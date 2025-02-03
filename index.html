@@ -1694,3 +1694,52 @@ const updateBaseDisplay = (phase) => {
         historyContainer.scrollTop = scrollTop - walk;
     });
 </script>
+
+
+
+    <style>
+    #float-download {
+        position: fixed;
+        bottom: 800px;
+        right: 400px;
+        background: #2196F3;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 9999;
+        transition: background 0.3s;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        text-align: center;
+        text-decoration: none;
+    }
+    #float-download:hover {
+        background: #d25d19;
+    }
+    /* 修正后的提示框样式 */
+    #float-download::after {
+        content: "此工具保底之用，集大成之作；即便不学用法，以其中的 修正模块 配合此三阶校准法，也不可思议";
+        position: absolute;
+        bottom: calc(100% + 8px);  /* 固定在按钮上方8px处 */
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+    #float-download:hover::after {
+        opacity: 1;
+    }
+</style>
+
+<a href="https://wwpx.lanzn.com/icAuj2mlrlla" target="_blank" id="float-download">
+    基底拟合v4下载
+</a>
