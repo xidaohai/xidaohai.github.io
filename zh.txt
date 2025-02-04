@@ -1,0 +1,30 @@
+
+以下cm皆为cm/360°单位，0.0几部分是m_yaw参数
+
+CS或Apex
+cm= (360×2.54) / (游戏灵敏度×DPI×0.022)
+
+Valorant
+cm= (360×2.54) / (游戏灵敏度×DPI×0.07)
+​
+Overwatch
+cm= (360×2.54) / (游戏灵敏度×DPI×0.0066)
+
+
+CS /Apex	
+灵敏度=41563.636/(cm×DPI)
+
+Valorant	
+灵敏度=13062.857/(cm×DPI)
+
+Overwatch	
+灵敏度=138545.455/(cm×DPI)
+
+
+Valorant游戏灵敏度 = CS或Apex游戏灵敏度 × 0.314465
+
+​Overwatch游戏灵敏度 = CS或Apex游戏灵敏度 × 3.333333
+
+Valorant转Overwatch：灵敏度 ×10.6
+
+Overwatch转Valorant：灵敏度 ÷10.6
