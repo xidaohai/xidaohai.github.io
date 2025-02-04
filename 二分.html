@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西岛海 · 衍选二分法</title>
+    <style>
+        :root {
+            --primary-color: #2a4365;
+            --accent-color: #4299e1;
+            --text-light: #e2e8f0;
+            --background-dark: #1a202c;
+            --background-light: #2d3748;
+            --gradient-start: #1a202c;
+            --gradient-end: #2d3748;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.15);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.2);
+        }
+
+        body {
+            font-family: 'Inter', system-ui;
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--background-dark);
+            line-height: 1.6;
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-right: auto;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .phase-header {
+            margin: 3rem 0 2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 3px solid var(--accent-color);
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            position: relative;
+        }
+
+        .phase-header::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--accent-color);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1.2rem;
+            margin: 2rem 0;
+        }
+
+        input {
+            padding: 1rem;
+            border: 2px solid var(--background-light);
+            border-radius: 8px;
+            flex: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+            background: var(--background-light);
+            color: var(--text-light);
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(66,153,225,0.2);
+        }
+
+        button {
+            padding: 1rem 2rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: #3182ce;
+        }
+
+        .value-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1.5rem;
+            margin: 3rem 0;
+            align-items: center;
+        }
+
+        .value-card {
+            background: var(--background-light);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--background-light);
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .current-base-display {
+            background: var(--background-light);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(66,153,225,0.15);
+            text-align: center;
+            min-width: 200px;
+            border: 2px solid var(--accent-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .current-base-display::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--accent-color), #63b3ed);
+            z-index: -1;
+            animation: pulse 2s infinite;
+        }
+
+        .cm-value {
+            font-size: 1.8rem;
+            color: var(--text-light);
+            margin: 1rem 0;
+            font-weight: 700;
+            font-feature-settings: "tnum";
+        }
+
+        .phase-note {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(66,153,225,0.05);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+            color: var(--text-light);
+            font-size: 0.95rem;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .derivation-box {
+            background: var(--background-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--background-light);
+        }
+
+        .calc-step {
+            margin: 0.8rem 0;
+            padding-left: 1rem;
+            border-left: 3px solid var(--accent-color);
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        #finalResult {
+            margin: 3rem auto;
+            padding: 2rem;
+            background: rgba(72,187,120,0.1);
+            border-radius: 8px;
+            text-align: center;
+            max-width: 400px;
+            border: 2px solid #48bb78;
+        }
+
+        #finalResult strong {
+            color: #2f855a;
+            font-size: 1.5rem;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .history-container {
+            width: 300px;
+            padding: 1.75rem;
+            background: var(--background-light);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--background-light);
+            max-height:87vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .history-container h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .history-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(66,153,225,0.05);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+            color: var(--text-light);
+            font-size: 0.9rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .history-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .history-item.phase-separator {
+            margin: 2rem 0;
+            padding: 0;
+            background: none;
+            border-left: none;
+            text-align: center;
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 2rem 1rem;
+                flex-direction: column;
+            }
+            .value-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .current-base-display {
+                order: -1;
+                margin-bottom: 2rem;
+            }
+            .history-container {
+                width: 100%;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <h2 class="phase-header">衍选二分法</h2>
+        <div class="input-group">
+            <input type="number" id="baseNumber" placeholder="输入基准数 (例如：50)" value="50">
+            <button onclick="startCalculation()">开始计算</button>
+        </div>
+        <div class="phase-note" id="phase1Note" style="display:none;">
+            <strong>使用说明：</strong><br>
+            1. 输入基准数后，点击“开始计算”按钮。<br>
+            2. 根据提示选择“低”或“高”值，逐步缩小范围。<br>
+            3. 完成所有阶段后，计算过程最后一步会显示最终结果。
+        </div>
+        <div class="value-container" id="phase1Values" style="display:none;">
+            <div class="value-card">
+                <h3>低值</h3>
+                <div class="cm-value" id="lowValue">-</div>
+                <button onclick="chooseLow()">选择低值</button>
+            </div>
+            <div class="current-base-display" id="currentBasePhase1">
+                <h3>当前基准值</h3>
+                <div class="cm-value" id="currentBaseValue">-</div>
+            </div>
+            <div class="value-card">
+                <h3>高值</h3>
+                <div class="cm-value" id="highValue">-</div>
+                <button onclick="chooseHigh()">选择高值</button>
+            </div>
+        </div>
+        <div class="derivation-box" id="phase1Derivation" style="display:none;">
+            <div>计算过程：</div>
+            <div id="phase1CalcSteps"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentBase = 0; // 当前基准数
+        let low = 0; // 低值
+        let high = 0; // 高值
+        const ratios = [0.4375, 0.3125, 0.1875, 0.0625, 0.036]; // 收束比例
+        let currentStep = 0; // 当前阶段
+        let choiceCount = 0; // 当前阶段的选择次数
+        let processLog = []; // 计算过程记录
+
+        function startCalculation() {
+            // 获取基准数并重置状态
+            currentBase = parseFloat(document.getElementById('baseNumber').value);
+            currentStep = 0;
+            choiceCount = 0;
+            processLog = [];
+            if (isNaN(currentBase)) {
+                alert("请输入有效数字！");
+                return;
+            }
+
+            // 初始化低值和高值（第一次计算）
+            updateRange();
+
+            // 显示结果
+            document.getElementById('phase1Values').style.display = 'grid';
+            document.getElementById('phase1Note').style.display = 'block';
+            document.getElementById('phase1Derivation').style.display = 'block';
+
+            // 清空计算过程
+            document.getElementById('phase1CalcSteps').innerHTML = '';
+        }
+
+        function updateRange() {
+            // 根据当前比例计算新的低值和高值
+            const range = currentBase * ratios[currentStep];
+            low = currentBase - range;
+            high = currentBase + range;
+
+            // 更新显示
+            document.getElementById('lowValue').textContent = low.toFixed(4);
+            document.getElementById('highValue').textContent = high.toFixed(4);
+            document.getElementById('currentBaseValue').textContent = currentBase.toFixed(4);
+        }
+
+        function chooseHigh() {
+            // 选择高值，计算平均值作为新基准
+            const newBase = (currentBase + high) / 2;
+            processLog.push(`阶段 ${currentStep + 1}: 选择高值，新基准数 = (${currentBase.toFixed(4)} + ${high.toFixed(4)}) / 2 = ${newBase.toFixed(4)}`);
+            currentBase = newBase;
+            handleChoice();
+        }
+
+        function chooseLow() {
+            // 选择低值，计算平均值作为新基准
+            const newBase = (currentBase + low) / 2;
+            processLog.push(`阶段 ${currentStep + 1}: 选择低值，新基准数 = (${currentBase.toFixed(4)} + ${low.toFixed(4)}) / 2 = ${newBase.toFixed(4)}`);
+            currentBase = newBase;
+            handleChoice();
+        }
+
+        function handleChoice() {
+            // 更新选择次数
+            choiceCount++;
+
+            // 更新范围
+            updateRange();
+
+            // 显示计算过程
+            const processDiv = document.getElementById('phase1CalcSteps');
+            processDiv.innerHTML = processLog.join('<br>');
+
+            // 检查是否完成当前阶段
+            if (choiceCount >= 2) {
+                // 进入下一个阶段
+                currentStep++;
+                choiceCount = 0;
+
+                // 检查是否完成所有阶段
+                if (currentStep >= ratios.length) {
+                    alert("所有阶段已完成！");
+                    document.getElementById('phase1Values').style.display = 'none';
+                } else {
+                    // 更新范围并显示新阶段
+                    updateRange();
+                    processDiv.innerHTML += `<br>进入阶段 ${currentStep + 1}`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+<!-- 作者信息悬浮窗 -->
+<div class="credits-box" id="creditsBox" style="opacity: 1; transition: opacity 0.5s ease;">
+    <div class="credit-item">
+        <span class="credit-label">公式作者</span>
+        <a href="https://space.bilibili.com/1534330" target="_blank">
+            <svg viewBox="0 0 24 24">
+                <path d="M18.5 5.5v13h-13v-13h13zm-3.5-3.5h-13v20h20v-20h-7zm-6 14.5h4v-4h-4v4z"/>
+            </svg>
+            西岛海（xlm）
+
+<!-- 样式部分 -->
+<style>
+    .credits-box {
+        position: fixed;
+        bottom: 50px;
+        right: 40px;
+        background: var(--background-light);
+        padding: 1.2rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--accent-color);
+        color: var(--text-light);
+        font-size: 0.9rem;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+        backdrop-filter: blur(4px);
+    }
+
+    .credits-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(66,153,225,0.2);
+    }
+
+    .credit-item {
+        margin: 0.5rem 0;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background 0.3s ease;
+    }
+
+    .credit-item:hover {
+        background: rgba(66,153,225,0.1);
+    }
+
+    .credit-item a {
+        color: var(--accent-color);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .credit-item svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+    }
+
+    .credit-label {
+        font-weight: 500;
+        margin-right: 6px;
+        color: var(--text-light);
+    }
+</style>
+
+
+
+
+<!-- 悬浮窗说明 -->
+<style>
+  .instruction-box {
+    position: fixed;
+    top: -300px; /* 调整到页面顶部 */
+    left: 20px;   /* 调整到页面左侧 */
+    background: rgba(45, 55, 72, 0.95);
+    padding: 1.2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(66, 120, 180, 0.3);
+    backdrop-filter: blur(8px);
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    z-index: 1000;
+    max-width: 250px;
+    transition: transform 0.3s ease;
+}
+
+    .instruction-box:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(66,120, 180, 0.2);
+    }
+
+    .instruction-box strong {
+        color: #63b3ed;
+        font-weight: 300;
+    }
+</style>
+
+
+<div class="instruction-box">
+    <strong>应用范围：</strong>
+    <ul>
+        <li>此衍选二分法可以二分任何数字，共选10次，会得到最终结果。</li>
+    </ul>
+</div>
+
+
