@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西岛海 · 三阶校准法</title>
+    <script>
+        // 精准换算公式（通过50cm=2.07818反推）
+        function cmToCSGO(cm) {
+            if (cm <= 0) return "无效数值";
+            return (360 / (cm * 400 * 0.0086614) ).toFixed(5);
+        }
+        function cmToVALO(cm) {
+            if (cm <= 0) return "无效数值";
+            return (360 / (cm * 400 * 0.0086614)/ 3.1818 ).toFixed(5);
+        }
+        function cmToOW(cm) {
+            if (cm <= 0) return "无效数值";
+            return (360 / (cm * 400 * 0.0086614)/ 0.3 ).toFixed(5);
+        }
+
+        let currentPhase = 1;
+        let currentBase = 0;
+        let history = [];
+        
+        function updateCurrentBase() {
+        // 获取输入框中的值
+        const inputElement = document.getElementById('currentBaseInput');
+        const newValue = parseFloat(inputElement.value);
+
+        // 检查输入值是否为有效数字
+// 检查输入值是否为有效数字
+        if (!isNaN(newValue)) {
+            // 更新全局变量
+            currentBase = newValue;
+
+            addHistory(`<div class="phase-separator">修改基准值为: ${currentBase.toFixed(2)}</div>`);
+            
+            generateValues();
+        }
+        }
+
+
+        function startPhase(phase) {
+            const input = parseFloat(document.getElementById('inputCm').value);
+            if (!input || input <= 0) return alert("请输入有效的厘米数值");
+            
+            currentPhase = phase;
+            currentBase = Math.max(input, 1.01);
+            document.getElementById('phase1Note').style.display = 'block';
+            document.getElementById('phase1Values').style.display = 'grid';
+            document.getElementById('nextPhaseBtn').style.display = 'block';
+            document.getElementById('phase2NextBtn').style.display = 'block';
+            generateValues();
+        }
+
+
+
+
+
+       function generateValues() {
+    const updateBaseDisplay = (phase) => {
+        const elementId = `currentBasePhase${phase}`;
+        const baseCm = currentBase.toFixed(2);
+        const csgoSens = cmToCSGO(currentBase);
+        const valoSens = cmToVALO(currentBase);
+        const owSens = cmToOW(currentBase);
+
+        // 更新基准值的显示，包含换算后的灵敏度值
+        document.getElementById(elementId).innerHTML = `
+            <h3>当前基准值</h3>
+            <div class="cm-value">${baseCm} cm</div>
+            <div class="Cpi-Is-400">真实dpi为400时:</div>
+            <div class="valo-sens">Valorant: ${valoSens}</div>
+            <div class="ow-sens">OW: ${owSens}</div>
+            <div class="csgo-sens">CS/Apex: ${csgoSens}</div>
+        `;
+    };
+
+
+
+
+
+            if (currentPhase === 1) {
+                const left = currentBase * 0.5625;
+                const right = currentBase * 1.3125;
+
+                document.getElementById('leftCpiIs400').textContent = `真实dpi为400时:`;
+                document.getElementById('leftCm').textContent = `${left.toFixed(2)} cm`;
+                document.getElementById('leftCSGO').textContent = `CS/Apex: ${cmToCSGO(left)}`;
+                document.getElementById('leftVALO').textContent = `Valorant: ${cmToVALO(left)}`;
+                document.getElementById('leftOW').textContent = `OW: ${cmToOW(left)}`;
+
+
+                document.getElementById('rightCpiIs400').textContent = `真实dpi为400时:`;
+                document.getElementById('rightCm').textContent = `${right.toFixed(2)} cm`;
+                document.getElementById('rightCSGO').textContent = `CS/Apex: ${cmToCSGO(right)}`;
+                document.getElementById('rightVALO').textContent = `Valorant: ${cmToVALO(right)}`;
+                document.getElementById('rightOW').textContent = `OW: ${cmToOW(right)}`;
+
+                updateBaseDisplay(1);
+
+            } else if (currentPhase === 2) {
+                const left = currentBase * 0.9375;
+                const right = currentBase * 1.1875;
+                
+                document.getElementById('phase2LeftCpiIs400').textContent = `真实dpi为400时:`;
+                document.getElementById('phase2Left').textContent = `${left.toFixed(2)} cm`;
+                document.getElementById('phase2LeftCSGO').textContent = `CS/Apex: ${cmToCSGO(left)}`;
+                document.getElementById('phase2LeftVALO').textContent = `Valorant: ${cmToVALO(left)}`;
+                document.getElementById('phase2LeftOW').textContent = `OW: ${cmToOW(left)}`;
+
+
+                document.getElementById('phase2RightCpiIs400').textContent = `真实dpi为400时:`;
+                document.getElementById('phase2Right').textContent = `${right.toFixed(2)} cm`;
+                document.getElementById('phase2RightCSGO').textContent = `CS/Apex: ${cmToCSGO(right)}`;
+                document.getElementById('phase2RightVALO').textContent = `Valorant: ${cmToVALO(right)}`;
+                document.getElementById('phase2RightOW').textContent = `OW: ${cmToOW(right)}`;
+                updateBaseDisplay(2);
+                document.getElementById('phase2NextBtn').style.display = 'block';
+                
+            } else if (currentPhase === 3) {
+                const left = currentBase * 23 / 24;
+                const right = currentBase * 25 / 24;
+                
+                document.getElementById('phase3LeftCpiIs400').textContent = `真实dpi为400时:`;
+                document.getElementById('phase3Left').textContent = `${left.toFixed(2)} cm`;
+                document.getElementById('phase3LeftCSGO').textContent = `CS/Apex: ${cmToCSGO(left)}`;
+                document.getElementById('phase3LeftVALO').textContent = `Valorant: ${cmToVALO(left)}`;
+                document.getElementById('phase3LeftOW').textContent = `OW: ${cmToOW(left)}`;
+
+
+                document.getElementById('phase3RightCpiIs400').textContent = `真实dpi为400时:`;
+                document.getElementById('phase3Right').textContent = `${right.toFixed(2)} cm`;
+                document.getElementById('phase3RightCSGO').textContent = `CS/Apex: ${cmToCSGO(right)}`;
+                document.getElementById('phase3RightVALO').textContent = `Valorant: ${cmToVALO(right)}`;
+                document.getElementById('phase3RightOW').textContent = `OW: ${cmToOW(right)}`;
+
+                updateBaseDisplay(3);
+            }
+        }
+
+        // 各阶段选择逻辑
+        function selectValue(direction) {
+            const factor = direction === 'left' ? 0.5625 : 1.3125;
+            const oldBase = currentBase;
+            const intermediate = oldBase * factor;
+            currentBase = (oldBase + intermediate) / 2;
+
+            const leftValue = oldBase * 0.5625;
+            const rightValue = oldBase * 1.3125;
+
+            const steps = `
+                <div class="calc-step">原基准值：${oldBase.toFixed(2)}cm</div>
+                <div class="calc-step">应用系数：×${factor}</div>
+                <div class="calc-step">中间值：${oldBase.toFixed(2)} × ${factor} = ${intermediate.toFixed(2)}cm</div>
+                <div class="calc-step">新基准值：(${oldBase.toFixed(2)} + ${intermediate.toFixed(2)})/2 = ${currentBase.toFixed(2)}cm</div>
+            `;
+            document.getElementById('phase1CalcSteps').innerHTML = steps;
+            document.getElementById('phase1Derivation').style.display = 'block';
+            document.getElementById('nextPhaseBtn').style.display = 'inline';
+            // addHistory(`阶段1：选择${direction === 'left' ? '左值' : '右值'}，左值：${leftValue.toFixed(2)}cm，右值：${rightValue.toFixed(2)}cm，新基准值：${currentBase.toFixed(2)}cm`);
+            generateValues();
+        }
+
+        function selectPhase2Value(direction) {
+            const factor = direction === 'left' ? 0.9375 : 1.1875;
+            const oldBase = currentBase;
+            const intermediate = oldBase * factor;
+            currentBase = intermediate;
+
+            const leftValue = oldBase * 0.9375;
+            const rightValue = oldBase * 1.1875;
+
+            const steps = `
+                <div class="calc-step">原基准值：${oldBase.toFixed(2)}cm</div>
+                <div class="calc-step">优化系数：×${factor}</div>
+                <div class="calc-step">中间值：${oldBase.toFixed(2)} × ${factor} = ${intermediate.toFixed(2)}cm</div>
+                <div class="calc-step">新基准值：${currentBase.toFixed(2)}cm</div>
+            `;
+            document.getElementById('phase1CalcSteps').innerHTML = steps;
+            document.getElementById('phase1Derivation').style.display = 'block';
+            document.getElementById('phase2NextBtn').style.display = 'block';
+            // addHistory(`阶段2：选择${direction === 'left' ? '左值' : '右值'}，左值：${leftValue.toFixed(2)}cm，右值：${rightValue.toFixed(2)}cm，新基准值：${currentBase.toFixed(2)}cm`);
+            generateValues();
+        }
+
+        function selectPhase3Value(direction) {
+            const factor = direction === 'left' ? 0.9584 : 1.0416;
+            const oldBase = currentBase;
+            const intermediate = oldBase * factor;
+            currentBase = intermediate;
+
+            const leftValue = oldBase * 0.9584;
+            const rightValue = oldBase * 1.0416;
+
+            const steps = `
+                <div class="calc-step">原基准值：${oldBase.toFixed(2)}cm</div>
+                <div class="calc-step">优化系数：×${factor}</div>
+                <div class="calc-step">中间值：${oldBase.toFixed(2)} × ${factor} = ${intermediate.toFixed(2)}cm</div>
+                <div class="calc-step">最终值：${currentBase.toFixed(2)}cm</div>
+            `;
+            document.getElementById('phase1CalcSteps').innerHTML = steps;
+            document.getElementById('phase1Derivation').style.display = 'block';
+            document.getElementById('finalCmValue').textContent = currentBase.toFixed(2);
+            document.getElementById('finalResult').style.display = 'block';
+            // addHistory(`阶段3：选择${direction === 'left' ? '左值' : '右值'}，左值：${leftValue.toFixed(2)}cm，右值：${rightValue.toFixed(2)}cm，最终推荐灵敏度：${currentBase.toFixed(2)}cm`);
+            generateValues();
+        }
+
+        function nextPhase() {
+            if (currentPhase === 1) {
+                document.getElementById('phase1Values').style.display = 'none';
+                document.getElementById('phase2').style.display = 'block';
+                currentPhase = 2;
+                // addHistory(`<div class="phase-separator">—— 进入阶段2 ——</div>`);
+                generateValues();
+            } else if (currentPhase === 2) {
+                document.getElementById('phase2').style.display = 'none';
+                document.getElementById('phase3').style.display = 'block';
+                currentPhase = 3;
+                // addHistory(`<div class="phase-separator">—— 进入阶段3 ——</div>`);
+                generateValues();
+            }
+        }
+
+        // function addHistory(entry) {
+        //     history.push(entry);
+        //     const historyElement = document.getElementById('history');
+        //     const historyItem = document.createElement('div');
+        //     historyItem.className = 'history-item';
+        //     historyItem.innerHTML = entry;
+        //     historyElement.appendChild(historyItem);
+        // }
+
+        // 滚轮滚动历史记录
+        document.addEventListener('DOMContentLoaded', () => {
+            const historyContainer = document.getElementById('historyContainer');
+            if (historyContainer) {
+                historyContainer.addEventListener('wheel', (event) => {
+                    event.preventDefault();
+                    historyContainer.scrollBy({
+                        top: event.deltaY,
+                        behavior: 'smooth'
+                    });
+                });
+            } else {
+                console.error('元素 historyContainer 未找到');
+            }
+        });
+                // 修改后的添加历史记录函数
+                function addHistory(entry) {
+            const historyElement = document.getElementById('history');
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            // 生成时间戳
+            const timeString = new Date().toLocaleTimeString('zh-CN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            // 解析条目内容
+            let content = '';
+            if (entry.includes('阶段1')) {
+                content = `
+                    <div class="history-phase">Ⅰ阶选择</div>
+                    <div class="history-details">${entry.replace('阶段1：','')}</div>
+                    <span class="history-time">${timeString}</span>
+                `;
+            } else if (entry.includes('阶段2')) {
+                content = `
+                    <div class="history-phase">Ⅱ阶优化</div>
+                    <div class="history-details">${entry.replace('阶段2：','')}</div>
+                    <span class="history-time">${timeString}</span>
+                `;
+            } else if (entry.includes('阶段3')) {
+                content = `
+                    <div class="history-phase">Ⅲ阶确定</div>
+                    <div class="history-details">${entry.replace('阶段3：','')}</div>
+                    <span class="history-time">${timeString}</span>
+                `;
+            } else if (entry.includes('进入阶段')) {
+                content = `
+                    <div class="history-phase" style="color:#48bb78;">　
+                        ${entry.replace(/<[^>]+>/g, '')}
+                    </div>
+                `;
+            } else if (entry.includes('修改基准值')) {
+                content = `
+                    <div class="history-phase">已修改基准值</div>
+                    <div class="history-details">${entry.replace('修改基准值：','')}</div>
+                    <span class="history-time">${timeString}</span>
+                `;
+                
+            }
+
+            historyItem.innerHTML = content;
+            historyElement.prepend(historyItem);  // 新记录显示在最上方
+            
+            // 自动滚动到最新条目
+            historyElement.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+
+        // 拖动滚动历史记录
+        let isDragging = false;
+        let startY, scrollTop;
+
+        historyContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startY = e.pageY - historyContainer.offsetTop;
+            scrollTop = historyContainer.scrollTop;
+        });
+
+        historyContainer.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        historyContainer.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        historyContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const y = e.pageY - historyContainer.offsetTop;
+            const walk = (y - startY) * 2; // 拖动速度
+            historyContainer.scrollTop = scrollTop - walk;
+        });
+    </script>
+    <style>
+        :root {
+            --primary-color: #2a4365;
+            --accent-color: #4299e1;
+            --text-light: #e2e8f0;
+            --background-dark: #1a202c;
+            --background-light: #2d3748;
+            --gradient-start: #1a202c;
+            --gradient-end: #2d3748;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui;
+            padding: 2rem 1rem;
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--background-dark);
+            line-height: 1.6;
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-right: auto; 
+            max-width: 100%; 
+            padding: 1rem;
+        }
+
+        .phase-header {
+            margin: 2rem 0 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--accent-color);
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            position: relative;
+        }
+
+        .phase-header::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--accent-color);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        input {
+            padding: 1rem;
+            border: 2px solid var(--background-light);
+            border-radius: 8px;
+            flex: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+            background: var(--background-light);
+            color: var(--text-light);
+        }
+
+        button {
+            padding: 1rem 2rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem; /* 增加按钮字体大小 */
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: #3182ce;
+        }
+
+        .value-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            align-items: center;
+        }
+
+        .value-card {
+            background: var(--background-light);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--background-light);
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .current-base-display {
+            background: var(--background-light);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(66,153,225,0.15);
+            text-align: center;
+            min-width: 200px;
+            border: 2px solid var(--accent-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cm-value {
+            font-size: 1.6rem;
+            color: var(--text-light);
+            margin: 1rem 0;
+            font-weight: 700;
+            font-feature-settings: "tnum";
+        }
+
+        .csgo-sens {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .phase-note {
+            margin: 1rem 0;
+            padding: 1.5rem;
+            background: rgba(66,153,225,0.05);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+            color: var(--text-light);
+            font-size: 0.9rem;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .derivation-box {
+            background: var(--background-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--background-light);
+        }
+
+        .calc-step {
+            margin: 0.8rem 0;
+            padding-left: 1rem;
+            border-left: 3px solid var(--accent-color);
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        #finalResult {
+            margin: 1rem auto;
+            padding: 2rem;
+            background: rgba(72,187,120,0.1);
+            border-radius: 8px;
+            text-align: center;
+            max-width: 400px;
+            border: 2px solid #48bb78;
+        }
+
+        #finalResult strong {
+            color: #2f855a;
+            font-size: 1.4rem;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+
+        
+        .history-container {
+            /* 手機端禁用但保留 */
+            display: none; 
+
+            width: 300px;
+            padding: 1.5rem;
+
+            background: var(--background-light);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(66,153,225,0.3);
+            max-height: 60vh;
+            overflow-y: auto;
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            z-index: 999;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .history-container h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .history-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+        }
+
+        .history-container {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* 手机端特定样式 */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+                width: 310px;
+            }
+
+            button {
+                padding: 1rem;
+                font-size: 1rem;
+                text-align: center;
+                justify-content: center; 
+            }
+
+            .value-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .value-card {
+                padding: 1.5rem;
+            }
+
+            .current-base-display {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+    <style>
+        /* 其他原有样式保持不变 */
+
+        /* 新增作者信息悬浮框样式 */
+        #toggleCredits {
+                position: fixed;
+                top: 75%;
+                right: 20px;
+                transform: translateY(-50%);
+                cursor: pointer;
+                z-index: 1001;
+            }
+        .credits-box {
+            display: none ;
+            opacity: 0;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--background-light);
+            padding: 1.2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--accent-color);
+            color: var(--text-light);
+            font-size: 0.9rem;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .credits-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(66,153,225,0.2);
+        }
+
+        .credit-item {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+
+        .credit-item:hover {
+            background: rgba(66,153,225,0.1);
+        }
+
+        .credit-item a {
+            color: var(--accent-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .credit-item svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .credit-label {
+            font-weight: 500;
+            margin-right: 6px;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+
+</body>
+</html>
+<body>
+    <div class="main-content">
+        <!-- 阶段1 -->
+        <div class="phase-container">
+            <h2 class="phase-header">Ⅰ 初阶·矫快敏</h2>
+            <div class="input-group">
+                <input type="number" id="inputCm" step="0.1" placeholder="输入当前cm/360° (如 40)">
+                <button onclick="startPhase(1)">开始校准</button>
+            </div>
+            <div class="phase-note" id="phase1Note" style="display:none;">
+                <strong>进入第二阶段：</strong><br>
+                1. 当反复出现同一基准值时<br>
+                2. 当选择变得困难时[以此为主]
+            </div>
+            <div class="value-container" id="phase1Values" style="display:none;">
+                <div class="value-card">
+                    <h3>左值·快敏（数小）</h3>
+                    <div class="cm-value" id="leftCm">-</div>
+                    <div class="Cpi-Is-400" id="leftCpiIs400" >-</div>
+                    <div class="valo-sens" id="leftVALO">-</div>
+                    <div class="ow-sens" id="leftOW">-</div>
+                    <div class="csgo-sens" id="leftCSGO">-</div>
+                    <button onclick="selectValue('left')" class="select-btn">此方向</button>
+                </div>
+                <div class="current-base-display" id="currentBasePhase1">
+                    <h3>当前基准值</h3>
+                    <div class="cm-value">${currentBase.toFixed(2)} cm</div>
+                </div>
+                <div class="value-card">
+                    <h3>右值·慢敏（数大）</h3>
+                    <div class="cm-value" id="rightCm">-</div>
+                    <div class="Cpi-Is-400" id="rightCpiIs400" >-</div>
+                    <div class="valo-sens" id="rightVALO">-</div>
+                    <div class="ow-sens" id="rightOW">-</div>
+                    <div class="csgo-sens" id="rightCSGO">-</div>
+                    <button onclick="selectValue('right')" class="select-btn">此方向</button>
+                </div>
+            </div>
+            <button id="nextPhaseBtn" style="display:none;" onclick="nextPhase()">踏入Ⅱ阶·拔慢敏 →</button>
+        </div>
+
+        <!-- 阶段2 -->
+        <div class="phase-container" id="phase2" style="display:none;">
+            <h2 class="phase-header">Ⅱ 二阶·拔慢敏</h2>
+            <div class="phase-note">
+                <strong>进入第三阶段：</strong><br>
+                1. 当反复出现同一基准值时[以此为主]<br>
+                2. 当选择变得困难时
+            </div>
+            <div class="value-container">
+                <div class="value-card">
+                    <h3>左值·快敏（数小）</h3>
+                    <div class="cm-value" id="phase2Left">-</div>
+                    <div class="Cpi-Is-400" id="phase2LeftCpiIs400" >-</div>
+                    <div class="valo-sens" id="phase2LeftVALO">-</div>
+                    <div class="ow-sens" id="phase2LeftOW">-</div>
+                    <div class="csgo-sens" id="phase2LeftCSGO">-</div>
+                    <button onclick="selectPhase2Value('left')">选此</button>
+                </div>
+                <div class="current-base-display" id="currentBasePhase2">
+                    <h3>当前基准值</h3>
+                    <div class="cm-value">${currentBase.toFixed(2)} cm</div>
+                </div>
+                <div class="value-card">
+                    <h3>右值·慢敏（数大）</h3>
+                    <div class="cm-value" id="phase2Right">-</div>
+                    <div class="Cpi-Is-400" id="phase2RightCpiIs400" >-</div>
+                    <div class="valo-sens" id="phase2RightVALO">-</div>
+                    <div class="ow-sens" id="phase2RightOW">-</div>
+                    <div class="csgo-sens" id="phase2RightCSGO">-</div>
+                    <button onclick="selectPhase2Value('right')">选此</button>
+                </div>
+            </div>
+            <button id="phase2NextBtn" style="display:none;" onclick="nextPhase()">迈入Ⅲ阶·细常敏 →</button>
+        </div>
+
+        <!-- 阶段3 -->
+        <div class="phase-container" id="phase3" style="display:none;">
+            <h2 class="phase-header">Ⅲ 三阶·细常敏</h2>
+            <div class="phase-note">
+                <strong>最终优化阶段：</strong><br>
+                通过对数函数进行微调，找到最适合的灵敏度
+            </div>
+            <div class="value-container">
+                <div class="value-card">
+                    <h3>快敏（数小）</h3>
+                    <div class="cm-value" id="phase3Left">-</div>
+                    <div class="Cpi-Is-400" id="phase3LeftCpiIs400" >-</div>
+                    <div class="valo-sens" id="phase3LeftVALO">-</div>
+                    <div class="ow-sens" id="phase3LeftOW">-</div>
+                    <div class="csgo-sens" id="phase3LeftCSGO">-</div>
+                    <button onclick="selectPhase3Value('left')">确定</button>
+                </div>
+                <div class="current-base-display" id="currentBasePhase3">
+                    <h3>当前基准值</h3>
+                    <div class="cm-value">${currentBase.toFixed(2)} cm</div>
+                </div>
+                <div class="value-card">
+                    <h3>慢敏（数大）</h3>
+                    <div class="cm-value" id="phase3Right">-</div>
+                    <div class="Cpi-Is-400" id="phase3RightCpiIs400" >-</div>
+                    <div class="valo-sens" id="phase3RightVALO">-</div>
+                    <div class="ow-sens" id="phase3RightOW">-</div>
+                    <div class="csgo-sens" id="phase3RightCSGO">-</div>
+                    <button onclick="selectPhase3Value('right')">确定</button>
+                </div>
+            </div>
+            <div class="phase-note" id="finalResult" style="display:none;">
+                最终推荐灵敏度：<strong id="finalCmValue">-</strong> cm/360°
+            </div>
+        </div>
+
+        <div class="derivation-box" id="phase1Derivation" style="display:none;">
+            <div>计算过程：</div>
+            <div id="phase1CalcSteps"></div>
+        </div>
+
+
+
+
+
+   <!-- 极敏内推法模块  · 瞄准-->
+<div style="margin-right:auto;position: relative;left: 16px;">
+    <div style="background: #2d3748;padding: 1rem 2rem;border-radius: 12px;box-shadow: 0 4px 6px rgba(0,0,0,0.1);max-width: 100%;">
+        <h3 style="color: #63b3ed; margin-bottom: 15px; text-align: center;">极敏内推法 · 瞄准</h3>
+        <div style="margin-bottom: 15px; text-align: center; color: #a0aec0; font-style: italic;">
+            公式：x = (k + 3m) / 4
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 8px; color: #cbd5e0;">最快可承受灵敏度 (k)：</label>
+            <input type="number" id="jk" step="0.1" placeholder="cm/360" style="margin: auto;width: 90%; padding: 10px; border: 1px solid #4a5568; border-radius: 6px; background: #2d3748; color: #e2e8f0;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 8px; color: #cbd5e0;">最慢可承受灵敏度 (m)：</label>
+            <input type="number" id="jm" step="0.1" placeholder="cm/360" style="width: 90%; padding: 10px; border: 1px solid #4a5568; border-radius: 6px; background: #2d3748; color: #e2e8f0;">
+        </div>
+        <button onclick="calculateQuickXAim()" style="width: 100%; padding: 10px; background: #4299e1; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s ease;">
+            计算参考完美灵敏度
+        </button>
+        <div id="quick-result" style="margin-top: 15px; padding: 15px; background: rgba(66, 153, 225, 0.1); border-radius: 6px; text-align: center; display: none;">
+            <div style="font-size: 1.2rem; color: #63b3ed;">-</div>
+        </div>
+    </div>
+</div>
+
+<!-- 极敏内推法模块 · 游戏-->
+<div style="margin-right:auto;position: relative;left: 16px;">
+    <div style="background: #2d3748;padding: 1rem 2rem;border-radius: 12px;box-shadow: 0 4px 6px rgba(0,0,0,0.1);max-width: 100%;">
+        <h3 style="color: #63b3ed; margin-bottom: 15px; text-align: center;">极敏内推法· 游戏</h3>
+        <div style="margin-bottom: 15px; text-align: center; color: #a0aec0; font-style: italic;">
+            公式：x = (3k + m) / 4
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 8px; color: #cbd5e0;">最快可承受灵敏度 (k)：</label>
+            <input type="number" id="jk2" step="0.1" placeholder="cm/360" style="margin: auto;width: 90%; padding: 10px; border: 1px solid #4a5568; border-radius: 6px; background: #2d3748; color: #e2e8f0;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 8px; color: #cbd5e0;">最慢可承受灵敏度 (m)：</label>
+            <input type="number" id="jm2" step="0.1" placeholder="cm/360" style="width: 90%; padding: 10px; border: 1px solid #4a5568; border-radius: 6px; background: #2d3748; color: #e2e8f0;">
+        </div>
+        <button onclick="calculateQuickXGame()" style="width: 100%; padding: 10px; background: #4299e1; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s ease;">
+            计算参考完美灵敏度
+        </button>
+        <div id="quick-result2" style="margin-top: 15px; padding: 15px; background: rgba(66, 153, 225, 0.1); border-radius: 6px; text-align: center; display: none;">
+            <div style="font-size: 1.2rem; color: #63b3ed;">-</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 极敏内推法 · 瞄准
+    function calculateQuickXAim() {
+        const k = parseFloat(document.getElementById('jk').value);
+        const m = parseFloat(document.getElementById('jm').value);
+
+        if (isNaN(k) || isNaN(m)) {
+            alert("请输入有效的数值！");
+            return;
+        }
+
+        const x = (k + 3 * m) / 4;
+        const resultBox = document.getElementById('quick-result');
+        resultBox.style.display = 'block';
+        resultBox.querySelector('div').textContent = `参考灵敏度: ${x.toFixed(2)}`;
+    }
+
+    // 极敏内推法 · 游戏
+    function calculateQuickXGame() {
+        const k = parseFloat(document.getElementById('jk2').value);
+        const m = parseFloat(document.getElementById('jm2').value);
+
+        if (isNaN(k) || isNaN(m)) {
+            alert("请输入有效的数值！");
+            return;
+        }
+
+        const x = (3 * k + m) / 4;
+        const resultBox = document.getElementById('quick-result2');
+        resultBox.style.display = 'block';
+        resultBox.querySelector('div').textContent = `参考灵敏度: ${x.toFixed(2)}`;
+    }
+</script>
+
+<!-- 新增作者信息模块 -->
+<div style="margin: 20px auto; width: 100%; max-width: 100%;">
+    <div style="background: #2d3748; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h3 style="color: #63b3ed; margin-bottom: 1rem; text-align: center;">开发团队</h3>
+        <div class="credit-item">
+            <span class="credit-label">公式作者</span>
+            <a href="https://space.bilibili.com/1534330" target="_blank" style="color: #4299e1; text-decoration: none;">
+                <svg viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:middle;margin-right:8px;">
+                    <path d="M18.5 5.5v13h-13v-13h13zm-3.5-3.5h-13v20h20v-20h-7zm-6 14.5h4v-4h-4v4z" fill="currentColor"/>
+                </svg>
+                西岛海（xlm）
+            </a>
+        </div>
+        <div class="credit-item" style="margin-top: 1rem;">
+            <span class="credit-label">网页开发</span>
+            <a href="https://space.bilibili.com/481183680" target="_blank" style="color: #4299e1; text-decoration: none;">
+                <svg viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:middle;margin-right:8px;">
+                    <path d="M14.4 6l-.3-1.5c-.1-.4-.3-.7-.6-1-.3-.3-.7-.5-1.1-.5h-1.8c-.4 0-.8.2-1.1.5-.3.3-.5.6-.6 1l-.3 1.5h5.8zm1.6 1h-9v12h9v-12zm-6-6h3c.6 0 1 .4 1 1v1h-5v-1c0-.6.4-1 1-1z" fill="currentColor"/>
+                </svg>
+                维生素Cの奶茶
+            </a>
+        </div>
+        <div class="credit-item" style="margin-top: 1rem;">
+            <span class="credit-label">界面设计</span>
+            <a href="https://space.bilibili.com/1124699971" target="_blank" style="color: #4299e1; text-decoration: none;">
+                <svg viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:middle;margin-right:8px;">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M6 5a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-14z" fill="currentColor"/>
+                    <path d="M11 4h2" fill="currentColor"/>
+                </svg>
+                軟沙Ransa
+            </a>
+        </div>
+    </div>
+</div>
