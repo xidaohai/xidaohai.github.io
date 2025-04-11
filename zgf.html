@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>西岛海 · 灵敏度正改法 </title>
+    <style>
+        :root {
+            --primary-color: #2a4365;
+            --accent-color: #4299e1;
+            --text-light: #e2e8f0;
+            --background-dark: #1a202c;
+            --background-light: #2d3748;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui;
+            padding: 1rem;
+            background: var(--background-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .calculator-container {
+            max-width: 100%;
+            margin: 1rem auto;
+            padding: 1.5rem;
+            background: var(--background-light);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .input-group {
+            margin: 1.2rem 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            background: var(--background-dark);
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(66,153,225,0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            touch-action: manipulation;
+        }
+
+        button:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1.2rem;
+            background: rgba(66,153,225,0.1);
+            border-radius: 8px;
+            text-align: center;
+            animation: fadeIn 0.5s;
+            display: none;
+        }
+
+        .dual-results {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .result-column {
+            flex: 1;
+            padding: 1rem;
+            background: rgba(66,153,225,0.05);
+            border-radius: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .formula-display {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--background-dark);
+            border-radius: 8px;
+            font-family: monospace;
+            color: #63b3ed;
+            font-size: 1em;
+            overflow-x: auto;
+        }
+
+        .history-section {
+            margin-top: 1.5rem;
+            background: rgba(66,153,225,0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .history-item {
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            background: var(--background-dark);
+            border-radius: 6px;
+            animation: fadeIn 0.3s;
+            word-break: break-word;
+        }
+
+        .result-box strong {
+            font-size: 1.2em;
+            color: #63b3ed;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 2rem;
+            }
+            .calculator-container {
+                max-width: 500px;
+                padding: 2rem;
+            }
+            label {
+                font-size: 1rem;
+            }
+            input {
+                padding: 1rem;
+            }
+            .formula-display {
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .calculator-container {
+                padding: 1rem;
+            }
+            .formula-display {
+                font-size: 0.9em;
+                padding: 0.8rem;
+            }
+            button {
+                padding: 0.9rem;
+                font-size: 1rem;
+            }
+            .result-box {
+                padding: 1rem;
+                font-size: 0.95rem;
+            }
+            .dual-results {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h2 style="text-align: center; color: #63b3ed; margin-bottom: 1.5rem;">西岛海 · 灵敏度正改法</h2>
+        
+        <div class="formula-display">
+            新值 = ( 旧值 x 360° ) ⁄ ( 360°+ Δ值 )
+        </div>
+
+        <div class="input-group">
+            <label>旧值（cm/360°）：</label>
+            <input type="number" id="oldValue" step="0.1" min="0.1" placeholder="输入原cm/360°">
+        </div>
+
+        <div class="input-group">
+            <label>Δ值（调整量）：【负数则慢，正数则快；一般11.25°为微调度数】</label>
+            <input type="number" id="deltaValue" step="0.1" min="-359.9" placeholder="输入想要调整的度数">
+        </div>
+
+        <button onclick="calculateNewValue()">计算新值</button>
+
+        <div class="result-box" id="resultBox">
+            <div style="font-size: 1.1rem;">计算结果：</div>
+            <div style="font-size: 1.6rem; font-weight: bold; margin: 1rem 0;">
+                <strong id="newValue">-</strong> cm/360°
+            </div>
+
+            <div class="dual-results">
+                <div class="result-column">
+                    <div>5cm / <strong id="rotationAngle">-</strong>°</div>
+                    <small style="color: #a0aec0;">鼠标摆一下
+                        大概能在游戏里转</small>
+                </div>
+                <div class="result-column">
+                    <div>中远距离目标大小 ≈ <strong id="targetDistance">-</strong>cm</div>
+                    <small style="color: #a0aec0;">（在鼠标垫上的物理距离）</small>
+                </div>
+            </div>
+
+            <div style="margin-top: 1rem;">调整后参数：旧值 <span id="dispOldVal">-</span> | Δ值 <span id="dispDelta">-</span></div>
+        </div>
+
+        <div class="history-section" id="historySection">
+            <div style="margin-bottom: 1rem; color: #a0aec0;">调整历史：</div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        let calculationHistory = [];
+    
+        function calculateNewValue() {
+            const oldValue = parseFloat(document.getElementById('oldValue').value);
+            const delta = parseFloat(document.getElementById('deltaValue').value);
+    
+            if (isNaN(oldValue)) return alert("请输入有效的旧值");
+            if (isNaN(delta)) return alert("请输入有效的调整量");
+            if (360 + delta === 0) return alert("调整量不能为-360");
+    
+            const newValue = (oldValue * 360) / (360 + delta);
+            const rotationAngle = (5 / newValue * 360).toFixed(1);
+            const targetDistance = (0.003 * newValue).toFixed(3);
+            const timestamp = new Date().toLocaleTimeString();
+
+            document.getElementById('oldValue').value = newValue.toFixed(2);
+            document.getElementById('newValue').textContent = newValue.toFixed(2);
+            document.getElementById('rotationAngle').textContent = rotationAngle;
+            document.getElementById('targetDistance').textContent = targetDistance;
+            document.getElementById('dispOldVal').textContent = oldValue;
+            document.getElementById('dispDelta').textContent = delta;
+            document.getElementById('resultBox').style.display = 'block';
+
+            calculationHistory.unshift({
+                oldValue,
+                delta,
+                newValue,
+                timestamp
+            });
+            
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = calculationHistory
+                .map((entry, index) => `
+                    <div class="history-item">
+                        [#${index + 1}] ${entry.timestamp}
+                        - 旧值: ${entry.oldValue} 
+                        | Δ: ${entry.delta}
+                        → 新值: <strong>${entry.newValue.toFixed(2)}</strong>
+                    </div>
+                `)
+                .join('');
+            
+            document.getElementById('historySection').style.display = 
+                calculationHistory.length > 0 ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
