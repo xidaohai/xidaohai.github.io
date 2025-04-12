@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>西岛海 · CM360正改法</title>
+    <style>
+        :root {
+            --primary-color: #2c5282;
+            --accent-color: #3182ce;
+            --text-dark: #2d3748;
+            --text-light: #f7fafc;
+            --background-main: #f0f4f8;
+            --background-panel: #ffffff;
+            --border-color: #cbd5e0;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* 深色主题变量 */
+        .dark-theme {
+            --primary-color: #4299e1;
+            --accent-color: #63b3ed;
+            --text-dark: #e2e8f0;
+            --text-light: #1a202c;
+            --background-main: #1a202c;
+            --background-panel: #2d3748;
+            --border-color: #4a5568;
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        body {
+            font-family: 'Inter', system-ui;
+            padding: 1rem;
+            background: var(--background-main);
+            color: var(--text-dark);
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .theme-switcher {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            border: none;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .theme-switcher svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-light);
+        }
+
+        .calculator-container {
+            max-width: 500px;
+            margin: 1rem auto;
+            padding: 2rem;
+            background: var(--background-panel);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .input-group {
+            margin: 1.2rem 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #718096;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.9rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--background-panel);
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(49,130,206,0.1);
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+            margin: 1rem 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--accent-color);
+            color: var(--text-light);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .preset-btn {
+            padding: 0.7rem;
+            background: var(--primary-color);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--background-main);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            animation: fadeIn 0.5s;
+            display: none;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.2rem;
+            margin: 1.8rem 0;
+        }
+
+        .metric-card {
+            padding: 1rem;
+            background: var(--background-panel);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0.7rem 0;
+            letter-spacing: -0.5px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #718096;
+            line-height: 1.4;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2.5rem 0 1.2rem;
+        }
+
+        .history-item {
+            padding: 0.9rem;
+            margin: 0.6rem 0;
+            background: var(--background-main);
+            border-radius: 6px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .clear-history {
+            padding: 0.3rem 0.6rem;
+            background: rgba(62, 229, 126, 0.08);
+            color: #ba4ff8;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border: 1px solid rgba(62, 101, 229, 0.15);
+            width: auto;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .calculator-container {
+                padding: 1.2rem;
+            }
+            .preset-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .metric-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .metric-value {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-switcher" onclick="toggleTheme()">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 3c-.825 0-1.62.125-2.369.357A7.952 7.952 0 0 0 3.05 8.631 9.006 9.006 0 0 0 12 21a9.006 9.006 0 0 0 8.945-10.001c.232.75.357 1.544.357 2.369 0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8z"/>
+        </svg>
+    </button>
+
+    <div class="calculator-container">
+        <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 1.8rem; letter-spacing: -0.5px;">
+            西岛海 · CM360正改法
+        </h2>
+        
+        <div class="formula-display">
+            新值 = ( 旧值 x 360°) ⁄ ( 360°+ Δ值 )
+        </div>
+
+        <div class="input-group">
+            <label>旧值（cm/360°）：【一般在20-80之间】</label>
+            <input type="number" id="oldValue" step="0.1" min="0.1" placeholder="输入原cm/360°">
+        </div>
+
+        <div class="input-group">
+            <label>Δ值（360°± Δ°）：【负向慢，正数快】</label>
+            <div class="preset-buttons">
+                <button class="preset-btn" onclick="adjustDelta(0.25)">+0.25°</button>
+                <button class="preset-btn" onclick="adjustDelta(-0.25)">-0.25°</button>
+                <button class="preset-btn" onclick="adjustDelta(1)">+1°</button>
+                <button class="preset-btn" onclick="adjustDelta(-1)">-1°</button>
+                <button class="preset-btn" onclick="adjustDelta(10)">+10°</button>
+                <button class="preset-btn" onclick="adjustDelta(-10)">-10°</button>
+            </div>
+            <input type="number" id="deltaValue" step="0.25" value="0" 
+                   oninput="validateDelta()" 
+                   placeholder="输入想要调整的度数">
+        </div>
+
+        <button onclick="calculateNewValue()">计算新值</button>
+
+        <div class="result-box" id="resultBox">
+            <div style="font-size: 1.1rem; color: #718096;">计算结果：</div>
+            <div style="font-size: 1.8rem; font-weight: 700; margin: 1.2rem 0; color: var(--primary-color);">
+                <span id="newValue">-</span> cm/360°
+            </div>
+
+            <div class="metric-grid">
+                <div class="metric-card">
+                    <div class="metric-label">5cm（手腕动一下）</div>
+                    <div class="metric-value" id="rotationAngle">-°</div>
+                    <div class="metric-label">游戏内转向角度【转向】</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">3.6°（近距离目标）</div>
+                    <div class="metric-value" id="targetDistance">-cm</div>
+                    <div class="metric-label">所需鼠标移动【瞄准】</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; color: #a0aec0; font-size: 0.9rem;">
+                调整前的参数：旧值 <span id="dispOldVal">-</span> | Δ值 <span id="dispDelta">-</span>
+            </div>
+        </div>
+
+        <div class="history-section" id="historySection">
+            <div class="history-header">
+                <h3 style="color: #718096; margin: 0; font-size: 1rem;">调整历史</h3>
+                <button class="clear-history" onclick="clearHistory()">清空记录</button>
+            </div>
+            <div id="historyList">
+                <div class="history-item" style="color: #a0aec0;">
+                    <div>时间</div>
+                    <div>旧值 → 新值 (Δ调整量)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 主题切换功能
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('cm360Theme', isDark ? 'dark' : 'light');
+        }
+
+        // 初始化主题
+        const savedTheme = localStorage.getItem('cm360Theme');
+        if (savedTheme === 'dark') document.body.classList.add('dark-theme');
+
+        // 历史记录和计算功能
+        let calculationHistory = JSON.parse(localStorage.getItem('cm360History')) || [];
+
+        function adjustDelta(value) {
+            const deltaInput = document.getElementById('deltaValue');
+            deltaInput.value = (parseFloat(deltaInput.value) || 0) + value;
+            validateDelta();
+        }
+
+        function validateDelta() {
+            const deltaInput = document.getElementById('deltaValue');
+            let value = parseFloat(deltaInput.value) || 0;
+            
+            if (value <= -360) {
+                value = -359.9;
+                alert("调整量不能小于-359.9°");
+            }
+            if (value >= 360) {
+                value = 359.9;
+                alert("调整量不能超过359.9°");
+            }
+            
+            deltaInput.value = value.toFixed(2);
+        }
+
+        // 修改后的计算函数
+        function calculateNewValue() {
+            const oldValue = parseFloat(document.getElementById('oldValue').value);
+            const delta = parseFloat(document.getElementById('deltaValue').value);
+
+            if (isNaN(oldValue)) return alert("请输入有效的旧值");
+            if (isNaN(delta)) return alert("请输入有效的调整量");
+            if (360 + delta === 0) return alert("调整量不能为-360");
+
+            const newValue = (oldValue * 360) / (360 + delta);
+            const rotationAngle = (5 / newValue * 360).toFixed(1);
+            const targetDistance = (newValue * 3.6 / 360).toFixed(2);
+
+            // 新增自动更新旧值功能
+            document.getElementById('oldValue').value = newValue.toFixed(2);
+            
+            updateDisplay(newValue, rotationAngle, targetDistance, oldValue, delta);
+            saveToHistory(oldValue, delta, newValue);
+        }
+
+        function updateDisplay(newValue, rotationAngle, targetDistance, oldValue, delta) {
+            document.getElementById('newValue').textContent = newValue.toFixed(2);
+            document.getElementById('rotationAngle').textContent = `${rotationAngle}°`;
+            document.getElementById('targetDistance').textContent = `${targetDistance}cm`;
+            document.getElementById('dispOldVal').textContent = oldValue.toFixed(2);
+            document.getElementById('dispDelta').textContent = delta.toFixed(2);
+            document.getElementById('resultBox').style.display = 'block';
+        }
+
+        function saveToHistory(oldValue, delta, newValue) {
+            calculationHistory.unshift({
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                oldValue: oldValue.toFixed(2),
+                delta: delta.toFixed(2),
+                newValue: newValue.toFixed(2)
+            });
+
+            if (calculationHistory.length > 10) calculationHistory.pop();
+            localStorage.setItem('cm360History', JSON.stringify(calculationHistory));
+            updateHistoryDisplay();
+        }
+
+        function clearHistory() {
+            if (!confirm("确定要清空所有历史记录吗？")) return;
+            calculationHistory = [];
+            localStorage.removeItem('cm360History');
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = `
+                <div class="history-item" style="color: #a0aec0;">
+                    <div>时间</div>
+                    <div>旧值 → 新值 (Δ调整量)</div>
+                </div>
+                ${calculationHistory.map(item => `
+                    <div class="history-item">
+                        <div>${item.timestamp}</div>
+                        <div>${item.oldValue} → ${item.newValue} (Δ${item.delta})</div>
+                    </div>
+                `).join('')}
+            `;
+            
+            document.getElementById('historySection').style.display = 
+                calculationHistory.length > 0 ? 'block' : 'none';
+        }
+
+        updateHistoryDisplay();
+    </script>
+</body>
+</html>
