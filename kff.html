@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西岛海 · 快分法</title>
+    <link rel="icon" href="https://xidaohai.github.io/miaozhun.ico" type="image/x-icon">
+    <style>
+ <style>
+        /* 新增的页脚样式 */
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(66, 153, 225, 0.2);
+            color: #a0aec0;
+            font-size: 0.9rem;
+            background: rgba(26, 32, 44, 0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 0 0 12px 12px;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .credits {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .credit-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1.2rem;
+            background: rgba(45, 55, 72, 0.5);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(66, 153, 225, 0.2);
+        }
+
+        .credit-item:hover {
+            background: rgba(66, 153, 225, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .credit-item a {
+            color: var(--accent-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .credit-item svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .copyright {
+            margin-top: 1.5rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .credits {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .credit-item {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        
+        :root {
+            --primary-color: #2a4365;
+            --accent-color: #4299e1;
+            --text-light: #e2e8f0;
+            --background-dark: #1a202c;
+            --background-light: #2d3748;
+            --gradient-start: #1a202c;
+            --gradient-end: #2d3748;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.15);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.2);
+            --success-color: #48bb78;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: var(--background-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--accent-color);
+            position: relative;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: var(--accent-color);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #a0aec0;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .calculator-card {
+            background: var(--background-light);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid rgba(66, 153, 225, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .calculator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input {
+            padding: 1rem;
+            border: 2px solid var(--background-light);
+            border-radius: 8px;
+            flex: 1;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+            background: var(--background-light);
+            color: var(--text-light);
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(66,153,225,0.2);
+            outline: none;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: #3182ce;
+        }
+
+        .binary-value-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            align-items: stretch;
+        }
+
+        .binary-value-card {
+            background: var(--background-light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+            border: 1px solid rgba(66, 153, 225, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .binary-value-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-color);
+        }
+
+        .binary-value-card h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+
+        .cm-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            color: var(--text-light);
+        }
+
+        .binary-base-display {
+            background: var(--background-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(66,153,225,0.15);
+            text-align: center;
+            min-width: 150px;
+            border: 2px solid var(--accent-color);
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .binary-base-display::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--accent-color), #63b3ed);
+            z-index: -1;
+            animation: pulse 2s infinite;
+            opacity: 0.3;
+        }
+
+        .binary-derivation-box {
+            background: var(--background-light);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(66, 153, 225, 0.2);
+        }
+
+        .binary-derivation-box::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .binary-derivation-box::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+
+        .calc-step {
+            margin: 0.8rem 0;
+            padding-left: 1rem;
+            border-left: 3px solid var(--accent-color);
+            font-size: 0.95rem;
+            color: var(--text-light);
+        }
+
+        #binaryFinalResult {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.1) 0%, rgba(66, 153, 225, 0.1) 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(66,153,225,0.15);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            animation: resultSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 2rem;
+            text-align: center;
+            border: 2px solid var(--success-color);
+            display: none;
+        }
+
+        @keyframes resultSlideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #binaryFinalResult::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 25%,
+                rgba(255,255,255,0.1) 50%,
+                transparent 75%
+            );
+            animation: shine 3s infinite linear;
+            transform: rotate(45deg);
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .final-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--success-color);
+        }
+
+        .final-value::after {
+            content: "✓";
+            color: var(--success-color);
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 4px rgba(72,187,120,0.3));
+        }
+
+        .result-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            letter-spacing: 1px;
+            color: var(--text-light);
+        }
+
+        .instructions {
+            background: var(--background-light);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 800px;
+            margin-top: 2rem;
+        }
+
+        .instructions h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+            border-bottom: 1px solid rgba(66, 153, 225, 0.3);
+            padding-bottom: 0.5rem;
+        }
+
+        .instructions ol {
+            padding-left: 1.5rem;
+        }
+
+        .instructions li {
+            margin-bottom: 1rem;
+        }
+
+        .highlight {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(66, 153, 225, 0.2);
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .credits {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .credit-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .credit-item a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .credit-item a:hover {
+            color: #63b3ed;
+        }
+
+        .credit-item svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .binary-value-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .binary-base-display {
+                order: -1;
+                margin-bottom: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="fade-in">
+            <h1>西岛海 · 灵敏度快分法</h1>
+            <p class="subtitle">第七代衍选法 · 快速确定最佳灵敏度范围</p>
+        </header>
+
+        <div class="main-content">
+            <div class="calculator-card fade-in">
+                <div class="input-group">
+                    <input type="number" id="binaryBaseNumber" step="0.1" placeholder="输入任意数值（不必是cm，可以是MOBA游戏的数值）">
+                    <button onclick="binaryStart()">开始分析</button>
+                </div>
+
+                <div class="binary-value-container" id="binaryPhaseValues" style="display: none;">
+                    <!-- 左值卡片 -->
+                    <div class="binary-value-card">
+                        <h3>低值</h3>
+                        <div class="cm-value" id="binaryLowValue">-</div>
+                        <button onclick="binaryChooseLow()">选择低值</button>
+                    </div>
+                    
+                    <!-- 基准值显示 -->
+                    <div class="binary-base-display">
+                        <h3>当前基准</h3>
+                        <div class="cm-value" id="binaryCurrentBase">-</div>
+                    </div>
+
+                    <!-- 右值卡片 -->
+                    <div class="binary-value-card">
+                        <h3>高值</h3>
+                        <div class="cm-value" id="binaryHighValue">-</div>
+                        <button onclick="binaryChooseHigh()">选择高值</button>
+                    </div>
+                </div>
+
+                <div class="binary-derivation-box" id="binaryDerivation" style="display: none;">
+                    <div>计算过程：</div>
+                    <div id="binaryCalcSteps"></div>
+                </div>
+
+                <div id="binaryFinalResult">
+                    <div class="result-label">最终推荐值</div>
+                    <div class="final-value" id="binaryFinalValue">-</div>
+                </div>
+            </div>
+
+            <div class="instructions fade-in">
+                <h2>使用说明</h2>
+                <ol>
+                    <li>可以填入任意数（例如cm/360、小众游戏的灵敏度、乃至于moba游戏的灵敏度），但最好在100以内</li>
+                    <li>可以在任意阶段<span class="highlight">手动修改基准值</span>，点击大号的基准数就能修改</li>
+                </ol>
+                <p><strong>提示：</strong>建议在固定的游戏场景中进行测试，以获得最准确的结果。</p>
+            </div>
+        </div>
+
+        <footer class="fade-in">
+            <p>西岛海快分法 · 第七代算法</p>
+            <div class="credits">
+                <div class="credit-item">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                    </svg>
+                    <a href="https://space.bilibili.com/1534330" target="_blank">公式作者：西岛海（xlm）</a>
+                </div>
+        </footer>
+    </div>
+
+    <script>
+        // 快分·第七代算法
+        let binaryCurrentBase = 0;
+        let binaryInitialBase = 0;
+        let binaryLow = 0;
+        let binaryHigh = 0;
+        const binaryRatios = [0.4375, 0.375, 0.3125, 0.1875, 0.125, 0.125, 0.125, 0.0625, 0.03125];
+        let binaryPhaseLimit = 9;
+        let binaryCurrentStep = 0;
+        let binaryProcessLog = [];
+        
+        function binaryStart() {
+            const input = document.getElementById('binaryBaseNumber').value;
+            if (!input || isNaN(input)) {
+                alert("请输入有效数字！");
+                return;
+            }
+            
+            binaryCurrentBase = parseFloat(input);
+            binaryInitialBase = binaryCurrentBase;
+            binaryCurrentStep = 0;
+            binaryProcessLog = [];
+            
+            document.getElementById('binaryPhaseValues').style.display = 'flex';
+            document.getElementById('binaryDerivation').style.display = 'block';
+            document.getElementById('binaryFinalResult').style.display = 'none';
+            
+            // 添加动画效果
+            document.getElementById('binaryPhaseValues').classList.add('fade-in');
+            
+            binaryUpdateRange();
+        }
+        
+        function binaryUpdateRange() {
+            const range = binaryInitialBase * binaryRatios[binaryCurrentStep];
+            binaryLow = binaryCurrentBase * (1 - binaryRatios[binaryCurrentStep]);
+            binaryHigh = binaryCurrentBase * (1 + binaryRatios[binaryCurrentStep]);
+            
+            document.getElementById('binaryLowValue').textContent = binaryLow.toFixed(2);
+            document.getElementById('binaryHighValue').textContent = binaryHigh.toFixed(2);
+            document.getElementById('binaryCurrentBase').textContent = binaryCurrentBase.toFixed(2);
+            
+            // 添加当前阶段信息
+            const stepInfo = `阶段 ${binaryCurrentStep + 1}/${binaryPhaseLimit} · 调整比例: ±${(binaryRatios[binaryCurrentStep] * 100).toFixed(2)}%`;
+            document.getElementById('binaryCalcSteps').innerHTML = binaryProcessLog.join('<br>') + (binaryProcessLog.length > 0 ? '<br>' : '') + 
+                `<div class="calc-step">${stepInfo}</div>`;
+        }
+        
+        function binaryChooseLow() {
+            const ratio = binaryRatios[binaryCurrentStep];
+            binaryCurrentBase = binaryCurrentBase * (1 - ratio);
+            binaryProcessLog.push(`阶段 ${binaryCurrentStep + 1}: 选择低值 → 新基准 = ${binaryCurrentBase.toFixed(2)}`);
+            binaryHandleChoice();
+        }
+        
+        function binaryChooseHigh() {
+            const ratio = binaryRatios[binaryCurrentStep];
+            binaryCurrentBase = binaryCurrentBase * (1 + ratio);
+            binaryProcessLog.push(`阶段 ${binaryCurrentStep + 1}: 选择高值 → 新基准 = ${binaryCurrentBase.toFixed(2)}`);
+            binaryHandleChoice();
+        }
+        
+        function binaryHandleChoice() {
+            binaryCurrentStep++;
+            if (binaryCurrentStep >= binaryPhaseLimit) {
+                // 结束分析，显示最终结果
+                document.getElementById('binaryPhaseValues').style.display = 'none';
+                document.getElementById('binaryDerivation').style.display = 'none';
+                document.getElementById('binaryFinalResult').style.display = 'block';
+                document.getElementById('binaryFinalValue').textContent = binaryCurrentBase.toFixed(2);
+                
+                // 添加完整计算历史
+                document.getElementById('binaryCalcSteps').innerHTML = binaryProcessLog.join('<br>') + 
+                    `<div class="calc-step">最终推荐值: ${binaryCurrentBase.toFixed(2)}</div>`;
+            } else {
+                binaryUpdateRange();
+                
+                // 添加动画效果
+                const cards = document.querySelectorAll('.binary-value-card');
+                cards.forEach(card => {
+                    card.style.animation = 'none';
+                    void card.offsetWidth; // 触发重绘
+                    card.style.animation = 'fadeIn 0.5s ease-out';
+                });
+            }
+        }
+
+        // 允许用户手动修改基准值
+        document.getElementById('binaryCurrentBase').addEventListener('click', function() {
+            const newValue = prompt("请输入新的基准值:", binaryCurrentBase.toFixed(2));
+            if (newValue && !isNaN(newValue)) {
+                binaryCurrentBase = parseFloat(newValue);
+                binaryProcessLog.push(`[手动修改] 基准值更新为: ${binaryCurrentBase.toFixed(2)}`);
+                binaryUpdateRange();
+            }
+        });
+
+        // 输入框回车键触发开始
+        document.getElementById('binaryBaseNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                binaryStart();
+            }
+        });
+    </script>
+</body>
+</html>
