@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西岛海手部摆动计算工具 - 修正版</title>
+    <style>
+        /* 默认通用样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease, text-shadow 0.5s ease;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 背景纹理层 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.03"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="0.5"/><circle cx="20" cy="20" r="5" fill="white"/><circle cx="80" cy="80" r="5" fill="white"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 风格一：通用变量 */
+        body.style-1 {
+            background: linear-gradient(135deg, #1a1a2a 0%, #2a2a3a 100%);
+            color: rgba(220, 220, 230, 0.9);
+            --primary-bg: rgba(25, 25, 35, 0.7);
+            --secondary-bg: rgba(40, 40, 50, 0.5);
+            --border-color: rgba(100, 100, 130, 0.4);
+            --accent-color: rgba(80, 120, 170, 0.6);
+            --glow-color: rgba(110, 150, 200, 0.3);
+            --module1-color: rgba(80, 120, 170, 0.6);
+            --module2-color: rgba(170, 120, 80, 0.6);
+            --module3-color: rgba(120, 80, 170, 0.6);
+            --module4-color: rgba(170, 80, 120, 0.6);
+        }
+
+        /* 风格二：硬朗风格变量 */
+        body.style-2 {
+            background: linear-gradient(135deg, #2c3e50 0%, #1c2530 100%);
+            color: rgba(220, 220, 230, 0.9);
+            --primary-bg: rgba(30, 30, 40, 0.8);
+            --secondary-bg: rgba(40, 40, 50, 0.5);
+            --border-color: rgba(70, 90, 110, 0.5);
+            --accent-color: #5bc0de;
+            --glow-color: rgba(91, 192, 222, 0.3);
+            --module1-color: #5bc0de;
+            --module2-color: #f0ad4e;
+            --module3-color: #d9534f;
+            --module4-color: #5cb85c;
+        }
+        
+        /* 竖排标题样式 */
+        .vertical-title {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: rgba(220, 220, 230, 0.9);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            white-space: nowrap;
+            text-shadow: 0 0 10px rgba(110, 150, 200, 0.5);
+            z-index: 2;
+        }
+
+        .container {
+            display: flex;
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            z-index: 1;
+        }
+        
+        #style-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+        #style-switcher:hover {
+            background: var(--accent-color);
+            box-shadow: 0 0 8px var(--glow-color);
+        }
+
+        .module {
+            flex: 1;
+            background: var(--primary-bg);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glow-color), transparent);
+        }
+
+        .module-1 {
+            border-top: 3px solid var(--module1-color);
+        }
+
+        .module-2 {
+            border-top: 3px solid var(--module2-color);
+        }
+
+        .module-3 {
+            border-top: 3px solid var(--module3-color);
+        }
+        
+        .module-4 {
+            border-top: 3px solid var(--module4-color);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 1.5rem;
+            text-align: center;
+            text-shadow: 0 0 8px var(--glow-color);
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .module-1 h2 {
+            color: var(--module1-color);
+        }
+
+        .module-2 h2 {
+            color: var(--module2-color);
+        }
+
+        .module-3 h2 {
+            color: var(--module3-color);
+        }
+        
+        .module-4 h2 {
+            color: var(--module4-color);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .input-group-row .input-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 15px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px var(--glow-color);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-vertical-slider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 180px;
+            margin: 15px 0;
+        }
+
+        .slider-wrapper {
+            position: relative;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            margin: 0 15px;
+        }
+
+        input[type="range"].vertical-custom {
+            -webkit-appearance: none;
+            appearance: none;
+            transform: rotate(-90deg);
+            width: 150px;
+            height: 5px;
+            background: var(--secondary-bg);
+            border-radius: 5px;
+            outline: none;
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -2.5px;
+            margin-left: -75px;
+        }
+
+        input[type="range"].vertical-custom::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--glow-color);
+        }
+
+        .module-1 input[type="range"].vertical-custom::-webkit-slider-thumb {
+            background: var(--module1-color);
+        }
+
+        .module-2 input[type="range"].vertical-custom::-webkit-slider-thumb {
+            background: var(--module2-color);
+        }
+
+        .module-3 input[type="range"].vertical-custom::-webkit-slider-thumb {
+            background: var(--module3-color);
+        }
+        
+        .module-4 input[type="range"].vertical-custom::-webkit-slider-thumb {
+            background: var(--module4-color);
+        }
+
+        .slider-markers {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 150px;
+            margin-left: 10px;
+        }
+
+        .slider-markers span {
+            font-size: 0.7rem;
+            color: var(--text-color);
+            opacity: 0.6;
+        }
+        
+        .ratio-display {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            width: 50px;
+            text-align: right;
+        }
+
+        .results {
+            background: var(--secondary-bg);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .result-label {
+            font-weight: 500;
+        }
+
+        .result-value {
+            font-weight: 600;
+        }
+
+        .module-1 .result-value {
+            color: var(--module1-color);
+        }
+
+        .module-2 .result-value {
+            color: var(--module2-color);
+        }
+
+        .module-3 .result-value {
+            color: var(--module3-color);
+        }
+        
+        .module-4 .result-value {
+            color: var(--module4-color);
+        }
+
+        .formula-note {
+            font-size: 0.8rem;
+            margin-top: 25px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-color);
+        }
+        
+        body.style-2 .formula-note {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .module-1 .formula-note {
+            border-left-color: var(--module1-color);
+        }
+
+        .module-2 .formula-note {
+            border-left-color: var(--module2-color);
+        }
+
+        .module-3 .formula-note {
+            border-left-color: var(--module3-color);
+        }
+        
+        .module-4 .formula-note {
+            border-left-color: var(--module4-color);
+        }
+
+        /* 按钮样式 */
+        .button-group {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: var(--accent-color);
+            box-shadow: 0 0 8px var(--glow-color);
+        }
+
+        .module-3 button {
+            background: var(--module3-color);
+        }
+
+        .module-3 button:hover {
+            background: rgba(120, 80, 170, 0.8);
+        }
+        
+        body.style-2 .module-3 button:hover {
+            background: rgba(217, 83, 79, 0.8);
+        }
+
+        .module-4 button {
+            background: var(--module4-color);
+        }
+
+        .module-4 button:hover {
+            background: rgba(170, 80, 120, 0.8);
+        }
+        
+        body.style-2 .module-4 button:hover {
+            background: rgba(92, 184, 92, 0.8);
+        }
+
+        .separator {
+            width: 100%;
+            height: 1px;
+            background: var(--border-color);
+            margin: 20px 0;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .custom-vertical-slider {
+                height: 150px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .vertical-title {
+                position: static;
+                transform: none;
+                text-align: center;
+                writing-mode: horizontal-tb;
+                margin-bottom: 20px;
+            }
+        }
+
+        .lock-button {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            fill: var(--text-color);
+            opacity: 0.6;
+        }
+        
+        body.style-2 .lock-button {
+            fill: var(--accent-color);
+        }
+        .lock-button:hover {
+            opacity: 1;
+        }
+
+        /* 新增作者信息栏样式 */
+        .author-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
+            background: rgba(40, 40, 50, 0.8);
+            border: 1px solid rgba(100, 100, 130, 0.4);
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .author-info a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            text-shadow: 0 0 5px var(--glow-color);
+        }
+
+        .author-info a:hover {
+            color: #fff;
+            text-shadow: 0 0 10px #fff;
+        }
+    </style>
+</head>
+<body class="style-1">
+    <div class="vertical-title">西岛海手部摆动&灵敏度高级校准工具</div>
+    <button id="style-switcher">切换至硬朗风格</button>
+    <div class="container">
+        <div class="module module-1">
+            <h2>模块一：计算目标大小度数</h2>
+            
+            <div class="input-group">
+                <label for="hand-length-1">手长 (cm)</label>
+                <input type="number" id="hand-length-1" min="10" max="30" step="0.1" value="18">
+            </div>
+            
+            <div class="input-group">
+                <label for="swing-angle-1">手的摆动角度 (度)</label>
+                <input type="number" id="swing-angle-1" min="0" max="180" step="1" value="50">
+            </div>
+    
+            <div class="input-group">
+                <label for="x-value-1">X值 (CM/360°)</label>
+                <input type="number" id="x-value-1" min="1" max="99999" step="0.1" value="4000">
+            </div>
+          
+            <div class="input-group">
+                <label>光口上下比例位置</label>
+                <div class="custom-vertical-slider">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <svg id="lock-button-1" class="lock-button" viewBox="0 0 16 16">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm2 5V3a3 3 0 1 0-6 0v3H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1zM4 7h8v7H4V7z"/>
+                        </svg>
+                        <span id="light-ratio-display-1" class="ratio-display">0.69</span>
+                        <input type="number" id="wrist-to-light-input-1" style="display: none; width: 80px; text-align: right;" step="0.1" min="0">
+                    </div>
+                    <div class="slider-wrapper">
+                        <input type="range" id="light-ratio-1" class="vertical-custom" min="0" max="16" step="1" value="11" orient="vertical">
+                    </div>
+  
+                    <div class="slider-markers">
+                        <span>16</span>
+                        <span>12</span>
+                        <span>8</span>
+                        <span>4</span>
+                        <span>0</span>
+                    </div>
+                </div>
+            </div>
+           
+            <div class="results">
+                <div class="result-item">
+                    <span class="result-label">光口摆动距离:</span>
+                    <span class="result-value" id="swing-distance-1">0 cm</span>
+                </div>
+         
+                <div class="result-item">
+                    <span class="result-label">目标大小度数:</span>
+                    <span class="result-value" id="target-degree-1">0°</span>
+                </div>
+            </div>
+            
+            <div class="formula-note">
+                公式: 目标大小度数 = 光口摆动距离 / X * 360°
+            </div>
+        </div>
+        
+        <div class="module module-2">
+            <h2>模块二：计算X值</h2>
+            
+            <div class="input-group">
+                <label for="hand-length-2">手长 (cm)</label>
+                <input type="number" id="hand-length-2" min="10" max="30" step="0.1" value="18">
+            </div>
+            
+            <div class="input-group">
+                <label for="swing-angle-2">手的摆动角度 (度)</label>
+                <input type="number" id="swing-angle-2" min="0" max="180" step="1" value="50">
+            </div>
+            
+            <div class="input-group">
+                <label>光口上下比例位置</label>
+                <div class="custom-vertical-slider">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <svg id="lock-button-2" class="lock-button" viewBox="0 0 16 16">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm2 5V3a3 3 0 1 0-6 0v3H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1zM4 7h8v7H4V7z"/>
+                        </svg>
+                        <span id="light-ratio-display-2" class="ratio-display">0.69</span>
+                        <input type="number" id="wrist-to-light-input-2" style="display: none; width: 80px; text-align: right;" step="0.1" min="0">
+                    </div>
+                    <div class="slider-wrapper">
+                        <input type="range" id="light-ratio-2" class="vertical-custom" min="0" max="16" step="1" value="11" orient="vertical">
+                    </div>
+  
+                    <div class="slider-markers">
+                        <span>16</span>
+                        <span>12</span>
+                        <span>8</span>
+                        <span>4</span>
+                        <span>0</span>
+                    </div>
+                </div>
+            </div>
+           
+            <div class="input-group">
+                <label for="target-degree-input">目标大小度数 (度)</label>
+                <input type="number" id="target-degree-input" min="1" max="360" step="0.1" value="1">
+            </div>
+            
+            <div class="results">
+                <div class="result-item">
+                    <span class="result-label">光口摆动距离:</span>
+                    <span class="result-value" id="swing-distance-2">5.81 cm</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">X值 (CM/360°):</span>
+                    <span class="result-value" id="x-value-result">40.00</span>
+                </div>
+            </div>
+            
+            <div class="formula-note">
+                公式: X = 光口摆动距离 / 目标大小度数 * 360°
+            </div>
+        </div>
+        
+        <div class="module module-3">
+            <h2>模块三：值的百分比增减&根号计算</h2>
+            
+            <div class="input-group-row">
+                <div class="input-group">
+                    <label for="x-value-input-1">值A (CM/360°)</label>
+                    <input type="number" id="x-value-input-1" min="1" max="99999" step="0.1" value="4000">
+                </div>
+                <div class="input-group">
+                    <label for="x-value-input-2">值B (CM/360°)</label>
+                    <input type="number" id="x-value-input-2" min="1" max="99999" step="0.1" value="3000">
+                </div>
+            </div>
+            
+            <div class="results">
+                <div class="result-item">
+                    <span class="result-label">以A为基准值:</span>
+                    <span class="result-value" id="percentage-change">0%</span>
+                </div>
+            </div>
+
+            <div class="separator"></div>
+            
+            <div class="input-group">
+                <label for="sqrt-input">开根计算器</label>
+                <input type="number" id="sqrt-input" step="0.1" value="100">
+            </div>
+            
+            <div class="results">
+                <div class="result-item">
+                    <span class="result-label">计算结果:</span>
+                    <span class="result-value" id="sqrt-result">0</span>
+                </div>
+            </div>
+            
+            <div class="separator"></div>
+
+            <div class="input-group-row">
+                <div class="input-group">
+                    <label for="original-value">原始值</label>
+                    <input type="number" id="original-value" step="0.1" value="100">
+                </div>
+                <div class="input-group">
+                    <label for="change-percentage">增减百分比 (%)</label>
+                    <input type="number" id="change-percentage" step="0.1" value="10">
+                </div>
+            </div>
+            
+            <div class="results">
+                <div class="result-item">
+                    <span class="result-label">变化后的值:</span>
+                    <span class="result-value" id="changed-value">0</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="module module-4">
+            <h2>模块四：说明</h2>
+            <div class="formula-note">
+我认为手部摆动的角度的大小不一，会与我理想结果不同。<br>
+故而设计一个多用的灵敏度校准工具。<br><br>
+
+校准手部角度与灵敏度的方法：<br>
+1. 在模块一、二当中填入手的大小（腕部上横线到中指尖），X值<br>
+2. 在模块一当中填入手的摆动角度，模块二默认50°不要动<br>
+3. 其他一切不要动<br>
+4. 模块一目标大小度数填入模块二当中<br>
+5. 得到模块二X值，以此作为校准后的X值<br><br>
+
+其他种种玩法调法，各位自行摸索。
+            </div>
+            <div class="formula-note">
+                摆动公式：<br>
+                弧度=度 × 180/π<br>
+                手腕上横线到鼠标光口位置 = 手长 * 光口上下位置比例<br>
+                光口摆动距离 = 手腕上横线到鼠标光口位置 * 手部摆动弧度
+            </div>
+            <div class="formula-note">
+                特定概念：<br>
+                X = 一个在 CM/360° 单位下的数值<br>
+                X的计算方式：固定手腕以最大幅度摆动，准星移动后，以恰好的角度经过游戏内目标大小的cm/360°灵敏度。
+            </div>
+            <div class="formula-note">
+                目标大小度数: 游戏内目标所占据的游戏内角度。
+            </div>
+        </div>
+    </div>
+
+    <div class="author-info">
+        作者：<a href="https://space.bilibili.com/1534330" target="_blank">西岛海</a>
+    </div>
+
+    <script>
+        // 锁头状态变量
+        let isLocked1 = true;
+        let isLocked2 = true;
+
+        // 锁头图标的 SVG 路径
+        const lockIcon = '<path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm2 5V3a3 3 0 1 0-6 0v3H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-1zM4 7h8v7H4V7z"/>';
+        const unlockIcon = '<path d="M11 1a2 2 0 0 1 2 2v4H9V3a2 2 0 0 1 2-2zM9 5h2v2h2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V3a3 3 0 0 1 4.417-2.756zM8 7H6V3a3 3 0 0 0-6 0v4h2v2H2v5a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2V3a3 3 0 0 0 2-2z"/>';
+        // 绑定事件监听器
+        document.getElementById('style-switcher').addEventListener('click', toggleStyle);
+        document.getElementById('hand-length-1').addEventListener('input', calculateModule1);
+        document.getElementById('swing-angle-1').addEventListener('input', calculateModule1);
+        document.getElementById('light-ratio-1').addEventListener('input', calculateModule1);
+        document.getElementById('x-value-1').addEventListener('input', calculateModule1);
+        document.getElementById('lock-button-1').addEventListener('click', toggleLock1);
+        document.getElementById('wrist-to-light-input-1').addEventListener('input', calculateModule1);
+        document.getElementById('hand-length-2').addEventListener('input', calculateModule2);
+        document.getElementById('swing-angle-2').addEventListener('input', calculateModule2);
+        document.getElementById('target-degree-input').addEventListener('input', calculateModule2);
+        document.getElementById('light-ratio-2').addEventListener('input', calculateModule2);
+        document.getElementById('lock-button-2').addEventListener('click', toggleLock2);
+        document.getElementById('wrist-to-light-input-2').addEventListener('input', calculateModule2);
+        document.getElementById('x-value-input-1').addEventListener('input', calculateModule3);
+        document.getElementById('x-value-input-2').addEventListener('input', calculateModule3);
+        document.getElementById('original-value').addEventListener('input', calculateModule3);
+        document.getElementById('change-percentage').addEventListener('input', calculateModule3);
+        document.getElementById('sqrt-input').addEventListener('input', calculateModule3);
+        
+        // 初始化计算
+        calculateModule1();
+        calculateModule2();
+        calculateModule3();
+        // 风格切换功能
+        function toggleStyle() {
+            const body = document.body;
+            const styleSwitcher = document.getElementById('style-switcher');
+            if (body.classList.contains('style-1')) {
+                body.classList.remove('style-1');
+                body.classList.add('style-2');
+                styleSwitcher.textContent = '切换至默认风格';
+            } else {
+                body.classList.remove('style-2');
+                body.classList.add('style-1');
+                styleSwitcher.textContent = '切换至硬朗风格';
+            }
+        }
+
+        // 模块一锁头功能
+        function toggleLock1() {
+            isLocked1 = !isLocked1;
+            const slider = document.getElementById('light-ratio-1');
+            const input = document.getElementById('wrist-to-light-input-1');
+            const lockButton = document.getElementById('lock-button-1');
+            const ratioDisplay = document.getElementById('light-ratio-display-1');
+            if (isLocked1) {
+                slider.style.display = 'block';
+                input.style.display = 'none';
+                lockButton.innerHTML = lockIcon;
+                ratioDisplay.style.display = 'block';
+            } else {
+                slider.style.display = 'none';
+                input.style.display = 'block';
+                lockButton.innerHTML = unlockIcon;
+                ratioDisplay.style.display = 'none';
+            }
+            calculateModule1();
+        }
+
+        // 模块二锁头功能
+        function toggleLock2() {
+            isLocked2 = !isLocked2;
+            const slider = document.getElementById('light-ratio-2');
+            const input = document.getElementById('wrist-to-light-input-2');
+            const lockButton = document.getElementById('lock-button-2');
+            const ratioDisplay = document.getElementById('light-ratio-display-2');
+            if (isLocked2) {
+                slider.style.display = 'block';
+                input.style.display = 'none';
+                lockButton.innerHTML = lockIcon;
+                ratioDisplay.style.display = 'block';
+            } else {
+                slider.style.display = 'none';
+                input.style.display = 'block';
+                lockButton.innerHTML = unlockIcon;
+                ratioDisplay.style.display = 'none';
+            }
+            calculateModule2();
+        }
+
+        function calculateModule1() {
+            const handLength = parseFloat(document.getElementById('hand-length-1').value);
+            const swingAngle = parseFloat(document.getElementById('swing-angle-1').value);
+            const xValue = parseFloat(document.getElementById('x-value-1').value);
+            
+            let wristToLightOpening;
+            if (isLocked1) {
+                const lightRatio = parseFloat(document.getElementById('light-ratio-1').value);
+                const ratioValue = lightRatio / 16;
+                document.getElementById('light-ratio-display-1').textContent = ratioValue.toFixed(4);
+                wristToLightOpening = handLength * ratioValue;
+            } else {
+                wristToLightOpening = parseFloat(document.getElementById('wrist-to-light-input-1').value);
+            }
+
+            const swingRadians = swingAngle * (Math.PI / 180);
+            const lightOpeningDistance = wristToLightOpening * swingRadians;
+            
+            const targetSizeDegree = (lightOpeningDistance / xValue) * 360;
+            
+            document.getElementById('swing-distance-1').textContent = lightOpeningDistance.toFixed(2) + ' cm';
+            document.getElementById('target-degree-1').textContent = targetSizeDegree.toFixed(8) + '°';
+        }
+        
+        function calculateModule2() {
+            const handLength = parseFloat(document.getElementById('hand-length-2').value);
+            const swingAngle = parseFloat(document.getElementById('swing-angle-2').value);
+            const targetDegree = parseFloat(document.getElementById('target-degree-input').value);
+            
+            let wristToLightOpening;
+            if (isLocked2) {
+                const lightRatio = parseFloat(document.getElementById('light-ratio-2').value);
+                const ratioValue = lightRatio / 16;
+                document.getElementById('light-ratio-display-2').textContent = ratioValue.toFixed(4);
+                wristToLightOpening = handLength * ratioValue;
+            } else {
+                wristToLightOpening = parseFloat(document.getElementById('wrist-to-light-input-2').value);
+            }
+
+            const swingRadians = swingAngle * (Math.PI / 180);
+            const lightOpeningDistance = wristToLightOpening * swingRadians;
+            
+            const xValue = (lightOpeningDistance / targetDegree) * 360;
+            
+            document.getElementById('swing-distance-2').textContent = lightOpeningDistance.toFixed(2) + ' cm';
+            document.getElementById('x-value-result').textContent = xValue.toFixed(2);
+        }
+        
+        function calculateModule3() {
+            const xValue1 = parseFloat(document.getElementById('x-value-input-1').value);
+            const xValue2 = parseFloat(document.getElementById('x-value-input-2').value);
+            const percentageChange = ((xValue2 - xValue1) / xValue1) * 100;
+            let displayValue = percentageChange.toFixed(2) + '%';
+            if (percentageChange > 0) {
+                displayValue = '+' + displayValue;
+            }
+            document.getElementById('percentage-change').textContent = displayValue;
+
+            const sqrtInput = parseFloat(document.getElementById('sqrt-input').value);
+            let sqrtResult;
+            if (sqrtInput >= 0) {
+                sqrtResult = Math.sqrt(sqrtInput);
+                document.getElementById('sqrt-result').textContent = sqrtResult.toFixed(2);
+            } else {
+                document.getElementById('sqrt-result').textContent = '无效输入';
+            }
+
+            const originalValue = parseFloat(document.getElementById('original-value').value);
+            const changePercentage = parseFloat(document.getElementById('change-percentage').value);
+            const changedValue = originalValue * (1 + changePercentage / 100);
+            document.getElementById('changed-value').textContent = changedValue.toFixed(2);
+        }
+    </script>
+</body>
+</html>
