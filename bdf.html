@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西岛海 · 完美灵敏度公式 · 计算器</title>
+    <style>
+        /* 所有CSS样式保持不变 */
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: rgba(30, 30, 30, 0.8);
+            --bg-tertiary: rgba(45, 45, 45, 0.7);
+            --card-bg: rgba(34, 34, 34, 0.7);
+            --text-primary: #E0E0E0;
+            --text-secondary: #A0A0A0;
+            --accent-blue: #64B5F6;
+            --accent-green: #4CAF50;
+            --accent-red: #FF5252;
+            --accent-light-red: #FF6961;
+            --accent-brown: #8B4513;
+            --border-color: rgba(60, 60, 60, 0.8);
+            --shadow-color-light: rgba(0, 0, 0, 0.2);
+            --shadow-color-dark: rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+        .header p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .floating-author-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .floating-author-link a {
+            background-color: var(--bg-tertiary);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px var(--shadow-color-dark);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            white-space: nowrap;
+        }
+        .floating-author-link a:hover {
+            box-shadow: 0 6px 20px var(--shadow-color-dark);
+            background-color: var(--accent-brown);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .floating-author-link a i {
+            font-size: 1.5rem;
+        }
+        
+        .main-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 
+                0 6px 20px var(--shadow-color-dark), 
+                0 2px 5px var(--shadow-color-light);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .card:hover {
+            box-shadow: 
+                0 8px 25px var(--shadow-color-dark), 
+                0 4px 10px var(--shadow-color-light);
+            transform: translateY(-4px);
+        }
+
+        .card-header-with-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-green);
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--accent-blue);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card h2.formula-analysis-title {
+            color: var(--accent-green);
+        }
+        .card h2.auxiliary-formulas-title {
+            color: var(--accent-red);
+        }
+        
+        .toggle-btn {
+            background-color: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px var(--shadow-color-dark);
+        }
+        .toggle-btn:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            -moz-appearance: textfield;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+        .input-group input::-webkit-outer-spin-button,
+        .input-group input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.2);
+        }
+        .input-group input::placeholder, .input-group textarea::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+        .input-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 5px var(--shadow-color-dark);
+        }
+        .btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px var(--shadow-color-dark);
+        }
+        .btn-primary {
+            background-color: var(--accent-blue);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #5a9cdb;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover {
+            background-color: var(--bg-tertiary);
+            transform: translateY(-1px);
+        }
+        .btn-warning {
+            background-color: var(--accent-light-red);
+            color: #fff;
+        }
+        .btn-warning:hover {
+            background-color: #e55c5c;
+            transform: translateY(-1px);
+        }
+        .btn-link {
+            background: none;
+            color: var(--text-secondary);
+            border: none;
+            padding: 0;
+            font-size: 0.9rem;
+            text-decoration: underline;
+            transition: color 0.3s ease;
+        }
+        .btn-link:hover {
+            color: var(--text-primary);
+        }
+        .btn-result {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            padding: 8px 12px;
+            margin-top: 10px;
+        }
+        .btn-result:hover {
+            background-color: #444;
+        }
+
+        .results-container-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .results-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .results-row-medium {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .results-row-nowrap {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .results-container-wrapper #results-container-auxiliary .result-card {
+            max-width: 450px;
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+
+        .result-card-highlight {
+            border: 3px solid var(--accent-blue);
+            box-shadow: 0 0 25px var(--accent-blue), 0 0 12px rgba(100, 181, 246, 0.7);
+            animation: intense-pulse 1.2s infinite alternate;
+            transition: all 0.2s ease-in-out;
+        }
+
+        @keyframes intense-pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.05);
+                opacity: 0.95;
+            }
+        }
+
+        .result-card {
+            background-color: var(--bg-tertiary);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 
+                inset 0 0 5px rgba(0, 0, 0, 0.4), 
+                0 2px 5px var(--shadow-color-dark);
+            transition: all 0.3s ease;
+        }
+        .result-card:hover {
+            box-shadow: 
+                inset 0 0 5px rgba(0, 0, 0, 0.4), 
+                0 4px 15px rgba(100, 181, 246, 0.2);
+        }
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        .result-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .result-action-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px var(--shadow-color-dark);
+        }
+        .result-action-btn:hover {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+        .result-action-btn:active {
+            transform: translateY(1px);
+        }
+
+        .extra-formulas .result-display {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .extra-formulas .result-box {
+            background-color: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px var(--shadow-color-dark);
+            flex: 1 1 200px;
+            max-width: 250px;
+        }
+        .extra-formulas .result-box .label-and-formula {
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+        .extra-formulas .result-box .result-value {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: var(--text-primary);
+        }
+
+        .error-message {
+            color: var(--accent-red);
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 15px;
+            min-height: 20px;
+        }
+        .extra-error-message {
+            color: var(--accent-light-red);
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 15px;
+            min-height: 20px;
+        }
+
+        .formula-analysis-section {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px var(--shadow-color-dark);
+            transition: all 0.3s ease;
+        }
+        .formula-analysis-section h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--accent-green);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .formula-analysis-content {
+            display: grid;
+            grid-template-columns: auto 40px auto 1fr;
+            grid-template-rows: auto auto auto;
+            align-items: center;
+            justify-content: center;
+            gap: 20px 40px;
+            text-align: center;
+            transition: all 0.5s ease-in-out;
+            overflow: hidden;
+            padding: 20px 0;
+        }
+        
+        .formula-analysis-content.hidden {
+            display: none;
+        }
+
+        .base-formula-box, .mid-formula-box, .branch-formula-box, .auxiliary-formula-box {
+            background-color: var(--bg-tertiary);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4), 0 2px 5px var(--shadow-color-dark);
+            transition: transform 0.3s ease;
+            white-space: nowrap;
+        }
+        .base-formula-box:hover, .mid-formula-box:hover, .branch-formula-box:hover, .auxiliary-formula-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.1);
+        }
+
+        .base-formula-box {
+            grid-column: 1 / 2;
+            grid-row: 1 / 2;
+        }
+        .vertical-connector-main {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+            width: 2px;
+            height: 20px;
+            background-color: var(--text-secondary);
+            justify-self: center;
+        }
+        .mid-formula-box {
+            grid-column: 1 / 2;
+            grid-row: 3 / 4;
+        }
+
+        .horizontal-connector-bottom {
+            grid-column: 2 / 3;
+            grid-row: 3 / 4;
+            height: 2px;
+            background-color: var(--text-secondary);
+            align-self: center;
+            justify-self: center;
+            width: 40px;
+        }
+
+        .branch-container.high-sensitivity-branch {
+            grid-column: 3 / 4;
+            grid-row: 1 / 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .branch-container.low-sensitivity-branch {
+            grid-column: 3 / 4;
+            grid-row: 3 / 4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .auxiliary-formulas-container {
+            grid-column: 4 / 5;
+            grid-row: 1 / span 3;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .auxiliary-formula-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 15px;
+        }
+        .auxiliary-formula-box .label {
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        .branch-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .branch-title {
+            font-size: 1.2rem;
+            color: var(--accent-blue);
+        }
+        .branch-formula-list {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .auxiliary-formulas-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        .auxiliary-toggle-btn {
+            margin-top: 15px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .variable-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .variable-table th, .variable-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .variable-table th {
+            font-weight: bold;
+            color: var(--accent-blue);
+        }
+        .variable-table tr:hover {
+            background-color: var(--bg-tertiary);
+        }
+        
+        .variable-explanation-card {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 6px 20px var(--shadow-color-dark), 0 2px 5px var(--shadow-color-light);
+            transition: all 0.3s ease;
+        }
+        .variable-explanation-card:hover {
+            box-shadow: 0 8px 25px var(--shadow-color-dark), 0 4px 10px var(--shadow-color-light);
+            transform: translateY(-4px);
+        }
+
+        @media (min-width: 600px) {
+            .main-cards-container {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 30px;
+            }
+            .card-group {
+                flex: 1;
+            }
+        }
+        @media (max-width: 900px) {
+            .formula-analysis-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                gap: 20px;
+            }
+            .base-formula-box, .vertical-connector-main, .mid-formula-box, .horizontal-connector-top, .horizontal-connector-bottom, .branch-container, .auxiliary-formulas-container {
+                grid-column: auto;
+                grid-row: auto;
+            }
+            .horizontal-connector-top, .horizontal-connector-bottom {
+                width: 2px;
+                height: 40px;
+            }
+        }
+
+        /* KaTeX 样式调整 */
+        .katex { 
+            font-size: 1.1em !important;
+        }
+        .katex-display {
+            margin: 0.5em 0 !important;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="data:text/css;base64,{{KATEX_CSS_BASE64}}">
+    <script src="data:text/javascript;base64,{{KATEX_JS_BASE64}}"></script>
+    <script src="data:text/javascript;base64,{{KATEX_AUTO_RENDER_JS_BASE64}}"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>西岛海 · 灵敏度表达法</h1>
+        <p>精确计算你的最佳参考灵敏度</p>
+    </div>
+    
+    <div class="variable-explanation-card">
+        <h2><i class="fas fa-info-circle"></i> 变量说明</h2>
+        <table class="variable-table">
+            <thead>
+                <tr>
+                    <th>变量</th>
+                    <th>定义</th>
+                    <th>得值关键</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>变量X</td>
+                    <td>固定手腕以最大幅度摆动，准星恰好经过目标大小的cm/360°灵敏度。</td>
+                    <td>①.摆动手时请放松 ②.cm/360°反复调整 ③.使得准星划过目标大小时，不多不少</td>
+                </tr>
+                <tr>
+                    <td>变量Y</td>
+                    <td>固定手腕以最大幅度摆动，准星恰好经过常用甩枪距离的cm/360°灵敏度。</td>
+                    <td>①.同上②.同上 ③.使得准星划过常用甩枪距离，不多不少（相当于准星移至目标中心点）</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="main-cards-container">
+        <div class="card-group calculator-section">
+            <div class="card">
+                <h2><i class="fas fa-calculator"></i> 主表达式计算</h2>
+                <div class="input-group">
+                    <label for="x"><i class="fas fa-dot-circle"></i> 变量 X cm/360°（一般在500-5000之间）（常见于1000-4000之间）：</label>
+                    <input type="number" id="x" placeholder="固定手腕 极限摆动范围 等于 准星划过 目标最短长度 的cm/360°灵敏度" step="0.0001" value="4000">
+                </div>
+                <div class="input-group">
+                    <label for="y"><i class="fas fa-dot-circle"></i> 变量 Y cm/360°（一般在20-4000之间）（常见于100-1000之间）：</label>
+                    <input type="number" id="y" placeholder="固定手腕 极限摆动范围 等于 准星划过 常用甩枪长度 的cm/360°灵敏度" step="0.0001" value="200">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="calculateBtn" onclick="calculateAllExpressions()"><i class="fas fa-cogs"></i> 进行计算</button>
+                </div>
+                <div class="error-message" id="error-message"></div>
+                <div class="results-container-wrapper">
+                    <div id="results-container-top" class="results-row"></div>
+                    <div id="results-container-medium" class="results-row-medium"></div>
+                    <div id="results-container-bottom" class="results-row-nowrap"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-group">
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> 极敏内推法</h2>
+                <div class="input-group">
+                    <label for="k"><i class="fas fa-keyboard"></i> 可承受的 最快 灵敏度 K （数小）：</label>
+                    <input type="number" id="k" placeholder="请填入CM/360°单位的灵敏度" step="0.0001">
+                </div>
+                <div class="input-group">
+                    <label for="m"><i class="fas fa-mouse-pointer"></i> 可承受的 最慢 灵敏度 M（数大）：</label>
+                    <input type="number" id="m" placeholder="请填入CM/360°单位的灵敏度" step="0.0001">
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="calculateExtraFormulas()"><i class="fas fa-cogs"></i> 计算</button>
+                    <button class="btn btn-warning" onclick="resetExtraFormulas()"><i class="fas fa-redo-alt"></i> 重置</button>
+                </div>
+                <div class="extra-error-message" id="extra-error-message"></div>
+                <div class="extra-formulas">
+                    <div class="result-display">
+                        <div class="result-box">
+                            <div class="label-and-formula">
+                                侧重转向: <span class="katex-formula" data-formula="(3k + m) / 4"></span>
+                            </div>
+                            <div class="result-value" id="resultA">--</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="label-and-formula">
+                                侧重精准: <span class="katex-formula" data-formula="(k + 3m) / 4"></span>
+                            </div>
+                            <div class="result-value" id="resultB">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="auxiliary-formulas-section">
+                    <div class="card-header-with-toggle">
+                        <h2 class="auxiliary-formulas-title"><i class="fas fa-tools"></i> 一般参考顺序：侧重瞄准 - 侧重速度</h2>
+                    </div>
+                    <div id="auxiliaryContent" class="hidden">
+                        <div class="error-message" id="auxiliary-error-message"></div>
+                        <div class="results-container-wrapper">
+                            <div id="results-container-auxiliary" class="results-row"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="formula-analysis-section">
+        <div class="card-header-with-toggle">
+            <h2 class="formula-analysis-title"><i class="fas fa-project-diagram"></i> 公式拆解与分析</h2>
+            <button id="toggleAnalysisBtn" class="toggle-btn" onclick="toggleAnalysisSection()">
+                <i class="fas fa-plus-circle"></i> 展开公式分析
+            </button>
+        </div>
+        <div id="analysisContent" class="formula-analysis-content hidden">
+            <div class="base-formula-box">
+                <span>侧重速度: <span class="katex-formula" data-formula="√(X+Y)"></span></span>
+            </div>
+            <div class="vertical-connector-main"></div>
+            <div class="mid-formula-box">
+                <span>侧重瞄准: <span class="katex-formula" data-formula="√X+√Y"></span></span>
+            </div>
+            
+            <div class="horizontal-connector-bottom"></div>
+            
+            <div class="branch-container high-sensitivity-branch">
+                <div class="branch-header">
+                    <span class="branch-title">快敏</span>
+                </div>
+                <div class="branch-formula-list">
+                    <div class="branch-formula-box"><span class="katex-formula" data-formula="侧重速度的1cm/?°下+π°"></span></div>
+                    <div class="branch-formula-box"><span class="katex-formula" data-formula="+1.5°"></span></div>
+                    <div class="branch-formula-box"><span class="katex-formula" data-formula="+0.75°"></span></div>
+                </div>
+            </div>
+    
+            
+            <div class="branch-container low-sensitivity-branch">
+                <div class="branch-header">
+                    <span class="branch-title">慢敏</span>
+                </div>
+                <div class="branch-formula-list">
+                    <div class="branch-formula-box"><span class="katex-formula" data-formula="侧重瞄准的1cm/?°下-0.75°"></span></div>
+                    <div class="branch-formula-box"><span class="katex-formula" data-formula="-1.5°"></span></div>
+                    <div class="branch-formula-box"><span class="katex-formula" data-formula="-π°"></span></div>
+                </div>
+            </div>
+            
+            <div class="auxiliary-formulas-container">
+                <div class="auxiliary-formula-box">
+                    <div class="label">起源公式</div>
+                    <span><span class="katex-formula" data-formula="√X"></span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="floating-author-link">
+    <a href="https://space.bilibili.com/1534330" target="_blank" style="background-color: var(--accent-brown); border-color: var(--accent-brown);">
+        <i class="fab fa-bilibili"></i>
+        <span>作者 西岛海xlm</span>
+    </a>
+</div>
+
+<script src="data:text/javascript;base64,{{FONT_AWESOME_JS_BASE64}}"></script>
+
+<script>
+    // 定义核心表达式，按行分组
+    const expressions = {
+        // 快速组
+        top: [
+            { id: 'result_extreme_fast', label: '超快', expression: (x, y) => { const oldVal = Math.sqrt(x + y); return 360 / ((360 / oldVal) + 3.1416); } },
+            { id: 'result_3125p_mult', label: '很快', expression: (x, y) => { const oldVal = Math.sqrt(x + y); return 360 / ((360 / oldVal) + 1.5); } },
+            { id: 'result_1875p_mult', label: '快敏', expression: (x, y) => { const oldVal = Math.sqrt(x + y); return 360 / ((360 / oldVal) + 0.75); } },
+        ],
+        // 中等灵敏度
+        medium: [
+            { id: 'result_medium', label: '侧重速度', expression: (x, y) => { const oldVal = Math.sqrt(x + y); const deltaVal = 0; return (oldVal * 360) / (360 + deltaVal); } },
+            { id: 'result_sqrt_x_plus_sqrt_y', label: '侧重瞄准', expression: (x, y) => Math.sqrt(x) + Math.sqrt(y) },
+        ],
+        // 慢速组
+        bottom: [
+            { id: 'result_125p_mult', label: '慢敏', expression: (x, y) => { const oldVal = Math.sqrt(x) + Math.sqrt(y); return 360 / ((360 / oldVal) - 0.75); } },
+            { id: 'result_25p_mult', label: '很慢', expression: (x, y) => { const oldVal = Math.sqrt(x) + Math.sqrt(y); return 360 / ((360 / oldVal) - 1.5); } },
+            { id: 'result_375p', label: '超慢', expression: (x, y) => { const oldVal = Math.sqrt(x) + Math.sqrt(y); return 360 / ((360 / oldVal) - 3.1416); } },
+        ]
+    };
+    // 定义新的辅助表达式
+    const auxiliaryExpressions = [
+    ];
+    /**
+     * 将结果值从主表达式卡片传输到额外公式部分的输入字段
+     * @param {string} sourceId - 源结果元素的ID（例如'result_medium'）
+     * @param {string} targetInputId - 目标输入字段的ID（例如'k'或'm'）
+     */
+    function transferToExtra(sourceId, targetInputId) {
+        const sourceElement = document.getElementById(sourceId);
+        if (sourceElement) {
+            const valueElement = sourceElement.querySelector('.result-value');
+            if (valueElement) {
+                const value = parseFloat(valueElement.textContent);
+                if (!isNaN(value)) {
+                    document.getElementById(targetInputId).value = value;
+                    calculateExtraFormulas();
+                    console.log(`成功传输值 ${value}.`);
+                } else {
+                    console.error("源元素的值不是有效数字。");
+                }
+            } else {
+                console.error(`在卡片 ${sourceId} 中找不到 .result-value 元素。`);
+            }
+        } else {
+            console.error(`找不到ID为 ${sourceId} 的元素。`);
+        }
+    }
+
+    // 主函数：计算所有表达式并动态生成HTML
+    function calculateAllExpressions() {
+        const calculateBtn = document.getElementById('calculateBtn');
+        const originalText = calculateBtn.innerHTML;
+        
+        // 改变按钮状态
+        calculateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 计算中...';
+        calculateBtn.disabled = true;
+
+        // 使用setTimeout来模拟计算过程，并在计算完成后恢复按钮状态
+        setTimeout(() => {
+            calculateExpressions();
+            calculateNewFormulas();
+            
+            // 恢复按钮状态
+            calculateBtn.innerHTML = originalText;
+            calculateBtn.disabled = false;
+        }, 500); // 延迟500毫秒
+    }
+
+    // 计算主表达式并动态生成HTML
+    function calculateExpressions() {
+        const x = parseFloat(document.getElementById('x').value);
+        const y = parseFloat(document.getElementById('y').value);
+        const errorMessageDiv = document.getElementById('error-message');
+        
+        // 清除所有容器
+        document.getElementById('results-container-top').innerHTML = '';
+        document.getElementById('results-container-medium').innerHTML = '';
+        document.getElementById('results-container-bottom').innerHTML = '';
+        errorMessageDiv.textContent = '';
+
+        if (isNaN(x) || isNaN(y)) {
+            errorMessageDiv.textContent = "请输入有效的数字！";
+            return;
+        }
+
+        // 循环遍历表达式并附加到正确的容器
+        ['top', 'medium', 'bottom'].forEach(groupKey => {
+            const container = document.getElementById(`results-container-${groupKey}`);
+            expressions[groupKey].forEach(item => {
+                try {
+                    const result = item.expression(x, y);
+                    
+                    // 创建结果卡片
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'result-card';
+                    
+                    // 为'中敏 (基础)'卡片添加高亮类
+                    if (item.id === 'result_medium' || item.id === 'result_sqrt_x_plus_sqrt_y') {
+                        resultCard.classList.add('result-card-highlight');
+                    }
+                    
+                    resultCard.id = item.id; // 为每个结果卡片设置ID
+                    resultCard.innerHTML = `
+                        <span class="result-label">${item.label}</span>
+                        <span class="result-value">${isNaN(result) ? 'NaN' : result.toFixed(2)}</span>
+                        <div class="result-actions">
+                            <button class="result-action-btn" onclick="transferToExtra('${item.id}', 'k')">-> K</button>
+                            <button class="result-action-btn" onclick="transferToExtra('${item.id}', 'm')">-> M</button>
+                        </div>
+                    `;
+                    container.appendChild(resultCard);
+                } catch (e) {
+                    console.error(`计算"${item.label}"时出错:`, e);
+                    errorMessageDiv.textContent = `计算"${item.label}"时出错，请检查输入值。`;
+                }
+            });
+        });
+    }
+
+    // 计算新添加的辅助公式
+    function calculateNewFormulas() {
+        const x = parseFloat(document.getElementById('x').value);
+        const y = parseFloat(document.getElementById('y').value);
+        const errorMessageDiv = document.getElementById('auxiliary-error-message');
+        const container = document.getElementById('results-container-auxiliary');
+        // 清除之前的结果
+        container.innerHTML = '';
+        errorMessageDiv.textContent = '';
+        if (isNaN(x) || isNaN(y)) {
+            errorMessageDiv.textContent = "请输入有效的数字！";
+            return;
+        }
+
+        // 循环遍历新表达式并附加到辅助容器
+        auxiliaryExpressions.forEach(item => {
+            try {
+                const result = item.expression(x, y);
+                
+                const resultCard = document.createElement('div');
+                resultCard.className = 'result-card';
+
+                // 为'最佳瞄准参考公式'卡片添加高亮类
+                if (item.id === 'result_sqrt_x_plus_sqrt_y') {
+                    resultCard.classList.add('result-card-highlight');
+                }
+
+                resultCard.innerHTML = `
+                    <span class="result-label">${item.label}</span>
+                    <span class="result-value">${isNaN(result) ? 'NaN' : result.toFixed(2)}</span>
+                `;
+                container.appendChild(resultCard);
+            } catch (e) {
+                console.error(`计算"${item.label}"时出错:`, e);
+                errorMessageDiv.textContent = `计算"${item.label}"时出错，请检查输入值。`;
+            }
+        });
+    }
+
+    // 计算额外公式
+    function calculateExtraFormulas() {
+        const k = parseFloat(document.getElementById('k').value);
+        const m = parseFloat(document.getElementById('m').value);
+        const errorMessageDiv = document.getElementById('extra-error-message');
+        errorMessageDiv.textContent = '';
+        if (isNaN(k) || isNaN(m)) {
+            errorMessageDiv.textContent = "请输入有效的数字！";
+            return;
+        }
+
+        try {
+            const resultA = (3 * k + m) / 4;
+            document.getElementById('resultA').textContent = resultA.toFixed(2);
+
+            const resultB = (k + 3 * m) / 4;
+            document.getElementById('resultB').textContent = resultB.toFixed(2);
+        } catch (e) {
+            errorMessageDiv.textContent = "计算出错，请检查输入值是否正确。";
+            console.error(e);
+        }
+    }
+
+    // 重置额外公式部分
+    function resetExtraFormulas() {
+        document.getElementById('k').value = '';
+        document.getElementById('m').value = '';
+        document.getElementById('resultA').textContent = '--';
+        document.getElementById('resultB').textContent = '--';
+        document.getElementById('extra-error-message').textContent = '';
+    }
+
+    // 切换公式分析部分的可见性
+    function toggleAnalysisSection() {
+        const contentDiv = document.getElementById('analysisContent');
+        const button = document.getElementById('toggleAnalysisBtn');
+        const isHidden = contentDiv.classList.toggle('hidden');
+        
+        if (isHidden) {
+            button.innerHTML = '<i class="fas fa-plus-circle"></i> 展开公式分析';
+        } else {
+            button.innerHTML = '<i class="fas fa-minus-circle"></i> 隐藏公式分析';
+        }
+        
+        // 重新渲染公式以确保正确显示
+        renderAllFormulas();
+    }
+
+    // 使用KaTeX渲染所有公式
+    function renderAllFormulas() {
+        // 渲染所有带有katex-formula类的元素
+        document.querySelectorAll('.katex-formula').forEach(element => {
+            try {
+                katex.render(element.getAttribute('data-formula'), element, {
+                    displayMode: false,
+                    throwOnError: false
+                });
+            } catch (err) {
+                console.error("KaTeX渲染错误:", err);
+                element.innerHTML = element.getAttribute('data-formula');
+            }
+        });
+    }
+
+    // 页面加载时执行，现在只自动计算主表达式
+    window.onload = function() {
+        // 初始化Font Awesome图标
+        if (typeof FontAwesomeKitConfig !== 'undefined') {
+            FontAwesomeKitConfig.autoReplaceSvg = true;
+        }
+        
+        // 渲染所有公式
+        renderAllFormulas();
+        // 计算所有表达式
+        calculateAllExpressions();
+    };
+</script>
+
+<script>
+    // 等待DOM加载完成后渲染所有公式
+    document.addEventListener('DOMContentLoaded', function() {
+        renderAllFormulas();
+    });
+</script>
+
+</body>
+</html>
