@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XLM·蛋白质与B12需求计算器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f4f7f6 0%, #e0e7ff 100%);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            gap: 20px;
+            padding: 20px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            width: 100%;
+            max-width: 450px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #3498db, #2c3e50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        h2 {
+            text-align: center;
+            color: #3498db;
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 15px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: all 0.3s;
+            background-color: #f9f9f9;
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: #3498db;
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #e8f5e9, #c8e6c9);
+            color: #2e7d32;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            display: none;
+            border-left: 5px solid #2e7d32;
+        }
+        .note {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+            text-align: center;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .info-panel {
+            background: linear-gradient(to bottom, #ecf0f1, #dfe6e9);
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 350px;
+            box-sizing: border-box;
+            margin-top: 20px;
+            border: 1px solid #dde1e4;
+        }
+        .info-panel h3 {
+            font-size: 18px;
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .info-panel p {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .divider {
+            border-top: 2px dashed #ccc;
+            margin: 30px 0;
+        }
+        .b12-details {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-radius: 10px;
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            color: #555;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #3498db;
+            color: #fff;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                padding: 15px;
+                gap: 15px;
+                align-items: center; /* 手机端居中对齐 */
+            }
+            .container {
+                max-width: 100%;
+                padding: 20px;
+            }
+            .container:first-of-type {
+                margin-bottom: 0;
+            }
+        }
+        .editable {
+            background-color: #fff !important;
+            border: 2px solid #3498db !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>七大基本营养素</h3>
+    <hr>
+    <table>
+        <thead>
+            <tr>
+                <th>存活阶段</th>
+                <th>营养素，重要性左到右为高到低</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>短期存活【基本不缺】</td>
+                <td>水、碳水化合物</td>
+            </tr>
+            <tr>
+                <td>中期存活【有可能缺】</td>
+                <td>蛋白质</td>
+            </tr>
+            <tr>
+                <td>长期存活【很可能缺】</td>
+                <td>脂肪、矿物质、维生素、膳食纤维</td>
+            </tr>
+        </tbody>
+    </table>
+        <div class="info-panel">
+        <h3>重量参考</h3>
+        <p>• 一碗米饭: 200g</p>
+        <p>• 一个苹果或西红柿或香蕉: 150g</p>
+        <p>• 一个泡面面饼或馒头或一把叶菜: 100g</p>
+        <p>• 一个鸡蛋: 50g</p>
+        <p>• 一小把坚果: 20g</p>
+        
+
+    </div>
+    <div class="info-panel">
+        <h3>各类型平均蛋白质含量</h3>
+        <p>• 米饭类主食: 2.5%</p>
+        <p>• 面食类主食: 8%</p>
+        <p>• 燕麦类主食: 13%</p>
+        <p>• 不含豆制品的素菜: 2%</p>
+        <p>• 含一半豆制品的素菜: 6%</p>
+        <p>• 肉类配菜: 15%</p>
+        <p>• 高蛋白食物: 25%</p>
+    </div>
+</div>
+
+<div class="container">
+    <h2>蛋白质比例估算</h2>
+    <div class="input-group">
+        <label for="mealsPerDay">每日吃多少顿</label>
+        <input type="number" id="mealsPerDay" value="2.5" min="1" max="10" step="0.5">
+    </div>
+    <div class="input-group">
+        <label for="mealSize">每顿食量（克）</label>
+        <input type="number" id="mealSize" value="250" min="0" step="10">
+    </div>
+    <div class="input-group">
+        <label for="mainFood">主食类型</label>
+        <select id="mainFood">
+            <option value="no_main_food">没有主食 (0%蛋白质)</option>
+            <option value="rice" selected>米饭 (2.5%蛋白质)</option>
+            <option value="pasta">面食 (8%蛋白质)</option>
+            <option value="oats">燕麦 (13%蛋白质)</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label for="sideDish">配菜类型</label>
+        <select id="sideDish">
+            <option value="no_side_dish">没有配菜 (0%蛋白质)</option>
+            <option value="vegetarian_no_soy" selected>不含豆制品的素菜 (2%蛋白质)</option>
+            <option value="vegetarian_soy">含一半豆制品的素菜 (6%蛋白质)</option>
+            <option value="meat">肉菜 (15%蛋白质)</option>
+            <option value="high_protein">高蛋白食物 (25%蛋白质)</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label for="foodRatio">主食/配菜比例</label>
+        <select id="foodRatio">
+            <option value="100/0">100%主食 / 0%配菜</option>
+            <option value="0/100">0%主食 / 100%配菜</option>
+            <option value="90/10">90%主食 / 10%配菜</option>
+            <option value="75/25">75%主食 / 25%配菜</option>
+            <option value="50/50" selected>50%主食 / 50%配菜</option>
+            <option value="25/75">25%主食 / 75%配菜</option>
+            <option value="10/90">10%主食 / 90%配菜</option>
+        </select>
+    </div>
+    <button id="applyEstimatesBtn">应用估算值</button>
+</div>
+
+<div class="container">
+    <h1>豆粉需求计算器</h1>
+    <h2>主计算器</h2>
+    <div class="input-group">
+        <label for="weight">体重（斤）</label>
+        <input type="number" id="weight" placeholder="例如：120" min="0">
+    </div>
+    <div class="input-group">
+        <label for="proteinStandard">每日蛋白质标准</label>
+        <select id="proteinStandard">
+            <option value="0.6">0.6 克/公斤（最低需求）</option>
+            <option value="0.66" selected>0.66 克/公斤（平均需求EAR）</option>
+            <option value="0.8">0.8 克/公斤（推荐摄入RDA）</option>
+            <option value="1.0">1.0 克/公斤（健身人群）</option>
+            <option value="1.2">1.2 克/公斤（运动员）</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label for="totalFood">总食物量（克）</label>
+        <input type="number" id="totalFood" value="625" min="0">
+    </div>
+    <div class="input-group">
+        <label for="foodProteinRatio">食物蛋白质比例（%）</label>
+        <input type="number" id="foodProteinRatio" value="4.625" placeholder="例如：4.625" min="0" max="100" step="0.01" class="editable">
+    </div>
+    <button id="calculateProteinBtn">计算</button>
+    <div class="result" id="proteinResultDiv"></div>
+    <div class="divider"></div>
+    <h2>B12需求计算（慎）</h2>
+    <div class="input-group">
+        <label for="b12Standard">每日B12标准（微克）</label>
+        <select id="b12Standard">
+            <option value="0.4">0.4 微克（婴幼儿 0-6个月）</option>
+            <option value="0.5">0.5 微克（婴幼儿 7-12个月）</option>
+            <option value="0.9">0.9 微克（儿童 1-3岁）</option>
+            <option value="1.2">1.2 微克（儿童 4-8岁）</option>
+            <option value="1.8">1.8 微克（青少年 9-13岁）</option>
+            <option value="2.4" selected>2.4 微克（青少年 14-18岁及成年人）</option>
+            <option value="2.6">2.6 微克（孕妇）</option>
+            <option value="2.8">2.8 微克（哺乳期）</option>
+        </select>
+    </div>
+    <div class="input-group">
+        <label for="b12Intake">每日B12食物摄入量（微克）</label>
+        <input type="number" id="b12Intake" value="0" readonly>
+    </div>
+    <button id="calculateB12Btn">计算B12需求</button>
+    <div class="result" id="b12ResultDiv"></div>
+    <div class="b12-details" id="b12DetailsDiv">
+        <p>若通过以下食物补充，则每日需额外摄入：</p>
+        <ul style="list-style-type: none; padding: 0;">
+            <li id="b12FermentedBeanCurdResult"></li>
+            <li id="b12MilkResult"></li>
+            <li id="b12SupplementResult"></li>
+        </ul>
+    </div>
+    <div class="note">
+        <p><strong>注意：</strong>此计算基于豆粉蛋白质含量40%，且B12含量几乎为零。</p>
+        <p>青腐乳（某致和臭豆腐）的B12含量因发酵工艺差异大，这里以约<strong>15微克/100克</strong>估算，仅供参考。</p>
+        <p>牛奶含量以约<strong>0.45微克/100克</strong>估算。</p>
+    </div>
+</div>
+
+<script>
+// 使用 IIFE (立即调用函数表达式) 创建一个独立的、安全的作用域
+// 这可以防止变量污染全局空间，是构建健壮模块的基石
+(function() {
+    // 1. CONFIGURATION: 存放所有固定不变的配置和“魔数”
+    const CONFIG = {
+        proteinRatios: {
+            no_main_food: 0, rice: 0.025, pasta: 0.08, oats: 0.13,
+            no_side_dish: 0, vegetarian_no_soy: 0.02, vegetarian_soy: 0.06,
+            meat: 0.15, high_protein: 0.25, soyPowder: 0.4,
+        },
+        b12Contents: {
+            meatPerGram: 0.015, fermentedBeanCurdPer100g: 15,
+            milkPer100g: 0.45, supplementPerPill: 10,
+        },
+        assumptions: {
+            fermentedBeanCurdPieceWeight: 15, milkCupWeight: 250,
+        }
+    };
+    // 2. DOM ELEMENTS: 集中管理所有 DOM 元素的引用
+    const DOM = {
+        // 主计算器
+        weight: document.getElementById('weight'),
+        proteinStandard: document.getElementById('proteinStandard'),
+        totalFood: document.getElementById('totalFood'),
+        foodProteinRatio: document.getElementById('foodProteinRatio'),
+        calculateProteinBtn: document.getElementById('calculateProteinBtn'),
+        proteinResultDiv: document.getElementById('proteinResultDiv'),
+        // B12 计算器
+        b12Standard: document.getElementById('b12Standard'),
+        b12Intake: document.getElementById('b12Intake'),
+        calculateB12Btn: document.getElementById('calculateB12Btn'),
+        b12ResultDiv: document.getElementById('b12ResultDiv'),
+        b12DetailsDiv: document.getElementById('b12DetailsDiv'),
+        b12FermentedBeanCurdResult: document.getElementById('b12FermentedBeanCurdResult'),
+        b12MilkResult: document.getElementById('b12MilkResult'),
+        b12SupplementResult: document.getElementById('b12SupplementResult'),
+        // 估算器
+        mealsPerDay: document.getElementById('mealsPerDay'),
+        mealSize: document.getElementById('mealSize'),
+        mainFood: document.getElementById('mainFood'),
+        sideDish: document.getElementById('sideDish'),
+        foodRatio: document.getElementById('foodRatio'),
+        applyEstimatesBtn: document.getElementById('applyEstimatesBtn'),
+    };
+    // 3. STATE: 应用程序的唯一数据源 (Single Source of Truth)
+    // 界面上的一切都应是这个 state 对象的反映
+    const state = {
+        // 输入值
+        weight: 0, proteinStandard: 0, totalFood: 0, foodProteinRatio: 0,
+        b12Standard: 0, sideDish: '', mealsPerDay: 0, mealSize: 0, mainFood: '',
+        foodRatio: '',
+        // 计算结果
+        protein: { required: 0, fromFood: 0, deficit: 0, soyPowderNeeded: 0, showResult: false },
+        b12: { intake: 0, deficit: 0, showResult: false, curdNeeded: 0, milkNeeded: 0, pillsNeeded: 0 },
+    };
+    // 4. LOGIC: 纯粹的计算函数，不直接操作 DOM
+    const Logic = {
+        // 从估算器计算平均蛋白质比例
+        calculateAverageProteinRatio: () => {
+            const mainFoodRatio = CONFIG.proteinRatios[state.mainFood] || 0;
+            const sideDishRatio = CONFIG.proteinRatios[state.sideDish] || 0;
+            const [mainFoodPercent, sideDishPercent] = state.foodRatio.split('/').map(p => parseFloat(p) / 100);
+            const mainFoodWeight = state.totalFood * mainFoodPercent;
+            const sideDishWeight = state.totalFood * sideDishPercent;
+            const totalProtein = (mainFoodWeight * mainFoodRatio) + (sideDishWeight * sideDishRatio);
+            return state.totalFood > 0 ? (totalProtein / state.totalFood) * 100 : 0;
+        },
+        // 计算B12摄入
+        calculateB12Intake: () => {
+            if (state.sideDish === 'meat' && state.totalFood > 0) {
+                const [mainFoodPercent, sideDishPercent] = state.foodRatio.split('/').map(p => parseFloat(p) / 100);
+                return (state.totalFood * sideDishPercent) * CONFIG.b12Contents.meatPerGram;
+            }
+            return 0;
+        },
+        // 执行蛋白质需求的核心计算
+        runProteinCalculation: () => {
+            const weightKg = state.weight / 2;
+            state.protein.required = weightKg * state.proteinStandard;
+            state.protein.fromFood = state.totalFood * (state.foodProteinRatio / 100);
+            state.protein.deficit = state.protein.required - state.protein.fromFood;
+            state.protein.soyPowderNeeded = state.protein.deficit > 0 ? state.protein.deficit / CONFIG.proteinRatios.soyPowder : 0;
+        },
+        // 执行B12需求的核心计算
+        runB12Calculation: () => {
+            state.b12.intake = state.sideDish === 'meat' && state.totalFood > 0 ? (state.totalFood * parseFloat(state.foodRatio.split('/')[1] || 0) / 100) * CONFIG.b12Contents.meatPerGram : 0;
+            state.b12.deficit = state.b12Standard - state.b12.intake;
+            if (state.b12.deficit > 0) {
+                const deficit = state.b12.deficit;
+                state.b12.curdNeeded = (deficit / CONFIG.b12Contents.fermentedBeanCurdPer100g) * 100;
+                state.b12.milkNeeded = (deficit / CONFIG.b12Contents.milkPer100g) * 100;
+                state.b12.pillsNeeded = deficit / CONFIG.b12Contents.supplementPerPill;
+            }
+        }
+    };
+    // 5. RENDER: 渲染函数，根据 state 更新界面
+    const Render = {
+        // 更新所有输入框的值，确保与 state 同步
+        inputs: () => {
+            DOM.totalFood.value = state.totalFood;
+            DOM.foodProteinRatio.value = state.foodProteinRatio.toFixed(3);
+            DOM.foodProteinRatio.readOnly = false;
+            DOM.foodProteinRatio.classList.add('editable');
+            DOM.b12Intake.value = state.b12.intake.toFixed(2);
+        },
+        // 渲染蛋白质计算结果
+        proteinResult: () => {
+            if (!state.protein.showResult) {
+                DOM.proteinResultDiv.style.display = 'none';
+                return;
+            }
+            const div = DOM.proteinResultDiv;
+            div.style.display = 'block';
+            if (state.protein.deficit <= 0) {
+                div.textContent = `您每日多摄入约 ${(-state.protein.deficit).toFixed(2)} 克蛋白质。`;
+                div.style.background = "linear-gradient(to right, #e8f5e9, #c8e6c9)";
+                div.style.color = "#2e7d32";
+                div.style.borderLeft = "5px solid #2e7d32";
+            } else {
+                div.textContent = `您每日需额外补充约 ${state.protein.soyPowderNeeded.toFixed(2)} 克豆粉（${state.protein.deficit.toFixed(2)} 克蛋白质）。`;
+                div.style.background = "linear-gradient(to right, #ffebee, #ffcdd2)";
+                div.style.color = "#c62828";
+                div.style.borderLeft = "5px solid #c62828";
+            }
+        },
+        // 渲染B12计算结果
+        b12Result: () => {
+            if (!state.b12.showResult) {
+                DOM.b12ResultDiv.style.display = 'none';
+                DOM.b12DetailsDiv.style.display = 'none';
+                return;
+            }
+            const div = DOM.b12ResultDiv;
+            div.style.display = 'block';
+
+            if (state.b12.deficit <= 0) {
+                div.textContent = `您每日已摄入足够B12，多摄入约 ${(-state.b12.deficit).toFixed(2)} 微克。`;
+                div.style.background = "linear-gradient(to right, #e8f5e9, #c8e6c9)";
+                div.style.color = "#2e7d32";
+                div.style.borderLeft = "5px solid #2e7d32";
+                DOM.b12DetailsDiv.style.display = 'none';
+            } else {
+                div.textContent = `您每日需额外补充约 ${state.b12.deficit.toFixed(2)} 微克B12。`;
+                div.style.background = "linear-gradient(to right, #ffebee, #ffcdd2)";
+                div.style.color = "#c62828";
+                div.style.borderLeft = "5px solid #c62828";
+
+                const curdPieces = state.b12.curdNeeded / CONFIG.assumptions.fermentedBeanCurdPieceWeight;
+                const milkCups = state.b12.milkNeeded / CONFIG.assumptions.milkCupWeight;
+                DOM.b12FermentedBeanCurdResult.textContent = `• 约 ${state.b12.curdNeeded.toFixed(2)} 克青腐乳（约 ${curdPieces.toFixed(1)} 块）`;
+                DOM.b12MilkResult.textContent = `• 约 ${state.b12.milkNeeded.toFixed(2)} 克牛奶（约 ${milkCups.toFixed(1)} 杯）`;
+                DOM.b12DetailsDiv.style.display = 'block';
+            }
+        },
+        // 执行所有渲染任务
+        all: () => {
+            Render.inputs();
+            Render.proteinResult();
+            Render.b12Result();
+        }
+    };
+
+    // 6. EVENT HANDLERS & INITIALIZATION
+    // 从界面读取所有输入，更新 state 对象
+    function updateStateFromDOM() {
+        state.weight = parseFloat(DOM.weight.value) || 0;
+        state.proteinStandard = parseFloat(DOM.proteinStandard.value) || 0.6;
+        state.totalFood = parseFloat(DOM.totalFood.value) || 0;
+        state.foodProteinRatio = parseFloat(DOM.foodProteinRatio.value) || 0;
+        state.b12Standard = parseFloat(DOM.b12Standard.value) || 2.4;
+        state.mealsPerDay = parseFloat(DOM.mealsPerDay.value) || 2.5;
+        state.mealSize = parseFloat(DOM.mealSize.value) || 250;
+        state.mainFood = DOM.mainFood.value;
+        state.sideDish = DOM.sideDish.value;
+        state.foodRatio = DOM.foodRatio.value;
+    }
+
+    // 主更新流程
+    function handleUpdate() {
+        updateStateFromDOM();
+        Logic.runB12Calculation(); // B12计算依赖totalFood, sideDish
+        Render.all();
+    }
+    
+    // 绑定所有事件
+    function bindEvents() {
+        // 对于会改变 state 的输入，绑定事件监听器
+        const inputsToWatch = [DOM.weight, DOM.proteinStandard, DOM.totalFood, DOM.foodProteinRatio, DOM.b12Standard, DOM.sideDish, DOM.mainFood, DOM.mealsPerDay, DOM.mealSize, DOM.foodRatio];
+        inputsToWatch.forEach(input => {
+            input.addEventListener('input', handleUpdate);
+            input.addEventListener('change', handleUpdate); // 'change' for selects
+        });
+        // 绑定按钮点击事件
+        DOM.applyEstimatesBtn.addEventListener('click', () => {
+            updateStateFromDOM(); // 先同步一次当前所有输入
+            if (state.mealsPerDay <= 0 || state.mealSize <= 0) {
+                alert("请输入有效的餐数和食量！"); return;
+            }
+            state.totalFood = state.mealsPerDay * state.mealSize;
+            state.foodProteinRatio = Logic.calculateAverageProteinRatio();
+            Logic.runB12Calculation(); // 应用后需重算B12
+            state.protein.showResult = false; // 应用估算后，隐藏旧的计算结果
+            Render.all();
+        });
+        DOM.calculateProteinBtn.addEventListener('click', () => {
+            updateStateFromDOM();
+            if (state.weight <= 0) { alert("请输入有效的体重！"); return; }
+            Logic.runProteinCalculation();
+            state.protein.showResult = true; // 标记为需要显示结果
+            Render.all();
+        });
+        DOM.calculateB12Btn.addEventListener('click', () => {
+            updateStateFromDOM();
+            Logic.runB12Calculation();
+            state.b12.showResult = true; // 标记为需要显示结果
+            Render.all();
+        });
+    }
+
+    // 初始化函数
+    function init() {
+        console.log("Calculator Initialized.");
+        bindEvents();
+        // 页面加载时，根据默认值进行一次完整的状态更新和渲染
+        handleUpdate();
+    }
+
+    // 启动应用程序
+    // 等待 DOM 加载完毕后执行初始化
+    document.addEventListener('DOMContentLoaded', init);
+
+})();
+</script>
+
+</body>
+</html>
