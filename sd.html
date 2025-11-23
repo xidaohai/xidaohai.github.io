@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西岛海·三阶校准法·初阶闪电算 - V18.1</title>
+    <style>
+        /* =========================================================================
+         * A. 颜色变量与专业美学基础
+         * ========================================================================= */
+        :root {
+            --color-dark: #2c3e50; /* 深蓝灰 - 主要文本/容器 */
+            --color-light-bg: #f9fbfd; /* 极浅背景 */
+            --color-card-bg: #ffffff; /* 卡片背景 */
+            --color-border: #e0e6ed; /* 浅边框 */
+            --color-accent-base: #3498db; /* 基础专业蓝 */
+            --color-accent-r1: #2980b9; /* 阶段1：深蓝 */
+            --color-accent-r2: #16a085; /* 阶段2：墨绿 */
+            --color-accent-r3: #e67e22; /* 阶段3：稳定橙 */
+            --color-warning: #e74c3c; /* 警示红 - 最终颜色 */
+            --color-highlight: #f1c40f; /* 黄金色 - 评价 */
+            --border-radius: 6px;
+            --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --current-accent: var(--color-accent-r1); /* 动态阶段色 */
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', 'Arial', sans-serif, 'Microsoft YaHei', 'SimHei';
+        }
+        
+        body {
+            background-color: var(--color-light-bg);
+            color: var(--color-dark);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        /* --- 核心结构：双面板布局 --- */
+        .main-container {
+            display: flex;
+            max-width: 1400px; 
+            width: 100%;
+            gap: 20px;
+        }
+        
+        .panel {
+            background-color: var(--color-card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--color-border);
+            padding: 25px;
+        }
+        
+        .controls-panel {
+            flex: 2; 
+        }
+        
+        .results-panel {
+            flex: 1; 
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        
+        /* --- 标题与信息卡 --- */
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--color-dark);
+            font-size: 2.2em;
+            font-weight: 700;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: var(--current-accent);
+            padding-bottom: 5px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .info-card {
+            background-color: #f7f9fc; 
+            border-radius: var(--border-radius);
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--current-accent);
+            line-height: 1.8;
+            font-size: 0.95em;
+        }
+        
+        /* --- 阶段输入区 --- */
+        .phase-section {
+            padding: 20px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            background-color: var(--color-card-bg);
+        }
+        
+        /* --- 远近纬度 (垂直堆叠) - 移除数字，聚焦标签 --- */
+        .distance-buttons {
+            display: flex; 
+            flex-direction: column;
+            gap: 10px; 
+            margin-top: 15px;
+        }
+        
+        .distance-btn {
+            width: 100%; 
+            padding: 15px 15px; 
+            border: 2px solid var(--color-border);
+            background-color: #ffffff;
+            font-size: 1.0em; 
+            transition: all 0.3s ease;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-align: left; 
+            display: flex;
+            align-items: center;
+            justify-content: center; /* 按钮内容居中 */
+            line-height: 1.3;
+        }
+
+        .distance-btn:hover:not(:disabled) {
+            border-color: var(--color-accent-base);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+
+        .distance-btn.active {
+            border-color: var(--current-accent);
+            background-color: #eaf1f7; 
+            color: var(--color-dark);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+
+        /* 隐藏度数标签 */
+        .btn-degree {
+            display: none;
+        }
+
+        /* 提升中文标签的视觉权重 */
+        .btn-label {
+            font-size: 1.2em; /* 增大字体，使其成为主要内容 */
+            font-weight: 700; /* 粗体 */
+            color: var(--color-dark); /* 使用深色 */
+            margin: 0; /* 移除边距 */
+            flex-grow: unset; 
+            text-align: center; /* 文本居中 */
+        }
+        
+        .distance-btn.active .btn-label {
+            color: var(--current-accent); /* 选中时使用强调色 */
+        }
+        
+        /* 快慢纬度 滑块和星级保持 v15.3 优化 */
+        .dimension-value {
+             font-size: 1.8em;
+             font-weight: 700;
+             color: var(--current-accent);
+        }
+        
+        .slider-container {
+            padding: 15px 0; 
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 10px; 
+            background: #ddd;
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.9;
+            transition: opacity .2s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px; 
+            height: 24px; 
+            background: var(--current-accent);
+            border-radius: 50%;
+            cursor: grab;
+            border: 4px solid var(--color-card-bg); 
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+             width: 24px;
+             height: 24px;
+             background: var(--current-accent);
+             border-radius: 50%;
+             cursor: grab;
+             border: 4px solid var(--color-card-bg);
+             box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stars-container {
+            display: flex; 
+            justify-content: center;
+            gap: 15px; 
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .star {
+            font-size: 3em; 
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .star.active {
+            color: var(--color-highlight); 
+            text-shadow: 0 0 8px rgba(241, 196, 15, 0.6); 
+        }
+        
+        /* --- 动作按钮 (保持 v15.3 优化) --- */
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--color-border);
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .action-btn {
+            padding: 12px 30px; 
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .apply-btn {
+            background-color: var(--current-accent); 
+            color: var(--color-card-bg); 
+        }
+        
+        .apply-btn:hover:not(:disabled) {
+            background-color: var(--color-accent-base); 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .apply-btn:disabled {
+            background-color: #bdc3c7; 
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .reset-btn {
+            background-color: transparent;
+            border: 2px solid #ccc;
+            color: var(--color-dark);
+        }
+        
+        .reset-btn:hover {
+            border-color: var(--color-warning);
+            color: var(--color-warning);
+        }
+
+        /* --- 单位切换按钮 (保持 v15.3 优化) --- */
+        .unit-toggle {
+            display: flex;
+            background-color: #eef3f7; 
+            border-radius: var(--border-radius);
+            padding: 3px;
+            border: 1px solid #dcdcdc; 
+            margin-left: 20px; 
+        }
+        
+        .unit-toggle button {
+            flex: 1;
+            padding: 10px 15px; 
+            border: none;
+            background: transparent;
+            border-radius: calc(var(--border-radius) - 2px);
+            cursor: pointer;
+            font-size: 0.95em; 
+            transition: all 0.2s ease;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        .unit-toggle button.active {
+            background-color: var(--color-card-bg);
+            color: var(--color-dark);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+            font-weight: 700;
+        }
+        
+        /* --- DPI 输入 (保持 v15.3 优化) --- */
+        .dpi-input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        .dpi-input-group input {
+            padding: 10px 12px; 
+            border: 2px solid var(--color-border); 
+            border-radius: var(--border-radius);
+            width: 120px; 
+            text-align: center;
+            font-size: 1.2em; 
+            transition: border-color 0.3s;
+        }
+
+        .dpi-input-group input:focus {
+            outline: none;
+            border-color: var(--color-accent-base);
+        }
+        
+        /* --- 主灵敏度卡片 (Result Panel) - 颜色随阶段变化 --- */
+        .main-sens-card {
+            background-color: #f7f9fc; 
+            border-radius: var(--border-radius);
+            padding: 20px 10px;
+            margin: 15px 0 25px 0; 
+            border-left: 5px solid var(--current-accent); /* 动态颜色边框 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        /* 流程终结时强制使用红色 */
+        .main-sens-card.finalized {
+            border-left-color: var(--color-warning) !important;
+        }
+        
+        .sensitivity-value {
+            font-size: 3.8em; 
+            font-weight: 800;
+            text-align: center;
+            margin: 5px 0;
+            transition: color 0.3s;
+            color: var(--color-dark); /* 默认深色 */
+        }
+        
+        /* 最终结果时颜色为红色 */
+        .sensitivity-value.final-result {
+            color: var(--color-warning); 
+            animation: none; 
+        }
+
+        .sensitivity-range {
+            text-align: center;
+            color: #666;
+            font-size: 1.0em;
+            margin-bottom: 5px;
+        }
+        
+        /* --- 游戏灵敏度卡片 --- */
+        .game-sens-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px; 
+            margin-top: 20px;
+        }
+        .game-sens-card {
+            background-color: var(--color-card-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            padding: 15px 10px;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+            transition: border-color 0.2s;
+        }
+        .game-sens-card:hover {
+            border-color: #bdc3c7;
+        }
+        .game-name {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #95a5a6;
+            margin-bottom: 5px;
+        }
+        .game-sens-value {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: var(--color-dark);
+            line-height: 1.2;
+        }
+        .game-sens-hint {
+            font-size: 0.8em;
+            color: #bdc3c7;
+            margin-top: 5px;
+        }
+
+        /* =========================================================================
+         * 新增：悬浮窗样式 (改为 Fixed 定位)
+         * ========================================================================= */
+        .floating-help-btn {
+            /* 关键修改：使用 fixed 定位，使其独立于文档流 */
+            position: fixed; 
+            right: 20px; /* 距离视口右侧 20px */
+            bottom: 20px; /* 距离视口底部 20px */
+            
+            z-index: 1000; /* 确保悬浮在其他内容之上 */
+            
+            /* 保持原有风格和尺寸 */
+            padding: 12px 18px; /* 略微调整宽度 */
+            width: auto; /* 宽度自适应内容 */
+            white-space: nowrap; 
+            
+            text-align: center;
+            background-color: var(--color-accent-base); /* 使用基础蓝 */
+            color: var(--color-card-bg); /* 白色文字 */
+            text-decoration: none; /* 移除下划线 */
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1.0em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 提升浮动感和阴影深度 */
+            transition: all 0.3s ease;
+            border: 1px solid var(--color-accent-base);
+        }
+
+        .floating-help-btn:hover {
+            background-color: var(--color-accent-r1); /* 悬停时使用深蓝 */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px); /* 轻微上浮 */
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        
+        <div class="panel controls-panel" id="main-container">
+            <h1>西岛海 · FPS游戏 灵敏度闪电算</h1>
+            
+            <div class="info-card">
+                <p><strong>全局设定范围:</strong> 5cm/25.3125&deg; (最慢) 到 5cm/50.625&deg; (最快)</p>
+                <p class="step-info"><strong>PerCM 步长 (Adjustment °/1cm):</strong> <span id="current-base-d-step">0.0000</span></p> 
+                <p class="step-info"><strong>精密调整区间 (硬性锁定 S<sub>-2</sub> 到 S<sub>+1</sub>):</strong> <span id="precision-range-display">请先选择远近纬度</span></p>
+            </div>
+            
+            <div id="adjustment-controls">
+                <div id="distance-phase" class="phase-section">
+                    <div class="section-title">阶段 1/3: 远近纬度选择 (基础设定)</div>
+                    <div class="distance-buttons">
+                        <button class="distance-btn" data-value="25.3125">
+                            <span class="btn-degree">25.3125&deg;</span>
+                            <span class="btn-label">最远（或目标最小）</span>
+                        </button>
+                        
+                        <button class="distance-btn" data-value="28.125">
+                            <span class="btn-degree">28.125&deg;</span>
+                            <span class="btn-label">远</span>
+                        </button>
+                        
+                        <button class="distance-btn" data-value="30.9375">
+                            <span class="btn-degree">30.9375&deg;</span>
+                            <span class="btn-label">中远</span>
+                        </button>
+                        
+                        <button class="distance-btn" data-value="33.75">
+                            <span class="btn-degree">33.75&deg;</span>
+                            <span class="btn-label">中</span>
+                        </button>
+                        
+                        <button class="distance-btn" data-value="39.375">
+                            <span class="btn-degree">39.375&deg;</span>
+                            <span class="btn-label">中近</span>
+                        </button>
+                        
+                        <button class="distance-btn" data-value="45">
+                            <span class="btn-degree">45&deg;</span>
+                            <span class="btn-label">近</span>
+                        </button>
+                        
+                        <button class="distance-btn" data-value="50.625">
+                            <span class="btn-degree">50.625&deg;</span>
+                            <span class="btn-label">贴脸（或目标最大）</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="adjustment-input-area">
+                    <div id="speed-phase" class="phase-section" style="display: none;">
+                        <div class="section-title">阶段 2/3: 快慢纬度调节 (当前轮次: <span id="adjustment-count-display">0</span>)</div>
+                        <div class="dimension">
+                            <div class="dimension-header">
+                                <span class="dimension-name">调整幅度 [-7 至 +7]</span>
+                                <span class="dimension-value" id="speed-value">0</span>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" min="-7" max="7" value="0" class="slider" id="speed-slider">
+                            </div>
+                            <div class="slider-labels" style="display:flex; justify-content:space-between; font-size:0.9em; color:#999;">
+                                <span>想快点</span>
+                                <span>想慢点</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="usability-phase" class="phase-section" style="display: none;">
+                        <div class="section-title">阶段 3/3: 好用纬度评价 (请对结果做出决策)</div>
+                        <div class="dimension-header" style="justify-content: center;">
+                            <span class="dimension-name">请对当前灵敏度进行评价 (满分 3 星)</span>
+                        </div>
+                        <div class="stars-container" id="stars-container">
+                            <div class="star" data-rating="1">★</div>
+                            <div class="star active" data-rating="2">★</div>
+                            <div class="star" data-rating="3">★</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons" id="action-buttons" style="display: none;">
+                <button class="action-btn apply-btn" id="apply-btn" disabled>应用调整</button>
+                <button class="action-btn reset-btn" id="reset-btn">重置系统</button>
+            </div>
+        </div>
+
+        <div class="panel results-panel">
+             <div class="result-section">
+                <div class="dimension-header" style="align-items: center;">
+                    <h2 style="font-size:1.5em; color:var(--color-dark);">实时灵敏度监测</h2>
+                    <div class="unit-toggle">
+                        <button class="unit-btn" id="cm5-unit">5cm/多少&deg;</button>
+                        <button class="unit-btn active" id="cm360-unit">cm/360&deg;</button>
+                    </div>
+                </div>
+                
+                <div class="main-sens-card">
+                    <div class="sensitivity-value" id="sensitivity-result">请先选择远近纬度</div> 
+                    <div class="sensitivity-range" id="sensitivity-range"></div>
+                </div>
+            </div>
+
+            <div class="dpi-input-group">
+                <label for="dpi-input">当前 DPI:</label>
+                <input type="number" id="dpi-input" value="400" min="100" step="100" oninput="updateDisplay()">
+            </div>
+
+            <div class="game-sensitivity-display">
+                <div class="section-title" style="text-align: center; margin-bottom: 10px;">🎮 游戏灵敏度实时换算 (DPI: <span id="current-dpi-display">400</span>)</div>
+                <div class="game-sens-grid">
+                    <div class="game-sens-card">
+                        <div class="game-name">CS / Apex</div>
+                        <div class="game-sens-value" id="sens-cs">N/A</div>
+                        <div class="game-sens-hint">灵敏度 (m_yaw=0.022)</div>
+                    </div>
+                    <div class="game-sens-card">
+                        <div class="game-name">Valorant</div>
+                        <div class="game-sens-value" id="sens-val">N/A</div>
+                        <div class="game-sens-hint">灵敏度 (m_yaw=0.07)</div>
+                    </div>
+                    <div class="game-sens-card">
+                        <div class="game-name">Overwatch</div>
+                        <div class="game-sens-value" id="sens-ow">N/A</div>
+                        <div class="game-sens-hint">灵敏度 (m_yaw=0.0066)</div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <a href="https://space.bilibili.com/1534330" class="floating-help-btn" target="_blank">
+        作者：西岛海_xlm
+    </a>
+
+    <script>
+        // =========================================================================
+        // A. 常量与状态变量 (核心数据)
+        // =========================================================================
+
+        const MAX_ADJUSTMENTS = 2; // 快慢调整上限为 2 次 
+        // 修正注释：25.3125° 对应 cm/360° 越大，越慢
+        const MIN_DEGREES = 25.3125;  // 最远 / 极慢 - 全局硬性下限
+        const MAX_DEGREES = 50.625; // 贴脸 / 极快 - 全局硬性上限
+        const TOLERANCE = 0.0001; 
+        
+        const ALL_STEPS = [
+            25.3125, 28.125, 30.9375, 
+            33.75, 
+            39.375, 45, 50.625
+        ];
+        
+        // 用户提供的换算常数 (360 * 2.54 / m_yaw)
+        const CONST_CS = 41563.636; 
+        const CONST_VAL = 13062.857;
+        const CONST_OW = 138545.455;
+        
+        const PHASE_COLORS = {
+            0: 'var(--color-accent-r1)', // AC=1 的颜色
+            1: 'var(--color-accent-r2)', // AC=2 的颜色
+            2: 'var(--color-accent-r3)'
+        };
+        
+        let currentPhase = 'distance'; 
+        let currentDegreesFor5cm = 0; 
+        let adjustmentCounter = 0; // 当前已完成的调整轮次计数 (上限为 2)
+        let currentStarRating = 2; // 默认 2 星
+        let isFinalized = false;
+        let lastSpeedPhaseResult = null; 
+        let initialDegrees = 0; // 记录最初选择的远近纬度值
+        
+        let PRECISION_MIN = MIN_DEGREES; 
+        let PRECISION_MAX = MAX_DEGREES; 
+        
+        const rootElement = document.documentElement;
+        const distanceButtons = document.querySelectorAll('.distance-btn');
+        const usabilityStars = document.querySelectorAll('#stars-container .star');
+        const speedSlider = document.getElementById('speed-slider');
+        const applyBtn = document.getElementById('apply-btn');
+        const sensitivityResult = document.getElementById('sensitivity-result');
+        const precisionRangeDisplay = document.getElementById('precision-range-display');
+        const dpiInput = document.getElementById('dpi-input');
+        const sensCS = document.getElementById('sens-cs');
+        const sensVal = document.getElementById('sens-val');
+        const sensOW = document.getElementById('sens-ow');
+        const currentDpiDisplay = document.getElementById('current-dpi-display');
+        const cm5UnitBtn = document.getElementById('cm5-unit');
+        const cm360UnitBtn = document.getElementById('cm360-unit');
+
+
+        // =========================================================================
+        // B. 核心计算函数
+        // =========================================================================
+        
+        /** 查找并设置硬性精密调整区间边界 (V18.0: 重新植入极值隔离逻辑) */
+        function setHardPrecisionBounds(S0) {
+            
+            const index = ALL_STEPS.findIndex(step => Math.abs(step - S0) < TOLERANCE);
+            
+            // 找不到 S0，使用全局硬性边界，并返回
+            if (index === -1) {
+                PRECISION_MIN = MIN_DEGREES;
+                PRECISION_MAX = MAX_DEGREES;
+                return;
+            }
+            
+            // 1. 最远距离 (25.3125, Index 0) - 隔离处理 (只能向快/大度数调整 S+1)
+            if (Math.abs(S0 - MIN_DEGREES) < TOLERANCE) {
+                PRECISION_MIN = S0; // 慢端（左侧）锁定在自己
+                PRECISION_MAX = ALL_STEPS[Math.min(ALL_STEPS.length - 1, index + 1)]; // 快端（右侧）锁定在 S+1
+                return;
+            }
+
+            // 2. 贴脸距离 (50.625, Index 6) - 隔离处理 (只能向慢/小度数调整 S-2)
+            if (Math.abs(S0 - MAX_DEGREES) < TOLERANCE) {
+                PRECISION_MIN = ALL_STEPS[Math.max(0, index - 2)]; // 慢端（左侧）锁定在 S-2
+                PRECISION_MAX = S0; // 快端（右侧）锁定在自己
+                return;
+            }
+
+            // 3. 其他距离 - 标准处理 (S-2 到 S+1)
+            // 往慢 (Degrees减小，PerCM减小) - 限制到 I - 2 (S-2)
+            PRECISION_MIN = ALL_STEPS[Math.max(0, index - 2)]; 
+
+            // 往快 (Degrees增大，PerCM增大) - 限制到 I + 1 (S+1)
+            PRECISION_MAX = ALL_STEPS[Math.min(ALL_STEPS.length - 1, index + 1)]; 
+        }
+
+        /** 转换为 cm/360° */
+        function toCM360(degrees) {
+            // cm/360° = (5cm * 360°) / X°
+            return degrees === 0 ? Infinity : (5 * 360) / degrees;
+        }
+
+        /** 转换为 5cm/多少° */
+        function toDegreesFor5cm(cm360) {
+            // 5cm/多少° = (5 * 360) / cm360
+            return cm360 === Infinity ? 0 : (5 * 360) / cm360;
+        }
+
+        /** 计算每厘米度数变化及步长 (基于PerCM均分) */
+        function calculatePerCMChange() {
+            if (currentDegreesFor5cm === 0) {
+                return { 
+                    currentPerCM: 0, 
+                    P_MIN_PerCM: 0, 
+                    P_MAX_PerCM: 0,
+                    leftStepChange: 0, 
+                    rightStepChange: 0
+                };
+            }
+            
+            const currentCM360 = toCM360(currentDegreesFor5cm);
+            
+            // PerCM (Degrees/1cm) = 360 / cm360
+            const currentPerCM = 360 / currentCM360; 
+            
+            // P_MIN_PerCM (慢极限): 对应 PRECISION_MIN (度数最小，PerCM最小)
+            const P_MIN_PerCM = (360 / toCM360(PRECISION_MIN)); 
+            
+            // P_MAX_PerCM (快极限): 对应 PRECISION_MAX (度数最大，PerCM最大)
+            const P_MAX_PerCM = (360 / toCM360(PRECISION_MAX)); 
+            
+            // leftStepChange: 调整到慢极限 P_MIN 所需要的 PerCM 步长 (应为负值)
+            const leftStepChange = (P_MIN_PerCM - currentPerCM) / 7; 
+
+            // rightStepChange: 调整到快极限 P_MAX 所需要的 PerCM 步长 (应为正值)
+            const rightStepChange = (P_MAX_PerCM - currentPerCM) / 7; 
+            
+            return { currentPerCM, P_MIN_PerCM, P_MAX_PerCM, leftStepChange, rightStepChange };
+        }
+
+        /** 计算灵敏度调整后的新值 (基于PerCM均分) */
+        function calculateSensitivityAdjustment() {
+            if (currentDegreesFor5cm === 0) return { newDegreesFor5cm: 0, actualAdjustment: 0, forcedJump: false, adjustmentMessage: "未选择远近纬度。", appliedMultiplier: 1.0 };
+
+            const oldDegreesFor5cm = currentDegreesFor5cm;
+            const speed = parseInt(speedSlider.value); 
+            
+            let newDegreesFor5cm;
+            let forcedJump = false;
+            let adjustmentMessage = "";
+
+            // --- 基于PerCM均分的调整路径 ---
+            const { currentPerCM, P_MIN_PerCM, P_MAX_PerCM, leftStepChange, rightStepChange } = calculatePerCMChange();
+            
+            let newPerCM = currentPerCM;
+            
+            if (speed < 0) {
+                // 想快点 (Move towards P_MAX/S+1), 需要 PerCM 增加
+                // rightStepChange 为正值
+                newPerCM = currentPerCM + (Math.abs(speed) * rightStepChange); 
+
+            } else if (speed > 0) {
+                // 想慢点 (Move towards P_MIN/S-2), 需要 PerCM 减少
+                // leftStepChange 为负值
+                newPerCM = currentPerCM + (speed * leftStepChange); 
+            }
+            
+            // 确保新的每厘米度数在硬性精密区间内
+            newPerCM = Math.max(P_MIN_PerCM, Math.min(P_MAX_PerCM, newPerCM));
+            
+            // 将新的每厘米度数转换回5cm/多少°
+            const newCM360 = 360 / newPerCM;
+            newDegreesFor5cm = toDegreesFor5cm(newCM360);
+
+            // 硬性精密区间锁定检查
+            if (newDegreesFor5cm < PRECISION_MIN - TOLERANCE) {
+                adjustmentMessage = `调整超出硬性精密区间下限 (${PRECISION_MIN.toFixed(3)}°)，已截断并锁定。`;
+                newDegreesFor5cm = PRECISION_MIN;
+                forcedJump = true; 
+            } else if (newDegreesFor5cm > PRECISION_MAX + TOLERANCE) {
+                adjustmentMessage = `调整超出硬性精密区间上限 (${PRECISION_MAX.toFixed(3)}°)，已截断并锁定。`;
+                newDegreesFor5cm = PRECISION_MAX;
+                forcedJump = true; 
+            }
+
+            // 确保结果不会超出全局极值
+            newDegreesFor5cm = Math.max(MIN_DEGREES, Math.min(MAX_DEGREES, newDegreesFor5cm)); 
+
+            const actualAdjustment = newDegreesFor5cm - oldDegreesFor5cm;
+
+            return {
+                newDegreesFor5cm,
+                actualAdjustment, 
+                forcedJump,
+                adjustmentMessage,
+                appliedMultiplier: 1.0
+            };
+        }
+
+        /** 计算游戏灵敏度并更新显示 */
+        function calculateGameSensitivities() {
+            const dpi = parseInt(dpiInput.value) || 400; // 默认使用 400
+            currentDpiDisplay.textContent = dpi;
+            
+            if (currentDegreesFor5cm === 0) {
+                sensCS.textContent = 'N/A';
+                sensVal.textContent = 'N/A';
+                sensOW.textContent = 'N/A';
+                return;
+            }
+
+            const cm360 = toCM360(currentDegreesFor5cm);
+            
+            if (cm360 === Infinity) {
+                sensCS.textContent = 'N/A';
+                sensVal.textContent = 'N/A';
+                sensOW.textContent = 'N/A';
+                return;
+            }
+
+            // Sensitivity = Constant / (cm360 * DPI)
+            const sensCSVal = CONST_CS / (cm360 * dpi);
+            const sensValVal = CONST_VAL / (cm360 * dpi);
+            const sensOWVal = CONST_OW / (cm360 * dpi);
+            
+            // 实时显示
+            sensCS.textContent = sensCSVal.toFixed(4);
+            sensVal.textContent = sensValVal.toFixed(4);
+            sensOW.textContent = sensOWVal.toFixed(4);
+        }
+
+        // =========================================================================
+        // C. 状态更新与事件处理 (核心控制)
+        // =========================================================================
+        
+        /** 更新动态强调色 */
+        function updateColors() {
+            if (isFinalized) {
+                // 流程终结时，强调色强制为红色
+                rootElement.style.setProperty('--current-accent', 'var(--color-warning)');
+                return;
+            }
+
+            // 使用 adjustmentCounter 来确定当前颜色阶段
+            const colorIndex = adjustmentCounter > 0 ? (adjustmentCounter - 1) % MAX_ADJUSTMENTS : 0;
+            const colorVar = PHASE_COLORS[colorIndex] || PHASE_COLORS[0];
+            rootElement.style.setProperty('--current-accent', colorVar);
+        }
+
+        /** 终结流程并显示结果 (颜色固定为红色) */
+        function finalizeAdjustment(finalStatusMessage) {
+            if (isFinalized) return;
+            isFinalized = true;
+            currentPhase = 'final';
+            
+            // 确保强调色更新为红色
+            updateColors(); 
+
+            updatePhaseDisplay();
+            
+            // 添加类，使灵敏度数值和卡片边框最终显示为红色
+            sensitivityResult.classList.add('final-result');
+            document.querySelector('.main-sens-card').classList.add('finalized'); 
+            
+            console.log("流程结束:", finalStatusMessage);
+            
+            updateDisplay(); 
+        }
+
+        /** 更新阶段显示 (控制 actionButtons 的显示) */
+        function updatePhaseDisplay() {
+            const distancePhase = document.getElementById('distance-phase');
+            const speedPhase = document.getElementById('speed-phase');
+            const usabilityPhase = document.getElementById('usability-phase');
+            const adjustmentControls = document.getElementById('adjustment-controls');
+            const actionButtons = document.getElementById('action-buttons');
+            
+            distancePhase.style.display = 'none';
+            speedPhase.style.display = 'none';
+            usabilityPhase.style.display = 'none';
+            
+            if (isFinalized) {
+                adjustmentControls.style.display = 'none';
+                actionButtons.style.display = 'none';
+                return; 
+            }
+            
+            adjustmentControls.style.display = 'block';
+            actionButtons.style.display = 'none'; // 默认隐藏操作按钮
+
+            applyBtn.textContent = '应用调整';
+
+            if (currentPhase === 'distance') {
+                distancePhase.style.display = 'block'; 
+                applyBtn.disabled = true; 
+            } else if (currentPhase === 'speed') {
+                speedPhase.style.display = 'block'; 
+                actionButtons.style.display = 'flex'; // 第二步（speed）开始显示
+                applyBtn.disabled = false;
+                // 重置滑块和数值显示
+                speedSlider.value = 0; 
+                document.getElementById('speed-value').textContent = 0;
+                document.getElementById('adjustment-count-display').textContent = `${adjustmentCounter + 1}`; 
+            } else if (currentPhase === 'usability') {
+                usabilityPhase.style.display = 'block'; 
+                actionButtons.style.display = 'flex'; // 评价阶段也显示
+                applyBtn.disabled = false;
+                applyBtn.textContent = '确认评价并做出决策';
+                document.getElementById('adjustment-count-display').textContent = `${adjustmentCounter}`;
+                
+                // 重置评价星级显示为默认 2 星
+                usabilityStars.forEach(star => {
+                    star.classList.remove('active');
+                    if (parseInt(star.dataset.rating) <= currentStarRating) {
+                        star.classList.add('active');
+                    }
+                });
+            }
+        }
+
+
+        /** 更新当前界面所有显示数值 */
+        function updateDisplay() {
+            if (currentDegreesFor5cm === 0) {
+                 document.getElementById('current-base-d-step').textContent = "0.0000";
+                 precisionRangeDisplay.textContent = "请先选择远近纬度";
+                 sensitivityResult.textContent = "请先选择远近纬度";
+                 document.getElementById('sensitivity-range').textContent = "";
+                 calculateGameSensitivities();
+                 return;
+            }
+
+            const cm360 = toCM360(currentDegreesFor5cm);
+
+            // 根据激活的按钮决定显示格式
+            const sensitivityRange = document.getElementById('sensitivity-range');
+
+            if (cm360UnitBtn.classList.contains('active')) {
+                sensitivityResult.textContent = cm360.toFixed(2) + 'cm';
+                // 显示当前值
+                let rangeHint = `[360°] 对应: ${currentDegreesFor5cm.toFixed(3)}°/5cm`;
+                if (currentDegreesFor5cm < MIN_DEGREES - TOLERANCE) {
+                    rangeHint += " (低于理论下限)";
+                } else if (currentDegreesFor5cm > MAX_DEGREES + TOLERANCE) {
+                    rangeHint += " (高于理论上限)";
+                }
+                sensitivityRange.textContent = rangeHint;
+            } else { // cm5UnitBtn is active
+                sensitivityResult.textContent = currentDegreesFor5cm.toFixed(3) + '°';
+                let rangeHint = `[5cm] 对应: ${cm360.toFixed(2)}cm/360°`;
+                 if (currentDegreesFor5cm < MIN_DEGREES - TOLERANCE) {
+                    rangeHint += " (低于理论下限)";
+                } else if (currentDegreesFor5cm > MAX_DEGREES + TOLERANCE) {
+                    rangeHint += " (高于理论上限)";
+                }
+                sensitivityRange.textContent = rangeHint;
+            }
+
+            // 计算并显示步长 (PerCM Step Magnitude)
+            const { P_MIN_PerCM, P_MAX_PerCM } = calculatePerCMChange();
+            
+            // 修正显示：展示实际的 PerCM 调整步长 |P_MAX - P_MIN| / 14 (只需计算一侧的 7 步)
+            const stepMagnitude = Math.abs(P_MAX_PerCM - P_MIN_PerCM) / 14; 
+            
+            document.getElementById('current-base-d-step').textContent = stepMagnitude.toFixed(4); 
+            
+            precisionRangeDisplay.textContent = `[${PRECISION_MIN.toFixed(3)}° 到 ${PRECISION_MAX.toFixed(3)}°]`;
+
+            calculateGameSensitivities();
+        }
+        
+        /** 应用灵敏度调整 (中央状态机) */
+        function applySensitivityAdjustment() {
+            if (isFinalized) {
+                finalizeAdjustment('流程已锁定');
+                return;
+            }
+            
+            if (currentPhase === 'speed') {
+                
+                const currentSpeedValue = parseInt(speedSlider.value);
+
+                // --- 零幅度即锁定 ---
+                if (currentSpeedValue === 0) {
+                    adjustmentCounter++; 
+                    finalizeAdjustment(`您在第 ${adjustmentCounter} 轮选择了 0 调整幅度。系统判定当前灵敏度 (${currentDegreesFor5cm.toFixed(3)}°/5cm) 为最终结果。`);
+                    return;
+                }
+                
+                // --- 极值边界决策 (不合理方向立即锁定) ---
+                const isExtremeMin = Math.abs(initialDegrees - MIN_DEGREES) < TOLERANCE; // 最慢/最远
+                const isExtremeMax = Math.abs(initialDegrees - MAX_DEGREES) < TOLERANCE; // 最快/贴脸
+
+                let shouldFinalizeExtreme = false;
+                let extremeMessage = "";
+
+                if (isExtremeMin && currentSpeedValue > 0) {
+                    // 最远(慢) -> 尝试变更慢 (+1到+7) -> 立即锁定
+                    currentDegreesFor5cm = MIN_DEGREES; // 锁定在原值
+                    extremeMessage = `操作不合理：您在"最远"点（极慢）选择往"更慢"调整。流程锁定在 ${MIN_DEGREES.toFixed(3)}°/5cm。`;
+                    shouldFinalizeExtreme = true;
+                } else if (isExtremeMax && currentSpeedValue < 0) {
+                    // 贴脸(快) -> 尝试变更快 (-1到-7) -> 立即锁定
+                    currentDegreesFor5cm = MAX_DEGREES; // 锁定在原值
+                    extremeMessage = `操作不合理：您在"贴脸"点（极快）选择往"更快"调整。流程锁定在 ${MAX_DEGREES.toFixed(3)}°/5cm。`;
+                    shouldFinalizeExtreme = true;
+                }
+                
+                if (shouldFinalizeExtreme) {
+                    adjustmentCounter++; // 计入一次操作
+                    finalizeAdjustment(extremeMessage);
+                    return;
+                }
+                // --- END 极值边界锁定 ---
+
+                // --- 正常调整路径 ---
+                const result = calculateSensitivityAdjustment();
+                let newDegreesFor5cm = result.newDegreesFor5cm; 
+                // 必须检查是否有效调整，否则可能因为浮点导致无变化而计数器增加
+                const adjustmentOccurred = Math.abs(result.actualAdjustment) > TOLERANCE;
+                
+                // 统一更新状态
+                currentDegreesFor5cm = newDegreesFor5cm; 
+                
+                // --- 最大幅度触边即刻锁定 ---
+                const isMaxAdjustment = Math.abs(currentSpeedValue) === 7;
+                // 检查是否到达硬性边界
+                const resultIsOnBoundary = (
+                    (currentSpeedValue < 0 && Math.abs(newDegreesFor5cm - PRECISION_MAX) < TOLERANCE) || // 变快(-7) 到达快端界限 (PRECISION_MAX)
+                    (currentSpeedValue > 0 && Math.abs(newDegreesFor5cm - PRECISION_MIN) < TOLERANCE)    // 变慢(+7) 到达慢端界限 (PRECISION_MIN)
+                );
+                
+                if (isMaxAdjustment && resultIsOnBoundary && adjustmentOccurred) {
+                    adjustmentCounter++; 
+                    finalizeAdjustment(`系统触发最大幅度触边锁定。最终灵敏度为 ${currentDegreesFor5cm.toFixed(3)}°/5cm。`);
+                    return; 
+                }
+                
+                // --- 强制锁定逻辑 (调整结果冲过头了) ---
+                if (result.forcedJump) {
+                    adjustmentCounter++; 
+                    finalizeAdjustment(`调整触发了硬性限制，已强制锁定最终灵敏度为 ${currentDegreesFor5cm.toFixed(3)}°/5cm。`);
+                    return;
+                } 
+                
+                // 调整计数器增加，表示本轮调整已执行 (非锁定状态下，进入下一阶段)
+                adjustmentCounter++; 
+
+                // --- 终结判定：如果是第二次调整 (AC=2)，则直接锁定并结束 ---
+                if (adjustmentCounter >= MAX_ADJUSTMENTS) {
+                    // 强制锁定
+                    finalizeAdjustment(`二次快慢调整（第 ${MAX_ADJUSTMENTS} 轮）已完成。系统判定调节流程结束，并强制锁定最终灵敏度 (${currentDegreesFor5cm.toFixed(3)}°/5cm)。`);
+                    return;
+                }
+                
+                // --- 第一次调整后的处理 (AC=1) ---
+                if (adjustmentCounter === 1) { 
+                    if (!adjustmentOccurred) { 
+                        // 无变化：自动跳过评价，进入第二轮快慢调节
+                        currentPhase = 'speed'; 
+                    } else {
+                        // 有变化：进入评价/决策点
+                        currentPhase = 'usability';
+                    }
+                } 
+
+            } else if (currentPhase === 'usability') {
+                
+                // 此处仅处理第一次调整后的评价 (AC 此时为 1)
+                const rating = currentStarRating;
+                
+                if (rating === 3) {
+                    // 3星: 锁定结果并结束
+                    finalizeAdjustment(`您选择了 3 星评价，系统已锁定当前灵敏度 (${currentDegreesFor5cm.toFixed(3)}°/5cm) 为最终结果。`);
+                    return; 
+                    
+                } else if (rating === 1) {
+                    // 1星: 重置系统
+                    console.log("您选择了 1 星评价，系统将初始化所有参数。");
+                    setTimeout(resetAll, 50); // 立即重置
+                    return;
+                    
+                } else if (rating === 2) {
+                    // 2星: 继续进行下一轮快慢的选择 (进入第 2 轮，即最终轮)
+                    currentPhase = 'speed'; 
+                    currentStarRating = 2; // 重置星级显示
+                }
+            }
+            
+            updateDisplay(); 
+            updatePhaseDisplay();
+            updateColors(); 
+        }
+        
+        function resetAll() {
+            currentDegreesFor5cm = 0; 
+            adjustmentCounter = 0;
+            currentStarRating = 2; 
+            isFinalized = false;
+            currentPhase = 'distance';
+            lastSpeedPhaseResult = null;
+            PRECISION_MIN = MIN_DEGREES; 
+            PRECISION_MAX = MAX_DEGREES;
+            initialDegrees = 0;
+
+            // DOM重置 
+            applyBtn.disabled = true;
+            sensitivityResult.classList.remove('final-result');
+            document.querySelector('.main-sens-card').classList.remove('finalized'); // 移除 finalized 类
+
+            distanceButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('active');
+            });
+            usabilityStars.forEach(star => {
+                star.classList.remove('active');
+                if (parseInt(star.dataset.rating) === 2) {
+                    star.classList.add('active');
+                }
+            });
+            
+            // 默认显示 cm/360°
+            cm5UnitBtn.classList.remove('active');
+            cm360UnitBtn.classList.add('active'); 
+            
+            dpiInput.value = 400; // 重置 DPI 为 400
+
+            updateDisplay();
+            updatePhaseDisplay();
+            updateColors(); 
+        }
+        
+        // =========================================================================
+        // D. 事件绑定
+        // =========================================================================
+
+        distanceButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (currentPhase !== 'distance' || isFinalized) return;
+                
+                const value = parseFloat(this.dataset.value);
+                currentDegreesFor5cm = value;
+                initialDegrees = value; // 记录初始值
+                
+                setHardPrecisionBounds(value);
+
+                distanceButtons.forEach(b => {
+                    b.classList.remove('active');
+                    b.disabled = true; 
+                });
+                this.classList.add('active');
+
+                currentPhase = 'speed';
+                
+                updateDisplay();
+                updatePhaseDisplay();
+                updateColors(); /* 首次进入 speed 阶段，颜色更新 */
+            });
+        });
+        
+        // 星级点击事件 (3星决策 - 仅在第一次调整后启用)
+        usabilityStars.forEach(star => {
+            star.addEventListener('click', function() {
+                if (currentPhase !== 'usability' || isFinalized) return;
+
+                const rating = parseInt(this.dataset.rating);
+                currentStarRating = rating;
+                
+                usabilityStars.forEach(s => {
+                    s.classList.remove('active');
+                    if (parseInt(s.dataset.rating) <= rating) {
+                        s.classList.add('active');
+                    }
+                });
+            });
+        });
+        
+        // V18.1 修正: 移除实时更新逻辑，仅更新滑块显示和按钮状态
+        speedSlider.addEventListener('input', function() {
+            document.getElementById('speed-value').textContent = this.value;
+            // 仅确保应用按钮可用，灵敏度监测值将在应用调整后更新
+            applyBtn.disabled = false;
+        });
+
+        // V18.1 修正: 移除滑块松开事件，不再需要恢复显示
+        // speedSlider.addEventListener('mouseup', updateDisplay); 
+        // speedSlider.addEventListener('touchend', updateDisplay);
+        
+        // 单位切换事件
+        cm360UnitBtn.addEventListener('click', function() {
+            if (!this.classList.contains('active')) {
+                this.classList.add('active');
+                cm5UnitBtn.classList.remove('active');
+                updateDisplay();
+            }
+        });
+        
+        cm5UnitBtn.addEventListener('click', function() {
+            if (!this.classList.contains('active')) {
+                this.classList.add('active');
+                cm360UnitBtn.classList.remove('active');
+                updateDisplay();
+            }
+        });
+        
+        // DPI输入变化时，重新计算游戏灵敏度
+        dpiInput.addEventListener('input', updateDisplay);
+
+        applyBtn.addEventListener('click', applySensitivityAdjustment);
+        document.getElementById('reset-btn').addEventListener('click', resetAll);
+        
+        // 初始化调用
+        updateDisplay();
+        updatePhaseDisplay();
+        updateColors();
+    </script>
+</body>
+</html>
