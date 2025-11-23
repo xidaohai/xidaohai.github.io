@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专业曲线拟合分析工具 | Pro Curve Fitting</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/regression@2.0.1/dist/regression.min.js"></script>
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --bg-hover: #f9fafb;
+            --bg-active: #eff6ff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --primary-color: #2563eb;
+            --accent-color: #059669;
+            --danger-color: #dc2626;
+            --border-color: #e5e7eb;
+            --chart-grid: #f3f4f6;
+            --chart-text: #666666;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --scrollbar-track: #f1f1f1;
+            --scrollbar-thumb: #c1c1c1;
+            --scrollbar-thumb-hover: #a8a8a8;
+            --sidebar-width: 320px;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --bg-input: #374151;
+            --bg-hover: #374151;
+            --bg-active: #1e3a8a;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --primary-color: #3b82f6;
+            --accent-color: #10b981;
+            --danger-color: #ef4444;
+            --border-color: #374151;
+            --chart-grid: #374151;
+            --chart-text: #9ca3af;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --scrollbar-track: #2d3748;
+            --scrollbar-thumb: #4a5568;
+            --scrollbar-thumb-hover: #718096;
+        }
+        
+        /* --- 全局滚动条样式优化 --- */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track); 
+            border-radius: 4px;
+        }
+         
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb); 
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover); 
+        }
+        
+        /* Firefox 适配 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: 20px;
+            height: 100vh;
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        header {
+            background: var(--bg-card);
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+            z-index: 100;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        /* 参考表下拉菜单样式 */
+        .nav-item-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .reference-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 480px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            padding: 20px;
+            display: none; /* 默认隐藏 */
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 1000;
+            margin-top: 10px;
+        }
+
+        /* 悬停显示 */
+        .nav-item-container:hover .reference-dropdown {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 连接区域，防止鼠标移出按钮间隙时菜单消失 */
+        .nav-item-container::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: transparent;
+        }
+
+        .ref-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .ref-section h4 {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .ref-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .ref-formula {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            color: var(--primary-color);
+            background: var(--bg-hover);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .chart-icons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .mini-chart-card {
+            background: var(--bg-hover);
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .mini-chart-card:hover {
+            transform: translateY(-2px);
+            background: var(--bg-active);
+        }
+
+        .mini-chart-svg {
+            width: 100%;
+            height: 40px;
+            stroke: var(--text-primary);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .mini-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            display: block;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 14px 1fr;
+            grid-template-rows: 1fr;
+            gap: 0; 
+            height: calc(100vh - 80px);
+            padding-top: 20px;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            min-width: 0;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .panel-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .panel-content {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+            overflow-x: hidden; 
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-input);
+            color: var(--text-primary);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-primary:hover { filter: brightness(1.1); }
+        
+        .btn-danger { background: var(--bg-card); color: var(--danger-color); border: 1px solid var(--danger-color); }
+        .btn-danger:hover { background: var(--bg-hover); opacity: 0.8; }
+
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { color: var(--danger-color); }
+        
+        .btn-icon-only {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 8px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-icon-only:hover {
+            background-color: var(--bg-hover);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-outline {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            flex: 1;
+            min-width: 60px;
+        }
+        .btn-outline:hover {
+            background: var(--bg-hover);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .data-table-container {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .data-row:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .data-row.editing {
+            background-color: var(--bg-active);
+        }
+
+        .data-row:last-child { border-bottom: none; }
+        .data-row:nth-child(even) { background-color: var(--bg-hover); }
+
+        .edit-input {
+            width: 60px;
+            padding: 2px 4px;
+            border: 1px solid var(--primary-color);
+            border-radius: 3px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+        }
+
+        .edit-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .edit-btn {
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            border-radius: 3px;
+        }
+
+        .chart-controls {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .control-item {
+            margin-bottom: 12px;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .chart-wrapper {
+            flex: 0 0 auto;
+            height: 55%; 
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            position: relative;
+            min-height: 20px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .resizer-horizontal {
+            height: 14px;
+            background: transparent;
+            cursor: row-resize;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 20;
+            margin: 4px 0;
+        }
+
+        .handle-horizontal {
+            width: 48px;
+            height: 6px;
+            background-color: #d1d5db;
+            border-radius: 3px;
+            transition: background-color 0.2s, transform 0.2s;
+            position: relative;
+        }
+        
+        .handle-horizontal::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 100%; height: 100%;
+            border-radius: 3px;
+            box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .resizer-horizontal:hover .handle-horizontal {
+            background-color: var(--primary-color);
+            transform: scaleY(1.2);
+        }
+        .resizer-horizontal:active .handle-horizontal { background-color: #1d4ed8; }
+
+        .resizer-vertical {
+            width: 14px;
+            height: 100%;
+            background: transparent;
+            cursor: col-resize;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .handle-vertical {
+            width: 6px;
+            height: 48px;
+            background-color: #d1d5db;
+            border-radius: 3px;
+            transition: background-color 0.2s, transform 0.2s;
+            position: relative;
+        }
+
+        .handle-vertical::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 100%; height: 100%;
+            border-radius: 3px;
+            box-shadow: inset 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .resizer-vertical:hover .handle-vertical {
+            background-color: var(--primary-color);
+            transform: scaleX(1.2);
+        }
+        .resizer-vertical:active .handle-vertical { background-color: #1d4ed8; }
+
+        .formulas-wrapper {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            min-height: 0;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .formulas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            gap: 15px;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .formula-card {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            transition: all 0.2s;
+            position: relative;
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .formula-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .formula-card.active {
+            border-color: var(--primary-color);
+            background-color: var(--bg-active);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .r2-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .formula-container-row {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .formula-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0; 
+        }
+
+        .formula-box-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            white-space: nowrap;
+        }
+
+        .math-display-box {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            padding: 8px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: nowrap;
+            height: 100%; 
+            display: flex;
+            align-items: center;
+        }
+
+        .raw-box {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid transparent;
+        }
+
+        .beautified-box {
+            background: rgba(245, 158, 11, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            font-weight: 600;
+        }
+        
+        [data-theme="dark"] .beautified-box {
+            color: #fbbf24;
+        }
+
+        .arrow-separator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            padding-top: 16px; 
+        }
+
+        .optimization-note {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            margin-top: 6px;
+            font-style: italic;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 6px;
+        }
+
+        .btn-lock {
+            position: relative;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .btn-lock:hover {
+            background: var(--bg-hover);
+        }
+        
+        .btn-lock.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .btn-lock.active:hover {
+            filter: brightness(1.1);
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            flex: 1;
+        }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .btn-import {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        .btn-import:hover {
+            background: var(--bg-hover);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .zoom-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .fit-category {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .fit-subtype {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                display: flex; 
+                flex-direction: column;
+                gap: 10px;
+                overflow-y: auto;
+            }
+            body { overflow: auto; height: auto; }
+            .chart-wrapper { height: 350px !important; flex: none; }
+            .resizer-horizontal, .resizer-vertical { display: none; }
+            .sidebar { width: 100% !important; }
+        }
+        
+        @media (max-width: 600px) {
+            .formula-container-row { flex-direction: column; }
+            .arrow-separator {
+                padding-top: 0;
+                transform: rotate(90deg);
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17l-6-11-6 7"/></svg>
+            CurveLab <span class="badge">XDH</span>
+        </h1>
+        
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="font-size: 0.85rem; color: var(--text-secondary);" class="subtitle-text">
+                专业严谨 · 逻辑分析 · 优美拟合
+            </div>
+            
+            <div class="nav-item-container">
+                <button class="btn-icon-only" title="灵感参考表">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.9.66-1.68 1.35-2.25 2-1.66 2.56-4.6.57-6.95C15.3 2.62 12.04 1.76 9.4 3.32 6.57 5.03 5.6 8.92 7.22 11.75c.69.57 1.17 1.35 1.35 2.25"/></svg>
+                </button>
+                
+                <div class="reference-dropdown">
+                    <div class="ref-grid">
+                        <div class="ref-section">
+                            <h4>经典物理/数学模型</h4>
+                            <div class="ref-item">
+                                <span>自由落体</span>
+                                <span class="ref-formula">h = ½gt²</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>牛顿第二定律</span>
+                                <span class="ref-formula">F = ma</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>胡克定律</span>
+                                <span class="ref-formula">F = kx</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>复利增长</span>
+                                <span class="ref-formula">A = P(1+r)ᵗ</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>圆面积</span>
+                                <span class="ref-formula">S = πr²</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>正态分布</span>
+                                <span class="ref-formula">e⁻ˣ²</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>欧姆定律</span>
+                                <span class="ref-formula">V = IR</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>能量守恒</span>
+                                <span class="ref-formula">E = ½mv²</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>理想气体</span>
+                                <span class="ref-formula">PV = nRT</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>库仑定律</span>
+                                <span class="ref-formula">F = kq₁q₂/r²</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>热传导</span>
+                                <span class="ref-formula">Q = kAΔT/d</span>
+                            </div>
+                            <div class="ref-item">
+                                <span>简谐运动</span>
+                                <span class="ref-formula">x = Acos(ωt+φ)</span>
+                            </div>
+                        </div>
+
+                        <div class="ref-section">
+                            <h4>常见数据形态</h4>
+                            <div class="chart-icons-grid">
+                                <div class="mini-chart-card">
+                                    <svg class="mini-chart-svg" viewBox="0 0 100 50">
+                                        <path d="M10,40 L90,10" />
+                                    </svg>
+                                    <span class="mini-label">线性增长 (Linear)</span>
+                                </div>
+                                <div class="mini-chart-card">
+                                    <svg class="mini-chart-svg" viewBox="0 0 100 50">
+                                        <path d="M10,40 Q50,40 90,10" />
+                                    </svg>
+                                    <span class="mini-label">指数爆发 (Exp)</span>
+                                </div>
+                                <div class="mini-chart-card">
+                                    <svg class="mini-chart-svg" viewBox="0 0 100 50">
+                                        <path d="M10,40 Q30,10 90,10" />
+                                    </svg>
+                                    <span class="mini-label">对数饱和 (Log)</span>
+                                </div>
+                                <div class="mini-chart-card">
+                                    <svg class="mini-chart-svg" viewBox="0 0 100 50">
+                                        <path d="M10,25 Q30,5 50,25 T90,25" />
+                                    </svg>
+                                    <span class="mini-label">周期波动 (Wave)</span>
+                                </div>
+                                <div class="mini-chart-card">
+                                    <svg class="mini-chart-svg" viewBox="0 0 100 50">
+                                        <path d="M10,40 L30,10 L50,40 L70,10 L90,40" />
+                                    </svg>
+                                    <span class="mini-label">振荡衰减 (Oscillation)</span>
+                                </div>
+                                <div class="mini-chart-card">
+                                    <svg class="mini-chart-svg" viewBox="0 0 100 50">
+                                        <path d="M10,10 L50,40 L90,10" />
+                                    </svg>
+                                    <span class="mini-label">抛物线 (Parabola)</span>
+                                </div>
+                                <div class="mini-chart-card">
+                                    <svg class="mini-chart-svg" viewBox="0 0 100 50">
+                                        <path d="M10,40 L30,40 L50,10 L70,10 L90,40" />
+                                    </svg>
+                                    <span class="mini-label">阶梯函数 (Step)</span>
+                                </div>
+                                <div class="mini-chart-card">
+                                    <svg class="mini-chart-svg" viewBox="0 0 100 50">
+                                        <path d="M10,25 L30,25 L50,40 L70,40 L90,25" />
+                                    </svg>
+                                    <span class="mini-label">S型曲线 (Sigmoid)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-icon-only" onclick="toggleTheme()" id="themeBtn" title="切换明暗模式">
+                <svg id="moonIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                <svg id="sunIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="main-layout" id="mainLayout">
+        <aside class="sidebar">
+            <div class="panel-header">
+                数据点输入 (Data Input)
+                <button class="btn-lock" id="dragLockBtn" title="锁定/解锁图表拖动添加点功能">
+                    <svg id="lockedIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <svg id="unlockedIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M18 11V7a5 5 0 0 0-8.4-3.5"/></svg>
+                    <span id="lockText">锁定拖动</span>
+                </button>
+            </div>
+            <div class="panel-content">
+                <div class="input-row">
+                    <input type="number" id="xInput" placeholder="X 值" step="any">
+                    <input type="number" id="yInput" placeholder="Y 值" step="any">
+                    <button class="btn-primary" onclick="addPoint()">添加</button>
+                </div>
+
+                <div class="data-table-container">
+                    <div id="pointsList">
+                        </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-danger" onclick="clearAllData()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M15 2V4a2 2 0 0 0-2 2h-2a2 2 0 0 0-2-2V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+                        清空
+                    </button>
+                    <div class="file-input-wrapper">
+                        <input type="file" accept=".txt" onchange="importTxt(event)">
+                        <button class="btn-import">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            导入
+                        </button>
+                    </div>
+                    <button class="btn-outline" onclick="exportTxt()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        导出
+                    </button>
+                </div>
+
+                <div class="chart-controls">
+                    <div class="control-item">
+                        <div class="control-label">
+                            <span>数据点大小 (Point Size)</span>
+                            <span id="radiusVal">4px</span>
+                        </div>
+                        <input type="range" min="1" max="7" step="1" value="4" oninput="updateChartConfig(this.value, 'radius')">
+                    </div>
+
+                    <div class="control-item">
+                        <div class="control-label">
+                            <span>拟合曲线平滑度 (Smoothness)</span>
+                            <span id="samplingVal">100 个点</span>
+                        </div>
+                        <input type="range" min="20" max="500" step="10" value="100" oninput="updateChartConfig(this.value, 'sampling')">
+                    </div>
+
+                    <div class="control-item">
+                        <div class="control-label">
+                            <span>X 轴自动填充范围 (Padding)</span>
+                            <span id="xPaddingVal">10%</span>
+                        </div>
+                        <input type="range" min="0" max="30" step="5" value="10" oninput="updateChartConfig(this.value, 'xPadding')">
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="resizer-vertical" id="verticalDragHandle">
+            <div class="handle-vertical"></div>
+        </div>
+
+        <div class="content-area" id="contentArea">
+            <div class="chart-wrapper" id="chartWrapper">
+                <canvas id="fittingChart"></canvas>
+                <div class="zoom-hint">使用滚轮缩放 | Shift+滚轮水平缩放</div>
+            </div>
+            
+            <div class="resizer-horizontal" id="horizontalDragHandle">
+                <div class="handle-horizontal"></div>
+            </div>
+
+            <div class="formulas-wrapper">
+                <div class="panel-header">
+                    拟合结果分析 (<span id="fitCount">0 个结果</span>)
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 400; font-style: italic;">
+                        R² 越高，拟合优度越好 | 所有非线性模型均已启用 LMA 深度优化
+                    </div>
+                </div>
+                <div class="formulas-grid" id="formulaGrid">
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        等待数据点输入...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // =======================================================
+        // 【核心数据和配置】
+        // =======================================================
+        let points = [];
+        let editingIndex = -1;
+        let chart = null;
+        let chartConfig = {
+            radius: 4,
+            sampling: 100,
+            xPadding: 0.1, // 10%
+            theme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        };
+        
+        let isDragging = false;
+        let draggingPoint = null;
+        let dragEnabled = true; // 控制是否允许拖动添加点功能
+        let shouldBlockClick = false; 
+        let dragStartPos = {x: 0, y: 0};
+        const DRAG_TOLERANCE = 5; 
+
+        // 拟合模型类型枚举
+        const FIT_TYPES = {
+            LINEAR: 'linear',
+            POLYNOMIAL: 'polynomial',
+            EXPONENTIAL: 'exponential',
+            EXPONENTIAL_LM: 'exponential_lm',
+            LOGARITHMIC: 'logarithmic',
+            LOGARITHMIC_LM: 'logarithmic_lm',
+            POWER: 'power',
+            POWER_LM: 'power_lm',
+            SINE: 'sine',
+            SINE_FULL: 'sine_full',
+            GAUSSIAN: 'gaussian',
+            LORENTZIAN: 'lorentzian',
+            HYPERBOLIC: 'hyperbolic',
+            RATIONAL: 'rational',
+            RATIONAL_FULL: 'rational_full',
+            LOGISTIC: 'logistic',
+            LOGISTIC_LM: 'logistic_lm',
+            GOMPERTZ: 'gompertz',
+            GOMPERTZ_LM: 'gompertz_lm',
+            MICHAELIS_MENTEN: 'michaelis_menten',
+            INVERSE_PROPORTIONAL: 'inverse_proportional',
+            MODIFIED_EXPONENTIAL: 'modified_exponential',
+            MODIFIED_POWER: 'modified_power',
+            QUADRATIC_RATIONAL: 'quadratic_rational',
+            WEIBULL: 'weibull',
+            DOUBLE_EXPONENTIAL: 'double_exponential'
+        };
+
+        // =======================================================
+        // 【Levenberg-Marquardt 算法实现】
+        // =======================================================
+
+        function levenbergMarquardt(modelFunc, data, initialParams, jacobianFunc, options = {}) {
+            const {
+                maxIterations = 100,
+                tolerance = 1e-6,
+                lambda0 = 0.001,
+                lambdaFactor = 10
+            } = options;
+
+            let params = [...initialParams];
+            let lambda = lambda0;
+            let iteration = 0;
+            let converged = false;
+            
+            function computeResiduals() {
+                return data.map(([x, y]) => y - modelFunc(params, x));
+            }
+            
+            function computeError(residuals) {
+                return residuals.reduce((sum, r) => sum + r * r, 0) / residuals.length;
+            }
+            
+            let residuals = computeResiduals();
+            let currentError = computeError(residuals);
+            let bestError = currentError;
+            let bestParams = [...params];
+            
+            while (iteration < maxIterations && !converged) {
+                const J = [];
+                for (let i = 0; i < data.length; i++) {
+                    const [x, y] = data[i];
+                    J.push(jacobianFunc(params, x));
+                }
+                
+                const n = params.length;
+                const JTJ = Array(n).fill(0).map(() => Array(n).fill(0));
+                const JTr = Array(n).fill(0);
+                
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        JTJ[i][j] = J.reduce((sum, row, idx) => sum + row[i] * row[j], 0);
+                    }
+                    JTr[i] = J.reduce((sum, row, idx) => sum + row[i] * residuals[idx], 0);
+                }
+                
+                const A = JTJ.map((row, i) => 
+                    row.map((val, j) => val + (i === j ? lambda * val : 0))
+                );
+                
+                const delta = solveLinearSystem(A, JTr);
+                
+                const newParams = params.map((p, i) => p + delta[i]);
+                const newResiduals = data.map(([x, y]) => y - modelFunc(newParams, x));
+                const newError = computeError(newResiduals);
+                
+                if (newError < currentError) {
+                    params = newParams;
+                    residuals = newResiduals;
+                    currentError = newError;
+                    lambda /= lambdaFactor;
+                    
+                    if (currentError < bestError) {
+                        bestError = currentError;
+                        bestParams = [...params];
+                    }
+                    
+                    if (Math.abs(newError - currentError) < tolerance || 
+                        delta.reduce((max, d) => Math.max(max, Math.abs(d)), 0) < tolerance) {
+                        converged = true;
+                    }
+                } else {
+                    lambda *= lambdaFactor;
+                }
+                iteration++;
+            }
+            
+            return {
+                params: bestParams,
+                error: bestError,
+                iterations: iteration,
+                converged: converged
+            };
+        }
+
+        function solveLinearSystem(A, b) {
+            const n = A.length;
+            const Ab = A.map((row, i) => [...row, b[i]]);
+            
+            for (let i = 0; i < n; i++) {
+                let maxRow = i;
+                for (let j = i + 1; j < n; j++) {
+                    if (Math.abs(Ab[j][i]) > Math.abs(Ab[maxRow][i])) {
+                        maxRow = j;
+                    }
+                }
+                
+                [Ab[i], Ab[maxRow]] = [Ab[maxRow], Ab[i]];
+                
+                for (let j = i + 1; j < n; j++) {
+                    const factor = Ab[j][i] / Ab[i][i];
+                    for (let k = i; k <= n; k++) {
+                        Ab[j][k] -= factor * Ab[i][k];
+                    }
+                }
+            }
+            
+            const x = Array(n).fill(0);
+            for (let i = n - 1; i >= 0; i--) {
+                x[i] = Ab[i][n];
+                for (let j = i + 1; j < n; j++) {
+                    x[i] -= Ab[i][j] * x[j];
+                }
+                x[i] /= Ab[i][i];
+            }
+            
+            return x;
+        }
+
+        // =======================================================
+        // 【LM算法模型定义】
+        // =======================================================
+
+        function exponentialModel(params, x) { const [a, b] = params; return a * Math.exp(b * x); }
+        function exponentialJacobian(params, x) { const [a, b] = params; const expVal = Math.exp(b * x); return [expVal, a * x * expVal]; }
+
+        function logarithmicModel(params, x) { const [a, b] = params; return a + b * Math.log(x); }
+        function logarithmicJacobian(params, x) { const [a, b] = params; return [1, Math.log(x)]; }
+
+        function powerModel(params, x) { const [a, b] = params; return a * Math.pow(x, b); }
+        function powerJacobian(params, x) { const [a, b] = params; const powVal = Math.pow(x, b); return [powVal, a * powVal * Math.log(x)]; }
+
+        function logisticModel(params, x) { const [L, k, x0, d] = params; return d + (L - d) / (1 + Math.exp(-k * (x - x0))); }
+        function logisticJacobian(params, x) {
+            const [L, k, x0, d] = params;
+            const expVal = Math.exp(-k * (x - x0));
+            const denom = 1 + expVal;
+            const denomSq = denom * denom;
+            return [1 / denom, (L - d) * (x - x0) * expVal / denomSq, -(L - d) * k * expVal / denomSq, 1 - 1 / denom];
+        }
+
+        function gompertzModel(params, x) { const [yMin, yMax, b, c] = params; return yMin + (yMax - yMin) * Math.exp(-Math.exp(-b * (x - c))); }
+        function gompertzJacobian(params, x) {
+            const [yMin, yMax, b, c] = params;
+            const inner = Math.exp(-b * (x - c));
+            const outer = Math.exp(-inner);
+            const amp = yMax - yMin;
+            return [1 - outer, outer, amp * outer * inner * (x - c), -amp * outer * inner * b];
+        }
+
+        function inverseProportionalModel(params, x) { const [a, b] = params; return a / (b + x); }
+        function inverseProportionalJacobian(params, x) { const [a, b] = params; const den = b + x; return [1 / den, -a / (den * den)]; }
+
+        function modifiedExponentialModel(params, x) { const [a, b, c] = params; return a * (1 - Math.exp(-b * x)) + c; }
+        function modifiedExponentialJacobian(params, x) { const [a, b, c] = params; const expVal = Math.exp(-b * x); return [1 - expVal, a * x * expVal, 1]; }
+
+        function modifiedPowerModel(params, x) { const [a, b, c] = params; return a * Math.pow(x, b) + c; }
+        function modifiedPowerJacobian(params, x) { const [a, b, c] = params; const powVal = Math.pow(x, b); return [powVal, a * powVal * Math.log(x), 1]; }
+
+        function quadraticRationalModel(params, x) { const [a, b, c, d] = params; return (a + b * x) / (1 + c * x + d * x * x); }
+        function quadraticRationalJacobian(params, x) {
+            const [a, b, c, d] = params;
+            const num = a + b * x;
+            const den = 1 + c * x + d * x * x;
+            const denSq = den * den;
+            return [1 / den, x / den, -num * x / denSq, -num * x * x / denSq];
+        }
+
+        function weibullModel(params, x) { const [a, b, c] = params; return c * (1 - Math.exp(-Math.pow(x / b, a))); }
+        function weibullJacobian(params, x) {
+            const [a, b, c] = params;
+            const r = x / b;
+            const powVal = Math.pow(r, a);
+            const expVal = Math.exp(-powVal);
+            return [c * expVal * powVal * Math.log(r), c * expVal * a * Math.pow(r, a) / b, 1 - expVal];
+        }
+
+        function doubleExponentialModel(params, x) { const [a, b, c, d] = params; return a * Math.exp(b * x) + c * Math.exp(d * x); }
+        function doubleExponentialJacobian(params, x) { 
+            const [a, b, c, d] = params; const e1 = Math.exp(b * x), e2 = Math.exp(d * x); 
+            return [e1, a * x * e1, e2, c * x * e2]; 
+        }
+
+        function gaussianModel(params, x) { const [A, mu, sigma] = params; return A * Math.exp(-Math.pow(x - mu, 2) / (2 * sigma * sigma)); }
+        function gaussianJacobian(params, x) {
+            const [A, mu, sigma] = params;
+            const expVal = Math.exp(-Math.pow(x - mu, 2) / (2 * sigma * sigma));
+            return [expVal, A * expVal * (x - mu) / (sigma * sigma), A * expVal * Math.pow(x - mu, 2) / (sigma * sigma * sigma)];
+        }
+
+        function lorentzianModel(params, x) { const [A, mu, gamma] = params; return A / (1 + Math.pow((x - mu) / gamma, 2)); }
+        function lorentzianJacobian(params, x) {
+            const [A, mu, gamma] = params;
+            const denom = 1 + Math.pow((x - mu) / gamma, 2);
+            return [1 / denom, (2 * A * (x - mu)) / (Math.pow(gamma, 2) * Math.pow(denom, 2)), (2 * A * Math.pow(x - mu, 2)) / (Math.pow(gamma, 3) * Math.pow(denom, 2))];
+        }
+
+        function michaelisMentenModel(params, x) { const [Vmax, Km] = params; return (Vmax * x) / (Km + x); }
+        function michaelisMentenJacobian(params, x) { const [Vmax, Km] = params; return [x / (Km + x), (-Vmax * x) / Math.pow(Km + x, 2)]; }
+
+        function sineFullModel(params, x) { const [a, b, c, d] = params; return a * Math.sin(b * x + c) + d; }
+        function sineFullJacobian(params, x) {
+            const [a, b, c, d] = params;
+            const cosVal = Math.cos(b * x + c);
+            return [Math.sin(b * x + c), a * x * cosVal, a * cosVal, 1];
+        }
+
+        function rationalFullModel(params, x) { const [a, b, c, d] = params; return (a + b * x) / (1 + c * x + d * x * x); }
+        function rationalFullJacobian(params, x) {
+            const [a, b, c, d] = params;
+            const num = a + b * x;
+            const den = 1 + c * x + d * x * x;
+            const denSq = den * den;
+            return [1 / den, x / den, -num * x / denSq, -num * x * x / denSq];
+        }
+
+        // =======================================================
+        // 【初始化与主题】
+        // =======================================================
+
+        function initChart() {
+            const ctx = document.getElementById('fittingChart').getContext('2d');
+            const scatterData = points.map(p => ({x: p[0], y: p[1]}));
+            
+            const getChartColor = (cssVar) => {
+                const computed = getComputedStyle(document.documentElement).getPropertyValue(cssVar);
+                return computed ? computed.trim() : cssVar;
+            };
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: '数据点 (Data Points)',
+                        data: scatterData,
+                        backgroundColor: 'red', 
+                        borderColor: 'red', 
+                        pointRadius: chartConfig.radius,
+                        order: 1 
+                    }, {
+                        label: '拟合曲线 (Fit Curve)',
+                        data: [],
+                        type: 'line',
+                        fill: false,
+                        borderColor: getChartColor('--primary-color'),
+                        borderWidth: 2,
+                        pointBackgroundColor: 'transparent',
+                        pointBorderColor: 'transparent',
+                        pointRadius: 0,
+                        order: 2 
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 400 },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'X 轴 (自变量)', color: (ctx) => chartConfig.theme === 'dark' ? getChartColor('--chart-text') : getChartColor('--text-secondary') },
+                            grid: { color: (ctx) => getChartColor('--chart-grid') },
+                            ticks: { color: (ctx) => getChartColor('--chart-text') }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: { display: true, text: 'Y 轴 (因变量)', color: (ctx) => chartConfig.theme === 'dark' ? getChartColor('--chart-text') : getChartColor('--text-secondary') },
+                            grid: { color: (ctx) => getChartColor('--chart-grid') },
+                            ticks: { color: (ctx) => getChartColor('--chart-text') }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: true, labels: { color: (ctx) => getChartColor('--text-primary') } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.x !== null) label += `(X: ${context.parsed.x.toFixed(4)}, Y: ${context.parsed.y.toFixed(4)})`;
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    interaction: { mode: 'nearest', intersect: false }
+                }
+            });
+            initWheelZoom();
+        }
+
+        function updateChart(fitPoints, r2) {
+            if (!chart) return;
+            const scatterData = points.map(p => ({x: p[0], y: p[1]}));
+            chart.data.datasets[0].data = scatterData;
+            if (fitPoints) {
+                chart.data.datasets[1].data = fitPoints;
+                chart.data.datasets[1].label = `拟合曲线 (Fit Curve, R²:${r2.toFixed(4)})`;
+            } else {
+                chart.data.datasets[1].data = [];
+                chart.data.datasets[1].label = '拟合曲线 (Fit Curve)';
+            }
+
+            if (points.length > 0) {
+                const xValues = points.map(p => p[0]);
+                const xMin = Math.min(...xValues);
+                const xMax = Math.max(...xValues);
+                const xRange = xMax - xMin;
+                const padding = xRange === 0 ? 1 : xRange * chartConfig.xPadding;
+                chart.options.scales.x.min = xMin - padding;
+                chart.options.scales.x.max = xMax + padding;
+            } else {
+                chart.options.scales.x.min = undefined;
+                chart.options.scales.x.max = undefined;
+            }
+            chart.update();
+        }
+
+        function updateChartTheme() {
+            if (!chart) return;
+            const getChartColor = (cssVar) => getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+            const textSecondary = getChartColor('--text-secondary');
+            const chartGrid = getChartColor('--chart-grid');
+            const chartText = getChartColor('--chart-text');
+
+            chart.options.scales.x.title.color = chartConfig.theme === 'dark' ? chartText : textSecondary;
+            chart.options.scales.x.grid.color = chartGrid;
+            chart.options.scales.x.ticks.color = chartText;
+            chart.options.scales.y.title.color = chartConfig.theme === 'dark' ? chartText : textSecondary;
+            chart.options.scales.y.grid.color = chartGrid;
+            chart.options.scales.y.ticks.color = chartText;
+            chart.data.datasets[1].borderColor = getChartColor('--primary-color');
+            chart.options.plugins.legend.labels.color = getChartColor('--text-primary');
+            chart.update('none');
+        }
+
+        function toggleTheme() {
+            const currentTheme = chartConfig.theme;
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            chartConfig.theme = newTheme;
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcons(newTheme);
+            updateChartTheme();
+        }
+
+        function updateThemeIcons(theme) {
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+            if (theme === 'dark') {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            } else {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            }
+        }
+
+        function applyInitialTheme() {
+            document.documentElement.setAttribute('data-theme', chartConfig.theme);
+            updateThemeIcons(chartConfig.theme);
+        }
+
+        function updateChartConfig(value, type) {
+            if (type === 'radius') {
+                chartConfig.radius = parseInt(value);
+                document.getElementById('radiusVal').textContent = `${value}px`;
+                if (chart && chart.data.datasets[0]) {
+                    chart.data.datasets[0].pointRadius = chartConfig.radius;
+                    chart.update('none');
+                }
+            } else if (type === 'sampling') {
+                chartConfig.sampling = parseInt(value);
+                document.getElementById('samplingVal').textContent = `${value} 个点`;
+                calculateAllFits(); 
+            } else if (type === 'xPadding') {
+                chartConfig.xPadding = parseInt(value) / 100;
+                document.getElementById('xPaddingVal').textContent = `${value}%`;
+                calculateAllFits(); 
+            }
+        }
+
+        // =======================================================
+        // 【数据点列表与CRUD操作】
+        // =======================================================
+
+        function updatePointsList() {
+            const list = document.getElementById('pointsList');
+            list.innerHTML = '';
+
+            if (points.length === 0) {
+                list.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-secondary);">暂无数据点</div>`;
+                return;
+            }
+
+            points.forEach((point, index) => {
+                const row = document.createElement('div');
+                row.className = `data-row ${index === editingIndex ? 'editing' : ''}`;
+                row.setAttribute('data-index', index);
+
+                if (index === editingIndex) {
+                    row.innerHTML = `
+                        <div>${index + 1}.</div>
+                        <input type="number" id="editX_${index}" class="edit-input" value="${point[0]}" step="any">
+                        <input type="number" id="editY_${index}" class="edit-input" value="${point[1]}" step="any">
+                        <div class="edit-buttons">
+                            <button class="btn-primary edit-btn" onclick="saveEdit(${index})" title="保存"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+                            <button class="btn-danger edit-btn" onclick="cancelEdit(${index})" title="取消"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
+                    `;
+                    row.onkeydown = (e) => { if (e.key === 'Enter') saveEdit(index); if (e.key === 'Escape') cancelEdit(index); };
+                } else {
+                    row.innerHTML = `
+                        <div style="width: 15px; flex-shrink: 0;">${index + 1}.</div>
+                        <div style="flex-grow: 1; text-align: right;">X: ${point[0].toFixed(4)}</div>
+                        <div style="flex-grow: 1; text-align: right;">Y: ${point[1].toFixed(4)}</div>
+                        <div class="edit-buttons" style="width: 36px; flex-shrink: 0;">
+                            <button class="btn-ghost edit-btn" onclick="editPoint(${index})" title="编辑"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+                            <button class="btn-ghost edit-btn" onclick="deletePoint(${index})" title="删除"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12v.01"/><path d="M14 12v.01"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/></svg></button>
+                        </div>
+                    `;
+                    row.onclick = (e) => { if (e.target.tagName !== 'BUTTON' && e.target.closest('button') === null) editPoint(index); };
+                }
+                list.appendChild(row);
+            });
+        }
+
+        function addPoint(xVal = null, yVal = null) {
+            const xInput = document.getElementById('xInput');
+            const yInput = document.getElementById('yInput');
+            if (xVal === null) xVal = parseFloat(xInput.value);
+            if (yVal === null) yVal = parseFloat(yInput.value);
+
+            if (!isNaN(xVal) && !isNaN(yVal)) {
+                points.push([parseFloat(xVal.toFixed(4)), parseFloat(yVal.toFixed(4))]);
+                points.sort((a, b) => a[0] - b[0]);
+                xInput.value = '';
+                yInput.value = '';
+                xInput.focus();
+                updatePointsList();
+                calculateAllFits();
+            }
+        }
+
+        function deletePoint(index) {
+            points.splice(index, 1);
+            editingIndex = -1;
+            points.sort((a, b) => a[0] - b[0]);
+            updatePointsList();
+            calculateAllFits();
+        }
+        
+        function clearAllData() {
+            if (points.length > 0 && confirm("确定清空所有数据点吗？此操作不可撤销。")) {
+                points = [];
+                editingIndex = -1;
+                updatePointsList();
+                calculateAllFits();
+            } else if (points.length === 0) alert("当前列表已为空。");
+        }
+
+        function editPoint(index) {
+            if (editingIndex !== -1) cancelEdit(editingIndex);
+            editingIndex = index;
+            updatePointsList();
+            setTimeout(() => { const xInput = document.getElementById(`editX_${index}`); if (xInput) xInput.focus(); }, 0);
+        }
+
+        function saveEdit(index) {
+            const newX = parseFloat(document.getElementById(`editX_${index}`).value);
+            const newY = parseFloat(document.getElementById(`editY_${index}`).value);
+            if (!isNaN(newX) && !isNaN(newY)) {
+                points[index] = [parseFloat(newX.toFixed(4)), parseFloat(newY.toFixed(4))];
+                editingIndex = -1;
+                points.sort((a, b) => a[0] - b[0]);
+                updatePointsList();
+                calculateAllFits();
+            } else alert("X值或Y值无效，请重新输入。");
+        }
+
+        function cancelEdit(index) { editingIndex = -1; updatePointsList(); }
+        
+        // =======================================================
+        // 【拖动交互】
+        // =======================================================
+        
+        function initDragHandling() {
+            const canvas = document.getElementById('fittingChart');
+            if (!canvas) return;
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('click', handleCanvasClick); 
+            canvas.style.cursor = dragEnabled ? 'grab' : 'default';
+        }
+        
+        function handleMouseDown(e) {
+            if (e.button !== 0 || !chart) return; 
+            const rect = chart.canvas.getBoundingClientRect();
+            dragStartPos = {x: e.clientX, y: e.clientY};
+            shouldBlockClick = false; 
+            draggingPoint = findClosestPoint(e.clientX - rect.left, e.clientY - rect.top);
+            if (draggingPoint) {
+                isDragging = true; 
+                chart.options.animation = { duration: 0 }; 
+                document.body.style.cursor = 'grabbing';
+                e.preventDefault();
+            }
+        }
+        
+        function handleMouseMove(e) {
+            if (!isDragging || !draggingPoint) return;
+            if (Math.abs(e.clientX - dragStartPos.x) > DRAG_TOLERANCE || Math.abs(e.clientY - dragStartPos.y) > DRAG_TOLERANCE) shouldBlockClick = true; 
+            const rect = chart.canvas.getBoundingClientRect();
+            points[draggingPoint.index] = [chart.scales.x.getValueForPixel(e.clientX - rect.left), chart.scales.y.getValueForPixel(e.clientY - rect.top)];
+            updateScatterPointsOnly();
+            e.preventDefault();
+        }
+
+        function handleMouseUp(e) {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.cursor = dragEnabled ? 'grab' : 'default';
+                if (chart) chart.options.animation = { duration: 400 };
+                if (shouldBlockClick) { 
+                    points.sort((a, b) => a[0] - b[0]);
+                    updatePointsList();
+                    calculateAllFits();
+                }
+                draggingPoint = null;
+            }
+        }
+        
+        function handleCanvasClick(e) {
+            if (shouldBlockClick) { shouldBlockClick = false; return; }
+            if (!dragEnabled) return; 
+            const rect = chart.canvas.getBoundingClientRect();
+            if (findClosestPoint(e.clientX - rect.left, e.clientY - rect.top)) return; 
+            const xVal = chart.scales.x.getValueForPixel(e.clientX - rect.left);
+            const yVal = chart.scales.y.getValueForPixel(e.clientY - rect.top);
+            if (xVal !== undefined && yVal !== undefined) {
+                points.push([parseFloat(xVal.toFixed(4)), parseFloat(yVal.toFixed(4))]);
+                points.sort((a, b) => a[0] - b[0]);
+                updatePointsList();
+                calculateAllFits();
+            }
+        }
+
+        function findClosestPoint(x, y) {
+            if (!chart) return null;
+            const tolerance = chartConfig.radius + 8; 
+            for (let i = 0; i < points.length; i++) {
+                const pixelX = chart.scales.x.getPixelForValue(points[i][0]);
+                const pixelY = chart.scales.y.getPixelForValue(points[i][1]);
+                if (Math.sqrt(Math.pow(x - pixelX, 2) + Math.pow(y - pixelY, 2)) <= tolerance) return { index: i, point: points[i] };
+            }
+            return null;
+        }
+
+        function updateScatterPointsOnly() {
+            if (!chart) return;
+            chart.data.datasets[0].data = points.map(p => ({x: p[0], y: p[1]}));
+            chart.update('none'); 
+        }
+
+        // =======================================================
+        // 【缩放与窗口调整】
+        // =======================================================
+
+        function initWheelZoom() {
+            const canvas = document.getElementById('fittingChart');
+            if (!canvas) return;
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (!chart || points.length === 0) return; 
+                const rect = canvas.getBoundingClientRect();
+                const xScale = chart.scales.x, yScale = chart.scales.y;
+                const mouseX = xScale.getValueForPixel(e.clientX - rect.left);
+                const mouseY = yScale.getValueForPixel(e.clientY - rect.top);
+                if (mouseX === undefined || mouseY === undefined) return;
+                const zoomFactor = e.deltaY < 0 ? 1.11 : 0.9;
+                if (e.shiftKey) {
+                    xScale.min = mouseX - (mouseX - xScale.min) * zoomFactor;
+                    xScale.max = mouseX + (xScale.max - mouseX) * zoomFactor;
+                } else {
+                    xScale.min = mouseX - (mouseX - xScale.min) * zoomFactor;
+                    xScale.max = mouseX + (xScale.max - mouseX) * zoomFactor;
+                    yScale.min = mouseY - (mouseY - yScale.min) * zoomFactor;
+                    yScale.max = mouseY + (yScale.max - mouseY) * zoomFactor;
+                }
+                chart.update('none');
+            }, { passive: false });
+        }
+
+        function initHorizontalResizer() {
+            const resizer = document.getElementById('horizontalDragHandle');
+            const chartWrapper = document.getElementById('chartWrapper');
+            const contentArea = document.getElementById('contentArea');
+            let isResizing = false, startY, startHeight;
+
+            resizer.addEventListener('mousedown', (e) => {
+                isResizing = true; startY = e.clientY; startHeight = chartWrapper.offsetHeight;
+                document.body.style.cursor = 'row-resize'; document.body.style.userSelect = 'none';
+                if(chart) chart.options.events = []; 
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                let newHeight = Math.max(150, Math.min(startHeight + e.clientY - startY, contentArea.offsetHeight - resizer.offsetHeight - 150));
+                chartWrapper.style.flex = `0 0 ${newHeight}px`;
+                if(chart) chart.resize(); 
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false; document.body.style.cursor = ''; document.body.style.userSelect = '';
+                    if(chart) { chart.options.events = ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove']; chart.update('none'); }
+                }
+            });
+        }
+
+        function initVerticalResizer() {
+            const resizer = document.getElementById('verticalDragHandle');
+            const sidebar = document.querySelector('.sidebar');
+            const mainLayout = document.getElementById('mainLayout');
+            let isResizing = false, startX, startWidth;
+
+            resizer.addEventListener('mousedown', (e) => {
+                isResizing = true; startX = e.clientX; startWidth = sidebar.offsetWidth;
+                document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                let newWidth = Math.max(250, Math.min(startWidth + e.clientX - startX, 500));
+                mainLayout.style.gridTemplateColumns = `${newWidth}px 14px 1fr`;
+                if(chart) chart.resize();
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false; document.body.style.cursor = ''; document.body.style.userSelect = '';
+                    document.documentElement.style.setProperty('--sidebar-width', `${sidebar.offsetWidth}px`);
+                }
+            });
+        }
+
+        function setupInputs() {
+            const xInput = document.getElementById('xInput'), yInput = document.getElementById('yInput');
+            if (xInput) xInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); xInput.value && !yInput.value ? yInput.focus() : addPoint(); } });
+            if (yInput) yInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addPoint(); } });
+        }
+
+        function importTxt(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const lines = e.target.result.trim().split(/\r?\n/).filter(line => line.trim() !== '');
+                points = [];
+                for (const line of lines) {
+                    const parts = line.trim().split(/[\s,]+/).filter(p => p !== '');
+                    if (parts.length >= 2) {
+                        const x = parseFloat(parts[0]), y = parseFloat(parts[1]);
+                        if (!isNaN(x) && !isNaN(y)) points.push([parseFloat(x.toFixed(4)), parseFloat(y.toFixed(4))]);
+                    }
+                }
+                if (points.length > 0) {
+                    points.sort((a, b) => a[0] - b[0]);
+                    updatePointsList();
+                    calculateAllFits();
+                } else alert("未在文件中找到有效的格式数据");
+                event.target.value = ''; 
+            };
+            reader.readAsText(file);
+        }
+
+        function exportTxt() {
+            if (points.length === 0) { alert("无数据可导出"); return; }
+            const url = URL.createObjectURL(new Blob([points.map(p => `${p[0]},${p[1]}`).join('\n')], {type: 'text/plain'}));
+            const a = document.createElement('a');
+            a.href = url; a.download = 'fitting_data.txt';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // =======================================================
+        // 【核心修正区】 优美化功能
+        // =======================================================
+        
+        function calculateR2FromPrediction(data, predictFunc) {
+            if (data.length < 2) return 0;
+            const yValues = data.map(p => p[1]);
+            const yMean = yValues.reduce((sum, y) => sum + y, 0) / yValues.length;
+            let ssRes = 0, ssTot = 0;
+            for (const point of data) {
+                ssRes += Math.pow(point[1] - predictFunc(point[0]), 2);
+                ssTot += Math.pow(point[1] - yMean, 2);
+            }
+            return ssTot < 1e-10 ? 1 : 1 - (ssRes / ssTot);
+        }
+        
+        function generateFitPoints(data, predictFunc) {
+            if (data.length < 1) return [];
+            const xValues = data.map(p => p[0]);
+            const xMin = Math.min(...xValues), xMax = Math.max(...xValues), range = xMax - xMin;
+            const padding = range * chartConfig.xPadding;
+            const startX = xMin - padding, endX = xMax + padding;
+            const step = (endX - startX) / chartConfig.sampling;
+            const fitPoints = [];
+            for (let i = 0; i <= chartConfig.sampling; i++) {
+                const x = startX + i * step;
+                try {
+                    const y = predictFunc(x);
+                    if (isFinite(y)) fitPoints.push({x, y});
+                } catch (e) {}
+            }
+            return fitPoints;
+        }
+
+        function beautifyCoefficient(val, idx, operations) {
+            if (Math.abs(val) < 1e-10) return 0; 
+            const fractions = [1/2, 1/3, 2/3, 1/4, 3/4, 1/5, 2/5, 3/5, 4/5, 1/6, 5/6, Math.PI, Math.E];
+            let closestFraction = 0, minDiff = Infinity;
+            for (const f of fractions) {
+                const diff = Math.abs(Math.abs(val) - f);
+                if (diff < minDiff) { minDiff = diff; closestFraction = f; }
+            }
+            if (minDiff < 0.05 * Math.max(1, Math.abs(val))) {
+                const niceVal = (val < 0 ? -1 : 1) * closestFraction;
+                operations.push(`系数[${idx}] ${val.toFixed(4)} → 规整`);
+                return niceVal;
+            }
+            const rounded = Math.round(val);
+            if (Math.abs(val - rounded) < 0.05 * Math.max(1, Math.abs(val))) {
+                 if (Math.abs(val - rounded) > 1e-10) operations.push(`系数[${idx}] ${val.toFixed(4)} → 取整`);
+                return rounded;
+            }
+            return parseFloat(val.toFixed(4));
+        }
+        
+        function performBeautification(fitName, coefficients, rawTemplate, fitType) {
+            const operations = [];
+            const niceCoeffs = coefficients.map((c, idx) => beautifyCoefficient(c, idx, operations));
+            let displayFormula = '', fitCategory = '', fitSubtype = '', predictFunc;
+
+            switch (fitType) {
+                case FIT_TYPES.EXPONENTIAL_LM:
+                    const [a_exp, b_exp] = niceCoeffs;
+                    displayFormula = `y = ${a_exp}e${b_exp === 1 ? 'ˣ' : (b_exp === -1 ? '⁻ˣ' : `⁽${b_exp}ˣ⁾`)}`;
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '指数增长/衰减 (LMA)';
+                    predictFunc = x => a_exp * Math.exp(b_exp * x);
+                    break;
+                case FIT_TYPES.LOGARITHMIC_LM:
+                    const [a_log, b_log] = niceCoeffs;
+                    displayFormula = `y = ${a_log}${b_log > 0 ? ' + ' : ''}${b_log === 0 ? '' : b_log + ' ln(x)'}`.replace(/\+ -/g, '- ');
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '对数关系 (LMA)';
+                    predictFunc = x => a_log + b_log * Math.log(x);
+                    break;
+                case FIT_TYPES.POWER_LM:
+                    const [a_pow, b_pow] = niceCoeffs;
+                    displayFormula = `y = ${a_pow === 1 ? '' : a_pow}x${b_pow === 1 ? '' : (b_pow === -1 ? '⁻¹' : '⁽' + b_pow + '⁾')}`;
+                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '幂律关系 (LMA)';
+                    predictFunc = x => a_pow * Math.pow(x, b_pow);
+                    break;
+                case FIT_TYPES.LOGISTIC_LM:
+                    const [L_log, k_log, x0_log, d_log] = niceCoeffs;
+                    let x0_p_log = x0_log === 0 ? '' : (x0_log > 0 ? ` - ${x0_log}` : ` + ${-x0_log}`);
+                    displayFormula = `y = ${d_log} + ${(L_log - d_log)} / (1 + e^[${-k_log} (x${x0_p_log})])`.replace(/\+ -/g, '- ');
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = 'S型生长曲线 (LMA)';
+                    predictFunc = x => d_log + (L_log - d_log) / (1 + Math.exp(-k_log * (x - x0_log)));
+                    break;
+                case FIT_TYPES.GOMPERTZ_LM:
+                    const [yMin_g, yMax_g, b_g, c_g] = niceCoeffs;
+                    let c_p_g = c_g === 0 ? '' : (c_g > 0 ? ` - ${c_g}` : ` + ${-c_g}`);
+                    displayFormula = `y = ${yMin_g} + ${(yMax_g - yMin_g)} exp(-exp^[${-b_g} (x${c_p_g})])`.replace(/\+ -/g, '- ');
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '不对称生长曲线 (LMA)';
+                    predictFunc = x => yMin_g + (yMax_g - yMin_g) * Math.exp(-Math.exp(-b_g * (x - c_g)));
+                    break;
+                case FIT_TYPES.LINEAR: 
+                    const [a_lin, b_lin] = niceCoeffs;
+                    displayFormula = `y = ${b_lin === 0 ? '' : b_lin + 'x'}${b_lin !== 0 && a_lin > 0 ? ' + ' : ''}${a_lin === 0 ? (b_lin === 0 ? '0' : '') : a_lin}`.replace(/\+ -/g, '- ');
+                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '基本趋势分析';
+                    predictFunc = x => a_lin + b_lin * x;
+                    break;
+                case FIT_TYPES.POLYNOMIAL: 
+                    displayFormula = niceCoeffs.map((c, i) => i === 0 ? c : (c > 0 ? ` + ${c}x${i>1?'^'+i:''}` : ` - ${-c}x${i>1?'^'+i:''}`)).join('');
+                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = `${coefficients.length - 1} 阶多项式`;
+                    predictFunc = x => niceCoeffs.reduce((sum, c, i) => sum + c * Math.pow(x, i), 0);
+                    break;
+                case FIT_TYPES.SINE_FULL:
+                    const [a_sf, b_sf, c_sf, d_sf] = niceCoeffs;
+                    displayFormula = `y = ${a_sf}sin(${b_sf}x ${c_sf >= 0 ? '+ ' + c_sf : '- ' + Math.abs(c_sf)}) ${d_sf >= 0 ? '+ ' + d_sf : '- ' + Math.abs(d_sf)}`;
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '周期波动 (LMA)';
+                    predictFunc = x => a_sf * Math.sin(b_sf * x + c_sf) + d_sf;
+                    break;
+                case FIT_TYPES.GAUSSIAN:
+                    const [A_gau, mu_gau, sig_gau] = niceCoeffs;
+                    displayFormula = `y = ${A_gau}e^[-(x${mu_gau>=0?'-'+mu_gau:'+'+(-mu_gau)})² / ${2*sig_gau*sig_gau}]`;
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '高斯分布 (LMA)';
+                    predictFunc = x => A_gau * Math.exp(-Math.pow(x - mu_gau, 2) / (2 * sig_gau * sig_gau));
+                    break;
+                case FIT_TYPES.LORENTZIAN:
+                    const [A_lor, mu_lor, gam_lor] = niceCoeffs;
+                    displayFormula = `y = ${A_lor} / (1 + ((x${mu_lor>=0?'-'+mu_lor:'+'+(-mu_lor)})/${gam_lor})²)`;
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '洛伦兹线型 (LMA)';
+                    predictFunc = x => A_lor / (1 + Math.pow((x - mu_lor) / gam_lor, 2));
+                    break;
+                case FIT_TYPES.MICHAELIS_MENTEN:
+                    const [vm, km] = niceCoeffs;
+                    displayFormula = `y = (${vm}x) / (${km} + x)`;
+                    fitCategory = '动力学模型 (Kinetics)'; fitSubtype = '酶促反应 (LMA)';
+                    predictFunc = x => (vm * x) / (km + x);
+                    break;
+                case FIT_TYPES.INVERSE_PROPORTIONAL:
+                    const [a_inv, b_inv] = niceCoeffs;
+                    displayFormula = `y = ${a_inv} / (${b_inv} + x)`;
+                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '反比例关系 (LMA)';
+                    predictFunc = x => a_inv / (b_inv + x);
+                    break;
+                case FIT_TYPES.MODIFIED_EXPONENTIAL:
+                    const [a_me, b_me, c_me] = niceCoeffs;
+                    displayFormula = `y = ${a_me}(1 - e^[${-b_me}x]) + ${c_me}`.replace(/\+ -/g, '- ');
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '修正指数 (LMA)';
+                    predictFunc = x => a_me * (1 - Math.exp(-b_me * x)) + c_me;
+                    break;
+                case FIT_TYPES.MODIFIED_POWER:
+                    const [a_mp, b_mp, c_mp] = niceCoeffs;
+                    displayFormula = `y = ${a_mp}x^${b_mp} + ${c_mp}`.replace(/\+ -/g, '- ');
+                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '修正幂律 (LMA)';
+                    predictFunc = x => a_mp * Math.pow(x, b_mp) + c_mp;
+                    break;
+                case FIT_TYPES.QUADRATIC_RATIONAL:
+                    const [a_qr, b_qr, c_qr, d_qr] = niceCoeffs;
+                    displayFormula = `y = (${a_qr} + ${b_qr}x) / (1 + ${c_qr}x + ${d_qr}x²)`.replace(/\+ -/g, '- ');
+                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '二次有理 (LMA)';
+                    predictFunc = x => (a_qr + b_qr * x) / (1 + c_qr * x + d_qr * x * x);
+                    break;
+                case FIT_TYPES.WEIBULL:
+                    const [a_w, b_w, c_w] = niceCoeffs;
+                    displayFormula = `y = ${c_w}(1 - exp(-(x/${b_w})^${a_w}))`;
+                    fitCategory = '统计分布 (Statistical)'; fitSubtype = '韦伯分布 (LMA)';
+                    predictFunc = x => c_w * (1 - Math.exp(-Math.pow(x / b_w, a_w)));
+                    break;
+                case FIT_TYPES.DOUBLE_EXPONENTIAL:
+                    const [a_de, b_de, c_de, d_de] = niceCoeffs;
+                    displayFormula = `y = ${a_de}e^[${b_de}x] + ${c_de}e^[${d_de}x]`.replace(/\+ -/g, '- ');
+                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '双指数 (LMA)';
+                    predictFunc = x => a_de * Math.exp(b_de * x) + c_de * Math.exp(d_de * x);
+                    break;
+                case FIT_TYPES.RATIONAL_FULL:
+                    const [a_rat, b_rat, c_rat, d_rat] = niceCoeffs;
+                    displayFormula = `y = (${a_rat} + ${b_rat}x) / (1 + ${c_rat}x + ${d_rat}x²)`.replace(/\+ -/g, '- ');
+                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '有理函数 (LMA)';
+                    predictFunc = x => (a_rat + b_rat * x) / (1 + c_rat * x + d_rat * x * x);
+                    break;
+                default:
+                    displayFormula = '无法优美化'; predictFunc = x => 0;
+            }
+            const r2Optimized = calculateR2FromPrediction(points.map(p => [p[0], p[1]]), predictFunc);
+            return { formula: displayFormula, operations: operations, r2: r2Optimized, fitCategory: fitCategory, fitSubtype: fitSubtype };
+        }
+
+        // =======================================================
+        // 【拟合逻辑核心 - 整合 LMA 优化】
+        // =======================================================
+        function calculateAllFits() {
+            if (points.length < 2) {
+                updateChart([], null);
+                document.getElementById('formulaGrid').innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">请至少输入2个点进行拟合</div>';
+                document.getElementById('fitCount').textContent = '0 个结果';
+                return;
+            }
+
+            const data = points.map(p => [p[0], p[1]]);
+            const results = [];
+            const yValues = data.map(p => p[1]);
+            const xValues = data.map(p => p[0]);
+            const yMin = Math.min(...yValues), yMax = Math.max(...yValues);
+            const xMean = xValues.reduce((a, b) => a + b, 0) / xValues.length;
+
+            // 1. 线性拟合 (保持 OLS，因其解析解即最优)
+            try {
+                const linear = regression.linear(data);
+                const lp = x => linear.equation[0] + linear.equation[1] * x;
+                results.push({ name: '线性拟合', r2: calculateR2FromPrediction(data, lp), rawString: `y = ${linear.equation[1].toFixed(4)}x + ${linear.equation[0].toFixed(4)}`, points: generateFitPoints(data, lp), beautify: () => performBeautification('Linear', [linear.equation[0], linear.equation[1]], '', FIT_TYPES.LINEAR) });
+            } catch (e) {}
+
+            // 2. 多项式拟合 (保持 OLS)
+            for (let order = 2; order <= 3; order++) {
+                if (points.length > order) {
+                    try {
+                        const poly = regression.polynomial(data, { order: order });
+                        const pp = x => poly.equation.reduce((sum, c, i) => sum + c * Math.pow(x, i), 0);
+                        results.push({ name: `${order} 阶多项式`, r2: calculateR2FromPrediction(data, pp), rawString: `y = ...`, points: generateFitPoints(data, pp), beautify: () => performBeautification('Poly', poly.equation, '', FIT_TYPES.POLYNOMIAL) });
+                    } catch (e) {}
+                }
+            }
+
+            // 3. 指数拟合 (合并：初猜 -> LMA)
+            try {
+                const initExp = regression.exponential(data);
+                const initialParams = [initExp.equation[0], initExp.equation[1]];
+                let params = initialParams;
+                let fitType = FIT_TYPES.EXPONENTIAL_LM;
+                
+                try {
+                    const lm = levenbergMarquardt(exponentialModel, data, initialParams, exponentialJacobian);
+                    if (lm.converged) params = lm.params;
+                } catch(e) {}
+
+                const ep = x => params[0] * Math.exp(params[1] * x);
+                const er2 = calculateR2FromPrediction(data, ep);
+                results.push({ name: '指数拟合', r2: er2, rawString: `y=${params[0].toFixed(4)}e^(${params[1].toFixed(4)}x)`, points: generateFitPoints(data, ep), beautify: () => performBeautification('Exp', params, '', FIT_TYPES.EXPONENTIAL_LM) });
+            } catch (e) {}
+
+            // 4. 对数拟合 (合并：初猜 -> LMA)
+            try {
+                const initLog = regression.logarithmic(data);
+                const initialParams = [initLog.equation[0], initLog.equation[1]];
+                let params = initialParams;
+
+                try {
+                    const lm = levenbergMarquardt(logarithmicModel, data, initialParams, logarithmicJacobian);
+                    if (lm.converged) params = lm.params;
+                } catch(e) {}
+
+                const lp = x => params[0] + params[1] * Math.log(x);
+                results.push({ name: '对数拟合', r2: calculateR2FromPrediction(data, lp), rawString: `y=${params[0].toFixed(4)}+${params[1].toFixed(4)}ln(x)`, points: generateFitPoints(data, lp), beautify: () => performBeautification('Log', params, '', FIT_TYPES.LOGARITHMIC_LM) });
+            } catch (e) {}
+
+            // 5. 幂律拟合 (合并：初猜 -> LMA)
+            try {
+                const initPow = regression.power(data);
+                const initialParams = [initPow.equation[0], initPow.equation[1]];
+                let params = initialParams;
+
+                try {
+                    const lm = levenbergMarquardt(powerModel, data, initialParams, powerJacobian);
+                    if (lm.converged) params = lm.params;
+                } catch(e) {}
+
+                const pp = x => params[0] * Math.pow(x, params[1]);
+                results.push({ name: '幂律拟合', r2: calculateR2FromPrediction(data, pp), rawString: `y=${params[0].toFixed(4)}x^${params[1].toFixed(4)}`, points: generateFitPoints(data, pp), beautify: () => performBeautification('Pow', params, '', FIT_TYPES.POWER_LM) });
+            } catch (e) {}
+
+            // 6. Logistic 拟合 (LMA)
+            if (points.length >= 4) {
+                try {
+                    const initialParams = [yMax, 1.0, data[Math.floor(data.length/2)][0], yMin];
+                    let params = initialParams;
+                    try {
+                        const lm = levenbergMarquardt(logisticModel, data, initialParams, logisticJacobian);
+                        if (lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const func = x => logisticModel(params, x);
+                    results.push({ name: 'Logistic 拟合', r2: calculateR2FromPrediction(data, func), rawString: `L=${params[0].toFixed(2)}, k=${params[1].toFixed(2)}...`, points: generateFitPoints(data, func), beautify: () => performBeautification('Logistic', params, '', FIT_TYPES.LOGISTIC_LM) });
+                } catch(e) {}
+            }
+
+            // 7. Gompertz 拟合 (LMA)
+            if (points.length >= 4) {
+                try {
+                    const initialParams = [yMin, yMax, 1.0, data[Math.floor(data.length/2)][0]];
+                    let params = initialParams;
+                    try {
+                        const lm = levenbergMarquardt(gompertzModel, data, initialParams, gompertzJacobian);
+                        if (lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const func = x => gompertzModel(params, x);
+                    results.push({ name: 'Gompertz 拟合', r2: calculateR2FromPrediction(data, func), rawString: `yMin=${params[0].toFixed(2)}...`, points: generateFitPoints(data, func), beautify: () => performBeautification('Gompertz', params, '', FIT_TYPES.GOMPERTZ_LM) });
+                } catch(e) {}
+            }
+
+            // 8. 峰值拟合 (Gaussian / Lorentzian) (LMA)
+            if (points.length >= 3) {
+                const maxIndex = yValues.indexOf(yMax);
+                const muEst = data[maxIndex][0];
+                const sigmaEst = Math.sqrt(xValues.reduce((s, x) => s + (x-xMean)**2, 0)/xValues.length) || 1;
+                
+                // Gaussian
+                try {
+                    let params = [yMax, muEst, sigmaEst];
+                    try {
+                        const lm = levenbergMarquardt(gaussianModel, data, params, gaussianJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const gp = x => gaussianModel(params, x);
+                    results.push({ name: '高斯拟合', r2: calculateR2FromPrediction(data, gp), rawString: `Gaus...`, points: generateFitPoints(data, gp), beautify: () => performBeautification('Gaussian', params, '', FIT_TYPES.GAUSSIAN) });
+                } catch(e) {}
+
+                // Lorentzian
+                try {
+                    let params = [yMax, muEst, 1.0];
+                    try {
+                        const lm = levenbergMarquardt(lorentzianModel, data, params, lorentzianJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const lp = x => lorentzianModel(params, x);
+                    results.push({ name: '洛伦兹拟合', r2: calculateR2FromPrediction(data, lp), rawString: `Lorentz...`, points: generateFitPoints(data, lp), beautify: () => performBeautification('Lorentzian', params, '', FIT_TYPES.LORENTZIAN) });
+                } catch(e) {}
+            }
+
+            // 9. 正弦拟合 (LMA)
+            if (points.length >= 4) {
+                try {
+                    const range = Math.max(...xValues) - Math.min(...xValues);
+                    let params = [(yMax-yMin)/2, (2*Math.PI)/range, 0, (yMax+yMin)/2];
+                    try {
+                        const lm = levenbergMarquardt(sineFullModel, data, params, sineFullJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const sp = x => sineFullModel(params, x);
+                    results.push({ name: '正弦拟合', r2: calculateR2FromPrediction(data, sp), rawString: `Sine...`, points: generateFitPoints(data, sp), beautify: () => performBeautification('Sine', params, '', FIT_TYPES.SINE_FULL) });
+                } catch(e) {}
+            }
+            
+            // 10. 米氏方程 (LMA)
+            if (points.length >= 3) {
+                try {
+                    // Lineweaver-Burk 线性化初猜
+                    const invData = data.filter(p=>p[0]>0 && p[1]>0).map(p=>[1/p[0], 1/p[1]]);
+                    const lin = regression.linear(invData);
+                    let params = [1/lin.equation[0], lin.equation[1]/lin.equation[0]]; // Vmax, Km
+                    if (isNaN(params[0]) || isNaN(params[1])) params = [yMax, xMean]; // 备用初猜
+
+                    try {
+                        const lm = levenbergMarquardt(michaelisMentenModel, data, params, michaelisMentenJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const mp = x => michaelisMentenModel(params, x);
+                    results.push({ name: '米氏方程', r2: calculateR2FromPrediction(data, mp), rawString: `MM...`, points: generateFitPoints(data, mp), beautify: () => performBeautification('MM', params, '', FIT_TYPES.MICHAELIS_MENTEN) });
+                } catch(e) {}
+            }
+            
+            // 11. 反比例 & 双曲 (LMA)
+            if (points.length >= 3) {
+                 try {
+                     let params = [yMax * xMean, xMean];
+                     try {
+                        const lm = levenbergMarquardt(inverseProportionalModel, data, params, inverseProportionalJacobian);
+                        if(lm.converged) params = lm.params;
+                     } catch(e) {}
+                     const ip = x => inverseProportionalModel(params, x);
+                     results.push({ name: '反比例/双曲拟合', r2: calculateR2FromPrediction(data, ip), rawString: `Inv...`, points: generateFitPoints(data, ip), beautify: () => performBeautification('Inverse', params, '', FIT_TYPES.INVERSE_PROPORTIONAL) });
+                 } catch(e) {}
+            }
+
+            // 12. 修正指数 (LMA)
+            if (points.length >= 4) {
+                try {
+                    let params = [yMax-yMin, 1.0, yMin];
+                    try {
+                        const lm = levenbergMarquardt(modifiedExponentialModel, data, params, modifiedExponentialJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const mep = x => modifiedExponentialModel(params, x);
+                    results.push({ name: '修正指数拟合', r2: calculateR2FromPrediction(data, mep), rawString: `ModExp...`, points: generateFitPoints(data, mep), beautify: () => performBeautification('ModExp', params, '', FIT_TYPES.MODIFIED_EXPONENTIAL) });
+                } catch(e) {}
+            }
+            
+            // 13. 修正幂律 (LMA)
+            if (points.length >= 4) {
+                try {
+                    let params = [1, 1, yMin];
+                    try {
+                        const lm = levenbergMarquardt(modifiedPowerModel, data, params, modifiedPowerJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const mpp = x => modifiedPowerModel(params, x);
+                    results.push({ name: '修正幂律拟合', r2: calculateR2FromPrediction(data, mpp), rawString: `ModPow...`, points: generateFitPoints(data, mpp), beautify: () => performBeautification('ModPow', params, '', FIT_TYPES.MODIFIED_POWER) });
+                } catch(e) {}
+            }
+            
+            // 14. 二次有理 (LMA)
+            if (points.length >= 5) {
+                try {
+                    const lin = regression.linear(data);
+                    let params = [lin.equation[0], lin.equation[1], 0.1, 0.01];
+                    try {
+                        const lm = levenbergMarquardt(quadraticRationalModel, data, params, quadraticRationalJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const qrp = x => quadraticRationalModel(params, x);
+                    results.push({ name: '二次有理拟合', r2: calculateR2FromPrediction(data, qrp), rawString: `QR...`, points: generateFitPoints(data, qrp), beautify: () => performBeautification('QuadRat', params, '', FIT_TYPES.QUADRATIC_RATIONAL) });
+                } catch(e) {}
+            }
+            
+            // 15. 有理函数 (LMA)
+            if (points.length >= 5) {
+                try {
+                    const lin = regression.linear(data);
+                    let params = [lin.equation[0], lin.equation[1], 0.01, 0.001];
+                    try {
+                         const lm = levenbergMarquardt(rationalFullModel, data, params, rationalFullJacobian);
+                         if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const rfp = x => rationalFullModel(params, x);
+                    results.push({ name: '有理函数拟合', r2: calculateR2FromPrediction(data, rfp), rawString: `Rational...`, points: generateFitPoints(data, rfp), beautify: () => performBeautification('Rational', params, '', FIT_TYPES.RATIONAL_FULL) });
+                } catch(e) {}
+            }
+
+            // 16. 韦伯分布 (LMA)
+            if (points.length >= 4) {
+                try {
+                    let params = [2.0, xMean, yMax];
+                    try {
+                        const lm = levenbergMarquardt(weibullModel, data, params, weibullJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const wp = x => weibullModel(params, x);
+                    results.push({ name: '韦伯分布', r2: calculateR2FromPrediction(data, wp), rawString: `Weibull...`, points: generateFitPoints(data, wp), beautify: () => performBeautification('Weibull', params, '', FIT_TYPES.WEIBULL) });
+                } catch(e) {}
+            }
+            
+            // 17. 双指数 (LMA)
+            if (points.length >= 6) {
+                try {
+                    let params = [yMax*0.6, 0.5, yMax*0.4, -0.1];
+                    try {
+                        const lm = levenbergMarquardt(doubleExponentialModel, data, params, doubleExponentialJacobian);
+                        if(lm.converged) params = lm.params;
+                    } catch(e) {}
+                    const dep = x => doubleExponentialModel(params, x);
+                    results.push({ name: '双指数拟合', r2: calculateR2FromPrediction(data, dep), rawString: `DoubleExp...`, points: generateFitPoints(data, dep), beautify: () => performBeautification('DoubleExp', params, '', FIT_TYPES.DOUBLE_EXPONENTIAL) });
+                } catch(e) {}
+            }
+
+            results.sort((a, b) => b.r2 - a.r2);
+            
+            document.getElementById('fitCount').textContent = `${results.length} 个结果`;
+            document.getElementById('formulaGrid').innerHTML = '';
+            
+            if (results.length > 0) {
+                const bestFit = results[0];
+                updateChart(bestFit.points, bestFit.r2);
+                
+                results.forEach((res, index) => {
+                    const isBest = index === 0;
+                    const beautified = res.beautify ? res.beautify() : {formula: 'N/A', operations: [], r2: res.r2, fitCategory: '未知', fitSubtype: ''};
+                    const r2Display = beautified.r2.toFixed(4);
+                    const card = document.createElement('div');
+                    card.className = `formula-card ${isBest ? 'active' : ''}`;
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <span>${res.name}</span>
+                            <span class="r2-badge">R²: ${r2Display}</span>
+                        </div>
+                        <div class="fit-category">${beautified.fitCategory}</div>
+                        <div class="fit-subtype">${beautified.fitSubtype}</div>
+                        <div class="formula-container-row">
+                            <div class="formula-box">
+                                <div class="formula-box-label">原始拟合公式 (Raw)</div>
+                                <div class="math-display-box raw-box" title="${res.rawString}">${res.rawString}</div>
+                            </div>
+                            <div class="arrow-separator">&rarr;</div>
+                            <div class="formula-box">
+                                <div class="formula-box-label">极致优美化公式 (Beautified)</div>
+                                <div class="math-display-box beautified-box" title="${beautified.formula}">${beautified.formula}</div>
+                            </div>
+                        </div>
+                        ${beautified.operations.length > 0 ? `<div class="optimization-note">优化操作: ${beautified.operations.join(' | ')}</div>` : ''}
+                    `;
+                    document.getElementById('formulaGrid').appendChild(card);
+                });
+            } else {
+                 document.getElementById('formulaGrid').innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">无有效拟合结果</div>';
+            }
+        }
+
+        // =======================================================
+        // 【启动】
+        // =======================================================
+        function initializeExampleData() {
+            points = [[1.0, 1.2], [2.0, 3.8], [3.0, 8.5], [4.0, 16.2], [5.0, 25.1]];
+            points.sort((a, b) => a[0] - b[0]);
+            updatePointsList();
+            calculateAllFits();
+        }
+
+        window.addEventListener('load', () => {
+            applyInitialTheme();
+            initChart();
+            initHorizontalResizer();
+            initVerticalResizer();
+            initializeExampleData();
+            setupInputs();
+            initDragHandling();
+
+            const lockBtn = document.getElementById('dragLockBtn');
+            if (lockBtn) {
+                lockBtn.onclick = () => {
+                    dragEnabled = !dragEnabled;
+                    const lockedIcon = document.getElementById('lockedIcon');
+                    const unlockedIcon = document.getElementById('unlockedIcon');
+                    const lockText = document.getElementById('lockText');
+                    const canvas = document.getElementById('fittingChart');
+                    
+                    if (dragEnabled) {
+                        lockedIcon.style.display = 'none'; unlockedIcon.style.display = 'block';
+                        lockBtn.classList.add('active'); lockText.textContent = '解锁拖动';
+                        canvas.style.cursor = 'grab';
+                    } else {
+                        lockedIcon.style.display = 'block'; unlockedIcon.style.display = 'none';
+                        lockBtn.classList.remove('active'); lockText.textContent = '锁定拖动';
+                        canvas.style.cursor = 'default';
+                    }
+                };
+                if (dragEnabled) {
+                    document.getElementById('lockedIcon').style.display = 'none';
+                    document.getElementById('unlockedIcon').style.display = 'block';
+                    lockBtn.classList.add('active');
+                    document.getElementById('lockText').textContent = '解锁拖动';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
