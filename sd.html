@@ -611,7 +611,7 @@
                         <div class="section-title">阶段 2/3: 快慢纬度调节 (当前轮次: <span id="adjustment-count-display">0</span>)</div>
                         <div class="dimension">
                             <div class="dimension-header">
-                                <span class="dimension-name" id="speed-range-display">调整幅度 [动态范围]</span>
+                                <span class="dimension-name" id="speed-range-display">调整灵敏速度 [动态范围]</span>
                                 <span class="dimension-value" id="speed-value">0</span>
                             </div>
                             <div class="slider-container">
@@ -987,7 +987,7 @@
                     // 6. 更新滑块标签和显示文本
                     sliderLabels.children[0].textContent = N_Fast_int > 0 ? `快极限 (-${N_Fast_int})` : '已在快极限';
                     sliderLabels.children[1].textContent = N_Slow_int > 0 ? `慢极限 (+${N_Slow_int})` : '已在慢极限';
-                    speedRangeDisplay.textContent = `调整幅度 [${speedSlider.min} (快) 至 +${speedSlider.max} (慢)]`;
+                    speedRangeDisplay.textContent = `调整灵敏速度 [${speedSlider.min} (快) 至 +${speedSlider.max} (慢)]`;
 
                 } else {
                     // 无法调整时，范围为 [0, 0]
@@ -995,7 +995,7 @@
                     speedSlider.max = 0;
                     sliderLabels.children[0].textContent = '快极限';
                     sliderLabels.children[1].textContent = '慢极限';
-                    speedRangeDisplay.textContent = `调整幅度 [0 (快) 至 +0 (慢)]`;
+                    speedRangeDisplay.textContent = `调整灵敏速度 [0 (快) 至 +0 (慢)]`;
                 }
                 
                 // 7. 确保滑块在 0 (代表当前值)
@@ -1199,7 +1199,7 @@
             speedSlider.max = 7;
             document.querySelector('.slider-labels').children[0].textContent = '快极限';
             document.querySelector('.slider-labels').children[1].textContent = '慢极限';
-            speedRangeDisplay.textContent = '调整幅度 [动态范围]';
+            speedRangeDisplay.textContent = '调整灵敏速度 [动态范围]';
 
 
             updateDisplay();
