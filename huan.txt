@@ -1,3 +1,5 @@
+教程：https://www.bilibili.com/video/BV1gwPVe9EKB
+
 （墨澜城提出）西岛海：
 
 简单说，就是在更换设备后，
@@ -17,3 +19,4 @@
 调整驱动DPI大小，然后用mousetester测试真实DPI是多少，
 调一遍驱动DPI，就测一遍真实DPI，如此反复，
 使得 当前真实DPI 尽可能的接近 之前的真实DPI。（即驱动步进越小越好）
+
