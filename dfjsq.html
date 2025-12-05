@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XLM·蛋白质与B12需求计算器 (完美布局版)</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2c3e50;
+            --bg-grad: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        /* 核心修复：应用全局盒模型，防止内边距导致按钮溢出 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-grad);
+            color: #333;
+            margin: 0;
+            padding: 10px;
+            font-size: 13px;
+            overflow-x: hidden;
+        }
+
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 12px;
+            width: 100%;
+            align-items: start;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.6);
+            display: flex;
+            flex-direction: column;
+            width: 100%; /* 确保卡片不超宽 */
+        }
+
+        h1 { font-size: 16px; color: var(--primary-dark); margin: 5px 0 10px; text-align: center; font-weight: 700; }
+        h2 { font-size: 14px; color: var(--primary); margin: 8px 0 5px; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+        h3 { font-size: 13px; color: #555; margin: 8px 0 5px; font-weight: 700; text-align: center; background: #f0f2f5; padding: 4px; border-radius: 4px;}
+
+        hr { margin: 8px 0; border: 0; border-top: 1px solid #eee; }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .input-group label {
+            flex: 0 0 40%;
+            font-weight: 600;
+            color: #555;
+            font-size: 12px;
+        }
+        .input-group input, .input-group select {
+            flex: 0 0 58%;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            height: 28px;
+            background-color: #fff;
+        }
+        .input-group input:focus { border-color: var(--primary); outline: none; }
+
+        button {
+            width: 100%;
+            max-width: 100%; /* 双重保险防止溢出 */
+            padding: 8px;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 5px;
+            white-space: normal;
+            line-height: 1.3;
+            height: auto;
+            min-height: 32px;
+        }
+        button:hover { opacity: 0.9; }
+
+        .result {
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+            border-left: 3px solid #2e7d32;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 5px; }
+        th, td { border: 1px solid #ddd; padding: 4px; text-align: center; }
+        th { background-color: #f1f1f1; color: #333; }
+        
+        .bmi-table th { background-color: #2c3e50; color: #fff; }
+        .energy-table th { background-color: #9b59b6; color: #fff; }
+        .fast-food-table th { background-color: #e67e22; color: #fff; }
+
+        .info-panel, .note {
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        .info-panel p, .note p { margin: 4px 0; }
+
+        .food-list { list-style: none; padding: 0; margin: 0; font-size: 12px; }
+        .food-item { display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 3px 0; }
+        .food-amount { color: #d35400; font-weight: bold; }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 999;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 2% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        #modal-text {
+            white-space: pre-wrap;
+            font-family: inherit;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-y: auto;
+            flex: 1;
+            margin-top: 20px;
+            padding-right: 10px;
+        }
+        #modal-text::-webkit-scrollbar { width: 6px; }
+        #modal-text::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<div id="grid-container">
+
+    <!-- 1. 基础理论 -->
+    <div class="card">
+        <h3>七大基本营养素</h3>
+        <table>
+            <thead><tr><th>存活阶段</th><th>营养素，存活重要性左右为高低</th></tr></thead>
+            <tbody>
+                <tr><td>短期存活【基本不缺】</td><td>水、碳水化合物</td></tr>
+                <tr><td>中期存活【有可能缺】</td><td>蛋白质</td></tr>
+                <tr><td>长期存活【很可能缺】</td><td>脂肪、矿物质、维生素、膳食纤维</td></tr>
+            </tbody>
+        </table>
+
+        <div class="info-panel">
+            <h3>蛋白质由氨基酸构成</h3>
+            <table>
+                <thead><tr><th>食物类型</th><th>缺乏的氨基酸</th><th>丰富的氨基酸</th><th>补充方案</th></tr></thead>
+                <tbody>
+                    <tr><td>黄豆</td><td>蛋氨酸、半胱氨酸</td><td>赖氨酸</td><td>大米、面食</td></tr>
+                    <tr><td>大米、面食</td><td>赖氨酸</td><td>蛋氨酸、半胱氨酸</td><td>黄豆</td></tr>
+                </tbody>
+            </table>
+            
+            <h3>如何真正的补充蛋白质？</h3>
+            <p>黄豆唯独蛋氨酸含量不高，这在吸收时会如木桶效应：8种必须氨基酸当中的蛋氨酸缺乏，会使得整个合成过程被限制在蛋氨酸的水平上。</p>
+            <p>你吃进去的所有其他氨基酸，也会因为“积木”不全而无法被高效利用，最终被分解并作为能量消耗掉或排出体外。</p>
+            <p>所以要与以下饮食互补，才能达到完美的蛋白质摄入。</p>
+            <p><strong>蛋氨酸含量由高到低：芝麻酱100g含600mg、花生300、面食225、玉米175、大米125。</strong></p>
+        </div>
+    </div>
+
+    <!-- 2. 身体状态 -->
+    <div class="card">
+        <h3>身体状态评估 (BMI)</h3>
+        <div class="input-group">
+            <label for="heightCm">身高（厘米）</label>
+            <input type="number" id="heightCm" placeholder="例如：175">
+        </div>
+        <div class="input-group">
+            <label for="weightKg">体重（斤）</label>
+            <input type="number" id="weightKg" placeholder="例如：130">
+        </div>
+        <button id="calculateBmiBtn">计算BMI</button>
+        <div class="result" id="bmiResultDiv"></div>
+        
+        <div class="info-panel">
+            <h3>BMI标准表（中国）</h3>
+            <table class="bmi-table">
+                <thead><tr><th>BMI值</th><th>档位</th></tr></thead>
+                <tbody>
+                    <tr><td>小于 18.5</td><td>偏瘦</td></tr>
+                    <tr><td>18.5 - 23.9</td><td>正常</td></tr>
+                    <tr><td>24 - 27.9</td><td>超重</td></tr>
+                    <tr><td>大于等于 28</td><td>肥胖</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. 能量需求 -->
+    <div class="card">
+        <h1>每日能量需求 (Katch-McArdle)</h1>
+        <div class="input-group">
+            <label for="gender">性别</label>
+            <select id="gender"><option value="male" selected>男</option><option value="female">女</option></select>
+        </div>
+        <div class="input-group">
+            <label for="age">年龄（岁）</label>
+            <input type="number" id="age" placeholder="例如：30">
+        </div>
+        <div class="input-group">
+            <label for="energyHeightCm">身高（厘米）</label>
+            <input type="number" id="energyHeightCm" placeholder="例如：175">
+        </div>
+        <div class="input-group">
+            <label for="energyWeightKg">体重（斤）</label>
+            <input type="number" id="energyWeightKg" placeholder="例如：130">
+        </div>
+        <div class="input-group">
+            <label for="bodyComposition" style="color:#d35400;">肌肉/体脂状态</label>
+            <select id="bodyComposition">
+                <option value="0">标准/平均 (体脂:男~15%/女~23% 肌肉适中)</option>
+                <option value="5" selected>肌肉少/体脂高 (体脂:男~20%/女~28% 肌肉偏少)</option>
+                <option value="10">瘦胖子 (体脂:男~25%/女~33% 肌肉匮乏)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="activityLevel">运动频率</label>
+            <select id="activityLevel">
+                <option value="1.05">极低消耗 (卧床/康复期)</option>
+                <option value="1.15" selected>久坐不动 (办公室/居家)</option>
+                <option value="1.3">少量运动 (每周1-3天)</option>
+                <option value="1.5">中等强度 (每周3-5天)</option>
+            </select>
+        </div>
+        <button id="calculateEnergyBtn">计算 (比Owen更低的瘦体重算法)</button>
+        <div class="result" id="energyResultDiv"></div>
+        
+        <div class="info-panel">
+            <p><strong>已启用 Katch-McArdle 公式：</strong></p>
+            <p>Owen公式仍基于总体重，而此公式只计算“去脂体重”（不计算脂肪消耗）。</p>
+            <p>如果您选择了“肌肉较少”选项，系统会假设您的体脂率较高，从而剔除更多无效体重，得出<strong>比Owen更低</strong>的、针对低代谢人群的真实基数。</p>
+            <p class="note" style="background:#fff; border:1px dashed #ccc; padding:5px;">
+                <strong>编者认为：</strong>得到两个能量结果后，应当根据自身情况乘以零点几、一点几这类系数，做出精确调整才是。
+                并且这个系数，和日常所吃的食疗（比如四神汤、复合维生素矿物质推荐值等）有密切关系，比如我个人可能需要x0.75左右才能得到正确千卡值，此时四神汤、保健品的剂量也随之x0.75。当然，以上只是我个人如此，具体请咨询医师。
+            </p>
+        </div>
+    </div>
+
+    <!-- 4. 饮食估算 -->
+    <div class="card">
+        <h1>饮食估算器 (吃多少)</h1>
+        <div class="input-group">
+            <label for="mealsPerDay">每日吃多少顿</label>
+            <input type="number" id="mealsPerDay" value="2.5" step="0.5">
+        </div>
+        <div class="input-group">
+            <label for="mealSize">每顿食量（克）</label>
+            <input type="number" id="mealSize" value="250" step="10">
+        </div>
+        <div class="input-group">
+            <label for="mainFood">主食类型</label>
+            <select id="mainFood">
+                <option value="no_main_food">没有主食 (0%)</option>
+                <option value="rice" selected>米饭 (2.5%)</option>
+                <option value="pasta">面食 (5%)</option>
+                <option value="oats">燕麦 (2.5%)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="sideDish">配菜类型</label>
+            <select id="sideDish">
+                <option value="no_side_dish">没有配菜 (0%)</option>
+                <option value="vegetarian_no_soy" selected>不含豆素菜 (5%)</option>
+                <option value="vegetarian_soy">含豆素菜 (9%)</option>
+                <option value="meat">肉菜 (约20%)</option>
+                <option value="high_protein">高蛋白食物 (25%)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="foodRatio">主食/配菜比例</label>
+            <select id="foodRatio">
+                <option value="100/0">100%主 / 0%配</option>
+                <option value="75/25">75%主 / 25%配</option>
+                <option value="50/50" selected>50%主 / 50%配</option>
+                <option value="25/75">25%主 / 75%配</option>
+                <option value="0/100">0%主 / 100%配</option>
+            </select>
+        </div>
+        <button id="applyEstimatesBtn">应用估算值并计算出千卡值</button>
+        <div class="result" id="calorieResultDiv"></div>
+        <div class="info-panel">
+            <p>此模块将自动把结果填入下方的“豆粉主计算器”中。</p>
+            <p><strong>修正说明：</strong></p>
+            <p>1. 面食和燕麦已修正为<strong>熟重</strong>（烹饪后）的蛋白质含量，避免虚高。</p>
+            <p>2. 素菜蛋白质比例已按要求保留了较高估值（5%和9%）。</p>
+            <h3>重量参考</h3>
+            <p>• 一碗米饭: 200g</p>
+            <p>• 一个苹果或西红柿或香蕉: 150g</p>
+            <p>• 一个泡面面饼或馒头或一把叶菜: 100g</p>
+            <p>• 一个鸡蛋: 50g</p>
+            <p>• 一小把坚果: 20g</p>
+        </div>
+    </div>
+
+    <!-- 5. 豆粉缺口 (主计算器) -->
+    <div class="card">
+        <h1>豆粉需求计算器 (差多少)</h1>
+        
+        <div class="input-group">
+            <label for="weight">体重（斤）</label>
+            <input type="number" id="weight" placeholder="120">
+        </div>
+        <div class="input-group">
+            <label for="proteinStandard">每日蛋白质标准</label>
+            <select id="proteinStandard">
+                <option value="0.6">0.6 克/公斤（最低需求）</option>
+                <option value="0.66" selected>0.66 克/公斤（平均需求EAR）</option>
+                <option value="0.8">0.8 克/公斤（推荐摄入RDA）</option>
+                <option value="1.0">1.0 克/公斤（健身人群）</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="totalFood">总食物量（克）</label>
+            <input type="number" id="totalFood" value="625" placeholder="自动生成">
+        </div>
+        <div class="input-group">
+            <label for="foodProteinRatio">食物蛋白质比例（%）</label>
+            <input type="number" id="foodProteinRatio" value="4.625" step="0.01" placeholder="自动计算">
+        </div>
+        <button id="calculateProteinBtn">计算缺口</button>
+        <div class="result" id="proteinResultDiv"></div>
+    </div>
+
+    <!-- 6. 蛋氨酸 -->
+    <div class="card">
+        <h2>蛋氨酸互补计算器</h2>
+        <div class="input-group">
+            <label for="soy-flour">黄豆粉摄入量 (克)</label>
+            <input type="number" id="soy-flour" placeholder="自动填充/输入">
+        </div>
+        <div class="input-group">
+            <label for="methionine-weight">体重 (斤)</label>
+            <input type="number" id="methionine-weight" placeholder="请输入体重">
+        </div>
+        <button id="calculate-methionine-btn">计算补充需求</button>
+        
+        <div class="result" id="methionine-results" style="display:none; background:none; padding:0; border:none;">
+            <div class="result" style="display:block; margin-bottom:5px;">
+                <div id="methionine-summary"></div>
+            </div>
+            <div class="info-panel">
+                <strong>需要补充的富蛋氨酸食物：</strong>
+                <ul class="food-list" id="food-list"></ul>
+            </div>
+        </div>
+        
+        <div class="note">
+            <strong>说明：</strong>
+            <p>编者计算过：当我们吃100g米饭或者面食，需要大概五分之一（20g）的黄豆来补充短板，就比较合适，以此类推。
+            并且补充时间不应该大于（一、二个时辰）现代二、四个小时。</p>
+        </div>
+    </div>
+
+    <!-- 7. B12 -->
+    <div class="card">
+        <h1>B12需求计算（慎）</h1>
+        <div class="input-group">
+            <label for="b12Standard">每日B12标准（微克）</label>
+            <select id="b12Standard">
+                <option value="0.9">0.9 (儿童1-3岁)</option>
+                <option value="2.4" selected>2.4 (成人)</option>
+                <option value="2.6">2.6 (孕妇)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="b12Intake">每日B12食物摄入量</label>
+            <input type="number" id="b12Intake" value="0" placeholder="肉蛋奶摄入估计">
+        </div>
+        <button id="calculateB12Btn">计算B12需求</button>
+        <div class="result" id="b12ResultDiv"></div>
+        <div class="info-panel" id="b12DetailsDiv" style="display:none; background-color:#e3f2fd;">
+            <p>若通过以下食物补充，则每日需额外摄入：</p>
+            <ul style="padding-left:15px; margin:0;">
+                <li id="b12FermentedBeanCurdResult"></li>
+                <li id="b12MilkResult"></li>
+                <li id="b12SupplementResult"></li>
+            </ul>
+        </div>
+        <div class="note">
+            <p><strong>注意：</strong>此计算基于豆粉蛋白质含量40%，且B12含量几乎为零。</p>
+            <p>青腐乳（某致和臭豆腐）的B12含量因发酵工艺差异大，这里以约<strong>15微克/100克</strong>估算，仅供参考。</p>
+            <p>牛奶含量以约<strong>0.45微克/100克</strong>估算。</p>
+        </div>
+    </div>
+
+    <!-- 8. 反推工具 -->
+    <div class="card">
+        <h2>卡路里摄入反推</h2>
+        <div class="input-group">
+            <label for="totalCalories">每日总摄入卡路里</label>
+            <input type="number" id="totalCalories" placeholder="例如：2000">
+        </div>
+        <div class="input-group">
+            <label for="reverseMealsPerDay">每日吃多少顿</label>
+            <input type="number" id="reverseMealsPerDay" value="2.5" step="0.5">
+        </div>
+        <div class="input-group">
+            <label for="reverseMainFood">主食类型</label>
+            <select id="reverseMainFood">
+                <option value="rice" selected>米饭</option>
+                <option value="pasta">面食 (5%)</option>
+                <option value="oats">燕麦 (2.5%)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="reverseSideDish">配菜类型</label>
+            <select id="reverseSideDish">
+                <option value="vegetarian_no_soy">不含豆制品的素菜</option>
+                <option value="meat">肉菜</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="reverseFoodRatio">主食/配菜比例</label>
+            <select id="reverseFoodRatio">
+                <option value="50/50" selected>50% / 50%</option>
+                <option value="100/0">100% 主食</option>
+            </select>
+        </div>
+        <button id="calculateReverseBtn">反推每顿食量</button>
+        <div class="result" id="reverseCalorieResultDiv"></div>
+
+        <div class="info-panel">
+            <h3>各类型食物卡路里（千卡/100克）</h3>
+            <table class="calorie-table">
+                <tbody>
+                    <tr><td>米饭类主食</td><td>~130</td><td>不含豆素菜</td><td>~30</td></tr>
+                    <tr><td>面食类主食</td><td>~110</td><td>含豆素菜</td><td>~120</td></tr>
+                    <tr><td>燕麦类主食</td><td>~68</td><td>肉菜</td><td>~250</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h3>快餐平均营养数据</h3>
+        <table class="fast-food-table">
+            <thead><tr><th>食物类型</th><th>平均重量</th><th>千卡</th><th>蛋白质(g)</th></tr></thead>
+            <tbody>
+                <tr><td>汉堡</td><td>180g</td><td>475</td><td>21.5</td></tr>
+                <tr><td>大份薯条</td><td>140g</td><td>475</td><td>6</td></tr>
+                <tr><td>6块麦乐鸡块</td><td>100g</td><td>300</td><td>17.5</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<button id="floating-btn" class="floating-btn">治疗<br>抑郁</button>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <pre id="modal-text"></pre>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // 1. CONFIGURATION
+        const CONFIG = {
+            proteinRatios: {
+                no_main_food: 0,
+                rice: 0.025,
+                pasta: 0.05,     // 修正：熟面条 5% (原8%)
+                oats: 0.025,     // 修正：熟燕麦粥 2.5% (原13%)
+                no_side_dish: 0,
+                // 用户要求：素菜预估高一些 (5% 和 9%)
+                vegetarian_no_soy: 0.05, 
+                vegetarian_soy: 0.09,    
+                meat: 0.20,
+                high_protein: 0.25,
+                soyPowder: 0.4,
+            },
+            caloriesPerGram: {
+                no_main_food: 0,
+                rice: 1.3,
+                pasta: 1.10, // 修正：熟面条 110 kcal (原158)
+                oats: 0.68,  // 熟燕麦粥
+                no_side_dish: 0,
+                vegetarian_no_soy: 0.40, 
+                vegetarian_soy: 1.3,
+                meat: 2.5,
+                high_protein: 2.0,
+            },
+            b12Contents: {
+                meatPerGram: 0.015,
+                fermentedBeanCurdPer100g: 15,
+                milkPer100g: 0.45,
+                supplementPerPill: 10,
+            },
+            methionine: {
+                dailyNeedMgPerKg: 19,
+                soyFlourMgPer100g: 550, 
+                foods: [
+                    { name: "芝麻酱", methionine: 600, unit: "克" },
+                    { name: "花生", methionine: 300, unit: "克" },
+                    { name: "面食", methionine: 225, unit: "克" },
+                    { name: "玉米", methionine: 175, unit: "克" },
+                    { name: "大米", methionine: 125, unit: "克" },
+                ]
+            }
+        };
+
+        // 2. DOM ELEMENTS
+        const DOM = {
+            weight: document.getElementById('weight'),
+            proteinStandard: document.getElementById('proteinStandard'),
+            totalFood: document.getElementById('totalFood'),
+            foodProteinRatio: document.getElementById('foodProteinRatio'),
+            calculateProteinBtn: document.getElementById('calculateProteinBtn'),
+            proteinResultDiv: document.getElementById('proteinResultDiv'),
+
+            b12Standard: document.getElementById('b12Standard'),
+            b12Intake: document.getElementById('b12Intake'),
+            calculateB12Btn: document.getElementById('calculateB12Btn'),
+            b12ResultDiv: document.getElementById('b12ResultDiv'),
+            b12DetailsDiv: document.getElementById('b12DetailsDiv'),
+            b12FermentedBeanCurdResult: document.getElementById('b12FermentedBeanCurdResult'),
+            b12MilkResult: document.getElementById('b12MilkResult'),
+            b12SupplementResult: document.getElementById('b12SupplementResult'),
+
+            mealsPerDay: document.getElementById('mealsPerDay'),
+            mealSize: document.getElementById('mealSize'),
+            mainFood: document.getElementById('mainFood'),
+            sideDish: document.getElementById('sideDish'),
+            foodRatio: document.getElementById('foodRatio'),
+            applyEstimatesBtn: document.getElementById('applyEstimatesBtn'),
+            calorieResultDiv: document.getElementById('calorieResultDiv'),
+
+            heightCm: document.getElementById('heightCm'),
+            weightKg: document.getElementById('weightKg'),
+            calculateBmiBtn: document.getElementById('calculateBmiBtn'),
+            bmiResultDiv: document.getElementById('bmiResultDiv'),
+
+            gender: document.getElementById('gender'),
+            age: document.getElementById('age'),
+            energyHeightCm: document.getElementById('energyHeightCm'),
+            energyWeightKg: document.getElementById('energyWeightKg'),
+            activityLevel: document.getElementById('activityLevel'),
+            bodyComposition: document.getElementById('bodyComposition'), 
+            calculateEnergyBtn: document.getElementById('calculateEnergyBtn'),
+            energyResultDiv: document.getElementById('energyResultDiv'),
+
+            totalCalories: document.getElementById('totalCalories'),
+            reverseMealsPerDay: document.getElementById('reverseMealsPerDay'),
+            reverseMainFood: document.getElementById('reverseMainFood'),
+            reverseSideDish: document.getElementById('reverseSideDish'),
+            reverseFoodRatio: document.getElementById('reverseFoodRatio'),
+            calculateReverseBtn: document.getElementById('calculateReverseBtn'),
+            reverseCalorieResultDiv: document.getElementById('reverseCalorieResultDiv'),
+
+            soyFlourInput: document.getElementById('soy-flour'),
+            methionineWeightInput: document.getElementById('methionine-weight'),
+            calculateMethionineBtn: document.getElementById('calculate-methionine-btn'),
+            methionineResultsDiv: document.getElementById('methionine-results'),
+            methionineSummaryDiv: document.getElementById('methionine-summary'),
+            methionineFoodList: document.getElementById('food-list'),
+
+            floatingBtn: document.getElementById('floating-btn'),
+            modal: document.getElementById('myModal'),
+            closeBtn: document.getElementsByClassName("close-btn")[0],
+            modalText: document.getElementById("modal-text")
+        };
+
+        // 3. STATE
+        const state = {
+            weight: 0,
+            proteinStandard: 0,
+            totalFood: 0,
+            foodProteinRatio: 4.625,
+            b12Standard: 0,
+            b12Intake: 0,
+            sideDish: '',
+            mealsPerDay: 0,
+            mealSize: 0,
+            mainFood: '',
+            foodRatio: '',
+            heightCm: 0,
+            weightKg: 0,
+            gender: '',
+            age: 0,
+            energyHeightCm: 0,
+            energyWeightKg: 0,
+            activityLevel: 0,
+            bodyCompositionOffset: 0,
+            totalCalories: 0,
+            reverseMealsPerDay: 0,
+            reverseMainFood: '',
+            reverseSideDish: '',
+            reverseFoodRatio: '',
+            soyFlour: 0,
+            methionineWeight: 0,
+
+            protein: { required: 0, fromFood: 0, deficit: 0, soyPowderNeeded: 0, showResult: false },
+            b12: { deficit: 0, showResult: false, curdNeeded: 0, milkNeeded: 0, pillsNeeded: 0 },
+            bmi: { value: 0, category: '', showResult: false },
+            energy: { bmr: 0, tdee: 0, showResult: false },
+            calories: { value: 0, showResult: false },
+            reverse: { totalFood: 0, mealSize: 0, estimatedProtein: 0, showResult: false },
+            methionine: { dailyNeed: 0, fromSoy: 0, deficit: 0, showResult: false }
+        };
+
+        // 4. LOGIC
+        const Logic = {
+            calculateAverageProteinRatio: () => {
+                const mainFoodRatio = CONFIG.proteinRatios[state.mainFood] || 0;
+                const sideDishRatio = CONFIG.proteinRatios[state.sideDish] || 0;
+                const [mainFoodPercent, sideDishPercent] = state.foodRatio.split('/').map(p => parseFloat(p) / 100);
+                const totalFoodInGrams = state.mealsPerDay * state.mealSize;
+                const totalProtein = (totalFoodInGrams * mainFoodPercent * mainFoodRatio) + (totalFoodInGrams * sideDishPercent * sideDishRatio);
+                state.totalFood = totalFoodInGrams;
+                state.foodProteinRatio = (totalFoodInGrams) ? (totalProtein / totalFoodInGrams) * 100 : 0;
+            },
+
+            calculateTotalCalories: () => {
+                const mainFoodCal = CONFIG.caloriesPerGram[state.mainFood] || 0;
+                const sideDishCal = CONFIG.caloriesPerGram[state.sideDish] || 0;
+                const [mainFoodPercent, sideDishPercent] = state.foodRatio.split('/').map(p => parseFloat(p) / 100);
+                const totalFoodInGrams = state.mealsPerDay * state.mealSize;
+                const totalCalories = (totalFoodInGrams * mainFoodPercent * mainFoodCal) + (totalFoodInGrams * sideDishPercent * sideDishCal);
+                state.calories.value = totalCalories;
+                state.calories.showResult = true;
+            },
+
+            calculateProteinNeeded: () => {
+                const weightInKg = state.weight / 2;
+                state.protein.required = weightInKg * state.proteinStandard;
+                state.protein.fromFood = state.totalFood * (state.foodProteinRatio / 100);
+                state.protein.deficit = Math.max(0, state.protein.required - state.protein.fromFood);
+                state.protein.soyPowderNeeded = state.protein.deficit / CONFIG.proteinRatios.soyPowder;
+                state.protein.showResult = true;
+                
+                // 联动蛋氨酸
+                if (state.weight > 0 && state.protein.soyPowderNeeded > 0) {
+                    DOM.soyFlourInput.value = state.protein.soyPowderNeeded.toFixed(0);
+                    DOM.methionineWeightInput.value = state.weight;
+                }
+            },
+
+            calculateB12Needed: () => {
+                state.b12.deficit = Math.max(0, state.b12Standard - state.b12Intake);
+                state.b12.curdNeeded = (state.b12.deficit / CONFIG.b12Contents.fermentedBeanCurdPer100g) * 100;
+                state.b12.milkNeeded = (state.b12.deficit / CONFIG.b12Contents.milkPer100g) * 100;
+                state.b12.pillsNeeded = state.b12.deficit / CONFIG.b12Contents.supplementPerPill;
+                state.b12.showResult = true;
+            },
+
+            calculateBmi: () => {
+                const heightInMeters = state.heightCm / 100;
+                const weightInKg = state.weightKg / 2;
+                state.bmi.value = weightInKg / (heightInMeters * heightInMeters);
+                if (state.bmi.value < 18.5) { state.bmi.category = "偏瘦"; } 
+                else if (state.bmi.value < 24) { state.bmi.category = "正常"; } 
+                else if (state.bmi.value < 28) { state.bmi.category = "超重"; } 
+                else { state.bmi.category = "肥胖"; }
+                state.bmi.showResult = true;
+            },
+
+            calculateEnergy: () => {
+                // 使用 Katch-McArdle 公式
+                const heightInCm = state.energyHeightCm;
+                const weightInKg = state.energyWeightKg / 2;
+                const age = state.age;
+                const gender = state.gender;
+                
+                // 1. 计算BMI
+                const heightInM = heightInCm / 100;
+                const bmi = weightInKg / (heightInM * heightInM);
+
+                // 2. 估算体脂率 (Deurenberg 公式)
+                // Gender value: Male=1, Female=0
+                const genderVal = (gender === 'male') ? 1 : 0;
+                let bodyFatPercent = (1.20 * bmi) + (0.23 * age) - (10.8 * genderVal) - 5.4;
+                
+                // 3. 应用体质修正 (加上用户选择的百分比偏移)
+                bodyFatPercent = bodyFatPercent + state.bodyCompositionOffset;
+
+                // 边界保护
+                if (bodyFatPercent < 5) bodyFatPercent = 5;
+                if (bodyFatPercent > 70) bodyFatPercent = 70;
+
+                // 4. 计算去脂体重 (LBM)
+                const lbm = weightInKg * (1 - (bodyFatPercent / 100));
+
+                // 5. Katch-McArdle 公式
+                const bmr = 370 + (21.6 * lbm);
+
+                state.energy.bmr = bmr;
+                state.energy.tdee = bmr * state.activityLevel;
+                state.energy.showResult = true;
+            },
+
+            calculateReverse: () => {
+                const [mainFoodPercent, sideDishPercent] = state.reverseFoodRatio.split('/').map(p => parseFloat(p) / 100);
+                const mainFoodCal = CONFIG.caloriesPerGram[state.reverseMainFood] || 0;
+                const sideDishCal = CONFIG.caloriesPerGram[state.reverseSideDish] || 0;
+                const mainFoodProt = CONFIG.proteinRatios[state.reverseMainFood] || 0;
+                const sideDishProt = CONFIG.proteinRatios[state.reverseSideDish] || 0;
+
+                const mealsPerDay = state.reverseMealsPerDay;
+                const totalCalories = state.totalCalories;
+                const weightedCaloriePerGram = (mainFoodCal * mainFoodPercent) + (sideDishCal * sideDishPercent);
+                
+                if (weightedCaloriePerGram > 0) {
+                    state.reverse.totalFood = totalCalories / weightedCaloriePerGram;
+                    state.reverse.mealSize = state.reverse.totalFood / mealsPerDay;
+                    const totalProtein = (state.reverse.totalFood * mainFoodPercent * mainFoodProt) + 
+                                       (state.reverse.totalFood * sideDishPercent * sideDishProt);
+                    state.reverse.estimatedProtein = totalProtein;
+                } else {
+                    state.reverse.totalFood = 0;
+                    state.reverse.mealSize = 0;
+                    state.reverse.estimatedProtein = 0;
+                }
+                state.reverse.showResult = true;
+            },
+
+            calculateMethionineComplement: () => {
+                const weightInKg = state.methionineWeight / 2;
+                const dailyMethionineNeed = weightInKg * CONFIG.methionine.dailyNeedMgPerKg;
+                const methionineFromSoy = (state.soyFlour / 100) * CONFIG.methionine.soyFlourMgPer100g;
+                const methionineDeficit = Math.max(0, dailyMethionineNeed - methionineFromSoy);
+                state.methionine.dailyNeed = dailyMethionineNeed;
+                state.methionine.fromSoy = methionineFromSoy;
+                state.methionine.deficit = methionineDeficit;
+                state.methionine.showResult = true;
+            }
+        };
+
+        // 5. RENDERER
+        const Renderer = {
+            renderProteinResult: () => {
+                if (state.protein.showResult) {
+                    DOM.proteinResultDiv.style.display = 'block';
+                    DOM.proteinResultDiv.innerHTML = `需求: <strong>${state.protein.required.toFixed(1)}g</strong> | 食物提供: <strong>${state.protein.fromFood.toFixed(1)}g</strong><br>缺口: <strong>${state.protein.deficit.toFixed(1)}g</strong> | 需补黄豆粉: <strong>${state.protein.soyPowderNeeded.toFixed(1)}g</strong>`;
+                }
+            },
+            renderBmiResult: () => {
+                if (state.bmi.showResult) {
+                    DOM.bmiResultDiv.style.display = 'block';
+                    DOM.bmiResultDiv.innerHTML = `BMI: <strong>${state.bmi.value.toFixed(1)}</strong> (${state.bmi.category})`;
+                }
+            },
+            renderEnergyResult: () => {
+                if (state.energy.showResult) {
+                    DOM.energyResultDiv.style.display = 'block';
+                    DOM.energyResultDiv.innerHTML = `基础代谢(BMR): <strong>${state.energy.bmr.toFixed(0)}</strong><br>总消耗(TDEE): <strong>${state.energy.tdee.toFixed(0)}</strong>`;
+                }
+            },
+            renderCalorieResult: () => {
+                if (state.calories.showResult) {
+                    DOM.calorieResultDiv.style.display = 'block';
+                    DOM.calorieResultDiv.innerHTML = `估算热量: <strong>${state.calories.value.toFixed(0)} 千卡</strong>`;
+                }
+            },
+            renderB12Result: () => {
+                if (state.b12.showResult) {
+                    DOM.b12ResultDiv.style.display = 'block';
+                    if (state.b12.deficit === 0) {
+                        DOM.b12ResultDiv.innerHTML = '✅ B12摄入已达标';
+                        DOM.b12DetailsDiv.style.display = 'none';
+                    } else {
+                        DOM.b12DetailsDiv.style.display = 'block';
+                        DOM.b12ResultDiv.innerHTML = `缺口: <strong>${state.b12.deficit.toFixed(2)} μg</strong>`;
+                        DOM.b12FermentedBeanCurdResult.innerHTML = `青腐乳: 约 <strong>${(state.b12.deficit / 15 * 100).toFixed(0)}g</strong>`;
+                        DOM.b12MilkResult.innerHTML = `牛奶: 约 <strong>${(state.b12.deficit / 0.45 * 100).toFixed(0)}g</strong>`;
+                        DOM.b12SupplementResult.innerHTML = `补剂: 约 <strong>${state.b12.pillsNeeded.toFixed(1)} 片</strong>`;
+                    }
+                }
+            },
+            renderReverseResult: () => {
+                if (state.reverse.showResult) {
+                    DOM.reverseCalorieResultDiv.style.display = 'block';
+                    DOM.reverseCalorieResultDiv.innerHTML = `日总量: <strong>${state.reverse.totalFood.toFixed(0)}g</strong> | 每顿: <strong>${state.reverse.mealSize.toFixed(0)}g</strong><br>预估蛋白: <strong>${state.reverse.estimatedProtein.toFixed(1)}g</strong>`;
+                }
+            },
+            renderMethionineResult: () => {
+                if (state.methionine.showResult) {
+                    DOM.methionineResultsDiv.style.display = 'block';
+                    DOM.methionineSummaryDiv.innerHTML = `需求: <strong>${state.methionine.dailyNeed.toFixed(0)}mg</strong> | 已有: <strong>${state.methionine.fromSoy.toFixed(0)}mg</strong> | 缺口: <strong style="color:red">${state.methionine.deficit.toFixed(0)}mg</strong>`;
+                    
+                    DOM.methionineFoodList.innerHTML = '';
+                    if (state.methionine.deficit === 0) {
+                        DOM.methionineFoodList.innerHTML = '<li class="food-item">✅ 蛋氨酸已达标</li>';
+                    } else {
+                        CONFIG.methionine.foods.forEach(food => {
+                            const amount = (state.methionine.deficit / food.methionine) * 100;
+                            const listItem = document.createElement('li');
+                            listItem.className = 'food-item';
+                            listItem.innerHTML = `<span class="food-name">${food.name}</span><span class="food-amount">${amount.toFixed(1)} ${food.unit}</span>`;
+                            DOM.methionineFoodList.appendChild(listItem);
+                        });
+                    }
+                }
+            },
+            updateMainCalculatorInputs: () => {
+                DOM.totalFood.value = state.totalFood.toFixed(0);
+                DOM.foodProteinRatio.value = state.foodProteinRatio.toFixed(3);
+            }
+        };
+
+        // 6. EVENT LISTENERS
+        const BindEvents = () => {
+            // 输入同步逻辑
+            const weightGroup = ['weight', 'weightKg', 'energyWeightKg', 'methionine-weight'];
+            const heightGroup = ['heightCm', 'energyHeightCm'];
+
+            const setupSync = (ids) => {
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(!el) return;
+                    el.addEventListener('input', (e) => {
+                        const val = e.target.value;
+                        ids.forEach(targetId => {
+                            if(targetId !== id) {
+                                const targetEl = document.getElementById(targetId);
+                                if(targetEl) targetEl.value = val;
+                            }
+                        });
+                    });
+                });
+            };
+
+            setupSync(weightGroup);
+            setupSync(heightGroup);
+
+            // 原有事件监听
+            DOM.calculateProteinBtn.addEventListener('click', () => {
+                state.weight = parseFloat(DOM.weight.value) || 0;
+                state.proteinStandard = parseFloat(DOM.proteinStandard.value) || 0.66;
+                state.totalFood = parseFloat(DOM.totalFood.value) || 0;
+                state.foodProteinRatio = parseFloat(DOM.foodProteinRatio.value) || 0;
+                Logic.calculateProteinNeeded();
+                Renderer.renderProteinResult();
+            });
+            DOM.applyEstimatesBtn.addEventListener('click', () => {
+                state.mealsPerDay = parseFloat(DOM.mealsPerDay.value) || 0;
+                state.mealSize = parseFloat(DOM.mealSize.value) || 0;
+                state.mainFood = DOM.mainFood.value;
+                state.sideDish = DOM.sideDish.value;
+                state.foodRatio = DOM.foodRatio.value;
+                Logic.calculateAverageProteinRatio();
+                Renderer.updateMainCalculatorInputs();
+                Logic.calculateTotalCalories();
+                Renderer.renderCalorieResult();
+            });
+            DOM.calculateBmiBtn.addEventListener('click', () => {
+                state.heightCm = parseFloat(DOM.heightCm.value) || 0;
+                state.weightKg = parseFloat(DOM.weightKg.value) || 0;
+                Logic.calculateBmi();
+                Renderer.renderBmiResult();
+            });
+            DOM.calculateEnergyBtn.addEventListener('click', () => {
+                state.gender = DOM.gender.value;
+                state.age = parseFloat(DOM.age.value) || 0;
+                state.energyHeightCm = parseFloat(DOM.energyHeightCm.value) || 0;
+                state.energyWeightKg = parseFloat(DOM.energyWeightKg.value) || 0;
+                state.activityLevel = parseFloat(DOM.activityLevel.value) || 0;
+                state.bodyCompositionOffset = parseFloat(DOM.bodyComposition.value) || 0;
+                Logic.calculateEnergy();
+                Renderer.renderEnergyResult();
+            });
+            DOM.calculateB12Btn.addEventListener('click', () => {
+                state.b12Standard = parseFloat(DOM.b12Standard.value) || 2.4;
+                state.b12Intake = parseFloat(DOM.b12Intake.value) || 0;
+                Logic.calculateB12Needed();
+                Renderer.renderB12Result();
+            });
+            DOM.calculateReverseBtn.addEventListener('click', () => {
+                state.totalCalories = parseFloat(DOM.totalCalories.value) || 0;
+                state.reverseMealsPerDay = parseFloat(DOM.reverseMealsPerDay.value) || 0;
+                state.reverseMainFood = DOM.reverseMainFood.value;
+                state.reverseSideDish = DOM.reverseSideDish.value;
+                state.reverseFoodRatio = DOM.reverseFoodRatio.value;
+                Logic.calculateReverse();
+                Renderer.renderReverseResult();
+            });
+            DOM.calculateMethionineBtn.addEventListener('click', () => {
+                state.soyFlour = parseFloat(DOM.soyFlourInput.value) || 0;
+                state.methionineWeight = parseFloat(DOM.methionineWeightInput.value) || 0;
+                Logic.calculateMethionineComplement();
+                Renderer.renderMethionineResult();
+            });
+            
+            // 还原所有原始弹窗文本
+            DOM.floatingBtn.addEventListener('click', () => {
+                const modalTextContent = `xlm：
+
+抗抑郁焦虑，生物角度结论：大脑是地，肠道抗抑郁焦虑益生菌是肥，维bd锌镁Omega-3是工人，
+色氨酸是种子，黄豆（大豆异黄酮）是神农。
+
+其中以我的体验（基本排除了维生素矿物质、黑豆、米面主食）：
+【黄豆】最重要【不论男女】，并且大豆异黄酮在其他东西里基本不含。
+
+这里有一个我的经验公式给大家参考：
+【抗焦虑抑郁 每天应吃黄豆g数=体重斤x十六分之三】
+此时你可能会得到大体的数：比如20g黄豆，但这是一天的量，
+实际应该除以2，也就是10g每6小时服用一次。（一般一个时辰起效）
+
+实用性重要程度我个人排序：由上到下由高到低
+【黄豆】大豆异黄酮
+维生素B族
+抗抑郁焦虑益生菌
+色氨酸（黄豆黑豆都有很多，米面虽然只有前二者三分之一的含量，
+但吃的总量多，基本不用担心缺少色氨酸）
+其他种种
+
+从理论上：B族和Omega-3的抗抑郁焦虑证据更稳定，其次是色氨酸。而以上内容仅代表我个人意见。
+
+我曾经一年吃纯素（也不吃鸡蛋），看着配料表：甚至酱油的配料表我都看。
+当时平常一天两顿到两顿半，只吃土豆、米饭、酱油，有时候会少量加点配菜。
+
+三个月后我开始头疼，过一段时间不再头疼了，一年后我开始出现以下问题：
+1. 呼吸困难，具体来说，是吸气困难而不是吐气。甚至睡觉都要举着手睡，否则喘不上气。
+2. 左胸附近不适，用了各种艾灸方式，烫的皮肤都是疤痕，后背全是疤痕，并没有效果。
+
+两年后我出现以下问题：
+1.经常内心恐慌不安
+2.纠结细节难以自拔
+
+然后我在某一天，喝了一些蛋白质，因为我比较敏感，直接改善了一些喜欢纠结的问题，但是恐慌还有。
+又过了一年，恐慌严重了，经常晚上、甚至刚睡醒就难安，思维变得极端。
+
+有一天我的母亲让我喝牛奶，说对身体好，我感觉到了什么，
+便去网上搜索营养学相关知识。这才知道吃素最需要注意：
+1.蛋白质
+2.B12
+
+于是我买了一罐臭豆腐，因为我还想保持吃素的习惯，我吃了大概不到半罐，情况好转一些。
+加上当时几个月经常喝牛奶，已经基本好转了。
+
+在这个过程中，以及我小时候的经验，我总结了以下几点：（现代人不缺水和碳水）
+
+1. 首先最重要的就是黄豆，防止纠结、防止思维陷入沉密（过于细密）的状态。
+2. 然后就是B12、B9、B6等调节情绪的维生素。
+3. 益生菌，益生菌有专门调节情绪的菌类，需要单独购买，有些帮助，我有感受。
+
+4. 晒太阳帮助不大，我并非反对晒太阳，而是对情绪帮助不大，
+   我推测可能是应该从小时候注意维生素D，而非成人后注意。
+
+5. 其他科学理论建议（我暂时没有体验）：补充Omega-3、镁、钾、铁
+
+这并不是说吃肉：蛋白质就不缺，
+比如：一个人120斤，一天1个鸡蛋、300ml牛奶、一碟肉菜。够不够蛋白质？
+不够，你仅仅摄入了30g蛋白质，就算我按0.66克/公斤的平均需求量，而不是0.8的推荐量来算：
+你还差10g蛋白质，所以需要每日摄入蛋白质的计算，并做出调整，你才能改善自己。
+
+这里我建议：多喝豆粉、维生素B族不要有缺口。
+
+我崇敬的印光法师曾经说过：
+先后天衰弱，当以善于保养为事。若欲靠食物滋养，食素人宜多吃麦。
+食麦之力大于米力不止数倍。光吃了面食，则精神健壮，气力充足，音声高大。
+米则只可饱腹，无此效力。麦比参力尚高数倍。
+有钱人服参，乃是钱无处用，故作此消耗耳。非真能补人也。
+又大磨麻油，亦补人。小磨麻油，以炒焦枯了，力道退半。人但知香，实则是焦味耳
+。莲子，桂圆，红枣，芡实，薏米，皆可滋补。岂必须血肉，方能滋补乎。总之皆不如麦之力大。
+如不能吃，则兼带著吃。久则自知，亦自好吃矣。
+《文钞三编卷上·复蔡契诚居士书一》
+
+黄豆、豆油，补料最多，宜常服之。早间粥中，宜下磨破之黄豆。
+平常食油，专用豆油，较比猪油，补力更大。
+何苦用钱买祸（以食肉欠杀债，故云买祸）而求补益耶。
+吃荤之人，若肯吃素，定规会少病强健。
+《文钞续编卷上·复鲍衡士书》
+
+=======================================================================
+
+关于欧米伽3和欧米伽6：
+我们知道这二者是必须脂肪，意味着谁都不可缺少，人体不能自己合成。
+我们平常吃的种子油，基本都是欧米伽6，并且欧米伽3在一般饮食中不常见。
+所以一般营养学都主张：【6别吃多了，3别吃少了】。
+
+细胞除了传递信号还有运输营养，而二者决定了细胞的外壳性能。
+而信号既包括大脑下达的神经信号，也包括全身细胞之间的局部化学信号。
+【从功能上欧米伽6是车辆，欧米伽3是交警】。
+欧米伽6的过多，会产生炎症反应，所以需要欧米伽3来调节。
+车辆可以稍微多，但交警不能没有。一般欧米伽6与欧米伽3的比例最佳是1:1，实际不超过5:1就行。
+
+欧米伽3可以分为ALA、DHA、EPA三种，ALA如同面粉，DHA和EPA如同面包，是成品。
+也就是说当有足量的DHA和EPA，就不需要ALA了。
+就像亚麻籽所产生的ALA虽然可以在摄入后分化成DHA和EPA，但转化出来的量少。
+比如10g亚麻籽粉，粗看差不多能让人吸收男60、女120mg的EPA；男2.5、女25mg的DHA。
+所以要额外补充DHA和EPA，这二者最好是1:1，也是买补剂时必须要看的两点量值。
+欧米伽3补油，在制造过程会产生氧化劣化，所以要买就买高质量的（在没有对应食物的情况下）。
+
+正常人一天DHA和EPA加起来推荐250–500mg/天，
+【DHA主脑眼健康；EPA主血管清理与情绪调节。】所以有些血管病人，医生可能让他吃大量的EPA。
+
+=======================================================================
+
+关于膳食纤维：
+分为可溶，不可溶二者。
+不可溶如同砖头、可溶如同水泥。
+而肠道的益生菌只能吃水泥，不能吃砖头。
+肠道的垃圾需要砖头刮下来，填充排出。
+
+10克时参考：
+奇亚籽 可溶3.3g 不可溶0.3g
+亚麻籽 可溶1.0g 不可溶1.7g
+黄豆   可溶0.5g 不可溶0.5g
+燕麦   可溶0.7g 不可溶0.3g
+
+总结：
+奇亚籽：高纤维、水泥型。核心功能是凝胶、饱腹、滋养菌群。
+亚麻籽粉：中纤维、砖头型。核心功能是增粪便体积、强蠕动、物理清理。
+黄豆粉：低纤维、均衡型。核心功能是提供基础营养和温和的肠道支持。
+
+可见，奇亚籽是可溶王者、亚麻籽是不可溶王者
+
+所以我们为了肠道、排便健康，需要摄入膳食纤维，我个人体验吃亚麻籽会有明显排便改变。
+
+=======================================================================
+
+关于血管健康：
+
+【脑梗】主要是要【杀灭坏胆固醇，增加好胆固醇（高密度脂蛋白）】。
+
+低密度脂蛋白如同多余的载运胆固醇的卡车，运输的不好的胆固醇，
+所以多数语境中低密度脂蛋白和坏胆固醇二者几乎相等，也在以下语境中暂且对等看待。
+高低密度脂蛋白都有肝脏自己生成；胆固醇也是，所以胆固醇不需要额外摄取，否则容易超量。
+
+低密度脂蛋白由肝脏运输到血管各个角落，低密度多了，则多余卡车多了，容易乱撞；
+【主要怕量多、其次是氧化。】所以为了抗氧化，
+可以补足维生素C、E、各类植物素（胡萝卜素、番茄红素等）。
+而高密度胆固醇则是从血管中搜刮不需要的胆固醇和卡车建材垃圾归回到肝脏进行废弃处理。
+
+而杀灭低密度脂蛋白、增多高密度脂蛋白的方法就是常吃可溶性膳食纤维（如【喝奇亚籽】）。
+
+脑梗还有两个帮凶：甘油三酯，还有次之的同型半胱氨酸。
+
+【先说甘油三酯：】
+坏脂肪包括 饱和脂肪 和 反式脂肪；好脂肪主要是不饱和脂肪。
+
+坏脂肪（饱和、反式）→ 显著升高甘油三酯
+中脂肪（欧米伽-9， 适量的欧米伽-6）→ 稳定或轻微影响甘油三酯
+好脂肪（【欧米伽-3】）→ 显著降低甘油三酯
+
+饱和脂肪多见于肉油、黄油（全脂奶制品）；反式脂肪多见于人造油（油炸点心），
+【【他们二者是脑梗主要原因，造成低密度脂蛋白胆和甘油三酯双双升高的核心。】】
+所以这两种脂肪要少吃。
+
+【同型半胱氨酸：】
+
+不可过高，如同利刃，损伤血管。所以要依靠补充绿色蔬菜。
+实在不行，服用适量的【维生素B族】，也是可以降低同型半胱氨酸的。
+
+【如果在这个基础上，常测血压、不抽烟、少吃糖，则是更好】
+
+=======================================================================
+
+关于中药方子【七枝灵】
+
+本文为张至顺道长在2013年11月17日正安聚友会广州论坛
+《南山隐修人 张至顺道长论医道》视频的
+
+那么第一个绝方，就是七枝灵。一个是一枝花，一个是扭子七，一个是灵芝，就是这三个东西。
+你不管他什么病，你把它加到里头，绝对没错。
+
+那么就是一个扭子七，一个七叶一枝花，它这两个东西，长的形式和它的症状，和它的杆杆，
+我都拿着我道家的内容，我组织了这三个方子。
+
+那么这个扭子七是三个叶，三个叶归肝脏，肝是三个叶，它是从上往下长，从天往地下长。
+那个一枝花，它是一个杆杆，一个杆杆上面七个叶，七个叶分七派，在人身上就在肺脏。
+
+它那三个叶在肝脏，就是那么属于灵魂，它是这样子。
+那么扭子七它是上边大，一结这么长一个杆杆，一个豆豆，一个杆杆一个豆豆，
+它从上往下长，上面是个大的，下面越长越大，
+它能长一二十年、二三十年，三十年它就结三十个东西，往下长。
+
+那么一枝花是怎么长的？一枝花是从底下一点，它越长越大，越长越大，一个节节一个节节，
+今年开花结，它到明年的它那个杆杆，它就长出来了。
+它是一节一节地往上长，越长越大，越长越大。它叫十二重楼，这个药名就是叫重楼，
+它是十二重楼，实际上能长二十年、三十年，跟人脊骨是一样，一节一节往上长。
+
+我就是从这两个东西，配成了一个单方。因为我们从道学里头研究出来的，
+那么我另外加一个灵芝，就是大家在街上买的那个灵芝。
+那个灵芝，没有苗，没有籽，没有根，它是接天地的灵气，才长出了这个东西。
+因为它没根，它也没苗，也没籽儿。
+就因为这个灵芝，在人身上调整人身上的灵魂，这一点都不错。
+
+这是三个东西，你把它记住，一个灵芝，一个扭子七，一个一枝花。
+那个一枝花有个独杆杆，长上去开七个，它结个苞苞，就像心脏，
+它上面有七个叶，七个叶有七个须，上通七窍。
+
+【这个方子是我的一个绝方子，你不管在哪儿看什么病，你把它加到里头，百分之九十的有效。
+你单用也可以。】
+
+===
+
+主持人：师傅刚才讲，那个方子呢，有七个叶子，说明他是入肺经的，
+有三个叶子呢，说明他是入肝经的，
+他用这味药作为一个普世方，加在不同的药里面，可以提升药力，是不是？
+张道：（点了两下头）
+
+===
+
+跟那个纽子七，它是从上面（手从上往下比划），
+结个包包这么大（OK状），它长个杆杆（手往上指了一下）。
+它也，那个东西它是长，这么长一节一节的（用大拇指和食指比量出大概一个食指那么长），
+长一节一个包包（横着滑动一下手后，手OK状比量了一个大小），
+长一节（手突然往下滑动）一个包包（OK状放开）。
+他从上往下长（手从上往下比量），它从心脏往肾脏里长（手从上往下比量），它往下长。
+
+===
+
+白板后面写：
+
+【七枝灵：重楼1份，纽子七1份，灵芝0.1-0.2份。】
+
+
+=======================================================================
+
+另外，年轻人睡觉腿要蹬直，至少直一个（曲一个的情况下）。
+
+
+最后，希望这篇文章能够帮助到更多的人。
+`;
+                DOM.modalText.textContent = modalTextContent;
+                DOM.modal.style.display = "block";
+            });
+            DOM.closeBtn.onclick = function() {
+                DOM.modal.style.display = "none";
+            }
+            window.onclick = function(event) {
+                if (event.target == DOM.modal) {
+                    DOM.modal.style.display = "none";
+                }
+            }
+        };
+
+        const Init = () => {
+            BindEvents();
+        };
+
+        Init();
+    })();
+</script>
+
+</body>
+</html>
