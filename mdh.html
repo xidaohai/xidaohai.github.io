@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>西岛海 · 全景视觉瞄准校准理论</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --input-bg: #252525;
+            --text-main: #e0e0e0;
+            --text-sub: #a0a0a0;
+            
+            /* 核心色调 */
+            --primary: #00bcd4;   /* 标准/科技青 */
+            --accent: #bb86fc;    /* 理论/逻辑紫 */
+            --gold: #ffd700;      /* 经验/实战金 */
+            --warm: #ff7043;      /* 坐远/变小 */
+            --cool: #4caf50;      /* 坐近/变大 */
+            --error: #cf6679;     /* 错误/极端 */
+            
+            --radius: 12px;
+            --shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: var(--surface-color);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            /* 确保内容在移动端能排在悬浮窗的后面 */
+            z-index: 10;
+        }
+
+        /* 标题与排版 */
+        h1 { margin-top: 0; color: var(--primary); text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; letter-spacing: 1px; }
+        h2 { border-left: 4px solid var(--primary); padding-left: 15px; margin-top: 50px; color: #fff; font-size: 1.5em; }
+        h3 { color: var(--text-main); margin-bottom: 15px; font-weight: 600; }
+        p { color: var(--text-sub); margin-bottom: 15px; }
+        strong { color: var(--text-main); }
+
+        /* 核心理论框 */
+        .logic-box {
+            background: rgba(187, 134, 252, 0.08);
+            border: 1px solid rgba(187, 134, 252, 0.2);
+            padding: 25px;
+            border-radius: var(--radius);
+            margin-bottom: 40px;
+        }
+        .logic-list { list-style: none; padding: 0; }
+        .logic-list li { margin-bottom: 10px; padding-left: 20px; position: relative; }
+        .logic-list li::before { content: "•"; color: var(--accent); font-weight: bold; position: absolute; left: 0; }
+
+        /* 新增：经验公式框 (金色风格) */
+        .tip-box {
+            background: rgba(255, 215, 0, 0.05); /* 金色背景淡化 */
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            padding: 25px;
+            border-radius: var(--radius);
+            margin: 30px 0;
+        }
+        .tip-box h3 { color: var(--gold); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        .formula-card {
+            background: #121212;
+            border: 1px dashed var(--gold);
+            color: var(--gold);
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        /* 公式渲染优化，避免使用 LaTeX */
+        .formula-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--gold);
+            margin: 10px 0;
+            font-family: 'Times New Roman', serif; /* 更适合数学符号的字体 */
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .numerator {
+            display: block;
+            border-bottom: 1px solid currentColor;
+            padding-bottom: 1px;
+        }
+        .denominator {
+            display: block;
+            padding-top: 1px;
+        }
+
+        /* SVG 图示通用样式 */
+        .diagram-container {
+            width: 100%;
+            background: #181818;
+            border-radius: var(--radius);
+            padding: 20px 0;
+            border: 1px solid #333;
+            text-align: center;
+            margin: 30px 0;
+            overflow-x: auto;
+        }
+        svg { max-width: 100%; height: auto; }
+        text { font-family: sans-serif; }
+
+        /* 场景对比卡片 */
+        .scenario-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+            justify-content: space-between;
+        }
+        .scenario-card {
+            background: #252525;
+            padding: 20px;
+            border-radius: var(--radius);
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .scenario-section { flex-direction: column; }
+            .scenario-card { min-width: 100%; }
+        }
+
+        /* 计算器区域 */
+        .calculator-section {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: var(--radius);
+            border: 1px solid #444;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        @media (max-width: 768px) { 
+            .calculator-section { grid-template-columns: 1fr; gap: 20px; } 
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; color: var(--text-sub); margin-bottom: 8px; font-size: 0.9em; font-weight: 500; }
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background: #181818;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 1.2em;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .result-display {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #1e1e1e;
+            border: 2px dashed #444;
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+        .result-value { font-size: 3em; font-weight: bold; color: var(--primary); margin: 10px 0; }
+        .result-desc { font-size: 0.9em; line-height: 1.5; }
+
+        /* 步骤列表 */
+        .step-list { counter-reset: step; list-style: none; padding: 0; }
+        .step-list li { position: relative; padding-left: 60px; margin-bottom: 25px; }
+        .step-list li::before {
+            counter-increment: step;
+            content: "0" counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 188, 212, 0.1);
+            color: var(--primary);
+            text-align: center;
+            line-height: 40px;
+            border-radius: 50%;
+            font-weight: bold;
+            border: 1px solid rgba(0, 188, 212, 0.3);
+        }
+
+        /* 辅助类 */
+        .highlight { color: var(--primary); font-weight: bold; }
+        .text-warm { color: var(--warm); }
+        .text-cool { color: var(--cool); }
+        .text-error { color: var(--error); }
+
+        /* 作者信息 */
+        .authors {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(0, 188, 212, 0.3);
+            z-index: 100;
+            font-size: 0.9em;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .authors a {
+            color: var(--primary);
+            text-decoration: none;
+            margin: 0 8px;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+        
+        .authors a:hover { color: var(--accent); text-decoration: underline; }
+        .authors span { color: var(--text-sub); margin-right: 5px; }
+        
+        @media (max-width: 768px) {
+            .authors { position: static; margin-top: 30px; text-align: center; background: rgba(30, 30, 30, 0.7); backdrop-filter: none; }
+            body { padding-bottom: 20px; }
+        }
+
+        /* 左侧悬浮窗样式 */
+        .floating-tip {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(0, 188, 212, 0.15); /* 使用 primary 色调的半透明背景 */
+            border: 1px solid var(--primary);
+            padding: 15px;
+            border-radius: var(--radius);
+            max-width: 280px;
+            box-shadow: var(--shadow);
+            z-index: 101;
+        }
+        .floating-tip h3 {
+            color: var(--primary); 
+            margin-top: 0; 
+            border-bottom: 1px solid rgba(0, 188, 212, 0.3); 
+            padding-bottom: 8px;
+        }
+        .floating-tip p, .floating-tip li {
+            color: var(--text-main); 
+            font-size: 0.9em;
+        }
+        .floating-tip ol {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+        .floating-tip strong {
+            color: var(--gold);
+        }
+
+        /* 新增：右侧计算器模块 (金色系) */
+        .floating-calculator-right {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(255, 215, 0, 0.05); /* 金色背景淡化 */
+            border: 1px solid var(--gold);
+            padding: 15px;
+            border-radius: var(--radius);
+            max-width: 260px;
+            box-shadow: var(--shadow);
+            z-index: 101;
+            font-size: 0.9em;
+        }
+        .floating-calculator-right h3 {
+            color: var(--gold);
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .floating-calculator-right .input-group-small {
+            margin-bottom: 15px;
+        }
+        .floating-calculator-right label {
+            display: block;
+            color: var(--text-sub);
+            margin-bottom: 5px;
+            font-size: 0.85em;
+        }
+        .floating-calculator-right input {
+            width: 100%;
+            padding: 8px;
+            font-size: 1em;
+            background: #181818;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .floating-calculator-right input:focus {
+            border-color: var(--gold);
+        }
+        .calc-result-box {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px dashed var(--gold);
+        }
+        .process-text {
+            color: var(--text-sub);
+            font-size: 0.8em;
+            margin-top: 8px;
+            font-family: monospace;
+            line-height: 1.4;
+        }
+        
+        /* 移动端适配：悬浮窗变成普通块 */
+        @media (max-width: 1300px) {
+            .floating-tip, .floating-calculator-right {
+                position: static; 
+                margin: 20px auto; 
+                max-width: 90%; 
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .container {
+                order: 0; /* 保持内容在上 */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="floating-tip">
+    <h3>🎯 ADS 灵敏度校准提醒</h3>
+    <p>
+        如果我没有MDH，只有ADS（开镜灵敏度）怎么办？很简单：
+    </p>
+    <ol>
+        <li>得到实用值：先得到"实用值 A"（即拉枪cm x e）。</li>
+        <li>记录拉枪：然后移动鼠标，让准星恰好落在此实用值对应的目标上，记录当前鼠标移动了多少 cm。</li>
+        <li>调整 ADS：开镜后，反复调整 ADS，直到与刚刚鼠标所移动的距离相同、准星的落点相同即可。</li>
+    </ol>
+</div>
+
+<div class="floating-calculator-right">
+    <h3>🔭 西岛海【极限、快适应值】算法</h3>
+    <p style="font-size: 0.9em; color: var(--gold); margin-top:-5px; text-align: center;">
+        <strong>公式：倍率 R(X) = 111 / (X + 111)</strong>
+    </p>
+    
+    <div class="input-group-small">
+        <label>FOV 变化值 (X，填入减少的 FOV，如 -20)</label>
+        <input type="number" id="fovDiff" value="-60" placeholder="-20">
+    </div>
+    
+    <div class="input-group-small">
+        <label>腰射 CM/360° (基础灵敏度)</label>
+        <input type="number" id="cm360" value="60" placeholder="30">
+    </div>
+
+    <div class="calc-result-box">
+        <div style="margin-bottom: 5px;">换算后的 CM/360°:</div>
+        <div style="font-size: 1.5em; font-weight: bold; color: var(--gold);">
+            <span id="finalResult">105.00</span> <span style="font-size:0.5em;">cm</span>
+        </div>
+<div class="process-text" id="calcProcess">
+    ① FOV 变化值 X = -60<br>
+    ② 倍率 R(X) = 111 / (-60 + 111)<br>
+    &nbsp;&nbsp;= 111 / 51 = <strong>2.1765</strong><br>
+    ③ 换算后的 CM/360° = 60 × 2.1765 = <strong>130.59 cm</strong>
+</div>
+    </div>
+</div>
+
+<div class="container">
+    <h1>📐 视觉瞄准校准理论</h1>
+    
+    <div class="logic-box">
+        <h3 style="color: var(--accent); margin-top:0;">🧠 核心原理：视觉恒定性</h3>
+        <p>为什么我们不应该用"屏幕上的物理距离"来衡量灵敏度？</p>
+        <ul class="logic-list">
+            <li><strong>本质上：</strong> MDH保证的是，【手动多少长度 【绑定】 眼看多少长度】。</li>
+            <li><strong>物理错觉：</strong> 同样的 10cm 物理移动，在 IMAX 巨幕上显得微不足道，在手机屏幕上却巨大无比。</li>
+            <li><strong>视网膜速度：</strong> 肌肉记忆（跟枪/微调）本质上是对<strong>"物体在视网膜上扫过的角度"</strong>的反应。</li>
+            <li><strong>尺子作为绝对锚点：</strong> 通过"固定手臂距离拿尺子"，我们创造了一个<strong>永远不变的参照系</strong>。不管屏幕怎么变，只要准星在尺子上跑过的刻度不变，你的手感就永远一致。</li>
+        </ul>
+    </div>
+
+    <h2>1. 几何原理可视化</h2>
+    <p>下图展示了当<strong>视觉投射（尺子刻度）</strong>保持不变时，屏幕距离/大小的变化如何影响实际覆盖比例 (MDH)。</p>
+        <div class="diagram-container">
+        <svg width="800" height="280" viewBox="0 0 800 280">
+            <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#666" />
+                </marker>
+            </defs>
+
+            <circle cx="50" cy="140" r="8" fill="#fff" stroke="#bb86fc" stroke-width="2"/>
+            <text x="30" y="170" fill="#fff" font-size="12">眼睛 (Eye)</text>
+
+            <line x1="200" y1="40" x2="200" y2="240" stroke="#bb86fc" stroke-width="1" stroke-dasharray="4,4" />
+            <rect x="198" y="90" width="4" height="100" fill="#00bcd4" opacity="0.8" />
+            <text x="185" y="30" fill="#bb86fc" font-size="12">📏 尺子截面 (固定臂长)</text>
+            <text x="210" y="145" fill="#00bcd4" font-size="12" font-weight="bold">基准 (10cm)</text>
+
+            <line x1="50" y1="140" x2="750" y2="28" stroke="#333" stroke-width="1" />
+            <line x1="50" y1="140" x2="750" y2="252" stroke="#333" stroke-width="1" />
+
+            <line x1="400" y1="60" x2="400" y2="220" stroke="#4caf50" stroke-width="3" />
+            <text x="380" y="50" fill="#4caf50" font-size="12">📺 A: 近/大屏</text>
+            <line x1="400" y1="112" x2="400" y2="168" stroke="#fff" stroke-width="2" />
+            <text x="410" y="145" fill="#888" font-size="10">占比小 (MDH↓)</text>
+
+            <line x1="650" y1="10" x2="650" y2="270" stroke="#ff7043" stroke-width="3" />
+            <text x="630" y="270" fill="#ff7043" font-size="12">📱 B: 远/小屏</text>
+            <line x1="650" y1="45" x2="650" y2="235" stroke="#fff" stroke-width="2" />
+            <text x="660" y="145" fill="#888" font-size="10">占比大 (MDH↑)</text>
+
+            <path d="M50 140 L200 90 L650 18" fill="none" stroke="#00bcd4" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="2"/>
+            <path d="M50 140 L200 190 L650 262" fill="none" stroke="#00bcd4" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="2"/>
+        </svg>
+    </div>
+
+    <div class="scenario-section">
+        <div class="scenario-card">
+            <h3 class="text-warm">🔴 场景 A: 坐得远 / 屏幕小</h3>
+            <svg width="250" height="120" viewBox="0 0 250 120">
+                <rect x="50" y="20" width="150" height="80" fill="none" stroke="#666" stroke-dasharray="4"/>
+                <rect x="50" y="50" width="150" height="20" fill="#ff7043" opacity="0.5"/>
+                <text x="125" y="110" text-anchor="middle" fill="#888" font-size="10">基准移动占满了屏幕</text>
+            </svg>
+            <p style="font-size:0.9em;">
+                屏幕在视野里变小了。<br>
+                <strong>MDH 需变大</strong> (例如 >80%)<br>
+                <small>灵敏度系数变高以补偿视觉慢速</small>
+            </p>
+        </div>
+
+        <div class="scenario-card">
+            <h3 class="text-cool">🟢 场景 B: 坐得近 / 屏幕大</h3>
+            <svg width="250" height="120" viewBox="0 0 250 120">
+                 <rect x="10" y="10" width="230" height="100" fill="none" stroke="#666" stroke-dasharray="4"/>
+                 <rect x="90" y="50" width="70" height="20" fill="#4caf50" opacity="0.5"/>
+                 <text x="125" y="110" text-anchor="middle" fill="#888" font-size="10">基准移动只占中心一小块</text>
+            </svg>
+            <p style="font-size:0.9em;">
+                屏幕在视野里变大了。<br>
+                <strong>MDH 需变小</strong> (例如 <40%)<br>
+                <small>灵敏度系数变低以防止视觉晕眩</small>
+            </p>
+        </div>
+    </div>
+
+    <h2>2. 操作指南 (The Ruler Method)</h2>
+    <ul class="step-list">
+        <li>
+            <strong>建立黄金基准 (Golden Standard)</strong><br>
+            在家里最舒服的状态下，做一次你最习惯的"拉枪/甩枪"动作（例如鼠标移动 10cm）。<br>
+            <span class="highlight">保持手臂伸直，拿尺子量出这次甩枪在视野里的长度。</span><br>
+            记下这个数，假设是 <strong>10cm</strong>。这代表了你肌肉记忆里的"标准视角"。
+        </li>
+        <li>
+            <strong>测量新环境</strong><br>
+            当你换了网吧，或者换了坐姿。伸直手臂，拿尺子量一下<strong>当前屏幕的半宽</strong>（从中心到边缘）。<br>
+            <em>提示：如果屏幕变小/坐远了，读数会变小（如 11cm）；如果屏幕变大/坐近了，读数会变大（如 25cm）。</em>
+        </li>
+        <li>
+            <strong>填入计算</strong><br>
+            将这两个数值填入下方计算器，得到你需要设置的 MDH 百分比。
+        </li>
+    </ul>
+
+    <div class="tip-box">
+        <h3>西岛海经验公式 (实战)</h3>
+        <div class="formula-card">
+           【 核心公式：实用值 = 常用最远拉枪长度 x e-1~e+1之间 】（e≈2.72）
+        </div>
+        <p>主张实际用尺子量，而不是靠转换网站。<strong>【西岛海短TTK游戏开镜常用 实用值16.5cm、MDH60%左右】</strong>：</p>
+        <ul class="logic-list">
+            <li><strong>① 端尺取值：</strong>拿尺子伸直手臂，想得一个你"常用最远"拉枪 cm 数。</li>
+            <li><strong>② 乘以e：</strong>将这个拉枪数值 <strong>x e</strong>，得到"实用值 A"。</li>
+            <li><strong>③ 除以半宽：</strong>用 <strong>A</strong> 除以 <strong>屏幕一侧长度（端尺测量值）</strong>。</li>
+        </ul>
+        <div class="formula-card">
+            【 常用公式：MDH% = ( 常用最远拉枪长度 x e ) / 屏幕半宽长度 】
+        </div>
+        <ul class="logic-list">
+            <li><strong>【常用最远拉枪】概念：</strong>这个长度介于，【常用的甩枪距离】（最常见、也比较短），与，【不太常用的最远甩枪距离】（个别时候能用到），之间，【但属于"常用"的甩枪长度范围内】。</li>
+            <li><strong>【常用最远拉枪】参考：</strong>【西岛海短TTK开镜常用最远拉枪：5.5cm】。</li>
+        </ul>
+    </div>
+
+    <h2>3. 视觉一致性计算器</h2>
+    <div class="calculator-section">
+        <div class="inputs">
+            <div class="input-group">
+                <label>📏 你的基准甩枪读数 / 或 实用值A (Target Visual cm)</label>
+                <input type="number" id="baseVal" value="13" placeholder="例如: 10">
+                <small style="color:#666;">你永远不变的手感参照 (MDH 分子)。</small>
+            </div>
+            <div class="input-group">
+                <label>📺 当前屏幕半宽读数 (Screen Radius cm)</label>
+                <input type="number" id="screenVal" value="27.2" placeholder="例如: 20">
+                <small style="color:#666;">伸直手臂测量当前屏幕中心到边缘的长度。</small>
+            </div>
+        </div>
+
+        <div class="result-display">
+            <div style="color:#888; text-transform:uppercase; letter-spacing:1px; font-size:0.8em;">应填入的 MDH 数值</div>
+            <div class="result-value" id="mdhResult">47.79%</div>
+            <div class="result-desc" id="statusMessage">
+                <span style="color:#00bcd4;">状态：标准视距</span><br>
+                屏幕处于常规视觉范围内，手感最自然。
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="authors">
+    <span>作者:</span>
+    <a href="https://space.bilibili.com/1534330" target="_blank">西岛海</a>
+    <span>顾问:</span>
+    <a href="https://space.bilibili.com/10778584" target="_blank">墨澜城</a>
+</div>
+
+
+<script>
+    const baseInput = document.getElementById('baseVal');
+    const screenInput = document.getElementById('screenVal');
+    const resDisplay = document.getElementById('mdhResult');
+    const statusDisplay = document.getElementById('statusMessage');
+
+    // 主 MDH 计算逻辑
+    function calculateMDH() {
+        const target = parseFloat(baseInput.value);
+        const screenW = parseFloat(screenInput.value);
+
+        if (isNaN(target) || isNaN(screenW) || screenW === 0) {
+            resDisplay.innerText = "--%";
+            statusDisplay.innerHTML = "请输入有效数值";
+            resDisplay.style.color = "#777";
+            return;
+        }
+
+        // 计算 MDH
+        const mdh = (target / screenW) * 100;
+        resDisplay.innerText = mdh.toFixed(2) + "%";
+
+        // 逻辑判断与反馈
+        if (screenW < target) {
+            resDisplay.style.color = "#cf6679"; // Error Red
+            statusDisplay.innerHTML = `
+                <span class="text-error">⚠️ 极端视距警告</span><br>
+                屏幕在视野中太小了！你的标准甩枪会直接甩出屏幕外。<br>
+                (MDH > 100%)
+            `;
+        } else if (mdh > 75) {
+            resDisplay.style.color = "#ff7043"; // Warm Orange
+            statusDisplay.innerHTML = `
+                <span class="text-warm">状态：坐得远 或 屏幕小</span><br>
+                你的甩枪动作占了屏幕很大比例。<br>
+                MDH 变大 (灵敏度系数变高) 以补偿视觉慢速。
+            `;
+        } else if (mdh < 45) {
+            resDisplay.style.color = "#4caf50"; // Cool Green
+            statusDisplay.innerHTML = `
+                <span class="text-cool">状态：坐得近 或 屏幕大</span><br>
+                你的甩枪动作只占屏幕一小部分。<br>
+                MDH 变小 (灵敏度系数变低) 以防止视觉眩晕。
+            `;
+        } else {
+            resDisplay.style.color = "#00bcd4"; // Primary Cyan
+            statusDisplay.innerHTML = `
+                <span style="color:#00bcd4;">状态：标准视距</span><br>
+                屏幕处于常规视觉范围内，手感最自然。
+            `;
+        }
+    }
+
+    baseInput.addEventListener('input', calculateMDH);
+    screenInput.addEventListener('input', calculateMDH);
+
+    // ==========================================
+    // FOV 倍率计算逻辑 (右侧悬浮窗)
+    // 公式：倍率 = 111 / (X + 111)，X 为 FOV 变化值
+    // ==========================================
+    const fovDiffInput = document.getElementById('fovDiff');
+    const cm360Input = document.getElementById('cm360');
+    const finalResultDisplay = document.getElementById('finalResult');
+    const calcProcessDisplay = document.getElementById('calcProcess');
+
+    function calcFovRate() {
+        // 直接使用用户输入的 FOV 变化值 X
+        const X = parseFloat(fovDiffInput.value); 
+        const cm = parseFloat(cm360Input.value);
+
+        if (isNaN(X) || isNaN(cm)) {
+            finalResultDisplay.innerText = "--";
+            calcProcessDisplay.innerHTML = "请输入有效数字";
+            return;
+        }
+
+        // 验证分母
+        const rateDenominator = X + 111;
+        if (rateDenominator <= 0) {
+             finalResultDisplay.innerText = "错误";
+             calcProcessDisplay.innerHTML = `分母小于或等于零 (FOV 变化值 X 必须大于 -140)`;
+             return;
+        }
+
+        // 公式：倍率 = 111 / (X + 111)
+        const rate = 111 / rateDenominator;
+        
+        // 结果 = 腰射 CM/360° * 倍率
+        const result = cm * rate;
+
+        finalResultDisplay.innerText = result.toFixed(2);
+        
+        // 显示计算过程
+        calcProcessDisplay.innerHTML = `
+            ① FOV 变化值 X = ${X}<br>
+            ② 倍率 R(X) = 111 / (${X} + 111)<br>
+            &nbsp;&nbsp;= 111 / ${rateDenominator.toFixed(0)} = <strong>${rate.toFixed(4)}</strong><br>
+            ③ 换算后的 CM/360° = ${cm} × ${rate.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong>
+        `;
+    }
+
+    fovDiffInput.addEventListener('input', calcFovRate);
+    cm360Input.addEventListener('input', calcFovRate);
+
+    // 初始运行
+    calculateMDH();
+    calcFovRate();
+</script>
+
+</body>
+</html>
