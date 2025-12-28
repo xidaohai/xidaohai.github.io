@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Pro Mouse Lab - 轨迹高亮版</title>
+    <style>
+        :root {
+            --bg: #08080c; --card: #121218; 
+            --accent-deg: #00e5ff; 
+            --accent-avg: #ffaa00; 
+            --text: #e0e0e6; --dim: #5c5c66; --border: #1f1f26;
+            --line-color: #00ff88;
+            --btn-hold: #2979ff;
+            --btn-toggle: #9d00ff;
+            --btn-stop: #ff0055;
+        }
+        body {
+            font-family: 'Inter', system-ui; background: var(--bg); color: var(--text);
+            margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- 全屏背景参考线 --- */
+        .guide-lines-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: space-evenly;
+            pointer-events: none; z-index: 0; padding: 20px 0; box-sizing: border-box;
+        }
+        .guide-line { width: 100%; height: 1px; background: var(--line-color); }
+        .guide-line:nth-child(even) { opacity: 0.25; height: 2px; box-shadow: 0 0 5px var(--line-color); }
+        .guide-line:nth-child(odd) { opacity: 0.05; }
+
+        /* --- 主容器 --- */
+        .main-wrapper { 
+            width: 100%; max-width: 900px; height: 95vh;
+            display: flex; flex-direction: column; gap: 15px; padding: 20px; 
+            z-index: 10; pointer-events: none; 
+            box-sizing: border-box;
+        }
+        
+        .header-bar, .dashboard-grid, .trace-card { pointer-events: auto; }
+
+        /* --- 头部 --- */
+        .header-bar { display: flex; gap: 15px; min-height: 60px; flex-shrink: 0; }
+        .main-btn {
+            flex: 1; border-radius: 12px; border: none; font-weight: 800;
+            color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 15px; text-transform: uppercase; letter-spacing: 1px;
+            transition: transform 0.1s, filter 0.1s;
+        }
+        .main-btn:active { transform: scale(0.96); filter: brightness(1.1); }
+        #btnHold { background: linear-gradient(135deg, var(--accent-deg), var(--btn-hold)); }
+        #btnToggle { background: linear-gradient(135deg, #b042ff, var(--btn-toggle)); }
+        #btnToggle.running { 
+            background: linear-gradient(135deg, #ff4444, var(--btn-stop)); 
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+        #btnReset { background: var(--card); border: 1px solid var(--border); color: var(--text); flex: 0.4; }
+
+        /* --- 专用轨迹白板 (置顶) --- */
+        .trace-card {
+            flex: 1; 
+            background: #000; 
+            border: 1px solid var(--border); border-radius: 20px;
+            display: flex; flex-direction: column; overflow: hidden; position: relative;
+            cursor: crosshair;
+            min-height: 200px; 
+        }
+        .trace-header {
+            position: absolute; top: 15px; left: 20px;
+            font-size: 12px; color: var(--dim); font-weight: 700; letter-spacing: 1.5px;
+            z-index: 5; pointer-events: none;
+        }
+        canvas#traceCanvas { width: 100%; height: 100%; display: block; }
+
+        /* --- 仪表盘 (下方) --- */
+        .dashboard-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; 
+            height: 220px; 
+            flex-shrink: 0;
+        }
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+            padding: 20px; display: flex; flex-direction: column; 
+            position: relative; overflow: hidden;
+        }
+        .label { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; z-index: 2; margin-bottom: 5px; }
+        
+        .visual-area { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        .crosshair-h { position: absolute; width: 100%; height: 1px; background: #252530; z-index: 0; }
+        .crosshair-v { position: absolute; height: 100%; width: 1px; background: #252530; z-index: 0; }
+        
+        .pointer-line {
+            position: absolute; width: 1200px; height: 4px; background: var(--accent-deg);
+            transform-origin: center center; top: 50%; left: 50%;
+            margin-top: -2px; margin-left: -600px;
+            box-shadow: 0 0 15px rgba(0,229,255, 0.4); z-index: 1;
+        }
+        .ptr-avg { background: var(--accent-avg); box-shadow: 0 0 15px rgba(255,170,0, 0.4); }
+        .value-text { text-align: center; font-size: 36px; font-weight: 800; margin-top: 5px; font-variant-numeric: tabular-nums; z-index: 2; }
+
+        .author-link {
+            position: fixed; bottom: 10px; right: 20px; color: var(--dim);
+            font-size: 10px; text-decoration: none; opacity: 0.5; z-index: 20; pointer-events: auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="guide-lines-container">
+    <div class="guide-line"></div><div class="guide-line"></div>
+    <div class="guide-line"></div><div class="guide-line"></div>
+    <div class="guide-line"></div><div class="guide-line"></div>
+    <div class="guide-line"></div><div class="guide-line"></div>
+    <div class="guide-line"></div><div class="guide-line"></div>
+</div>
+
+<div class="main-wrapper">
+    <div class="header-bar">
+        <button class="main-btn" id="btnHold">按住测试 (HOLD)</button>
+        <button class="main-btn" id="btnToggle">点击开始 (TOGGLE)</button>
+        <button class="main-btn" id="btnReset" onclick="resetAll()">重置</button>
+    </div>
+
+    <!-- 1. 轨迹板 (置顶) -->
+    <div class="trace-card" id="traceContainer">
+        <div class="trace-header">轨迹记录板 (TRACE AREA) - 全局感应</div>
+        <canvas id="traceCanvas"></canvas>
+    </div>
+
+    <!-- 2. 仪表盘 (下方) -->
+    <div class="dashboard-grid">
+        <div class="card">
+            <div class="label">实时方向 (LIVE)</div>
+            <div class="visual-area">
+                <div class="crosshair-h"></div><div class="crosshair-v"></div>
+                <div id="ptrLive" class="pointer-line"></div>
+            </div>
+            <div class="value-text" id="txtLive" style="color:var(--accent-deg)">0.0°</div>
+        </div>
+
+        <div class="card">
+            <div class="label">平均方向 (AVG)</div>
+            <div class="visual-area">
+                <div class="crosshair-h"></div><div class="crosshair-v"></div>
+                <div id="ptrAvg" class="pointer-line ptr-avg"></div>
+            </div>
+            <div class="value-text" id="txtAvg" style="color:var(--accent-avg)">0.0°</div>
+        </div>
+    </div>
+</div>
+
+<a href="https://space.bilibili.com/1534330" target="_blank" class="author-link">DESIGNED BY XiDaoHai</a>
+
+<script>
+    // --- 全局状态 ---
+    let trackingMode = 'idle'; 
+    let prevX = null, prevY = null; 
+    
+    // 算法参数
+    let liveMomentumX = 0, liveMomentumY = 0;
+    const DECAY = 0.98; 
+    let sumSin2 = 0, sumCos2 = 0; 
+    let eventCount = 0;
+
+    const btnHold = document.getElementById('btnHold');
+    const btnToggle = document.getElementById('btnToggle');
+    const ptrLive = document.getElementById('ptrLive');
+    const ptrAvg = document.getElementById('ptrAvg');
+    
+    const traceContainer = document.getElementById('traceContainer');
+    const canvas = document.getElementById('traceCanvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    let drawQueue = []; 
+
+    function resizeCanvas() {
+        const rect = traceContainer.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.fillStyle = '#000000'; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    setTimeout(resizeCanvas, 100);
+
+    function startTracking(mode) {
+        if (trackingMode !== 'idle') return;
+        trackingMode = mode;
+        
+        prevX = null; prevY = null;
+        liveMomentumX = 0; liveMomentumY = 0;
+        sumSin2 = 0; sumCos2 = 0; eventCount = 0;
+        updateVisuals(0, 0);
+
+        if (mode === 'toggle') {
+            btnToggle.textContent = "运行中... (点击停止)";
+            btnToggle.classList.add('running');
+            btnHold.style.opacity = '0.5'; btnHold.style.pointerEvents = 'none';
+        } else if (mode === 'hold') {
+            btnHold.textContent = "正在检测...";
+            btnToggle.style.opacity = '0.5'; btnToggle.style.pointerEvents = 'none';
+        }
+    }
+
+    function stopTracking() {
+        if (trackingMode === 'idle') return;
+
+        if (trackingMode === 'toggle') {
+            btnToggle.textContent = "点击开始 (TOGGLE)";
+            btnToggle.classList.remove('running');
+            btnHold.style.opacity = '1'; btnHold.style.pointerEvents = 'auto';
+        } else if (trackingMode === 'hold') {
+            btnHold.textContent = "按住测试 (HOLD)";
+            btnToggle.style.opacity = '1'; btnToggle.style.pointerEvents = 'auto';
+        }
+        
+        trackingMode = 'idle';
+    }
+
+    window.resetAll = function() {
+        stopTracking();
+        updateVisuals(0, 0);
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    };
+
+    btnHold.addEventListener('pointerdown', (e) => {
+        if (trackingMode === 'idle') {
+            startTracking('hold');
+            btnHold.setPointerCapture(e.pointerId);
+        }
+    });
+    window.addEventListener('pointerup', () => {
+        if (trackingMode === 'hold') stopTracking();
+    });
+
+    btnToggle.addEventListener('click', () => {
+        if (trackingMode === 'idle') startTracking('toggle');
+        else if (trackingMode === 'toggle') stopTracking();
+    });
+
+    window.addEventListener('pointermove', (e) => {
+        if (trackingMode === 'idle') return;
+        
+        if (prevX === null || prevY === null) {
+            prevX = e.clientX;
+            prevY = e.clientY;
+            return;
+        }
+
+        const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+        const len = events.length;
+        
+        let currentDeg = null;
+        const rect = canvas.getBoundingClientRect();
+
+        for (let i = 0; i < len; i++) {
+            const ev = events[i];
+            const dx = ev.clientX - prevX;
+            const dy = ev.clientY - prevY;
+
+            if (dx !== 0 || dy !== 0) {
+                // 全局角度计算
+                liveMomentumX = liveMomentumX * DECAY + dx;
+                liveMomentumY = liveMomentumY * DECAY + dy;
+                
+                const rawRad = Math.atan2(dy, dx);
+                sumSin2 += Math.sin(rawRad * 2);
+                sumCos2 += Math.cos(rawRad * 2);
+                eventCount++;
+
+                // 记录绘图坐标
+                const startX = prevX - rect.left;
+                const startY = prevY - rect.top;
+                const endX = ev.clientX - rect.left;
+                const endY = ev.clientY - rect.top;
+                drawQueue.push({x1: startX, y1: startY, x2: endX, y2: endY});
+            }
+            prevX = ev.clientX;
+            prevY = ev.clientY;
+        }
+
+        if (liveMomentumX !== 0 || liveMomentumY !== 0) {
+            const momentumRad = Math.atan2(liveMomentumY, liveMomentumX);
+            currentDeg = momentumRad * (180 / Math.PI);
+        }
+
+        if (currentDeg !== null) {
+            ptrLive.style.transform = `rotate(${currentDeg}deg)`;
+            let slopeText = formatAngle(currentDeg);
+            document.getElementById('txtLive').textContent = slopeText.toFixed(1) + '°';
+        }
+
+        if (eventCount > 0) {
+            const avgDoubleRadian = Math.atan2(sumSin2, sumCos2);
+            let avgDeg = (avgDoubleRadian / 2) * (180 / Math.PI);
+            ptrAvg.style.transform = `rotate(${avgDeg}deg)`;
+            let avgText = formatAngle(avgDeg);
+            document.getElementById('txtAvg').textContent = avgText.toFixed(1) + '°';
+        }
+    });
+
+    function renderLoop() {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (drawQueue.length > 0) {
+            ctx.beginPath();
+            
+            // 调整：更亮的蓝色 #0099ff，配合极细线条在黑底上更清晰
+            ctx.strokeStyle = '#0099ff'; 
+            
+            ctx.lineWidth = 0.5; 
+            ctx.shadowBlur = 0;
+
+            for (let i = 0; i < drawQueue.length; i++) {
+                const seg = drawQueue[i];
+                ctx.moveTo(seg.x1, seg.y1);
+                ctx.lineTo(seg.x2, seg.y2);
+            }
+            ctx.stroke();
+            drawQueue = [];
+        }
+
+        requestAnimationFrame(renderLoop);
+    }
+    requestAnimationFrame(renderLoop);
+
+
+    function formatAngle(deg) {
+        if (deg > 90) return deg - 180;
+        if (deg < -90) return deg + 180;
+        return deg;
+    }
+
+    function updateVisuals(degLive, degAvg) {
+        ptrLive.style.transform = `rotate(${degLive}deg)`;
+        ptrAvg.style.transform = `rotate(${degAvg}deg)`;
+        document.getElementById('txtLive').textContent = degLive.toFixed(1) + '°';
+        document.getElementById('txtAvg').textContent = degAvg.toFixed(1) + '°';
+    }
+</script>
+</body>
+</html>
