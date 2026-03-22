@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>云水僧念佛摄心偈 - 手机精排版</title>
+    <style>
+        :root {
+            --bg-color: #010101;
+            --gold: #d4af37;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            color: var(--gold);
+            font-family: "PingFang SC", "Microsoft YaHei", serif;
+            overflow: hidden;
+            display: flex;
+            touch-action: manipulation;
+        }
+
+        /* 西方虚空背景 */
+        .sky {
+            position: absolute;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 35%, #1a1000 0%, #050505 50%, #000000 100%);
+            z-index: 0;
+        }
+        #sunset {
+            position: absolute;
+            top: 35%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw; height: 30vh;
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.05) 0%, transparent 70%);
+            filter: blur(40px);
+            z-index: 1;
+        }
+
+        /* 【左上角】法义说明：保持顶部避开一切 */
+        #source-box {
+            position: absolute;
+            top: 10px; left: 10px;
+            width: 70vw;
+            max-height: 3em; 
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.65rem;
+            line-height: 1.5;
+            color: rgba(212, 175, 55, 0.4);
+            z-index: 300; /* 展开时层级最高 */
+            overflow: hidden;
+            transition: all 0.4s ease;
+            text-align: justify;
+        }
+        #source-box.expanded {
+            max-height: 75vh;
+            overflow-y: auto;
+            color: rgba(212, 175, 55, 0.9);
+            border-color: var(--gold);
+        }
+        #source-box::before {
+            content: "【法义背景 · 点击展开/复制】";
+            display: block; color: var(--gold); font-weight: bold; font-size: 0.6rem;
+        }
+
+        /* 【右侧下部】完整偈颂：移至下方，不与左上角重叠 */
+        #poem-aside {
+            position: absolute;
+            right: 8px; 
+            bottom: 5vh; /* 移至底部区域 */
+            writing-mode: vertical-rl;
+            font-size: 0.82rem;
+            line-height: 2.1;
+            color: rgba(212, 175, 55, 0.22);
+            letter-spacing: 0.25em;
+            z-index: 10; /* 在莲华下方，允许重叠 */
+            height: auto;
+            pointer-events: none;
+        }
+
+        /* 左侧：当前念佛阶段 */
+        #side-phase {
+            position: absolute;
+            left: 10px; top: 60%;
+            transform: translateY(-50%);
+            writing-mode: vertical-rl;
+            z-index: 10;
+            pointer-events: none;
+        }
+        #phase-txt {
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 0.4em;
+            opacity: 0.5;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        /* 3D 舞台 */
+        #stage {
+            position: absolute;
+            width: 100%; height: 100%;
+            perspective: 1000px;
+            perspective-origin: 50% 35%;
+            z-index: 100; /* 莲华飞行层 */
+        }
+
+        /* 底部口部 */
+        #mouth-base {
+            position: absolute;
+            bottom: -5px; left: 50%;
+            transform: translateX(-50%);
+            width: 80vw; height: 60px;
+            background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.05) 0%, transparent 75%);
+            border-top: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 50% 50% 0 0;
+            z-index: 150;
+        }
+        .mist {
+            position: absolute;
+            bottom: 30px; left: 50%;
+            width: 80px; height: 80px;
+            background: radial-gradient(circle, rgba(255, 255, 245, 0.12) 0%, transparent 70%);
+            filter: blur(20px);
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 80;
+            animation: rise 5s ease-out forwards;
+        }
+        @keyframes rise {
+            0% { transform: translate3d(-50%, 0, 0) scale(0.6); opacity: 0; }
+            20% { opacity: 0.45; }
+            100% { transform: translate3d(-50%, -200px, 0) scale(3.5); opacity: 0; }
+        }
+
+        /* 3D 莲华容器与光效 */
+        .lotus-wrap {
+            position: absolute;
+            left: 50%; bottom: 60px;
+            transform-style: preserve-3d;
+            will-change: transform, opacity;
+            animation: flyToWest 10s ease-in-out forwards;
+        }
+        .lotus-halo {
+            position: absolute;
+            width: 180px; height: 180px;
+            background: radial-gradient(circle, currentColor 0%, transparent 70%);
+            opacity: 0.35;
+            transform: translate3d(-50%, -50%, -30px);
+            left: 50%; top: 50%;
+            filter: blur(15px);
+        }
+        .petal {
+            position: absolute;
+            bottom: 0; left: -25px;
+            width: 50px; height: 90px;
+            transform-origin: bottom center;
+            opacity: 0.85;
+            backface-visibility: hidden;
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, currentColor 75%, rgba(255,255,255,0.8) 100%);
+            clip-path: path("M25 90 C35 75 50 60 50 35 C50 15 25 0 25 0 C25 0 0 15 0 35 C0 60 15 75 25 90 Z");
+        }
+
+        @keyframes flyToWest {
+            0% { transform: translate3d(-50%, 0, 600px) rotateX(25deg); opacity: 0; }
+            15% { opacity: 1; transform: translate3d(-50%, -5vh, 350px) rotateX(35deg); }
+            100% { transform: translate3d(-50%, -40vh, -6000px) rotateX(85deg); opacity: 0; }
+        }
+
+        /* 底部佛号 */
+        #mantra {
+            position: absolute;
+            bottom: 8vh; left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.6rem;
+            font-weight: bold;
+            letter-spacing: 8px;
+            opacity: 0;
+            z-index: 200;
+            white-space: nowrap;
+            transition: opacity 0.8s;
+        }
+
+        .fade-io { animation: f-io 3.2s forwards; }
+        @keyframes f-io { 0%, 100% { opacity: 0; } 15%, 85% { opacity: 0.95; } }
+
+        #toast {
+            position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(212, 175, 55, 0.95); color: #000;
+            padding: 10px 25px; border-radius: 50px; font-weight: bold;
+            opacity: 0; transition: 0.3s; z-index: 1000; pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sky"></div>
+    <div id="sunset"></div>
+
+    <!-- 左上角法义：点击展开并复制 -->
+    <div id="source-box" onclick="toggleCopy()">
+        蕅益大师《阿弥陀经要解》有云：“若信愿坚固，临终十念一念，亦决得生。若无信愿，纵将名号持至风吹不入，雨打不湿，如银墙铁壁相似，亦无得生之理。”祖师如此极力道破，乃为一辈以持名压捺妄想，不知求生者，吐肝吐胆，剖心沥血之诚实语，修净业者，不可不知也。但吾人既知生信发愿，决定求生。奈妄想纷飞，口虽念佛，心全昏散，亦属往生之障。若如（森）之业障深重之最极钝根，遵照前人几许良法，均觉费力，仍难制心一处。兹录云水僧书壁“念佛摄心偈”，似发前人所未发。以之调摄身心，实较其他各法为有效。况念念存想莲华，即西方胜境而安心，自然有助净行，毫无流弊。与势至之都摄六根，净念相继，不谋而合。呈似印公老人，亦赞妙善。故敢钞附于此，俾如（森）驽钝之净业行人，依之修习。偈云：
+    </div>
+
+    <!-- 右下角偈颂：下移以避开左上角 -->
+    <div id="poem-aside">
+        若问念佛法　摄心自有方<br>
+        每念一声佛　口作莲华香<br>
+        因我清净心　所以有此香<br>
+        华从口中出　朵朵向西方<br>
+        一佛华一朵　有色复有光<br>
+        念到一声佛　青色放青光<br>
+        念到二声佛　黄色放黄光<br>
+        念到三声佛　赤色放赤光<br>
+        念到四声佛　白色放白光<br>
+        如是轮转想　念念不可忘<br>
+        不必记其数　但想色香光<br>
+        果能心不乱　决见大愿王
+    </div>
+
+    <div id="side-phase"><div id="phase-txt">摄心念佛</div></div>
+
+    <div id="stage"></div>
+    <div id="mouth-base"></div>
+    <div id="mantra">南无阿弥陀佛</div>
+    <div id="toast">完整法义已复制</div>
+
+    <script>
+        const stage = document.getElementById('stage');
+        const mantra = document.getElementById('mantra');
+        const phaseTxt = document.getElementById('phase-txt');
+        const sourceBox = document.getElementById('source-box');
+
+        const phases = [
+            { text: "青色放青光", color: "#1E90FF" },
+            { text: "黄色放黄光", color: "#ffee00" },
+            { text: "赤色放赤光", color: "#ff3300" },
+            { text: "白色放白光", color: "#ffffff" }
+        ];
+
+        let count = 0;
+
+        function toggleCopy() {
+            sourceBox.classList.toggle('expanded');
+            const poemText = document.getElementById('poem-aside').innerText.replace(/\n/g, " ");
+            const fullContent = sourceBox.innerText + "\n\n偈云：\n" + poemText;
+            navigator.clipboard.writeText(fullContent).then(() => {
+                const toast = document.getElementById('toast');
+                toast.style.opacity = '1';
+                setTimeout(() => toast.style.opacity = '0', 2000);
+            });
+        }
+
+        function run() {
+            const p = phases[count % 4];
+            phaseTxt.innerText = p.text;
+            phaseTxt.style.color = p.color;
+            mantra.style.color = p.color;
+            mantra.style.textShadow = `0 0 12px ${p.color}`;
+            mantra.classList.remove('fade-io');
+            void mantra.offsetWidth;
+            mantra.classList.add('fade-io');
+
+            const mist = document.createElement('div');
+            mist.className = 'mist';
+            document.body.appendChild(mist);
+            setTimeout(() => mist.remove(), 5000);
+
+            createLotus(p.color);
+            count++;
+        }
+
+        function createLotus(color) {
+            const wrap = document.createElement('div');
+            wrap.className = 'lotus-wrap';
+            wrap.style.color = color;
+
+            const halo = document.createElement('div');
+            halo.className = 'lotus-halo';
+            wrap.appendChild(halo);
+
+            const body = document.createElement('div');
+            body.style.transformStyle = 'preserve-3d';
+
+            // 瓣膜三层结构：6+6+4
+            const configs = [
+                { n: 6, ang: 70, z: -10, s: 1.0 },
+                { n: 6, ang: 45, z: 0, s: 0.8 },
+                { n: 4, ang: 20, z: 10, s: 0.6 }
+            ];
+
+            configs.forEach(c => {
+                for (let i = 0; i < c.n; i++) {
+                    const petal = document.createElement('div');
+                    petal.className = 'petal';
+                    const rotY = (360 / c.n) * i;
+                    petal.style.transform = `rotateY(${rotY}deg) rotateX(${c.ang}deg) translate3d(0, 0, ${c.z}px) scale(${c.s})`;
+                    body.appendChild(petal);
+                }
+            });
+
+            wrap.appendChild(body);
+            stage.appendChild(wrap);
+            setTimeout(() => wrap.remove(), 10200);
+        }
+
+        setInterval(run, 3800);
+        setTimeout(run, 1000);
+    </script>
+</body>
+</html>
