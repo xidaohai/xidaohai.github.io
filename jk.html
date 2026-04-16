@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XLM·健康数据计算器</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2c3e50;
+            --bg-grad: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        /* 全局盒模型修复 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg-grad);
+            color: #333;
+            margin: 0;
+            padding: 10px;
+            font-size: 13px;
+            overflow-x: hidden;
+        }
+
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 12px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 { font-size: 16px; color: var(--primary-dark); margin: 5px 0 10px; text-align: center; font-weight: 700; }
+        h2 { font-size: 14px; color: var(--primary); margin: 8px 0 5px; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+        h3 { font-size: 13px; color: #555; margin: 8px 0 5px; font-weight: 700; text-align: center; background: #f0f2f5; padding: 4px; border-radius: 4px;}
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .input-group label {
+            flex: 0 0 40%;
+            font-weight: 600;
+            color: #555;
+            font-size: 12px;
+        }
+        .input-group input, .input-group select {
+            flex: 0 0 58%;
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            height: 28px;
+            background-color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        button:hover { opacity: 0.9; }
+
+        .result {
+            margin-top: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            background: #e8f5e9;
+            color: #2e7d32;
+            font-size: 12px;
+            font-weight: 600;
+            display: none;
+            border-left: 3px solid #2e7d32;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 5px; }
+        th, td { border: 1px solid #ddd; padding: 4px; text-align: center; }
+        th { background-color: #f1f1f1; color: #333; }
+        
+        .bmi-table th { background-color: #2c3e50; color: #fff; }
+
+        .info-panel, .note {
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 999;
+            border: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .close-btn { position: absolute; right: 15px; top: 10px; font-size: 24px; cursor: pointer; color: #999; }
+        #modal-text { white-space: pre-wrap; font-size: 14px; line-height: 1.6; max-height: 70vh; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div id="grid-container">
+
+    <div class="card">
+        <h3>七大基本营养素</h3>
+        <table>
+            <thead><tr><th>存活阶段</th><th>营养素，存活重要性左右为高低</th></tr></thead>
+            <tbody>
+                <tr><td>短期存活【基本不缺】</td><td>水、碳水化合物</td></tr>
+                <tr><td>中期存活【有可能缺】</td><td>蛋白质</td></tr>
+                <tr><td>长期存活【很可能缺】</td><td>脂肪、矿物质、维生素、膳食纤维</td></tr>
+            </tbody>
+        </table>
+
+        <div class="info-panel">
+            <h3>蛋白质由氨基酸构成</h3>
+            <table>
+                <thead><tr><th>食物类型</th><th>缺乏的氨基酸</th><th>丰富的氨基酸</th><th>补充方案</th></tr></thead>
+                <tbody>
+                    <tr><td>黄豆</td><td>蛋氨酸、半胱氨酸</td><td>【赖氨酸】</td><td>大米、面食</td></tr>
+                    <tr><td>大米、面食</td><td>赖氨酸</td><td>蛋氨酸、半胱氨酸</td><td>黄豆</td></tr>
+                </tbody>
+            </table>
+            
+            <h3><strong>【吃素之人】容易缺少赖氨酸（黄豆黑豆最多）、B12、欧米伽3。<br>①必需氨基酸当中，最需要注意蛋氨酸(主食)、赖氨酸(豆制品)二者，容易有短板，其他不必注意。<br>②B12几乎只能靠vegan补剂补充，植物几乎不含（臭豆腐、牛奶含少量）。<br>③欧米伽3就算常吃核桃，也难充足，最好加上vegan藻油补剂。</strong></h3>
+            <p>【素食者】如何方便且完整的补充蛋白质？<br>省钱角度是熟的（网上卖的基本熟制）黑芝麻粉1:5黄豆粉（因为不能保证每天大米白面是足够的）。每日至少能喝体重斤数/10的总重量，那么会有基本保障。（小心锰超标，10mgUL每日，熟黑芝麻粉不建议每日超过10g）<br>总之，主食吃得少，再补点熟黑芝麻粉；吃得多，光喝熟黄豆粉就行了。</p>
+            <p>黄豆唯独蛋氨酸含量不高，这在吸收时会如木桶效应：<br>8种必须氨基酸当中的蛋氨酸缺乏，会使得整个合成过程被限制在蛋氨酸的水平上。</p>
+            <p>你吃进去的所有其他氨基酸，也会因为“积木”不全而无法被高效利用，最终被分解并作为能量消耗掉或排出体外。</p>
+            <p>蛋白质每日0.6 克/公斤（最低需求）或 0.66 克/公斤（平均需求EAR），指的是有完整的必须氨基酸情况下需要这些蛋白质<br>（补充时间不应该大于（一、二个时辰）现代二、四个小时。）</p>
+
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>身体状态评估 (BMI)</h3>
+        <div class="input-group">
+            <label for="heightCm">身高（厘米）</label>
+            <input type="number" id="heightCm" placeholder="168">
+        </div>
+        <div class="input-group">
+            <label for="weightKg">体重（斤）</label>
+            <input type="number" id="weightKg" placeholder="116">
+        </div>
+        <button id="calculateBmiBtn">计算BMI</button>
+        <div class="result" id="bmiResultDiv"></div>
+        
+        <div class="info-panel">
+            <h3>BMI标准表（中国）【个人建议不低于21.2】</h3>
+            <table class="bmi-table">
+                <thead><tr><th>BMI值</th><th>档位</th></tr></thead>
+                <tbody>
+                    <tr><td>小于 18.5</td><td>偏瘦</td></tr>
+                    <tr><td>18.5 - 23.9</td><td>正常</td></tr>
+                    <tr><td>24 - 27.9</td><td>超重</td></tr>
+                    <tr><td>大于等于 28</td><td>肥胖</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h1>每日能量需求 (Katch-McArdle)</h1>
+        <div class="input-group">
+            <label for="gender">性别</label>
+            <select id="gender"><option value="male" selected>男</option><option value="female">女</option></select>
+        </div>
+        <div class="input-group">
+            <label for="age">年龄（岁）</label>
+            <input type="number" id="age" value="25">
+        </div>
+        <div class="input-group">
+            <label for="energyHeightCm">身高（厘米）</label>
+            <input type="number" id="energyHeightCm">
+        </div>
+        <div class="input-group">
+            <label for="energyWeightKg">体重（斤）</label>
+            <input type="number" id="energyWeightKg">
+        </div>
+        <div class="input-group">
+            <label for="bodyComposition" style="color:#d35400;">肌肉/体脂状态</label>
+            <select id="bodyComposition">
+                <option value="0">标准/平均 (体脂:男~15%/女~23%)</option>
+                <option value="5" selected>肌肉少/体脂高 (体脂:男~20%/女~28%)</option>
+                <option value="10">瘦胖子 (体脂:男~25%/女~33%)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="activityLevel">运动频率</label>
+            <select id="activityLevel">
+                <option value="1.05">极低消耗 (卧床/康复期)</option>
+                <option value="1.15" selected>久坐不动 (办公室/居家)</option>
+                <option value="1.3">少量运动 (每周1-3天)</option>
+                <option value="1.5">中等强度 (每周3-5天)</option>
+            </select>
+        </div>
+        <button id="calculateEnergyBtn">计算基数</button>
+        <div class="result" id="energyResultDiv"></div>
+        
+        <div class="info-panel">
+            <p><strong>已启用 Katch-McArdle 公式：</strong></p>
+            <p>Owen公式仍基于总体重，而此公式只计算“去脂体重”（不计算脂肪消耗）。</p>
+            <p>如果您选择了“肌肉较少”选项，系统会假设您的体脂率较高，从而剔除更多无效体重，得出<strong>比Owen更低</strong>的、针对低代谢人群的真实基数。</p>
+            <p class="note" style="background:#fff; border:1px dashed #ccc; padding:5px;">
+                <strong>编者认为：</strong>得到两个能量结果后，应当根据自身情况乘以零点几、一点几这类系数，做出精确调整才是。
+                并且这个系数，和日常所吃的食疗（比如四神汤、复合维生素矿物质推荐值等）有密切关系，比如我个人可能需要x0.75左右才能得到正确千卡值，此时四神汤、保健品的剂量也随之x0.75。当然，以上只是我个人如此，具体请咨询医师。
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<button id="floating-btn" class="floating-btn">营养<br>抑郁</button>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <pre id="modal-text"></pre>
+    </div>
+</div>
+
+<script>
+(function() {
+    const DOM = {
+        heights: [document.getElementById('heightCm'), document.getElementById('energyHeightCm')],
+        weights: [document.getElementById('weightKg'), document.getElementById('energyWeightKg')],
+        bmiBtn: document.getElementById('calculateBmiBtn'),
+        bmiRes: document.getElementById('bmiResultDiv'),
+        energyBtn: document.getElementById('calculateEnergyBtn'),
+        energyRes: document.getElementById('energyResultDiv'),
+        floatBtn: document.getElementById('floating-btn'),
+        modal: document.getElementById('myModal'),
+        modalText: document.getElementById('modal-text'),
+        closeBtn: document.querySelector('.close-btn')
+    };
+
+    // 数据同步：身高/体重同步输入
+    const syncInputs = (els) => {
+        els.forEach(el => {
+            el.addEventListener('input', (e) => {
+                els.forEach(target => { if(target !== el) target.value = e.target.value; });
+            });
+        });
+    };
+    syncInputs(DOM.heights);
+    syncInputs(DOM.weights);
+
+    // BMI 计算逻辑
+    DOM.bmiBtn.onclick = () => {
+        const h = parseFloat(DOM.heights[0].value) / 100;
+        const wKg = parseFloat(DOM.weights[0].value) / 2;
+        if (!h || !wKg) return;
+        const bmi = wKg / (h * h);
+        let cat = bmi < 18.5 ? "偏瘦" : bmi < 24 ? "正常" : bmi < 28 ? "超重" : "肥胖";
+        DOM.bmiRes.innerHTML = `BMI: <strong>${bmi.toFixed(1)}</strong> (${cat})`;
+        DOM.bmiRes.style.display = 'block';
+    };
+
+    // 能量需求计算 (Katch-McArdle)
+    DOM.energyBtn.onclick = () => {
+        const hCm = parseFloat(DOM.heights[1].value);
+        const wKg = parseFloat(DOM.weights[1].value) / 2;
+        const age = parseFloat(document.getElementById('age').value);
+        const gender = document.getElementById('gender').value;
+        const offset = parseFloat(document.getElementById('bodyComposition').value);
+        const activity = parseFloat(document.getElementById('activityLevel').value);
+
+        if (!hCm || !wKg || !age) return;
+
+        // 估算体脂率并计算去脂体重
+        const bmi = wKg / ((hCm/100) * (hCm/100));
+        let bodyFat = (1.20 * bmi) + (0.23 * age) - (10.8 * (gender === 'male' ? 1 : 0)) - 5.4 + offset;
+        bodyFat = Math.max(5, Math.min(60, bodyFat));
+        const lbm = wKg * (1 - (bodyFat / 100));
+        
+        const bmr = 370 + (21.6 * lbm);
+        const tdee = bmr * activity;
+
+        DOM.energyRes.innerHTML = `基础代谢(BMR): <strong>${bmr.toFixed(0)}</strong><br>总消耗(TDEE): <strong>${tdee.toFixed(0)}</strong>`;
+        DOM.energyRes.style.display = 'block';
+    };
+
+    // 弹窗逻辑
+    DOM.floatBtn.onclick = () => {
+        DOM.modalText.textContent = `xlm：\n\n抗抑郁焦虑，生物角度结论：大脑是地，肠道抗抑郁焦虑益生菌是肥，
+维bd锌镁Omega-3是工人，色氨酸是种子，黄豆（大豆异黄酮）是神农。
+从理论上：B族（尤其是B6、B9、B12）和Omega-3（主要是EPA）的抗抑郁焦虑证据更稳定，其次是色氨酸。
+
+其中以我的体验（基本排除了维生素矿物质、黑豆、米面主食）：
+【黄豆】最重要【不论男女】，并且大豆异黄酮在其他东西里基本不含。
+
+这里有一个我的经验公式给大家参考：
+【抗焦虑抑郁 每天应吃黄豆g数=体重斤x十六分之三】
+此时你可能会得到大体的数：比如20g黄豆，但这是一天的量，
+实际应该除以2，也就是10g每6小时服用一次。（一般一个时辰起效）
+
+这里我建议：多喝豆粉、维生素B族不要有缺口、可以尝试益生菌。
+
+我崇敬的印光法师曾经说过：
+先后天衰弱，当以善于保养为事。若欲靠食物滋养，食素人宜多吃麦。
+食麦之力大于米力不止数倍。光吃了面食，则精神健壮，气力充足，音声高大。
+米则只可饱腹，无此效力。麦比参力尚高数倍。
+有钱人服参，乃是钱无处用，故作此消耗耳。非真能补人也。
+又大磨麻油，亦补人。小磨麻油，以炒焦枯了，力道退半。人但知香，实则是焦味耳
+。莲子，桂圆，红枣，芡实，薏米，皆可滋补。岂必须血肉，方能滋补乎。总之皆不如麦之力大。
+如不能吃，则兼带著吃。久则自知，亦自好吃矣。
+《文钞三编卷上·复蔡契诚居士书一》
+
+黄豆、豆油，补料最多，宜常服之。早间粥中，宜下磨破之黄豆。
+平常食油，专用豆油，较比猪油，补力更大。
+何苦用钱买祸（以食肉欠杀债，故云买祸）而求补益耶。
+吃荤之人，若肯吃素，定规会少病强健。
+《文钞续编卷上·复鲍衡士书》
+
+=======================================================================
+
+关于黄豆：基本上，我们买的包装性的黄豆粉，都是可以冲泡的，这意味着【都是熟制过的】。
+有个基本知识点就是，黄豆想要好好吸收，必须熟制才行，不论是炒到刚变色熟、还是煮熟，才可以吃。
+因为生黄豆有胰蛋白酶抑制剂，会让你无法吸收蛋白质，
+只有熟了才会破坏胰蛋白酶抑制剂，从而吸收蛋白质。
+
+=======================================================================
+
+关于色氨酸，可以简单这样理解：
+原料是豆浆、搬运是碳水、钥匙是B6。这样才能入脑起作用。
+也就是说，豆浆牛奶+米饭面食，不仅可以补足蛋白质，还可以补足色氨酸，有了B6就完美应用了色氨酸。
+
+而B6往往存在于土豆（最好带皮）、香蕉当中。其次玉米、豆类、蔬菜坚果都有，
+一天一根香蕉+土豆，或者两个土豆就够了。
+
+=======================================================================
+
+关于欧米伽3和欧米伽6：
+我们知道这二者是必须脂肪，意味着谁都不可缺少，人体不能自己合成。
+我们平常吃的种子油，基本都是欧米伽6，并且欧米伽3在一般饮食中不常见。
+所以一般营养学都主张：【6别吃多了，3别吃少了】。
+
+细胞除了传递信号还有运输营养，而二者决定了细胞的外壳性能。
+而信号既包括大脑下达的神经信号，也包括全身细胞之间的局部化学信号。
+【从功能上欧米伽6是车辆，欧米伽3是交警】。
+欧米伽6的过多，会产生炎症反应，所以需要欧米伽3来调节。
+车辆可以稍微多，但交警不能没有。一般欧米伽6与欧米伽3的比例最佳是1:1，实际不超过5:1就行。
+
+欧米伽3可以分为ALA、DHA、EPA三种，ALA如同面粉，DHA和EPA如同面包，是成品。
+也就是说当有足量的DHA和EPA，就不需要ALA了。
+就像亚麻籽所产生的ALA虽然可以在摄入后分化成DHA和EPA，但转化出来的量少。
+比如10g亚麻籽粉，粗看差不多能让人吸收男60、女120mg的EPA；男2.5、女25mg的DHA。
+所以要额外补充DHA和EPA，这二者最好是1:1，也是买补剂时必须要看的两点量值。
+欧米伽3补油，在制造过程会产生氧化劣化，所以要买就买高质量的（在没有对应食物的情况下）。
+
+正常人一天DHA和EPA加起来推荐250–500mg/天，
+【DHA主脑眼健康；EPA主血管清理与情绪调节。】所以有些血管病人，医生可能让他吃大量的EPA。
+
+补：【藻油要吃最好晚上吃。不要和维矿一起吃。】已经在几个月的尝试过程中发现，藻油有助于睡眠、对精神和疲劳之间的转换调节很有帮助。
+【其重要程度，在我这边勉强和豆粉画等号（≤）。】
+
+=======================================================================
+
+关于膳食纤维：
+分为可溶，不可溶二者。
+不可溶如同砖头、可溶如同水泥。
+而肠道的益生菌只能吃水泥，不能吃砖头。
+肠道的垃圾需要砖头刮下来，填充排出。
+
+10克时参考：
+奇亚籽 可溶3.3g 不可溶0.3g
+亚麻籽 可溶1.0g 不可溶1.7g
+黄豆   可溶0.5g 不可溶0.5g
+燕麦   可溶0.7g 不可溶0.3g
+
+总结：
+奇亚籽：高纤维、水泥型。核心功能是凝胶、饱腹、滋养菌群。
+亚麻籽粉：中纤维、砖头型。核心功能是增粪便体积、强蠕动、物理清理。
+黄豆粉：低纤维、均衡型。核心功能是提供基础营养和温和的肠道支持。
+
+可见，奇亚籽是可溶王者、亚麻籽是不可溶王者
+
+所以我们为了肠道、排便健康，需要摄入膳食纤维，我个人体验吃亚麻籽会有明显排便改变。
+
+=======================================================================
+
+关于血管健康：
+
+【脑梗】主要是要【杀灭坏胆固醇，增加好胆固醇（高密度脂蛋白）】。
+
+低密度脂蛋白如同多余的载运胆固醇的卡车，运输的不好的胆固醇，
+所以多数语境中低密度脂蛋白和坏胆固醇二者几乎相等，也在以下语境中暂且对等看待。
+高低密度脂蛋白都有肝脏自己生成；胆固醇也是，所以胆固醇不需要额外摄取，否则容易超量。
+
+低密度脂蛋白由肝脏运输到血管各个角落，低密度多了，则多余卡车多了，容易乱撞；
+【主要怕量多、其次是氧化。】所以为了抗氧化，
+可以补足维生素C、E、各类植物素（胡萝卜素、番茄红素等）。
+而高密度胆固醇则是从血管中搜刮不需要的胆固醇和卡车建材垃圾归回到肝脏进行废弃处理。
+
+而杀灭低密度脂蛋白、增多高密度脂蛋白的方法就是常吃可溶性膳食纤维（如【喝奇亚籽】）。
+
+脑梗还有两个帮凶：甘油三酯，还有次之的同型半胱氨酸。
+
+【先说甘油三酯：】
+坏脂肪包括 饱和脂肪 和 反式脂肪；好脂肪主要是不饱和脂肪。
+
+坏脂肪（饱和、反式）→ 显著升高甘油三酯
+中脂肪（欧米伽-9， 适量的欧米伽-6）→ 稳定或轻微影响甘油三酯
+好脂肪（【欧米伽-3】）→ 显著降低甘油三酯
+
+饱和脂肪多见于肉油、黄油（全脂奶制品）；反式脂肪多见于人造油（油炸点心），
+【【他们二者是脑梗主要原因，造成低密度脂蛋白胆和甘油三酯双双升高的核心。】】
+所以这两种脂肪要少吃。
+
+【同型半胱氨酸：】
+
+不可过高，如同利刃，损伤血管。所以要依靠补充绿色蔬菜。
+实在不行，服用适量的【维生素B族】，也是可以降低同型半胱氨酸的。
+
+【如果在这个基础上，常测血压、不抽烟、少吃糖，则是更好】
+
+【关于DHA的争议：】
+
+DHA比EPA的比例，从沙丁鱼来看，1:1；从金枪鱼则是2:1；藻油则是10比1左右。
+沙丁鱼相比金枪鱼的生活更加自然，运动性更加平和。
+若从这个角度看，也许用1:1或者10比1的藻油，是最佳的选择。
+
+而2:1的藻油，对血管健康又如何呢？
+总体而言，应该是有益的：即便增长了LDLC的含量，但是更多的下降了甘油三酯的含量，所以净收益是正向的。
+
+=======================================================================
+
+关于【维生素D】
+【效果对我来讲：暂不完全明确、确定。以下关于维生素D的说法，仅供参考，不一定正确。】
+我见过很多人说上限4000国际单位，并且补充哪怕过万，只要有适当的k2就不会有问题（防止钙引起高血钙）。
+然而我个人维生素D的含量是八点几，日服2500单位（80的k2和200左右的钙和100左右的镁）。
+连续几天之后，觉都睡不着，就像喝了兴奋剂，过了几天耳鸣严重（因为我敏感）。
+所以我认为，这东西应该是【副作用很小的兴奋剂】，
+但这个兴奋剂不是不好意义上的，可2500（我120斤），也似乎有些过量了。
+直觉上应该是1200国际单位的维生素D比较合适。不应该超过体重的两倍x10（2400国际单位）。
+【要吃也要白天吃。】
+
+=======================================================================
+
+【年轻人睡觉腿要蹬直，至少直一个（曲一个的情况下），最好直两个腿，内裤睡前要弄宽松。】
+
+最后，希望这篇文章能够帮助到更多的人。\n\n`;
+        DOM.modal.style.display = "block";
+    };
+    DOM.closeBtn.onclick = () => DOM.modal.style.display = "none";
+    window.onclick = (e) => { if(e.target == DOM.modal) DOM.modal.style.display = "none"; };
+})();
+</script>
+
+</body>
+</html>
