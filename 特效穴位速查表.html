@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>特效穴·临床频次速查</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+            background: #f5f2ef;
+            color: #2c241e;
+            padding: 16px 12px 30px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .page-header {
+            margin-bottom: 20px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #d2c1b4;
+        }
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #4a3729;
+            letter-spacing: 1px;
+        }
+        .page-header .sub {
+            color: #6e5746;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 18px 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            border: 1px solid #e9dfd7;
+        }
+        .card-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #4d3627;
+            margin-bottom: 14px;
+            padding-bottom: 6px;
+            border-bottom: 1.5px solid #dfd1c6;
+            display: flex;
+            align-items: center;
+        }
+        .freq-card {
+            background: #faf7f4;
+            border-left: 6px solid #8b624b;
+        }
+        .freq-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .freq-table th {
+            text-align: left;
+            padding: 8px 4px 4px;
+            font-weight: 600;
+            color: #5f4232;
+            border-bottom: 1px solid #d9cabe;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .freq-table td {
+            padding: 6px 4px;
+            border-bottom: 1px solid #efe5dd;
+            vertical-align: top;
+        }
+        .freq-table tr:last-child td { border-bottom: none; }
+        .freq-num {
+            font-weight: 700;
+            color: #8b5a3e;
+            width: 40px;
+        }
+        .freq-name {
+            font-weight: 600;
+            color: #2c1f17;
+        }
+        .freq-code {
+            color: #7f6857;
+            font-size: 0.8rem;
+            margin-left: 4px;
+        }
+        .freq-count {
+            text-align: right;
+            font-family: 'SF Mono', monospace;
+            color: #6d4f3c;
+        }
+        .verse-block {
+            font-family: 'KaiTi', '华文楷体', 'STKaiti', serif;
+            background: #f3ede7;
+            padding: 14px 16px;
+            border-radius: 16px;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #1f1a16;
+            border: 1px solid #e2d3c7;
+            margin: 12px 0 6px;
+        }
+        .acupoint-tag {
+            display: inline-block;
+            background: #7d5f4b;
+            color: white;
+            font-weight: 500;
+            padding: 3px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .acupoint-tag.light {
+            background: #b19b8b;
+        }
+        .tag-dong {
+            background: #5f6b5c;
+        }
+        .special-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 8px 0;
+            font-size: 0.9rem;
+        }
+        .special-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #e7dbd2;
+            vertical-align: top;
+        }
+        .special-table tr:last-child td { border-bottom: none; }
+        .col-illness {
+            font-weight: 700;
+            color: #5b4132;
+            width: 32%;
+        }
+        .col-points {
+            color: #2e241e;
+        }
+        .source-badge {
+            display: inline-block;
+            background: #e8dfd7;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #53412f;
+            margin-left: 6px;
+            text-transform: uppercase;
+        }
+        .source-dong {
+            background: #d1d9cc;
+            color: #2e402b;
+        }
+        .footnote {
+            font-size: 0.8rem;
+            color: #8c7767;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #dbcfc4;
+            text-align: right;
+        }
+        .note-sm {
+            background: #f3ede8;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+        @media (max-width: 480px) {
+            .page-header h1 { font-size: 1.8rem; }
+            .card { padding: 16px 12px; }
+        }
+        .dong-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin-top: 8px;
+        }
+        .dong-item {
+            background: #e9e5df;
+            border-radius: 24px;
+            padding: 4px 14px;
+            font-size: 0.9rem;
+            border: 1px solid #cec1b5;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h1>特效穴·频次速查</h1>
+        <div class="sub">基于临床文献数据 · 四总穴 · 经验特效 · 董氏奇穴</div>
+    </div>
+
+    <!-- 频率排名卡片 (最上方，依据txt数据) -->
+    <div class="card freq-card">
+        <div class="card-title">穴位使用频率排序 TOP53</div>
+        <div style="font-size:0.85rem; color:#705945; margin-bottom: 10px;">数据源自针灸处方文献计量统计 (频次/篇次)</div>
+        <table class="freq-table">
+            <thead>
+                <tr><th>#</th><th>穴位</th><th>频次</th></tr>
+            </thead>
+            <tbody>
+                <tr><td class="freq-num">1</td><td class="freq-name">足三里 <span class="freq-code">ST36</span></td><td class="freq-count">10,235</td></tr>
+                <tr><td class="freq-num">2</td><td class="freq-name">合谷 <span class="freq-code">LI4</span></td><td class="freq-count">7,665</td></tr>
+                <tr><td class="freq-num">3</td><td class="freq-name">三阴交 <span class="freq-code">SP6</span></td><td class="freq-count">6,713</td></tr>
+                <tr><td class="freq-num">4</td><td class="freq-name">太冲 <span class="freq-code">LR3</span></td><td class="freq-count">5,076</td></tr>
+                <tr><td class="freq-num">5</td><td class="freq-name">风池 <span class="freq-code">GB20</span></td><td class="freq-count">5,064</td></tr>
+                <tr><td class="freq-num">6</td><td class="freq-name">曲池 <span class="freq-code">LI11</span></td><td class="freq-count">4,878</td></tr>
+                <tr><td class="freq-num">7</td><td class="freq-name">肾俞 <span class="freq-code">BL23</span></td><td class="freq-count">4,652</td></tr>
+                <tr><td class="freq-num">8</td><td class="freq-name">阳陵泉 <span class="freq-code">GB34</span></td><td class="freq-count">4,432</td></tr>
+                <tr><td class="freq-num">9</td><td class="freq-name">内关 <span class="freq-code">PC6</span></td><td class="freq-count">3,921</td></tr>
+                <tr><td class="freq-num">10</td><td class="freq-name">百会 <span class="freq-code">GV20</span></td><td class="freq-count">3,472</td></tr>
+                <tr><td class="freq-num">11</td><td class="freq-name">关元 <span class="freq-code">CV4</span></td><td class="freq-count">3,443</td></tr>
+                <tr><td class="freq-num">12</td><td class="freq-name">外关 <span class="freq-code">SJ5</span></td><td class="freq-count">3,087</td></tr>
+                <tr><td class="freq-num">13</td><td class="freq-name">大椎 <span class="freq-code">GV14</span></td><td class="freq-count">2,874</td></tr>
+                <tr><td class="freq-num">14</td><td class="freq-name">太溪 <span class="freq-code">KI3</span></td><td class="freq-count">2,833</td></tr>
+                <tr><td class="freq-num">15</td><td class="freq-name">颊车 <span class="freq-code">ST6</span></td><td class="freq-count">2,754</td></tr>
+                <tr><td class="freq-num">16</td><td class="freq-name">地仓 <span class="freq-code">ST4</span></td><td class="freq-count">2,688</td></tr>
+                <tr><td class="freq-num">17</td><td class="freq-name">脾俞 <span class="freq-code">BL20</span></td><td class="freq-count">2,504</td></tr>
+                <tr><td class="freq-num">18</td><td class="freq-name">肩髃 <span class="freq-code">LI15</span></td><td class="freq-count">2,470</td></tr>
+                <tr><td class="freq-num">19</td><td class="freq-name">环跳 <span class="freq-code">GB30</span></td><td class="freq-count">2,466</td></tr>
+                <tr><td class="freq-num">20</td><td class="freq-name">委中 <span class="freq-code">BL40</span></td><td class="freq-count">2,399</td></tr>
+                <tr><td class="freq-num">21</td><td class="freq-name">中脘 <span class="freq-code">CV12</span></td><td class="freq-count">2,390</td></tr>
+                <tr><td class="freq-num">22</td><td class="freq-name">丰隆 <span class="freq-code">ST40</span></td><td class="freq-count">2,384</td></tr>
+                <tr><td class="freq-num">23</td><td class="freq-name">血海 <span class="freq-code">SP10</span></td><td class="freq-count">2,286</td></tr>
+                <tr><td class="freq-num">24</td><td class="freq-name">气海 <span class="freq-code">CV6</span></td><td class="freq-count">2,267</td></tr>
+                <tr><td class="freq-num">25</td><td class="freq-name">阳白 <span class="freq-code">GB14</span></td><td class="freq-count">2,205</td></tr>
+                <tr><td class="freq-num">26</td><td class="freq-name">翳风 <span class="freq-code">SJ17</span></td><td class="freq-count">2,143</td></tr>
+                <tr><td class="freq-num">27</td><td class="freq-name">阴陵泉 <span class="freq-code">SP9</span></td><td class="freq-count">2,082</td></tr>
+                <tr><td class="freq-num">28</td><td class="freq-name">下关 <span class="freq-code">ST7</span></td><td class="freq-count">1,939</td></tr>
+                <tr><td class="freq-num">29</td><td class="freq-name">迎香 <span class="freq-code">LI20</span></td><td class="freq-count">1,874</td></tr>
+                <tr><td class="freq-num">30</td><td class="freq-name">水沟 <span class="freq-code">GV26</span></td><td class="freq-count">1,844</td></tr>
+                <tr><td class="freq-num">31</td><td class="freq-name">肝俞 <span class="freq-code">BL18</span></td><td class="freq-count">1,768</td></tr>
+                <tr><td class="freq-num">32</td><td class="freq-name">肺俞 <span class="freq-code">BL13</span></td><td class="freq-count">1,752</td></tr>
+                <tr><td class="freq-num">33</td><td class="freq-name">攒竹 <span class="freq-code">BL2</span></td><td class="freq-count">1,748</td></tr>
+                <tr><td class="freq-num">34</td><td class="freq-name">悬钟 <span class="freq-code">GB39</span></td><td class="freq-count">1,724</td></tr>
+                <tr><td class="freq-num">35</td><td class="freq-name">四白 <span class="freq-code">ST2</span></td><td class="freq-count">1,693</td></tr>
+                <tr><td class="freq-num">36</td><td class="freq-name">昆仑 <span class="freq-code">BL60</span></td><td class="freq-count">1,633</td></tr>
+                <tr><td class="freq-num">37</td><td class="freq-name">天枢 <span class="freq-code">ST25</span></td><td class="freq-count">1,452</td></tr>
+                <tr><td class="freq-num">38</td><td class="freq-name">中极 <span class="freq-code">CV3</span></td><td class="freq-count">1,441</td></tr>
+                <tr><td class="freq-num">39</td><td class="freq-name">膈俞 <span class="freq-code">BL17</span></td><td class="freq-count">1,439</td></tr>
+                <tr><td class="freq-num">40</td><td class="freq-name">神门 <span class="freq-code">HT7</span></td><td class="freq-count">1,404</td></tr>
+                <tr><td class="freq-num">41</td><td class="freq-name">大肠俞 <span class="freq-code">BL25</span></td><td class="freq-count">1,365</td></tr>
+                <tr><td class="freq-num">42</td><td class="freq-name">承山 <span class="freq-code">BL57</span></td><td class="freq-count">1,349</td></tr>
+                <tr><td class="freq-num">43</td><td class="freq-name">手三里 <span class="freq-code">LI10</span></td><td class="freq-count">1,305</td></tr>
+                <tr><td class="freq-num">44</td><td class="freq-name">后溪 <span class="freq-code">SI3</span></td><td class="freq-count">1,244</td></tr>
+                <tr><td class="freq-num">45</td><td class="freq-name">命门 <span class="freq-code">GV4</span></td><td class="freq-count">1,212</td></tr>
+                <tr><td class="freq-num">46</td><td class="freq-name">膻中 <span class="freq-code">CV17</span></td><td class="freq-count">1,211</td></tr>
+                <tr><td class="freq-num">47</td><td class="freq-name">廉泉 <span class="freq-code">CV23</span></td><td class="freq-count">1,157</td></tr>
+                <tr><td class="freq-num">48</td><td class="freq-name">印堂 <span class="freq-code">GV29</span></td><td class="freq-count">1,138</td></tr>
+                <tr><td class="freq-num">49</td><td class="freq-name">秩边 <span class="freq-code">BL54</span></td><td class="freq-count">1,079</td></tr>
+                <tr><td class="freq-num">50</td><td class="freq-name">神阙 <span class="freq-code">CV8</span></td><td class="freq-count">1,071</td></tr>
+                <tr><td class="freq-num">51</td><td class="freq-name">心俞 <span class="freq-code">BL15</span></td><td class="freq-count">1,067</td></tr>
+                <tr><td class="freq-num">52</td><td class="freq-name">颧髎 <span class="freq-code">SI18</span></td><td class="freq-count">1,035</td></tr>
+                <tr><td class="freq-num">53</td><td class="freq-name">承浆 <span class="freq-code">CV24</span></td><td class="freq-count">1,028</td></tr>
+            </tbody>
+        </table>
+        <div class="note-sm">※ 数据基于针灸处方文献统计，反映临床常用趋势。足三里、合谷、三阴交为核心高频穴。</div>
+    </div>
+
+    <!-- 四总穴歌 (保留) -->
+    <div class="card">
+        <div class="card-title">四总穴歌、十总穴增补</div>
+        <div class="verse-block">
+            肚腹三里留 · 腰背委中求<br>
+            头项寻列缺 · 面口合谷收<br>
+小腹三阴交，心胸内关谋，胁肋寻飞虎，复苏必水沟，大椎督阳府，关元壮真攸。
+<div class="card-title"></div>
+            <span style="font-size:0.9rem; opacity:0.8;">1. 肚腹三里留
+
+白话： 肚子、肠胃相关的毛病（胃痛、腹胀、腹泻、消化不良），找足三里穴。
+位置： 膝盖外侧凹陷往下约四指宽处。
+
+2. 腰背委中求
+
+白话： 腰部、后背酸痛僵硬，弯不下去或直不起来，找膝盖窝正中间的委中穴。
+
+3. 头项寻列缺
+
+白话： 头痛、脖子僵硬、落枕，或者是外感风寒引起的头重，找手腕内侧的列缺穴。
+位置： 两手虎口交叉，食指指尖摸到桡骨茎突的凹陷处。
+
+4. 面口合谷收
+
+白话： 脸上的问题（牙痛、口腔溃疡、长痘、面瘫、流鼻血），找虎口处的合谷穴。
+
+5. 小腹三阴交
+
+白话： 肚脐以下小腹的问题，比如女性的月经不调、痛经，或者男女的泌尿系统不适，找脚踝内侧的三阴交穴。
+
+6. 心胸内关谋
+
+白话： 胸闷、心慌、心跳加速、恶心反胃、晕车，找手腕横纹往上约三指宽的内关穴。
+
+7. 胁肋寻飞虎
+
+白话： 身体两侧肋骨胀痛、岔气、带状疱疹后遗痛，找手背腕横纹往上约四指宽的支沟穴（别名飞虎）。
+
+8. 复苏必水沟
+
+白话： 遇到突然晕倒、不省人事、癫痫发作的急救情况，掐鼻唇沟上三分之一处的水沟穴（即人中穴）。
+
+9. 大椎督阳府
+
+白话： 脖子后面最突出的骨头下方的大椎穴，是阳气总开关。主要用于退烧、治感冒怕冷、肩膀僵硬。
+
+10. 关元壮真攸
+
+白话： 肚脐正下方约四指宽的关元穴，是储存元气的地方。用于身体极度虚弱、怕冷、肾虚、尿频，能强身健体、补益根本。 </span>
+        </div>
+        <div style="margin-top: 10px;">
+            <span class="acupoint-tag">足三里</span><span class="acupoint-tag">委中</span><span class="acupoint-tag">列缺</span><span class="acupoint-tag">合谷</span>
+            <span class="acupoint-tag">三阴交</span><span class="acupoint-tag">内关</span><span class="acupoint-tag">水沟</span><span class="acupoint-tag">大椎</span><span class="acupoint-tag">关元</span>
+        </div>
+    </div>
+
+    <!-- 合并框架：经验特效穴速查 (含经外奇穴、一病一穴，标注来源) -->
+    <div class="card">
+        <div class="card-title">经验特效穴·病症对照</div>
+        <div style="font-size:0.85rem; color:#6a5341; margin-bottom: 12px;">涵盖传统特效穴、经外奇穴及董氏奇穴经验，标注“董”为董氏奇穴</div>
+        <table class="special-table">
+            <tr><td class="col-illness">头痛 / 偏头痛</td><td class="col-points"><strong>风池、太阳、太冲</strong> <span class="source-badge">传统</span> · 侧三里、侧下三里 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">眩晕 / 高血压</td><td class="col-points"><strong>百会、曲池、太冲</strong> <span class="source-badge">传统</span> · 火硬、火主 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">失眠 / 焦虑</td><td class="col-points"><strong>神门、三阴交、安眠</strong> <span class="source-badge">经外</span> · 五花穴 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">面瘫 / 口眼歪斜</td><td class="col-points"><strong>颊车、地仓、合谷</strong> <span class="source-badge">传统</span> · 侧三里、上巨虚 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">牙痛</td><td class="col-points"><strong>合谷、颊车、下关</strong> <span class="source-badge">传统</span> · 灵骨、大白 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">咽喉肿痛</td><td class="col-points"><strong>少商 (点刺出血)、廉泉</strong> <span class="source-badge">传统</span> · 足五金、足千金 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">咳嗽 / 哮喘</td><td class="col-points"><strong>孔最、定喘、肺俞</strong> <span class="source-badge">经外/传统</span> · 水金、水通 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">心悸 / 胸痛</td><td class="col-points"><strong>内关、膻中、心俞</strong> <span class="source-badge">传统</span> · 通关、通山 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">胃痛 / 腹胀</td><td class="col-points"><strong>足三里、中脘、内关</strong> <span class="source-badge">传统</span> · 四花上穴 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">呃逆 / 呕吐</td><td class="col-points"><strong>内关、中魁</strong> <span class="source-badge">经外</span> · 火星上下 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">便秘 / 腹泻</td><td class="col-points"><strong>天枢、上巨虚、足三里</strong> <span class="source-badge">传统</span> · 腑肠穴 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">痛经 / 月经不调</td><td class="col-points"><strong>三阴交、地机、次髎</strong> <span class="source-badge">传统</span> · 妇科穴、还巢 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">急性腰扭伤</td><td class="col-points"><strong>水沟、后溪、腰痛点</strong> <span class="source-badge">经外</span> · 二角明、马金水 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">坐骨神经痛</td><td class="col-points"><strong>环跳、阳陵泉、秩边</strong> <span class="source-badge">传统</span> · 灵骨、大白、鼻翼 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">肩周炎</td><td class="col-points"><strong>条口、肩髃、膏肓</strong> <span class="source-badge">传统</span> · 肾关、四花中 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">膝痛 / 关节炎</td><td class="col-points"><strong>犊鼻、阳陵泉、血海</strong> <span class="source-badge">传统</span> · 心膝、肩中 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">目赤肿痛 / 眼疾</td><td class="col-points"><strong>耳尖、太阳 (放血)、睛明</strong> <span class="source-badge">经外/传统</span> · 上白、分白 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">耳鸣 / 耳聋</td><td class="col-points"><strong>听宫、翳风、中渚</strong> <span class="source-badge">传统</span> · 驷马、三重 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">鼻炎 / 鼻塞</td><td class="col-points"><strong>迎香、印堂、上星</strong> <span class="source-badge">传统</span> · 木穴、驷马 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">皮肤病 / 荨麻疹</td><td class="col-points"><strong>曲池、血海、膈俞</strong> <span class="source-badge">传统</span> · 驷马、分枝上下 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">中风后遗症</td><td class="col-points"><strong>百会、曲池、足三里、阳陵泉</strong> <span class="source-badge">传统</span> · 灵骨、大白、重子重仙 <span class="source-badge source-dong">董</span></td></tr>
+            <tr><td class="col-illness">高热 / 中暑</td><td class="col-points"><strong>大椎、曲池、十宣 (放血)</strong> <span class="source-badge">经外</span> · 三叉三 <span class="source-badge source-dong">董</span></td></tr>
+        </table>
+    </div>
+
+    <!-- 董氏奇穴 常用补充 -->
+    <div class="card">
+        <div class="card-title">董氏奇穴 · 常用要穴</div>
+        <div style="margin-bottom: 12px;">董氏奇穴自成体系，取穴精少，常以倒马针法增效。以下为临床高频应用穴位：</div>
+        <div class="dong-list">
+            <span class="dong-item"><strong>灵骨</strong> (大白) — 坐骨神经痛、腰痛、肺气不足</span>
+            <span class="dong-item"><strong>大白</strong> — 小儿气喘、高热、前头痛</span>
+            <span class="dong-item"><strong>重子·重仙</strong> — 背痛、肺炎、感冒</span>
+            <span class="dong-item"><strong>肾关</strong> — 肩臂痛、多尿、肾虚</span>
+            <span class="dong-item"><strong>天皇·地皇·人皇</strong> (即阴陵泉、地机、三阴交附近) — 泌尿生殖</span>
+            <span class="dong-item"><strong>妇科穴</strong> — 不孕、月经不调</span>
+            <span class="dong-item"><strong>还巢</strong> — 配合妇科穴治妇科</span>
+            <span class="dong-item"><strong>木穴</strong> — 手癣、眼干、流涕</span>
+            <span class="dong-item"><strong>驷马穴</strong> — 皮肤病、鼻炎、乳房问题</span>
+            <span class="dong-item"><strong>四花上穴</strong> — 胃病、哮喘、心律不齐</span>
+            <span class="dong-item"><strong>三重穴</strong> — 甲状腺肿、面瘫、偏头痛</span>
+            <span class="dong-item"><strong>侧三里·侧下三里</strong> — 牙痛、面神经麻痹</span>
+            <span class="dong-item"><strong>水金·水通</strong> — 咳嗽、气喘、肾脏炎</span>
+            <span class="dong-item"><strong>上三黄</strong> (明黄、天黄、其黄) — 肝病、眼病、脊椎病</span>
+            <span class="dong-item"><strong>足五金·足千金</strong> — 咽喉炎、甲状腺</span>
+        </div>
+        <div class="note-sm" style="margin-top: 16px;">※ 董氏奇穴定位多在传统经络附近，另有独特区域。常用组合：灵骨+大白（温阳补气）；肾关+复溜（治飞蚊症）；妇科+还巢（调经助孕）。</div>
+    </div>
+
+    <div class="footnote">
+        数据整合自针灸文献及临床经验 · 仅供专业参考 · 实际治疗需辨证取穴
+    </div>
+</div>
+</body>
+</html>
