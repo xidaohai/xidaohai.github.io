@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特定穴速查表</title>
+    <style>
+        :root {
+            --primary-slate: #2c3e50;
+            --accent-blue: #34495e;
+            --clinical-blue: #f8fafc;
+            --border-soft: #e2e8f0;
+            --text-main: #1a202c;
+            --text-secondary: #4a5568;
+            --status-danger: #c53030;
+            --status-warning: #975a16;
+            --status-safe: #276749;
+            --status-core: #744210;
+            --pair-bg: #f6f9fc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.5;
+            color: var(--text-main);
+            background-color: #f7fafc;
+            padding: 30px 15px;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-slate);
+            padding-bottom: 15px;
+        }
+
+        h1 { font-size: 1.6rem; color: var(--primary-slate); letter-spacing: -0.025em; }
+
+        .section-card {
+            background: #ffffff;
+            border: 1px solid var(--border-soft);
+            border-radius: 6px;
+            margin-bottom: 25px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            font-size: 1.15rem;
+            color: var(--primary-slate);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 1.15rem;
+            background: var(--primary-slate);
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+
+        .classic-mnemonic {
+            background-color: var(--clinical-blue);
+            border-left: 4px solid var(--accent-blue);
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .mnemonic-title {
+            font-weight: 700;
+            color: var(--primary-slate);
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.85rem;
+        }
+
+        .table-wrapper { width: 100%; overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 700px;
+        }
+
+        th {
+            background-color: #fdfdfd;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: left;
+            padding: 10px 14px;
+            border-bottom: 2px solid var(--border-soft);
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-soft);
+            vertical-align: middle;
+        }
+
+        .pair-group {
+            background-color: var(--pair-bg);
+        }
+
+        .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 6px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .label-danger { color: var(--status-danger); background: #fff5f5; border-color: #feb2b2; }
+        .label-warning { color: var(--status-warning); background: #fffff0; border-color: #faf089; }
+        .label-safe { color: var(--status-safe); background: #f0fff4; border-color: #9ae6b4; }
+        .label-pair { color: #2b6cb0; background: #ebf8ff; border-color: #90cdf4; }
+        
+        .point-highlight { color: var(--status-core); font-weight: 700; }
+        .pair-badge { font-size: 0.75rem; background: #e2e8f0; color: #2d3748; padding: 2px 8px; border-radius: 16px; }
+
+        .note-text { font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px; font-style: italic; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .section-card { box-shadow: none; border: 1px solid #eee; break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>特定穴速查·可简易辩证取用</h1>
+    </header>
+
+    <!-- ========= 需配对使用的类别 ========= -->
+    <!-- 1. 十五络穴（表里经配对） -->
+    <section class="section-card">
+        <h2>十五络穴 · 可单独使用（郭廷英推荐，一针见效。） <span class="label label-pair">需成对记忆</span></h2>
+        <div class="classic-mnemonic">
+            <span class="mnemonic-title">《十五络穴歌》</span>
+            列缺偏历肺大肠，通里支正心小肠；内关外关包焦外，公孙丰隆脾胃详；<br>
+            光明蠡沟胆肝络，大钟飞扬肾膀胱；脾之大络名大包，任络鸠尾督长强。
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">表里经配对</th>
+                        <th style="width: 20%;">络穴名称</th>
+                        <th>临床应用场景（表里同病）</th>
+                        <th style="width: 15%;">实操指引</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="pair-group"><td rowspan="2"><strong>肺 ↔ 大肠</strong></td><td><span class="point-highlight">列缺</span> (肺络)</td><td>咳嗽、头项强痛、手腕无力</td><td><span class="label label-safe">前臂桡侧</span></td></tr>
+                    <tr class="pair-group"><td>偏历 (大肠络)</td><td>齿痛、耳鸣、手臂酸痛</td><td><span class="label label-safe">前臂桡侧</span></td></tr>
+                    
+                    <tr><td rowspan="2"><strong>心 ↔ 小肠</strong></td><td>通里 (心络)</td><td>心悸、舌强不语、腕痛</td><td><span class="label label-safe">前臂尺侧</span></td></tr>
+                    <tr><td>支正 (小肠络)</td><td>项强、肘挛、热病</td><td><span class="label label-safe">前臂尺侧</span></td></tr>
+                    
+                    <tr class="pair-group"><td rowspan="2"><strong>心包 ↔ 三焦</strong></td><td><span class="point-highlight">内关</span> (心包络)</td><td>心痛、心悸、胃痛、呕吐</td><td><span class="label label-safe">前臂内侧</span></td></tr>
+                    <tr class="pair-group"><td>外关 (三焦络)</td><td>偏头痛、耳聋、胁痛</td><td><span class="label label-safe">前臂外侧</span></td></tr>
+                    
+                    <tr><td rowspan="2"><strong>脾 ↔ 胃</strong></td><td><strong>公孙</strong> (脾络)</td><td>胃痛、腹胀、月经不调</td><td><span class="label label-safe">足内侧</span></td></tr>
+                    <tr><td><strong>丰隆</strong> (胃络)</td><td>痰多、咳嗽、眩晕</td><td><span class="label label-safe">小腿前侧</span></td></tr>
+                    
+                    <tr class="pair-group"><td rowspan="2"><strong>肝 ↔ 胆</strong></td><td>蠡沟 (肝络)</td><td>月经不调、小腹痛、阴痒</td><td><span class="label label-safe">小腿内侧</span></td></tr>
+                    <tr class="pair-group"><td>光明 (胆络)</td><td>目痛、夜盲、下肢痿痹</td><td><span class="label label-safe">小腿外侧</span></td></tr>
+                    
+                    <tr><td rowspan="2"><strong>肾 ↔ 膀胱</strong></td><td>大钟 (肾络)</td><td>腰脊强痛、足跟痛、痴呆</td><td><span class="label label-safe">足内侧</span></td></tr>
+                    <tr><td>飞扬 (膀胱络)</td><td>头痛、鼻塞、腰背痛</td><td><span class="label label-safe">小腿后侧</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="note-text">※ 任脉络鸠尾、督脉络长强、脾之大络大包，均为躯干穴位，居家以指压为主，不推荐揿针。</div>
+    </section>
+
+    <!-- ========= 可单用/灵活组合的类别 ========= -->
+    <!-- 3. 十二原穴（可单用，常配络穴） -->
+    <section class="section-card">
+        <h2>十二原穴 · 可单独取用 <span class="label label-safe">灵活配穴</span></h2>
+        <div class="classic-mnemonic">
+            <span class="mnemonic-title">《十二原穴歌》</span>
+            肺经太渊心经神门，心包大陵大肠合谷；小肠腕骨三焦阳池，脾经太白肾经太溪；<br>
+            肝经太冲胃经冲阳，膀胱京骨胆经丘墟。
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>原穴</th><th>归经</th><th>核心主治（虚证/慢性病）</th><th>常用配穴建议</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>太渊</strong></td><td>肺</td><td>咳嗽、气喘、肺气虚</td><td>配列缺（原络配穴）</td></tr>
+                    <tr><td><span class="point-highlight">合谷</span></td><td>大肠</td><td>牙痛、头痛、面口疾患</td><td>配太冲（四关穴）</td></tr>
+                    <tr><td><strong>冲阳</strong></td><td>胃</td><td>胃痛、腹胀、口臭</td><td>配足三里</td></tr>
+                    <tr><td><strong>太白</strong></td><td>脾</td><td>腹胀、腹泻、乏力</td><td>配公孙</td></tr>
+                    <tr><td><strong>神门</strong></td><td>心</td><td>失眠、心悸、健忘</td><td>配内关</td></tr>
+                    <tr><td><strong>腕骨</strong></td><td>小肠</td><td>耳鸣、目黄、颈肿</td><td>配后溪</td></tr>
+                    <tr><td><strong>京骨</strong></td><td>膀胱</td><td>头痛、腰痛、癫痫</td><td>配委中</td></tr>
+                    <tr><td><strong>太溪</strong></td><td>肾</td><td>腰酸、耳鸣、足跟痛</td><td>配照海</td></tr>
+                    <tr><td><strong>大陵</strong></td><td>心包</td><td>心悸、胃痛、疮疡</td><td>配内关</td></tr>
+                    <tr><td><strong>阳池</strong></td><td>三焦</td><td>消渴、腕痛、耳聋</td><td>配外关</td></tr>
+                    <tr><td><strong>丘墟</strong></td><td>胆</td><td>偏头痛、胁痛、踝扭伤</td><td>配阳陵泉</td></tr>
+                    <tr><td><span class="point-highlight">太冲</span></td><td>肝</td><td>头痛、高血压、月经不调</td><td>配合谷（四关）</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="note-text">※ 原穴均可单独使用，慢性虚证可温和灸或轻柔按压。</div>
+    </section>
+
+    <!-- 4. 六腑下合穴（可单用，常配募穴） -->
+    <section class="section-card">
+        <h2>六腑下合穴 · 可单独取用 <span class="label label-safe">按腑对应</span></h2>
+        <div class="classic-mnemonic">
+            <span class="mnemonic-title">《下合穴歌》</span>
+            大肠下合上巨虚，小肠下合下巨虚；三焦委阳胆阳陵，膀胱委中胃三里。
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>下合穴</th><th>六腑</th><th>主治（实证/不通）</th><th>常配募穴</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="point-highlight">足三里</span></td><td>胃</td><td>胃痛、腹胀、消化不良、虚劳</td><td>中脘</td></tr>
+                    <tr><td><strong>上巨虚</strong></td><td>大肠</td><td>腹泻、便秘、肠痈</td><td>天枢</td></tr>
+                    <tr><td><strong>下巨虚</strong></td><td>小肠</td><td>小腹痛、泄痢、下肢痿痹</td><td>关元</td></tr>
+                    <tr><td><strong>阳陵泉</strong></td><td>胆</td><td>口苦、胁痛、黄疸、膝痛</td><td>日月</td></tr>
+                    <tr><td><strong>委中</strong></td><td>膀胱</td><td>小便不利、腰背痛、下肢痿痹</td><td>中极</td></tr>
+                    <tr><td><strong>委阳</strong></td><td>三焦</td><td>水肿、小便不利、腰脊强痛</td><td>石门</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="note-text">※ 下合穴单独使用效果即佳，实证用强刺激，虚证可艾灸。</div>
+    </section>
+
+        <!-- 2. 八脉交会穴（固定上下配对） -->
+    <section class="section-card">
+        <h2>八脉交会穴 · 上下固定配对使用 <span class="label label-pair">必须配对取穴</span></h2>
+        <div class="classic-mnemonic">
+            <span class="mnemonic-title">《八脉交会八穴歌》</span>
+            公孙冲脉胃心胸，内关阴维下总同；临泣胆经连带脉，阳维锐眦外关逢；<br>
+            后溪督脉内眦颈，申脉阳跷络亦通；列缺任脉行肺系，阴跷照海隔喉咙。
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">配对组合</th>
+                        <th style="width: 25%;">穴位（上 + 下）</th>
+                        <th>主治区域</th>
+                        <th style="width: 15%;">典型症状</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>胃心胸组合</strong></td><td><span class="point-highlight">内关</span> (手) + <strong>公孙</strong> (足)</td><td>胃、心、胸</td><td>胃痛、恶心、心悸、胸闷</td></tr>
+                    <tr><td><strong>侧头耳目组合</strong></td><td><strong>外关</strong> (手) + <strong>足临泣</strong> (足)</td><td>耳后、侧头、胁肋、外眼角</td><td>偏头痛、耳鸣、目外眦痛、胁痛</td></tr>
+                    <tr><td><strong>颈肩背组合</strong></td><td><strong>后溪</strong> (手) + <strong>申脉</strong> (足)</td><td>颈项、肩背、内眼角</td><td>落枕、颈椎病、腰背痛、目内眦痛</td></tr>
+                    <tr><td><strong>咽喉胸膈组合</strong></td><td><span class="point-highlight">列缺</span> (手) + <strong>照海</strong> (足)</td><td>咽喉、胸膈、肺</td><td>咽干咽痛、咳嗽、胸膈满闷</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="note-text">※ 每对穴位必须上下同时按压或留针，才能发挥最大区域调节作用。</div>
+    </section>
+
+    <!-- 5. 八会穴（按组织单用） -->
+    <section class="section-card">
+        <h2>八会穴 · 按病变组织单独取用 <span class="label label-safe">对症选穴</span></h2>
+        <div class="classic-mnemonic">
+            <span class="mnemonic-title">《八会穴歌》</span>
+            血会膈俞气膻中，脉会太渊筋阳陵；骨会大杼髓绝骨，脏会章门中脘腑。
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>所会</th><th>穴位</th><th>适用病症</th><th>居家操作</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>血会</td><td>膈俞</td><td>贫血、瘀血、皮肤瘙痒</td><td>背部，宜艾灸或轻按</td></tr>
+                    <tr><td>气会</td><td>膻中</td><td>胸闷、气短、咳嗽、少乳</td><td>胸前，掌根揉按</td></tr>
+                    <tr><td>脉会</td><td>太渊</td><td>无脉症、手腕痛、咳喘</td><td>腕部，轻柔点按</td></tr>
+                    <tr><td>筋会</td><td><strong>阳陵泉</strong></td><td>抽筋、关节屈伸不利、肩周炎</td><td>小腿外侧，可按揉或揿针</td></tr>
+                    <tr><td>骨会</td><td>大杼</td><td>颈椎病、腰椎病、骨质增生</td><td>背部，宜艾灸或轻按</td></tr>
+                    <tr><td>髓会</td><td>绝骨(悬钟)</td><td>头晕健忘、下肢痿软、耳鸣</td><td>外踝上，可按揉</td></tr>
+                    <tr><td>脏会</td><td>章门</td><td>五脏虚损、肝脾肿大、胁痛</td><td>侧腹部，宜轻揉</td></tr>
+                    <tr><td>腑会</td><td>中脘</td><td>胃痛、腹胀、反酸、消化不良</td><td>上腹部，按揉或艾灸</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="note-text">※ 八会穴根据病变组织单独取用，不需要配对。</div>
+    </section>
+
+    <!-- 6. 日常保健十大穴（可单独使用） -->
+    <section class="section-card">
+        <h2>日常保健十大穴 · 单独或组合使用</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>穴位</th><th>核心主治</th><th>常用组合建议</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><span class="point-highlight">合谷</span></td><td>牙痛、头痛、感冒发热</td><td>配太冲（开四关）、配曲池</td></tr>
+                    <tr><td><span class="point-highlight">内关</span></td><td>心慌、胸闷、晕车恶心</td><td>配公孙（八脉交会固定搭配）</td></tr>
+                    <tr><td><span class="point-highlight">足三里</span></td><td>胃痛、腹胀、强身健体</td><td>配中脘、配三阴交</td></tr>
+                    <tr><td><span class="point-highlight">三阴交</span></td><td>痛经、月经不调、泌尿系问题</td><td>配关元、配太冲</td></tr>
+                    <tr><td><strong>委中</strong></td><td>腰背痛、下肢痿痹</td><td>配肾俞、配承山</td></tr>
+                    <tr><td><strong>风池</strong></td><td>感冒、头痛、颈项强痛</td><td>配大椎、配合谷</td></tr>
+                    <tr><td><strong>涌泉</strong></td><td>失眠、头晕、引火下行</td><td>配太溪、配神门</td></tr>
+                    <tr><td><strong>中脘</strong></td><td>胃痛、腹胀、反酸</td><td>配足三里、配内关</td></tr>
+                    <tr><td><strong>关元</strong></td><td>元气亏损、疲劳、生殖系统问题</td><td>配三阴交、配肾俞</td></tr>
+                    <tr><td><strong>阳陵泉</strong></td><td>膝关节痛、小腿抽筋、肩颈僵硬</td><td>配悬钟、配足三里</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="note-text">※ 以上穴位可单独使用，也可按推荐组合增强疗效。</div>
+    </section>
+</div>
+
+</body>
+</html>
