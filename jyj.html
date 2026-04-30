@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>特定穴速查表 · 甲乙经深度与针法【2026.4.28】</title>
+    <style>
+        :root {
+            --primary-slate: #2c3e50;
+            --accent-blue: #34495e;
+            --clinical-blue: #f8fafc;
+            --border-soft: #e2e8f0;
+            --text-main: #1a202c;
+            --text-secondary: #4a5568;
+            --depth-ancient: #805ad5;
+            --depth-modern: #2b6cb0;
+            --safest-ancient-bg: #faf5ff;
+            --safest-modern-bg: #ebf8ff;
+            --pair-bg: #f6f9fc;
+            --search-highlight: #fefcbf;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            line-height: 1.5;
+            color: var(--text-main);
+            background-color: #f7fafc;
+            padding: 20px 12px;
+        }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--primary-slate);
+            padding-bottom: 12px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary-slate);
+        }
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        .control-bar {
+            background: #fff;
+            border: 1px solid var(--border-soft);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .control-bar label {
+            font-weight: 600;
+            color: var(--primary-slate);
+            font-size: 0.85rem;
+        }
+        .control-bar input {
+            width: 72px;
+            padding: 5px 8px;
+            border: 1px solid var(--border-soft);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        .control-bar button {
+            background: var(--primary-slate);
+            color: #fff;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.78rem;
+        }
+        .control-note {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            margin-left: auto;
+            white-space: nowrap;
+        }
+        .search-bar-wrap {
+            background: #fff;
+            border: 1px solid var(--border-soft);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .search-bar-wrap input[type="search"] {
+            flex: 1;
+            padding: 8px 14px;
+            border: 1px solid var(--border-soft);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            min-width: 180px;
+        }
+        .search-bar-wrap input[type="search"]:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(52, 73, 94, 0.1);
+        }
+        .search-results-count {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+        .search-results-area {
+            margin-bottom: 25px;
+        }
+        .search-result-card {
+            background: #fff;
+            border: 1px solid var(--border-soft);
+            border-radius: 6px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            transition: background 0.2s;
+        }
+        .search-result-card:hover {
+            background: #fefcfa;
+        }
+        .search-result-card .point-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary-slate);
+            min-width: 70px;
+        }
+        .search-result-card .point-detail {
+            flex: 1;
+            min-width: 280px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+        .search-result-card .point-detail .depth-ancient-text {
+            color: var(--depth-ancient);
+            font-weight: 600;
+        }
+        .search-result-card .point-detail .depth-modern-text {
+            color: var(--depth-modern);
+            font-weight: 600;
+        }
+        .search-result-card .point-detail .depth-separator {
+            color: #a0aec0;
+            margin: 0 4px;
+        }
+        .search-result-card .safest-wrap {
+            text-align: center;
+            min-width: 80px;
+        }
+        .search-no-result {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .sections-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        @media (max-width: 820px) {
+            .sections-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .section-card {
+            background: #fff;
+            border: 1px solid var(--border-soft);
+            border-radius: 6px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            min-width: 0;
+        }
+        h2 {
+            font-size: 1rem;
+            color: var(--primary-slate);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 1rem;
+            background: var(--primary-slate);
+            margin-right: 10px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .classic-mnemonic {
+            background-color: var(--clinical-blue);
+            border-left: 4px solid var(--accent-blue);
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+        .mnemonic-title {
+            font-weight: 700;
+            color: var(--primary-slate);
+            display: block;
+            margin-bottom: 3px;
+            font-size: 0.8rem;
+        }
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            min-width: 480px;
+        }
+        th {
+            background-color: #fdfdfd;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 2px solid var(--border-soft);
+            font-size: 0.73rem;
+            white-space: nowrap;
+        }
+        td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-soft);
+            vertical-align: middle;
+        }
+        .pair-group {
+            background-color: var(--pair-bg);
+        }
+        .label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 4px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+            display: inline-block;
+        }
+        .label-pair {
+            color: #2b6cb0;
+            background: #ebf8ff;
+            border-color: #90cdf4;
+        }
+        .label-depth-ancient {
+            color: var(--depth-ancient);
+            background: #faf5ff;
+            border-color: #d6bcfa;
+            font-family: "SF Mono", "Consolas", monospace;
+            font-size: 0.64rem;
+        }
+        .label-depth-modern {
+            color: var(--depth-modern);
+            background: #ebf8ff;
+            border-color: #90cdf4;
+            font-family: "SF Mono", "Consolas", monospace;
+            font-size: 0.64rem;
+        }
+        .point-highlight {
+            color: #744210;
+            font-weight: 700;
+        }
+        .depth-cell {
+            font-size: 0.74rem;
+            line-height: 1.45;
+        }
+        .depth-ancient-text {
+            color: var(--depth-ancient);
+            font-weight: 600;
+        }
+        .depth-modern-text {
+            color: var(--depth-modern);
+            font-weight: 600;
+        }
+        .depth-separator {
+            color: #a0aec0;
+            margin: 0 1px;
+        }
+        .warning-tag {
+            font-size: 0.6rem;
+            color: #c53030;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .needle-method {
+            font-size: 0.6rem;
+            color: var(--depth-modern);
+            font-weight: 500;
+        }
+        .safest-value {
+            font-weight: 700;
+            font-size: 0.76rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+            display: inline-block;
+        }
+        .safest-ancient {
+            color: var(--depth-ancient);
+            background: var(--safest-ancient-bg);
+            border: 1px solid #d6bcfa;
+        }
+        .safest-modern {
+            color: var(--depth-modern);
+            background: var(--safest-modern-bg);
+            border: 1px solid #90cdf4;
+        }
+        .safest-header {
+            font-size: 0.65rem;
+            color: #c53030;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .note-text {
+            font-size: 0.73rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-style: italic;
+        }
+        .depth-legend {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        .legend-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+        }
+        .legend-dot.ancient {
+            background: #d6bcfa;
+            border: 1px solid #805ad5;
+        }
+        .legend-dot.modern {
+            background: #90cdf4;
+            border: 1px solid #2b6cb0;
+        }
+        .legend-dot.safest {
+            background: #fed7d7;
+            border: 1px solid #c53030;
+        }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .section-card { box-shadow: none; border: 1px solid #eee; break-inside: avoid; }
+            .control-bar, .search-bar-wrap { display: none; }
+            .sections-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>穴位深度速查表</h1>
+            <p class="subtitle">《针灸甲乙经》深度 · 留针呼吸数 · 现代针法（1寸=2.31cm，可自定义）【整理者：西岛海 · 邢立明】</p>
+        </header>
+
+        <div class="control-bar">
+            <label>📏 1寸 =</label>
+            <input type="number" id="inchInput" value="2.31" step="0.01" min="1.5" max="5.0">
+            <span style="font-size:0.8rem;color:var(--text-secondary);">cm</span>
+            <button id="resetBtn">恢复默认 2.31</button>
+            <span class="control-note">⚡ 实时换算全部深度</span>
+        </div>
+
+        <div class="search-bar-wrap">
+            <label style="font-weight:600;font-size:0.85rem;white-space:nowrap;">🔍 穴位搜索</label>
+            <input type="search" id="searchInput" placeholder="输入穴位名（如：上星、肝俞、环跳…）">
+            <span class="search-results-count" id="searchCount"></span>
+            <button id="clearSearchBtn" style="background:#e2e8f0;color:#2d3748;">清除</button>
+        </div>
+        <div class="search-results-area" id="searchResults"></div>
+
+        <div class="sections-grid">
+
+            <!-- 十五络穴 -->
+            <section class="section-card">
+                <h2>十五络穴 <span class="label label-pair">需成对记忆</span></h2>
+                <div class="classic-mnemonic"><span class="mnemonic-title">《十五络穴歌》</span>列缺偏历肺大肠，通里支正心小肠；内关外关包焦外，公孙丰隆脾胃详；<br>光明蠡沟胆肝络，大钟飞扬肾膀胱。</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>表里经配对</th><th>络穴</th><th>针刺深度对比 (甲乙经→现代)</th><th>现代针法</th><th>最短安全值</th></tr></thead>
+                        <tbody>
+                            <tr class="pair-group"><td rowspan="2"><strong>肺 ↔ 大肠</strong></td><td><span class="point-highlight">列缺</span></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.2" data-modern-max-cun="0.5">0.46–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留三呼</span></td><td class="needle-method">向上斜刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.2">0.46 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr class="pair-group"><td>偏历</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺或斜刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td rowspan="2"><strong>心 ↔ 小肠</strong></td><td>通里</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td>支正</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺或斜刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr class="pair-group"><td rowspan="2"><strong>心包 ↔ 三焦</strong></td><td><span class="point-highlight">内关</span></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入二分 未载留针</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr class="pair-group"><td>外关</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入二分 留七呼</span></td><td class="needle-method">直刺或斜刺</td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td rowspan="2"><strong>脾 ↔ 胃</strong></td><td><strong>公孙</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="4">0.92 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入四分 留二十呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="4">0.92 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>丰隆</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="3">0.69 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr class="pair-group"><td rowspan="2"><strong>肝 ↔ 胆</strong></td><td>蠡沟</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入二分 留三呼</span></td><td class="needle-method">平刺</td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr class="pair-group"><td><strong>光明</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="6">1.38 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入六分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td rowspan="2"><strong>肾 ↔ 膀胱</strong></td><td>大钟</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入二分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td>飞扬</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="3">0.69 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="depth-legend"><span><span class="legend-dot ancient"></span>《甲乙经》</span><span><span class="legend-dot modern"></span>现代教材</span><span><span class="legend-dot safest"></span>最短安全值</span><span>基准：<span id="currentInchDisplay">2.31</span> cm/寸</span></div>
+            </section>
+
+            <!-- 十二原穴 -->
+            <section class="section-card">
+                <h2>十二原穴 · 可单独取用</h2>
+                <div class="classic-mnemonic"><span class="mnemonic-title">《十二原穴歌》</span>肺经太渊心经神门，心包大陵大肠合谷；小肠腕骨三焦阳池，脾经太白肾经太溪；<br>肝经太冲胃经冲阳，膀胱京骨胆经丘墟。</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>原穴</th><th>归经</th><th>针刺深度对比 (甲乙经→现代)</th><th>现代针法</th><th>最短安全值</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>太渊</strong></td><td>肺</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.2" data-modern-max-cun="0.3">0.46–0.69 cm</span><br><span class="label label-depth-ancient">刺入二分 留二呼</span></td><td class="needle-method">直刺 <span class="warning-tag">⚠避开桡动脉</span></td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><span class="point-highlight">合谷</span></td><td>大肠</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入三分 留六呼</span></td><td class="needle-method">直刺 <span class="warning-tag">⚠孕妇禁针</span></td><td><span class="safest-value safest-ancient" data-safest-fen="3">0.69 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>冲阳</strong></td><td>胃</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留十呼</span></td><td class="needle-method">避开动脉直刺 <span class="warning-tag">⚠足背动脉</span></td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>太白</strong></td><td>脾</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>神门</strong></td><td>心</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>腕骨</strong></td><td>小肠</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入二分 留三呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>京骨</strong></td><td>膀胱</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺或斜刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>太溪</strong></td><td>肾</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>大陵</strong></td><td>心包</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>阳池</strong></td><td>三焦</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入二分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>丘墟</strong></td><td>胆</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="5">1.15 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入五分 留七呼</span></td><td class="needle-method">直刺或斜刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><span class="point-highlight">太冲</span></td><td>肝</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入三分 留十呼</span></td><td class="needle-method">直刺或斜刺</td><td><span class="safest-value safest-ancient" data-safest-fen="3">0.69 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 六腑下合穴 -->
+            <section class="section-card">
+                <h2>六腑下合穴 · 可单独取用</h2>
+                <div class="classic-mnemonic"><span class="mnemonic-title">《下合穴歌》</span>大肠下合上巨虚，小肠下合下巨虚；三焦委阳胆阳陵，膀胱委中胃三里。</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>下合穴</th><th>六腑</th><th>针刺深度对比 (甲乙经→现代)</th><th>现代针法</th><th>最短安全值</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="point-highlight">足三里</span></td><td>胃</td><td class="depth-cell"><span class="depth-ancient-text" data-cun="1.5">3.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入一寸五分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="1">2.31 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>上巨虚</strong></td><td>大肠</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="8">1.85 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入八分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="8">1.85 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>下巨虚</strong></td><td>小肠</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="5">1.15 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入五分 留十呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>阳陵泉</strong></td><td>胆</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="6">1.38 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入六分 留十呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="6">1.38 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>委中</strong></td><td>膀胱</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="5">1.15 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入五分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>委阳</strong></td><td>三焦</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="7">1.62 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入七分 留五呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 八脉交会穴 -->
+            <section class="section-card">
+                <h2>八脉交会穴 <span class="label label-pair">必须配对</span></h2>
+                <div class="classic-mnemonic"><span class="mnemonic-title">《八脉交会八穴歌》</span>公孙冲脉胃心胸，内关阴维下总同；临泣胆经连带脉，阳维锐眦外关逢；<br>后溪督脉内眦颈，申脉阳跷络亦通；列缺任脉行肺系，阴跷照海隔喉咙。</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>配对</th><th>穴位（上+下）</th><th>针刺深度对比 (甲乙经→现代)</th><th>现代针法</th><th>最短安全值</th></tr></thead>
+                        <tbody>
+                            <!-- 【已修复Bug】这里将“内/公”等文字移至span外部，防止被JS覆盖重写 -->
+                            <tr><td><strong>胃心胸</strong></td><td><span class="point-highlight">内关</span> + 公孙</td><td class="depth-cell">内 <span class="depth-ancient-text" data-fen="2">0.46 cm</span> / 公 <span class="depth-ancient-text" data-fen="4">0.92 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">内二分 公四分留二十呼</span></td><td class="needle-method">内关直刺<br>公孙直刺</td><td>内 <span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经(内关)</span></td></tr>
+                            <tr><td><strong>侧头耳目</strong></td><td>外关 + 足临泣</td><td class="depth-cell">外 <span class="depth-ancient-text" data-fen="2">0.46 cm</span> / 临 <span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="0.8">1.15–1.85 cm</span><br><span class="label label-depth-ancient">外二分留七呼 临二分</span></td><td class="needle-method">外关直刺或斜刺<br>临泣直刺或斜刺</td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>颈肩背</strong></td><td>后溪 + 申脉</td><td class="depth-cell">后 <span class="depth-ancient-text" data-fen="2">0.46 cm</span> / 申 <span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">后二分留二呼 申三分留六呼</span></td><td class="needle-method">后溪直刺或斜刺<br>申脉直刺或斜刺</td><td>后 <span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经(后溪)</span></td></tr>
+                            <tr><td><strong>咽喉胸膈</strong></td><td><span class="point-highlight">列缺</span> + 照海</td><td class="depth-cell">列 <span class="depth-ancient-text" data-fen="3">0.69 cm</span> / 照 <span class="depth-ancient-text" data-fen="4">0.92 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.2" data-modern-max-cun="0.5">0.46–1.15 cm</span><br><span class="label label-depth-ancient">列三分留三呼 照四分留六呼</span></td><td class="needle-method">列缺向上斜刺<br>照海直刺</td><td>列 <span class="safest-value safest-modern" data-safest-modern="0.2">0.46 cm</span><br><span class="safest-header">现代下限(列缺)</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 八会穴 -->
+            <section class="section-card">
+                <h2>八会穴 · 按病变组织取用</h2>
+                <div class="classic-mnemonic"><span class="mnemonic-title">《八会穴歌》</span>血会膈俞气膻中，脉会太渊筋阳陵；骨会大杼髓绝骨，脏会章门中脘腑。</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>所会</th><th>穴位</th><th>针刺深度对比 (甲乙经→现代)</th><th>现代针法</th><th>最短安全值</th></tr></thead>
+                        <tbody>
+                            <tr><td>血会</td><td>膈俞</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="0.8">1.15–1.85 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">斜刺（向内） <span class="warning-tag">⚠禁直刺深刺</span></td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td>气会</td><td>膻中</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.3" data-modern-max-cun="0.5">0.69–1.15 cm</span><br><span class="label label-depth-ancient">刺入二分 未载留针</span></td><td class="needle-method">平刺或斜刺 <span class="warning-tag">⚠胸前勿深刺</span></td><td><span class="safest-value safest-modern" data-safest-modern="0.3">0.69 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td>脉会</td><td>太渊</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.2" data-modern-max-cun="0.3">0.46–0.69 cm</span><br><span class="label label-depth-ancient">刺入二分 留二呼</span></td><td class="needle-method">直刺 <span class="warning-tag">⚠避开桡动脉</span></td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td>筋会</td><td><strong>阳陵泉</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="6">1.38 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入六分 留十呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="6">1.38 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td>骨会</td><td>大杼</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="0.8">1.15–1.85 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">斜刺（向内） <span class="warning-tag">⚠禁深刺</span></td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td>髓会</td><td><strong>绝骨（悬钟）</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="6">1.38 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="0.8">1.15–1.85 cm</span><br><span class="label label-depth-ancient">刺入六分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td>脏会</td><td>章门</td><td class="depth-cell"><span class="depth-ancient-text" data-fen="8">1.85 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="0.8">1.15–1.85 cm</span><br><span class="label label-depth-ancient">刺入八分 留七呼</span></td><td class="needle-method">斜刺 <span class="warning-tag">⚠勿直刺</span></td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td>腑会</td><td>中脘</td><td class="depth-cell"><span class="depth-ancient-text" data-cun="1.2">2.77 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入一寸二分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="1">2.31 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 日常保健十大穴 -->
+            <section class="section-card">
+                <h2>日常保健十大穴</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead><tr><th>穴位</th><th>针刺深度对比 (甲乙经→现代)</th><th>现代针法</th><th>最短安全值</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="point-highlight">合谷</span></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入三分 留六呼</span></td><td class="needle-method">直刺 <span class="warning-tag">⚠孕妇禁针</span></td><td><span class="safest-value safest-ancient" data-safest-fen="3">0.69 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><span class="point-highlight">内关</span></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="2">0.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入二分 未载留针</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="2">0.46 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><span class="point-highlight">足三里</span></td><td class="depth-cell"><span class="depth-ancient-text" data-cun="1.5">3.46 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入一寸五分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="1">2.31 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><span class="point-highlight">三阴交</span></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入三分 留七呼</span></td><td class="needle-method">直刺或斜刺 <span class="warning-tag">⚠孕妇禁针</span></td><td><span class="safest-value safest-ancient" data-safest-fen="3">0.69 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>委中</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="5">1.15 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入五分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="0.5">1.15 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>风池</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.8" data-modern-max-cun="1.2">1.85–2.77 cm</span><br><span class="label label-depth-ancient">刺入三分 留三呼</span></td><td class="needle-method">向鼻尖斜刺 <span class="warning-tag">⚠禁深刺</span></td><td><span class="safest-value safest-ancient" data-safest-fen="3">0.69 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>涌泉</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="3">0.69 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="0.5" data-modern-max-cun="1">1.15–2.31 cm</span><br><span class="label label-depth-ancient">刺入三分 留三呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="3">0.69 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                            <tr><td><strong>中脘</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-cun="1.2">2.77 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入一寸二分 留七呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-modern" data-safest-modern="1">2.31 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>关元</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-cun="2">4.62 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入二寸 留七呼</span></td><td class="needle-method">直刺或斜刺 <span class="warning-tag">⚠排尿后操作</span></td><td><span class="safest-value safest-modern" data-safest-modern="1">2.31 cm</span><br><span class="safest-header">现代下限</span></td></tr>
+                            <tr><td><strong>阳陵泉</strong></td><td class="depth-cell"><span class="depth-ancient-text" data-fen="6">1.38 cm</span> <span class="depth-separator">→</span> <span class="depth-modern-text" data-modern-min-cun="1" data-modern-max-cun="1.5">2.31–3.46 cm</span><br><span class="label label-depth-ancient">刺入六分 留十呼</span></td><td class="needle-method">直刺</td><td><span class="safest-value safest-ancient" data-safest-fen="6">1.38 cm</span><br><span class="safest-header">甲乙经</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ==================== 寸长换算 ====================
+            const inchInput = document.getElementById('inchInput');
+            const resetBtn = document.getElementById('resetBtn');
+            const currentInchDisplay = document.getElementById('currentInchDisplay');
+
+            function getInchCm() { return parseFloat(inchInput.value) || 2.31; }
+
+            function updateDepths() {
+                const inchCm = getInchCm();
+                if (currentInchDisplay) currentInchDisplay.textContent = inchCm.toFixed(2);
+                document.querySelectorAll('.depth-ancient-text[data-fen]').forEach(span => {
+                    const fen = parseInt(span.getAttribute('data-fen'), 10);
+                    if (!isNaN(fen)) span.textContent = (fen / 10 * inchCm).toFixed(2) + ' cm';
+                });
+                document.querySelectorAll('.depth-ancient-text[data-cun]').forEach(span => {
+                    const cun = parseFloat(span.getAttribute('data-cun'));
+                    if (!isNaN(cun)) span.textContent = (cun * inchCm).toFixed(2) + ' cm';
+                });
+                document.querySelectorAll('.depth-modern-text[data-modern-min-cun]').forEach(span => {
+                    const minCun = parseFloat(span.getAttribute('data-modern-min-cun'));
+                    const maxCun = parseFloat(span.getAttribute('data-modern-max-cun'));
+                    if (!isNaN(minCun) && !isNaN(maxCun))
+                        span.textContent = (minCun * inchCm).toFixed(2) + '–' + (maxCun * inchCm).toFixed(2) + ' cm';
+                });
+                document.querySelectorAll('.safest-value[data-safest-fen]').forEach(span => {
+                    const fen = parseInt(span.getAttribute('data-safest-fen'), 10);
+                    if (!isNaN(fen)) span.textContent = (fen / 10 * inchCm).toFixed(2) + ' cm';
+                });
+                document.querySelectorAll('.safest-value[data-safest-modern]').forEach(span => {
+                    const cun = parseFloat(span.getAttribute('data-safest-modern'));
+                    if (!isNaN(cun)) span.textContent = (cun * inchCm).toFixed(2) + ' cm';
+                });
+            }
+            resetBtn.addEventListener('click', () => { 
+                inchInput.value = '2.31';
+                updateDepths();
+                renderSearchResults();
+            });
+            inchInput.addEventListener('input', () => { 
+                updateDepths();
+                renderSearchResults(); 
+            });
+            updateDepths();
+
+            // ==================== 穴位数据库（已做医学逻辑校订校验） ====================
+            const extendedAcupoints = [
+                // ---- 头面部 ----
+                { "name": "上星", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "" },
+                { "name": "囟会", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "⚠小儿禁刺" },
+                { "name": "前顶", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "" },
+                { "name": "百会", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "" },
+                { "name": "后顶", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "" },
+                { "name": "强间", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "" },
+                { "name": "脑户", "depth_fen": 2, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "⚠禁深刺" },
+                { "name": "风府", "depth_fen": 4, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向下斜刺", "warning": "⚠禁深刺！深部为延髓" },
+                { "name": "哑门", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向下斜刺", "warning": "⚠禁深刺！深部为延髓" },
+                { "name": "天柱", "depth_fen": 2, "retain_breath": "留六呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或斜刺", "warning": "⚠不可向内上方深刺" },
+                { "name": "玉枕", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "" },
+                // ---- 背部 ----
+                { "name": "大杼", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "肺俞", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁直刺深刺" },
+                { "name": "心俞", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁直刺深刺" },
+                { "name": "膈俞", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁直刺深刺" },
+                { "name": "肝俞", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁直刺深刺" },
+                { "name": "脾俞", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁直刺深刺" },
+                { "name": "胃俞", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁直刺深刺" },
+                { "name": "肾俞", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或斜刺", "warning": "" },
+                { "name": "大肠俞", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "小肠俞", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "膀胱俞", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                // ---- 腹部 ----
+                { "name": "中脘", "depth_fen": null, "depth_cun": 1.2, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "上脘", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "下脘", "depth_fen": null, "depth_cun": 1, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "水分", "depth_fen": null, "depth_cun": 1, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "气海", "depth_fen": null, "depth_cun": 1.2, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "⚠孕妇禁针" },
+                { "name": "关元", "depth_fen": null, "depth_cun": 2, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺或斜刺", "warning": "⚠排尿后操作" },
+                { "name": "中极", "depth_fen": null, "depth_cun": 2, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "⚠排尿后操作" },
+                { "name": "天枢", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "章门", "depth_fen": 8, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺", "warning": "⚠勿直刺" },
+                // ---- 上肢 ----
+                { "name": "少商", "depth_fen": 1, "retain_breath": "留一呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "鱼际", "depth_fen": 2, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "太渊", "depth_fen": 2, "retain_breath": "留二呼", "modern_min_cun": 0.2, "modern_max_cun": 0.3, "method": "直刺", "warning": "⚠避开桡动脉" },
+                { "name": "经渠", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.2, "modern_max_cun": 0.3, "method": "直刺", "warning": "⚠避开桡动脉" },
+                { "name": "尺泽", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "孔最", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "商阳", "depth_fen": 1, "retain_breath": "留一呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "二间", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "三间", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "合谷", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "⚠孕妇禁针" }, // 修复：合谷通下，孕妇禁针
+                { "name": "阳溪", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "曲池", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "手三里", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "神门", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "少府", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "少冲", "depth_fen": 1, "retain_breath": "留一呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "少泽", "depth_fen": 1, "retain_breath": "留二呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "后溪", "depth_fen": 2, "retain_breath": "留二呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或斜刺", "warning": "" },
+                { "name": "腕骨", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "阳谷", "depth_fen": 2, "retain_breath": "留二呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "养老", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "支正", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺或斜刺", "warning": "" },
+                { "name": "小海", "depth_fen": 2, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "大陵", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "劳宫", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "中冲", "depth_fen": 1, "retain_breath": "留三呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "关冲", "depth_fen": 1, "retain_breath": "留三呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "液门", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "中渚", "depth_fen": 2, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "阳池", "depth_fen": 2, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "外关", "depth_fen": 2, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或斜刺", "warning": "" },
+                { "name": "支沟", "depth_fen": 2, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "天井", "depth_fen": 1, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                // ---- 下肢 ----
+                { "name": "隐白", "depth_fen": 1, "retain_breath": "留三呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "大都", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "太白", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "公孙", "depth_fen": 4, "retain_breath": "留二十呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "商丘", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "三阴交", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺或斜刺", "warning": "⚠孕妇禁针" },
+                { "name": "阴陵泉", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "血海", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "厉兑", "depth_fen": 1, "retain_breath": "留一呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "内庭", "depth_fen": 3, "retain_breath": "留二十呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "陷谷", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "冲阳", "depth_fen": 3, "retain_breath": "留十呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "避开动脉直刺", "warning": "⚠足背动脉" },
+                { "name": "解溪", "depth_fen": 5, "retain_breath": "留五呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "足三里", "depth_fen": null, "depth_cun": 1.5, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "上巨虚", "depth_fen": 8, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "下巨虚", "depth_fen": 5, "retain_breath": "留十呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "丰隆", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "犊鼻", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "斜刺", "warning": "" },
+                { "name": "阳陵泉", "depth_fen": 6, "retain_breath": "留十呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "光明", "depth_fen": 6, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "悬钟", "depth_fen": 6, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "直刺", "warning": "" },
+                { "name": "丘墟", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或斜刺", "warning": "" },
+                { "name": "足临泣", "depth_fen": 2, "retain_breath": "留五呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺或斜刺", "warning": "" },
+                { "name": "侠溪", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "足窍阴", "depth_fen": 1, "retain_breath": "留三呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "大敦", "depth_fen": 3, "retain_breath": "留十呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "" },
+                { "name": "太冲", "depth_fen": 3, "retain_breath": "留十呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或斜刺", "warning": "" },
+                { "name": "中封", "depth_fen": 4, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "蠡沟", "depth_fen": 2, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "" },
+                { "name": "中都", "depth_fen": 6, "retain_breath": "留六呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "曲泉", "depth_fen": 6, "retain_breath": "留十呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "涌泉", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "然谷", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "太溪", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "大钟", "depth_fen": 2, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "照海", "depth_fen": 4, "retain_breath": "留六呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "水泉", "depth_fen": 4, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "复溜", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "交信", "depth_fen": 4, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "至阴", "depth_fen": 3, "retain_breath": "留五呼", "modern_min_cun": 0.1, "modern_max_cun": 0.2, "method": "点刺出血", "warning": "⚠孕妇禁针" }, // 修复：易催产引发宫缩
+                { "name": "通谷", "depth_fen": 2, "retain_breath": "留五呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "束骨", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "京骨", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺或斜刺", "warning": "" },
+                { "name": "申脉", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺或斜刺", "warning": "" },
+                { "name": "金门", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "仆参", "depth_fen": 5, "retain_breath": "留十呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "昆仑", "depth_fen": 5, "retain_breath": "留十呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "⚠孕妇禁针" },
+                { "name": "委中", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "委阳", "depth_fen": 7, "retain_breath": "留五呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "承山", "depth_fen": 7, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "飞扬", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "环跳", "depth_fen": null, "depth_cun": 1, "retain_breath": "留二十呼", "modern_min_cun": 2, "modern_max_cun": 3, "method": "直刺", "warning": "" },
+                { "name": "风市", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "梁丘", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "阴市", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "伏兔", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "髀关", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "条口", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "居髎", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "维道", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "带脉", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "日月", "depth_fen": 7, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "斜刺", "warning": "⚠勿深刺" },
+                { "name": "期门", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺", "warning": "⚠勿深刺" },
+                { "name": "大包", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺", "warning": "⚠勿深刺" },
+                { "name": "渊腋", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺", "warning": "⚠勿深刺" },
+                // ---- 胸颈部 ----
+                { "name": "天突", "depth_fen": null, "depth_cun": 1, "retain_breath": "留七呼", "modern_min_cun": 0.2, "modern_max_cun": 0.3, "method": "先直刺再向下斜刺", "warning": "⚠禁深刺" },
+                { "name": "璇玑", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "华盖", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "紫宫", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "玉堂", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "膻中", "depth_fen": 2, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺或斜刺", "warning": "⚠胸前勿深刺" },
+                { "name": "中庭", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "鸠尾", "depth_fen": null, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向下斜刺", "warning": "⚠禁深刺" },
+                { "name": "巨阙", "depth_fen": 6, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向下斜刺", "warning": "⚠禁深刺" },
+                { "name": "缺盆", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "斜刺", "warning": "⚠禁深刺！孕妇禁针" }, // 修复：孕妇也禁缺盆
+                { "name": "气舍", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "人迎", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "避开动脉直刺", "warning": "⚠禁深刺！刺伤动脉可致命" },
+                { "name": "水突", "depth_fen": null, "depth_cun": 1, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "扶突", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "天鼎", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "天窗", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "天容", "depth_fen": null, "depth_cun": 1, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "颧髎", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "听宫", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "听会", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "耳门", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "丝竹空", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "⚠禁灸" },
+                { "name": "攒竹", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺或斜刺", "warning": "⚠禁灸" },
+                { "name": "睛明", "depth_fen": 6, "retain_breath": "留六呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "⚠禁灸，禁提插捻转" },
+                { "name": "承泣", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "⚠禁灸，禁提插捻转" },
+                { "name": "四白", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "地仓", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "斜刺或平刺", "warning": "" },
+                { "name": "颊车", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "下关", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "头维", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "平刺", "warning": "⚠禁灸" },
+                { "name": "角孙", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "翳风", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                // ---- 其他 ----
+                { "name": "长强", "depth_fen": null, "depth_cun": 2, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "⚠勿直刺" },
+                { "name": "腰俞", "depth_fen": null, "depth_cun": 2, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "" },
+                { "name": "命门", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或向上斜刺", "warning": "" },
+                { "name": "至阳", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "⚠禁深刺" },
+                { "name": "身柱", "depth_fen": 5, "retain_breath": "留五呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "⚠禁深刺" },
+                { "name": "陶道", "depth_fen": 5, "retain_breath": "留五呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "" },
+                { "name": "大椎", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "⚠禁深刺" },
+                { "name": "神道", "depth_fen": 5, "retain_breath": "留五呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "⚠禁深刺" },
+                { "name": "筋缩", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "" },
+                { "name": "脊中", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "⚠禁深刺" },
+                { "name": "悬枢", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "腰阳关", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "风门", "depth_fen": 5, "retain_breath": "留五呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "神堂", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "魄户", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "膏肓", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "志室", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "秩边", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 1.5, "modern_max_cun": 3, "method": "直刺", "warning": "" },
+                { "name": "承扶", "depth_fen": null, "depth_cun": 2, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "殷门", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "浮郄", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "合阳", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 2, "method": "直刺", "warning": "" },
+                { "name": "跗阳", "depth_fen": 6, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "阳交", "depth_fen": 6, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "外丘", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "阳辅", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "地五会", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "阴包", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "足五里", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "阴廉", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "急脉", "depth_fen": 2, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "⚠避开动脉" },
+                { "name": "石门", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "⚠孕妇禁针" },
+                { "name": "阴交", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "⚠孕妇禁针" },
+                { "name": "神阙", "depth_fen": null, "retain_breath": "", "modern_min_cun": 0, "modern_max_cun": 0, "method": "禁刺", "warning": "⚠禁刺，仅灸" },
+                { "name": "建里", "depth_fen": 5, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "梁门", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "关门", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "滑肉门", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "水道", "depth_fen": null, "depth_cun": 2.5, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "归来", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "气冲", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "大巨", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "外陵", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "大赫", "depth_fen": null, "depth_cun": 1, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "横骨", "depth_fen": null, "depth_cun": 1, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "⚠排尿后操作" },
+                { "name": "曲骨", "depth_fen": null, "depth_cun": 1.5, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "⚠排尿后操作" },
+                { "name": "会阴", "depth_fen": null, "depth_cun": 2, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "上髎", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "次髎", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "中髎", "depth_fen": null, "depth_cun": 2, "retain_breath": "留十呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "下髎", "depth_fen": null, "depth_cun": 2, "retain_breath": "留十呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "会阳", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "白环俞", "depth_fen": 5, "retain_breath": "留六呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "中膂俞", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "胆俞", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "三焦俞", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "魂门", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "阳纲", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "意舍", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "胃仓", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "肓门", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺（向内）", "warning": "⚠禁深刺" },
+                { "name": "胞肓", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "肩井", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺", "warning": "⚠禁深刺！孕妇禁针" }, // 修复：孕妇禁针
+                { "name": "天宗", "depth_fen": 5, "retain_breath": "留六呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或斜刺", "warning": "" },
+                { "name": "秉风", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "直刺", "warning": "" },
+                { "name": "曲垣", "depth_fen": 9, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "直刺", "warning": "" },
+                { "name": "肩外俞", "depth_fen": 6, "retain_breath": "留六呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺", "warning": "" },
+                { "name": "肩中俞", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "斜刺", "warning": "" },
+                { "name": "肩贞", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "臑俞", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "肩髃", "depth_fen": 6, "retain_breath": "留六呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺或斜刺", "warning": "" },
+                { "name": "巨骨", "depth_fen": null, "depth_cun": 1.5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "天髎", "depth_fen": 8, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 0.8, "method": "直刺", "warning": "" },
+                { "name": "肩髎", "depth_fen": 7, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "消泺", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "清冷渊", "depth_fen": 3, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "四渎", "depth_fen": 6, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "会宗", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "三阳络", "depth_fen": null, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "⚠禁深刺" },
+                { "name": "温溜", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "下廉", "depth_fen": 5, "retain_breath": "留五呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "上廉", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "肘髎", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "臂臑", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺或向上斜刺", "warning": "" },
+                { "name": "天府", "depth_fen": 4, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "侠白", "depth_fen": 4, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "极泉", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "⚠避开腋动脉" },
+                { "name": "青灵", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "少海", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "灵道", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "通里", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "阴郄", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "郄门", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "间使", "depth_fen": 6, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "曲泽", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "天泉", "depth_fen": 6, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "漏谷", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "地机", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "箕门", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "⚠避开动脉" },
+                { "name": "筑宾", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "阴谷", "depth_fen": 4, "retain_breath": "留二呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "膝关", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "中渎", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 1, "modern_max_cun": 1.5, "method": "直刺", "warning": "" },
+                { "name": "膝阳关", "depth_fen": 5, "retain_breath": "", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "颔厌", "depth_fen": 7, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "悬颅", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "悬厘", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "曲鬓", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺", "warning": "" },
+                { "name": "率谷", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "天冲", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "浮白", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "头窍阴", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "完骨", "depth_fen": 2, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "向下斜刺", "warning": "" },
+                { "name": "本神", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "阳白", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "头临泣", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "目窗", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "正营", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "承灵", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "脑空", "depth_fen": 4, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "瞳子髎", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "平刺", "warning": "" },
+                { "name": "上关", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "直刺", "warning": "" },
+                { "name": "大迎", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "直刺或斜刺", "warning": "⚠避开动脉" },
+                { "name": "水沟", "depth_fen": 3, "retain_breath": "留七呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "向上斜刺", "warning": "" },
+                { "name": "兑端", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.2, "modern_max_cun": 0.3, "method": "向上斜刺", "warning": "" },
+                { "name": "龈交", "depth_fen": 3, "retain_breath": "", "modern_min_cun": 0.2, "modern_max_cun": 0.3, "method": "向上斜刺", "warning": "" },
+                { "name": "承浆", "depth_fen": 3, "retain_breath": "留六呼", "modern_min_cun": 0.3, "modern_max_cun": 0.5, "method": "斜刺", "warning": "" },
+                { "name": "廉泉", "depth_fen": 2, "retain_breath": "留三呼", "modern_min_cun": 0.5, "modern_max_cun": 1, "method": "向上斜刺", "warning": "" }
+            ];
+
+            // ==================== 搜索功能 ====================
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            const searchCount = document.getElementById('searchCount');
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+            function formatDepthAncient(point) {
+                const inchCm = getInchCm();
+                if (point.depth_fen) {
+                    return (point.depth_fen / 10 * inchCm).toFixed(2) + ' cm';
+                } else if (point.depth_cun) {
+                    return (point.depth_cun * inchCm).toFixed(2) + ' cm';
+                }
+                return '—';
+            }
+
+            function formatFenLabel(point) {
+                if (point.depth_fen) return '刺入' + point.depth_fen + '分';
+                if (point.depth_cun) return '刺入' + (point.depth_cun % 1 === 0 ? point.depth_cun.toFixed(0) : point.depth_cun.toFixed(1)) + '寸';
+                return '';
+            }
+
+            function formatModernDepth(point) {
+                const inchCm = getInchCm();
+                const min = point.modern_min_cun * inchCm;
+                const max = point.modern_max_cun * inchCm;
+                return min.toFixed(2) + '–' + max.toFixed(2) + ' cm';
+            }
+
+            function getSafestCm(point) {
+                const inchCm = getInchCm();
+                let ancientCm = Infinity;
+                if (point.depth_fen) ancientCm = point.depth_fen / 10 * inchCm;
+                if (point.depth_cun) ancientCm = point.depth_cun * inchCm;
+                const modernMinCm = point.modern_min_cun * inchCm;
+                if (ancientCm <= modernMinCm) {
+                    return { cm: ancientCm, source: '甲乙经' };
+                } else {
+                    return { cm: modernMinCm, source: '现代下限' };
+                }
+            }
+
+            function renderSearchResults() {
+                const query = searchInput.value.trim().toLowerCase();
+                if (!query) {
+                    searchResults.innerHTML = '';
+                    searchCount.textContent = '';
+                    return;
+                }
+                const filtered = extendedAcupoints.filter(p => p.name.toLowerCase().includes(query));
+                searchCount.textContent = '共 ' + filtered.length + ' 个结果';
+                if (filtered.length === 0) {
+                    searchResults.innerHTML = '<div class="search-no-result">未找到匹配的穴位，请尝试其他名称</div>';
+                    return;
+                }
+                
+                let html = '';
+                filtered.forEach(point => {
+                    const ancientCm = formatDepthAncient(point);
+                    const modernCm = formatModernDepth(point);
+                    const fenLabel = formatFenLabel(point);
+                    const retain = point.retain_breath ? ' ' + point.retain_breath : '';
+                    const safest = getSafestCm(point);
+                    const safestClass = safest.source === '甲乙经' ? 'safest-ancient' : 'safest-modern';
+                    const method = point.method || '';
+                    const warning = point.warning || '';
+                    
+                    html += `
+                <div class="search-result-card">
+                  <div class="point-name">${point.name}</div>
+                  <div class="point-detail">
+                    <span class="depth-ancient-text">${ancientCm}</span>
+                    <span class="depth-separator">→</span>
+                    <span class="depth-modern-text">${modernCm}</span>
+                    <br>
+                    <span class="label label-depth-ancient">${fenLabel}${retain}</span>
+                    ${method ? '<span style="font-size:0.65rem;color:#2b6cb0;"> | ' + method + '</span>' : ''}
+                    ${warning ? '<span class="warning-tag" style="margin-left:4px;">' + warning + '</span>' : ''}
+                  </div>
+                  <div class="safest-wrap">
+                    <span class="safest-value ${safestClass}">${safest.cm.toFixed(2)} cm</span>
+                    <br><span class="safest-header">${safest.source}</span>
+                  </div>
+                </div>`;
+                });
+                searchResults.innerHTML = html;
+            }
+
+            searchInput.addEventListener('input', renderSearchResults);
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                searchResults.innerHTML = '';
+                searchCount.textContent = '';
+            });
+        })();
+    </script>
+</body>
+</html>
