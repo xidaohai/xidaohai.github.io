@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none" />
+    <title>概率实验室：蒙提·霍尔 vs 蒙提·福尔</title>
+    <style>
+        :root {
+            --gold: #f7c948;
+            --red: #ff7b7b;
+            --bg: #1a1a2e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            color: #fff;
+            position: relative;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 25px 25px 45px 25px; /* 底部留出作者署名空间 */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* 模式切换器 */
+        .switcher {
+            display: flex;
+            background: rgba(0,0,0,0.4);
+            padding: 4px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #8a87a2;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 1;
+            transition: 0.3s;
+        }
+        .mode-btn.active { color: #fff; }
+        .slider {
+            position: absolute;
+            width: calc(50% - 4px);
+            height: calc(100% - 8px);
+            border-radius: 12px;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .knows .slider { transform: translateX(0); background: var(--gold); }
+        .guesses .slider { transform: translateX(100%); background: var(--red); }
+
+        /* 标题显示 */
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 22px; margin-bottom: 8px; transition: color 0.3s; }
+        .header p { font-size: 13px; color: #b0adc0; line-height: 1.5; }
+        .knows h1 { color: var(--gold); }
+        .guesses h1 { color: var(--red); }
+
+        .msg-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            padding: 15px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--gold);
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        .guesses .msg-box { border-color: var(--red); }
+
+        /* 门网格 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .door {
+            aspect-ratio: 3/4;
+            background: #2d2b44;
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s;
+        }
+        .door-panel {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(170deg, #3a3757, #23213a);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.5s;
+            z-index: 2;
+        }
+        .door.selected { border-color: #fff; transform: scale(1.05); }
+        .door.eliminated { opacity: 0.1; pointer-events: none; }
+        .door.open .door-panel { transform: translateX(-100%); opacity: 0; }
+        .door-content { font-size: 24px; display: flex; align-items: center; justify-content: center; height: 100%; }
+
+        /* 按钮 */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 10px;
+        }
+        .knows .btn-primary { background: var(--gold); color: #1a1a2e; }
+        .guesses .btn-primary { background: var(--red); color: #1a1a2e; }
+        .btn:disabled { opacity: 0.3; }
+        .btn-restart { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .prob-tip {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .knows .prob-tip strong { color: var(--gold); }
+        .guesses .prob-tip strong { color: var(--red); }
+
+        /* 作者链接 */
+        .author-link {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            font-size: 11px;
+            color: rgba(138, 135, 162, 0.6);
+            text-decoration: none;
+            transition: 0.3s;
+            font-weight: 500;
+        }
+        .author-link:hover { color: var(--gold); text-decoration: underline; }
+
+        .hidden { display: none !important; }
+
+        /* 针对超小屏手机的微调 */
+        @media (max-width: 360px) {
+            .grid { gap: 6px; }
+            .header h1 { font-size: 18px; }
+            .msg-box { font-size: 13px; min-height: 60px; }
+        }
+    </style>
+</head>
+<body class="knows">
+
+<div class="container">
+    <!-- 模式切换器 -->
+    <div class="switcher">
+        <div class="slider"></div>
+        <button class="mode-btn active" onclick="setMode('knows')">主持人知道</button>
+        <button class="mode-btn" onclick="setMode('guesses')">主持人不知</button>
+    </div>
+
+    <div class="header">
+        <h1 id="t">蒙提·霍尔 (10门)</h1>
+        <p id="st">主持人知道苹果位置，他会刻意过滤空门</p>
+    </div>
+
+    <div class="msg-box" id="msg">请在 10 扇门中选一扇作为预选</div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="actions">
+        <button id="btnConfirm" class="btn btn-primary" disabled onclick="confirmPick()">确定初步选择</button>
+        <button id="btnFinal" class="btn btn-primary hidden" onclick="reveal()">确认最终选择</button>
+        <button id="btnRestart" class="btn btn-restart hidden" onclick="init()">重新开始</button>
+    </div>
+
+    <div id="tip" class="prob-tip hidden"></div>
+
+    <!-- 作者署名 -->
+    <a href="https://space.bilibili.com/1534330" class="author-link" target="_blank">网页作者：西岛海</a>
+</div>
+
+<script>
+    const TOTAL = 10;
+    let appleIndex, userPick, keptIndex, mode = 'knows', phase = 'start';
+
+    function setMode(m) {
+        if (phase !== 'start' && phase !== 'end') return;
+        mode = m;
+        document.body.className = m;
+        document.querySelectorAll('.mode-btn').forEach((b, i) => {
+            b.classList.toggle('active', (i === 0 && m === 'knows') || (i === 1 && m === 'guesses'));
+        });
+        document.getElementById('t').innerText = m === 'knows' ? "蒙提·霍尔 (10门)" : "蒙提·福尔 (10门)";
+        document.getElementById('st').innerHTML = m === 'knows' ? 
+            "主持人<strong>知道</strong>位置：他会刻意过滤空门" : 
+            "主持人<strong>不知道</strong>位置：假设他恰巧避开了苹果";
+        init();
+    }
+
+    function init() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        for (let i = 0; i < TOTAL; i++) {
+            const d = document.createElement('div');
+            d.className = 'door';
+            d.innerHTML = `<div class="door-panel"><span style="color:rgba(255,255,255,0.2);font-weight:bold">${i+1}</span></div><div class="door-content">/</div>`;
+            d.onclick = () => pick(i);
+            grid.appendChild(d);
+        }
+        // 初始苹果索引
+        appleIndex = Math.floor(Math.random() * TOTAL);
+        phase = 'start';
+        userPick = null;
+        document.getElementById('btnConfirm').classList.remove('hidden');
+        document.getElementById('btnConfirm').disabled = true;
+        document.getElementById('btnFinal').classList.add('hidden');
+        document.getElementById('btnRestart').classList.add('hidden');
+        document.getElementById('tip').classList.add('hidden');
+        document.getElementById('msg').innerText = "请在 10 扇门中选一扇作为预选";
+    }
+
+    function pick(i) {
+        if (phase !== 'start' && phase !== 'decision') return;
+        userPick = i;
+        document.querySelectorAll('.door').forEach((d, idx) => d.classList.toggle('selected', idx === i));
+        if (phase === 'start') {
+            document.getElementById('btnConfirm').disabled = false;
+            document.getElementById('msg').innerHTML = `你选了 <strong>${i+1}号门</strong>，请确定。`;
+        } else {
+            document.getElementById('msg').innerHTML = i === keptIndex ? "你决定【换门】" : "你决定【坚持】";
+        }
+    }
+
+    function confirmPick() {
+        phase = 'decision';
+        document.getElementById('btnConfirm').classList.add('hidden');
+        document.getElementById('btnFinal').classList.remove('hidden');
+
+        if (mode === 'knows') {
+            // 三门问题逻辑：苹果位置固定，主持人必留苹果
+            if (userPick === appleIndex) {
+                let opts = Array.from({length:10},(_,i)=>i).filter(i=>i!==userPick);
+                keptIndex = opts[Math.floor(Math.random()*opts.length)];
+            } else {
+                keptIndex = appleIndex;
+            }
+        } else {
+            // 蒙提·福尔逻辑：主持人盲抽
+            // 为模拟“恰巧避开”后的条件概率，将苹果重新以 50/50 分布在预选门和剩余门之间
+            let opts = Array.from({length:10},(_,i)=>i).filter(i=>i!==userPick);
+            keptIndex = opts[Math.floor(Math.random()*opts.length)];
+            appleIndex = Math.random() > 0.5 ? userPick : keptIndex;
+        }
+
+        document.querySelectorAll('.door').forEach((d, i) => {
+            if (i !== userPick && i !== keptIndex) d.classList.add('eliminated');
+        });
+        document.getElementById('msg').innerHTML = `主持人排除了8扇空门！<br>剩 ${userPick+1}号(原选) 和 ${keptIndex+1}号，换吗？`;
+    }
+
+    function reveal() {
+        phase = 'end';
+        document.getElementById('btnFinal').classList.add('hidden');
+        document.getElementById('btnRestart').classList.remove('hidden');
+        const isWin = userPick === appleIndex;
+
+        document.querySelectorAll('.door').forEach((d, i) => {
+            if (!d.classList.contains('eliminated')) {
+                d.classList.add('open');
+                if (i === appleIndex) d.querySelector('.door-content').innerHTML = '🍎';
+            }
+        });
+
+        document.getElementById('msg').innerHTML = isWin ? 
+            `<span style="color:#6fcf97">恭喜！你拿到了苹果！</span>` : 
+            `<span style="color:#ff7b7b">很遗憾，这扇门是空的。</span>`;
+
+        const tip = document.getElementById('tip');
+        tip.classList.remove('hidden');
+        if (mode === 'knows') {
+            tip.innerHTML = `<strong>实验分析：</strong> 主持人有意识的过滤带走了大量信息。此时坚持胜率 <strong>10%</strong>，换门胜率 <strong>90%</strong>。`;
+        } else {
+            tip.innerHTML = `<strong>实验分析：</strong> 主持人是盲开的，虽然结果上恰巧避开了，但他没提供有效筛选信息。此时胜率均为 <strong>50%</strong>。`;
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
