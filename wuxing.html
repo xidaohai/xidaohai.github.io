@@ -42,14 +42,16 @@
             margin: 4px 0 0;
         }
 
-        /* ===== 五行卡片纵向列表 ===== */
-        .node-list {
+        /* ============================================================
+                   视图1: 纵向卡片列表 (默认)
+                   ============================================================ */
+        .view-list .node-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-top: 8px;
         }
-        .el-card {
+        .view-list .el-card {
             background: #ffffff;
             border-radius: 16px;
             padding: 12px 16px;
@@ -61,27 +63,23 @@
             transition: box-shadow 0.2s;
             touch-action: manipulation;
         }
-        .el-card:active {
+        .view-list .el-card:active {
             box-shadow: 0 2px 12px rgba(0,0,0,0.10);
         }
-
-        /* 左侧：名称 + 器官 */
-        .el-info {
+        .view-list .el-info {
             flex: 0 0 58px;
         }
-        .el-name {
+        .view-list .el-name {
             font-size: 22px;
             font-weight: 700;
             line-height: 1.2;
         }
-        .el-organ {
+        .view-list .el-organ {
             font-size: 11px;
             color: #7f8c8d;
             line-height: 1.2;
         }
-
-        /* 中间：能量柱 */
-        .bar-wrap {
+        .view-list .bar-wrap {
             flex: 1;
             height: 44px;
             background: #ecf0f1;
@@ -90,14 +88,14 @@
             position: relative;
             min-width: 60px;
         }
-        .bar-fill {
+        .view-list .bar-fill {
             height: 100%;
             width: 0%;
             transition: width 0.35s ease;
             border-radius: 8px;
             opacity: 0.85;
         }
-        .bar-label {
+        .view-list .bar-label {
             position: absolute;
             right: 6px;
             top: 50%;
@@ -109,14 +107,12 @@
             padding: 0 6px;
             border-radius: 4px;
         }
-
-        /* 右侧：+ / - 按钮 */
-        .btns {
+        .view-list .btns {
             display: flex;
             gap: 8px;
             flex: 0 0 72px;
         }
-        .btns button {
+        .view-list .btns button {
             flex: 1;
             height: 48px;
             border: none;
@@ -133,12 +129,113 @@
             justify-content: center;
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
-        .btns button:active {
+        .view-list .btns button:active {
             transform: scale(0.92);
             opacity: 0.8;
         }
 
-        /* ===== 图例 ===== */
+        /* ============================================================
+                   视图2: 图形五角星阵 (优化对齐)
+                   ============================================================ */
+        .view-graph .board {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            margin: 0 auto;
+            max-width: 400px;
+        }
+        .view-graph .board-svg {
+            width: 100%;
+            height: 100%;
+        }
+        .view-graph .el-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1.5px solid #e5e7eb;
+            padding: 5px 3px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            touch-action: manipulation;
+            box-sizing: border-box;
+        }
+        .view-graph .el-name {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 1px;
+            line-height: 1.2;
+        }
+        .view-graph .el-organ {
+            font-size: 9px;
+            color: #6b7280;
+            margin-bottom: 3px;
+        }
+        .view-graph .bar-wrap {
+            width: 24px;
+            height: 52px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 4px;
+        }
+        .view-graph .bar-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            transition: height .35s ease;
+            border-radius: 4px 4px 0 0;
+        }
+        .view-graph .bar-ticks {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column-reverse;
+            pointer-events: none;
+        }
+        .view-graph .bar-tick {
+            flex: 1;
+            border-top: 0.5px solid rgba(0,0,0,0.06);
+        }
+        .view-graph .el-value {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .view-graph .btns {
+            display: flex;
+            gap: 4px;
+        }
+        .view-graph .btns button {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            font-size: 15px;
+            line-height: 1;
+            color: #fff;
+            cursor: pointer;
+            transition: transform .1s, opacity .15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .view-graph .btns button:active {
+            transform: scale(0.90);
+            opacity: 0.8;
+        }
+
+        /* 图形视图下隐藏列表，列表视图下隐藏图形 */
+        .view-list .graph-only { display: none !important; }
+        .view-graph .list-only { display: none !important; }
+
+        /* ===== 图例 (共用) ===== */
         .legend {
             display: flex;
             flex-wrap: wrap;
@@ -159,13 +256,8 @@
             height: 10px;
             border-radius: 50%;
         }
-        .legend-line {
-            display: inline-block;
-            width: 20px;
-            height: 2px;
-        }
 
-        /* ===== 日志 ===== */
+        /* ===== 日志 (共用) ===== */
         .log {
             background: #ffffff;
             border-radius: 14px;
@@ -187,20 +279,22 @@
         .ev-cheng { color: #e74c3c; }
         .ev-wu    { color: #8e44ad; }
 
-        /* ===== 底部按钮 ===== */
+        /* ===== 底部按钮区域 ===== */
         .actions {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin-top: 4px;
+            flex-wrap: wrap;
         }
         .actions button {
             flex: 1;
+            min-width: 70px;
             max-width: 160px;
             padding: 14px 0;
             font-size: 15px;
             font-weight: 500;
-            background: transparent;
+            background: #ffffff;
             color: #2c3e50;
             border: 1.5px solid #d5dbdb;
             border-radius: 12px;
@@ -208,7 +302,6 @@
             transition: background 0.15s, border-color 0.15s;
             touch-action: manipulation;
             user-select: none;
-            background: #ffffff;
         }
         .actions button:active {
             background: #ecf0f1;
@@ -222,34 +315,58 @@
         .actions button.primary:active {
             background: #1a2a3a;
         }
-
-        /* ===== 状态标签颜色 ===== */
-        .state-tag {
-            font-size: 10px;
-            padding: 1px 8px;
-            border-radius: 20px;
-            margin-left: 4px;
-            font-weight: 500;
+        .actions button.switch-btn {
+            border-color: #8e9aaf;
+            background: #eef2f7;
+            color: #2c3e50;
+            flex: 0 0 auto;
+            padding: 14px 18px;
+            min-width: 80px;
         }
-        .state-tag.重虚 { background: #fde8e8; color: #c0392b; }
-        .state-tag.偏虚 { background: #fdebd0; color: #d97706; }
-        .state-tag.平   { background: #d5f5e3; color: #27ae60; }
-        .state-tag.偏盛 { background: #fdebd0; color: #d97706; }
-        .state-tag.亢盛 { background: #fde8e8; color: #c0392b; }
+        .actions button.switch-btn:active {
+            background: #d5dbdb;
+        }
     </style>
 </head>
 <body>
 
-<div class="wrap">
+<div class="wrap" id="app">
     <div class="header">
         <h1>☯ 五行<span>·</span>沙盘</h1>
         <p>点击 + / − 观察五脏联动</p>
     </div>
 
-    <!-- 五行卡片列表 -->
-    <div id="nodeList" class="node-list"></div>
+    <div id="viewList" class="view-list list-only">
+        <div id="nodeList" class="node-list"></div>
+    </div>
 
-    <!-- 图例 -->
+    <div id="viewGraph" class="view-graph graph-only" style="display:none;">
+        <div class="board">
+            <svg class="board-svg" viewBox="0 0 560 560" id="svgBoard">
+                <defs>
+                    <marker id="arr-sheng" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M2 1L8 5L2 9" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </marker>
+                    <marker id="arr-ke" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                        <path d="M2 1L8 5L2 9" fill="none" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </marker>
+                </defs>
+                <path d="M 104,195 Q 180,65 280,82" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
+                <path d="M 280,82 Q 380,65 456,195" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
+                <path d="M 456,195 Q 480,330 395,456" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
+                <path d="M 395,456 Q 280,500 165,456" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
+                <path d="M 165,456 Q 80,330 104,195" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
+                <line x1="104" y1="195" x2="456" y2="195" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
+                <line x1="456" y1="195" x2="165" y2="456" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
+                <line x1="165" y1="456" x2="280" y2="82" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
+                <line x1="280" y1="82" x2="395" y2="456" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
+                <line x1="395" y1="456" x2="104" y2="195" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
+                
+                <g id="svgNodesGroup"></g>
+            </svg>
+        </div>
+    </div>
+
     <div class="legend">
         <span class="legend-item"><span class="legend-dot" style="background:#27ae60;"></span> 相生</span>
         <span class="legend-item"><span class="legend-dot" style="background:#7f8c8d;"></span> 相克</span>
@@ -259,44 +376,104 @@
         <span class="legend-item"><span class="legend-dot" style="background:#8e44ad;"></span> 相侮</span>
     </div>
 
-    <!-- 日志 -->
     <div class="log" id="log">
         <strong>当前状态：</strong><br>
         <span id="logText">五脏平衡 · 能量皆为 5</span>
     </div>
 
-    <!-- 底部按钮 -->
     <div class="actions">
         <button class="primary" onclick="doRebalance()">↻ 自愈</button>
         <button onclick="resetAll()">归位 5</button>
+        <button class="switch-btn" onclick="toggleView()" id="switchBtn">📊 图形</button>
     </div>
 </div>
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 五行配置
+// 五行配置 (以节点左上角进行调整，使其中心完美对齐五角星顶点)
+// 节点宽 76px, 高 130px，在 560x560 坐标系中进行 (cx - 38, cy - 65) 修正
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const ELS = [
-    { id:0, name:'木', organ:'肝', color:'#27ae60', sheng:1, ke:2, mother:4, ctrl:3 },
-    { id:1, name:'火', organ:'心', color:'#e74c3c', sheng:2, ke:3, mother:0, ctrl:4 },
-    { id:2, name:'土', organ:'脾', color:'#d97706', sheng:3, ke:4, mother:1, ctrl:0 },
-    { id:3, name:'金', organ:'肺', color:'#7f8c8d', sheng:4, ke:0, mother:2, ctrl:1 },
-    { id:4, name:'水', organ:'肾', color:'#2980b9', sheng:0, ke:1, mother:3, ctrl:2 }
+    { id:0, name:'木', organ:'肝', color:'#27ae60', cx:104, cy:195, sheng:1, ke:2, mother:4, ctrl:3 },
+    { id:1, name:'火', organ:'心', color:'#e74c3c', cx:280, cy:82,  sheng:2, ke:3, mother:0, ctrl:4 },
+    { id:2, name:'土', organ:'脾', color:'#d97706', cx:456, cy:195, sheng:3, ke:4, mother:1, ctrl:0 },
+    { id:3, name:'金', organ:'肺', color:'#7f8c8d', cx:395, cy:456, sheng:4, ke:0, mother:2, ctrl:1 },
+    { id:4, name:'水', organ:'肾', color:'#2980b9', cx:165, cy:456, sheng:0, ke:1, mother:3, ctrl:2 }
 ];
 
 let vals = [5, 5, 5, 5, 5];
+let currentView = 'list';
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 渲染（纵向卡片）
+// 核心逻辑
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function render() {
+function clamp(v) { return Math.max(1, Math.min(10, v)); }
+
+function applyTCM() {
+    const old = [...vals];
+    const delta = [0, 0, 0, 0, 0];
+    const events = [];
+
+    for (let i = 0; i < 5; i++) {
+        const el = ELS[i];
+        const v = old[i];
+        const { sheng, ke, mother, ctrl } = el;
+
+        if (v > 5) {
+            const strength = (v - 5) / 5;
+            const gain = strength * 0.25;
+            delta[sheng] += gain;
+            if (strength > 0.15) events.push(`sheng:${el.name}生${ELS[sheng].name}`);
+        }
+        if (v > 5) {
+            const strength = (v - 5) / 5;
+            const loss = strength * 0.18;
+            delta[ke] -= loss;
+            if (strength > 0.15) events.push(`ke:${el.name}克${ELS[ke].name}`);
+        }
+        if (v < 5) {
+            const weakness = (5 - v) / 5;
+            const loss = weakness * 0.15;
+            delta[sheng] -= loss;
+            if (weakness > 0.15) events.push(`xu:${el.name}虚→${ELS[sheng].name}受损`);
+        }
+        if (v > 7) {
+            const excess = (v - 7) / 3;
+            const loss = excess * 0.12;
+            delta[mother] -= loss;
+            if (excess > 0.1) events.push(`dao:${el.name}亢→${ELS[mother].name}被盗`);
+        }
+        if (v > 6 && old[ke] < 5) {
+            const severity = (v - 6) / 4 * (5 - old[ke]) / 5;
+            const loss = severity * 0.30;
+            delta[ke] -= loss;
+            if (severity > 0.08) events.push(`cheng:${el.name}乘${ELS[ke].name}`);
+        }
+        if (v > 8 && old[ctrl] < 5) {
+            const severity = (v - 8) / 2 * (5 - old[ctrl]) / 5;
+            const loss = severity * 0.25;
+            delta[ctrl] -= loss;
+            if (severity > 0.08) events.push(`wu:${el.name}侮${ELS[ctrl].name}`);
+        }
+    }
+
+    for (let i = 0; i < 5; i++) {
+        vals[i] = clamp(vals[i] + delta[i]);
+    }
+
+    return events;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 渲染：列表视图
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderList() {
     const container = document.getElementById('nodeList');
     container.innerHTML = '';
 
     ELS.forEach((el, i) => {
         const v = vals[i];
         const pct = Math.max(5, Math.min(100, (v / 10) * 100));
-        const stateLabel = v <= 2 ? '重虚' : v <= 4 ? '偏虚' : v <= 6 ? '平' : v <= 8 ? '偏盛' : '亢盛';
 
         const card = document.createElement('div');
         card.className = 'el-card';
@@ -321,74 +498,71 @@ function render() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 核心逻辑（与之前一致，基于快照同时计算）
+// 渲染：图形视图 (利用 foreignObject 完美对齐)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-function clamp(v) { return Math.max(1, Math.min(10, v)); }
+function renderGraph() {
+    const container = document.getElementById('svgNodesGroup');
+    container.innerHTML = '';
 
-function applyTCM() {
-    const old = [...vals];
-    const delta = [0, 0, 0, 0, 0];
-    const events = [];
+    // 定义图形卡片的宽高
+    const nodeW = 76;
+    const nodeH = 132;
 
-    for (let i = 0; i < 5; i++) {
-        const el = ELS[i];
-        const v = old[i];
-        const { sheng, ke, mother, ctrl } = el;
+    ELS.forEach((el, i) => {
+        const v = vals[i];
+        const pct = Math.max(5, Math.min(100, (v / 10) * 100));
 
-        // 相生（我生者受益）
-        if (v > 5) {
-            const strength = (v - 5) / 5;
-            const gain = strength * 0.25;
-            delta[sheng] += gain;
-            if (strength > 0.15) events.push(`sheng:${el.name}生${ELS[sheng].name}`);
-        }
+        // 计算左上角 X 和 Y，实现中心点对齐
+        const x = el.cx - nodeW / 2;
+        const y = el.cy - nodeH / 2;
 
-        // 相克（我克者受损）
-        if (v > 5) {
-            const strength = (v - 5) / 5;
-            const loss = strength * 0.18;
-            delta[ke] -= loss;
-            if (strength > 0.15) events.push(`ke:${el.name}克${ELS[ke].name}`);
-        }
+        // 创建 SVG 命名空间的 foreignObject
+        const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+        fo.setAttribute('x', x);
+        fo.setAttribute('y', y);
+        fo.setAttribute('width', nodeW);
+        fo.setAttribute('height', nodeH);
 
-        // 母病及子（母虚 → 子受损）
-        if (v < 5) {
-            const weakness = (5 - v) / 5;
-            const loss = weakness * 0.15;
-            delta[sheng] -= loss;
-            if (weakness > 0.15) events.push(`xu:${el.name}虚→${ELS[sheng].name}受损`);
-        }
+        fo.innerHTML = `
+            <div class="el-node" style="border-color: ${el.color}55;" xmlns="http://www.w3.org/1999/xhtml">
+                <div class="el-name" style="color:${el.color}">${el.name}</div>
+                <div class="el-organ">${el.organ}</div>
+                <div class="bar-wrap">
+                    <div class="bar-fill" style="height:${pct}%;background:${el.color};opacity:0.85"></div>
+                    <div class="bar-ticks">${'<div class="bar-tick"></div>'.repeat(10)}</div>
+                </div>
+                <div class="el-value" style="color:${el.color}">${v.toFixed(1)}</div>
+                <div class="btns">
+                    <button style="background:${el.color}" onclick="change(${i}, 1.0)">+</button>
+                    <button style="background:${el.color}99" onclick="change(${i}, -1.0)">−</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(fo);
+    });
+}
 
-        // 子盗母气（子亢盛 → 母受损）
-        if (v > 7) {
-            const excess = (v - 7) / 3;
-            const loss = excess * 0.12;
-            delta[mother] -= loss;
-            if (excess > 0.1) events.push(`dao:${el.name}亢→${ELS[mother].name}被盗`);
-        }
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 切换视图
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function toggleView() {
+    const viewList = document.getElementById('viewList');
+    const viewGraph = document.getElementById('viewGraph');
+    const switchBtn = document.getElementById('switchBtn');
 
-        // 相乘（过度克制）
-        if (v > 6 && old[ke] < 5) {
-            const severity = (v - 6) / 4 * (5 - old[ke]) / 5;
-            const loss = severity * 0.30;
-            delta[ke] -= loss;
-            if (severity > 0.08) events.push(`cheng:${el.name}乘${ELS[ke].name}`);
-        }
-
-        // 相侮（反克）
-        if (v > 8 && old[ctrl] < 5) {
-            const severity = (v - 8) / 2 * (5 - old[ctrl]) / 5;
-            const loss = severity * 0.25;
-            delta[ctrl] -= loss;
-            if (severity > 0.08) events.push(`wu:${el.name}侮${ELS[ctrl].name}`);
-        }
+    if (currentView === 'list') {
+        currentView = 'graph';
+        viewList.style.display = 'none';
+        viewGraph.style.display = 'block';
+        switchBtn.textContent = '📋 列表';
+        renderGraph();
+    } else {
+        currentView = 'list';
+        viewGraph.style.display = 'none';
+        viewList.style.display = 'block';
+        switchBtn.textContent = '📊 图形';
+        renderList();
     }
-
-    for (let i = 0; i < 5; i++) {
-        vals[i] = clamp(vals[i] + delta[i]);
-    }
-
-    return events;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -397,7 +571,8 @@ function applyTCM() {
 function change(i, delta) {
     vals[i] = clamp(vals[i] + delta);
     const events = applyTCM();
-    render();
+    if (currentView === 'list') renderList();
+    else renderGraph();
     updateLog(events);
 }
 
@@ -407,13 +582,15 @@ function doRebalance() {
         vals[i] = clamp(vals[i]);
     }
     const events = applyTCM();
-    render();
+    if (currentView === 'list') renderList();
+    else renderGraph();
     updateLog(events, true);
 }
 
 function resetAll() {
     vals = [5, 5, 5, 5, 5];
-    render();
+    if (currentView === 'list') renderList();
+    else renderGraph();
     document.getElementById('logText').textContent = '五脏平衡 · 能量皆为 5';
 }
 
@@ -426,24 +603,21 @@ const evClass = {
 };
 
 function updateLog(events, isRebalance) {
-    const stateLabel = v =>
-        v <= 2 ? '重虚' : v <= 4 ? '偏虚' : v <= 6 ? '平' : v <= 8 ? '偏盛' : '亢盛';
-
     let parts = [];
     ELS.forEach((el, i) => {
         parts.push(`<span style="color:${el.color}">${el.name}${vals[i].toFixed(1)}</span>`);
     });
 
-    let html = parts.join('　');
+    let html = parts.join(' ');
 
     const fmtEvts = evs => evs.map(e => {
         const [t, ...rest] = e.split(':');
         return `<span class="${evClass[t] || ''}">${rest.join(':')}</span>`;
-    }).join('　');
+    }).join(' ');
 
     if (isRebalance) {
         html += '<br>↻ 自愈向平衡收敛';
-        if (events.length) html += '　' + fmtEvts(events);
+        if (events.length) html += ' ' + fmtEvts(events);
     } else if (events.length) {
         html += '<br>▶ ' + fmtEvts(events);
     } else {
@@ -456,7 +630,7 @@ function updateLog(events, isRebalance) {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 初始化
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-render();
+renderList();
 document.getElementById('logText').textContent = '五脏平衡 · 能量皆为 5';
 </script>
 </body>
