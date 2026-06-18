@@ -2,415 +2,331 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>中医五行 · 西岛海</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>中医五行 · 手机版</title>
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
         body {
             margin: 0;
             min-height: 100vh;
+            background: #f0f4f8;
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            padding: 12px 10px 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
-            background: #f0f4f8;
-            font-family: system-ui, 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            padding: 8px;
         }
         .wrap {
-            padding: 0.5rem 0.2rem;
-            max-width: 620px;
+            max-width: 420px;
             width: 100%;
         }
-        .board {
-            position: relative;
-            width: 560px;
-            height: 560px;
-            margin: 0 auto;
+
+        /* ===== 标题 ===== */
+        .header {
+            text-align: center;
+            padding: 6px 0 10px;
         }
-        .board-svg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a2a3a;
+            margin: 0;
+            letter-spacing: 2px;
         }
-        .el-node {
-            position: absolute;
-            transform: translate(-50%, -50%);
+        .header h1 span { color: #c0392b; }
+        .header p {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin: 4px 0 0;
+        }
+
+        /* ===== 五行卡片纵向列表 ===== */
+        .node-list {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            width: 88px;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .el-card {
             background: #ffffff;
             border-radius: 16px;
-            border: 1.5px solid #e5e7eb;
-            padding: 10px 8px 8px;
-            transition: border-color .2s, box-shadow .2s;
-            z-index: 10;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #ccc;
+            transition: box-shadow 0.2s;
             touch-action: manipulation;
         }
-        .el-node:hover {
-            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        .el-card:active {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+        }
+
+        /* 左侧：名称 + 器官 */
+        .el-info {
+            flex: 0 0 58px;
         }
         .el-name {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 2px;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.2;
         }
         .el-organ {
             font-size: 11px;
-            color: #6b7280;
-            margin-bottom: 6px;
+            color: #7f8c8d;
+            line-height: 1.2;
         }
+
+        /* 中间：能量柱 */
         .bar-wrap {
-            width: 36px;
-            height: 100px;
-            background: #f3f4f6;
-            border-radius: 6px;
+            flex: 1;
+            height: 44px;
+            background: #ecf0f1;
+            border-radius: 8px;
             overflow: hidden;
             position: relative;
-            margin-bottom: 8px;
+            min-width: 60px;
         }
         .bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.35s ease;
+            border-radius: 8px;
+            opacity: 0.85;
+        }
+        .bar-label {
             position: absolute;
-            bottom: 0;
-            width: 100%;
-            transition: height .35s ease;
-            border-radius: 6px 6px 0 0;
-        }
-        .bar-ticks {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column-reverse;
-            pointer-events: none;
-        }
-        .bar-tick {
-            flex: 1;
-            border-top: 0.5px solid rgba(0,0,0,0.06);
-        }
-        .el-value {
-            font-size: 20px;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 6px;
+            color: #2c3e50;
+            background: rgba(255,255,255,0.7);
+            padding: 0 6px;
+            border-radius: 4px;
         }
+
+        /* 右侧：+ / - 按钮 */
         .btns {
             display: flex;
-            gap: 6px;
+            gap: 8px;
+            flex: 0 0 72px;
         }
         .btns button {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
+            flex: 1;
+            height: 48px;
             border: none;
-            font-size: 18px;
-            line-height: 1;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: 500;
             color: #fff;
             cursor: pointer;
-            transition: transform .1s, opacity .15s;
+            transition: transform 0.1s, opacity 0.15s;
+            touch-action: manipulation;
+            user-select: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
         }
-        .btns button:hover { opacity: .82; transform: scale(1.08); }
-        .btns button:active { transform: scale(.94); }
-
-        .log {
-            max-width: 560px;
-            margin: 14px auto 0;
-            background: #f9fafb;
-            border-radius: 16px;
-            border-left: 3px solid #d1d5db;
-            padding: 12px 16px;
-            font-size: 13px;
-            line-height: 1.9;
-            color: #4b5563;
-            min-height: 72px;
+        .btns button:active {
+            transform: scale(0.92);
+            opacity: 0.8;
         }
-        .log strong { color: #111827; }
 
-        .ev-sheng { color: #16a34a; }
-        .ev-ke    { color: #9ca3af; }
-        .ev-xu    { color: #6b7280; }
-        .ev-dao   { color: #d97706; }
-        .ev-cheng { color: #dc2626; }
-        .ev-wu    { color: #9333ea; }
-
+        /* ===== 图例 ===== */
         .legend {
-            max-width: 560px;
-            margin: 10px auto 0;
             display: flex;
-            justify-content: center;
-            gap: 16px;
             flex-wrap: wrap;
-            font-size: 12px;
-            color: #6b7280;
+            justify-content: center;
+            gap: 8px 14px;
+            margin: 14px 0 8px;
+            font-size: 11px;
+            color: #5d6d7e;
         }
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
+        }
+        .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .legend-line {
+            display: inline-block;
+            width: 20px;
+            height: 2px;
         }
 
+        /* ===== 日志 ===== */
+        .log {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #34495e;
+            min-height: 64px;
+            margin: 10px 0 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-left: 4px solid #bdc3c7;
+        }
+        .log strong { color: #1a2a3a; }
+
+        .ev-sheng { color: #27ae60; }
+        .ev-ke    { color: #7f8c8d; }
+        .ev-xu    { color: #6b7280; }
+        .ev-dao   { color: #d97706; }
+        .ev-cheng { color: #e74c3c; }
+        .ev-wu    { color: #8e44ad; }
+
+        /* ===== 底部按钮 ===== */
         .actions {
-            max-width: 560px;
-            margin: 12px auto 0;
             display: flex;
             gap: 10px;
             justify-content: center;
-            flex-wrap: wrap;
+            margin-top: 4px;
         }
         .actions button {
-            padding: 8px 20px;
-            font-size: 13px;
+            flex: 1;
+            max-width: 160px;
+            padding: 14px 0;
+            font-size: 15px;
+            font-weight: 500;
             background: transparent;
-            color: #4b5563;
-            border: 0.5px solid #d1d5db;
-            border-radius: 8px;
+            color: #2c3e50;
+            border: 1.5px solid #d5dbdb;
+            border-radius: 12px;
             cursor: pointer;
-            transition: background .15s, color .15s;
+            transition: background 0.15s, border-color 0.15s;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
             user-select: none;
-            min-height: 40px;
+            background: #ffffff;
         }
-        .actions button:hover {
-            background: #f3f4f6;
-            color: #111827;
+        .actions button:active {
+            background: #ecf0f1;
+            transform: scale(0.97);
         }
         .actions button.primary {
-            border-color: #6b7280;
-            color: #111827;
+            border-color: #5d6d7e;
+            background: #2c3e50;
+            color: #fff;
+        }
+        .actions button.primary:active {
+            background: #1a2a3a;
         }
 
-        /* ========== 手机端专属优化 ========== */
-        @media (max-width: 600px) {
-            .board { 
-                width: 100%; 
-                height: auto; 
-                aspect-ratio: 1/1; 
-                max-width: 560px;
-                margin: 0 auto;
-            }
-            .el-node { 
-                width: 76px; 
-                padding: 8px 4px 6px; 
-                border-radius: 14px;
-            }
-            .el-name { font-size: 16px; }
-            .el-organ { font-size: 10px; margin-bottom: 4px; }
-            .bar-wrap { 
-                width: 30px; 
-                height: 76px; 
-                margin-bottom: 6px;
-            }
-            .el-value { 
-                font-size: 18px; 
-                margin-bottom: 4px;
-            }
-            .btns { gap: 5px; }
-            .btns button { 
-                width: 32px; 
-                height: 32px; 
-                font-size: 20px; 
-                font-weight: 500;
-            }
-            .log { 
-                font-size: 12px; 
-                padding: 10px 14px; 
-                min-height: 64px;
-                margin-top: 10px;
-            }
-            .legend { 
-                font-size: 11px; 
-                gap: 10px; 
-                margin-top: 8px;
-            }
-            .actions button { 
-                font-size: 14px; 
-                padding: 10px 24px; 
-                min-height: 44px;
-                border-radius: 10px;
-            }
+        /* ===== 状态标签颜色 ===== */
+        .state-tag {
+            font-size: 10px;
+            padding: 1px 8px;
+            border-radius: 20px;
+            margin-left: 4px;
+            font-weight: 500;
         }
-
-        /* 小屏手机（宽度 ≤ 420px）进一步适配 */
-        @media (max-width: 420px) {
-            .wrap { padding: 0.2rem 0; }
-            .el-node { 
-                width: 62px; 
-                padding: 6px 2px 5px; 
-                border-radius: 12px;
-            }
-            .el-name { font-size: 13px; }
-            .el-organ { font-size: 9px; margin-bottom: 3px; }
-            .bar-wrap { 
-                width: 24px; 
-                height: 58px; 
-                margin-bottom: 4px;
-                border-radius: 4px;
-            }
-            .bar-fill { border-radius: 4px 4px 0 0; }
-            .el-value { 
-                font-size: 15px; 
-                margin-bottom: 3px;
-            }
-            .btns { gap: 4px; }
-            .btns button { 
-                width: 28px; 
-                height: 28px; 
-                font-size: 16px; 
-            }
-            .log { 
-                font-size: 11px; 
-                padding: 8px 12px; 
-                min-height: 56px;
-                line-height: 1.7;
-                margin-top: 8px;
-                border-left-width: 2px;
-            }
-            .legend { 
-                font-size: 10px; 
-                gap: 6px; 
-            }
-            .legend-item { gap: 3px; }
-            .actions { gap: 6px; }
-            .actions button { 
-                font-size: 12px; 
-                padding: 8px 16px; 
-                min-height: 36px;
-                border-radius: 8px;
-            }
-        }
-
-        /* 极端小屏（宽度 ≤ 360px） */
-        @media (max-width: 360px) {
-            .el-node { width: 54px; padding: 4px 2px 4px; }
-            .el-name { font-size: 12px; }
-            .el-organ { font-size: 8px; }
-            .bar-wrap { width: 20px; height: 48px; }
-            .el-value { font-size: 13px; }
-            .btns button { width: 24px; height: 24px; font-size: 14px; }
-            .log { font-size: 10px; padding: 6px 10px; min-height: 48px; }
-            .legend { font-size: 9px; gap: 4px; }
-            .actions button { font-size: 11px; padding: 6px 12px; min-height: 32px; }
-        }
+        .state-tag.重虚 { background: #fde8e8; color: #c0392b; }
+        .state-tag.偏虚 { background: #fdebd0; color: #d97706; }
+        .state-tag.平   { background: #d5f5e3; color: #27ae60; }
+        .state-tag.偏盛 { background: #fdebd0; color: #d97706; }
+        .state-tag.亢盛 { background: #fde8e8; color: #c0392b; }
     </style>
 </head>
 <body>
 
 <div class="wrap">
-    <div class="board">
-        <svg class="board-svg" viewBox="0 0 560 560">
-            <defs>
-                <marker id="arr-sheng" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                    <path d="M2 1L8 5L2 9" fill="none" stroke="#9ca3af" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </marker>
-                <marker id="arr-ke" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                    <path d="M2 1L8 5L2 9" fill="none" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </marker>
-            </defs>
-            <!-- 相生 (外圈虚线) -->
-            <path d="M 104,195 Q 180,65 280,82" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
-            <path d="M 280,82 Q 380,65 456,195" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
-            <path d="M 456,195 Q 480,330 395,456" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
-            <path d="M 395,456 Q 280,500 165,456" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
-            <path d="M 165,456 Q 80,330 104,195" fill="none" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-sheng)" opacity="0.7"/>
-            <!-- 相克 (内圈直线) -->
-            <line x1="104" y1="195" x2="456" y2="195" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
-            <line x1="456" y1="195" x2="165" y2="456" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
-            <line x1="165" y1="456" x2="280" y2="82" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
-            <line x1="280" y1="82" x2="395" y2="456" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
-            <line x1="395" y1="456" x2="104" y2="195" stroke="#f87171" stroke-width="1" opacity="0.35" marker-end="url(#arr-ke)"/>
-        </svg>
-        <div id="nodes"></div>
+    <div class="header">
+        <h1>☯ 五行<span>·</span>沙盘</h1>
+        <p>点击 + / − 观察五脏联动</p>
     </div>
 
+    <!-- 五行卡片列表 -->
+    <div id="nodeList" class="node-list"></div>
+
+    <!-- 图例 -->
     <div class="legend">
-        <div class="legend-item">
-            <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3"/></svg>
-            相生
-        </div>
-        <div class="legend-item">
-            <svg width="24" height="10"><line x1="0" y1="5" x2="24" y2="5" stroke="#f87171" stroke-width="1.5"/></svg>
-            相克／乘／侮
-        </div>
-        <div class="legend-item"><span class="ev-sheng">●</span> 相生</div>
-        <div class="legend-item"><span class="ev-ke">●</span> 相克</div>
-        <div class="legend-item"><span class="ev-xu">●</span> 母病及子</div>
-        <div class="legend-item"><span class="ev-dao">●</span> 子盗母气</div>
-        <div class="legend-item"><span class="ev-cheng">●</span> 相乘</div>
-        <div class="legend-item"><span class="ev-wu">●</span> 相侮</div>
+        <span class="legend-item"><span class="legend-dot" style="background:#27ae60;"></span> 相生</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#7f8c8d;"></span> 相克</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#6b7280;"></span> 母病及子</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#d97706;"></span> 子盗母气</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span> 相乘</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#8e44ad;"></span> 相侮</span>
     </div>
 
+    <!-- 日志 -->
     <div class="log" id="log">
-        <strong>五脏状态：</strong>目前处于完美的阴阳平衡（所有能量均为 5）。
+        <strong>当前状态：</strong><br>
+        <span id="logText">五脏平衡 · 能量皆为 5</span>
     </div>
 
+    <!-- 底部按钮 -->
     <div class="actions">
-        <button class="primary" onclick="doRebalance()">↻ 自愈一步</button>
-        <button onclick="resetAll()">归位平衡（5）</button>
+        <button class="primary" onclick="doRebalance()">↻ 自愈</button>
+        <button onclick="resetAll()">归位 5</button>
     </div>
 </div>
 
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 五行配置 (坐标基于 560x560)
-// 顺序: 木(左上) → 火(顶) → 土(右上) → 金(右下) → 水(左下)
+// 五行配置
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const ELS = [
-    { id:0, name:'木', organ:'肝', color:'#16a34a', cx:104, cy:195, sheng:1, ke:2, mother:4, ctrl:3 },
-    { id:1, name:'火', organ:'心', color:'#dc2626', cx:280, cy:82,  sheng:2, ke:3, mother:0, ctrl:4 },
-    { id:2, name:'土', organ:'脾', color:'#d97706', cx:456, cy:195, sheng:3, ke:4, mother:1, ctrl:0 },
-    { id:3, name:'金', organ:'肺', color:'#6b7280', cx:395, cy:456, sheng:4, ke:0, mother:2, ctrl:1 },
-    { id:4, name:'水', organ:'肾', color:'#2563eb', cx:165, cy:456, sheng:0, ke:1, mother:3, ctrl:2 }
+    { id:0, name:'木', organ:'肝', color:'#27ae60', sheng:1, ke:2, mother:4, ctrl:3 },
+    { id:1, name:'火', organ:'心', color:'#e74c3c', sheng:2, ke:3, mother:0, ctrl:4 },
+    { id:2, name:'土', organ:'脾', color:'#d97706', sheng:3, ke:4, mother:1, ctrl:0 },
+    { id:3, name:'金', organ:'肺', color:'#7f8c8d', sheng:4, ke:0, mother:2, ctrl:1 },
+    { id:4, name:'水', organ:'肾', color:'#2980b9', sheng:0, ke:1, mother:3, ctrl:2 }
 ];
 
-// 当前值 (1~10)
 let vals = [5, 5, 5, 5, 5];
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 渲染
+// 渲染（纵向卡片）
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function render() {
-    const c = document.getElementById('nodes');
-    c.innerHTML = '';
+    const container = document.getElementById('nodeList');
+    container.innerHTML = '';
+
     ELS.forEach((el, i) => {
-        const pct = Math.max(5, Math.min(100, vals[i] / 10 * 100));
-        const node = document.createElement('div');
-        node.className = 'el-node';
-        node.style.left = el.cx + 'px';
-        node.style.top  = el.cy + 'px';
-        node.style.borderColor = el.color + '55';
-        node.innerHTML = `
-            <div class="el-name" style="color:${el.color}">${el.name}</div>
-            <div class="el-organ">${el.organ}</div>
-            <div class="bar-wrap">
-                <div class="bar-fill" style="height:${pct}%;background:${el.color};opacity:0.85"></div>
-                <div class="bar-ticks">${'<div class="bar-tick"></div>'.repeat(10)}</div>
+        const v = vals[i];
+        const pct = Math.max(5, Math.min(100, (v / 10) * 100));
+        const stateLabel = v <= 2 ? '重虚' : v <= 4 ? '偏虚' : v <= 6 ? '平' : v <= 8 ? '偏盛' : '亢盛';
+
+        const card = document.createElement('div');
+        card.className = 'el-card';
+        card.style.borderLeftColor = el.color;
+
+        card.innerHTML = `
+            <div class="el-info">
+                <div class="el-name" style="color:${el.color}">${el.name}</div>
+                <div class="el-organ">${el.organ}</div>
             </div>
-            <div class="el-value" style="color:${el.color}">${vals[i].toFixed(1)}</div>
+            <div class="bar-wrap">
+                <div class="bar-fill" style="width:${pct}%;background:${el.color};"></div>
+                <span class="bar-label">${v.toFixed(1)}</span>
+            </div>
             <div class="btns">
-                <button style="background:${el.color}"   onclick="change(${i},  1.0)">+</button>
-                <button style="background:${el.color}99" onclick="change(${i}, -1.0)">−</button>
+                <button style="background:${el.color};" onclick="change(${i}, 1.0)">＋</button>
+                <button style="background:${el.color};opacity:0.7;" onclick="change(${i}, -1.0)">－</button>
             </div>
         `;
-        c.appendChild(node);
+        container.appendChild(card);
     });
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 核心逻辑：基于快照同时计算所有传导
+// 核心逻辑（与之前一致，基于快照同时计算）
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function clamp(v) { return Math.max(1, Math.min(10, v)); }
 
 function applyTCM() {
     const old = [...vals];
-    // 累积增量 (基于 old 快照计算，全部同时生效)
     const delta = [0, 0, 0, 0, 0];
     const events = [];
 
@@ -419,56 +335,55 @@ function applyTCM() {
         const v = old[i];
         const { sheng, ke, mother, ctrl } = el;
 
-        // ─── 相生（我生者受益） ───
+        // 相生（我生者受益）
         if (v > 5) {
-            const strength = (v - 5) / 5; // 0~1
+            const strength = (v - 5) / 5;
             const gain = strength * 0.25;
             delta[sheng] += gain;
-            if (strength > 0.15) events.push(`sheng:${el.name}生${ELS[sheng].name} (+${gain.toFixed(2)})`);
+            if (strength > 0.15) events.push(`sheng:${el.name}生${ELS[sheng].name}`);
         }
 
-        // ─── 相克（我克者受损） ───
+        // 相克（我克者受损）
         if (v > 5) {
             const strength = (v - 5) / 5;
             const loss = strength * 0.18;
             delta[ke] -= loss;
-            if (strength > 0.15) events.push(`ke:${el.name}克${ELS[ke].name} (-${loss.toFixed(2)})`);
+            if (strength > 0.15) events.push(`ke:${el.name}克${ELS[ke].name}`);
         }
 
-        // ─── 母病及子（母虚 → 子受损） ───
+        // 母病及子（母虚 → 子受损）
         if (v < 5) {
             const weakness = (5 - v) / 5;
             const loss = weakness * 0.15;
             delta[sheng] -= loss;
-            if (weakness > 0.15) events.push(`xu:${el.name}虚 → ${ELS[sheng].name}受损 (-${loss.toFixed(2)})`);
+            if (weakness > 0.15) events.push(`xu:${el.name}虚→${ELS[sheng].name}受损`);
         }
 
-        // ─── 子盗母气（子亢盛 → 母受损） ───
+        // 子盗母气（子亢盛 → 母受损）
         if (v > 7) {
             const excess = (v - 7) / 3;
             const loss = excess * 0.12;
             delta[mother] -= loss;
-            if (excess > 0.1) events.push(`dao:${el.name}亢 → ${ELS[mother].name}被盗 (-${loss.toFixed(2)})`);
+            if (excess > 0.1) events.push(`dao:${el.name}亢→${ELS[mother].name}被盗`);
         }
 
-        // ─── 相乘（过度克制） ───
+        // 相乘（过度克制）
         if (v > 6 && old[ke] < 5) {
             const severity = (v - 6) / 4 * (5 - old[ke]) / 5;
             const loss = severity * 0.30;
             delta[ke] -= loss;
-            if (severity > 0.08) events.push(`cheng:${el.name}乘${ELS[ke].name} (-${loss.toFixed(2)})`);
+            if (severity > 0.08) events.push(`cheng:${el.name}乘${ELS[ke].name}`);
         }
 
-        // ─── 相侮（反克） ───
+        // 相侮（反克）
         if (v > 8 && old[ctrl] < 5) {
             const severity = (v - 8) / 2 * (5 - old[ctrl]) / 5;
             const loss = severity * 0.25;
             delta[ctrl] -= loss;
-            if (severity > 0.08) events.push(`wu:${el.name}侮${ELS[ctrl].name} (-${loss.toFixed(2)})`);
+            if (severity > 0.08) events.push(`wu:${el.name}侮${ELS[ctrl].name}`);
         }
     }
 
-    // 应用所有累积增量
     for (let i = 0; i < 5; i++) {
         vals[i] = clamp(vals[i] + delta[i]);
     }
@@ -477,7 +392,7 @@ function applyTCM() {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 交互接口
+// 交互
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function change(i, delta) {
     vals[i] = clamp(vals[i] + delta);
@@ -487,7 +402,6 @@ function change(i, delta) {
 }
 
 function doRebalance() {
-    // 自愈：每个脏腑向 5 收敛 12%
     for (let i = 0; i < 5; i++) {
         vals[i] += (5 - vals[i]) * 0.12;
         vals[i] = clamp(vals[i]);
@@ -497,29 +411,30 @@ function doRebalance() {
     updateLog(events, true);
 }
 
+function resetAll() {
+    vals = [5, 5, 5, 5, 5];
+    render();
+    document.getElementById('logText').textContent = '五脏平衡 · 能量皆为 5';
+}
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 日志
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const evClass = {
-    sheng: 'ev-sheng',
-    ke: 'ev-ke',
-    xu: 'ev-xu',
-    dao: 'ev-dao',
-    cheng: 'ev-cheng',
-    wu: 'ev-wu'
+    sheng: 'ev-sheng', ke: 'ev-ke', xu: 'ev-xu',
+    dao: 'ev-dao', cheng: 'ev-cheng', wu: 'ev-wu'
 };
 
 function updateLog(events, isRebalance) {
     const stateLabel = v =>
-        v <= 2 ? '重虚' :
-        v <= 4 ? '偏虚' :
-        v <= 6 ? '平' :
-        v <= 8 ? '偏盛' : '亢盛';
+        v <= 2 ? '重虚' : v <= 4 ? '偏虚' : v <= 6 ? '平' : v <= 8 ? '偏盛' : '亢盛';
 
-    let html = '<strong>当前五行状态：</strong><br>';
+    let parts = [];
     ELS.forEach((el, i) => {
-        html += `<span style="color:${el.color}">${el.name}（${el.organ}）：${vals[i].toFixed(1)}【${stateLabel(vals[i])}】</span>　`;
+        parts.push(`<span style="color:${el.color}">${el.name}${vals[i].toFixed(1)}</span>`);
     });
+
+    let html = parts.join('　');
 
     const fmtEvts = evs => evs.map(e => {
         const [t, ...rest] = e.split(':');
@@ -527,28 +442,22 @@ function updateLog(events, isRebalance) {
     }).join('　');
 
     if (isRebalance) {
-        html += '<br><span style="color:#6b7280">自愈一步，五脏向平衡收敛。</span>';
-        if (events.length) html += '　仍有传导：' + fmtEvts(events);
+        html += '<br>↻ 自愈向平衡收敛';
+        if (events.length) html += '　' + fmtEvts(events);
     } else if (events.length) {
-        html += '<br>本次触发：' + fmtEvts(events);
+        html += '<br>▶ ' + fmtEvts(events);
     } else {
-        html += '<br><span style="color:#6b7280">无明显五行传导</span>';
+        html += '<br><span style="color:#95a5a6;">无明显传导</span>';
     }
 
-    document.getElementById('log').innerHTML = html;
-}
-
-function resetAll() {
-    vals = [5, 5, 5, 5, 5];
-    render();
-    document.getElementById('log').innerHTML = '<strong>五脏状态：</strong>已恢复阴阳平衡（所有能量均为 5）。';
+    document.getElementById('logText').innerHTML = html;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 初始化
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 render();
+document.getElementById('logText').textContent = '五脏平衡 · 能量皆为 5';
 </script>
-
 </body>
 </html>
