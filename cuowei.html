@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPI ↔ cm/360 专业换算</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            min-height: 100vh;
+            background: #f0f2f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+        .card {
+            background: #ffffff;
+            max-width: 700px;
+            width: 100%;
+            padding: 40px 40px 32px 40px;
+            border-radius: 28px;
+            box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.18), 0 8px 24px -8px rgba(0, 0, 0, 0.06);
+            transition: box-shadow 0.2s;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
+            color: #0b1426;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h1 span {
+            background: #eef2f8;
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #2f405c;
+            letter-spacing: 0.2px;
+        }
+        .header .badge-pro {
+            background: #0b1426;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 40px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* 双栏布局 */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .panel {
+            background: #f8fafd;
+            border-radius: 20px;
+            padding: 20px 20px 22px 20px;
+            border: 1px solid #e6ecf5;
+            transition: border 0.15s;
+        }
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2f405c;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel-title .num {
+            background: #d9e1ed;
+            color: #1f2f4a;
+            font-weight: 700;
+            font-size: 12px;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+        }
+        .field {
+            margin-bottom: 16px;
+        }
+        .field:last-child {
+            margin-bottom: 0;
+        }
+        .field label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1f2f4a;
+            margin-bottom: 5px;
+        }
+        .field label .unit {
+            color: #6a7d9e;
+            font-weight: 400;
+            font-size: 12px;
+        }
+        .field input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #dce3ef;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 500;
+            color: #0b1426;
+            background: #ffffff;
+            outline: none;
+            transition: 0.15s;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .field input:focus {
+            border-color: #1a2b48;
+            box-shadow: 0 0 0 4px rgba(26, 43, 72, 0.08);
+        }
+        .field input[readonly] {
+            background: #f0f4fc;
+            color: #0b1426;
+            font-weight: 600;
+            border-color: #d0dae8;
+        }
+        .field input::placeholder {
+            color: #b0bed6;
+            font-weight: 400;
+        }
+        .field .hint {
+            font-size: 12px;
+            color: #6a7d9e;
+            margin-top: 4px;
+        }
+
+        /* 公式条 */
+        .formula-strip {
+            background: #eef3fa;
+            border-radius: 60px;
+            padding: 12px 22px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px 18px;
+            margin-bottom: 20px;
+            border: 1px solid #dce5f2;
+        }
+        .formula-strip .eq {
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: #0b1426;
+            background: white;
+            padding: 2px 18px;
+            border-radius: 40px;
+            letter-spacing: 0.2px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+        }
+        .formula-strip .eq .hl {
+            color: #1a4c8c;
+        }
+        .formula-strip .desc {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f3a6b;
+        }
+        .formula-strip .rule {
+            font-size: 13px;
+            color: #3f5a7a;
+            background: #dce5f2;
+            padding: 2px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+        }
+
+        /* 结果 */
+        .result-row {
+            background: #f2f6fd;
+            border-radius: 20px;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #dce5f2;
+            margin-bottom: 22px;
+        }
+        .result-row .label {
+            font-weight: 500;
+            color: #1f2f4a;
+            font-size: 15px;
+        }
+        .result-row .value {
+            font-size: 30px;
+            font-weight: 700;
+            color: #0b1426;
+            letter-spacing: -0.5px;
+            background: white;
+            padding: 2px 24px;
+            border-radius: 60px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .result-row .value small {
+            font-size: 16px;
+            font-weight: 500;
+            color: #4a5d7e;
+            margin-left: 4px;
+        }
+
+        /* 按钮 */
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 14px 16px;
+            border: none;
+            border-radius: 60px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #eef2f8;
+            color: #1f2f4a;
+            cursor: pointer;
+            transition: 0.12s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: 1px solid transparent;
+        }
+        .btn-primary {
+            background: #0b1426;
+            color: white;
+            box-shadow: 0 4px 12px rgba(11, 20, 38, 0.15);
+        }
+        .btn-primary:hover {
+            background: #1a2b48;
+            transform: scale(0.97);
+        }
+        .btn-secondary {
+            background: #eef2f8;
+            border-color: #dce3ef;
+        }
+        .btn-secondary:hover {
+            background: #e2e8f2;
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #6a7d9e;
+            border-top: 1px solid #e6ecf5;
+            padding-top: 18px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .footer-note span {
+            background: #f0f4fa;
+            padding: 2px 14px;
+            border-radius: 40px;
+            color: #2f405c;
+        }
+
+        @media (max-width: 550px) {
+            .card { padding: 24px 16px; }
+            .two-col { grid-template-columns: 1fr; gap: 16px; }
+            .panel { padding: 16px; }
+            .formula-strip { flex-direction: column; align-items: center; text-align: center; border-radius: 28px; padding: 14px; }
+            .result-row { flex-direction: column; gap: 6px; align-items: flex-start; }
+            .result-row .value { font-size: 26px; padding: 2px 16px; }
+            .actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="header">
+        <h1>
+            ⚙️ DPI错位换算器（基准和目标往往不会相差太大）
+        </h1>
+        <div class="badge-pro">西岛海制</div>
+    </div>
+
+    <!-- 双栏输入 -->
+    <div class="two-col">
+        <!-- 已知条件 -->
+        <div class="panel">
+            <div class="panel-title">
+                <span class="num">1</span> 已知条件 · 基准手感
+            </div>
+            <div class="field">
+                <label>基准 DPI <span class="unit">(dpi)</span></label>
+                <input type="number" id="baseDpi" value="3200" step="1" min="1" placeholder="例如 3200">
+                <div class="hint">你已适应的原始 DPI</div>
+            </div>
+            <div class="field">
+                <label>基准 cm/360° <span class="unit">(cm)</span></label>
+                <input type="number" id="baseCm" value="47.5" step="0.1" min="0.1" placeholder="例如 47.5">
+                <div class="hint">对应基准 DPI 的物理距离</div>
+            </div>
+        </div>
+
+        <!-- 目标换算 -->
+        <div class="panel">
+            <div class="panel-title">
+                <span class="num">2</span> 目标换算 · 新设置【供脑内参考用】
+            </div>
+            <div class="field">
+                <label>目标 DPI <span class="unit">(dpi)</span></label>
+                <input type="number" id="targetDpi" value="3880" step="1" min="1" placeholder="例如 3880">
+                <div class="hint">你要切换到的 DPI</div>
+            </div>
+            <div class="field">
+                <label>目标 cm/360° <span class="unit">(结果)</span></label>
+                <input type="number" id="targetCm" step="0.01" placeholder="请点击计算" readonly>
+                <div class="hint">保持手感一致的等效距离</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 公式 -->
+    <div class="formula-strip">
+        <span class="desc">公式</span>
+        <span class="eq">
+            目标 = 基准 × <span class="hl">( 目标 DPI / 基准 DPI )</span>
+        </span>
+    </div>
+
+    <!-- 按钮 -->
+    <div class="actions">
+        <button class="btn btn-primary" id="calcBtn">⟳ 计算</button>
+        <button class="btn btn-secondary" id="resetBtn">↺ 重置</button>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        const baseDpi = document.getElementById('baseDpi');
+        const baseCm = document.getElementById('baseCm');
+        const targetDpi = document.getElementById('targetDpi');
+        const targetCm = document.getElementById('targetCm');
+        const resultDisplay = document.getElementById('resultDisplay');
+
+        function compute() {
+            const bDpi = parseFloat(baseDpi.value);
+            const bCm = parseFloat(baseCm.value);
+            const tDpi = parseFloat(targetDpi.value);
+
+            if (isNaN(bDpi) || bDpi <= 0 || isNaN(bCm) || bCm <= 0 || isNaN(tDpi) || tDpi <= 0) {
+                targetCm.value = '';
+                resultDisplay.innerHTML = '⚠️ 请输入有效数值';
+                return;
+            }
+
+            const tCm = bCm * (tDpi / bDpi);
+            const rounded = Math.round(tCm * 100) / 100;
+            targetCm.value = rounded.toFixed(2);
+            resultDisplay.innerHTML = `${rounded.toFixed(2)} <small>cm/360°</small>`;
+        }
+
+        function swap() {
+            const a = baseDpi.value.trim();
+            const b = targetDpi.value.trim();
+            if (a === '' || b === '') return;
+            const aNum = parseFloat(a);
+            const bNum = parseFloat(b);
+            if (isNaN(aNum) || isNaN(bNum) || aNum <= 0 || bNum <= 0) return;
+            baseDpi.value = bNum;
+            targetDpi.value = aNum;
+            compute();
+        }
+
+        function resetDefault() {
+            baseDpi.value = '3200';
+            baseCm.value = '47.5';
+            targetDpi.value = '3880';
+            compute();
+        }
+
+        document.getElementById('calcBtn').addEventListener('click', compute);
+        document.getElementById('swapBtn').addEventListener('click', swap);
+        document.getElementById('resetBtn').addEventListener('click', resetDefault);
+
+        [baseDpi, baseCm, targetDpi].forEach(inp => {
+            inp.addEventListener('input', compute);
+            inp.addEventListener('change', compute);
+        });
+
+        document.querySelectorAll('input').forEach(inp => {
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    compute();
+                }
+            });
+        });
+
+        window.addEventListener('load', resetDefault);
+    })();
+</script>
+</body>
+</html>
