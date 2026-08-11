@@ -2,15 +2,13 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Pro Mouse Lab - 轨迹高亮版</title>
+    <title>Pro Mouse Lab - 轨迹高亮与平均方向版</title>
     <style>
         :root {
             --bg: #08080c; --card: #121218; 
-            --accent-deg: #00e5ff; 
             --accent-avg: #ffaa00; 
             --text: #e0e0e6; --dim: #5c5c66; --border: #1f1f26;
             --line-color: #00ff88;
-            --btn-hold: #2979ff;
             --btn-toggle: #9d00ff;
             --btn-stop: #ff0055;
         }
@@ -35,36 +33,43 @@
             width: 100%; max-width: 900px; height: 95vh;
             display: flex; flex-direction: column; gap: 15px; padding: 20px; 
             z-index: 10; pointer-events: none; 
-            box-sizing: border-box;
+            box-sizing: border-box; position: relative;
         }
         
-        .header-bar, .dashboard-grid, .trace-card { pointer-events: auto; }
+        .dashboard-single, .trace-card { pointer-events: auto; }
 
-        /* --- 头部 --- */
-        .header-bar { display: flex; gap: 15px; min-height: 60px; flex-shrink: 0; }
+        /* --- 居中按钮控制区 --- */
+        .center-controls {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+        }
         .main-btn {
-            flex: 1; border-radius: 12px; border: none; font-weight: 800;
-            color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            font-size: 15px; text-transform: uppercase; letter-spacing: 1px;
-            transition: transform 0.1s, filter 0.1s;
+            padding: 15px 40px; border-radius: 12px; border: none; font-weight: 800;
+            color: white; cursor: pointer; box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            font-size: 18px; text-transform: uppercase; letter-spacing: 1px;
+            transition: transform 0.1s, filter 0.1s; pointer-events: auto;
         }
         .main-btn:active { transform: scale(0.96); filter: brightness(1.1); }
-        #btnHold { background: linear-gradient(135deg, var(--accent-deg), var(--btn-hold)); }
         #btnToggle { background: linear-gradient(135deg, #b042ff, var(--btn-toggle)); }
         #btnToggle.running { 
             background: linear-gradient(135deg, #ff4444, var(--btn-stop)); 
             box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
         }
-        #btnReset { background: var(--card); border: 1px solid var(--border); color: var(--text); flex: 0.4; }
+        #btnReset { background: var(--card); border: 1px solid var(--border); color: var(--text); }
 
-        /* --- 专用轨迹白板 (置顶) --- */
+        /* --- 专用轨迹白板 --- */
         .trace-card {
             flex: 1; 
             background: #000; 
             border: 1px solid var(--border); border-radius: 20px;
             display: flex; flex-direction: column; overflow: hidden; position: relative;
             cursor: crosshair;
-            min-height: 200px; 
+            min-height: 300px; 
         }
         .trace-header {
             position: absolute; top: 15px; left: 20px;
@@ -74,8 +79,8 @@
         canvas#traceCanvas { width: 100%; height: 100%; display: block; }
 
         /* --- 仪表盘 (下方) --- */
-        .dashboard-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; 
+        .dashboard-single { 
+            display: flex; justify-content: center;
             height: 220px; 
             flex-shrink: 0;
         }
@@ -83,6 +88,7 @@
             background: var(--card); border: 1px solid var(--border); border-radius: 20px;
             padding: 20px; display: flex; flex-direction: column; 
             position: relative; overflow: hidden;
+            width: 100%; max-width: 450px;
         }
         .label { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; z-index: 2; margin-bottom: 5px; }
         
@@ -91,10 +97,9 @@
         .crosshair-v { position: absolute; height: 100%; width: 1px; background: #252530; z-index: 0; }
         
         .pointer-line {
-            position: absolute; width: 1200px; height: 4px; background: var(--accent-deg);
+            position: absolute; width: 1200px; height: 4px; 
             transform-origin: center center; top: 50%; left: 50%;
-            margin-top: -2px; margin-left: -600px;
-            box-shadow: 0 0 15px rgba(0,229,255, 0.4); z-index: 1;
+            margin-top: -2px; margin-left: -600px; z-index: 1;
         }
         .ptr-avg { background: var(--accent-avg); box-shadow: 0 0 15px rgba(255,170,0, 0.4); }
         .value-text { text-align: center; font-size: 36px; font-weight: 800; margin-top: 5px; font-variant-numeric: tabular-nums; z-index: 2; }
@@ -116,29 +121,20 @@
 </div>
 
 <div class="main-wrapper">
-    <div class="header-bar">
-        <button class="main-btn" id="btnHold">按住测试 (HOLD)</button>
-        <button class="main-btn" id="btnToggle">点击开始 (TOGGLE)</button>
-        <button class="main-btn" id="btnReset" onclick="resetAll()">重置</button>
+    <!-- 居中按钮 -->
+    <div class="center-controls">
+        <button class="main-btn" id="btnToggle">点击开始 (START)</button>
+        <button class="main-btn" id="btnReset" onclick="resetAll()">重置 (RESET)</button>
     </div>
 
-    <!-- 1. 轨迹板 (置顶) -->
+    <!-- 1. 轨迹板 -->
     <div class="trace-card" id="traceContainer">
         <div class="trace-header">轨迹记录板 (TRACE AREA) - 全局感应</div>
         <canvas id="traceCanvas"></canvas>
     </div>
 
     <!-- 2. 仪表盘 (下方) -->
-    <div class="dashboard-grid">
-        <div class="card">
-            <div class="label">实时方向 (LIVE)</div>
-            <div class="visual-area">
-                <div class="crosshair-h"></div><div class="crosshair-v"></div>
-                <div id="ptrLive" class="pointer-line"></div>
-            </div>
-            <div class="value-text" id="txtLive" style="color:var(--accent-deg)">0.0°</div>
-        </div>
-
+    <div class="dashboard-single">
         <div class="card">
             <div class="label">平均方向 (AVG)</div>
             <div class="visual-area">
@@ -158,14 +154,10 @@
     let prevX = null, prevY = null; 
     
     // 算法参数
-    let liveMomentumX = 0, liveMomentumY = 0;
-    const DECAY = 0.98; 
     let sumSin2 = 0, sumCos2 = 0; 
     let eventCount = 0;
 
-    const btnHold = document.getElementById('btnHold');
     const btnToggle = document.getElementById('btnToggle');
-    const ptrLive = document.getElementById('ptrLive');
     const ptrAvg = document.getElementById('ptrAvg');
     
     const traceContainer = document.getElementById('traceContainer');
@@ -183,60 +175,36 @@
     window.addEventListener('resize', resizeCanvas);
     setTimeout(resizeCanvas, 100);
 
-    function startTracking(mode) {
+    function startTracking() {
         if (trackingMode !== 'idle') return;
-        trackingMode = mode;
+        trackingMode = 'toggle';
         
         prevX = null; prevY = null;
-        liveMomentumX = 0; liveMomentumY = 0;
         sumSin2 = 0; sumCos2 = 0; eventCount = 0;
-        updateVisuals(0, 0);
+        updateVisuals(0);
 
-        if (mode === 'toggle') {
-            btnToggle.textContent = "运行中... (点击停止)";
-            btnToggle.classList.add('running');
-            btnHold.style.opacity = '0.5'; btnHold.style.pointerEvents = 'none';
-        } else if (mode === 'hold') {
-            btnHold.textContent = "正在检测...";
-            btnToggle.style.opacity = '0.5'; btnToggle.style.pointerEvents = 'none';
-        }
+        btnToggle.textContent = "运行中... (点击停止)";
+        btnToggle.classList.add('running');
     }
 
     function stopTracking() {
         if (trackingMode === 'idle') return;
-
-        if (trackingMode === 'toggle') {
-            btnToggle.textContent = "点击开始 (TOGGLE)";
-            btnToggle.classList.remove('running');
-            btnHold.style.opacity = '1'; btnHold.style.pointerEvents = 'auto';
-        } else if (trackingMode === 'hold') {
-            btnHold.textContent = "按住测试 (HOLD)";
-            btnToggle.style.opacity = '1'; btnToggle.style.pointerEvents = 'auto';
-        }
         
+        btnToggle.textContent = "点击开始 (START)";
+        btnToggle.classList.remove('running');
         trackingMode = 'idle';
     }
 
     window.resetAll = function() {
         stopTracking();
-        updateVisuals(0, 0);
+        updateVisuals(0);
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     };
 
-    btnHold.addEventListener('pointerdown', (e) => {
-        if (trackingMode === 'idle') {
-            startTracking('hold');
-            btnHold.setPointerCapture(e.pointerId);
-        }
-    });
-    window.addEventListener('pointerup', () => {
-        if (trackingMode === 'hold') stopTracking();
-    });
-
     btnToggle.addEventListener('click', () => {
-        if (trackingMode === 'idle') startTracking('toggle');
-        else if (trackingMode === 'toggle') stopTracking();
+        if (trackingMode === 'idle') startTracking();
+        else stopTracking();
     });
 
     window.addEventListener('pointermove', (e) => {
@@ -250,8 +218,6 @@
 
         const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
         const len = events.length;
-        
-        let currentDeg = null;
         const rect = canvas.getBoundingClientRect();
 
         for (let i = 0; i < len; i++) {
@@ -260,10 +226,7 @@
             const dy = ev.clientY - prevY;
 
             if (dx !== 0 || dy !== 0) {
-                // 全局角度计算
-                liveMomentumX = liveMomentumX * DECAY + dx;
-                liveMomentumY = liveMomentumY * DECAY + dy;
-                
+                // 平均角度双倍角算法计算
                 const rawRad = Math.atan2(dy, dx);
                 sumSin2 += Math.sin(rawRad * 2);
                 sumCos2 += Math.cos(rawRad * 2);
@@ -280,17 +243,7 @@
             prevY = ev.clientY;
         }
 
-        if (liveMomentumX !== 0 || liveMomentumY !== 0) {
-            const momentumRad = Math.atan2(liveMomentumY, liveMomentumX);
-            currentDeg = momentumRad * (180 / Math.PI);
-        }
-
-        if (currentDeg !== null) {
-            ptrLive.style.transform = `rotate(${currentDeg}deg)`;
-            let slopeText = formatAngle(currentDeg);
-            document.getElementById('txtLive').textContent = slopeText.toFixed(1) + '°';
-        }
-
+        // 更新平均方向 UI
         if (eventCount > 0) {
             const avgDoubleRadian = Math.atan2(sumSin2, sumCos2);
             let avgDeg = (avgDoubleRadian / 2) * (180 / Math.PI);
@@ -301,15 +254,13 @@
     });
 
     function renderLoop() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; 
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // 完全移除了 ctx.fillRect 自动覆盖层，轨迹不再消散
 
         if (drawQueue.length > 0) {
             ctx.beginPath();
             
-            // 调整：更亮的蓝色 #0099ff，配合极细线条在黑底上更清晰
-            ctx.strokeStyle = '#0099ff'; 
-            
+            // 使用带透明度的亮蓝色，重叠区域会更亮
+            ctx.strokeStyle = 'rgba(0, 153, 255, 0.6)'; 
             ctx.lineWidth = 0.5; 
             ctx.shadowBlur = 0;
 
@@ -326,17 +277,14 @@
     }
     requestAnimationFrame(renderLoop);
 
-
     function formatAngle(deg) {
         if (deg > 90) return deg - 180;
         if (deg < -90) return deg + 180;
         return deg;
     }
 
-    function updateVisuals(degLive, degAvg) {
-        ptrLive.style.transform = `rotate(${degLive}deg)`;
+    function updateVisuals(degAvg) {
         ptrAvg.style.transform = `rotate(${degAvg}deg)`;
-        document.getElementById('txtLive').textContent = degLive.toFixed(1) + '°';
         document.getElementById('txtAvg').textContent = degAvg.toFixed(1) + '°';
     }
 </script>
