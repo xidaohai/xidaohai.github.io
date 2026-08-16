@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>🎮 FPS 瞄准灵敏度 · MDV/MDH 讨论</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0e14;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #e6edf5;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            background: #141a22;
+            border-radius: 28px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03);
+            padding: 1.8rem 1.8rem 2.2rem;
+        }
+
+        /* 主题头部 */
+        .thread-header {
+            border-bottom: 1px solid #2a3340;
+            padding-bottom: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .thread-title {
+            font-size: 1.7rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .thread-title span {
+            background: #2a3a4a;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #b6cdff;
+            letter-spacing: 0.3px;
+        }
+
+        .thread-sub {
+            margin-top: 0.5rem;
+            color: #9aadc9;
+            font-size: 0.95rem;
+            border-left: 3px solid #3d5a7a;
+            padding-left: 1rem;
+            background: #1a2330;
+            border-radius: 0 12px 12px 0;
+            padding: 0.7rem 1rem;
+        }
+
+        .thread-sub strong {
+            color: #c8dfff;
+        }
+
+        /* 帖子卡片 */
+        .post {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0.2rem 1.2rem 0.2rem;
+            border-bottom: 1px solid #1f2835;
+            transition: background 0.1s ease;
+        }
+
+        .post:last-of-type {
+            border-bottom: none;
+        }
+
+        .post-avatar {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            background: #253240;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #b0d0ff;
+            box-shadow: inset 0 0 0 1px #3f5168;
+            background: #1e2b3b;
+            margin-top: 0.1rem;
+        }
+
+        .post-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .post-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.4rem 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .post-author {
+            font-weight: 600;
+            color: #d6e5ff;
+            font-size: 1rem;
+        }
+
+        .post-author .badge {
+            background: #2a405a;
+            font-size: 0.65rem;
+            font-weight: 500;
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            color: #b7d0f0;
+            margin-left: 0.3rem;
+            letter-spacing: 0.2px;
+        }
+
+        .post-time {
+            color: #7a8fa8;
+            font-size: 0.8rem;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        .post-body {
+            font-size: 0.96rem;
+            color: #dce6f2;
+            word-break: break-word;
+        }
+
+        .post-body p {
+            margin-bottom: 0.6rem;
+        }
+
+        .post-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .post-body code {
+            background: #1f2a39;
+            padding: 0.1rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #d4e2ff;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            border: 1px solid #2e3f53;
+        }
+
+        .post-body a {
+            color: #79b0ff;
+            text-decoration: none;
+            border-bottom: 1px dotted #3d5f85;
+        }
+
+        .post-body a:hover {
+            color: #b0d0ff;
+            border-bottom: 1px solid #79b0ff;
+        }
+
+        .post-body .quote-block {
+            background: #1a2332;
+            padding: 0.6rem 1rem;
+            border-radius: 14px;
+            border-left: 4px solid #3f6a9a;
+            margin: 0.6rem 0 0.4rem;
+            color: #c0d3ec;
+            font-size: 0.94rem;
+        }
+
+        .post-body .quote-block .quote-author {
+            font-weight: 500;
+            color: #aac2e8;
+        }
+
+        .post-body .mention {
+            color: #93b5f0;
+            font-weight: 500;
+        }
+
+        .post-body .highlight-box {
+            background: #1f2b3d;
+            border-radius: 16px;
+            padding: 0.5rem 1rem;
+            margin: 0.6rem 0;
+            border: 1px solid #314b67;
+        }
+
+        .hr-divider {
+            height: 1px;
+            background: #202b3a;
+            margin: 0.8rem 0;
+        }
+
+        .replies-indent {
+            padding-left: 1.2rem;
+            border-left: 2px solid #263544;
+            margin-top: 0.6rem;
+        }
+
+        .replies-indent .post {
+            border-bottom: 1px solid #1d2635;
+            padding-bottom: 0.8rem;
+            padding-top: 0.8rem;
+        }
+
+        .replies-indent .post:last-child {
+            border-bottom: none;
+        }
+
+        .replies-indent .post-avatar {
+            width: 36px;
+            height: 36px;
+            font-size: 0.9rem;
+        }
+
+        .small-meta {
+            font-size: 0.8rem;
+            color: #7a8fa8;
+        }
+
+        .tag-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag {
+            background: #1e2b3d;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            color: #a8c2e8;
+            border: 1px solid #2e405a;
+        }
+
+        .url-hint {
+            background: #1f2a3b;
+            padding: 0.25rem 0.8rem;
+            border-radius: 30px;
+            display: inline-block;
+            font-size: 0.8rem;
+            color: #93b0d9;
+            font-family: monospace;
+            border: 1px solid #314a63;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem 0.8rem;
+                border-radius: 20px;
+            }
+            .thread-title {
+                font-size: 1.35rem;
+            }
+            .post {
+                gap: 0.7rem;
+                padding: 0.8rem 0.1rem;
+            }
+            .post-avatar {
+                width: 38px;
+                height: 38px;
+                font-size: 0.9rem;
+            }
+            .replies-indent {
+                padding-left: 0.6rem;
+            }
+            .post-body {
+                font-size: 0.92rem;
+            }
+        }
+
+        /* 模拟讨论串的深度 */
+        .depth-1 {
+            border-left: 2px solid #253544;
+            padding-left: 1rem;
+            margin-left: 0.2rem;
+        }
+
+        .depth-1 .post:last-child {
+            border-bottom: none;
+        }
+
+        /* 小点缀 */
+        .emoji-big {
+            font-size: 1.2rem;
+        }
+
+        .footer-note {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #556b84;
+            text-align: center;
+            border-top: 1px solid #202b3b;
+            padding-top: 1.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .footer-note a {
+            color: #6b8fc0;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- 标题区域 -->
+    <div class="thread-header">
+        <div class="thread-title">
+            🎮 FPS 游戏瞄准灵敏度转换（MDV/MDH）讨论
+            <span>讨论</span>
+        </div>
+        <div class="thread-sub">
+            <strong>聚焦</strong> 《战地》、《使命召唤》、《Apex》、《PUBG》等游戏中的 <strong>统一士兵瞄准</strong> (MDV/MDH) 灵敏度转换机制的设置选择与理论依据。
+        </div>
+    </div>
+
+    <!-- 主帖 -->
+    <div class="post">
+        <div class="post-avatar">😎</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">Doomguy12345</span>
+                <span class="post-time">2025-12-13 16:21</span>
+            </div>
+            <div class="post-body">
+                <p>up能不能讲一下战地和使命召唤里面的那个统一士兵瞄准（也就叫mdv的）有什么说法，有说调成mdv0最好，有说133，有说游戏分辨率4比3用133，16比9用178，说法不一。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 回复 西岛海 -->
+    <div class="post">
+        <div class="post-avatar">🌊</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">西岛海</span>
+                <span class="post-time">2025-12-13 16:22</span>
+            </div>
+            <div class="post-body">
+                <p>我只能说在短TTK游戏下，维持MDH0%不变基本是错的。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 西岛海 第二条 -->
+    <div class="post">
+        <div class="post-avatar">🌊</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">西岛海</span>
+                <span class="post-time">2025-12-13 16:23</span>
+            </div>
+            <div class="post-body">
+                <p>我视频里讲得很清楚，这个理论已经跳过了分辨率影响。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 没错我就TTF 回复 西岛海 -->
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">2025-12-13 19:07</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@西岛海</span> : 请问海哥，那长ttk游戏呢，比如apex的默认开镜灵敏度1就是mdv0的转换方式。还有的短ttk游戏也是，像吃鸡的默认开镜灵敏度也是mdv0。感觉每个游戏的默认设置都不同，令人纠结。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 西岛海 回复 TTF -->
+    <div class="post">
+        <div class="post-avatar">🌊</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">西岛海</span>
+                <span class="post-time">2025-12-13 19:13</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@没错我就TTF</span> : 视频里有讲公式。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 墨澜城 -->
+    <div class="post">
+        <div class="post-avatar">📐</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">墨澜城</span>
+                <span class="post-time">2025-12-13 21:22</span>
+            </div>
+            <div class="post-body">
+                <p>【游戏分辨率4比3用133，16比9用178】是错的。吃鸡这种游戏，长时间压枪还有精细狙击都是利好mdv0的因素。mdv133%是个手感不错的巧合。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TTF 回复 墨澜城 -->
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">2025-12-13 22:02</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 怪不得ow玩家圈艾什百合流行mdv0的设置，因为都追求开镜精准爆头。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 墨澜城 回复 TTF (PUBG) -->
+    <div class="post">
+        <div class="post-avatar">📐</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">墨澜城</span>
+                <span class="post-time">2025-12-13 22:56</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@没错我就TTF</span> : 但你确定PUBG是mdh0%吗？我记得默认好像是mdh100%……</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 墨澜城 后续 -->
+    <div class="post">
+        <div class="post-avatar">📐</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">墨澜城</span>
+                <span class="post-time">2025-12-13 23:07</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@没错我就TTF</span> : 我自己玩pubg 随着倍率升高，各个档位的灵敏度是递减的，印象里应该是为了匹配更低一些的mdh</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 墨澜城 链接 -->
+    <div class="post">
+        <div class="post-avatar">📐</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">墨澜城</span>
+                <span class="post-time">2025-12-13 23:09</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@没错我就TTF</span> : 出处：<a href="#">https://www.mouse-sensitivity.com/forums/topic/9528-how-do-you-know-if-individual-fps-games-default-to-mdv-or-mdh-and-if-they-default-to-0-or-100-or-133-i-dont-understand-any-of-this/</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TTF 感谢 -->
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">2025-12-13 23:28</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 看到了，谢谢指正原来我一直以来都搞错了pubg的默认mdh。😂</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TTF 第二个回复 提到 Jedi -->
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">2025-12-13 23:28</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 其实我还想问有没有一个mdh/mdv能满足所有fps，或者海哥和老哥对这个灵敏度转换网站一个jedi转换法（底下评论有人说就是mdv68）的看法，这个作者说这个数值是0到100里“最大误差”最小的设置方法。</p>
+                <p><a href="#">https://www.mouse-sensitivity.com/forums/topic/7903-jedis-mouse-trick/#comment-39347</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 墨澜城 长回复 (5小时前) -->
+    <div class="post">
+        <div class="post-avatar">📐</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">墨澜城</span>
+                <span class="post-time">5小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@没错我就TTF</span> : 以开镜前后这个场景为例，以mdv%的这个长度画一个圆；向屏幕中某些点拉抢，相对于腰射，开镜后圆上的点是“完美”的，圆内会感觉偏快（也就是拉过头），圆外会偏慢。jedi的想法就是，我找一个半径，尽可能让屏幕上所有的点的偏差平均最小，嗯，有点最小二乘法的意思，也就得到了“尽可能兼顾”的值；这个方法初衷没毛病，但一看到平均……emmm我至少能想到以下几个问题，如果哥们有兴趣可以挖一下</p>
+                <div class="quote-block">
+                    <div>偏差的绝对值与相对值：同样的5个像素的误差，对于50像素的微调 和 500像素的大拉而言，显然不是一个量级的相对误差；</div>
+                    <div>不同长度的甩枪动作出现的频率并非平均分布，因此“偏差平均最小”可能需要按频率加权；</div>
+                    <div>不同长度的甩枪动作对“记忆”的需求高低并不一致，比如准星附近的微调，偏差一些也能很轻松摆正，但狙击镜边缘的flick则需要更清晰、稳定的“记忆”；</div>
+                </div>
+                <p>所以……几个因素下，有的可能把最终结果推高，有的可能拉低，短时间内我不好说……😂 从纯粹瞄准上说，应该比mdv133%好；但如果结合实战，高倍镜下很可能目标尺寸会更大（我可能拿1倍打50米，但用3倍打100米，所以偏快可以接受），体感后座也会倍增（偏快有利于控制）。</p>
+                <p>最后，一笔糊涂账😏 有限元分析个锤子，直接上经验公式😂</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TTF 连续几条 (5小时前) 合并显示，但保留各个独立post体现讨论节奏 -->
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">5小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 确实是这样，那么还是不纠结了，固定一个值一直用形成习惯和感觉最重要。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">5小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 墨老哥，我突然有一个想法，就是关于确定一个固定mdh值来长期使用（转换所有fps之间的腰射，腰射和开镜），你看有没有用。举例一个场景，比如cs里面架枪（敌人选择这游戏最常见的敌人的移速—拿ak的移速），自己的反应速度下需要架多远的身位，这个距离投射在屏幕上，取一个mdh值。这个方式把反应速度的因素参与到自己的个人mdh值确定。那么得出来的值，就是是目标从准星处移走，在自身反应速度下，目标拉开的距离=需要拉枪的距离。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">5小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 然后这个敌人的移速就取5m/s～6m/s，这也是大多数fps游戏的地速（二代fps里cs拿ak是5.4m/s，三代fps里跑速一般是5～7）</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">5小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 当然目标速度在屏幕上的移动速度也由距离影响，选用常见的交火距离即可，这个距离还需要确定一下，我觉得一般是中近距离。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">4小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 感觉对海哥说的短ttk0不好有自己的理解，比如打动态定位的目标，人是有个阅读和反应的时间，然后瞬间甩枪定位上去，用0就永远不会有这个甩枪的固定感觉。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">4小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 所以也引出了我上面的想法，就是用常见的交战距离，目标移速，结合自身的阅读反应时间，去找自己的mdh值。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">4小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 墨老哥，我还有些想法。</p>
+                <p>我觉得mdv/h怎么调，但只要固定一个值长期用，在“静态定位”场景就没问题。</p>
+                <p>我之前说的根据各种因素确定自己的mdh值，就是用来应对“动态定位”场景的。</p>
+                <p>这个常用场景，我想了下，还是用倍镜下的视角去取值更合理（cs的awp，彩六的2.5，apex的3x倍镜）。因为我的习惯是把所有开镜射击的fps的基础镜（1x，1.25x）的fov调整到和cs一样。</p>
+                <p>mdh/v0还是只适合“跟枪”场景，比如apex1倍镜和3倍镜的跟枪手感转换。</p>
+                <p>综上，1是我对“0不是最好的”的个人理解（若固定只用一个mdh/v）。不取用0也只是对“跟枪”场景有影响，且倍镜固定只用1，2个，也就多适应1，2个跟枪手感。且长ttk的交战反应容错更高，跟枪之前也得先定位。2是说说个人理解的mdh值的取法。然后那个jedi的取值mdv68/mdh38，感觉有点接近常用的拉枪距离啊。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 墨澜城 最后两条 -->
+    <div class="post">
+        <div class="post-avatar">📐</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">墨澜城</span>
+                <span class="post-time">4小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@没错我就TTF</span> : 我觉得怪怪的，像你说架多远的身位，如果真确定了这个，那不需要从边缘甩，直接架定点狙了。如果是我，更多还是关注架中间甩两边吧可能</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="post">
+        <div class="post-avatar">📐</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">墨澜城</span>
+                <span class="post-time">4小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@没错我就TTF</span> : 【常用的拉枪距离】这个词，视频里海哥有他自己习惯的表述和用词这样</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TTF 最后一条 -->
+    <div class="post">
+        <div class="post-avatar">🔫</div>
+        <div class="post-content">
+            <div class="post-meta">
+                <span class="post-author">没错我就TTF</span>
+                <span class="post-time">4小时前</span>
+            </div>
+            <div class="post-body">
+                <p>回复 <span class="mention">@墨澜城</span> : 嗯嗯，海哥视频我也是全程看完了的。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    <div class="footer-note">
+        🕹️ 重制讨论串 · 还原 <strong>MDV/MDH</strong> 深度交流 · 仅供参考
+    </div>
+
+</div>
+</body>
+</html>
