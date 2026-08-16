@@ -415,7 +415,7 @@
             <div class="mode-label">选择计算模型 (权重模式)</div>
             <div class="mode-toggle">
                 <button type="button" class="mode-btn active" id="btnModeAssym" onclick="setMode('assym')">
-                    🎯 实战微调 (宽0.25 / 距0.125)
+                    🎯 实战微调 (宽0.25 / 距0.0625)
                 </button>
                 <button type="button" class="mode-btn" id="btnModeEqual" onclick="setMode('equal')">
                     📐 光学等权 (宽0.25 / 距0.25)
@@ -426,7 +426,7 @@
         <div class="formula-box">
             <div class="formula-title" id="formulaTitle">当前模型：实战手感微调模型 (非对称)</div>
             <div class="formula-expr" id="formulaExpr">
-                CM<sub>目标</sub> = CM<sub>原始</sub> × ( W<sub>目标宽度</sub> / W<sub>原始宽度</sub> )<sup>0.25</sup> × ( D<sub>原始视距</sub> / D<sub>目标视距</sub> )<sup>0.125</sup>
+                CM<sub>目标</sub> = CM<sub>原始</sub> × ( W<sub>目标宽度</sub> / W<sub>原始宽度</sub> )<sup>0.25</sup> × ( D<sub>原始视距</sub> / D<sub>目标视距</sub> )<sup>0.0625</sup>
             </div>
             <div class="formula-legend">
                 <span><strong>CM</strong>：物理敏度 (cm/360)</span>
@@ -543,7 +543,6 @@
 
     let currentMode = 'assym';
 
-    // 纯复制功能
     function copyWidth(val) {
         navigator.clipboard.writeText(val).then(() => {
             showToast(`已成功复制: ${val} cm`);
@@ -566,7 +565,7 @@
             btnModeAssym.classList.add('active');
             btnModeEqual.classList.remove('active');
             formulaTitle.innerText = '当前模型：实战手感微调模型 (非对称)';
-            formulaExpr.innerHTML = 'CM<sub>目标</sub> = CM<sub>原始</sub> × ( W<sub>目标宽度</sub> / W<sub>原始宽度</sub> )<sup>0.25</sup> × ( D<sub>原始视距</sub> / D<sub>目标视距</sub> )<sup>0.125</sup>';
+            formulaExpr.innerHTML = 'CM<sub>目标</sub> = CM<sub>原始</sub> × ( W<sub>目标宽度</sub> / W<sub>原始宽度</sub> )<sup>0.25</sup> × ( D<sub>原始视距</sub> / D<sub>目标视距</sub> )<sup>0.0625</sup>';
         } else {
             btnModeEqual.classList.add('active');
             btnModeAssym.classList.remove('active');
@@ -590,7 +589,7 @@
         }
 
         const wRatio = Math.pow(wNew / wOld, 0.25);
-        const dExp = (currentMode === 'assym') ? 0.125 : 0.25;
+        const dExp = (currentMode === 'assym') ? 0.0625 : 0.25;
         const dRatio = Math.pow(dOld / dNew, dExp);
 
         const finalRatio = wRatio * dRatio;
