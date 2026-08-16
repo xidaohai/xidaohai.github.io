@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPS 敏度转换计算器 (物理宽度专业版)</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #38bdf8;
+            --result-bg: #0f172a;
+            --hover-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        .page-layout {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            max-width: 1050px;
+            align-items: flex-start;
+            justify-content: center;
+            margin-bottom: 60px;
+        }
+
+        @media (max-width: 900px) {
+            .page-layout {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar-panel {
+            width: 100%;
+            max-width: 320px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sidebar-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .size-category {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 12px 0 6px 0;
+        }
+
+        .size-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .size-item {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .size-item:hover {
+            border-color: var(--accent-color);
+            background-color: var(--hover-color);
+        }
+
+        .size-item .name {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .size-item .val {
+            color: var(--accent-color);
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        .copy-tip {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 14px;
+        }
+
+        .header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+        }
+
+        .mode-selector-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .mode-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .mode-toggle {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background-color: var(--bg-color);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            gap: 4px;
+        }
+
+        .mode-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .mode-btn.active {
+            background-color: var(--card-bg);
+            color: var(--accent-color);
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+        }
+
+        .formula-box {
+            background-color: var(--result-bg);
+            border-left: 4px solid var(--accent-color);
+            padding: 14px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .formula-title {
+            font-size: 0.78rem;
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .formula-expr {
+            font-family: "Fira Code", Consolas, Monaco, monospace;
+            font-size: 0.88rem;
+            color: #e2e8f0;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .formula-legend {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            .formula-legend { grid-template-columns: 1fr; }
+        }
+
+        .formula-legend span strong {
+            color: var(--text-primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .section-title {
+            grid-column: 1 / -1;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-color);
+            margin-top: 2px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 9px 12px;
+            padding-right: 50px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .input-wrapper .unit {
+            position: absolute;
+            right: 12px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .result-card {
+            background-color: var(--result-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .result-card .label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .result-card .value-group {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .result-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .result-card .unit-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .result-card .meta {
+            margin-top: 8px;
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        .footer-credits {
+            position: fixed;
+            bottom: 20px;
+            right: 24px;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            line-height: 1.6;
+            z-index: 10;
+            background-color: rgba(15, 23, 42, 0.92);
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .footer-credits a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
+        }
+
+        .footer-credits a:hover {
+            color: #7dd3fc;
+            text-decoration: underline;
+        }
+
+        .footer-credits .beta-tag {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #38bdf8;
+            color: #0f172a;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-layout">
+    <!-- 主计算器面板 -->
+    <div class="container">
+        <div class="header">
+            <h1>屏幕物理宽度、视距 与 cm360灵敏度</h1>
+            <p>基于物理横向宽度与视距的专业级跨比例换算模型</p>
+        </div>
+
+        <div class="mode-selector-wrapper">
+            <div class="mode-label">选择计算模型 (权重模式)</div>
+            <div class="mode-toggle">
+                <button type="button" class="mode-btn active" id="btnModeAssym" onclick="setMode('assym')">
+                    🎯 实战微调 (宽0.25 / 距0.125)
+                </button>
+                <button type="button" class="mode-btn" id="btnModeEqual" onclick="setMode('equal')">
+                    📐 光学等权 (宽0.25 / 距0.25)
+                </button>
+            </div>
+        </div>
+
+        <div class="formula-box">
+            <div class="formula-title" id="formulaTitle">当前模型：实战手感微调模型 (非对称)</div>
+            <div class="formula-expr" id="formulaExpr">
+                CM<sub>目标</sub> = CM<sub>原始</sub> × ( W<sub>目标宽度</sub> / W<sub>原始宽度</sub> )<sup>0.25</sup> × ( D<sub>原始视距</sub> / D<sub>目标视距</sub> )<sup>0.125</sup>
+            </div>
+            <div class="formula-legend">
+                <span><strong>CM</strong>：物理敏度 (cm/360)</span>
+                <span><strong>W</strong>：屏幕物理宽度 (厘米)</span>
+                <span><strong>D</strong>：人眼视距 (厘米)</span>
+                <span><strong>提示</strong>：点击右侧尺寸可直接复制数值</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="section-title">基准设置（原始条件）</div>
+            
+            <div class="input-group">
+                <label for="cmOld">原始灵敏度 (CM<sub>原始</sub>)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="cmOld" value="50" step="0.1">
+                    <span class="unit">cm/360</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="wOld">原始屏幕物理宽度 (W<sub>原始</sub>)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="wOld" value="53.1" step="0.1">
+                    <span class="unit">cm</span>
+                </div>
+            </div>
+
+            <div class="input-group" style="grid-column: 1 / -1;">
+                <label for="dOld">原始视距 (D<sub>原始</sub>)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="dOld" value="20" step="1">
+                    <span class="unit">cm</span>
+                </div>
+            </div>
+
+            <div class="section-title">目标设置（新条件）</div>
+
+            <div class="input-group">
+                <label for="wNew">目标屏幕物理宽度 (W<sub>目标</sub>)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="wNew" value="70.8" step="0.1">
+                    <span class="unit">cm</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="dNew">目标视距 (D<sub>目标</sub>)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="dNew" value="10" step="1">
+                    <span class="unit">cm</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-card">
+            <div class="label">计算得到的目标灵敏度 (CM<sub>目标</sub>)</div>
+            <div class="value-group">
+                <span class="value" id="resultValue">0.00</span>
+                <span class="unit-text">cm/360</span>
+            </div>
+            <div class="meta" id="resultDetails">--</div>
+        </div>
+    </div>
+
+    <!-- 右侧速查与纯复制面板 -->
+    <div class="sidebar-panel">
+        <div class="sidebar-title">📏 屏幕物理宽度速查</div>
+        <div class="sidebar-subtitle">点击任意尺寸即可复制数值到剪贴板</div>
+
+        <div class="size-category">🖥️ 16:9 常见显示器/笔记本</div>
+        <div class="size-list">
+            <div class="size-item" onclick="copyWidth('31.0')"><span class="name">14寸 (笔记本)</span><span class="val">31.0 cm</span></div>
+            <div class="size-item" onclick="copyWidth('34.4')"><span class="name">15.6寸 (笔记本)</span><span class="val">34.4 cm</span></div>
+            <div class="size-item" onclick="copyWidth('47.6')"><span class="name">21.5寸 (16:9)</span><span class="val">47.6 cm</span></div>
+            <div class="size-item" onclick="copyWidth('53.1')"><span class="name">24寸 (标准16:9)</span><span class="val">53.1 cm</span></div>
+            <div class="size-item" onclick="copyWidth('54.4')"><span class="name">24.5寸 (电竞16:9)</span><span class="val">54.4 cm</span></div>
+            <div class="size-item" onclick="copyWidth('59.8')"><span class="name">27寸 (16:9)</span><span class="val">59.8 cm</span></div>
+            <div class="size-item" onclick="copyWidth('70.8')"><span class="name">32寸 (16:9)</span><span class="val">70.8 cm</span></div>
+        </div>
+
+        <div class="size-category">🌊 21:9 带鱼屏常见尺寸</div>
+        <div class="size-list">
+            <div class="size-item" onclick="copyWidth('67.3')"><span class="name">29寸 (21:9)</span><span class="val">67.3 cm</span></div>
+            <div class="size-item" onclick="copyWidth('79.8')"><span class="name">34寸 (21:9)</span><span class="val">79.8 cm</span></div>
+        </div>
+
+        <div class="copy-tip">💡 点击后直接复制，可自由粘贴至任意输入框。</div>
+    </div>
+</div>
+
+<div id="toast">已复制数值到剪贴板！</div>
+
+<div class="footer-credits">
+    <div>作者：<a href="https://space.bilibili.com/10778584" target="_blank" rel="noopener noreferrer">墨澜城</a> / <a href="https://space.bilibili.com/1534330" target="_blank" rel="noopener noreferrer">西岛海</a></div>
+    <div>状态：<span class="beta-tag">Beta 版本 (纯复制面板版)</span></div>
+</div>
+
+<script>
+    const cmOldInput = document.getElementById('cmOld');
+    const wOldInput = document.getElementById('wOld');
+    const dOldInput = document.getElementById('dOld');
+    const wNewInput = document.getElementById('wNew');
+    const dNewInput = document.getElementById('dNew');
+
+    const resultValue = document.getElementById('resultValue');
+    const resultDetails = document.getElementById('resultDetails');
+    const formulaTitle = document.getElementById('formulaTitle');
+    const formulaExpr = document.getElementById('formulaExpr');
+
+    const btnModeAssym = document.getElementById('btnModeAssym');
+    const btnModeEqual = document.getElementById('btnModeEqual');
+    const toast = document.getElementById('toast');
+
+    let currentMode = 'assym';
+
+    // 纯复制功能
+    function copyWidth(val) {
+        navigator.clipboard.writeText(val).then(() => {
+            showToast(`已成功复制: ${val} cm`);
+        }).catch(() => {
+            showToast(`已复制: ${val} cm`);
+        });
+    }
+
+    function showToast(msg) {
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 1800);
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        if (mode === 'assym') {
+            btnModeAssym.classList.add('active');
+            btnModeEqual.classList.remove('active');
+            formulaTitle.innerText = '当前模型：实战手感微调模型 (非对称)';
+            formulaExpr.innerHTML = 'CM<sub>目标</sub> = CM<sub>原始</sub> × ( W<sub>目标宽度</sub> / W<sub>原始宽度</sub> )<sup>0.25</sup> × ( D<sub>原始视距</sub> / D<sub>目标视距</sub> )<sup>0.125</sup>';
+        } else {
+            btnModeEqual.classList.add('active');
+            btnModeAssym.classList.remove('active');
+            formulaTitle.innerText = '当前模型：纯物理光学等权模型 (几何对称)';
+            formulaExpr.innerHTML = 'CM<sub>目标</sub> = CM<sub>原始</sub> × ( W<sub>目标宽度</sub> / W<sub>原始宽度</sub> )<sup>0.25</sup> × ( D<sub>原始视距</sub> / D<sub>目标视距</sub> )<sup>0.25</sup>';
+        }
+        calculate();
+    }
+
+    function calculate() {
+        const cmOld = parseFloat(cmOldInput.value) || 0;
+        const wOld = parseFloat(wOldInput.value) || 0;
+        const dOld = parseFloat(dOldInput.value) || 0;
+        const wNew = parseFloat(wNewInput.value) || 0;
+        const dNew = parseFloat(dNewInput.value) || 0;
+
+        if (wOld <= 0 || wNew <= 0 || cmOld <= 0 || dOld <= 0 || dNew <= 0) {
+            resultValue.innerText = "错误";
+            resultDetails.innerText = "所有输入参数必须大于 0";
+            return;
+        }
+
+        const wRatio = Math.pow(wNew / wOld, 0.25);
+        const dExp = (currentMode === 'assym') ? 0.125 : 0.25;
+        const dRatio = Math.pow(dOld / dNew, dExp);
+
+        const finalRatio = wRatio * dRatio;
+        const finalCM = cmOld * finalRatio;
+
+        const wPct = ((wRatio - 1) * 100).toFixed(2);
+        const dPct = ((dRatio - 1) * 100).toFixed(2);
+        const totalPct = ((finalRatio - 1) * 100).toFixed(2);
+
+        resultValue.innerText = finalCM.toFixed(2);
+        resultDetails.innerText = `宽度修正: ${wPct >= 0 ? '+' : ''}${wPct}% | 视距修正: ${dPct >= 0 ? '+' : ''}${dPct}% | 综合手感: ${totalPct >= 0 ? '放慢 +' : '加快 '}${Math.abs(totalPct)}%`;
+    }
+
+    [cmOldInput, wOldInput, dOldInput, wNewInput, dNewInput].forEach(input => {
+        input.addEventListener('input', calculate);
+    });
+
+    calculate();
+</script>
+
+</body>
+</html>
