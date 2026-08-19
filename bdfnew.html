@@ -321,41 +321,7 @@
         </div>
     </div>
 
-    <!-- 1. 光口法 -->
-    <div class="formula-card">
-        <div class="card-top">
-            <div class="formula-info">
-                <span class="formula-title">【光口法】</span>
-                <span class="math-expr">S<sup>⅓</sup> · sl<sup>⅔</sup></span>
-            </div>
-            <div class="main-res-box">
-                <span class="res-label">公式得数</span>
-                <span class="res-val" id="res-gk">--</span>
-            </div>
-        </div>
-        <div class="quartile-frame">
-            <div class="q-item q-item-highlight">
-                <span class="q-tag">除以 2</span>
-                <span class="q-val" id="gk-half">--</span>
-            </div>
-            <div class="q-item">
-                <span class="q-tag">偏快</span>
-                <span class="q-val" id="gk-q1">--</span>
-            </div>
-            <div class="divider"></div>
-            <div class="q-item">
-                <span class="q-tag">【四分居中】</span>
-                <span class="q-val" id="gk-q2">--</span>
-            </div>
-            <div class="divider"></div>
-            <div class="q-item">
-                <span class="q-tag">偏慢</span>
-                <span class="q-val" id="gk-q3">--</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. 黄金圆周立方系 -->
+    <!-- 1. 自然法：立方系 -->
     <div class="formula-card">
         <div class="card-top">
             <div class="formula-info">
@@ -389,7 +355,7 @@
         </div>
     </div>
 
-    <!-- 3. 黄金分割指数系 -->
+    <!-- 2. 自然法：黄金系 -->
     <div class="formula-card">
         <div class="card-top">
             <div class="formula-info">
@@ -419,6 +385,74 @@
             <div class="q-item">
                 <span class="q-tag">偏慢</span>
                 <span class="q-val" id="gold-q3">--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 光口法：立方系 -->
+    <div class="formula-card">
+        <div class="card-top">
+            <div class="formula-info">
+                <span class="formula-title">【光口法】立方系</span>
+                <span class="math-expr">S<sup>⅓</sup> · sl<sup>⅔</sup></span>
+            </div>
+            <div class="main-res-box">
+                <span class="res-label">公式得数</span>
+                <span class="res-val" id="res-gk">--</span>
+            </div>
+        </div>
+        <div class="quartile-frame">
+            <div class="q-item q-item-highlight">
+                <span class="q-tag">除以 2</span>
+                <span class="q-val" id="gk-half">--</span>
+            </div>
+            <div class="q-item">
+                <span class="q-tag">偏快</span>
+                <span class="q-val" id="gk-q1">--</span>
+            </div>
+            <div class="divider"></div>
+            <div class="q-item">
+                <span class="q-tag">【四分居中】</span>
+                <span class="q-val" id="gk-q2">--</span>
+            </div>
+            <div class="divider"></div>
+            <div class="q-item">
+                <span class="q-tag">偏慢</span>
+                <span class="q-val" id="gk-q3">--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 光口法：黄金系（已极化消去 π，采用标准蓝色样式） -->
+    <div class="formula-card">
+        <div class="card-top">
+            <div class="formula-info">
+                <span class="formula-title">【光口法】黄金系</span>
+                <span class="math-expr">ϕ · sl<sup>⅔</sup> · S<sup>ϕ²</sup></span>
+            </div>
+            <div class="main-res-box">
+                <span class="res-label">公式得数</span>
+                <span class="res-val" id="res-gk-gold">--</span>
+            </div>
+        </div>
+        <div class="quartile-frame">
+            <div class="q-item q-item-highlight">
+                <span class="q-tag">除以 2</span>
+                <span class="q-val" id="gk-gold-half">--</span>
+            </div>
+            <div class="q-item">
+                <span class="q-tag">偏快</span>
+                <span class="q-val" id="gk-gold-q1">--</span>
+            </div>
+            <div class="divider"></div>
+            <div class="q-item">
+                <span class="q-tag">【四分居中】</span>
+                <span class="q-val" id="gk-gold-q2">--</span>
+            </div>
+            <div class="divider"></div>
+            <div class="q-item">
+                <span class="q-tag">偏慢</span>
+                <span class="q-val" id="gk-gold-q3">--</span>
             </div>
         </div>
     </div>
@@ -468,27 +502,33 @@
         const S = x + y;
 
         if (S <= 0) {
-            renderQuartiles(NaN, 'gk');
             renderQuartiles(NaN, 'cube');
             renderQuartiles(NaN, 'gold');
+            renderQuartiles(NaN, 'gk');
+            renderQuartiles(NaN, 'gk-gold');
             return;
         }
 
-        // 1. 光口法
-        if (sl > 0) {
-            const gkVal = Math.pow(S, 1/3) * Math.pow(sl, 2/3);
-            renderQuartiles(gkVal, 'gk');
-        } else {
-            renderQuartiles(NaN, 'gk');
-        }
-
-        // 2. 黄金圆周立方系
+        // 1. 黄金圆周立方系 (自然法)
         const cubeVal = PI * BIG_PHI * Math.pow(S, 1/3);
         renderQuartiles(cubeVal, 'cube');
 
-        // 3. 黄金分割指数系
+        // 2. 黄金分割指数系 (自然法)
         const goldVal = PI * Math.pow(S, PHI_SQUARE);
         renderQuartiles(goldVal, 'gold');
+
+        // 3. 光口法 (立方系) & 光口法 (黄金系)
+        if (sl > 0) {
+            const gkVal = Math.pow(S, 1/3) * Math.pow(sl, 2/3);
+            renderQuartiles(gkVal, 'gk');
+
+            // 极简约分后形态：phi * sl^(2/3) * S^(phi^2)
+            const gkGoldVal = SMALL_PHI * Math.pow(sl, 2/3) * Math.pow(S, PHI_SQUARE);
+            renderQuartiles(gkGoldVal, 'gk-gold');
+        } else {
+            renderQuartiles(NaN, 'gk');
+            renderQuartiles(NaN, 'gk-gold');
+        }
     }
 
     // 高敏/跟枪公式计算与自动替换函数
