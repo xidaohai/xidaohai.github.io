@@ -57,7 +57,7 @@
             font-weight: bold;
             margin-bottom: 16px;
             display: flex;
-            align-items: baseline;
+            align-items: center;
             gap: 8px;
             color: var(--main-blue);
         }
@@ -65,6 +65,33 @@
             font-size: 1.15rem;
             opacity: 0.85;
         }
+
+        /* 优化：显眼的“说明”按钮样式 */
+        .k-link {
+            font-size: 1.05rem; /* 字号放大 */
+            font-weight: 800; /* 加粗 */
+            color: #ffffff;
+            background-color: var(--amber-theme);
+            padding: 4px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-left: auto; /* 自动靠右对齐 */
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(180, 83, 9, 0.25);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .k-link:hover {
+            background-color: #78350f;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(120, 53, 15, 0.3);
+        }
+        .k-link:active {
+            transform: translateY(0);
+        }
+
         .control-container {
             display: grid;
             grid-template-columns: 1fr;
@@ -312,6 +339,8 @@
     <div class="header-title">
         <span class="date">2026.8.20</span>
         <span>同身寸 · 表达法</span>
+        <!-- 显眼的“说明”按钮 -->
+        <a href="https://xidaohai.github.io/tsc.html" target="_blank" class="k-link">说明</a>
     </div>
 
     <!-- 输入参数 -->
