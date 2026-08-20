@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>同身寸·表达法 - 西岛海</title>
+    <style>
+        :root {
+            --bg-color: #d8cab5;
+            --paper-texture: #cbba9f;
+            --main-blue: #1e3a8a;
+            --accent-purple: #4c1d95;
+            --amber-theme: #b45309;
+            --card-bg: #ece2d3;
+            --box-shadow: rgba(30, 20, 50, 0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            padding: 12px 8px;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(var(--paper-texture) 15%, transparent 16%),
+                radial-gradient(var(--paper-texture) 15%, transparent 16%);
+            background-size: 8px 8px;
+            background-position: 0 0, 4px 4px;
+            color: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft YaHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .sketch-card {
+            width: 100%;
+            max-width: 780px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 18px 14px;
+            box-shadow: 0 8px 24px var(--box-shadow);
+            position: relative;
+            border: 1px solid rgba(120, 100, 70, 0.25);
+        }
+        @media (min-width: 600px) {
+            body { padding: 24px 16px; }
+            .sketch-card { padding: 30px; }
+        }
+        .sketch-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 6px;
+            background: #b45309;
+            border-radius: 8px 0 0 8px;
+        }
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            color: var(--main-blue);
+        }
+        .header-title .date { 
+            font-size: 1.15rem;
+            opacity: 0.85;
+        }
+        .control-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        @media (min-width: 640px) {
+            .control-container {
+                grid-template-columns: 1.5fr 1fr;
+            }
+        }
+        .input-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.45);
+            border: 1.5px dashed var(--main-blue);
+            border-radius: 6px;
+            padding: 12px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--main-blue);
+        }
+        .input-group input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(30, 58, 138, 0.3);
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--main-blue);
+            padding: 6px 8px;
+            outline: none;
+            text-align: center;
+        }
+        .input-group input:focus {
+            border-color: var(--main-blue);
+            background: #fff;
+        }
+        .tracking-module {
+            background: rgba(76, 29, 149, 0.05);
+            border: 1.5px solid var(--accent-purple);
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .module-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--accent-purple);
+        }
+        .module-expr {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: var(--accent-purple);
+        }
+        .calc-btn {
+            background: var(--accent-purple);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            width: 100%;
+        }
+        .calc-btn:active { opacity: 0.85; }
+
+        .formula-card {
+            border: 1.5px solid rgba(180, 83, 9, 0.35);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 14px;
+            background: rgba(254, 243, 199, 0.35);
+        }
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .formula-title { 
+            font-size: 0.95rem; 
+            font-weight: bold; 
+            color: #78350f;
+        }
+        .math-expr { 
+            font-size: 1.05rem; 
+            font-weight: bold; 
+            color: var(--amber-theme);
+        }
+        .main-res-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1.5px solid var(--amber-theme);
+            border-radius: 6px;
+            padding: 4px 8px;
+            min-width: 110px;
+        }
+        .res-label { 
+            font-size: 0.72rem; 
+            font-weight: 600;
+            color: #475569;
+        }
+        .res-val { 
+            font-size: 1.15rem; 
+            font-weight: bold; 
+            color: var(--amber-theme); 
+            line-height: 1.2;
+        }
+        .toggle-btn {
+            background: var(--amber-theme);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 3px;
+            width: 100%;
+        }
+
+        .quartile-frame-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+            padding-bottom: 2px;
+        }
+        .quartile-frame {
+            display: flex;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(180, 83, 9, 0.3);
+            border-radius: 4px;
+            padding: 4px;
+            min-width: 270px;
+            justify-content: space-around;
+        }
+        .q-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 4px;
+        }
+        .q-tag { 
+            font-size: 0.68rem; 
+            font-weight: 600;
+            color: #78350f; 
+        }
+        .q-val { 
+            font-size: 0.95rem; 
+            font-weight: bold; 
+            color: var(--amber-theme); 
+        }
+        .divider {
+            width: 1px;
+            height: 22px;
+            background: rgba(180, 83, 9, 0.2);
+            align-self: center;
+        }
+
+        /* 过程折叠/面板 */
+        .steps-panel {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(180, 83, 9, 0.2);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+        .panel-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #78350f;
+            margin-bottom: 6px;
+        }
+        .step-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 0;
+            color: #334155;
+            flex-wrap: wrap;
+        }
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--amber-theme);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: bold;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .step-label {
+            font-weight: 600;
+            color: #475569;
+        }
+        .step-formula {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+        .step-result {
+            font-weight: bold;
+            color: var(--amber-theme);
+        }
+
+        .footer-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            font-size: 0.82rem;
+            color: #475569;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .signature {
+            font-weight: bold;
+            color: var(--main-blue);
+        }
+        sup, sub { font-size: 0.7em; }
+    </style>
+</head>
+<body>
+
+<div class="sketch-card">
+
+    <div class="header-title">
+        <span class="date">2026.8.20</span>
+        <span>同身寸 · 表达法</span>
+    </div>
+
+    <!-- 输入参数 -->
+    <div class="control-container">
+        <div class="input-panel">
+            <div class="input-group">
+                <label>x (目标):</label>
+                <input type="number" id="input-x" value="4000" step="any" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>y (甩枪):</label>
+                <input type="number" id="input-y" value="200" step="any" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>sl (光腕 cm):</label>
+                <input type="number" id="input-sl" value="11.5" step="any" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>k (1寸 = ? cm):</label>
+                <input type="number" id="input-tsc" value="2" step="any" oninput="calculate()">
+            </div>
+        </div>
+
+        <div class="tracking-module">
+            <div>
+                <div class="module-title">跟枪/高敏 预处理</div>
+                <div class="module-expr">x<sub>cun</sub><sup>0.9</sup> · y<sub>cun</sub><sup>0.1</sup></div>
+            </div>
+            <button class="calc-btn" onclick="applyTrackingFormula()">计算</button>
+        </div>
+    </div>
+
+    <!-- 跟枪推导 -->
+    <div class="steps-panel" id="stepsPanel" style="margin-bottom: 12px; border-color: var(--accent-purple);">
+        <div class="panel-title" style="color: var(--accent-purple);">📐 跟枪计算过程</div>
+        <div id="stepsContent">
+            <div class="step-line" style="color:#94a3b8; font-style:italic;">点击「计算跟枪核」更新数据</div>
+        </div>
+    </div>
+
+    <!-- 自然法 -->
+    <div class="formula-card">
+        <div class="card-top">
+            <div>
+                <div class="formula-title">自然法 (Φ/6)</div>
+                <div class="math-expr">π · Φ · S<sub>cun</sub><sup>Φ/6</sup></div>
+            </div>
+            <div class="main-res-box">
+                <span class="res-label" id="label-cube">得数 (cm/360°)</span>
+                <span class="res-val" id="res-cube">--</span>
+                <button class="toggle-btn" id="btn-cube" onclick="toggleUnit('cube')">切为寸 (cun)</button>
+            </div>
+        </div>
+        <div class="quartile-frame-wrapper">
+            <div class="quartile-frame">
+                <div class="q-item"><span class="q-tag">÷2</span><span class="q-val" id="cube-half">--</span></div>
+                <div class="divider"></div>
+                <div class="q-item"><span class="q-tag">偏快</span><span class="q-val" id="cube-q1">--</span></div>
+                <div class="divider"></div>
+                <div class="q-item"><span class="q-tag">四分【均衡】</span><span class="q-val" id="cube-q2">--</span></div>
+                <div class="divider"></div>
+                <div class="q-item"><span class="q-tag">偏慢</span><span class="q-val" id="cube-q3">--</span></div>
+            </div>
+        </div>
+        <div class="steps-panel">
+            <div class="panel-title">推导过程</div>
+            <div id="stepsNatural"></div>
+        </div>
+    </div>
+
+    <!-- 光口法 -->
+    <div class="formula-card">
+        <div class="card-top">
+            <div>
+                <div class="formula-title">光口法 (立方系)</div>
+                <div class="math-expr">sl<sub>cun</sub><sup>⅔</sup> · S<sub>cun</sub><sup>⅓</sup></div>
+            </div>
+            <div class="main-res-box">
+                <span class="res-label" id="label-gk">得数 (cm/360°)</span>
+                <span class="res-val" id="res-gk">--</span>
+                <button class="toggle-btn" id="btn-gk" onclick="toggleUnit('gk')">切为寸 (cun)</button>
+            </div>
+        </div>
+        <div class="quartile-frame-wrapper">
+            <div class="quartile-frame">
+                <div class="q-item"><span class="q-tag">÷2</span><span class="q-val" id="gk-half">--</span></div>
+                <div class="divider"></div>
+                <div class="q-item"><span class="q-tag">偏快</span><span class="q-val" id="gk-q1">--</span></div>
+                <div class="divider"></div>
+                <div class="q-item"><span class="q-tag">四分【均衡】</span><span class="q-val" id="gk-q2">--</span></div>
+                <div class="divider"></div>
+                <div class="q-item"><span class="q-tag">偏慢</span><span class="q-val" id="gk-q3">--</span></div>
+            </div>
+        </div>
+        <div class="steps-panel">
+            <div class="panel-title">推导过程</div>
+            <div id="stepsGk"></div>
+        </div>
+    </div>
+
+    <div class="footer-section">
+        <div><strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong> | <strong>sl<sub>cun</sub> = sl / k</strong></div>
+        <div class="signature">西岛海 - 表达法</div>
+    </div>
+
+</div>
+
+<script>
+    const PI = Math.PI;
+    const BIG_PHI = (1 + Math.sqrt(5)) / 2;
+    const P_EXP = BIG_PHI / 6; // Φ/6 ≈ 0.2697
+
+    // 默认单位为 cm
+    let unitMode = {
+        cube: 'cm',
+        gk: 'cm'
+    };
+
+    let cachedTrackingSteps = null;
+
+    function renderQuartiles(val, prefix, unit) {
+        document.getElementById(`label-${prefix}`).innerText = `得数 (${unit}/360°)`;
+        document.getElementById(`btn-${prefix}`).innerText = unit === 'cm' ? '切为寸 (cun)' : '切为厘米 (cm)';
+        
+        if (isNaN(val) || val <= 0) {
+            ['res', 'half', 'q1', 'q2', 'q3'].forEach(k => {
+                const el = document.getElementById(`${prefix}-${k}`);
+                if (el) el.innerText = '--';
+            });
+            return;
+        }
+
+        const half = val / 2;
+        const step = (val - half) / 4;
+        document.getElementById(`res-${prefix}`).innerText = val.toFixed(2);
+        document.getElementById(`${prefix}-half`).innerText = half.toFixed(2);
+        document.getElementById(`${prefix}-q1`).innerText = (half + step * 1).toFixed(2);
+        document.getElementById(`${prefix}-q2`).innerText = (half + step * 2).toFixed(2);
+        document.getElementById(`${prefix}-q3`).innerText = (half + step * 3).toFixed(2);
+    }
+
+    function renderStepList(containerId, steps) {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        if (!steps || steps.length === 0) {
+            el.innerHTML = '<div class="step-line" style="color:#94a3b8;">暂无数据</div>';
+            return;
+        }
+        el.innerHTML = steps.map((s, i) => `
+            <div class="step-line">
+                <span class="step-num">${i + 1}</span>
+                <span class="step-label">${s.label}:</span>
+                <span class="step-formula">${s.formula}</span>
+                <span>=</span>
+                <span class="step-result">${s.result}</span>
+            </div>
+        `).join('');
+    }
+
+    function toggleUnit(type) {
+        unitMode[type] = unitMode[type] === 'cm' ? 'cun' : 'cm';
+        calculate();
+    }
+
+    function calculate() {
+        const x = parseFloat(document.getElementById('input-x').value) || 0;
+        const y = parseFloat(document.getElementById('input-y').value) || 0;
+        const sl = parseFloat(document.getElementById('input-sl').value) || 0;
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2.2;
+        const S = x + y;
+
+        if (S <= 0 || k <= 0) {
+            renderQuartiles(NaN, 'cube', unitMode.cube);
+            renderQuartiles(NaN, 'gk', unitMode.gk);
+            renderStepList('stepsNatural', null);
+            renderStepList('stepsGk', null);
+            return;
+        }
+
+        const S_cun = S / k;
+        const sl_cun = sl / k;
+
+        // 1. 自然法
+        const nat_cun = PI * BIG_PHI * Math.pow(S_cun, P_EXP);
+        const nat_cm = nat_cun * k;
+        const nat_val = unitMode.cube === 'cm' ? nat_cm : nat_cun;
+        renderQuartiles(nat_val, 'cube', unitMode.cube);
+
+        renderStepList('stepsNatural', [
+            { label: '寸化', formula: `S ÷ k = ${S.toFixed(1)} ÷ ${k}`, result: `${S_cun.toFixed(3)} cun` },
+            { label: '寸算', formula: `π · Φ · ${S_cun.toFixed(3)}^${P_EXP.toFixed(3)}`, result: `${nat_cun.toFixed(3)} cun` },
+            { label: '结果', formula: `${nat_cun.toFixed(3)} × ${k}`, result: `${nat_cm.toFixed(2)} cm` }
+        ]);
+
+        // 2. 光口法
+        if (sl > 0) {
+            const gk_cun = Math.pow(sl_cun, 2/3) * Math.pow(S_cun, 1/3);
+            const gk_cm = gk_cun * k;
+            const gk_val = unitMode.gk === 'cm' ? gk_cm : gk_cun;
+            renderQuartiles(gk_val, 'gk', unitMode.gk);
+
+            renderStepList('stepsGk', [
+                { label: '寸化', formula: `sl_cun = ${(sl/k).toFixed(3)}, S_cun = ${S_cun.toFixed(3)}`, result: '完成' },
+                { label: '寸算', formula: `${sl_cun.toFixed(3)}^⅔ · ${S_cun.toFixed(3)}^⅓`, result: `${gk_cun.toFixed(3)} cun` },
+                { label: '结果', formula: `${gk_cun.toFixed(3)} × ${k}`, result: `${gk_cm.toFixed(2)} cm` }
+            ]);
+        } else {
+            renderQuartiles(NaN, 'gk', unitMode.gk);
+            renderStepList('stepsGk', null);
+        }
+
+        if (cachedTrackingSteps) {
+            renderStepList('stepsContent', cachedTrackingSteps);
+        }
+    }
+
+    function applyTrackingFormula() {
+        const x = parseFloat(document.getElementById('input-x').value) || 0;
+        const y = parseFloat(document.getElementById('input-y').value) || 0;
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2.2;
+
+        if (x <= 0 || y <= 0 || k <= 0) {
+            alert("请输入大于 0 的有效参数");
+            return;
+        }
+
+        const x_cun = x / k;
+        const y_cun = y / k;
+        const newX_cun = Math.pow(x_cun, 0.9) * Math.pow(y_cun, 0.1);
+        const newX_cm = newX_cun * k;
+
+        cachedTrackingSteps = [
+            { label: '寸化', formula: `x=${x_cun.toFixed(2)} cun, y=${y_cun.toFixed(2)} cun`, result: '完成' },
+            { label: '核算', formula: `${x_cun.toFixed(2)}^0.9 · ${y_cun.toFixed(2)}^0.1`, result: `${newX_cun.toFixed(3)} cun` },
+            { label: '换回', formula: `${newX_cun.toFixed(3)} × ${k}`, result: `${newX_cm.toFixed(2)} cm` }
+        ];
+
+        renderStepList('stepsContent', cachedTrackingSteps);
+
+        document.getElementById('input-x').value = newX_cm.toFixed(2);
+        document.getElementById('input-y').value = 0;
+        calculate();
+    }
+
+    calculate();
+</script>
+
+</body>
+</html>
