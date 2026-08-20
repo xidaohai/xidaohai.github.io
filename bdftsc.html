@@ -13,6 +13,8 @@
             --amber-theme: #b45309;
             --card-bg: #ece2d3;
             --box-shadow: rgba(30, 20, 50, 0.12);
+            --anchor-color: #7c3aed;
+            --anchor-glow: rgba(124, 58, 237, 0.2);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -32,7 +34,7 @@
         }
         .sketch-card {
             width: 100%;
-            max-width: 780px;
+            max-width: 820px;
             background: var(--card-bg);
             border-radius: 8px;
             padding: 18px 14px;
@@ -60,22 +62,21 @@
             align-items: center;
             gap: 8px;
             color: var(--main-blue);
+            flex-wrap: wrap;
         }
         .header-title .date { 
             font-size: 1.15rem;
             opacity: 0.85;
         }
-
-        /* 优化：显眼的“说明”按钮样式 */
         .k-link {
-            font-size: 1.05rem; /* 字号放大 */
-            font-weight: 800; /* 加粗 */
+            font-size: 1.05rem;
+            font-weight: 800;
             color: #ffffff;
             background-color: var(--amber-theme);
             padding: 4px 12px;
             border-radius: 6px;
             text-decoration: none;
-            margin-left: auto; /* 自动靠右对齐 */
+            margin-left: auto;
             cursor: pointer;
             box-shadow: 0 2px 6px rgba(180, 83, 9, 0.25);
             transition: all 0.2s ease;
@@ -88,9 +89,7 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(120, 53, 15, 0.3);
         }
-        .k-link:active {
-            transform: translateY(0);
-        }
+        .k-link:active { transform: translateY(0); }
 
         .control-container {
             display: grid;
@@ -103,6 +102,7 @@
                 grid-template-columns: 1.5fr 1fr;
             }
         }
+
         .input-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -136,6 +136,7 @@
             border-color: var(--main-blue);
             background: #fff;
         }
+
         .tracking-module {
             background: rgba(76, 29, 149, 0.05);
             border: 1.5px solid var(--accent-purple);
@@ -143,31 +144,110 @@
             padding: 12px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            gap: 8px;
+            justify-content: center;
+            gap: 6px;
         }
-        .module-title {
-            font-size: 0.9rem;
+        .tracking-module .module-title {
+            font-size: 0.85rem;
             font-weight: bold;
             color: var(--accent-purple);
         }
-        .module-expr {
-            font-size: 1.05rem;
+        .tracking-module .module-expr {
+            font-size: 1.0rem;
             font-weight: bold;
             color: var(--accent-purple);
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
         }
-        .calc-btn {
+        .tracking-module .calc-btn {
             background: var(--accent-purple);
             color: #fff;
             border: none;
             border-radius: 4px;
-            padding: 8px 10px;
+            padding: 6px 10px;
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
             width: 100%;
+            transition: opacity 0.15s;
         }
-        .calc-btn:active { opacity: 0.85; }
+        .tracking-module .calc-btn:active { opacity: 0.8; }
+
+        .correction-module {
+            background: rgba(76, 29, 149, 0.05);
+            border: 1.5px solid var(--accent-purple);
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+        .correction-module .module-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--accent-purple);
+        }
+        .correction-module .module-sub {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .correction-input-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .correction-input-row .step-btn {
+            width: 28px;
+            height: 28px;
+            border: 1.5px solid var(--accent-purple);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.6);
+            color: var(--accent-purple);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s;
+            flex-shrink: 0;
+            user-select: none;
+        }
+        .correction-input-row .step-btn:active {
+            background: var(--accent-purple);
+            color: #fff;
+            transform: scale(0.92);
+        }
+        .correction-input-row input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(76, 29, 149, 0.3);
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--accent-purple);
+            padding: 6px 4px;
+            outline: none;
+            text-align: center;
+            min-width: 50px;
+        }
+        .correction-input-row input:focus {
+            border-color: var(--accent-purple);
+            background: #fff;
+        }
+        .correction-input-row .pct-sign {
+            font-weight: 700;
+            color: var(--accent-purple);
+            font-size: 0.9rem;
+            min-width: 18px;
+        }
+        .correction-slider {
+            width: 100%;
+            accent-color: var(--accent-purple);
+            cursor: pointer;
+        }
 
         .formula-card {
             border: 1.5px solid rgba(180, 83, 9, 0.35);
@@ -181,6 +261,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
         .formula-title { 
             font-size: 0.95rem; 
@@ -192,85 +273,108 @@
             font-weight: bold; 
             color: var(--amber-theme);
         }
-        .main-res-box {
+
+        .toggle-group {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.75);
-            border: 1.5px solid var(--amber-theme);
-            border-radius: 6px;
-            padding: 4px 8px;
-            min-width: 110px;
-        }
-        .res-label { 
-            font-size: 0.72rem; 
-            font-weight: 600;
-            color: #475569;
-        }
-        .res-val { 
-            font-size: 1.15rem; 
-            font-weight: bold; 
-            color: var(--amber-theme); 
-            line-height: 1.2;
+            gap: 2px;
+            background: rgba(0,0,0,0.06);
+            border-radius: 4px;
+            padding: 2px;
         }
         .toggle-btn {
+            border: none;
+            background: transparent;
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 3px;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.15s;
+        }
+        .toggle-btn.active {
             background: var(--amber-theme);
             color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 6px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 3px;
-            width: 100%;
         }
+        .toggle-btn:active { transform: scale(0.94); }
 
-        .quartile-frame-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 10px;
-            padding-bottom: 2px;
+        .five-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 4px;
+            margin-top: 4px;
         }
-        .quartile-frame {
-            display: flex;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(180, 83, 9, 0.3);
-            border-radius: 4px;
-            padding: 4px;
-            min-width: 270px;
-            justify-content: space-around;
+        @media (max-width: 500px) {
+            .five-col {
+                gap: 2px;
+                font-size: 0.75rem;
+            }
         }
-        .q-item {
+        .col-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 0 4px;
+            padding: 4px 2px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid transparent;
+            transition: all 0.15s;
+            cursor: default;
+            min-height: 44px;
+            justify-content: center;
         }
-        .q-tag { 
-            font-size: 0.68rem; 
+        .col-item .tag {
+            font-size: 0.6rem;
             font-weight: 600;
-            color: #78350f; 
+            color: #78350f;
         }
-        .q-val { 
-            font-size: 0.95rem; 
-            font-weight: bold; 
-            color: var(--amber-theme); 
+        .col-item .val {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--amber-theme);
         }
-        .divider {
-            width: 1px;
-            height: 22px;
-            background: rgba(180, 83, 9, 0.2);
-            align-self: center;
+        .col-item .val.corrected {
+            color: var(--accent-purple);
         }
 
-        /* 过程折叠/面板 */
+        .col-item.clickable {
+            cursor: pointer;
+        }
+        .col-item.clickable:hover {
+            background: rgba(124, 58, 237, 0.08);
+        }
+        .col-item.anchor {
+            border-color: var(--anchor-color);
+            background: var(--anchor-glow);
+            box-shadow: 0 0 12px var(--anchor-glow);
+        }
+        .col-item .anchor-hint {
+            font-size: 0.5rem;
+            color: var(--anchor-color);
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.2s;
+            margin-top: 1px;
+        }
+        .col-item.anchor .anchor-hint {
+            opacity: 1;
+        }
+
+        .row-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-top: 4px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
         .steps-panel {
             background: rgba(255, 255, 255, 0.4);
             border: 1px solid rgba(180, 83, 9, 0.2);
             border-radius: 6px;
             padding: 8px 10px;
-            margin-top: 8px;
+            margin-top: 10px;
             font-size: 0.85rem;
         }
         .panel-title {
@@ -330,6 +434,57 @@
             color: var(--main-blue);
         }
         sup, sub { font-size: 0.7em; }
+
+        .correction-badge {
+            background: var(--accent-purple);
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+        .anchor-label {
+            font-size: 0.6rem;
+            color: var(--anchor-color);
+            font-weight: 700;
+            background: rgba(124, 58, 237, 0.12);
+            padding: 0 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        .status-bar .highlight {
+            color: var(--accent-purple);
+            font-weight: 700;
+        }
+
+        .tracking-steps {
+            background: rgba(76, 29, 149, 0.04);
+            border: 1px solid var(--accent-purple);
+            border-radius: 4px;
+            padding: 6px 8px;
+            margin-top: 6px;
+            font-size: 0.8rem;
+        }
+        .tracking-steps .step-line {
+            color: var(--accent-purple);
+        }
+        .reset-hint {
+            font-size: 0.6rem;
+            color: #94a3b8;
+            font-weight: 400;
+            margin-left: 6px;
+        }
     </style>
 </head>
 <body>
@@ -339,11 +494,10 @@
     <div class="header-title">
         <span class="date">2026.8.20</span>
         <span>同身寸 · 表达法</span>
-        <!-- 显眼的“说明”按钮 -->
         <a href="https://xidaohai.github.io/tsc.png" target="_blank" class="k-link">说明</a>
     </div>
 
-    <!-- 输入参数 -->
+    <!-- ===== 第一行：输入 + 跟枪 ===== -->
     <div class="control-container">
         <div class="input-panel">
             <div class="input-group">
@@ -355,95 +509,126 @@
                 <input type="number" id="input-y" value="200" step="any" oninput="calculate()">
             </div>
             <div class="input-group">
-                <label>sl (光腕 cm):</label>
-                <input type="number" id="input-sl" value="11.5" step="any" oninput="calculate()">
-            </div>
-            <div class="input-group">
                 <label>k (1寸 = ? cm):</label>
-                <input type="number" id="input-tsc" value="2" step="any" oninput="calculate()">
+                <input type="number" id="input-tsc" value="2" step="0.1" oninput="calculate()">
             </div>
+            <div class="input-group" style="grid-column: span 1;"></div>
         </div>
 
+        <!-- 跟枪/高敏 预处理 -->
         <div class="tracking-module">
             <div>
                 <div class="module-title">跟枪/高敏 预处理</div>
                 <div class="module-expr">x<sub>cun</sub><sup>0.9</sup> · y<sub>cun</sub><sup>0.1</sup></div>
+                <div style="font-size:0.6rem;color:#94a3b8;margin-top:2px;">⚠ 点击后将重置修正系数为 0%</div>
             </div>
-            <button class="calc-btn" onclick="applyTrackingFormula()">计算</button>
+            <button class="calc-btn" onclick="applyTracking()">计算</button>
+            <div id="trackingSteps" class="tracking-steps" style="display:none;">
+                <div class="step-line"><span class="step-label">寸化:</span> <span id="track-step1">--</span></div>
+                <div class="step-line"><span class="step-label">核算:</span> <span id="track-step2">--</span></div>
+                <div class="step-line"><span class="step-label">换回:</span> <span id="track-step3">--</span></div>
+            </div>
         </div>
     </div>
 
-    <!-- 跟枪推导 -->
-    <div class="steps-panel" id="stepsPanel" style="margin-bottom: 12px; border-color: var(--accent-purple);">
-        <div class="panel-title" style="color: var(--accent-purple);">📐 跟枪计算过程</div>
-        <div id="stepsContent">
-            <div class="step-line" style="color:#94a3b8; font-style:italic;">点击「计算跟枪核」更新数据</div>
+    <!-- ===== 个人修正系数 ===== -->
+    <div class="correction-module">
+        <div>
+            <span class="module-title">✧ 个人修正系数</span>
+            <span class="module-sub">点击下行数值设锚点 · 步长 0.25%</span>
+        </div>
+        <div class="correction-input-row">
+            <button class="step-btn" onclick="adjustCorrection(-0.25)">−</button>
+            <input type="number" id="input-correct" value="0" step="0.25" min="-10" max="10" oninput="onCorrectionInput();">
+            <span class="pct-sign">%</span>
+            <button class="step-btn" onclick="adjustCorrection(0.25)">+</button>
+        </div>
+        <input type="range" class="correction-slider" id="correct-slider" min="-10" max="10" step="0.25" value="0" 
+               oninput="onSliderInput();">
+        <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:#94a3b8;padding:0 2px;">
+            <span>−10%</span>
+            <span id="correction-display" style="font-weight:bold;color:var(--accent-purple);">0%</span>
+            <span>+10%</span>
         </div>
     </div>
 
-    <!-- 自然法 -->
+    <!-- ===== 自然法 ===== -->
     <div class="formula-card">
         <div class="card-top">
             <div>
-                <div class="formula-title">自然法 (Φ/6)</div>
+                <div class="formula-title">表达法 (Φ/6)</div>
                 <div class="math-expr">π · Φ · S<sub>cun</sub><sup>Φ/6</sup></div>
             </div>
-            <div class="main-res-box">
-                <span class="res-label" id="label-cube">得数 (cm/360°)</span>
-                <span class="res-val" id="res-cube">--</span>
-                <button class="toggle-btn" id="btn-cube" onclick="toggleUnit('cube')">切为寸 (cun)</button>
+            <div class="toggle-group">
+                <button class="toggle-btn active" id="btn-cm" onclick="setUnit('cm')">cm</button>
+                <button class="toggle-btn" id="btn-cun" onclick="setUnit('cun')">cun</button>
             </div>
         </div>
-        <div class="quartile-frame-wrapper">
-            <div class="quartile-frame">
-                <div class="q-item"><span class="q-tag">÷2</span><span class="q-val" id="cube-half">--</span></div>
-                <div class="divider"></div>
-                <div class="q-item"><span class="q-tag">偏快</span><span class="q-val" id="cube-q1">--</span></div>
-                <div class="divider"></div>
-                <div class="q-item"><span class="q-tag">四分【均衡】</span><span class="q-val" id="cube-q2">--</span></div>
-                <div class="divider"></div>
-                <div class="q-item"><span class="q-tag">偏慢</span><span class="q-val" id="cube-q3">--</span></div>
+
+        <!-- 上行：基准 -->
+        <div class="row-label">基准（无修正）</div>
+        <div class="five-col" id="baseRow">
+            <div class="col-item"><span class="tag">÷2</span><span class="val" id="base-half">--</span></div>
+            <div class="col-item"><span class="tag">偏快</span><span class="val" id="base-q1">--</span></div>
+            <div class="col-item"><span class="tag">均衡</span><span class="val" id="base-q2">--</span></div>
+            <div class="col-item"><span class="tag">偏慢</span><span class="val" id="base-q3">--</span></div>
+            <div class="col-item"><span class="tag">基准值</span><span class="val" id="base-base">--</span></div>
+        </div>
+
+        <!-- 下行：修正后 -->
+        <div style="margin-top:10px;border-top:1.5px dashed rgba(76,29,149,0.25);padding-top:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+                <span style="font-weight:bold;color:var(--accent-purple);font-size:0.85rem;">
+                    ✧ 修正后 <span class="correction-badge" id="correction-badge">±0%</span>
+                </span>
+                <span style="font-size:0.7rem;color:#94a3b8;">
+                    锚点: <span class="anchor-label" id="anchorName">均衡</span>
+                    <span style="margin-left:6px;font-size:0.6rem;color:#94a3b8;">点击数值切换</span>
+                </span>
+            </div>
+            <div class="five-col" id="correctedRow">
+                <div class="col-item clickable" data-key="half" onclick="setAnchor('half')">
+                    <span class="tag">÷2</span>
+                    <span class="val corrected" id="corr-half">--</span>
+                    <span class="anchor-hint">⬆ 锚点</span>
+                </div>
+                <div class="col-item clickable" data-key="q1" onclick="setAnchor('q1')">
+                    <span class="tag">偏快</span>
+                    <span class="val corrected" id="corr-q1">--</span>
+                    <span class="anchor-hint">⬆ 锚点</span>
+                </div>
+                <div class="col-item clickable" data-key="q2" onclick="setAnchor('q2')">
+                    <span class="tag">均衡</span>
+                    <span class="val corrected" id="corr-q2">--</span>
+                    <span class="anchor-hint">⬆ 锚点</span>
+                </div>
+                <div class="col-item clickable" data-key="q3" onclick="setAnchor('q3')">
+                    <span class="tag">偏慢</span>
+                    <span class="val corrected" id="corr-q3">--</span>
+                    <span class="anchor-hint">⬆ 锚点</span>
+                </div>
+                <div class="col-item clickable" data-key="base" onclick="setAnchor('base')">
+                    <span class="tag">基准值</span>
+                    <span class="val corrected" id="corr-base">--</span>
+                    <span class="anchor-hint">⬆ 锚点</span>
+                </div>
+            </div>
+            <div class="status-bar">
+                <span>修正系数 = <span class="highlight" id="corrFactorDisplay">1.000</span></span>
+                <span>锚点: <span class="highlight" id="anchorDisplay">均衡</span></span>
+                <span id="ratioInfo" style="font-size:0.6rem;color:#94a3b8;"></span>
             </div>
         </div>
+
         <div class="steps-panel">
             <div class="panel-title">推导过程</div>
             <div id="stepsNatural"></div>
         </div>
     </div>
 
-    <!-- 光口法 -->
-    <div class="formula-card">
-        <div class="card-top">
-            <div>
-                <div class="formula-title">光口法 (立方系)</div>
-                <div class="math-expr">sl<sub>cun</sub><sup>⅔</sup> · S<sub>cun</sub><sup>⅓</sup></div>
-            </div>
-            <div class="main-res-box">
-                <span class="res-label" id="label-gk">得数 (cm/360°)</span>
-                <span class="res-val" id="res-gk">--</span>
-                <button class="toggle-btn" id="btn-gk" onclick="toggleUnit('gk')">切为寸 (cun)</button>
-            </div>
-        </div>
-        <div class="quartile-frame-wrapper">
-            <div class="quartile-frame">
-                <div class="q-item"><span class="q-tag">÷2</span><span class="q-val" id="gk-half">--</span></div>
-                <div class="divider"></div>
-                <div class="q-item"><span class="q-tag">偏快</span><span class="q-val" id="gk-q1">--</span></div>
-                <div class="divider"></div>
-                <div class="q-item"><span class="q-tag">四分【均衡】</span><span class="q-val" id="gk-q2">--</span></div>
-                <div class="divider"></div>
-                <div class="q-item"><span class="q-tag">偏慢</span><span class="q-val" id="gk-q3">--</span></div>
-            </div>
-        </div>
-        <div class="steps-panel">
-            <div class="panel-title">推导过程</div>
-            <div id="stepsGk"></div>
-        </div>
-    </div>
-
     <div class="footer-section">
-        <div><strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong> | <strong>sl<sub>cun</sub> = sl / k</strong></div>
-        <div class="signature">西岛海 - 表达法</div>
+        <div><strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong></div>
+        <div class="signature">西岛海 · 表达法</div>
     </div>
 
 </div>
@@ -451,35 +636,182 @@
 <script>
     const PI = Math.PI;
     const BIG_PHI = (1 + Math.sqrt(5)) / 2;
-    const P_EXP = BIG_PHI / 6; // Φ/6 ≈ 0.2697
+    const P_EXP = BIG_PHI / 6;
 
-    // 默认单位为 cm
-    let unitMode = {
-        cube: 'cm',
-        gk: 'cm'
+    const RATIOS = {
+        half: 0.5,
+        q1: 0.625,
+        q2: 0.75,
+        q3: 0.875,
+        base: 1.0
     };
 
-    let cachedTrackingSteps = null;
+    const KEY_NAMES = {
+        half: '÷2',
+        q1: '偏快',
+        q2: '均衡',
+        q3: '偏慢',
+        base: '基准值'
+    };
 
-    function renderQuartiles(val, prefix, unit) {
-        document.getElementById(`label-${prefix}`).innerText = `得数 (${unit}/360°)`;
-        document.getElementById(`btn-${prefix}`).innerText = unit === 'cm' ? '切为寸 (cun)' : '切为厘米 (cm)';
-        
-        if (isNaN(val) || val <= 0) {
-            ['res', 'half', 'q1', 'q2', 'q3'].forEach(k => {
-                const el = document.getElementById(`${prefix}-${k}`);
-                if (el) el.innerText = '--';
+    let currentUnit = 'cm';
+    let currentAnchor = 'q2';
+
+    // ===== 修正系数：滑条输入 =====
+    function onSliderInput() {
+        const val = parseFloat(document.getElementById('correct-slider').value) || 0;
+        document.getElementById('input-correct').value = val.toFixed(2);
+        syncUI();
+        calculate();
+    }
+
+    // ===== 修正系数：手动输入 =====
+    function onCorrectionInput() {
+        let val = parseFloat(document.getElementById('input-correct').value) || 0;
+        val = Math.max(-10, Math.min(10, val));
+        val = Math.round(val / 0.25) * 0.25;
+        document.getElementById('input-correct').value = val.toFixed(2);
+        document.getElementById('correct-slider').value = val;
+        syncUI();
+        calculate();
+    }
+
+    // ===== 修正系数：步进按钮 =====
+    function adjustCorrection(delta) {
+        const input = document.getElementById('input-correct');
+        let val = parseFloat(input.value) || 0;
+        val = Math.round((val + delta) / 0.25) * 0.25;
+        val = Math.max(-10, Math.min(10, val));
+        input.value = val.toFixed(2);
+        document.getElementById('correct-slider').value = val;
+        syncUI();
+        calculate();
+    }
+
+    // ===== 重置修正系数为 0 =====
+    function resetCorrection() {
+        document.getElementById('input-correct').value = '0';
+        document.getElementById('correct-slider').value = '0';
+        // 重置锚点为均衡
+        currentAnchor = 'q2';
+        document.querySelectorAll('#correctedRow .col-item').forEach(el => {
+            el.classList.toggle('anchor', el.dataset.key === 'q2');
+        });
+        document.getElementById('anchorDisplay').textContent = '均衡';
+        document.getElementById('anchorName').textContent = '均衡';
+        syncUI();
+        calculate();
+    }
+
+    function syncUI() {
+        const val = parseFloat(document.getElementById('input-correct').value) || 0;
+        const stepped = Math.round(val / 0.25) * 0.25;
+        document.getElementById('correction-display').textContent = (stepped > 0 ? '+' : '') + stepped.toFixed(1) + '%';
+        document.getElementById('correction-badge').textContent = (stepped > 0 ? '+' : '') + stepped.toFixed(1) + '%';
+        document.getElementById('corrFactorDisplay').textContent = (1 + stepped / 100).toFixed(3);
+    }
+
+    // ===== 锚点切换 =====
+    function setAnchor(key) {
+        currentAnchor = key;
+        document.querySelectorAll('#correctedRow .col-item').forEach(el => {
+            el.classList.toggle('anchor', el.dataset.key === key);
+        });
+        document.getElementById('anchorDisplay').textContent = KEY_NAMES[key];
+        document.getElementById('anchorName').textContent = KEY_NAMES[key];
+        calculate();
+    }
+
+    // ===== 单位切换 =====
+    function setUnit(unit) {
+        currentUnit = unit;
+        document.getElementById('btn-cm').classList.toggle('active', unit === 'cm');
+        document.getElementById('btn-cun').classList.toggle('active', unit === 'cun');
+        calculate();
+    }
+
+    // ===== 跟枪/高敏 预处理 =====
+    function applyTracking() {
+        const x = parseFloat(document.getElementById('input-x').value) || 0;
+        const y = parseFloat(document.getElementById('input-y').value) || 0;
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
+
+        if (x <= 0 || y <= 0 || k <= 0) {
+            alert('请输入大于 0 的有效参数');
+            return;
+        }
+
+        const x_cun = x / k;
+        const y_cun = y / k;
+        const newX_cun = Math.pow(x_cun, 0.9) * Math.pow(y_cun, 0.1);
+        const newX_cm = newX_cun * k;
+
+        // 显示跟踪步骤
+        document.getElementById('trackingSteps').style.display = 'block';
+        document.getElementById('track-step1').textContent = `x=${x_cun.toFixed(2)} cun, y=${y_cun.toFixed(2)} cun`;
+        document.getElementById('track-step2').textContent = `${x_cun.toFixed(2)}^0.9 · ${y_cun.toFixed(2)}^0.1 = ${newX_cun.toFixed(3)} cun`;
+        document.getElementById('track-step3').textContent = `${newX_cun.toFixed(3)} × ${k} = ${newX_cm.toFixed(2)} cm`;
+
+        // 更新 x，清空 y
+        document.getElementById('input-x').value = newX_cm.toFixed(2);
+        document.getElementById('input-y').value = 0;
+
+        // ⚡ 重置修正系数为 0%
+        resetCorrection();
+
+        // 重新计算
+        calculate();
+    }
+
+    // ===== 渲染 =====
+    function renderValues(baseValCm) {
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
+        const isCun = currentUnit === 'cun';
+        const displayBase = isCun ? baseValCm / k : baseValCm;
+
+        if (isNaN(baseValCm) || baseValCm <= 0) {
+            ['base-half', 'base-q1', 'base-q2', 'base-q3', 'base-base'].forEach(id => {
+                document.getElementById(id).innerText = '--';
+            });
+            ['corr-half', 'corr-q1', 'corr-q2', 'corr-q3', 'corr-base'].forEach(id => {
+                document.getElementById(id).innerText = '--';
             });
             return;
         }
 
-        const half = val / 2;
-        const step = (val - half) / 4;
-        document.getElementById(`res-${prefix}`).innerText = val.toFixed(2);
-        document.getElementById(`${prefix}-half`).innerText = half.toFixed(2);
-        document.getElementById(`${prefix}-q1`).innerText = (half + step * 1).toFixed(2);
-        document.getElementById(`${prefix}-q2`).innerText = (half + step * 2).toFixed(2);
-        document.getElementById(`${prefix}-q3`).innerText = (half + step * 3).toFixed(2);
+        // 基准值
+        const baseVals = {};
+        for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
+            baseVals[key] = displayBase * RATIOS[key];
+        }
+
+        document.getElementById('base-half').innerText = baseVals.half.toFixed(2);
+        document.getElementById('base-q1').innerText = baseVals.q1.toFixed(2);
+        document.getElementById('base-q2').innerText = baseVals.q2.toFixed(2);
+        document.getElementById('base-q3').innerText = baseVals.q3.toFixed(2);
+        document.getElementById('base-base').innerText = baseVals.base.toFixed(2);
+
+        // 修正后
+        const corrPct = parseFloat(document.getElementById('input-correct').value) || 0;
+        const factor = 1 + corrPct / 100;
+
+        const anchorBase = baseVals[currentAnchor];
+        const anchorNew = anchorBase * factor;
+        const anchorRatio = RATIOS[currentAnchor];
+
+        const corrVals = {};
+        for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
+            corrVals[key] = anchorNew * (RATIOS[key] / anchorRatio);
+        }
+
+        document.getElementById('corr-half').innerText = corrVals.half.toFixed(2);
+        document.getElementById('corr-q1').innerText = corrVals.q1.toFixed(2);
+        document.getElementById('corr-q2').innerText = corrVals.q2.toFixed(2);
+        document.getElementById('corr-q3').innerText = corrVals.q3.toFixed(2);
+        document.getElementById('corr-base').innerText = corrVals.base.toFixed(2);
+
+        document.getElementById('ratioInfo').textContent = 
+            `锚点比例: ${(RATIOS[currentAnchor] * 100).toFixed(1)}% (相对基准值)`;
     }
 
     function renderStepList(containerId, steps) {
@@ -500,91 +832,38 @@
         `).join('');
     }
 
-    function toggleUnit(type) {
-        unitMode[type] = unitMode[type] === 'cm' ? 'cun' : 'cm';
-        calculate();
-    }
-
     function calculate() {
         const x = parseFloat(document.getElementById('input-x').value) || 0;
         const y = parseFloat(document.getElementById('input-y').value) || 0;
-        const sl = parseFloat(document.getElementById('input-sl').value) || 0;
-        const k = parseFloat(document.getElementById('input-tsc').value) || 2.2;
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
         const S = x + y;
 
+        syncUI();
+
         if (S <= 0 || k <= 0) {
-            renderQuartiles(NaN, 'cube', unitMode.cube);
-            renderQuartiles(NaN, 'gk', unitMode.gk);
+            renderValues(NaN);
             renderStepList('stepsNatural', null);
-            renderStepList('stepsGk', null);
             return;
         }
 
         const S_cun = S / k;
-        const sl_cun = sl / k;
-
-        // 1. 自然法
         const nat_cun = PI * BIG_PHI * Math.pow(S_cun, P_EXP);
         const nat_cm = nat_cun * k;
-        const nat_val = unitMode.cube === 'cm' ? nat_cm : nat_cun;
-        renderQuartiles(nat_val, 'cube', unitMode.cube);
+
+        renderValues(nat_cm);
 
         renderStepList('stepsNatural', [
             { label: '寸化', formula: `S ÷ k = ${S.toFixed(1)} ÷ ${k}`, result: `${S_cun.toFixed(3)} cun` },
             { label: '寸算', formula: `π · Φ · ${S_cun.toFixed(3)}^${P_EXP.toFixed(3)}`, result: `${nat_cun.toFixed(3)} cun` },
             { label: '结果', formula: `${nat_cun.toFixed(3)} × ${k}`, result: `${nat_cm.toFixed(2)} cm` }
         ]);
-
-        // 2. 光口法
-        if (sl > 0) {
-            const gk_cun = Math.pow(sl_cun, 2/3) * Math.pow(S_cun, 1/3);
-            const gk_cm = gk_cun * k;
-            const gk_val = unitMode.gk === 'cm' ? gk_cm : gk_cun;
-            renderQuartiles(gk_val, 'gk', unitMode.gk);
-
-            renderStepList('stepsGk', [
-                { label: '寸化', formula: `sl_cun = ${(sl/k).toFixed(3)}, S_cun = ${S_cun.toFixed(3)}`, result: '完成' },
-                { label: '寸算', formula: `${sl_cun.toFixed(3)}^⅔ · ${S_cun.toFixed(3)}^⅓`, result: `${gk_cun.toFixed(3)} cun` },
-                { label: '结果', formula: `${gk_cun.toFixed(3)} × ${k}`, result: `${gk_cm.toFixed(2)} cm` }
-            ]);
-        } else {
-            renderQuartiles(NaN, 'gk', unitMode.gk);
-            renderStepList('stepsGk', null);
-        }
-
-        if (cachedTrackingSteps) {
-            renderStepList('stepsContent', cachedTrackingSteps);
-        }
     }
 
-    function applyTrackingFormula() {
-        const x = parseFloat(document.getElementById('input-x').value) || 0;
-        const y = parseFloat(document.getElementById('input-y').value) || 0;
-        const k = parseFloat(document.getElementById('input-tsc').value) || 2.2;
-
-        if (x <= 0 || y <= 0 || k <= 0) {
-            alert("请输入大于 0 的有效参数");
-            return;
-        }
-
-        const x_cun = x / k;
-        const y_cun = y / k;
-        const newX_cun = Math.pow(x_cun, 0.9) * Math.pow(y_cun, 0.1);
-        const newX_cm = newX_cun * k;
-
-        cachedTrackingSteps = [
-            { label: '寸化', formula: `x=${x_cun.toFixed(2)} cun, y=${y_cun.toFixed(2)} cun`, result: '完成' },
-            { label: '核算', formula: `${x_cun.toFixed(2)}^0.9 · ${y_cun.toFixed(2)}^0.1`, result: `${newX_cun.toFixed(3)} cun` },
-            { label: '换回', formula: `${newX_cun.toFixed(3)} × ${k}`, result: `${newX_cm.toFixed(2)} cm` }
-        ];
-
-        renderStepList('stepsContent', cachedTrackingSteps);
-
-        document.getElementById('input-x').value = newX_cm.toFixed(2);
-        document.getElementById('input-y').value = 0;
-        calculate();
-    }
-
+    // ===== 初始化 =====
+    document.querySelector('#correctedRow .col-item[data-key="q2"]')?.classList.add('anchor');
+    document.getElementById('anchorDisplay').textContent = '均衡';
+    document.getElementById('anchorName').textContent = '均衡';
+    syncUI();
     calculate();
 </script>
 
