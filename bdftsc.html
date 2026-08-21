@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>同身寸·表达法 - 西岛海</title>
+    <title>同身寸 · 收束法 - 西岛海</title>
     <style>
         :root {
-            --bg-color: #d8cab5;
-            --paper-texture: #cbba9f;
-            --main-blue: #1e3a8a;
-            --accent-purple: #4c1d95;
-            --amber-theme: #b45309;
-            --card-bg: #ece2d3;
-            --box-shadow: rgba(30, 20, 50, 0.12);
-            --anchor-color: #7c3aed;
-            --anchor-glow: rgba(124, 58, 237, 0.2);
+            --bg: #d8cab5;
+            --paper: #cbba9f;
+            --blue: #1e3a8a;
+            --purple: #4c1d95;
+            --gold: #b8860b;
+            --card: #ece2d3;
+            --shadow: rgba(30, 20, 50, 0.12);
+            --anchor: #7c3aed;
+            --glow: rgba(124, 58, 237, 0.2);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             padding: 12px 8px;
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(var(--paper-texture) 15%, transparent 16%),
-                radial-gradient(var(--paper-texture) 15%, transparent 16%);
+            background: var(--bg);
+            background-image: radial-gradient(var(--paper) 15%, transparent 16%), radial-gradient(var(--paper) 15%, transparent 16%);
             background-size: 8px 8px;
             background-position: 0 0, 4px 4px;
             color: #1e293b;
@@ -32,83 +30,66 @@
             align-items: center;
             min-height: 100vh;
         }
-        .sketch-card {
+        .card {
             width: 100%;
             max-width: 820px;
-            background: var(--card-bg);
+            background: var(--card);
             border-radius: 8px;
             padding: 18px 14px;
-            box-shadow: 0 8px 24px var(--box-shadow);
+            box-shadow: 0 8px 24px var(--shadow);
+            border: 1px solid rgba(120,100,70,0.25);
             position: relative;
-            border: 1px solid rgba(120, 100, 70, 0.25);
         }
-        @media (min-width: 600px) {
-            body { padding: 24px 16px; }
-            .sketch-card { padding: 30px; }
-        }
-        .sketch-card::before {
+        @media (min-width:600px){ .card { padding: 30px; } }
+        .card::before {
             content: '';
             position: absolute;
             left: 0; top: 0; bottom: 0;
             width: 6px;
-            background: #b45309;
+            background: var(--gold);
             border-radius: 8px 0 0 8px;
         }
-        .header-title {
+        .header {
             font-size: 1.25rem;
             font-weight: bold;
             margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
-            color: var(--main-blue);
+            color: var(--blue);
             flex-wrap: wrap;
         }
-        .header-title .date { 
-            font-size: 1.15rem;
-            opacity: 0.85;
+        .header .date { font-size: 1.15rem; opacity: 0.85; }
+        .header .badge {
+            background: var(--gold);
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 12px;
+            border-radius: 12px;
         }
         .k-link {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 800;
-            color: #ffffff;
-            background-color: var(--amber-theme);
+            color: #fff;
+            background: var(--gold);
             padding: 4px 12px;
             border-radius: 6px;
             text-decoration: none;
             margin-left: auto;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(180, 83, 9, 0.25);
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            transition: 0.2s;
         }
-        .k-link:hover {
-            background-color: #78350f;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(120, 53, 15, 0.3);
-        }
-        .k-link:active { transform: translateY(0); }
+        .k-link:hover { background: #8b6914; transform: translateY(-1px); }
 
-        .control-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        @media (min-width: 640px) {
-            .control-container {
-                grid-template-columns: 1.5fr 1fr;
-            }
-        }
+        .top-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+        @media (min-width:640px){ .top-row { grid-template-columns: 1.3fr 1fr; } }
 
         .input-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            background: rgba(255, 255, 255, 0.45);
-            border: 1.5px dashed var(--main-blue);
+            background: rgba(255,255,255,0.45);
+            border: 1.5px dashed var(--blue);
             border-radius: 6px;
             padding: 12px;
         }
@@ -118,144 +99,124 @@
             gap: 3px;
             font-size: 0.88rem;
             font-weight: 600;
-            color: var(--main-blue);
+            color: var(--blue);
         }
         .input-group input {
             width: 100%;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(30, 58, 138, 0.3);
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(30,58,138,0.3);
             border-radius: 4px;
             font-size: 1rem;
             font-weight: bold;
-            color: var(--main-blue);
+            color: var(--blue);
             padding: 6px 8px;
-            outline: none;
             text-align: center;
+            outline: none;
         }
-        .input-group input:focus {
-            border-color: var(--main-blue);
-            background: #fff;
-        }
+        .input-group input:focus { border-color: var(--blue); background: #fff; }
 
-        .tracking-module {
-            background: rgba(76, 29, 149, 0.05);
-            border: 1.5px solid var(--accent-purple);
+        .track-module {
+            background: rgba(76,29,149,0.05);
+            border: 1.5px solid var(--purple);
             border-radius: 6px;
             padding: 12px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
+            min-height: 140px;
         }
-        .tracking-module .module-title {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--accent-purple);
-        }
-        .tracking-module .module-expr {
-            font-size: 1.0rem;
-            font-weight: bold;
-            color: var(--accent-purple);
-            font-family: 'Times New Roman', serif;
-            font-style: italic;
-        }
-        .tracking-module .calc-btn {
-            background: var(--accent-purple);
+        .track-module .title { font-size: 0.85rem; font-weight: bold; color: var(--purple); }
+        .track-module .expr { font-size: 0.95rem; font-weight: bold; color: var(--purple); font-family: 'Times New Roman', serif; }
+        .track-module .sub { font-size: 0.7rem; color: #64748b; font-family: 'Times New Roman', serif; }
+        .track-module .calc-btn {
+            background: var(--purple);
             color: #fff;
             border: none;
             border-radius: 4px;
-            padding: 6px 10px;
+            padding: 7px 10px;
             font-weight: bold;
             font-size: 0.85rem;
             cursor: pointer;
             width: 100%;
-            transition: opacity 0.15s;
+            transition: 0.15s;
+            margin-top: 4px;
         }
-        .tracking-module .calc-btn:active { opacity: 0.8; }
+        .track-module .calc-btn:hover { background: #3b0764; }
+        .track-module .calc-btn:active { transform: scale(0.98); }
+        .track-module .tag {
+            font-size: 0.6rem;
+            color: var(--purple);
+            font-weight: 700;
+            margin-top: 2px;
+        }
 
-        .correction-module {
-            background: rgba(76, 29, 149, 0.05);
-            border: 1.5px solid var(--accent-purple);
+        .correction {
+            background: rgba(76,29,149,0.05);
+            border: 1.5px solid var(--purple);
             border-radius: 6px;
             padding: 12px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             gap: 6px;
             margin-bottom: 16px;
         }
-        .correction-module .module-title {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--accent-purple);
-        }
-        .correction-module .module-sub {
-            font-size: 0.7rem;
-            color: #64748b;
-        }
-        .correction-input-row {
+        .correction .title { font-size: 0.85rem; font-weight: bold; color: var(--purple); }
+        .correction .sub { font-size: 0.7rem; color: #64748b; }
+        .correction .row {
             display: flex;
             align-items: center;
             gap: 4px;
         }
-        .correction-input-row .step-btn {
-            width: 28px;
-            height: 28px;
-            border: 1.5px solid var(--accent-purple);
+        .correction .row .step-btn {
+            width: 28px; height: 28px;
+            border: 1.5px solid var(--purple);
             border-radius: 4px;
             background: rgba(255,255,255,0.6);
-            color: var(--accent-purple);
+            color: var(--purple);
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.1s;
-            flex-shrink: 0;
             user-select: none;
         }
-        .correction-input-row .step-btn:active {
-            background: var(--accent-purple);
+        .correction .row .step-btn:active {
+            background: var(--purple);
             color: #fff;
             transform: scale(0.92);
         }
-        .correction-input-row input {
+        .correction .row input {
             flex: 1;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(76, 29, 149, 0.3);
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(76,29,149,0.3);
             border-radius: 4px;
             font-size: 1rem;
             font-weight: bold;
-            color: var(--accent-purple);
+            color: var(--purple);
             padding: 6px 4px;
-            outline: none;
             text-align: center;
+            outline: none;
             min-width: 50px;
         }
-        .correction-input-row input:focus {
-            border-color: var(--accent-purple);
-            background: #fff;
-        }
-        .correction-input-row .pct-sign {
-            font-weight: 700;
-            color: var(--accent-purple);
-            font-size: 0.9rem;
-            min-width: 18px;
-        }
-        .correction-slider {
+        .correction .row input:focus { border-color: var(--purple); background: #fff; }
+        .correction .row .pct { font-weight: 700; color: var(--purple); font-size: 0.9rem; min-width: 18px; }
+        .correction .slider {
             width: 100%;
-            accent-color: var(--accent-purple);
+            accent-color: var(--purple);
             cursor: pointer;
         }
 
         .formula-card {
-            border: 1.5px solid rgba(180, 83, 9, 0.35);
+            border: 1.5px solid var(--gold);
             border-radius: 6px;
             padding: 12px;
             margin-bottom: 14px;
-            background: rgba(254, 243, 199, 0.35);
+            background: rgba(184,134,11,0.05);
+            transition: 0.3s;
         }
+        .formula-card.track { border-color: var(--purple); background: rgba(76,29,149,0.04); }
         .card-top {
             display: flex;
             justify-content: space-between;
@@ -263,16 +224,9 @@
             gap: 8px;
             flex-wrap: wrap;
         }
-        .formula-title { 
-            font-size: 0.95rem; 
-            font-weight: bold; 
-            color: #78350f;
-        }
-        .math-expr { 
-            font-size: 1.05rem; 
-            font-weight: bold; 
-            color: var(--amber-theme);
-        }
+        .f-title { font-size: 0.95rem; font-weight: bold; color: #78350f; display: flex; align-items: center; gap: 6px; }
+        .f-expr { font-size: 1.05rem; font-weight: bold; color: var(--gold); font-family: 'Times New Roman', serif; transition: 0.3s; }
+        .f-expr.track { color: var(--purple); }
 
         .toggle-group {
             display: flex;
@@ -284,19 +238,29 @@
         .toggle-btn {
             border: none;
             background: transparent;
-            padding: 2px 10px;
+            padding: 2px 12px;
             font-size: 0.7rem;
             font-weight: 700;
             border-radius: 3px;
             cursor: pointer;
             color: #64748b;
-            transition: all 0.15s;
+            transition: 0.15s;
+            min-width: 44px;
+            text-align: center;
         }
-        .toggle-btn.active {
-            background: var(--amber-theme);
-            color: #fff;
+        .toggle-btn.active { background: var(--gold); color: #fff; }
+        .toggle-btn.purple.active { background: var(--purple); color: #fff; }
+
+        .mode-badge {
+            font-size: 0.65rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            background: rgba(184,134,11,0.15);
+            color: #78350f;
+            transition: 0.3s;
         }
-        .toggle-btn:active { transform: scale(0.94); }
+        .mode-badge.track { background: rgba(76,29,149,0.15); color: var(--purple); }
 
         .five-col {
             display: grid;
@@ -304,12 +268,7 @@
             gap: 4px;
             margin-top: 4px;
         }
-        @media (max-width: 500px) {
-            .five-col {
-                gap: 2px;
-                font-size: 0.75rem;
-            }
-        }
+        @media(max-width:500px){ .five-col { gap: 2px; font-size: 0.75rem; } }
         .col-item {
             display: flex;
             flex-direction: column;
@@ -318,71 +277,40 @@
             border-radius: 4px;
             background: rgba(255,255,255,0.3);
             border: 2px solid transparent;
-            transition: all 0.15s;
-            cursor: default;
             min-height: 44px;
             justify-content: center;
+            transition: 0.15s;
         }
-        .col-item .tag {
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: #78350f;
-        }
-        .col-item .val {
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--amber-theme);
-        }
-        .col-item .val.corrected {
-            color: var(--accent-purple);
-        }
-
-        .col-item.clickable {
-            cursor: pointer;
-        }
-        .col-item.clickable:hover {
-            background: rgba(124, 58, 237, 0.08);
-        }
+        .col-item .tag { font-size: 0.6rem; font-weight: 600; color: #78350f; }
+        .col-item .val { font-size: 0.95rem; font-weight: bold; color: var(--gold); }
+        .col-item .val.corrected { color: var(--purple); }
+        .col-item.clickable { cursor: pointer; }
+        .col-item.clickable:hover { background: rgba(124,58,237,0.08); }
         .col-item.anchor {
-            border-color: var(--anchor-color);
-            background: var(--anchor-glow);
-            box-shadow: 0 0 12px var(--anchor-glow);
+            border-color: var(--anchor);
+            background: var(--glow);
+            box-shadow: 0 0 12px var(--glow);
         }
-        .col-item .anchor-hint {
+        .col-item .hint {
             font-size: 0.5rem;
-            color: var(--anchor-color);
+            color: var(--anchor);
             font-weight: 700;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: 0.2s;
             margin-top: 1px;
         }
-        .col-item.anchor .anchor-hint {
-            opacity: 1;
-        }
+        .col-item.anchor .hint { opacity: 1; }
 
-        .row-label {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #94a3b8;
-            margin-top: 4px;
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
-
-        .steps-panel {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(180, 83, 9, 0.2);
+        .row-label { font-size: 0.65rem; font-weight: 600; color: #94a3b8; margin-top: 4px; text-align: center; letter-spacing: 0.5px; }
+        .steps {
+            background: rgba(255,255,255,0.4);
+            border: 1px solid rgba(180,83,9,0.2);
             border-radius: 6px;
             padding: 8px 10px;
             margin-top: 10px;
             font-size: 0.85rem;
         }
-        .panel-title {
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: #78350f;
-            margin-bottom: 6px;
-        }
+        .steps .title { font-size: 0.8rem; font-weight: bold; color: #78350f; margin-bottom: 6px; }
         .step-line {
             display: flex;
             align-items: center;
@@ -395,7 +323,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: var(--amber-theme);
+            background: var(--gold);
             color: #fff;
             font-size: 0.65rem;
             font-weight: bold;
@@ -404,56 +332,13 @@
             border-radius: 50%;
             flex-shrink: 0;
         }
-        .step-label {
-            font-weight: 600;
-            color: #475569;
-        }
-        .step-formula {
-            font-family: monospace;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 1px 5px;
-            border-radius: 3px;
-        }
-        .step-result {
-            font-weight: bold;
-            color: var(--amber-theme);
-        }
+        .step-num.purple { background: var(--purple); }
+        .step-label { font-weight: 600; color: #475569; }
+        .step-formula { font-family: monospace; background: rgba(0,0,0,0.04); padding: 1px 5px; border-radius: 3px; }
+        .step-result { font-weight: bold; color: var(--gold); }
+        .step-result.purple { color: var(--purple); }
 
-        .footer-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 14px;
-            font-size: 0.82rem;
-            color: #475569;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .signature {
-            font-weight: bold;
-            color: var(--main-blue);
-        }
-        sup, sub { font-size: 0.7em; }
-
-        .correction-badge {
-            background: var(--accent-purple);
-            color: #fff;
-            font-size: 0.6rem;
-            font-weight: 700;
-            padding: 1px 8px;
-            border-radius: 10px;
-            margin-left: 6px;
-        }
-        .anchor-label {
-            font-size: 0.6rem;
-            color: var(--anchor-color);
-            font-weight: 700;
-            background: rgba(124, 58, 237, 0.12);
-            padding: 0 6px;
-            border-radius: 3px;
-            margin-left: 4px;
-        }
-        .status-bar {
+        .status {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -463,266 +348,278 @@
             color: #94a3b8;
             margin-top: 4px;
         }
-        .status-bar .highlight {
-            color: var(--accent-purple);
-            font-weight: 700;
+        .status .hl { color: var(--purple); font-weight: 700; }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            font-size: 0.82rem;
+            color: #475569;
+            flex-wrap: wrap;
+            gap: 6px;
         }
-
-        .tracking-steps {
-            background: rgba(76, 29, 149, 0.04);
-            border: 1px solid var(--accent-purple);
-            border-radius: 4px;
-            padding: 6px 8px;
-            margin-top: 6px;
-            font-size: 0.8rem;
-        }
-        .tracking-steps .step-line {
-            color: var(--accent-purple);
-        }
-        .reset-hint {
+        .footer .sig { font-weight: bold; color: var(--blue); }
+        .correction-badge {
+            background: var(--purple);
+            color: #fff;
             font-size: 0.6rem;
-            color: #94a3b8;
-            font-weight: 400;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 10px;
             margin-left: 6px;
         }
+        .anchor-label {
+            font-size: 0.6rem;
+            color: var(--anchor);
+            font-weight: 700;
+            background: rgba(124,58,237,0.12);
+            padding: 0 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+        }
+        .ratio-explain {
+            font-size: 0.6rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .track-tag {
+            font-size: 0.6rem;
+            color: var(--purple);
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        sup, sub { font-size: 0.7em; }
     </style>
 </head>
 <body>
+<div class="card">
 
-<div class="sketch-card">
-
-    <div class="header-title">
-        <span class="date">2026.8.20</span>
+    <div class="header">
+        <span class="date">2026.8.21</span>
         <span>同身寸 · 表达法</span>
-        <a href="https://xidaohai.github.io/tsc.png" target="_blank" class="k-link">说明</a>
+        <span class="badge">xlm</span>
+        <a href="#" class="k-link">说明</a>
     </div>
 
-    <!-- ===== 第一行：输入 + 跟枪 ===== -->
-    <div class="control-container">
+    <!-- ===== 输入 + 跟枪模块 ===== -->
+    <div class="top-row">
         <div class="input-panel">
-            <div class="input-group">
-                <label>x (目标):</label>
-                <input type="number" id="input-x" value="4000" step="any" oninput="calculate()">
+            <div class="input-group"><label>x (目标):</label><input type="number" id="input-x" value="1470" step="any" oninput="calculate()"></div>
+            <div class="input-group"><label>y (甩枪):</label><input type="number" id="input-y" value="0" step="any" oninput="calculate()"></div>
+            <div class="input-group"><label>k (1寸 = ? cm):</label><input type="number" id="input-tsc" value="2" step="0.1" oninput="calculate()"></div>
+            <div class="input-group" style="display:flex;justify-content:flex-end;align-items:flex-end;">
+                <button class="toggle-btn active" id="mode-btn-std" onclick="setMode('standard')" style="padding:6px 10px;width:100%;border:1px solid var(--gold);">普通模式</button>
             </div>
-            <div class="input-group">
-                <label>y (甩枪):</label>
-                <input type="number" id="input-y" value="200" step="any" oninput="calculate()">
-            </div>
-            <div class="input-group">
-                <label>k (1寸 = ? cm):</label>
-                <input type="number" id="input-tsc" value="2" step="0.1" oninput="calculate()">
-            </div>
-            <div class="input-group" style="grid-column: span 1;"></div>
         </div>
-
-        <!-- 跟枪/高敏 预处理 -->
-        <div class="tracking-module">
+        <div class="track-module">
             <div>
-                <div class="module-title">跟枪/高敏 预处理</div>
-                <div class="module-expr">x<sub>cun</sub><sup>0.9</sup> · y<sub>cun</sub><sup>0.1</sup></div>
-                <div style="font-size:0.6rem;color:#94a3b8;margin-top:2px;">⚠ 点击后将重置修正系数为 0%</div>
+                <div class="title"> 【跟枪】算法 </div>
+                <div class="expr">S<sub>cun</sub> = Φ² · √(x<sub>c</sub>² + y<sub>c</sub>²)</div>
+                <div class="sub">N = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
+                <div class="tag">得数 = 最大值</div>
             </div>
-            <button class="calc-btn" onclick="applyTracking()">计算</button>
-            <div id="trackingSteps" class="tracking-steps" style="display:none;">
-                <div class="step-line"><span class="step-label">寸化:</span> <span id="track-step1">--</span></div>
-                <div class="step-line"><span class="step-label">核算:</span> <span id="track-step2">--</span></div>
-                <div class="step-line"><span class="step-label">换回:</span> <span id="track-step3">--</span></div>
-            </div>
+            <button class="calc-btn" onclick="applyTracking()">计算跟枪</button>
         </div>
     </div>
 
-    <!-- ===== 个人修正系数 ===== -->
-    <div class="correction-module">
-        <div>
-            <span class="module-title">✧ 个人修正系数</span>
-            <span class="module-sub">点击下行数值设锚点 · 步长 0.25%</span>
-        </div>
-        <div class="correction-input-row">
+    <!-- ===== 修正系数 ===== -->
+    <div class="correction">
+        <div><span class="title">✧ 个人修正系数</span><span class="sub">点击下行数值设锚点 · 步长 0.25%</span></div>
+        <div class="row">
             <button class="step-btn" onclick="adjustCorrection(-0.25)">−</button>
             <input type="number" id="input-correct" value="0" step="0.25" min="-10" max="10" oninput="onCorrectionInput();">
-            <span class="pct-sign">%</span>
+            <span class="pct">%</span>
             <button class="step-btn" onclick="adjustCorrection(0.25)">+</button>
         </div>
-        <input type="range" class="correction-slider" id="correct-slider" min="-10" max="10" step="0.25" value="0" 
-               oninput="onSliderInput();">
+        <input class="slider" id="correct-slider" type="range" min="-10" max="10" step="0.25" value="0" oninput="onSliderInput();">
         <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:#94a3b8;padding:0 2px;">
             <span>−10%</span>
-            <span id="correction-display" style="font-weight:bold;color:var(--accent-purple);">0%</span>
+            <span id="correction-display" style="font-weight:bold;color:var(--purple);">0%</span>
             <span>+10%</span>
         </div>
     </div>
 
-    <!-- ===== 自然法 ===== -->
-    <div class="formula-card">
+    <!-- ===== 核心公式展示 ===== -->
+    <div class="formula-card" id="formulaCard">
         <div class="card-top">
             <div>
-                <div class="formula-title">表达法 (Φ/6)</div>
-                <div class="math-expr">π · Φ · S<sub>cun</sub><sup>Φ/6</sup></div>
+                <div class="f-title">
+                    <span id="fTitle">收束法</span>
+                    <span class="mode-badge" id="modeBadge">普通模式</span>
+                </div>
+                <div class="f-expr" id="fExpr">N = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
             </div>
-            <div class="toggle-group">
-                <button class="toggle-btn active" id="btn-cm" onclick="setUnit('cm')">cm</button>
-                <button class="toggle-btn" id="btn-cun" onclick="setUnit('cun')">cun</button>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                <div class="toggle-group">
+                    <button class="toggle-btn active" id="btn-mode-std" onclick="setMode('standard')">普通</button>
+                    <button class="toggle-btn purple" id="btn-mode-track" onclick="setMode('tracking')">跟枪</button>
+                </div>
+                <div class="toggle-group">
+                    <button class="toggle-btn active" id="btn-cm" onclick="setUnit('cm')">cm</button>
+                    <button class="toggle-btn" id="btn-cun" onclick="setUnit('cun')">cun</button>
+                </div>
             </div>
         </div>
 
         <!-- 上行：基准 -->
         <div class="row-label">基准（无修正）</div>
         <div class="five-col" id="baseRow">
-            <div class="col-item"><span class="tag">÷2</span><span class="val" id="base-half">--</span></div>
-            <div class="col-item"><span class="tag">偏快</span><span class="val" id="base-q1">--</span></div>
-            <div class="col-item"><span class="tag">均衡</span><span class="val" id="base-q2">--</span></div>
-            <div class="col-item"><span class="tag">偏慢</span><span class="val" id="base-q3">--</span></div>
-            <div class="col-item"><span class="tag">基准值</span><span class="val" id="base-base">--</span></div>
+            <div class="col-item"><span class="tag">最小值</span><span class="val" id="base-half">--</span></div>
+            <div class="col-item"><span class="tag">偏慢</span><span class="val" id="base-q1">--</span></div>
+            <div class="col-item"><span class="tag" style="font-weight:800;color:var(--purple);">均衡</span><span class="val" id="base-q2" style="color:var(--purple);">--</span></div>
+            <div class="col-item"><span class="tag">偏快</span><span class="val" id="base-q3">--</span></div>
+            <div class="col-item"><span class="tag">最大值</span><span class="val" id="base-base">--</span></div>
         </div>
 
         <!-- 下行：修正后 -->
         <div style="margin-top:10px;border-top:1.5px dashed rgba(76,29,149,0.25);padding-top:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
-                <span style="font-weight:bold;color:var(--accent-purple);font-size:0.85rem;">
-                    ✧ 修正后 <span class="correction-badge" id="correction-badge">±0%</span>
-                </span>
-                <span style="font-size:0.7rem;color:#94a3b8;">
-                    锚点: <span class="anchor-label" id="anchorName">均衡</span>
-                    <span style="margin-left:6px;font-size:0.6rem;color:#94a3b8;">点击数值切换</span>
-                </span>
+                <span style="font-weight:bold;color:var(--purple);font-size:0.85rem;">✧ 修正后 <span class="correction-badge" id="correction-badge">±0%</span></span>
+                <span style="font-size:0.7rem;color:#94a3b8;">锚点: <span class="anchor-label" id="anchorName">均衡</span> <span style="margin-left:6px;font-size:0.6rem;color:#94a3b8;">点击数值切换</span></span>
             </div>
             <div class="five-col" id="correctedRow">
-                <div class="col-item clickable" data-key="half" onclick="setAnchor('half')">
-                    <span class="tag">÷2</span>
-                    <span class="val corrected" id="corr-half">--</span>
-                    <span class="anchor-hint">⬆ 锚点</span>
-                </div>
-                <div class="col-item clickable" data-key="q1" onclick="setAnchor('q1')">
-                    <span class="tag">偏快</span>
-                    <span class="val corrected" id="corr-q1">--</span>
-                    <span class="anchor-hint">⬆ 锚点</span>
-                </div>
-                <div class="col-item clickable" data-key="q2" onclick="setAnchor('q2')">
-                    <span class="tag">均衡</span>
-                    <span class="val corrected" id="corr-q2">--</span>
-                    <span class="anchor-hint">⬆ 锚点</span>
-                </div>
-                <div class="col-item clickable" data-key="q3" onclick="setAnchor('q3')">
-                    <span class="tag">偏慢</span>
-                    <span class="val corrected" id="corr-q3">--</span>
-                    <span class="anchor-hint">⬆ 锚点</span>
-                </div>
-                <div class="col-item clickable" data-key="base" onclick="setAnchor('base')">
-                    <span class="tag">基准值</span>
-                    <span class="val corrected" id="corr-base">--</span>
-                    <span class="anchor-hint">⬆ 锚点</span>
-                </div>
+                <div class="col-item clickable" data-key="half" onclick="setAnchor('half')"><span class="tag">最小值</span><span class="val corrected" id="corr-half">--</span><span class="hint">⬆ 锚点</span></div>
+                <div class="col-item clickable" data-key="q1" onclick="setAnchor('q1')"><span class="tag">偏慢</span><span class="val corrected" id="corr-q1">--</span><span class="hint">⬆ 锚点</span></div>
+                <div class="col-item clickable" data-key="q2" onclick="setAnchor('q2')"><span class="tag" style="font-weight:800;color:var(--anchor);">均衡</span><span class="val corrected" id="corr-q2" style="color:var(--anchor);">--</span><span class="hint">⬆ 锚点</span></div>
+                <div class="col-item clickable" data-key="q3" onclick="setAnchor('q3')"><span class="tag">偏快</span><span class="val corrected" id="corr-q3">--</span><span class="hint">⬆ 锚点</span></div>
+                <div class="col-item clickable" data-key="base" onclick="setAnchor('base')"><span class="tag">最大值</span><span class="val corrected" id="corr-base">--</span><span class="hint">⬆ 锚点</span></div>
             </div>
-            <div class="status-bar">
-                <span>修正系数 = <span class="highlight" id="corrFactorDisplay">1.000</span></span>
-                <span>锚点: <span class="highlight" id="anchorDisplay">均衡</span></span>
+            <div class="status">
+                <span>修正系数 = <span class="hl" id="corrFactorDisplay">1.000</span></span>
+                <span>锚点: <span class="hl" id="anchorDisplay">均衡</span></span>
                 <span id="ratioInfo" style="font-size:0.6rem;color:#94a3b8;"></span>
             </div>
+            <div class="ratio-explain" id="ratioExplain">最大值 = 4/3 × 均衡 ｜ 最小值 = 2/3 × 均衡</div>
         </div>
 
-        <div class="steps-panel">
-            <div class="panel-title">推导过程</div>
+        <div class="steps">
+            <div class="title" id="stepsTitle">推导过程</div>
             <div id="stepsNatural"></div>
         </div>
     </div>
 
-    <div class="footer-section">
-        <div><strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong></div>
-        <div class="signature">西岛海 · 表达法</div>
+    <div class="footer">
+        <div id="footerDesc"><strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong></div>
+        <div class="sig">作者 ： 西岛海</div>
     </div>
 
 </div>
 
 <script>
     const PI = Math.PI;
-    const BIG_PHI = (1 + Math.sqrt(5)) / 2;
-    const P_EXP = BIG_PHI / 6;
+    const PHI = (1 + Math.sqrt(5)) / 2;
+    const PHI2 = PHI * PHI;
+    const DENOM = 100 * PI * PI;
 
-    const RATIOS = {
-        half: 0.5,
-        q1: 0.625,
-        q2: 0.75,
-        q3: 0.875,
-        base: 1.0
-    };
+    // ---- 核心公式（唯一） ----
+    function calcN_cun(S_cun) {
+        return 8 * PI * Math.atan((PHI * S_cun) / DENOM);
+    }
 
-    const KEY_NAMES = {
-        half: '÷2',
-        q1: '偏快',
-        q2: '均衡',
-        q3: '偏慢',
-        base: '基准值'
-    };
+    // ---- 预处理 ----
+    function calcS_cun(x_c, y_c, mode) {
+        if (mode === 'standard') return x_c + y_c;
+        else return PHI2 * Math.hypot(x_c, y_c);
+    }
 
+    // ---- 状态 ----
+    let currentMode = 'standard';
     let currentUnit = 'cm';
     let currentAnchor = 'q2';
 
-    // ===== 修正系数：滑条输入 =====
+    // ---- 普通模式五档：以均衡值为基准 ----
+    const RATIOS_STD = { half: 2/3, q1: 5/6, q2: 1, q3: 7/6, base: 4/3 };
+
+    // ---- 跟枪模式五档：以最大值为基准 ----
+    const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
+
+    const KEY_NAMES = { half: '最小值', q1: '偏慢', q2: '均衡', q3: '偏快', base: '最大值' };
+
+    // ---- 切换模式 ----
+    function setMode(mode) {
+        currentMode = mode;
+        const isStd = mode === 'standard';
+        document.getElementById('btn-mode-std').classList.toggle('active', isStd);
+        document.getElementById('btn-mode-track').classList.toggle('active', !isStd);
+        document.getElementById('mode-btn-std').classList.toggle('active', isStd);
+        const badge = document.getElementById('modeBadge');
+        badge.textContent = isStd ? '普通模式' : '跟枪模式';
+        badge.className = 'mode-badge' + (isStd ? '' : ' track');
+        document.getElementById('fTitle').textContent = isStd ? '收束法' : '收束法 · 跟枪';
+        document.getElementById('fExpr').className = 'f-expr' + (isStd ? '' : ' track');
+        document.getElementById('formulaCard').className = 'formula-card' + (isStd ? '' : ' track');
+        document.getElementById('footerDesc').innerHTML = isStd
+            ? '<strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong>'
+            : '<strong>S<sub>cun</sub> = Φ²·√(x<sub>c</sub>²+y<sub>c</sub>²)</strong> | <strong>x<sub>c</sub>=x/k, y<sub>c</sub>=y/k</strong>';
+        document.getElementById('ratioExplain').textContent = isStd
+            ? '最大值 = 4/3 × 均衡 ｜ 最小值 = 2/3 × 均衡'
+            : '最小值 = 最大值/2 ｜ 均衡 = 最大值×0.75';
+        calculate();
+    }
+
+    // ---- 跟枪按钮 ----
+    function applyTracking() {
+        const x = parseFloat(document.getElementById('input-x').value) || 0;
+        const y = parseFloat(document.getElementById('input-y').value) || 0;
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
+        if (x <= 0 && y <= 0 || k <= 0) { alert('请输入有效参数'); return; }
+        setMode('tracking');
+        resetCorrection();
+    }
+
+    // ---- 修正系数 ----
     function onSliderInput() {
-        const val = parseFloat(document.getElementById('correct-slider').value) || 0;
-        document.getElementById('input-correct').value = val.toFixed(2);
+        const v = parseFloat(document.getElementById('correct-slider').value) || 0;
+        document.getElementById('input-correct').value = v.toFixed(2);
         syncUI();
         calculate();
     }
-
-    // ===== 修正系数：手动输入 =====
     function onCorrectionInput() {
-        let val = parseFloat(document.getElementById('input-correct').value) || 0;
-        val = Math.max(-10, Math.min(10, val));
-        val = Math.round(val / 0.25) * 0.25;
-        document.getElementById('input-correct').value = val.toFixed(2);
-        document.getElementById('correct-slider').value = val;
+        let v = parseFloat(document.getElementById('input-correct').value) || 0;
+        v = Math.max(-10, Math.min(10, v));
+        v = Math.round(v / 0.25) * 0.25;
+        document.getElementById('input-correct').value = v.toFixed(2);
+        document.getElementById('correct-slider').value = v;
         syncUI();
         calculate();
     }
-
-    // ===== 修正系数：步进按钮 =====
     function adjustCorrection(delta) {
         const input = document.getElementById('input-correct');
-        let val = parseFloat(input.value) || 0;
-        val = Math.round((val + delta) / 0.25) * 0.25;
-        val = Math.max(-10, Math.min(10, val));
-        input.value = val.toFixed(2);
-        document.getElementById('correct-slider').value = val;
+        let v = parseFloat(input.value) || 0;
+        v = Math.round((v + delta) / 0.25) * 0.25;
+        v = Math.max(-10, Math.min(10, v));
+        input.value = v.toFixed(2);
+        document.getElementById('correct-slider').value = v;
         syncUI();
         calculate();
     }
-
-    // ===== 重置修正系数为 0 =====
     function resetCorrection() {
         document.getElementById('input-correct').value = '0';
         document.getElementById('correct-slider').value = '0';
-        // 重置锚点为均衡
         currentAnchor = 'q2';
-        document.querySelectorAll('#correctedRow .col-item').forEach(el => {
-            el.classList.toggle('anchor', el.dataset.key === 'q2');
-        });
+        document.querySelectorAll('#correctedRow .col-item').forEach(el => el.classList.toggle('anchor', el.dataset.key === 'q2'));
         document.getElementById('anchorDisplay').textContent = '均衡';
         document.getElementById('anchorName').textContent = '均衡';
         syncUI();
         calculate();
     }
-
     function syncUI() {
-        const val = parseFloat(document.getElementById('input-correct').value) || 0;
-        const stepped = Math.round(val / 0.25) * 0.25;
-        document.getElementById('correction-display').textContent = (stepped > 0 ? '+' : '') + stepped.toFixed(1) + '%';
-        document.getElementById('correction-badge').textContent = (stepped > 0 ? '+' : '') + stepped.toFixed(1) + '%';
-        document.getElementById('corrFactorDisplay').textContent = (1 + stepped / 100).toFixed(3);
+        const v = parseFloat(document.getElementById('input-correct').value) || 0;
+        const s = Math.round(v / 0.25) * 0.25;
+        const label = (s > 0 ? '+' : '') + s.toFixed(1) + '%';
+        document.getElementById('correction-display').textContent = label;
+        document.getElementById('correction-badge').textContent = label;
+        document.getElementById('corrFactorDisplay').textContent = (1 + s / 100).toFixed(3);
     }
-
-    // ===== 锚点切换 =====
     function setAnchor(key) {
         currentAnchor = key;
-        document.querySelectorAll('#correctedRow .col-item').forEach(el => {
-            el.classList.toggle('anchor', el.dataset.key === key);
-        });
+        document.querySelectorAll('#correctedRow .col-item').forEach(el => el.classList.toggle('anchor', el.dataset.key === key));
         document.getElementById('anchorDisplay').textContent = KEY_NAMES[key];
         document.getElementById('anchorName').textContent = KEY_NAMES[key];
         calculate();
     }
-
-    // ===== 单位切换 =====
     function setUnit(unit) {
         currentUnit = unit;
         document.getElementById('btn-cm').classList.toggle('active', unit === 'cm');
@@ -730,59 +627,52 @@
         calculate();
     }
 
-    // ===== 跟枪/高敏 预处理 =====
-    function applyTracking() {
+    // ---- 主计算 ----
+    function calculate() {
         const x = parseFloat(document.getElementById('input-x').value) || 0;
         const y = parseFloat(document.getElementById('input-y').value) || 0;
         const k = parseFloat(document.getElementById('input-tsc').value) || 2;
+        syncUI();
 
-        if (x <= 0 || y <= 0 || k <= 0) {
-            alert('请输入大于 0 的有效参数');
+        if ((x <= 0 && y <= 0) || k <= 0) {
+            ['base-half','base-q1','base-q2','base-q3','base-base'].forEach(id => document.getElementById(id).innerText = '--');
+            ['corr-half','corr-q1','corr-q2','corr-q3','corr-base'].forEach(id => document.getElementById(id).innerText = '--');
+            document.getElementById('stepsNatural').innerHTML = '<div class="step-line" style="color:#94a3b8;">请输入有效数值</div>';
             return;
         }
 
-        const x_cun = x / k;
-        const y_cun = y / k;
-        const newX_cun = Math.pow(x_cun, 0.9) * Math.pow(y_cun, 0.1);
-        const newX_cm = newX_cun * k;
-
-        // 显示跟踪步骤
-        document.getElementById('trackingSteps').style.display = 'block';
-        document.getElementById('track-step1').textContent = `x=${x_cun.toFixed(2)} cun, y=${y_cun.toFixed(2)} cun`;
-        document.getElementById('track-step2').textContent = `${x_cun.toFixed(2)}^0.9 · ${y_cun.toFixed(2)}^0.1 = ${newX_cun.toFixed(3)} cun`;
-        document.getElementById('track-step3').textContent = `${newX_cun.toFixed(3)} × ${k} = ${newX_cm.toFixed(2)} cm`;
-
-        // 更新 x，清空 y
-        document.getElementById('input-x').value = newX_cm.toFixed(2);
-        document.getElementById('input-y').value = 0;
-
-        // ⚡ 重置修正系数为 0%
-        resetCorrection();
-
-        // 重新计算
-        calculate();
-    }
-
-    // ===== 渲染 =====
-    function renderValues(baseValCm) {
-        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
         const isCun = currentUnit === 'cun';
-        const displayBase = isCun ? baseValCm / k : baseValCm;
+        const isTrack = currentMode === 'tracking';
+        const unitStr = isCun ? 'cun' : 'cm';
 
-        if (isNaN(baseValCm) || baseValCm <= 0) {
-            ['base-half', 'base-q1', 'base-q2', 'base-q3', 'base-base'].forEach(id => {
-                document.getElementById(id).innerText = '--';
-            });
-            ['corr-half', 'corr-q1', 'corr-q2', 'corr-q3', 'corr-base'].forEach(id => {
-                document.getElementById(id).innerText = '--';
-            });
-            return;
+        // ---- 预处理 ----
+        const x_c = x / k;
+        const y_c = y / k;
+        const S_cun = calcS_cun(x_c, y_c, currentMode);
+        const N_cun = calcN_cun(S_cun);
+        const N_cm = N_cun * k;
+
+        // ---- 根据模式决定"基准值"的含义 ----
+        let baseVal;
+        let activeRatios;
+        let baseLabel;
+
+        if (isTrack) {
+            // 跟枪模式：得数 = 最大值
+            baseVal = isCun ? N_cun : N_cm;
+            activeRatios = RATIOS_TRACK;
+            baseLabel = '最大值';
+        } else {
+            // 普通模式：得数 = 均衡值
+            baseVal = isCun ? N_cun : N_cm;
+            activeRatios = RATIOS_STD;
+            baseLabel = '均衡';
         }
 
-        // 基准值
+        // ---- 五档 ----
         const baseVals = {};
         for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
-            baseVals[key] = displayBase * RATIOS[key];
+            baseVals[key] = baseVal * activeRatios[key];
         }
 
         document.getElementById('base-half').innerText = baseVals.half.toFixed(2);
@@ -791,17 +681,16 @@
         document.getElementById('base-q3').innerText = baseVals.q3.toFixed(2);
         document.getElementById('base-base').innerText = baseVals.base.toFixed(2);
 
-        // 修正后
+        // ---- 修正后 ----
         const corrPct = parseFloat(document.getElementById('input-correct').value) || 0;
         const factor = 1 + corrPct / 100;
-
         const anchorBase = baseVals[currentAnchor];
         const anchorNew = anchorBase * factor;
-        const anchorRatio = RATIOS[currentAnchor];
+        const anchorRatio = activeRatios[currentAnchor];
 
         const corrVals = {};
         for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
-            corrVals[key] = anchorNew * (RATIOS[key] / anchorRatio);
+            corrVals[key] = anchorNew * (activeRatios[key] / anchorRatio);
         }
 
         document.getElementById('corr-half').innerText = corrVals.half.toFixed(2);
@@ -810,62 +699,48 @@
         document.getElementById('corr-q3').innerText = corrVals.q3.toFixed(2);
         document.getElementById('corr-base').innerText = corrVals.base.toFixed(2);
 
-        document.getElementById('ratioInfo').textContent = 
-            `锚点比例: ${(RATIOS[currentAnchor] * 100).toFixed(1)}% (相对基准值)`;
-    }
+        document.getElementById('ratioInfo').textContent =
+            `${baseLabel} = ${baseVal.toFixed(2)} ${unitStr} ｜ ` +
+            `最大值 = ${baseVals.base.toFixed(2)} ｜ 最小值 = ${baseVals.half.toFixed(2)}`;
 
-    function renderStepList(containerId, steps) {
-        const el = document.getElementById(containerId);
-        if (!el) return;
-        if (!steps || steps.length === 0) {
-            el.innerHTML = '<div class="step-line" style="color:#94a3b8;">暂无数据</div>';
-            return;
+        // ---- 推导过程 ----
+        const inner = (PHI * S_cun) / DENOM;
+        const stepClass = isTrack ? 'purple' : '';
+        const stepResultClass = isTrack ? 'purple' : '';
+        let stepsHtml = '';
+        if (isTrack) {
+            stepsHtml = `
+                <div class="step-line"><span class="step-num ${stepClass}">1</span><span class="step-label">寸化</span><span class="step-formula">x_c=${x_c.toFixed(1)}, y_c=${y_c.toFixed(1)}</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">2</span><span class="step-label">欧氏模</span><span class="step-formula">S_cun = Φ²·√(${x_c.toFixed(1)}²+${y_c.toFixed(1)}²)</span><span>=</span><span class="step-result ${stepResultClass}">${S_cun.toFixed(3)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">3</span><span class="step-label">收束</span><span class="step-formula">8π·atan(${inner.toFixed(4)})</span><span>=</span><span class="step-result ${stepResultClass}">${N_cun.toFixed(3)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">4</span><span class="step-label">厘米还原</span><span class="step-formula">${N_cun.toFixed(3)} × ${k}</span><span>=</span><span class="step-result ${stepResultClass}">${N_cm.toFixed(2)} cm</span></div>
+                <div class="step-line" style="color:var(--purple);font-weight:600;border-top:1px dashed rgba(0,0,0,0.05);margin-top:4px;padding-top:4px;">
+                    <span>🎯 最大值 = ${baseVal.toFixed(2)} ${unitStr}</span>
+                    <span style="color:#94a3b8;font-weight:400;font-size:0.75rem;">(最小值 = 最大值/2，均衡 = 最大值×0.75)</span>
+                </div>
+            `;
+        } else {
+            const S = x + y;
+            stepsHtml = `
+                <div class="step-line"><span class="step-num">1</span><span class="step-label">寸化</span><span class="step-formula">S = x+y = ${x.toFixed(1)}+${y.toFixed(1)} = ${S.toFixed(1)}</span><span>=</span><span class="step-result">${S_cun.toFixed(3)} cun</span></div>
+                <div class="step-line"><span class="step-num">2</span><span class="step-label">内角</span><span class="step-formula">Φ·S_cun/100π² = ${inner.toFixed(4)} rad</span></div>
+                <div class="step-line"><span class="step-num">3</span><span class="step-label">收束</span><span class="step-formula">8π·atan(${inner.toFixed(4)})</span><span>=</span><span class="step-result">${N_cun.toFixed(3)} cun</span></div>
+                <div class="step-line"><span class="step-num">4</span><span class="step-label">厘米还原</span><span class="step-formula">${N_cun.toFixed(3)} × ${k}</span><span>=</span><span class="step-result">${N_cm.toFixed(2)} cm</span></div>
+                <div class="step-line" style="color:var(--purple);font-weight:600;border-top:1px dashed rgba(0,0,0,0.05);margin-top:4px;padding-top:4px;">
+                    <span>🎯 均衡 = ${baseVal.toFixed(2)} ${unitStr}</span>
+                    <span style="color:#94a3b8;font-weight:400;font-size:0.75rem;">(最大值 = 4/3×均衡)</span>
+                </div>
+            `;
         }
-        el.innerHTML = steps.map((s, i) => `
-            <div class="step-line">
-                <span class="step-num">${i + 1}</span>
-                <span class="step-label">${s.label}:</span>
-                <span class="step-formula">${s.formula}</span>
-                <span>=</span>
-                <span class="step-result">${s.result}</span>
-            </div>
-        `).join('');
+        document.getElementById('stepsNatural').innerHTML = stepsHtml;
     }
 
-    function calculate() {
-        const x = parseFloat(document.getElementById('input-x').value) || 0;
-        const y = parseFloat(document.getElementById('input-y').value) || 0;
-        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
-        const S = x + y;
-
-        syncUI();
-
-        if (S <= 0 || k <= 0) {
-            renderValues(NaN);
-            renderStepList('stepsNatural', null);
-            return;
-        }
-
-        const S_cun = S / k;
-        const nat_cun = PI * BIG_PHI * Math.pow(S_cun, P_EXP);
-        const nat_cm = nat_cun * k;
-
-        renderValues(nat_cm);
-
-        renderStepList('stepsNatural', [
-            { label: '寸化', formula: `S ÷ k = ${S.toFixed(1)} ÷ ${k}`, result: `${S_cun.toFixed(3)} cun` },
-            { label: '寸算', formula: `π · Φ · ${S_cun.toFixed(3)}^${P_EXP.toFixed(3)}`, result: `${nat_cun.toFixed(3)} cun` },
-            { label: '结果', formula: `${nat_cun.toFixed(3)} × ${k}`, result: `${nat_cm.toFixed(2)} cm` }
-        ]);
-    }
-
-    // ===== 初始化 =====
+    // ---- 初始化 ----
     document.querySelector('#correctedRow .col-item[data-key="q2"]')?.classList.add('anchor');
     document.getElementById('anchorDisplay').textContent = '均衡';
     document.getElementById('anchorName').textContent = '均衡';
     syncUI();
     calculate();
 </script>
-
 </body>
 </html>
