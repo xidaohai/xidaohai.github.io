@@ -615,9 +615,9 @@
 <div class="card">
 
     <div class="header">
-        <span class="date">2026.8.22</span>
+        <span class="date">2026.8.22 20:20</span>
         <span>同身寸 · 收束法</span>
-        <span class="badge">xlm · 精微版</span>
+        <span class="badge">xlm</span>
         <a href="https://xidaohai.github.io/tsc.png" class="k-link">说明</a>
     </div>
 
@@ -625,11 +625,11 @@
     <div class="top-row">
         <div class="input-panel">
             <div class="input-group">
-                <label>x (目标精细度):</label>
+                <label>x (目标大小测量):</label>
                 <input type="number" id="input-x" value="1470" step="any" oninput="syncFromTop()">
             </div>
             <div class="input-group">
-                <label>y (拉枪平稳度):</label>
+                <label>y (常用拉枪距离):</label>
                 <input type="number" id="input-y" value="0" step="any" oninput="syncFromTop()">
             </div>
             <div class="input-group">
@@ -645,13 +645,13 @@
 
         <div class="track-module">
             <div>
-                <div class="title">【跟枪】肌肉协同算法</div>
+                <div class="title">【跟枪】、高敏算法</div>
                 <div class="expr">S<sub>cun</sub> = Φ² · (x<sub>c</sub> + y<sub>c</sub> - √(x<sub>c</sub>y<sub>c</sub>))</div>
                 <div class="sub">N<sub>cun</sub> = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
                 <div class="sub" style="color:var(--purple);font-weight:600;">N<sub>final</sub> = N<sub>cun</sub> · (k₀/k)<sup>0.382</sup></div>
                 <div class="tag">得数 = 基准最大值 ｜ 均衡 = 75% ｜ 最小值 = 50%</div>
             </div>
-            <button class="calc-btn" onclick="applyTracking()">进行跟枪计算</button>
+            <button class="calc-btn" onclick="applyTracking()">进行计算</button>
         </div>
     </div>
 
@@ -755,13 +755,13 @@
 
         <!-- ===== 图表区 ===== -->
         <div class="chart-section">
-            <div class="chart-header">双算法全景动态响应视界 (横轴: 目标精细度 X)</div>
+            <div class="chart-header">双算法全景动态响应视界 (横轴: 目标X)</div>
             
             <div class="interactive-chart-grid">
                 <div class="slider-control-card">
                     <div class="ctrl-row">
                         <div class="ctrl-head">
-                            <span>x (目标难度)</span>
+                            <span>x (目标)</span>
                             <input type="number" class="ctrl-input-num" id="side-input-x" value="1470" step="10" oninput="syncFromSide('x')">
                         </div>
                         <input type="range" class="ctrl-range" id="side-range-x" min="0" max="5000" step="10" value="1470" oninput="syncFromRange('x')">
@@ -769,7 +769,7 @@
 
                     <div class="ctrl-row">
                         <div class="ctrl-head">
-                            <span>y (拉枪难度)</span>
+                            <span>y (拉枪)</span>
                             <input type="number" class="ctrl-input-num" id="side-input-y" value="0" step="10" oninput="syncFromSide('y')">
                         </div>
                         <input type="range" class="ctrl-range" id="side-range-y" min="0" max="2000" step="10" value="0" oninput="syncFromRange('y')">
@@ -853,7 +853,7 @@
             </div>
         </div>
         <div class="footer-right">
-            <span class="version">v2.1 · Φ动态</span>
+            <span class="version">v2</span>
             <span class="sig">西岛海</span>
         </div>
     </div>
