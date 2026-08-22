@@ -132,7 +132,7 @@
             min-height: 140px;
         }
         .track-module .title { font-size: 0.85rem; font-weight: bold; color: var(--purple); }
-        .track-module .expr { font-size: 0.9rem; font-weight: bold; color: var(--purple); font-family: 'Times New Roman', serif; }
+        .track-module .expr { font-size: 0.88rem; font-weight: bold; color: var(--purple); font-family: 'Times New Roman', serif; }
         .track-module .sub { font-size: 0.68rem; color: #64748b; font-family: 'Times New Roman', serif; }
         .track-module .calc-btn {
             background: var(--purple);
@@ -229,7 +229,7 @@
             flex-wrap: wrap;
         }
         .f-title { font-size: 0.95rem; font-weight: bold; color: #78350f; display: flex; align-items: center; gap: 6px; }
-        .f-expr { font-size: 1.05rem; font-weight: bold; color: var(--gold); font-family: 'Times New Roman', serif; transition: 0.3s; }
+        .f-expr { font-size: 1.0rem; font-weight: bold; color: var(--gold); font-family: 'Times New Roman', serif; transition: 0.3s; }
         .f-expr.track { color: var(--purple); }
 
         .toggle-group {
@@ -406,11 +406,11 @@
         <div class="input-panel">
             <div class="input-group">
                 <label>x (目标距离):</label>
-                <input type="number" id="input-x" value="1470" step="any" oninput="calculate()">
+                <input type="number" id="input-x" value="3000" step="any" oninput="calculate()">
             </div>
             <div class="input-group">
                 <label>y (常用甩枪距离):</label>
-                <input type="number" id="input-y" value="0" step="any" oninput="calculate()">
+                <input type="number" id="input-y" value="500" step="any" oninput="calculate()">
             </div>
             <div class="input-group">
                 <label>k (你的1寸):</label>
@@ -426,10 +426,10 @@
         <div class="track-module">
             <div>
                 <div class="title">【跟枪】算法</div>
-                <div class="expr">S<sub>cun</sub> = Φ² · √(x<sub>c</sub>² + y<sub>c</sub>²)</div>
+                <div class="expr">S<sub>cun</sub> = Φ² · (x<sub>c</sub> + y<sub>c</sub> - √(x<sub>c</sub>y<sub>c</sub>))</div>
                 <div class="sub">N<sub>cun</sub> = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
                 <div class="sub" style="color:var(--purple);font-weight:600;">N<sub>final</sub> = N<sub>cun</sub> · (k₀/k)<sup>0.382</sup></div>
-                <div class="tag">得数 = 基准最大值 ｜ 均衡 = 75%</div>
+                <div class="tag">得数 = 基准最大值 ｜ 均衡 = 2/3 (66.7%)</div>
             </div>
             <button class="calc-btn" onclick="applyTracking()">进行跟枪计算</button>
         </div>
@@ -460,7 +460,7 @@
                     <span id="fTitle">角极收束法</span>
                     <span class="mode-badge" id="modeBadge">普通模式</span>
                 </div>
-                <div class="f-expr" id="fExpr">N = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
+                <div class="f-expr" id="fExpr">N<sub>cun</sub> = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                 <div class="toggle-group">
@@ -525,19 +525,25 @@
     const DENOM = 100 * PI * PI;            // 100π² 核心收束常数
     const DAMP_EXP = 1 - 1 / PHI;           // 1/Φ² ≈ 0.381966 黄金阻尼指数
 
-    // ---- 核心收束公式 (得出结果寸 N_cun) ----
-    function calcN_cun(S_cun) {
-        const inner = (PHI * S_cun) / DENOM;
-        return 8 * PI * Math.atan(inner);
-    }
+    // ---- 状态 ----
+    let currentMode = 'standard';
+    let currentUnit = 'cm';
+    let currentAnchor = 'q2';
 
     // ---- 几何预处理 (纯寸坐标系) ----
     function calcS_cun(x_c, y_c, mode) {
         if (mode === 'standard') {
             return x_c + y_c;
         } else {
-            return PHI2 * Math.hypot(x_c, y_c);
+            // 黄金肌肉协同模：S_cun = Φ² · (x_c + y_c - √(x_c·y_c))
+            return PHI2 * (x_c + y_c - Math.sqrt(x_c * y_c));
         }
+    }
+
+    // ---- 唯一核心收束公式 (得出结果寸 N_cun) ----
+    function calcN_cun(S_cun) {
+        const inner = (PHI * S_cun) / DENOM;
+        return 8 * PI * Math.atan(inner);
     }
 
     // ---- 后处理：结果寸校准 (纯寸坐标系) ----
@@ -551,18 +557,14 @@
         }
     }
 
-    // ---- 状态 ----
-    let currentMode = 'standard';
-    let currentUnit = 'cm';
-    let currentAnchor = 'q2';
-
     // ---- 普通模式五档：以均衡值为基准 (1.0) ----
     const RATIOS_STD = { half: 2/3, q1: 5/6, q2: 1, q3: 7/6, base: 4/3 };
 
-    // ---- 跟枪模式五档：以最大值为基准 (1.0) ----
+    // ---- 跟枪模式：最大值为基准 (1.0) 最小值 = 最大值 / 2, 中间由四分法 -----
+    //  ratio: half=0.5, q1=0.625, q2=0.75, q3=0.875, base=1.0
     const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
 
-    const KEY_NAMES = { half: '最小值', q1: '偏慢', q2: '均衡', q3: '偏快', base: '最大值' };
+    const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
 
     // ---- 切换模式 ----
     function setMode(mode) {
@@ -574,16 +576,21 @@
         badge.textContent = isStd ? '普通模式' : '跟枪模式';
         badge.className = 'mode-badge' + (isStd ? '' : ' track');
         document.getElementById('fTitle').textContent = isStd ? '角极收束法' : '角极收束法 · 跟枪';
-        document.getElementById('fExpr').className = 'f-expr' + (isStd ? '' : ' track');
+        
+        // 顶部公式卡片严格只显示纯粹的 N_cun 核心收束公式
+        const exprElem = document.getElementById('fExpr');
+        exprElem.className = 'f-expr' + (isStd ? '' : ' track');
+        exprElem.innerHTML = 'N<sub>cun</sub> = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )';
+            
         document.getElementById('formulaCard').className = 'formula-card' + (isStd ? '' : ' track');
         
         document.getElementById('footerDesc').innerHTML = isStd
             ? '<strong>普通模式</strong>：S<sub>cun</sub> = x<sub>c</sub> + y<sub>c</sub> ｜ N<sub>final</sub> = N<sub>cun</sub> ｜ 均衡 = N<sub>final</sub> · k'
-            : '<strong>跟枪模式</strong>：S<sub>cun</sub> = Φ²·√(x<sub>c</sub>²+y<sub>c</sub>²) ｜ N<sub>final</sub> = N<sub>cun</sub>·(k₀/k)<sup>0.382</sup> ｜ 最大值 = N<sub>final</sub> · k';
+            : '<strong>跟枪模式</strong>：S<sub>cun</sub> = Φ²·(x<sub>c</sub>+y<sub>c</sub>-√(x<sub>c</sub>y<sub>c</sub>)) ｜ N<sub>final</sub> = N<sub>cun</sub>·(k₀/k)<sup>0.382</sup> ｜ 最大值 = N<sub>final</sub> · k';
             
         document.getElementById('ratioExplain').textContent = isStd
             ? '最大值 = 4/3 × 均衡 ｜ 最小值 = 2/3 × 均衡'
-            : '基准得数 = 最大值 ｜ 均衡 = 最大值 × 0.75 (3/4) ｜ 最小值 = 最大值 × 0.5 (1/2)';
+            : '基准得数 = 最大值 ｜ 最小值 = 最大值 ÷ 2 ｜ 中间由四分法均匀插值';
             
         calculate();
     }
@@ -682,7 +689,7 @@
         // ② 预处理
         const S_cun = calcS_cun(x_c, y_c, currentMode);
 
-        // ③ 核心收束 (结果寸)
+        // ③ 唯一核心收束 (结果寸)
         const N_cun = calcN_cun(S_cun);
 
         // ④ 结果寸校准 (后处理)
@@ -748,13 +755,13 @@
         if (isTrack) {
             stepsHtml = `
                 <div class="step-line"><span class="step-num ${stepClass}">1</span><span class="step-label">寸化计算</span><span class="step-formula">x_c = ${x_c.toFixed(1)}, y_c = ${y_c.toFixed(1)}</span></div>
-                <div class="step-line"><span class="step-num ${stepClass}">2</span><span class="step-label">几何预处理</span><span class="step-formula">S_cun = Φ²·√(${x_c.toFixed(1)}² + ${y_c.toFixed(1)}²)</span><span>=</span><span class="step-result ${stepResultClass}">${S_cun.toFixed(3)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">2</span><span class="step-label">肌肉协同模</span><span class="step-formula">S_cun = Φ²·(${x_c.toFixed(1)} + ${y_c.toFixed(1)} - √(${x_c.toFixed(1)}×${y_c.toFixed(1)}))</span><span>=</span><span class="step-result ${stepResultClass}">${S_cun.toFixed(3)} cun</span></div>
                 <div class="step-line"><span class="step-num ${stepClass}">3</span><span class="step-label">核心收束</span><span class="step-formula">N_cun = 8π·atan(Φ·${S_cun.toFixed(1)} / 100π²)</span><span>=</span><span class="step-result ${stepResultClass}">${N_cun.toFixed(3)} cun</span></div>
                 <div class="step-line"><span class="step-num ${stepClass}">4</span><span class="step-label">结果寸校准</span><span class="step-formula">N_final = ${N_cun.toFixed(3)} × (${k0}/${k})<sup>0.382</sup></span><span>=</span><span class="step-result ${stepResultClass}">${N_final.toFixed(3)} cun</span></div>
                 <div class="step-line"><span class="step-num ${stepClass}">5</span><span class="step-label">单位还原</span><span class="step-formula">${N_final.toFixed(3)} × ${k}</span><span>=</span><span class="step-result ${stepResultClass}">${N_cm.toFixed(2)} cm</span></div>
                 <div class="step-line" style="color:var(--purple);font-weight:600;border-top:1px dashed rgba(0,0,0,0.05);margin-top:4px;padding-top:4px;">
                     <span>🎯 基准最大值 = ${baseVal.toFixed(2)} ${unitStr}</span>
-                    <span style="color:#94a3b8;font-weight:400;font-size:0.75rem;">(均衡 = 最大值 × 0.75, 最小值 = 最大值 × 0.5)</span>
+                    <span style="color:#94a3b8;font-weight:400;font-size:0.75rem;">(最小值 = 最大值 ÷ 2, 中间由四分法均匀插值)</span>
                 </div>
             `;
         } else {
