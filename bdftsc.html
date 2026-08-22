@@ -156,62 +156,8 @@
         }
 
         /* ===== 旋钮行：Φ + 外部系数 + 内部底数 ===== */
-        .knob-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-        @media(max-width:640px){ .knob-row { grid-template-columns: 1fr; } }
-
-        .knob-box {
-            background: rgba(255,255,255,0.55);
-            border: 1.5px solid rgba(184,134,11,0.3);
-            border-radius: 6px;
-            padding: 8px 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .knob-box.phi-theme {
-            border-color: rgba(184,134,11,0.5);
-            background: rgba(184,134,11,0.06);
-        }
-        .knob-box.purple-theme {
-            border-color: rgba(76,29,149,0.3);
-            background: rgba(76,29,149,0.04);
-        }
-        .knob-title {
-            font-size: 0.78rem;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .knob-title .val-tag {
-            font-family: monospace;
-            font-size: 0.82rem;
-            font-weight: bold;
-            color: var(--blue);
-            background: rgba(255,255,255,0.8);
-            padding: 1px 6px;
-            border-radius: 3px;
-            border: 1px solid rgba(0,0,0,0.08);
-        }
-        .phi-theme .knob-title .val-tag { color: var(--gold); }
-        .purple-theme .knob-title .val-tag { color: var(--purple); }
-        .knob-sub {
-            font-size: 0.6rem;
-            color: #64748b;
-        }
-        .knob-box .slider {
-            width: 100%;
-            margin-top: 2px;
-            cursor: pointer;
-            accent-color: var(--blue);
-        }
-        .phi-theme .slider { accent-color: var(--gold); }
-        .purple-theme .slider { accent-color: var(--purple); }
+        /* 已移除，但保留对应 ID 的隐藏元素以保持 JS 兼容 */
+        .knob-row { display: none; }
 
         .correction {
             background: rgba(76,29,149,0.05);
@@ -655,35 +601,7 @@
         </div>
     </div>
 
-    <!-- ===== 旋钮行：Φ + 外部系数 + 内部底数 ===== -->
-    <div class="knob-row">
-        <div class="knob-box phi-theme">
-            <div class="knob-title">
-                <span>旋钮 Φ：黄金比例</span>
-                <span class="val-tag" id="phiTag">1.6180</span>
-            </div>
-            <div class="knob-sub">控制收束形态与曲率响应</div>
-            <input type="range" class="slider" id="phiSlider" min="1.0" max="2.2" step="0.001" value="1.618" oninput="syncPhi()">
-        </div>
-
-        <div class="knob-box">
-            <div class="knob-title">
-                <span>旋钮 A：外部系数 (C·π)</span>
-                <span class="val-tag" id="coeffTag">8.0π</span>
-            </div>
-            <div class="knob-sub">控制整体理论绝对上限</div>
-            <input type="range" class="slider" id="coeffSlider" min="4" max="14" step="0.2" value="8" oninput="syncCoeff()">
-        </div>
-
-        <div class="knob-box purple-theme">
-            <div class="knob-title">
-                <span>旋钮 B：内部底数 (D·π²)</span>
-                <span class="val-tag" id="denomTag">100π²</span>
-            </div>
-            <div class="knob-sub">控制临界收束早晚与平缓度</div>
-            <input type="range" class="slider" id="denomSlider" min="30" max="250" step="5" value="100" oninput="syncDenom()">
-        </div>
-    </div>
+    <!-- ===== 旋钮行：已移除 ===== -->
 
     <!-- ===== 个人修正系数 ===== -->
     <div class="correction">
@@ -848,13 +766,11 @@
                 <label>Φ: <input type="number" class="gold-input" id="footer-phi" value="1.618" step="0.001" min="1.0" max="2.2" oninput="syncFromFooter('phi')"></label>
                 <label>外部: <input type="number" id="footer-coeff" value="25.13" step="0.01" oninput="syncFromFooter('coeff')"></label>
                 <label>内部: <input type="number" id="footer-denom" value="986.96" step="0.1" oninput="syncFromFooter('denom')"></label>
-                <label>k: <input type="number" id="footer-k" value="2.0" step="0.1" oninput="syncFromFooter('k')"></label>
-                <label>k₀: <input type="number" id="footer-k0" value="2.1" step="0.1" oninput="syncFromFooter('k0')"></label>
             </div>
         </div>
         <div class="footer-right">
             <span class="version">v2</span>
-            <span class="sig">西岛海</span>
+            <span class="sig">作者：西岛海</span>
         </div>
     </div>
 
@@ -914,47 +830,22 @@
 
     // ---- 同步逻辑 ----
     function syncPhi() {
-        const v = parseFloat(document.getElementById('phiSlider').value) || DEFAULT_PHI;
-        currentPhi = v;
-        document.getElementById('phiTag').textContent = v.toFixed(4);
-        document.getElementById('side-input-phi').value = v.toFixed(3);
-        document.getElementById('side-range-phi').value = v;
-        document.getElementById('footer-phi').value = v.toFixed(3);
-        document.getElementById('phi-display-side').textContent = v.toFixed(3);
-        document.getElementById('phiIndicator').textContent = `Φ = ${v.toFixed(3)}`;
-        updateAllParamDisplays();
-        calculate();
+        // 此函数保留以防万一，但顶部滑块已移除
     }
 
     function syncCoeff() {
-        const v = parseFloat(document.getElementById('coeffSlider').value) || 8.0;
-        currentCoeff = v;
-        document.getElementById('coeffTag').textContent = v.toFixed(1) + 'π';
-        document.getElementById('side-input-coeff').value = v;
-        document.getElementById('side-range-coeff').value = v;
-        document.getElementById('footer-coeff').value = (v * PI).toFixed(2);
-        updateAllParamDisplays();
-        calculate();
+        // 此函数保留以防万一，但顶部滑块已移除
     }
 
     function syncDenom() {
-        const v = parseFloat(document.getElementById('denomSlider').value) || 100.0;
-        currentDenomFactor = v;
-        document.getElementById('denomTag').textContent = v.toFixed(0) + 'π²';
-        document.getElementById('side-input-denom').value = v;
-        document.getElementById('side-range-denom').value = v;
-        document.getElementById('footer-denom').value = (v * PI * PI).toFixed(2);
-        updateAllParamDisplays();
-        calculate();
+        // 此函数保留以防万一，但顶部滑块已移除
     }
 
     function syncFromPhiInput() {
         const v = parseFloat(document.getElementById('side-input-phi').value) || DEFAULT_PHI;
         const clamped = Math.max(1.0, Math.min(2.2, v));
         currentPhi = clamped;
-        document.getElementById('phiSlider').value = clamped;
         document.getElementById('side-range-phi').value = clamped;
-        document.getElementById('phiTag').textContent = clamped.toFixed(4);
         document.getElementById('footer-phi').value = clamped.toFixed(3);
         document.getElementById('phi-display-side').textContent = clamped.toFixed(3);
         document.getElementById('phiIndicator').textContent = `Φ = ${clamped.toFixed(3)}`;
@@ -965,9 +856,7 @@
     function syncFromPhiRange() {
         const v = parseFloat(document.getElementById('side-range-phi').value) || DEFAULT_PHI;
         currentPhi = v;
-        document.getElementById('phiSlider').value = v;
         document.getElementById('side-input-phi').value = v.toFixed(3);
-        document.getElementById('phiTag').textContent = v.toFixed(4);
         document.getElementById('footer-phi').value = v.toFixed(3);
         document.getElementById('phi-display-side').textContent = v.toFixed(3);
         document.getElementById('phiIndicator').textContent = `Φ = ${v.toFixed(3)}`;
@@ -980,10 +869,8 @@
             const v = parseFloat(document.getElementById('footer-phi').value) || DEFAULT_PHI;
             const clamped = Math.max(1.0, Math.min(2.2, v));
             currentPhi = clamped;
-            document.getElementById('phiSlider').value = clamped;
             document.getElementById('side-input-phi').value = clamped.toFixed(3);
             document.getElementById('side-range-phi').value = clamped;
-            document.getElementById('phiTag').textContent = clamped.toFixed(4);
             document.getElementById('phi-display-side').textContent = clamped.toFixed(3);
             document.getElementById('phiIndicator').textContent = `Φ = ${clamped.toFixed(3)}`;
             updateAllParamDisplays();
@@ -991,28 +878,16 @@
         } else if (type === 'coeff') {
             const rawVal = parseFloat(document.getElementById('footer-coeff').value) || (8.0 * PI);
             currentCoeff = rawVal / PI;
-            document.getElementById('coeffSlider').value = currentCoeff;
             document.getElementById('side-input-coeff').value = currentCoeff.toFixed(1);
             document.getElementById('side-range-coeff').value = currentCoeff;
-            document.getElementById('coeffTag').textContent = currentCoeff.toFixed(1) + 'π';
             updateAllParamDisplays(false);
             calculate();
         } else if (type === 'denom') {
             const rawVal = parseFloat(document.getElementById('footer-denom').value) || (100.0 * PI * PI);
             currentDenomFactor = rawVal / (PI * PI);
-            document.getElementById('denomSlider').value = currentDenomFactor;
             document.getElementById('side-input-denom').value = currentDenomFactor.toFixed(0);
             document.getElementById('side-range-denom').value = currentDenomFactor;
-            document.getElementById('denomTag').textContent = currentDenomFactor.toFixed(0) + 'π²';
             updateAllParamDisplays(false);
-            calculate();
-        } else if (type === 'k') {
-            const v = parseFloat(document.getElementById('footer-k').value) || 2.0;
-            document.getElementById('input-tsc').value = Math.max(0.1, v);
-            calculate();
-        } else if (type === 'k0') {
-            const v = parseFloat(document.getElementById('footer-k0').value) || 2.1;
-            document.getElementById('input-k0').value = Math.max(0.1, v);
             calculate();
         }
     }
@@ -1022,8 +897,6 @@
         const y = parseFloat(document.getElementById('input-y').value) || 0;
         const k = parseFloat(document.getElementById('input-tsc').value) || 2;
         const k0 = parseFloat(document.getElementById('input-k0').value) || 2.1;
-        document.getElementById('footer-k').value = k;
-        document.getElementById('footer-k0').value = k0;
         document.getElementById('side-input-x').value = x;
         document.getElementById('side-range-x').value = Math.min(5000, Math.max(0, x));
         document.getElementById('side-input-y').value = y;
@@ -1061,16 +934,12 @@
         if (type === 'coeff') {
             const v = parseFloat(document.getElementById('side-input-coeff').value) || 8.0;
             currentCoeff = Math.max(4, Math.min(14, v));
-            document.getElementById('coeffSlider').value = currentCoeff;
             document.getElementById('side-range-coeff').value = currentCoeff;
-            document.getElementById('coeffTag').textContent = currentCoeff.toFixed(1) + 'π';
             document.getElementById('footer-coeff').value = (currentCoeff * PI).toFixed(2);
         } else {
             const v = parseFloat(document.getElementById('side-input-denom').value) || 100.0;
             currentDenomFactor = Math.max(30, Math.min(250, v));
-            document.getElementById('denomSlider').value = currentDenomFactor;
             document.getElementById('side-range-denom').value = currentDenomFactor;
-            document.getElementById('denomTag').textContent = currentDenomFactor.toFixed(0) + 'π²';
             document.getElementById('footer-denom').value = (currentDenomFactor * PI * PI).toFixed(2);
         }
         updateAllParamDisplays();
@@ -1081,16 +950,12 @@
         if (type === 'coeff') {
             const v = parseFloat(document.getElementById('side-range-coeff').value) || 8.0;
             currentCoeff = v;
-            document.getElementById('coeffSlider').value = v;
             document.getElementById('side-input-coeff').value = v.toFixed(1);
-            document.getElementById('coeffTag').textContent = v.toFixed(1) + 'π';
             document.getElementById('footer-coeff').value = (v * PI).toFixed(2);
         } else {
             const v = parseFloat(document.getElementById('side-range-denom').value) || 100.0;
             currentDenomFactor = v;
-            document.getElementById('denomSlider').value = v;
             document.getElementById('side-input-denom').value = v.toFixed(0);
-            document.getElementById('denomTag').textContent = v.toFixed(0) + 'π²';
             document.getElementById('footer-denom').value = (v * PI * PI).toFixed(2);
         }
         updateAllParamDisplays();
@@ -1460,8 +1325,6 @@
     document.getElementById('phiIndicator').textContent = `Φ = ${DEFAULT_PHI.toFixed(3)}`;
     document.getElementById('phi-display-side').textContent = DEFAULT_PHI.toFixed(3);
     document.getElementById('footer-phi').value = DEFAULT_PHI.toFixed(3);
-    document.getElementById('footer-k').value = '2.0';
-    document.getElementById('footer-k0').value = '2.1';
     updateAllParamDisplays();
     syncFromTop();
     window.addEventListener('resize', calculate);
