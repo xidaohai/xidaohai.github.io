@@ -155,8 +155,6 @@
             font-weight: 700;
         }
 
-        /* ===== 旋钮行：Φ + 外部系数 + 内部底数 ===== */
-        /* 已移除，但保留对应 ID 的隐藏元素以保持 JS 兼容 */
         .knob-row { display: none; }
 
         .correction {
@@ -461,7 +459,6 @@
         .step-result { font-weight: bold; color: var(--gold); }
         .step-result.purple { color: var(--purple); }
 
-        /* ===== 页脚 ===== */
         .footer {
             display: flex;
             justify-content: space-between;
@@ -673,7 +670,7 @@
 
         <!-- ===== 图表区 ===== -->
         <div class="chart-section">
-            <div class="chart-header">双算法全景动态响应视界 (横轴: 目标X)</div>
+            <div class="chart-header">双算法全景动态响应视界 (横轴: 目标X · 固定Y拉枪距离)</div>
             
             <div class="interactive-chart-grid">
                 <div class="slider-control-card">
@@ -682,12 +679,12 @@
                             <span>x (目标)</span>
                             <input type="number" class="ctrl-input-num" id="side-input-x" value="1470" step="10" oninput="syncFromSide('x')">
                         </div>
-                        <input type="range" class="ctrl-range" id="side-range-x" min="0" max="5000" step="10" value="1470" oninput="syncFromRange('x')">
+                        <input type="range" class="ctrl-range" id="side-range-x" min="0" max="7000" step="10" value="1470" oninput="syncFromRange('x')">
                     </div>
 
                     <div class="ctrl-row">
                         <div class="ctrl-head">
-                            <span>y (拉枪)</span>
+                            <span>y (固定拉枪)</span>
                             <input type="number" class="ctrl-input-num" id="side-input-y" value="0" step="10" oninput="syncFromSide('y')">
                         </div>
                         <input type="range" class="ctrl-range" id="side-range-y" min="0" max="2000" step="10" value="0" oninput="syncFromRange('y')">
@@ -830,15 +827,12 @@
 
     // ---- 同步逻辑 ----
     function syncPhi() {
-        // 此函数保留以防万一，但顶部滑块已移除
     }
 
     function syncCoeff() {
-        // 此函数保留以防万一，但顶部滑块已移除
     }
 
     function syncDenom() {
-        // 此函数保留以防万一，但顶部滑块已移除
     }
 
     function syncFromPhiInput() {
@@ -877,42 +871,60 @@
             calculate();
         } else if (type === 'coeff') {
             const rawVal = parseFloat(document.getElementById('footer-coeff').value) || (8.0 * PI);
-            currentCoeff = rawVal / PI;
-            document.getElementById('side-input-coeff').value = currentCoeff.toFixed(1);
-            document.getElementById('side-range-coeff').value = currentCoeff;
+            let c = rawVal / PI;
+            c = Math.max(4, Math.min(14, c));
+            currentCoeff = c;
+            document.getElementById('footer-coeff').value = (c * PI).toFixed(2);
+            document.getElementById('side-input-coeff').value = c.toFixed(1);
+            document.getElementById('side-range-coeff').value = c;
             updateAllParamDisplays(false);
             calculate();
         } else if (type === 'denom') {
             const rawVal = parseFloat(document.getElementById('footer-denom').value) || (100.0 * PI * PI);
-            currentDenomFactor = rawVal / (PI * PI);
-            document.getElementById('side-input-denom').value = currentDenomFactor.toFixed(0);
-            document.getElementById('side-range-denom').value = currentDenomFactor;
+            let d = rawVal / (PI * PI);
+            d = Math.max(30, Math.min(250, d));
+            currentDenomFactor = d;
+            document.getElementById('footer-denom').value = (d * PI * PI).toFixed(2);
+            document.getElementById('side-input-denom').value = d.toFixed(0);
+            document.getElementById('side-range-denom').value = d;
             updateAllParamDisplays(false);
             calculate();
         }
     }
 
     function syncFromTop() {
-        const x = parseFloat(document.getElementById('input-x').value) || 0;
-        const y = parseFloat(document.getElementById('input-y').value) || 0;
+        let x = parseFloat(document.getElementById('input-x').value) || 0;
+        let y = parseFloat(document.getElementById('input-y').value) || 0;
         const k = parseFloat(document.getElementById('input-tsc').value) || 2;
         const k0 = parseFloat(document.getElementById('input-k0').value) || 2.1;
+
+        // 夹取到滑杆范围
+        x = Math.min(7000, Math.max(0, x));
+        y = Math.min(2000, Math.max(0, y));
+
+        document.getElementById('input-x').value = x;
+        document.getElementById('input-y').value = y;
         document.getElementById('side-input-x').value = x;
-        document.getElementById('side-range-x').value = Math.min(5000, Math.max(0, x));
+        document.getElementById('side-range-x').value = x;
         document.getElementById('side-input-y').value = y;
-        document.getElementById('side-range-y').value = Math.min(2000, Math.max(0, y));
+        document.getElementById('side-range-y').value = y;
+
         calculate();
     }
 
     function syncFromSide(type) {
         if (type === 'x') {
-            const v = parseFloat(document.getElementById('side-input-x').value) || 0;
+            let v = parseFloat(document.getElementById('side-input-x').value) || 0;
+            v = Math.min(7000, Math.max(0, v));
             document.getElementById('input-x').value = v;
-            document.getElementById('side-range-x').value = Math.min(5000, Math.max(0, v));
+            document.getElementById('side-input-x').value = v;
+            document.getElementById('side-range-x').value = v;
         } else {
-            const v = parseFloat(document.getElementById('side-input-y').value) || 0;
+            let v = parseFloat(document.getElementById('side-input-y').value) || 0;
+            v = Math.min(2000, Math.max(0, v));
             document.getElementById('input-y').value = v;
-            document.getElementById('side-range-y').value = Math.min(2000, Math.max(0, v));
+            document.getElementById('side-input-y').value = v;
+            document.getElementById('side-range-y').value = v;
         }
         calculate();
     }
@@ -932,13 +944,15 @@
 
     function syncFromParamInput(type) {
         if (type === 'coeff') {
-            const v = parseFloat(document.getElementById('side-input-coeff').value) || 8.0;
+            let v = parseFloat(document.getElementById('side-input-coeff').value) || 8.0;
             currentCoeff = Math.max(4, Math.min(14, v));
+            document.getElementById('side-input-coeff').value = currentCoeff.toFixed(1);
             document.getElementById('side-range-coeff').value = currentCoeff;
             document.getElementById('footer-coeff').value = (currentCoeff * PI).toFixed(2);
         } else {
-            const v = parseFloat(document.getElementById('side-input-denom').value) || 100.0;
+            let v = parseFloat(document.getElementById('side-input-denom').value) || 100.0;
             currentDenomFactor = Math.max(30, Math.min(250, v));
+            document.getElementById('side-input-denom').value = currentDenomFactor.toFixed(0);
             document.getElementById('side-range-denom').value = currentDenomFactor;
             document.getElementById('footer-denom').value = (currentDenomFactor * PI * PI).toFixed(2);
         }
@@ -1041,7 +1055,7 @@
     function syncUI() {
         const v = parseFloat(document.getElementById('input-correct').value) || 0;
         const s = Math.round(v / 0.25) * 0.25;
-        const label = (s > 0 ? '+' : '') + s.toFixed(1) + '%';
+        const label = (s > 0 ? '+' : '') + s.toFixed(2) + '%';
         document.getElementById('correction-display').textContent = label;
         document.getElementById('correction-badge').textContent = label;
         document.getElementById('corrFactorDisplay').textContent = (1 + s / 100).toFixed(3);
@@ -1166,7 +1180,7 @@
         drawChart(x, y, k, k0, trk_max_cm, trk_bal_cm, std_max_cm, std_bal_cm);
     }
 
-    // ---- 绘制图表与吸附点 ----
+    // ---- 绘制图表 ----
     function drawChart(x_in, y_in, k, k0, t_max, t_bal, s_max, s_bal) {
         const canvas = document.getElementById('compCanvas');
         if (!canvas) return;
@@ -1185,7 +1199,15 @@
         ctx.clearRect(0, 0, w, h);
 
         const maxX = 7000;
-        const maxY = Math.max(90, Math.max(t_max, s_max) * 1.15);
+
+        // 扫描所有曲线在范围内的最大值，防止曲线被顶部截断
+        let maxY = Math.max(90, t_max, s_max);
+        for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
+            const r_std = computeFullOutput(x_plot, y_in, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
+            const r_trk = computeFullOutput(x_plot, y_in, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
+            maxY = Math.max(maxY, r_std.N_cm, r_std.N_cm * (4 / 3), r_trk.N_cm, r_trk.N_cm * 0.75);
+        }
+        maxY = Math.max(90, maxY * 1.15);
 
         function toPx(x, y) {
             return {
@@ -1210,57 +1232,59 @@
             ctx.fillText(xVal, p.px, h - pad.bottom + 14);
         }
 
-        // 核心修复：纯 Y 输入保底
+        // 纯 Y 输入保底：固定拉枪距离
         const y_ratio = (x_in > 0) ? (y_in / x_in) : 0;
 
-        // 1. 普通算法曲线 (蓝色)
+        // 1. 普通算法曲线 (蓝色虚线)
         ctx.strokeStyle = '#3b82f6';
         ctx.lineWidth = 1.8;
         ctx.setLineDash([4, 3]);
         ctx.beginPath();
         let first = true;
         for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const curr_y = (x_in > 0) ? (x_plot * y_ratio) : y_in;
+            const curr_y = y_in;
             const r = computeFullOutput(x_plot, curr_y, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
             const p = toPx(x_plot, r.N_cm);
             if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
         }
         ctx.stroke();
 
+        // 普通最大 (蓝色实线)
         ctx.strokeStyle = '#1e3a8a';
         ctx.lineWidth = 2.2;
         ctx.setLineDash([]);
         ctx.beginPath();
         first = true;
         for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const curr_y = (x_in > 0) ? (x_plot * y_ratio) : y_in;
+            const curr_y = y_in;
             const r = computeFullOutput(x_plot, curr_y, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
             const p = toPx(x_plot, r.N_cm * (4 / 3));
             if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
         }
         ctx.stroke();
 
-        // 2. 跟枪算法曲线 (紫色)
+        // 2. 跟枪算法曲线 (紫色虚线)
         ctx.strokeStyle = '#a855f7';
         ctx.lineWidth = 1.8;
         ctx.setLineDash([4, 3]);
         ctx.beginPath();
         first = true;
         for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const curr_y = (x_in > 0) ? (x_plot * y_ratio) : y_in;
+            const curr_y = y_in;
             const r = computeFullOutput(x_plot, curr_y, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
             const p = toPx(x_plot, r.N_cm * 0.75);
             if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
         }
         ctx.stroke();
 
+        // 跟枪最大 (紫色实线)
         ctx.strokeStyle = '#7c3aed';
         ctx.lineWidth = 2.5;
         ctx.setLineDash([]);
         ctx.beginPath();
         first = true;
         for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const curr_y = (x_in > 0) ? (x_plot * y_ratio) : y_in;
+            const curr_y = y_in;
             const r = computeFullOutput(x_plot, curr_y, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
             const p = toPx(x_plot, r.N_cm);
             if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
