@@ -32,7 +32,7 @@
         }
         .card {
             width: 100%;
-            max-width: 820px;
+            max-width: 920px;
             background: var(--card);
             border-radius: 8px;
             padding: 18px 14px;
@@ -40,7 +40,7 @@
             border: 1px solid rgba(120,100,70,0.25);
             position: relative;
         }
-        @media (min-width:600px){ .card { padding: 30px; } }
+        @media (min-width:600px){ .card { padding: 26px 22px; } }
         .card::before {
             content: '';
             position: absolute;
@@ -52,7 +52,7 @@
         .header {
             font-size: 1.25rem;
             font-weight: bold;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -81,8 +81,8 @@
         }
         .k-link:hover { background: #8b6914; transform: translateY(-1px); }
 
-        .top-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
-        @media (min-width:640px){ .top-row { grid-template-columns: 1.3fr 1fr; } }
+        .top-row { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 14px; }
+        @media (min-width:640px){ .top-row { grid-template-columns: 1.25fr 1fr; } }
 
         .input-panel {
             display: grid;
@@ -155,15 +155,73 @@
             font-weight: 700;
         }
 
+        /* ===== 旋钮行：Φ + 外部系数 + 内部底数 ===== */
+        .knob-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        @media(max-width:640px){ .knob-row { grid-template-columns: 1fr; } }
+
+        .knob-box {
+            background: rgba(255,255,255,0.55);
+            border: 1.5px solid rgba(184,134,11,0.3);
+            border-radius: 6px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .knob-box.phi-theme {
+            border-color: rgba(184,134,11,0.5);
+            background: rgba(184,134,11,0.06);
+        }
+        .knob-box.purple-theme {
+            border-color: rgba(76,29,149,0.3);
+            background: rgba(76,29,149,0.04);
+        }
+        .knob-title {
+            font-size: 0.78rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .knob-title .val-tag {
+            font-family: monospace;
+            font-size: 0.82rem;
+            font-weight: bold;
+            color: var(--blue);
+            background: rgba(255,255,255,0.8);
+            padding: 1px 6px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        .phi-theme .knob-title .val-tag { color: var(--gold); }
+        .purple-theme .knob-title .val-tag { color: var(--purple); }
+        .knob-sub {
+            font-size: 0.6rem;
+            color: #64748b;
+        }
+        .knob-box .slider {
+            width: 100%;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: var(--blue);
+        }
+        .phi-theme .slider { accent-color: var(--gold); }
+        .purple-theme .slider { accent-color: var(--purple); }
+
         .correction {
             background: rgba(76,29,149,0.05);
             border: 1.5px solid var(--purple);
             border-radius: 6px;
-            padding: 12px;
+            padding: 10px 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 16px;
+            gap: 5px;
+            margin-bottom: 14px;
         }
         .correction .title { font-size: 0.85rem; font-weight: bold; color: var(--purple); }
         .correction .sub { font-size: 0.7rem; color: #64748b; }
@@ -199,7 +257,7 @@
             font-size: 1rem;
             font-weight: bold;
             color: var(--purple);
-            padding: 6px 4px;
+            padding: 5px 4px;
             text-align: center;
             outline: none;
             min-width: 50px;
@@ -229,7 +287,7 @@
             flex-wrap: wrap;
         }
         .f-title { font-size: 0.95rem; font-weight: bold; color: #78350f; display: flex; align-items: center; gap: 6px; }
-        .f-expr { font-size: 1.0rem; font-weight: bold; color: var(--gold); font-family: 'Times New Roman', serif; transition: 0.3s; }
+        .f-expr { font-size: 0.96rem; font-weight: bold; color: var(--gold); font-family: 'Times New Roman', serif; transition: 0.3s; }
         .f-expr.track { color: var(--purple); }
 
         .toggle-group {
@@ -270,7 +328,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
             gap: 4px;
-            margin-top: 4px;
+            margin-top: 6px;
         }
         @media(max-width:500px){ .five-col { gap: 2px; font-size: 0.75rem; } }
         .col-item {
@@ -305,13 +363,128 @@
         }
         .col-item.anchor .hint { opacity: 1; }
 
-        .row-label { font-size: 0.65rem; font-weight: 600; color: #94a3b8; margin-top: 4px; text-align: center; letter-spacing: 0.5px; }
+        .status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+        .status .hl { color: var(--purple); font-weight: 700; }
+
+        .chart-section {
+            background: rgba(255,255,255,0.45);
+            border: 1px solid rgba(120,100,70,0.25);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 14px;
+        }
+        .chart-header {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--blue);
+            margin-bottom: 10px;
+        }
+        .interactive-chart-grid {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+        @media(max-width:750px){ .interactive-chart-grid { grid-template-columns: 1fr; } }
+
+        .slider-control-card {
+            background: rgba(255,255,255,0.65);
+            border: 1px solid rgba(30,58,138,0.2);
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .ctrl-row {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .ctrl-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.72rem;
+            font-weight: bold;
+            color: var(--blue);
+        }
+        .ctrl-head.purple { color: var(--purple); }
+        .ctrl-head.gold { color: var(--gold); }
+        .ctrl-input-num {
+            width: 76px;
+            padding: 2px 4px;
+            font-size: 0.82rem;
+            font-weight: bold;
+            text-align: right;
+            border: 1px solid rgba(30,58,138,0.3);
+            border-radius: 3px;
+            outline: none;
+            background: #fff;
+            color: var(--blue);
+        }
+        .ctrl-input-num.purple { border-color: rgba(76,29,149,0.3); color: var(--purple); }
+        .ctrl-input-num.gold { border-color: rgba(184,134,11,0.4); color: var(--gold); }
+        .ctrl-range {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--blue);
+            margin-top: 2px;
+        }
+        .ctrl-range.purple { accent-color: var(--purple); }
+        .ctrl-range.gold { accent-color: var(--gold); }
+
+        .canvas-container {
+            background: #ffffff;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 4px;
+            position: relative;
+            padding: 8px 6px;
+        }
+        canvas {
+            width: 100%;
+            height: 250px;
+            display: block;
+        }
+
+        .chart-legend-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        @media(max-width:600px){ .chart-legend-grid { grid-template-columns: 1fr 1fr; } }
+        .legend-box {
+            background: rgba(255,255,255,0.7);
+            border-radius: 4px;
+            padding: 5px 8px;
+            border: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.65rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .legend-box.t-max { border-left: 3px solid #7c3aed; }
+        .legend-box.t-bal { border-left: 3px dashed #a855f7; }
+        .legend-box.s-max { border-left: 3px solid #1e3a8a; }
+        .legend-box.s-bal { border-left: 3px dashed #3b82f6; }
+        .legend-val { font-size: 0.85rem; font-weight: bold; font-family: monospace; }
+
         .steps {
             background: rgba(255,255,255,0.4);
             border: 1px solid rgba(180,83,9,0.2);
             border-radius: 6px;
             padding: 8px 10px;
-            margin-top: 10px;
+            margin-top: 12px;
             font-size: 0.85rem;
         }
         .steps .title { font-size: 0.8rem; font-weight: bold; color: #78350f; margin-bottom: 6px; }
@@ -342,17 +515,7 @@
         .step-result { font-weight: bold; color: var(--gold); }
         .step-result.purple { color: var(--purple); }
 
-        .status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 4px;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-        .status .hl { color: var(--purple); font-weight: 700; }
+        /* ===== 页脚 ===== */
         .footer {
             display: flex;
             justify-content: space-between;
@@ -361,9 +524,64 @@
             font-size: 0.82rem;
             color: #475569;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(0,0,0,0.08);
         }
-        .footer .sig { font-weight: bold; color: var(--blue); }
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .footer-left .desc { font-size: 0.75rem; }
+        .footer-left .params {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.5);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+        .footer-left .params label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+        .footer-left .params input {
+            width: 60px;
+            padding: 2px 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-align: center;
+            border: 1px solid rgba(30,58,138,0.2);
+            border-radius: 3px;
+            background: #fff;
+            color: var(--blue);
+            outline: none;
+        }
+        .footer-left .params input:focus { border-color: var(--purple); }
+        .footer-left .params input.gold-input { color: var(--gold); border-color: rgba(184,134,11,0.3); }
+        .footer-left .params input.gold-input:focus { border-color: var(--gold); }
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .footer-right .sig {
+            font-weight: bold;
+            color: var(--blue);
+            font-size: 0.85rem;
+        }
+        .footer-right .version {
+            font-size: 0.6rem;
+            color: #94a3b8;
+            font-family: monospace;
+        }
         .correction-badge {
             background: var(--purple);
             color: #fff;
@@ -382,13 +600,15 @@
             border-radius: 3px;
             margin-left: 4px;
         }
-        .ratio-explain {
-            font-size: 0.6rem;
-            color: #94a3b8;
-            text-align: center;
-            margin-top: 2px;
-        }
         sup, sub { font-size: 0.7em; }
+        .phi-indicator {
+            font-size: 0.55rem;
+            color: var(--gold);
+            font-weight: 700;
+            background: rgba(184,134,11,0.1);
+            padding: 0 6px;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
@@ -396,42 +616,72 @@
 
     <div class="header">
         <span class="date">2026.8.22</span>
-        <span>同身寸 · 表达法</span>
-        <span class="badge">xlm</span>
+        <span>同身寸 · 收束法</span>
+        <span class="badge">xlm · 精微版</span>
         <a href="https://xidaohai.github.io/tsc.png" class="k-link">说明</a>
     </div>
 
-    <!-- ===== 输入 + 跟枪模块 ===== -->
+    <!-- ===== 顶部输入面板 + 跟枪独立模块 ===== -->
     <div class="top-row">
         <div class="input-panel">
             <div class="input-group">
-                <label>x (目标距离):</label>
-                <input type="number" id="input-x" value="3000" step="any" oninput="calculate()">
+                <label>x (目标精细度):</label>
+                <input type="number" id="input-x" value="1470" step="any" oninput="syncFromTop()">
             </div>
             <div class="input-group">
-                <label>y (常用甩枪距离):</label>
-                <input type="number" id="input-y" value="500" step="any" oninput="calculate()">
+                <label>y (拉枪平稳度):</label>
+                <input type="number" id="input-y" value="0" step="any" oninput="syncFromTop()">
             </div>
             <div class="input-group">
-                <label>k (你的1寸):</label>
-                <input type="number" id="input-tsc" value="2" step="0.1" oninput="calculate()">
+                <label>k (个人实测寸):</label>
+                <input type="number" id="input-tsc" value="2" step="0.1" oninput="syncFromTop()">
             </div>
             <div class="input-group">
-                <label>k₀ (群体1寸):</label>
-                <input type="number" id="input-k0" value="2.1" step="0.1" oninput="calculate()">
+                <label>k₀ (群体基准寸):</label>
+                <input type="number" id="input-k0" value="2.1" step="0.1" oninput="syncFromTop()">
                 <span class="sub-note">默认 2.1 (一般请勿改动)</span>
             </div>
         </div>
 
         <div class="track-module">
             <div>
-                <div class="title">【跟枪】、高敏 算法</div>
+                <div class="title">【跟枪】肌肉协同算法</div>
                 <div class="expr">S<sub>cun</sub> = Φ² · (x<sub>c</sub> + y<sub>c</sub> - √(x<sub>c</sub>y<sub>c</sub>))</div>
                 <div class="sub">N<sub>cun</sub> = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
                 <div class="sub" style="color:var(--purple);font-weight:600;">N<sub>final</sub> = N<sub>cun</sub> · (k₀/k)<sup>0.382</sup></div>
-                <div class="tag">得数 = 基准最大值 ｜ 均衡 = 2/3 (66.7%)</div>
+                <div class="tag">得数 = 基准最大值 ｜ 均衡 = 75% ｜ 最小值 = 50%</div>
             </div>
-            <button class="calc-btn" onclick="applyTracking()">进行跟枪、高敏计算</button>
+            <button class="calc-btn" onclick="applyTracking()">进行跟枪计算</button>
+        </div>
+    </div>
+
+    <!-- ===== 旋钮行：Φ + 外部系数 + 内部底数 ===== -->
+    <div class="knob-row">
+        <div class="knob-box phi-theme">
+            <div class="knob-title">
+                <span>旋钮 Φ：黄金比例</span>
+                <span class="val-tag" id="phiTag">1.6180</span>
+            </div>
+            <div class="knob-sub">控制收束形态与曲率响应</div>
+            <input type="range" class="slider" id="phiSlider" min="1.0" max="2.2" step="0.001" value="1.618" oninput="syncPhi()">
+        </div>
+
+        <div class="knob-box">
+            <div class="knob-title">
+                <span>旋钮 A：外部系数 (C·π)</span>
+                <span class="val-tag" id="coeffTag">8.0π</span>
+            </div>
+            <div class="knob-sub">控制整体理论绝对上限</div>
+            <input type="range" class="slider" id="coeffSlider" min="4" max="14" step="0.2" value="8" oninput="syncCoeff()">
+        </div>
+
+        <div class="knob-box purple-theme">
+            <div class="knob-title">
+                <span>旋钮 B：内部底数 (D·π²)</span>
+                <span class="val-tag" id="denomTag">100π²</span>
+            </div>
+            <div class="knob-sub">控制临界收束早晚与平缓度</div>
+            <input type="range" class="slider" id="denomSlider" min="30" max="250" step="5" value="100" oninput="syncDenom()">
         </div>
     </div>
 
@@ -452,15 +702,16 @@
         </div>
     </div>
 
-    <!-- ===== 核心公式展示 ===== -->
+    <!-- ===== 核心公式展示卡片 ===== -->
     <div class="formula-card" id="formulaCard">
         <div class="card-top">
             <div>
                 <div class="f-title">
                     <span id="fTitle">角极收束法</span>
                     <span class="mode-badge" id="modeBadge">普通模式</span>
+                    <span class="phi-indicator" id="phiIndicator">Φ = 1.618</span>
                 </div>
-                <div class="f-expr" id="fExpr">N<sub>cun</sub> = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
+                <div class="f-expr" id="fExpr">N<sub>cun</sub> = 8.0π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                 <div class="toggle-group">
@@ -474,8 +725,7 @@
             </div>
         </div>
 
-        <!-- 上行：基准 -->
-        <div class="row-label">基准（无修正）</div>
+        <!-- 五档基准 -->
         <div class="five-col" id="baseRow">
             <div class="col-item"><span class="tag">最小值</span><span class="val" id="base-half">--</span></div>
             <div class="col-item"><span class="tag">偏快</span><span class="val" id="base-q1">--</span></div>
@@ -484,7 +734,7 @@
             <div class="col-item"><span class="tag">最大值</span><span class="val" id="base-base">--</span></div>
         </div>
 
-        <!-- 下行：修正后 -->
+        <!-- 五档修正后 -->
         <div style="margin-top:10px;border-top:1.5px dashed rgba(76,29,149,0.25);padding-top:8px;">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
                 <span style="font-weight:bold;color:var(--purple);font-size:0.85rem;">✧ 修正后 <span class="correction-badge" id="correction-badge">±0%</span></span>
@@ -500,73 +750,367 @@
             <div class="status">
                 <span>修正系数 = <span class="hl" id="corrFactorDisplay">1.000</span></span>
                 <span>锚点: <span class="hl" id="anchorDisplay">均衡</span></span>
-                <span id="ratioInfo" style="font-size:0.6rem;color:#94a3b8;"></span>
             </div>
-            <div class="ratio-explain" id="ratioExplain">最大值 = 4/3 × 均衡 ｜ 最小值 = 2/3 × 均衡</div>
         </div>
 
+        <!-- ===== 图表区 ===== -->
+        <div class="chart-section">
+            <div class="chart-header">双算法全景动态响应视界 (横轴: 目标精细度 X)</div>
+            
+            <div class="interactive-chart-grid">
+                <div class="slider-control-card">
+                    <div class="ctrl-row">
+                        <div class="ctrl-head">
+                            <span>x (目标难度)</span>
+                            <input type="number" class="ctrl-input-num" id="side-input-x" value="1470" step="10" oninput="syncFromSide('x')">
+                        </div>
+                        <input type="range" class="ctrl-range" id="side-range-x" min="0" max="5000" step="10" value="1470" oninput="syncFromRange('x')">
+                    </div>
+
+                    <div class="ctrl-row">
+                        <div class="ctrl-head">
+                            <span>y (拉枪难度)</span>
+                            <input type="number" class="ctrl-input-num" id="side-input-y" value="0" step="10" oninput="syncFromSide('y')">
+                        </div>
+                        <input type="range" class="ctrl-range" id="side-range-y" min="0" max="2000" step="10" value="0" oninput="syncFromRange('y')">
+                    </div>
+
+                    <!-- Φ 控制（侧边栏） -->
+                    <div class="ctrl-row" style="border-top:1px dashed rgba(0,0,0,0.06);padding-top:6px;">
+                        <div class="ctrl-head gold">
+                            <span>Φ (黄金比例)</span>
+                            <input type="number" class="ctrl-input-num gold" id="side-input-phi" value="1.618" step="0.01" min="1.0" max="2.2" oninput="syncFromPhiInput()">
+                        </div>
+                        <input type="range" class="ctrl-range gold" id="side-range-phi" min="1.0" max="2.2" step="0.001" value="1.618" oninput="syncFromPhiRange()">
+                    </div>
+
+                    <div class="ctrl-row">
+                        <div class="ctrl-head purple">
+                            <span id="txt-coeff-label">外部系数: 8.0π</span>
+                            <input type="number" class="ctrl-input-num purple" id="side-input-coeff" value="8" step="0.2" min="4" max="14" oninput="syncFromParamInput('coeff')">
+                        </div>
+                        <input type="range" class="ctrl-range purple" id="side-range-coeff" min="4" max="14" step="0.2" value="8" oninput="syncFromParamRange('coeff')">
+                    </div>
+
+                    <div class="ctrl-row">
+                        <div class="ctrl-head purple">
+                            <span id="txt-denom-label">内部底数: 100π²</span>
+                            <input type="number" class="ctrl-input-num purple" id="side-input-denom" value="100" step="5" min="30" max="250" oninput="syncFromParamInput('denom')">
+                        </div>
+                        <input type="range" class="ctrl-range purple" id="side-range-denom" min="30" max="250" step="5" value="100" oninput="syncFromParamRange('denom')">
+                    </div>
+                    
+                    <div class="ctrl-row" style="border-top:1px dashed rgba(0,0,0,0.06);padding-top:4px;margin-top:2px;">
+                        <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:#64748b;">
+                            <span>当前 y/x 比例: <strong id="ratio-display" style="color:var(--purple);">0.00</strong></span>
+                            <span>Φ = <strong id="phi-display-side" style="color:var(--gold);">1.618</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="compCanvas"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-legend-grid">
+                <div class="legend-box t-max">
+                    <span style="color:#7c3aed; font-weight:bold;">[跟枪最大·实线]</span>
+                    <span class="legend-val" id="lbl-t-max" style="color:#7c3aed;">-- cm</span>
+                </div>
+                <div class="legend-box t-bal">
+                    <span style="color:#a855f7; font-weight:bold;">[跟枪均衡·虚线]</span>
+                    <span class="legend-val" id="lbl-t-bal" style="color:#a855f7;">-- cm</span>
+                </div>
+                <div class="legend-box s-max">
+                    <span style="color:#1e3a8a; font-weight:bold;">[普通最大·实线]</span>
+                    <span class="legend-val" id="lbl-s-max" style="color:#1e3a8a;">-- cm</span>
+                </div>
+                <div class="legend-box s-bal">
+                    <span style="color:#3b82f6; font-weight:bold;">[普通均衡·虚线]</span>
+                    <span class="legend-val" id="lbl-s-bal" style="color:#3b82f6;">-- cm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 计算推导步骤 -->
         <div class="steps">
             <div class="title" id="stepsTitle">计算推导流程</div>
             <div id="stepsNatural"></div>
         </div>
     </div>
 
+    <!-- ===== 页脚 ===== -->
     <div class="footer">
-        <div id="footerDesc"><strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong></div>
-        <div class="sig">作者 ： 西岛海</div>
+        <div class="footer-left">
+            <div class="desc" id="footerDesc"><strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong></div>
+            <div class="params">
+                <label>Φ: <input type="number" class="gold-input" id="footer-phi" value="1.618" step="0.001" min="1.0" max="2.2" oninput="syncFromFooter('phi')"></label>
+                <label>外部: <input type="number" id="footer-coeff" value="25.13" step="0.01" oninput="syncFromFooter('coeff')"></label>
+                <label>内部: <input type="number" id="footer-denom" value="986.96" step="0.1" oninput="syncFromFooter('denom')"></label>
+                <label>k: <input type="number" id="footer-k" value="2.0" step="0.1" oninput="syncFromFooter('k')"></label>
+                <label>k₀: <input type="number" id="footer-k0" value="2.1" step="0.1" oninput="syncFromFooter('k0')"></label>
+            </div>
+        </div>
+        <div class="footer-right">
+            <span class="version">v2.1 · Φ动态</span>
+            <span class="sig">西岛海</span>
+        </div>
     </div>
 
 </div>
 
 <script>
     const PI = Math.PI;
-    const PHI = (1 + Math.sqrt(5)) / 2;    // 1.6180339887
-    const PHI2 = PHI * PHI;                 // 2.6180339887 (Φ² = Φ + 1)
-    const DENOM = 100 * PI * PI;            // 100π² 核心收束常数
-    const DAMP_EXP = 1 - 1 / PHI;           // 1/Φ² ≈ 0.381966 黄金阻尼指数
+    const DEFAULT_PHI = (1 + Math.sqrt(5)) / 2;
 
-    // ---- 状态 ----
     let currentMode = 'standard';
     let currentUnit = 'cm';
     let currentAnchor = 'q2';
+    let currentCoeff = 8.0;
+    let currentDenomFactor = 100.0;
+    let currentPhi = DEFAULT_PHI;
 
-    // ---- 几何预处理 (纯寸坐标系) ----
-    function calcS_cun(x_c, y_c, mode) {
+    const RATIOS_STD = { half: 2/3, q1: 5/6, q2: 1, q3: 7/6, base: 4/3 };
+    const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
+    const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
+
+    // ---- 核心数学引擎 ----
+    function calcS_cun(x_c, y_c, mode, phi) {
+        const phi2 = phi * phi;
         if (mode === 'standard') {
             return x_c + y_c;
         } else {
-            // 黄金肌肉协同模：S_cun = Φ² · (x_c + y_c - √(x_c·y_c))
-            return PHI2 * (x_c + y_c - Math.sqrt(x_c * y_c));
+            const sqrtTerm = Math.sqrt(Math.max(0, x_c * y_c));
+            return phi2 * (x_c + y_c - sqrtTerm);
         }
     }
 
-    // ---- 唯一核心收束公式 (得出结果寸 N_cun) ----
-    function calcN_cun(S_cun) {
-        const inner = (PHI * S_cun) / DENOM;
-        return 8 * PI * Math.atan(inner);
+    function calcN_cun(S_cun, coeff, denomFactor, phi) {
+        const denom = denomFactor * PI * PI;
+        const inner = (phi * S_cun) / denom;
+        return coeff * PI * Math.atan(inner);
     }
 
-    // ---- 后处理：结果寸校准 (纯寸坐标系) ----
-    function calcN_final(N_cun, mode, k, k0) {
+    function calcN_final(N_cun, mode, k, k0, phi) {
         if (mode === 'standard') {
             return N_cun;
         } else {
             const base_k0 = k0 > 0 ? k0 : 2.1;
-            const dampingFactor = Math.pow(base_k0 / k, DAMP_EXP);
+            const dampExp = 1 - 1 / phi;
+            const dampingFactor = Math.pow(base_k0 / k, dampExp);
             return N_cun * dampingFactor;
         }
     }
 
-    // ---- 普通模式五档：以均衡值为基准 (1.0) ----
-    const RATIOS_STD = { half: 2/3, q1: 5/6, q2: 1, q3: 7/6, base: 4/3 };
+    function computeFullOutput(x, y, k, k0, mode, coeff, denomFactor, phi) {
+        const x_c = x / k;
+        const y_c = y / k;
+        const S_cun = calcS_cun(x_c, y_c, mode, phi);
+        const N_cun = calcN_cun(S_cun, coeff, denomFactor, phi);
+        const N_final = calcN_final(N_cun, mode, k, k0, phi);
+        return { S_cun, N_cun, N_final, N_cm: N_final * k };
+    }
 
-    // ---- 跟枪模式：最大值为基准 (1.0) 最小值 = 最大值 / 2, 中间由四分法 -----
-    //  ratio: half=0.5, q1=0.625, q2=0.75, q3=0.875, base=1.0
-    const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
+    // ---- 同步逻辑 ----
+    function syncPhi() {
+        const v = parseFloat(document.getElementById('phiSlider').value) || DEFAULT_PHI;
+        currentPhi = v;
+        document.getElementById('phiTag').textContent = v.toFixed(4);
+        document.getElementById('side-input-phi').value = v.toFixed(3);
+        document.getElementById('side-range-phi').value = v;
+        document.getElementById('footer-phi').value = v.toFixed(3);
+        document.getElementById('phi-display-side').textContent = v.toFixed(3);
+        document.getElementById('phiIndicator').textContent = `Φ = ${v.toFixed(3)}`;
+        updateAllParamDisplays();
+        calculate();
+    }
 
-    const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
+    function syncCoeff() {
+        const v = parseFloat(document.getElementById('coeffSlider').value) || 8.0;
+        currentCoeff = v;
+        document.getElementById('coeffTag').textContent = v.toFixed(1) + 'π';
+        document.getElementById('side-input-coeff').value = v;
+        document.getElementById('side-range-coeff').value = v;
+        document.getElementById('footer-coeff').value = (v * PI).toFixed(2);
+        updateAllParamDisplays();
+        calculate();
+    }
 
-    // ---- 切换模式 ----
+    function syncDenom() {
+        const v = parseFloat(document.getElementById('denomSlider').value) || 100.0;
+        currentDenomFactor = v;
+        document.getElementById('denomTag').textContent = v.toFixed(0) + 'π²';
+        document.getElementById('side-input-denom').value = v;
+        document.getElementById('side-range-denom').value = v;
+        document.getElementById('footer-denom').value = (v * PI * PI).toFixed(2);
+        updateAllParamDisplays();
+        calculate();
+    }
+
+    function syncFromPhiInput() {
+        const v = parseFloat(document.getElementById('side-input-phi').value) || DEFAULT_PHI;
+        const clamped = Math.max(1.0, Math.min(2.2, v));
+        currentPhi = clamped;
+        document.getElementById('phiSlider').value = clamped;
+        document.getElementById('side-range-phi').value = clamped;
+        document.getElementById('phiTag').textContent = clamped.toFixed(4);
+        document.getElementById('footer-phi').value = clamped.toFixed(3);
+        document.getElementById('phi-display-side').textContent = clamped.toFixed(3);
+        document.getElementById('phiIndicator').textContent = `Φ = ${clamped.toFixed(3)}`;
+        updateAllParamDisplays();
+        calculate();
+    }
+
+    function syncFromPhiRange() {
+        const v = parseFloat(document.getElementById('side-range-phi').value) || DEFAULT_PHI;
+        currentPhi = v;
+        document.getElementById('phiSlider').value = v;
+        document.getElementById('side-input-phi').value = v.toFixed(3);
+        document.getElementById('phiTag').textContent = v.toFixed(4);
+        document.getElementById('footer-phi').value = v.toFixed(3);
+        document.getElementById('phi-display-side').textContent = v.toFixed(3);
+        document.getElementById('phiIndicator').textContent = `Φ = ${v.toFixed(3)}`;
+        updateAllParamDisplays();
+        calculate();
+    }
+
+    function syncFromFooter(type) {
+        if (type === 'phi') {
+            const v = parseFloat(document.getElementById('footer-phi').value) || DEFAULT_PHI;
+            const clamped = Math.max(1.0, Math.min(2.2, v));
+            currentPhi = clamped;
+            document.getElementById('phiSlider').value = clamped;
+            document.getElementById('side-input-phi').value = clamped.toFixed(3);
+            document.getElementById('side-range-phi').value = clamped;
+            document.getElementById('phiTag').textContent = clamped.toFixed(4);
+            document.getElementById('phi-display-side').textContent = clamped.toFixed(3);
+            document.getElementById('phiIndicator').textContent = `Φ = ${clamped.toFixed(3)}`;
+            updateAllParamDisplays();
+            calculate();
+        } else if (type === 'coeff') {
+            const rawVal = parseFloat(document.getElementById('footer-coeff').value) || (8.0 * PI);
+            currentCoeff = rawVal / PI;
+            document.getElementById('coeffSlider').value = currentCoeff;
+            document.getElementById('side-input-coeff').value = currentCoeff.toFixed(1);
+            document.getElementById('side-range-coeff').value = currentCoeff;
+            document.getElementById('coeffTag').textContent = currentCoeff.toFixed(1) + 'π';
+            updateAllParamDisplays(false);
+            calculate();
+        } else if (type === 'denom') {
+            const rawVal = parseFloat(document.getElementById('footer-denom').value) || (100.0 * PI * PI);
+            currentDenomFactor = rawVal / (PI * PI);
+            document.getElementById('denomSlider').value = currentDenomFactor;
+            document.getElementById('side-input-denom').value = currentDenomFactor.toFixed(0);
+            document.getElementById('side-range-denom').value = currentDenomFactor;
+            document.getElementById('denomTag').textContent = currentDenomFactor.toFixed(0) + 'π²';
+            updateAllParamDisplays(false);
+            calculate();
+        } else if (type === 'k') {
+            const v = parseFloat(document.getElementById('footer-k').value) || 2.0;
+            document.getElementById('input-tsc').value = Math.max(0.1, v);
+            calculate();
+        } else if (type === 'k0') {
+            const v = parseFloat(document.getElementById('footer-k0').value) || 2.1;
+            document.getElementById('input-k0').value = Math.max(0.1, v);
+            calculate();
+        }
+    }
+
+    function syncFromTop() {
+        const x = parseFloat(document.getElementById('input-x').value) || 0;
+        const y = parseFloat(document.getElementById('input-y').value) || 0;
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
+        const k0 = parseFloat(document.getElementById('input-k0').value) || 2.1;
+        document.getElementById('footer-k').value = k;
+        document.getElementById('footer-k0').value = k0;
+        document.getElementById('side-input-x').value = x;
+        document.getElementById('side-range-x').value = Math.min(5000, Math.max(0, x));
+        document.getElementById('side-input-y').value = y;
+        document.getElementById('side-range-y').value = Math.min(2000, Math.max(0, y));
+        calculate();
+    }
+
+    function syncFromSide(type) {
+        if (type === 'x') {
+            const v = parseFloat(document.getElementById('side-input-x').value) || 0;
+            document.getElementById('input-x').value = v;
+            document.getElementById('side-range-x').value = Math.min(5000, Math.max(0, v));
+        } else {
+            const v = parseFloat(document.getElementById('side-input-y').value) || 0;
+            document.getElementById('input-y').value = v;
+            document.getElementById('side-range-y').value = Math.min(2000, Math.max(0, v));
+        }
+        calculate();
+    }
+
+    function syncFromRange(type) {
+        if (type === 'x') {
+            const v = parseFloat(document.getElementById('side-range-x').value) || 0;
+            document.getElementById('input-x').value = v;
+            document.getElementById('side-input-x').value = v;
+        } else {
+            const v = parseFloat(document.getElementById('side-range-y').value) || 0;
+            document.getElementById('input-y').value = v;
+            document.getElementById('side-input-y').value = v;
+        }
+        calculate();
+    }
+
+    function syncFromParamInput(type) {
+        if (type === 'coeff') {
+            const v = parseFloat(document.getElementById('side-input-coeff').value) || 8.0;
+            currentCoeff = Math.max(4, Math.min(14, v));
+            document.getElementById('coeffSlider').value = currentCoeff;
+            document.getElementById('side-range-coeff').value = currentCoeff;
+            document.getElementById('coeffTag').textContent = currentCoeff.toFixed(1) + 'π';
+            document.getElementById('footer-coeff').value = (currentCoeff * PI).toFixed(2);
+        } else {
+            const v = parseFloat(document.getElementById('side-input-denom').value) || 100.0;
+            currentDenomFactor = Math.max(30, Math.min(250, v));
+            document.getElementById('denomSlider').value = currentDenomFactor;
+            document.getElementById('side-range-denom').value = currentDenomFactor;
+            document.getElementById('denomTag').textContent = currentDenomFactor.toFixed(0) + 'π²';
+            document.getElementById('footer-denom').value = (currentDenomFactor * PI * PI).toFixed(2);
+        }
+        updateAllParamDisplays();
+        calculate();
+    }
+
+    function syncFromParamRange(type) {
+        if (type === 'coeff') {
+            const v = parseFloat(document.getElementById('side-range-coeff').value) || 8.0;
+            currentCoeff = v;
+            document.getElementById('coeffSlider').value = v;
+            document.getElementById('side-input-coeff').value = v.toFixed(1);
+            document.getElementById('coeffTag').textContent = v.toFixed(1) + 'π';
+            document.getElementById('footer-coeff').value = (v * PI).toFixed(2);
+        } else {
+            const v = parseFloat(document.getElementById('side-range-denom').value) || 100.0;
+            currentDenomFactor = v;
+            document.getElementById('denomSlider').value = v;
+            document.getElementById('side-input-denom').value = v.toFixed(0);
+            document.getElementById('denomTag').textContent = v.toFixed(0) + 'π²';
+            document.getElementById('footer-denom').value = (v * PI * PI).toFixed(2);
+        }
+        updateAllParamDisplays();
+        calculate();
+    }
+
+    function updateAllParamDisplays(updateFooter = true) {
+        const cReal = currentCoeff * PI;
+        const dReal = currentDenomFactor * PI * PI;
+        document.getElementById('txt-coeff-label').textContent = `外部系数: ${currentCoeff.toFixed(1)}π`;
+        document.getElementById('txt-denom-label').textContent = `内部底数: ${currentDenomFactor.toFixed(0)}π²`;
+        if (updateFooter) {
+            document.getElementById('footer-coeff').value = cReal.toFixed(2);
+            document.getElementById('footer-denom').value = dReal.toFixed(2);
+        }
+        const exprElem = document.getElementById('fExpr');
+        exprElem.innerHTML = `N<sub>cun</sub> = ${currentCoeff.toFixed(1)}π · arctan( Φ · S<sub>cun</sub> / ${currentDenomFactor.toFixed(0)}π² )`;
+    }
+
+    // ---- 模式切换 ----
     function setMode(mode) {
         currentMode = mode;
         const isStd = mode === 'standard';
@@ -576,26 +1120,14 @@
         badge.textContent = isStd ? '普通模式' : '跟枪模式';
         badge.className = 'mode-badge' + (isStd ? '' : ' track');
         document.getElementById('fTitle').textContent = isStd ? '角极收束法' : '角极收束法 · 跟枪';
-        
-        // 顶部公式卡片严格只显示纯粹的 N_cun 核心收束公式
-        const exprElem = document.getElementById('fExpr');
-        exprElem.className = 'f-expr' + (isStd ? '' : ' track');
-        exprElem.innerHTML = 'N<sub>cun</sub> = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )';
-            
+        updateAllParamDisplays();
         document.getElementById('formulaCard').className = 'formula-card' + (isStd ? '' : ' track');
-        
         document.getElementById('footerDesc').innerHTML = isStd
             ? '<strong>普通模式</strong>：S<sub>cun</sub> = x<sub>c</sub> + y<sub>c</sub> ｜ N<sub>final</sub> = N<sub>cun</sub> ｜ 均衡 = N<sub>final</sub> · k'
             : '<strong>跟枪模式</strong>：S<sub>cun</sub> = Φ²·(x<sub>c</sub>+y<sub>c</sub>-√(x<sub>c</sub>y<sub>c</sub>)) ｜ N<sub>final</sub> = N<sub>cun</sub>·(k₀/k)<sup>0.382</sup> ｜ 最大值 = N<sub>final</sub> · k';
-            
-        document.getElementById('ratioExplain').textContent = isStd
-            ? '最大值 = 4/3 × 均衡 ｜ 最小值 = 2/3 × 均衡'
-            : '基准得数 = 最大值 ｜ 最小值 = 最大值 ÷ 2 ｜ 中间由四分法均匀插值';
-            
         calculate();
     }
 
-    // ---- 跟枪快捷切换 ----
     function applyTracking() {
         const x = parseFloat(document.getElementById('input-x').value) || 0;
         const y = parseFloat(document.getElementById('input-y').value) || 0;
@@ -605,7 +1137,7 @@
         resetCorrection();
     }
 
-    // ---- 修正系数处理 ----
+    // ---- 修正系数 ----
     function onSliderInput() {
         const v = parseFloat(document.getElementById('correct-slider').value) || 0;
         document.getElementById('input-correct').value = v.toFixed(2);
@@ -667,9 +1199,12 @@
     function calculate() {
         const x = parseFloat(document.getElementById('input-x').value) || 0;
         const y = parseFloat(document.getElementById('input-y').value) || 0;
-        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2.0;
         const k0 = parseFloat(document.getElementById('input-k0').value) || 2.1;
         syncUI();
+
+        const ratio = x > 0 ? (y / x) : 0;
+        document.getElementById('ratio-display').textContent = ratio.toFixed(3);
 
         if ((x <= 0 && y <= 0) || k <= 0) {
             ['base-half','base-q1','base-q2','base-q3','base-base'].forEach(id => document.getElementById(id).innerText = '--');
@@ -682,37 +1217,23 @@
         const isTrack = currentMode === 'tracking';
         const unitStr = isCun ? 'cun' : 'cm';
 
-        // ① 寸化
-        const x_c = x / k;
-        const y_c = y / k;
+        const result = computeFullOutput(x, y, k, k0, currentMode, currentCoeff, currentDenomFactor, currentPhi);
+        const baseVal = isCun ? result.N_final : result.N_cm;
 
-        // ② 预处理
-        const S_cun = calcS_cun(x_c, y_c, currentMode);
+        const stdResult = computeFullOutput(x, y, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
+        const std_bal_cm = stdResult.N_cm;
+        const std_max_cm = std_bal_cm * (4 / 3);
 
-        // ③ 唯一核心收束 (结果寸)
-        const N_cun = calcN_cun(S_cun);
+        const trkResult = computeFullOutput(x, y, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
+        const trk_max_cm = trkResult.N_cm;
+        const trk_bal_cm = trk_max_cm * 0.75;
 
-        // ④ 结果寸校准 (后处理)
-        const N_final = calcN_final(N_cun, currentMode, k, k0);
+        document.getElementById('lbl-t-max').textContent = trk_max_cm.toFixed(2) + ' cm';
+        document.getElementById('lbl-t-bal').textContent = trk_bal_cm.toFixed(2) + ' cm';
+        document.getElementById('lbl-s-max').textContent = std_max_cm.toFixed(2) + ' cm';
+        document.getElementById('lbl-s-bal').textContent = std_bal_cm.toFixed(2) + ' cm';
 
-        // ⑤ 最终单位还原
-        const N_cm = N_final * k;
-
-        // ---- 基准值与五档 ----
-        let baseVal;
-        let activeRatios;
-        let baseLabel;
-
-        if (isTrack) {
-            baseVal = isCun ? N_final : N_cm;
-            activeRatios = RATIOS_TRACK;
-            baseLabel = '最大值';
-        } else {
-            baseVal = isCun ? N_final : N_cm;
-            activeRatios = RATIOS_STD;
-            baseLabel = '均衡';
-        }
-
+        const activeRatios = isTrack ? RATIOS_TRACK : RATIOS_STD;
         const baseVals = {};
         for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
             baseVals[key] = baseVal * activeRatios[key];
@@ -724,16 +1245,14 @@
         document.getElementById('base-q3').innerText = baseVals.q3.toFixed(2);
         document.getElementById('base-base').innerText = baseVals.base.toFixed(2);
 
-        // 修正后五档
         const corrPct = parseFloat(document.getElementById('input-correct').value) || 0;
         const factor = 1 + corrPct / 100;
         const anchorBase = baseVals[currentAnchor];
-        const anchorNew = anchorBase * factor;
         const anchorRatio = activeRatios[currentAnchor];
 
         const corrVals = {};
         for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
-            corrVals[key] = anchorNew * (activeRatios[key] / anchorRatio);
+            corrVals[key] = anchorBase * factor * (activeRatios[key] / anchorRatio);
         }
 
         document.getElementById('corr-half').innerText = corrVals.half.toFixed(2);
@@ -742,36 +1261,35 @@
         document.getElementById('corr-q3').innerText = corrVals.q3.toFixed(2);
         document.getElementById('corr-base').innerText = corrVals.base.toFixed(2);
 
-        document.getElementById('ratioInfo').textContent =
-            `${baseLabel} = ${baseVal.toFixed(2)} ${unitStr} ｜ ` +
-            `最大值 = ${baseVals.base.toFixed(2)} ｜ 最小值 = ${baseVals.half.toFixed(2)}`;
-
-        // ---- 计算推导过程展示 ----
-        const inner = (PHI * S_cun) / DENOM;
+        // 推导步骤展示
+        const denom = currentDenomFactor * PI * PI;
+        const inner = (currentPhi * result.S_cun) / denom;
         const stepClass = isTrack ? 'purple' : '';
         const stepResultClass = isTrack ? 'purple' : '';
         let stepsHtml = '';
 
+        const x_c = x / k, y_c = y / k;
+
         if (isTrack) {
+            const phi2 = currentPhi * currentPhi;
             stepsHtml = `
                 <div class="step-line"><span class="step-num ${stepClass}">1</span><span class="step-label">寸化计算</span><span class="step-formula">x_c = ${x_c.toFixed(1)}, y_c = ${y_c.toFixed(1)}</span></div>
-                <div class="step-line"><span class="step-num ${stepClass}">2</span><span class="step-label">肌肉协同模</span><span class="step-formula">S_cun = Φ²·(${x_c.toFixed(1)} + ${y_c.toFixed(1)} - √(${x_c.toFixed(1)}×${y_c.toFixed(1)}))</span><span>=</span><span class="step-result ${stepResultClass}">${S_cun.toFixed(3)} cun</span></div>
-                <div class="step-line"><span class="step-num ${stepClass}">3</span><span class="step-label">核心收束</span><span class="step-formula">N_cun = 8π·atan(Φ·${S_cun.toFixed(1)} / 100π²)</span><span>=</span><span class="step-result ${stepResultClass}">${N_cun.toFixed(3)} cun</span></div>
-                <div class="step-line"><span class="step-num ${stepClass}">4</span><span class="step-label">结果寸校准</span><span class="step-formula">N_final = ${N_cun.toFixed(3)} × (${k0}/${k})<sup>0.382</sup></span><span>=</span><span class="step-result ${stepResultClass}">${N_final.toFixed(3)} cun</span></div>
-                <div class="step-line"><span class="step-num ${stepClass}">5</span><span class="step-label">单位还原</span><span class="step-formula">${N_final.toFixed(3)} × ${k}</span><span>=</span><span class="step-result ${stepResultClass}">${N_cm.toFixed(2)} cm</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">2</span><span class="step-label">肌肉协同模</span><span class="step-formula">S_cun = ${phi2.toFixed(3)}·(${x_c.toFixed(1)} + ${y_c.toFixed(1)} - √(${x_c.toFixed(1)}×${y_c.toFixed(1)}))</span><span>=</span><span class="step-result ${stepResultClass}">${result.S_cun.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">3</span><span class="step-label">核心收束</span><span class="step-formula">N_cun = ${currentCoeff.toFixed(1)}π·atan(${currentPhi.toFixed(3)}·${result.S_cun.toFixed(1)} / ${currentDenomFactor.toFixed(0)}π²)</span><span>=</span><span class="step-result ${stepResultClass}">${result.N_cun.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">4</span><span class="step-label">结果寸校准</span><span class="step-formula">N_final = ${result.N_cun.toFixed(4)} × (${k0}/${k})<sup>${(1-1/currentPhi).toFixed(3)}</sup></span><span>=</span><span class="step-result ${stepResultClass}">${result.N_final.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">5</span><span class="step-label">单位还原</span><span class="step-formula">${result.N_final.toFixed(4)} × ${k}</span><span>=</span><span class="step-result ${stepResultClass}">${result.N_cm.toFixed(2)} cm</span></div>
                 <div class="step-line" style="color:var(--purple);font-weight:600;border-top:1px dashed rgba(0,0,0,0.05);margin-top:4px;padding-top:4px;">
                     <span>🎯 基准最大值 = ${baseVal.toFixed(2)} ${unitStr}</span>
-                    <span style="color:#94a3b8;font-weight:400;font-size:0.75rem;">(最小值 = 最大值 ÷ 2, 中间由四分法均匀插值)</span>
+                    <span style="color:#94a3b8;font-weight:400;font-size:0.75rem;">(最小值 = 最大值 ÷ 2, 均衡 = 最大值 × 0.75)</span>
                 </div>
             `;
         } else {
-            const S = x + y;
             stepsHtml = `
-                <div class="step-line"><span class="step-num">1</span><span class="step-label">寸化计算</span><span class="step-formula">S_cun = (${x.toFixed(1)} + ${y.toFixed(1)}) ÷ ${k}</span><span>=</span><span class="step-result">${S_cun.toFixed(3)} cun</span></div>
-                <div class="step-line"><span class="step-num">2</span><span class="step-label">极角计算</span><span class="step-formula">Φ·S_cun / 100π² = ${inner.toFixed(4)} rad</span></div>
-                <div class="step-line"><span class="step-num">3</span><span class="step-label">核心收束</span><span class="step-formula">N_cun = 8π·atan(${inner.toFixed(4)})</span><span>=</span><span class="step-result">${N_cun.toFixed(3)} cun</span></div>
-                <div class="step-line"><span class="step-num">4</span><span class="step-label">结果寸校准</span><span class="step-formula">N_final = N_cun</span><span>=</span><span class="step-result">${N_final.toFixed(3)} cun</span></div>
-                <div class="step-line"><span class="step-num">5</span><span class="step-label">单位还原</span><span class="step-formula">${N_final.toFixed(3)} × ${k}</span><span>=</span><span class="step-result">${N_cm.toFixed(2)} cm</span></div>
+                <div class="step-line"><span class="step-num">1</span><span class="step-label">寸化计算</span><span class="step-formula">S_cun = (${x.toFixed(1)} + ${y.toFixed(1)}) ÷ ${k}</span><span>=</span><span class="step-result">${result.S_cun.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num">2</span><span class="step-label">极角计算</span><span class="step-formula">${currentPhi.toFixed(3)}·S_cun / ${currentDenomFactor.toFixed(0)}π² = ${inner.toFixed(6)} rad</span></div>
+                <div class="step-line"><span class="step-num">3</span><span class="step-label">核心收束</span><span class="step-formula">N_cun = ${currentCoeff.toFixed(1)}π·atan(${inner.toFixed(6)})</span><span>=</span><span class="step-result">${result.N_cun.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num">4</span><span class="step-label">结果寸校准</span><span class="step-formula">N_final = N_cun</span><span>=</span><span class="step-result">${result.N_final.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num">5</span><span class="step-label">单位还原</span><span class="step-formula">${result.N_final.toFixed(4)} × ${k}</span><span>=</span><span class="step-result">${result.N_cm.toFixed(2)} cm</span></div>
                 <div class="step-line" style="color:var(--purple);font-weight:600;border-top:1px dashed rgba(0,0,0,0.05);margin-top:4px;padding-top:4px;">
                     <span>🎯 基准均衡值 = ${baseVal.toFixed(2)} ${unitStr}</span>
                     <span style="color:#94a3b8;font-weight:400;font-size:0.75rem;">(最大值 = 4/3 × 均衡, 最小值 = 2/3 × 均衡)</span>
@@ -779,14 +1297,174 @@
             `;
         }
         document.getElementById('stepsNatural').innerHTML = stepsHtml;
+
+        drawChart(x, y, k, k0, trk_max_cm, trk_bal_cm, std_max_cm, std_bal_cm);
+    }
+
+    // ---- 绘制图表与吸附点 ----
+    function drawChart(x_in, y_in, k, k0, t_max, t_bal, s_max, s_bal) {
+        const canvas = document.getElementById('compCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const w = rect.width;
+        const h = rect.height;
+        const pad = { top: 20, right: 20, bottom: 25, left: 35 };
+
+        ctx.clearRect(0, 0, w, h);
+
+        const maxX = 7000;
+        const maxY = Math.max(90, Math.max(t_max, s_max) * 1.15);
+
+        function toPx(x, y) {
+            return {
+                px: pad.left + (x / maxX) * (w - pad.left - pad.right),
+                py: h - pad.bottom - (y / maxY) * (h - pad.top - pad.bottom)
+            };
+        }
+
+        // 网格
+        ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+        ctx.lineWidth = 1;
+        for (let yVal = 20; yVal <= maxY; yVal += 20) {
+            const p = toPx(0, yVal);
+            ctx.beginPath(); ctx.moveTo(pad.left, p.py); ctx.lineTo(w - pad.right, p.py); ctx.stroke();
+            ctx.fillStyle = '#94a3b8'; ctx.font = '9px monospace'; ctx.textAlign = 'right';
+            ctx.fillText(yVal, pad.left - 4, p.py + 3);
+        }
+        for (let xVal = 1000; xVal <= maxX; xVal += 1000) {
+            const p = toPx(xVal, 0);
+            ctx.beginPath(); ctx.moveTo(p.px, pad.top); ctx.lineTo(p.px, h - pad.bottom); ctx.stroke();
+            ctx.fillStyle = '#94a3b8'; ctx.font = '9px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(xVal, p.px, h - pad.bottom + 14);
+        }
+
+        // 核心修复：纯 Y 输入保底
+        const y_ratio = (x_in > 0) ? (y_in / x_in) : 0;
+
+        // 1. 普通算法曲线 (蓝色)
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        let first = true;
+        for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
+            const curr_y = (x_in > 0) ? (x_plot * y_ratio) : y_in;
+            const r = computeFullOutput(x_plot, curr_y, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
+            const p = toPx(x_plot, r.N_cm);
+            if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#1e3a8a';
+        ctx.lineWidth = 2.2;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        first = true;
+        for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
+            const curr_y = (x_in > 0) ? (x_plot * y_ratio) : y_in;
+            const r = computeFullOutput(x_plot, curr_y, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
+            const p = toPx(x_plot, r.N_cm * (4 / 3));
+            if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+        }
+        ctx.stroke();
+
+        // 2. 跟枪算法曲线 (紫色)
+        ctx.strokeStyle = '#a855f7';
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath();
+        first = true;
+        for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
+            const curr_y = (x_in > 0) ? (x_plot * y_ratio) : y_in;
+            const r = computeFullOutput(x_plot, curr_y, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
+            const p = toPx(x_plot, r.N_cm * 0.75);
+            if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#7c3aed';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        first = true;
+        for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
+            const curr_y = (x_in > 0) ? (x_plot * y_ratio) : y_in;
+            const r = computeFullOutput(x_plot, curr_y, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
+            const p = toPx(x_plot, r.N_cm);
+            if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+        }
+        ctx.stroke();
+
+        // 3. 当前模式吸附点
+        if (currentMode === 'tracking') {
+            const p_max = toPx(x_in, t_max);
+            const p_bal = toPx(x_in, t_bal);
+            ctx.fillStyle = '#7c3aed';
+            ctx.beginPath(); ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI); ctx.fill();
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 5, 0, 2 * PI); ctx.fill();
+            ctx.fillStyle = '#7c3aed';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`最大 ${t_max.toFixed(1)}`, p_max.px + 8, p_max.py - 2);
+            ctx.fillStyle = '#a855f7';
+            ctx.fillText(`均衡 ${t_bal.toFixed(1)}`, p_bal.px + 8, p_bal.py - 2);
+        } else {
+            const p_max = toPx(x_in, s_max);
+            const p_bal = toPx(x_in, s_bal);
+            ctx.fillStyle = '#1e3a8a';
+            ctx.beginPath(); ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI); ctx.fill();
+            ctx.fillStyle = '#3b82f6';
+            ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 5, 0, 2 * PI); ctx.fill();
+            ctx.fillStyle = '#1e3a8a';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`最大 ${s_max.toFixed(1)}`, p_max.px + 8, p_max.py - 2);
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillText(`均衡 ${s_bal.toFixed(1)}`, p_bal.px + 8, p_bal.py - 2);
+        }
+
+        // 垂直定位线
+        const p_v = toPx(x_in, 0);
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+        ctx.setLineDash([2, 3]);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(p_v.px, pad.top);
+        ctx.lineTo(p_v.px, h - pad.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#64748b';
+        ctx.font = '8px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`X=${x_in}`, p_v.px, h - pad.bottom + 22);
+        
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '8px monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(`y/x=${(y_in/(x_in||1)).toFixed(3)}`, w - pad.right, pad.top + 12);
+        ctx.fillText(`Φ=${currentPhi.toFixed(3)}`, w - pad.right, pad.top + 24);
     }
 
     // ---- 初始化 ----
     document.querySelector('#correctedRow .col-item[data-key="q2"]')?.classList.add('anchor');
     document.getElementById('anchorDisplay').textContent = '均衡';
     document.getElementById('anchorName').textContent = '均衡';
-    syncUI();
-    calculate();
+    document.getElementById('phiIndicator').textContent = `Φ = ${DEFAULT_PHI.toFixed(3)}`;
+    document.getElementById('phi-display-side').textContent = DEFAULT_PHI.toFixed(3);
+    document.getElementById('footer-phi').value = DEFAULT_PHI.toFixed(3);
+    document.getElementById('footer-k').value = '2.0';
+    document.getElementById('footer-k0').value = '2.1';
+    updateAllParamDisplays();
+    syncFromTop();
+    window.addEventListener('resize', calculate);
 </script>
 </body>
 </html>
