@@ -155,8 +155,6 @@
             font-weight: 700;
         }
 
-        .knob-row { display: none; }
-
         .correction {
             background: rgba(76,29,149,0.05);
             border: 1.5px solid var(--purple);
@@ -244,18 +242,18 @@
         .toggle-btn {
             border: none;
             background: transparent;
-            padding: 2px 12px;
+            padding: 2px 10px;
             font-size: 0.7rem;
             font-weight: 700;
             border-radius: 3px;
             cursor: pointer;
             color: #64748b;
             transition: 0.15s;
-            min-width: 44px;
             text-align: center;
         }
         .toggle-btn.active { background: var(--gold); color: #fff; }
         .toggle-btn.purple.active { background: var(--purple); color: #fff; }
+        .toggle-btn.algo-btn.active { background: #78350f; color: #fff; }
 
         .mode-badge {
             font-size: 0.65rem;
@@ -268,6 +266,7 @@
         }
         .mode-badge.track { background: rgba(76,29,149,0.15); color: var(--purple); }
 
+        /* ===== 五档顺序：[最小值] [偏快] [均衡] [偏慢] [最大值] ===== */
         .five-col {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
@@ -334,7 +333,7 @@
         }
         .interactive-chart-grid {
             display: grid;
-            grid-template-columns: 260px 1fr;
+            grid-template-columns: 220px 1fr;
             gap: 12px;
             align-items: center;
         }
@@ -362,8 +361,6 @@
             font-weight: bold;
             color: var(--blue);
         }
-        .ctrl-head.purple { color: var(--purple); }
-        .ctrl-head.gold { color: var(--gold); }
         .ctrl-input-num {
             width: 76px;
             padding: 2px 4px;
@@ -376,16 +373,12 @@
             background: #fff;
             color: var(--blue);
         }
-        .ctrl-input-num.purple { border-color: rgba(76,29,149,0.3); color: var(--purple); }
-        .ctrl-input-num.gold { border-color: rgba(184,134,11,0.4); color: var(--gold); }
         .ctrl-range {
             width: 100%;
             cursor: pointer;
             accent-color: var(--blue);
             margin-top: 2px;
         }
-        .ctrl-range.purple { accent-color: var(--purple); }
-        .ctrl-range.gold { accent-color: var(--gold); }
 
         .canvas-container {
             background: #ffffff;
@@ -459,6 +452,7 @@
         .step-result { font-weight: bold; color: var(--gold); }
         .step-result.purple { color: var(--purple); }
 
+        /* ===== 页脚 ===== */
         .footer {
             display: flex;
             justify-content: space-between;
@@ -477,38 +471,6 @@
             gap: 2px;
         }
         .footer-left .desc { font-size: 0.75rem; }
-        .footer-left .params {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            font-size: 0.7rem;
-            background: rgba(255,255,255,0.5);
-            padding: 4px 10px;
-            border-radius: 4px;
-            border: 1px solid rgba(0,0,0,0.06);
-        }
-        .footer-left .params label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-weight: 600;
-        }
-        .footer-left .params input {
-            width: 60px;
-            padding: 2px 4px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            text-align: center;
-            border: 1px solid rgba(30,58,138,0.2);
-            border-radius: 3px;
-            background: #fff;
-            color: var(--blue);
-            outline: none;
-        }
-        .footer-left .params input:focus { border-color: var(--purple); }
-        .footer-left .params input.gold-input { color: var(--gold); border-color: rgba(184,134,11,0.3); }
-        .footer-left .params input.gold-input:focus { border-color: var(--gold); }
         .footer-right {
             display: flex;
             align-items: center;
@@ -519,11 +481,6 @@
             font-weight: bold;
             color: var(--blue);
             font-size: 0.85rem;
-        }
-        .footer-right .version {
-            font-size: 0.6rem;
-            color: #94a3b8;
-            font-family: monospace;
         }
         .correction-badge {
             background: var(--purple);
@@ -544,13 +501,13 @@
             margin-left: 4px;
         }
         sup, sub { font-size: 0.7em; }
-        .phi-indicator {
-            font-size: 0.55rem;
-            color: var(--gold);
-            font-weight: 700;
-            background: rgba(184,134,11,0.1);
-            padding: 0 6px;
-            border-radius: 3px;
+        .algo-param-hint {
+            font-size: 0.6rem;
+            color: #64748b;
+            background: rgba(0,0,0,0.04);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Times New Roman', serif;
         }
     </style>
 </head>
@@ -558,10 +515,10 @@
 <div class="card">
 
     <div class="header">
-        <span class="date">2026.8.22 20:20</span>
-        <span>同身寸 · 收束法</span>
+        <span class="date">2026.8.23 8.29</span>
+        <span>同身寸 · 表达法</span>
         <span class="badge">xlm</span>
-        <a href="https://xidaohai.github.io/tsc.png" class="k-link">说明</a>
+        <a href="#" class="k-link">说明</a>
     </div>
 
     <!-- ===== 顶部输入面板 + 跟枪独立模块 ===== -->
@@ -569,18 +526,18 @@
         <div class="input-panel">
             <div class="input-group">
                 <label>x (目标大小测量):</label>
-                <input type="number" id="input-x" value="1470" step="any" oninput="syncFromTop()">
+                <input type="number" id="input-x" value="4000" step="any" oninput="syncFromTop()">
             </div>
             <div class="input-group">
                 <label>y (常用拉枪距离):</label>
-                <input type="number" id="input-y" value="0" step="any" oninput="syncFromTop()">
+                <input type="number" id="input-y" value="200" step="any" oninput="syncFromTop()">
             </div>
             <div class="input-group">
-                <label>k (个人实测寸):</label>
-                <input type="number" id="input-tsc" value="2" step="0.1" oninput="syncFromTop()">
+                <label>k (你的1寸):</label>
+                <input type="number" id="input-tsc" value="2.05" step="0.1" oninput="syncFromTop()">
             </div>
             <div class="input-group">
-                <label>k₀ (群体基准寸):</label>
+                <label>k₀ (群体1寸):</label>
                 <input type="number" id="input-k0" value="2.1" step="0.1" oninput="syncFromTop()">
                 <span class="sub-note">默认 2.1 (一般请勿改动)</span>
             </div>
@@ -590,15 +547,13 @@
             <div>
                 <div class="title">【跟枪】、高敏算法</div>
                 <div class="expr">S<sub>cun</sub> = Φ² · (x<sub>c</sub> + y<sub>c</sub> - √(x<sub>c</sub>y<sub>c</sub>))</div>
-                <div class="sub">N<sub>cun</sub> = 8π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
+                <div class="sub" id="trackCoreDesc">N<sub>cun</sub> = 8π · arctan( √(π + 1/5) · S / 123π² )</div>
                 <div class="sub" style="color:var(--purple);font-weight:600;">N<sub>final</sub> = N<sub>cun</sub> · (k₀/k)<sup>0.382</sup></div>
                 <div class="tag">得数 = 基准最大值 ｜ 均衡 = 75% ｜ 最小值 = 50%</div>
             </div>
             <button class="calc-btn" onclick="applyTracking()">进行计算</button>
         </div>
     </div>
-
-    <!-- ===== 旋钮行：已移除 ===== -->
 
     <!-- ===== 个人修正系数 ===== -->
     <div class="correction">
@@ -624,15 +579,25 @@
                 <div class="f-title">
                     <span id="fTitle">角极收束法</span>
                     <span class="mode-badge" id="modeBadge">普通模式</span>
-                    <span class="phi-indicator" id="phiIndicator">Φ = 1.618</span>
+                    <span class="mode-badge" style="background:#78350f;color:#fff;" id="algoBadge">实际算法</span>
                 </div>
-                <div class="f-expr" id="fExpr">N<sub>cun</sub> = 8.0π · arctan( Φ · S<sub>cun</sub> / 100π² )</div>
+                <div class="f-expr" id="fExpr">N<sub>cun</sub> = 8.0π · arctan( √(π + 1/5) · S<sub>cun</sub> / 123π² )</div>
+                <div style="font-size:0.6rem;color:#94a3b8;margin-top:2px;font-family:'Times New Roman',serif;">
+                    外部系数: 8.0π &nbsp;|&nbsp; 黄金比例: 1.618
+                </div>
             </div>
             <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                <!-- 实际算法 vs 理论算法 切换 -->
+                <div class="toggle-group">
+                    <button class="toggle-btn algo-btn active" id="btn-algo-prac" onclick="setAlgo('practical')">实际算法</button>
+                    <button class="toggle-btn algo-btn" id="btn-algo-theo" onclick="setAlgo('theoretical')">理论算法</button>
+                </div>
+                <!-- 普通 vs 跟枪 切换 -->
                 <div class="toggle-group">
                     <button class="toggle-btn active" id="btn-mode-std" onclick="setMode('standard')">普通</button>
                     <button class="toggle-btn purple" id="btn-mode-track" onclick="setMode('tracking')">跟枪</button>
                 </div>
+                <!-- cm vs cun 切换 -->
                 <div class="toggle-group">
                     <button class="toggle-btn active" id="btn-cm" onclick="setUnit('cm')">cm</button>
                     <button class="toggle-btn" id="btn-cun" onclick="setUnit('cun')">cun</button>
@@ -690,36 +655,14 @@
                         <input type="range" class="ctrl-range" id="side-range-y" min="0" max="2000" step="10" value="0" oninput="syncFromRange('y')">
                     </div>
 
-                    <!-- Φ 控制（侧边栏） -->
                     <div class="ctrl-row" style="border-top:1px dashed rgba(0,0,0,0.06);padding-top:6px;">
-                        <div class="ctrl-head gold">
-                            <span>Φ (黄金比例)</span>
-                            <input type="number" class="ctrl-input-num gold" id="side-input-phi" value="1.618" step="0.01" min="1.0" max="2.2" oninput="syncFromPhiInput()">
+                        <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:#64748b;">
+                            <span>当前算法: <strong id="algo-name-display" style="color:#78350f;">实际算法</strong></span>
+                            <span>y/x 比例: <strong id="ratio-display" style="color:var(--purple);">0.00</strong></span>
                         </div>
-                        <input type="range" class="ctrl-range gold" id="side-range-phi" min="1.0" max="2.2" step="0.001" value="1.618" oninput="syncFromPhiRange()">
                     </div>
-
-                    <div class="ctrl-row">
-                        <div class="ctrl-head purple">
-                            <span id="txt-coeff-label">外部系数: 8.0π</span>
-                            <input type="number" class="ctrl-input-num purple" id="side-input-coeff" value="8" step="0.2" min="4" max="14" oninput="syncFromParamInput('coeff')">
-                        </div>
-                        <input type="range" class="ctrl-range purple" id="side-range-coeff" min="4" max="14" step="0.2" value="8" oninput="syncFromParamRange('coeff')">
-                    </div>
-
-                    <div class="ctrl-row">
-                        <div class="ctrl-head purple">
-                            <span id="txt-denom-label">内部底数: 100π²</span>
-                            <input type="number" class="ctrl-input-num purple" id="side-input-denom" value="100" step="5" min="30" max="250" oninput="syncFromParamInput('denom')">
-                        </div>
-                        <input type="range" class="ctrl-range purple" id="side-range-denom" min="30" max="250" step="5" value="100" oninput="syncFromParamRange('denom')">
-                    </div>
-                    
-                    <div class="ctrl-row" style="border-top:1px dashed rgba(0,0,0,0.06);padding-top:4px;margin-top:2px;">
-                        <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:#64748b;">
-                            <span>当前 y/x 比例: <strong id="ratio-display" style="color:var(--purple);">0.00</strong></span>
-                            <span>Φ = <strong id="phi-display-side" style="color:var(--gold);">1.618</strong></span>
-                        </div>
+                    <div style="font-size:0.55rem;color:#94a3b8;text-align:center;border-top:1px dashed rgba(0,0,0,0.05);padding-top:4px;">
+                        ⚙ 外部系数固定 8.0π · 黄金比例固定 1.618
                     </div>
                 </div>
 
@@ -759,14 +702,8 @@
     <div class="footer">
         <div class="footer-left">
             <div class="desc" id="footerDesc"><strong>S = x + y</strong> | <strong>S<sub>cun</sub> = S / k</strong></div>
-            <div class="params">
-                <label>Φ: <input type="number" class="gold-input" id="footer-phi" value="1.618" step="0.001" min="1.0" max="2.2" oninput="syncFromFooter('phi')"></label>
-                <label>外部: <input type="number" id="footer-coeff" value="25.13" step="0.01" oninput="syncFromFooter('coeff')"></label>
-                <label>内部: <input type="number" id="footer-denom" value="986.96" step="0.1" oninput="syncFromFooter('denom')"></label>
-            </div>
         </div>
         <div class="footer-right">
-            <span class="version">v2</span>
             <span class="sig">作者：西岛海</span>
         </div>
     </div>
@@ -775,140 +712,143 @@
 
 <script>
     const PI = Math.PI;
-    const DEFAULT_PHI = (1 + Math.sqrt(5)) / 2;
+    const PHI = (1 + Math.sqrt(5)) / 2;
+    const PHI2 = PHI * PHI;
+    const DAMP_EXP = 1 - 1 / PHI;
+    const COEFF = 8.0;  // 固定外部系数
 
-    let currentMode = 'standard';
+    let currentMode = 'standard';     // 'standard' 或 'tracking'
+    let currentAlgo = 'practical';    // 'practical' (实际算法) 或 'theoretical' (理论算法)
     let currentUnit = 'cm';
     let currentAnchor = 'q2';
-    let currentCoeff = 8.0;
-    let currentDenomFactor = 100.0;
-    let currentPhi = DEFAULT_PHI;
 
     const RATIOS_STD = { half: 2/3, q1: 5/6, q2: 1, q3: 7/6, base: 4/3 };
     const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
     const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
 
+    // ---- 双算法常数解析 ----
+    function getAlgoParams(algo) {
+        if (algo === 'practical') {
+            // 实际算法: √(π + 1/5) · S / (123π²)
+            const mult = Math.sqrt(PI + 0.2);
+            const denom = 123 * PI * PI;
+            return {
+                name: '实际算法',
+                mult: mult,
+                denom: denom,
+                multExpr: '√(π + 1/5)',
+                denomExpr: '123π²',
+                fullExpr: 'N<sub>cun</sub> = 8.0π · arctan( √(π + 1/5) · S<sub>cun</sub> / 123π² )'
+            };
+        } else {
+            // 理论算法: √(π + 1/9) · S / (4/3 · π⁶)
+            const mult = Math.sqrt(PI + (1 / 9));
+            const denom = (4 / 3) * Math.pow(PI, 6);
+            return {
+                name: '理论算法',
+                mult: mult,
+                denom: denom,
+                multExpr: '√(π + 1/9)',
+                denomExpr: '(4/3 · π⁶)',
+                fullExpr: 'N<sub>cun</sub> = 8.0π · arctan( √(π + 1/9) · S<sub>cun</sub> / (4/3 · π⁶) )'
+            };
+        }
+    }
+
     // ---- 核心数学引擎 ----
-    function calcS_cun(x_c, y_c, mode, phi) {
-        const phi2 = phi * phi;
+    function calcS_cun(x_c, y_c, mode) {
         if (mode === 'standard') {
             return x_c + y_c;
         } else {
             const sqrtTerm = Math.sqrt(Math.max(0, x_c * y_c));
-            return phi2 * (x_c + y_c - sqrtTerm);
+            return PHI2 * (x_c + y_c - sqrtTerm);
         }
     }
 
-    function calcN_cun(S_cun, coeff, denomFactor, phi) {
-        const denom = denomFactor * PI * PI;
-        const inner = (phi * S_cun) / denom;
-        return coeff * PI * Math.atan(inner);
+    function calcN_cun(S_cun, algo) {
+        const p = getAlgoParams(algo);
+        const inner = (p.mult * S_cun) / p.denom;
+        return COEFF * PI * Math.atan(inner);
     }
 
-    function calcN_final(N_cun, mode, k, k0, phi) {
+    function calcN_final(N_cun, mode, k, k0) {
         if (mode === 'standard') {
             return N_cun;
         } else {
             const base_k0 = k0 > 0 ? k0 : 2.1;
-            const dampExp = 1 - 1 / phi;
-            const dampingFactor = Math.pow(base_k0 / k, dampExp);
+            const dampingFactor = Math.pow(base_k0 / k, DAMP_EXP);
             return N_cun * dampingFactor;
         }
     }
 
-    function computeFullOutput(x, y, k, k0, mode, coeff, denomFactor, phi) {
+    function computeFullOutput(x, y, k, k0, mode, algo) {
         const x_c = x / k;
         const y_c = y / k;
-        const S_cun = calcS_cun(x_c, y_c, mode, phi);
-        const N_cun = calcN_cun(S_cun, coeff, denomFactor, phi);
-        const N_final = calcN_final(N_cun, mode, k, k0, phi);
+        const S_cun = calcS_cun(x_c, y_c, mode);
+        const N_cun = calcN_cun(S_cun, algo);
+        const N_final = calcN_final(N_cun, mode, k, k0);
         return { S_cun, N_cun, N_final, N_cm: N_final * k };
     }
 
+    // ---- 算法切换 ----
+    function setAlgo(algo) {
+        currentAlgo = algo;
+        document.getElementById('btn-algo-prac').classList.toggle('active', algo === 'practical');
+        document.getElementById('btn-algo-theo').classList.toggle('active', algo === 'theoretical');
+        
+        const p = getAlgoParams(algo);
+        document.getElementById('algoBadge').textContent = p.name;
+        document.getElementById('algo-name-display').textContent = p.name;
+        document.getElementById('trackCoreDesc').innerHTML = `N<sub>cun</sub> = 8π · arctan( ${p.multExpr} · S / ${p.denomExpr} )`;
+        updateDisplays();
+        calculate();
+    }
+
+    // ---- 模式切换 ----
+    function setMode(mode) {
+        currentMode = mode;
+        const isStd = mode === 'standard';
+        document.getElementById('btn-mode-std').classList.toggle('active', isStd);
+        document.getElementById('btn-mode-track').classList.toggle('active', !isStd);
+        const badge = document.getElementById('modeBadge');
+        badge.textContent = isStd ? '普通模式' : '跟枪模式';
+        badge.className = 'mode-badge' + (isStd ? '' : ' track');
+        document.getElementById('fTitle').textContent = isStd ? '角极收束法' : '角极收束法 · 跟枪';
+        
+        document.getElementById('formulaCard').className = 'formula-card' + (isStd ? '' : ' track');
+        updateDisplays();
+        calculate();
+    }
+
+    function updateDisplays() {
+        const p = getAlgoParams(currentAlgo);
+        const exprElem = document.getElementById('fExpr');
+        exprElem.innerHTML = `N<sub>cun</sub> = ${COEFF.toFixed(1)}π · arctan( ${p.multExpr} · S<sub>cun</sub> / ${p.denomExpr} )`;
+        
+        document.getElementById('footerDesc').innerHTML = (currentMode === 'standard')
+            ? `<strong>普通模式 (${p.name})</strong>：S<sub>cun</sub> = x<sub>c</sub> + y<sub>c</sub> ｜ N<sub>final</sub> = N<sub>cun</sub> ｜ 均衡 = N<sub>final</sub> · k`
+            : `<strong>跟枪模式 (${p.name})</strong>：S<sub>cun</sub> = Φ²·(x<sub>c</sub>+y<sub>c</sub>-√(x<sub>c</sub>y<sub>c</sub>)) ｜ N<sub>final</sub> = N<sub>cun</sub>·(k₀/k)<sup>0.382</sup> ｜ 最大值 = N<sub>final</sub> · k`;
+    }
+
+    function applyTracking() {
+        const x = parseFloat(document.getElementById('input-x').value) || 0;
+        const y = parseFloat(document.getElementById('input-y').value) || 0;
+        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
+        if ((x <= 0 && y <= 0) || k <= 0) { alert('请输入有效参数'); return; }
+        setMode('tracking');
+        resetCorrection();
+    }
+
     // ---- 同步逻辑 ----
-    function syncPhi() {
-    }
-
-    function syncCoeff() {
-    }
-
-    function syncDenom() {
-    }
-
-    function syncFromPhiInput() {
-        const v = parseFloat(document.getElementById('side-input-phi').value) || DEFAULT_PHI;
-        const clamped = Math.max(1.0, Math.min(2.2, v));
-        currentPhi = clamped;
-        document.getElementById('side-range-phi').value = clamped;
-        document.getElementById('footer-phi').value = clamped.toFixed(3);
-        document.getElementById('phi-display-side').textContent = clamped.toFixed(3);
-        document.getElementById('phiIndicator').textContent = `Φ = ${clamped.toFixed(3)}`;
-        updateAllParamDisplays();
-        calculate();
-    }
-
-    function syncFromPhiRange() {
-        const v = parseFloat(document.getElementById('side-range-phi').value) || DEFAULT_PHI;
-        currentPhi = v;
-        document.getElementById('side-input-phi').value = v.toFixed(3);
-        document.getElementById('footer-phi').value = v.toFixed(3);
-        document.getElementById('phi-display-side').textContent = v.toFixed(3);
-        document.getElementById('phiIndicator').textContent = `Φ = ${v.toFixed(3)}`;
-        updateAllParamDisplays();
-        calculate();
-    }
-
-    function syncFromFooter(type) {
-        if (type === 'phi') {
-            const v = parseFloat(document.getElementById('footer-phi').value) || DEFAULT_PHI;
-            const clamped = Math.max(1.0, Math.min(2.2, v));
-            currentPhi = clamped;
-            document.getElementById('side-input-phi').value = clamped.toFixed(3);
-            document.getElementById('side-range-phi').value = clamped;
-            document.getElementById('phi-display-side').textContent = clamped.toFixed(3);
-            document.getElementById('phiIndicator').textContent = `Φ = ${clamped.toFixed(3)}`;
-            updateAllParamDisplays();
-            calculate();
-        } else if (type === 'coeff') {
-            const rawVal = parseFloat(document.getElementById('footer-coeff').value) || (8.0 * PI);
-            let c = rawVal / PI;
-            c = Math.max(4, Math.min(14, c));
-            currentCoeff = c;
-            document.getElementById('footer-coeff').value = (c * PI).toFixed(2);
-            document.getElementById('side-input-coeff').value = c.toFixed(1);
-            document.getElementById('side-range-coeff').value = c;
-            updateAllParamDisplays(false);
-            calculate();
-        } else if (type === 'denom') {
-            const rawVal = parseFloat(document.getElementById('footer-denom').value) || (100.0 * PI * PI);
-            let d = rawVal / (PI * PI);
-            d = Math.max(30, Math.min(250, d));
-            currentDenomFactor = d;
-            document.getElementById('footer-denom').value = (d * PI * PI).toFixed(2);
-            document.getElementById('side-input-denom').value = d.toFixed(0);
-            document.getElementById('side-range-denom').value = d;
-            updateAllParamDisplays(false);
-            calculate();
-        }
-    }
-
     function syncFromTop() {
         let x = parseFloat(document.getElementById('input-x').value) || 0;
         let y = parseFloat(document.getElementById('input-y').value) || 0;
-        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
-        const k0 = parseFloat(document.getElementById('input-k0').value) || 2.1;
-
-        // 夹取到滑杆范围
         x = Math.min(7000, Math.max(0, x));
         y = Math.min(2000, Math.max(0, y));
-
-        document.getElementById('input-x').value = x;
-        document.getElementById('input-y').value = y;
         document.getElementById('side-input-x').value = x;
         document.getElementById('side-range-x').value = x;
         document.getElementById('side-input-y').value = y;
         document.getElementById('side-range-y').value = y;
-
         calculate();
     }
 
@@ -917,13 +857,11 @@
             let v = parseFloat(document.getElementById('side-input-x').value) || 0;
             v = Math.min(7000, Math.max(0, v));
             document.getElementById('input-x').value = v;
-            document.getElementById('side-input-x').value = v;
             document.getElementById('side-range-x').value = v;
         } else {
             let v = parseFloat(document.getElementById('side-input-y').value) || 0;
             v = Math.min(2000, Math.max(0, v));
             document.getElementById('input-y').value = v;
-            document.getElementById('side-input-y').value = v;
             document.getElementById('side-range-y').value = v;
         }
         calculate();
@@ -940,80 +878,6 @@
             document.getElementById('side-input-y').value = v;
         }
         calculate();
-    }
-
-    function syncFromParamInput(type) {
-        if (type === 'coeff') {
-            let v = parseFloat(document.getElementById('side-input-coeff').value) || 8.0;
-            currentCoeff = Math.max(4, Math.min(14, v));
-            document.getElementById('side-input-coeff').value = currentCoeff.toFixed(1);
-            document.getElementById('side-range-coeff').value = currentCoeff;
-            document.getElementById('footer-coeff').value = (currentCoeff * PI).toFixed(2);
-        } else {
-            let v = parseFloat(document.getElementById('side-input-denom').value) || 100.0;
-            currentDenomFactor = Math.max(30, Math.min(250, v));
-            document.getElementById('side-input-denom').value = currentDenomFactor.toFixed(0);
-            document.getElementById('side-range-denom').value = currentDenomFactor;
-            document.getElementById('footer-denom').value = (currentDenomFactor * PI * PI).toFixed(2);
-        }
-        updateAllParamDisplays();
-        calculate();
-    }
-
-    function syncFromParamRange(type) {
-        if (type === 'coeff') {
-            const v = parseFloat(document.getElementById('side-range-coeff').value) || 8.0;
-            currentCoeff = v;
-            document.getElementById('side-input-coeff').value = v.toFixed(1);
-            document.getElementById('footer-coeff').value = (v * PI).toFixed(2);
-        } else {
-            const v = parseFloat(document.getElementById('side-range-denom').value) || 100.0;
-            currentDenomFactor = v;
-            document.getElementById('side-input-denom').value = v.toFixed(0);
-            document.getElementById('footer-denom').value = (v * PI * PI).toFixed(2);
-        }
-        updateAllParamDisplays();
-        calculate();
-    }
-
-    function updateAllParamDisplays(updateFooter = true) {
-        const cReal = currentCoeff * PI;
-        const dReal = currentDenomFactor * PI * PI;
-        document.getElementById('txt-coeff-label').textContent = `外部系数: ${currentCoeff.toFixed(1)}π`;
-        document.getElementById('txt-denom-label').textContent = `内部底数: ${currentDenomFactor.toFixed(0)}π²`;
-        if (updateFooter) {
-            document.getElementById('footer-coeff').value = cReal.toFixed(2);
-            document.getElementById('footer-denom').value = dReal.toFixed(2);
-        }
-        const exprElem = document.getElementById('fExpr');
-        exprElem.innerHTML = `N<sub>cun</sub> = ${currentCoeff.toFixed(1)}π · arctan( Φ · S<sub>cun</sub> / ${currentDenomFactor.toFixed(0)}π² )`;
-    }
-
-    // ---- 模式切换 ----
-    function setMode(mode) {
-        currentMode = mode;
-        const isStd = mode === 'standard';
-        document.getElementById('btn-mode-std').classList.toggle('active', isStd);
-        document.getElementById('btn-mode-track').classList.toggle('active', !isStd);
-        const badge = document.getElementById('modeBadge');
-        badge.textContent = isStd ? '普通模式' : '跟枪模式';
-        badge.className = 'mode-badge' + (isStd ? '' : ' track');
-        document.getElementById('fTitle').textContent = isStd ? '角极收束法' : '角极收束法 · 跟枪';
-        updateAllParamDisplays();
-        document.getElementById('formulaCard').className = 'formula-card' + (isStd ? '' : ' track');
-        document.getElementById('footerDesc').innerHTML = isStd
-            ? '<strong>普通模式</strong>：S<sub>cun</sub> = x<sub>c</sub> + y<sub>c</sub> ｜ N<sub>final</sub> = N<sub>cun</sub> ｜ 均衡 = N<sub>final</sub> · k'
-            : '<strong>跟枪模式</strong>：S<sub>cun</sub> = Φ²·(x<sub>c</sub>+y<sub>c</sub>-√(x<sub>c</sub>y<sub>c</sub>)) ｜ N<sub>final</sub> = N<sub>cun</sub>·(k₀/k)<sup>0.382</sup> ｜ 最大值 = N<sub>final</sub> · k';
-        calculate();
-    }
-
-    function applyTracking() {
-        const x = parseFloat(document.getElementById('input-x').value) || 0;
-        const y = parseFloat(document.getElementById('input-y').value) || 0;
-        const k = parseFloat(document.getElementById('input-tsc').value) || 2;
-        if ((x <= 0 && y <= 0) || k <= 0) { alert('请输入有效参数'); return; }
-        setMode('tracking');
-        resetCorrection();
     }
 
     // ---- 修正系数 ----
@@ -1096,14 +960,14 @@
         const isTrack = currentMode === 'tracking';
         const unitStr = isCun ? 'cun' : 'cm';
 
-        const result = computeFullOutput(x, y, k, k0, currentMode, currentCoeff, currentDenomFactor, currentPhi);
+        const result = computeFullOutput(x, y, k, k0, currentMode, currentAlgo);
         const baseVal = isCun ? result.N_final : result.N_cm;
 
-        const stdResult = computeFullOutput(x, y, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
+        const stdResult = computeFullOutput(x, y, k, k0, 'standard', currentAlgo);
         const std_bal_cm = stdResult.N_cm;
         const std_max_cm = std_bal_cm * (4 / 3);
 
-        const trkResult = computeFullOutput(x, y, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
+        const trkResult = computeFullOutput(x, y, k, k0, 'tracking', currentAlgo);
         const trk_max_cm = trkResult.N_cm;
         const trk_bal_cm = trk_max_cm * 0.75;
 
@@ -1141,8 +1005,8 @@
         document.getElementById('corr-base').innerText = corrVals.base.toFixed(2);
 
         // 推导步骤展示
-        const denom = currentDenomFactor * PI * PI;
-        const inner = (currentPhi * result.S_cun) / denom;
+        const p = getAlgoParams(currentAlgo);
+        const inner = (p.mult * result.S_cun) / p.denom;
         const stepClass = isTrack ? 'purple' : '';
         const stepResultClass = isTrack ? 'purple' : '';
         let stepsHtml = '';
@@ -1150,12 +1014,11 @@
         const x_c = x / k, y_c = y / k;
 
         if (isTrack) {
-            const phi2 = currentPhi * currentPhi;
             stepsHtml = `
                 <div class="step-line"><span class="step-num ${stepClass}">1</span><span class="step-label">寸化计算</span><span class="step-formula">x_c = ${x_c.toFixed(1)}, y_c = ${y_c.toFixed(1)}</span></div>
-                <div class="step-line"><span class="step-num ${stepClass}">2</span><span class="step-label">肌肉协同模</span><span class="step-formula">S_cun = ${phi2.toFixed(3)}·(${x_c.toFixed(1)} + ${y_c.toFixed(1)} - √(${x_c.toFixed(1)}×${y_c.toFixed(1)}))</span><span>=</span><span class="step-result ${stepResultClass}">${result.S_cun.toFixed(4)} cun</span></div>
-                <div class="step-line"><span class="step-num ${stepClass}">3</span><span class="step-label">核心收束</span><span class="step-formula">N_cun = ${currentCoeff.toFixed(1)}π·atan(${currentPhi.toFixed(3)}·${result.S_cun.toFixed(1)} / ${currentDenomFactor.toFixed(0)}π²)</span><span>=</span><span class="step-result ${stepResultClass}">${result.N_cun.toFixed(4)} cun</span></div>
-                <div class="step-line"><span class="step-num ${stepClass}">4</span><span class="step-label">结果寸校准</span><span class="step-formula">N_final = ${result.N_cun.toFixed(4)} × (${k0}/${k})<sup>${(1-1/currentPhi).toFixed(3)}</sup></span><span>=</span><span class="step-result ${stepResultClass}">${result.N_final.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">2</span><span class="step-label">肌肉协同模</span><span class="step-formula">S_cun = Φ²·(${x_c.toFixed(1)} + ${y_c.toFixed(1)} - √(${x_c.toFixed(1)}×${y_c.toFixed(1)}))</span><span>=</span><span class="step-result ${stepResultClass}">${result.S_cun.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">3</span><span class="step-label">核心收束 (${p.name})</span><span class="step-formula">N_cun = ${COEFF.toFixed(1)}π·atan(${p.multExpr}·${result.S_cun.toFixed(1)} / ${p.denomExpr})</span><span>=</span><span class="step-result ${stepResultClass}">${result.N_cun.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num ${stepClass}">4</span><span class="step-label">结果寸校准</span><span class="step-formula">N_final = ${result.N_cun.toFixed(4)} × (${k0}/${k})<sup>${DAMP_EXP.toFixed(3)}</sup></span><span>=</span><span class="step-result ${stepResultClass}">${result.N_final.toFixed(4)} cun</span></div>
                 <div class="step-line"><span class="step-num ${stepClass}">5</span><span class="step-label">单位还原</span><span class="step-formula">${result.N_final.toFixed(4)} × ${k}</span><span>=</span><span class="step-result ${stepResultClass}">${result.N_cm.toFixed(2)} cm</span></div>
                 <div class="step-line" style="color:var(--purple);font-weight:600;border-top:1px dashed rgba(0,0,0,0.05);margin-top:4px;padding-top:4px;">
                     <span>🎯 基准最大值 = ${baseVal.toFixed(2)} ${unitStr}</span>
@@ -1165,8 +1028,8 @@
         } else {
             stepsHtml = `
                 <div class="step-line"><span class="step-num">1</span><span class="step-label">寸化计算</span><span class="step-formula">S_cun = (${x.toFixed(1)} + ${y.toFixed(1)}) ÷ ${k}</span><span>=</span><span class="step-result">${result.S_cun.toFixed(4)} cun</span></div>
-                <div class="step-line"><span class="step-num">2</span><span class="step-label">极角计算</span><span class="step-formula">${currentPhi.toFixed(3)}·S_cun / ${currentDenomFactor.toFixed(0)}π² = ${inner.toFixed(6)} rad</span></div>
-                <div class="step-line"><span class="step-num">3</span><span class="step-label">核心收束</span><span class="step-formula">N_cun = ${currentCoeff.toFixed(1)}π·atan(${inner.toFixed(6)})</span><span>=</span><span class="step-result">${result.N_cun.toFixed(4)} cun</span></div>
+                <div class="step-line"><span class="step-num">2</span><span class="step-label">极角计算 (${p.name})</span><span class="step-formula">${p.multExpr}·S_cun / ${p.denomExpr} = ${inner.toFixed(6)} rad</span></div>
+                <div class="step-line"><span class="step-num">3</span><span class="step-label">核心收束</span><span class="step-formula">N_cun = ${COEFF.toFixed(1)}π·atan(${inner.toFixed(6)})</span><span>=</span><span class="step-result">${result.N_cun.toFixed(4)} cun</span></div>
                 <div class="step-line"><span class="step-num">4</span><span class="step-label">结果寸校准</span><span class="step-formula">N_final = N_cun</span><span>=</span><span class="step-result">${result.N_final.toFixed(4)} cun</span></div>
                 <div class="step-line"><span class="step-num">5</span><span class="step-label">单位还原</span><span class="step-formula">${result.N_final.toFixed(4)} × ${k}</span><span>=</span><span class="step-result">${result.N_cm.toFixed(2)} cm</span></div>
                 <div class="step-line" style="color:var(--purple);font-weight:600;border-top:1px dashed rgba(0,0,0,0.05);margin-top:4px;padding-top:4px;">
@@ -1199,13 +1062,11 @@
         ctx.clearRect(0, 0, w, h);
 
         const maxX = 7000;
-
-        // 扫描所有曲线在范围内的最大值，防止曲线被顶部截断
         let maxY = Math.max(90, t_max, s_max);
-        for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const r_std = computeFullOutput(x_plot, y_in, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
-            const r_trk = computeFullOutput(x_plot, y_in, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
-            maxY = Math.max(maxY, r_std.N_cm, r_std.N_cm * (4 / 3), r_trk.N_cm, r_trk.N_cm * 0.75);
+        for (let x_plot = 0; x_plot <= maxX; x_plot += 50) {
+            const r_std = computeFullOutput(x_plot, y_in, k, k0, 'standard', currentAlgo);
+            const r_trk = computeFullOutput(x_plot, y_in, k, k0, 'tracking', currentAlgo);
+            maxY = Math.max(maxY, r_std.N_cm * (4 / 3), r_trk.N_cm);
         }
         maxY = Math.max(90, maxY * 1.15);
 
@@ -1232,60 +1093,51 @@
             ctx.fillText(xVal, p.px, h - pad.bottom + 14);
         }
 
-        // 纯 Y 输入保底：固定拉枪距离
-        const y_ratio = (x_in > 0) ? (y_in / x_in) : 0;
-
-        // 1. 普通算法曲线 (蓝色虚线)
+        // 1. 普通算法曲线 (蓝色虚线/实线)
         ctx.strokeStyle = '#3b82f6';
         ctx.lineWidth = 1.8;
         ctx.setLineDash([4, 3]);
         ctx.beginPath();
         let first = true;
         for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const curr_y = y_in;
-            const r = computeFullOutput(x_plot, curr_y, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
+            const r = computeFullOutput(x_plot, y_in, k, k0, 'standard', currentAlgo);
             const p = toPx(x_plot, r.N_cm);
             if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
         }
         ctx.stroke();
 
-        // 普通最大 (蓝色实线)
         ctx.strokeStyle = '#1e3a8a';
         ctx.lineWidth = 2.2;
         ctx.setLineDash([]);
         ctx.beginPath();
         first = true;
         for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const curr_y = y_in;
-            const r = computeFullOutput(x_plot, curr_y, k, k0, 'standard', currentCoeff, currentDenomFactor, currentPhi);
+            const r = computeFullOutput(x_plot, y_in, k, k0, 'standard', currentAlgo);
             const p = toPx(x_plot, r.N_cm * (4 / 3));
             if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
         }
         ctx.stroke();
 
-        // 2. 跟枪算法曲线 (紫色虚线)
+        // 2. 跟枪算法曲线 (紫色虚线/实线)
         ctx.strokeStyle = '#a855f7';
         ctx.lineWidth = 1.8;
         ctx.setLineDash([4, 3]);
         ctx.beginPath();
         first = true;
         for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const curr_y = y_in;
-            const r = computeFullOutput(x_plot, curr_y, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
+            const r = computeFullOutput(x_plot, y_in, k, k0, 'tracking', currentAlgo);
             const p = toPx(x_plot, r.N_cm * 0.75);
             if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
         }
         ctx.stroke();
 
-        // 跟枪最大 (紫色实线)
         ctx.strokeStyle = '#7c3aed';
         ctx.lineWidth = 2.5;
         ctx.setLineDash([]);
         ctx.beginPath();
         first = true;
         for (let x_plot = 0; x_plot <= maxX; x_plot += 40) {
-            const curr_y = y_in;
-            const r = computeFullOutput(x_plot, curr_y, k, k0, 'tracking', currentCoeff, currentDenomFactor, currentPhi);
+            const r = computeFullOutput(x_plot, y_in, k, k0, 'tracking', currentAlgo);
             const p = toPx(x_plot, r.N_cm);
             if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
         }
@@ -1298,7 +1150,7 @@
             ctx.fillStyle = '#7c3aed';
             ctx.beginPath(); ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI); ctx.fill();
             ctx.fillStyle = '#a855f7';
-            ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 5, 0, 2 * PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 4.5, 0, 2 * PI); ctx.fill();
             ctx.fillStyle = '#7c3aed';
             ctx.font = 'bold 9px sans-serif';
             ctx.textAlign = 'left';
@@ -1311,7 +1163,7 @@
             ctx.fillStyle = '#1e3a8a';
             ctx.beginPath(); ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI); ctx.fill();
             ctx.fillStyle = '#3b82f6';
-            ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 5, 0, 2 * PI); ctx.fill();
+            ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 4.5, 0, 2 * PI); ctx.fill();
             ctx.fillStyle = '#1e3a8a';
             ctx.font = 'bold 9px sans-serif';
             ctx.textAlign = 'left';
@@ -1320,7 +1172,6 @@
             ctx.fillText(`均衡 ${s_bal.toFixed(1)}`, p_bal.px + 8, p_bal.py - 2);
         }
 
-        // 垂直定位线
         const p_v = toPx(x_in, 0);
         ctx.strokeStyle = 'rgba(0,0,0,0.12)';
         ctx.setLineDash([2, 3]);
@@ -1334,22 +1185,13 @@
         ctx.font = '8px monospace';
         ctx.textAlign = 'center';
         ctx.fillText(`X=${x_in}`, p_v.px, h - pad.bottom + 22);
-        
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '8px monospace';
-        ctx.textAlign = 'right';
-        ctx.fillText(`y/x=${(y_in/(x_in||1)).toFixed(3)}`, w - pad.right, pad.top + 12);
-        ctx.fillText(`Φ=${currentPhi.toFixed(3)}`, w - pad.right, pad.top + 24);
     }
 
     // ---- 初始化 ----
     document.querySelector('#correctedRow .col-item[data-key="q2"]')?.classList.add('anchor');
     document.getElementById('anchorDisplay').textContent = '均衡';
     document.getElementById('anchorName').textContent = '均衡';
-    document.getElementById('phiIndicator').textContent = `Φ = ${DEFAULT_PHI.toFixed(3)}`;
-    document.getElementById('phi-display-side').textContent = DEFAULT_PHI.toFixed(3);
-    document.getElementById('footer-phi').value = DEFAULT_PHI.toFixed(3);
-    updateAllParamDisplays();
+    setAlgo('practical');
     syncFromTop();
     window.addEventListener('resize', calculate);
 </script>
