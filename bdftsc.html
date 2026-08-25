@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>同身寸 · 收束法计算器 - 西岛海</title>
+    <title>同身寸 · 收束法计算器 - 西岛海 (纯开方版)</title>
     <style>
         :root {
             --bg: #dfd7cb;
             --paper: #d2c5b4;
-            --blue: #1e3a8a;
+            --blue: #0284c7;
+            --blue-dark: #0369a1;
             --purple: #6366f1;
             --purple-dark: #4338ca;
             --gold: #b8860b;
@@ -17,764 +18,152 @@
             --shadow: rgba(30, 20, 50, 0.08);
             --anchor: #7c3aed;
             --glow: rgba(99, 102, 241, 0.18);
-            --root-green: #0d7c3f;
             --border: #e2d9cc;
             --border-dark: #b8ab97;
         }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            padding: 14px 8px;
-            background: var(--bg);
+            padding: 14px 8px; background: var(--bg);
             background-image: radial-gradient(var(--paper) 18%, transparent 19%), radial-gradient(var(--paper) 18%, transparent 19%);
-            background-size: 10px 10px;
-            color: #1e293b;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-size: 10px 10px; color: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
         }
         .card {
-            width: 100%;
-            max-width: 900px;
-            background: var(--card);
-            border-radius: 12px;
-            padding: 18px 14px;
-            box-shadow: 0 8px 24px var(--shadow);
-            border: 1px solid var(--border-dark);
-            position: relative;
+            width: 100%; max-width: 900px; background: var(--card);
+            border-radius: 12px; padding: 18px 14px; box-shadow: 0 8px 24px var(--shadow);
+            border: 1px solid var(--border-dark); position: relative;
         }
-        @media (min-width:600px) {
-            .card {
-                padding: 22px 18px;
-            }
-        }
-        .card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 5px;
-            background: var(--gold);
-            border-radius: 12px 0 0 12px;
-        }
-        .header {
-            font-size: 1.15rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--blue);
-            flex-wrap: wrap;
-            border-bottom: 1.5px dashed var(--border);
-            padding-bottom: 10px;
-        }
-        .header .date {
-            font-size: 1rem;
-            opacity: 0.85;
-        }
-        .header .badge {
-            background: var(--purple-dark);
-            color: #fff;
-            font-size: 0.68rem;
-            padding: 2px 10px;
-            border-radius: 10px;
-            font-weight: 700;
-        }
-        .k-link {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #fff;
-            background: var(--gold);
-            padding: 3px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-left: auto;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .k-link:hover {
-            background: #8b6914;
-        }
+        @media (min-width:600px) { .card { padding: 22px 18px; } }
+        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--gold); border-radius: 12px 0 0 12px; }
+        .header { font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--blue-dark); flex-wrap: wrap; border-bottom: 1.5px dashed var(--border); padding-bottom: 10px; }
+        .header .date { font-size: 1rem; opacity: 0.85; }
+        .header .badge { background: var(--purple-dark); color: #fff; font-size: 0.68rem; padding: 2px 10px; border-radius: 10px; font-weight: 700; }
+        .k-link { font-size: 0.85rem; font-weight: 700; color: #fff; background: var(--gold); padding: 3px 10px; border-radius: 5px; text-decoration: none; margin-left: auto; cursor: pointer; transition: 0.2s; }
+        .k-link:hover { background: #8b6914; }
 
-        .top-row {
-            display: grid;
-            grid-template-columns: 1fr 1.35fr;
-            gap: 10px;
-            margin-bottom: 12px;
-            align-items: stretch;
-        }
-        @media (max-width:740px) {
-            .top-row {
-                grid-template-columns: 1fr;
-            }
-        }
+        .top-row { display: grid; grid-template-columns: 1fr 1.35fr; gap: 10px; margin-bottom: 12px; align-items: stretch; }
+        @media (max-width:740px) { .top-row { grid-template-columns: 1fr; } }
 
-        .input-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.75);
-            border: 1.5px dashed var(--blue);
-            border-radius: 8px;
-            padding: 10px 12px;
-            height: 100%;
-        }
+        .input-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: rgba(255, 255, 255, 0.75); border: 1.5px dashed var(--blue); border-radius: 8px; padding: 10px 12px; height: 100%; }
+        .input-group { display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 0.75rem; font-weight: 700; color: var(--blue-dark); }
+        .input-group input { width: 100%; background: #ffffff; border: 1px solid rgba(2, 132, 199, 0.3); border-radius: 4px; font-size: 0.9rem; font-weight: 800; color: var(--blue-dark); padding: 5px 6px; text-align: center; outline: none; font-family: "SF Mono", monospace; }
+        .input-group input:focus { border-color: var(--purple); background: #fff; }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 3px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--blue);
-        }
-        .input-group input {
-            width: 100%;
-            background: #ffffff;
-            border: 1px solid rgba(30, 58, 138, 0.3);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            color: var(--blue);
-            padding: 5px 6px;
-            text-align: center;
-            outline: none;
-            font-family: "SF Mono", monospace;
-        }
-        .input-group input:focus {
-            border-color: var(--purple);
-            background: #fff;
-        }
+        .track-module { background: rgba(76, 29, 149, 0.04); border: 1.5px solid var(--purple); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 4px; height: 100%; }
+        .track-module .title { font-size: 0.85rem; font-weight: 800; color: var(--purple-dark); }
+        .track-module .expr-main { font-size: 0.76rem; font-weight: 800; color: var(--purple-dark); font-family: "SF Mono", monospace; }
+        .track-module .expr-subs { font-size: 0.65rem; color: #475569; line-height: 1.4; font-family: "SF Mono", monospace; }
+        .track-module .calc-btn { background: var(--purple-dark); color: #fff; border: none; border-radius: 5px; padding: 6px 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; width: 100%; transition: 0.15s; }
+        .track-module .calc-btn:hover { background: #3b0764; }
+        .track-module .tag { font-size: 0.62rem; color: var(--purple-dark); font-weight: 700; }
 
-        .track-module {
-            background: rgba(76, 29, 149, 0.04);
-            border: 1.5px solid var(--purple);
-            border-radius: 8px;
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: 4px;
-            height: 100%;
-        }
-        .track-module .title {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--purple-dark);
-        }
-        .track-module .expr-main {
-            font-size: 0.76rem;
-            font-weight: 800;
-            color: var(--purple-dark);
-            font-family: "SF Mono", monospace;
-        }
-        .track-module .expr-subs {
-            font-size: 0.65rem;
-            color: #475569;
-            line-height: 1.4;
-            font-family: "SF Mono", monospace;
-        }
-        .track-module .calc-btn {
-            background: var(--purple-dark);
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 6px 10px;
-            font-weight: 700;
-            font-size: 0.82rem;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.15s;
-        }
-        .track-module .calc-btn:hover {
-            background: #3b0764;
-        }
-        .track-module .tag {
-            font-size: 0.62rem;
-            color: var(--purple-dark);
-            font-weight: 700;
-        }
+        .correction { background: rgba(76, 29, 149, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .correction .title { font-size: 0.78rem; font-weight: 800; color: var(--purple-dark); }
+        .correction .sub { font-size: 0.65rem; color: #64748b; margin-left: 4px; }
+        .correction .row { display: flex; align-items: center; gap: 6px; }
+        .correction .row .step-btn { width: 26px; height: 26px; border: 1px solid #cbd5e1; border-radius: 4px; background: #ffffff; color: var(--purple-dark); font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+        .correction .row .step-btn:hover { border-color: var(--purple); }
+        .correction .row input { flex: 1; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark); padding: 3px 6px; text-align: center; outline: none; font-family: "SF Mono", monospace; }
+        .correction .slider { width: 100%; accent-color: var(--purple-dark); cursor: pointer; height: 4px; }
 
-        .correction {
-            background: rgba(76, 29, 149, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 12px;
-        }
-        .correction .title {
-            font-size: 0.78rem;
-            font-weight: 800;
-            color: var(--purple-dark);
-        }
-        .correction .sub {
-            font-size: 0.65rem;
-            color: #64748b;
-            margin-left: 4px;
-        }
-        .correction .row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .correction .row .step-btn {
-            width: 26px;
-            height: 26px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            background: #ffffff;
-            color: var(--purple-dark);
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-        }
-        .correction .row .step-btn:hover {
-            border-color: var(--purple);
-        }
-        .correction .row input {
-            flex: 1;
-            background: #fff;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: var(--purple-dark);
-            padding: 3px 6px;
-            text-align: center;
-            outline: none;
-            font-family: "SF Mono", monospace;
-        }
-        .correction .slider {
-            width: 100%;
-            accent-color: var(--purple-dark);
-            cursor: pointer;
-            height: 4px;
-        }
+        .formula-card { border: 1.5px solid var(--gold); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: rgba(184, 134, 11, 0.03); transition: 0.25s; }
+        .formula-card.track { border-color: var(--purple); background: rgba(76, 29, 149, 0.03); }
+        .card-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .f-title { font-size: 0.88rem; font-weight: 800; color: #78350f; display: flex; align-items: center; gap: 6px; }
 
-        .formula-card {
-            border: 1.5px solid var(--gold);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: rgba(184, 134, 11, 0.03);
-            transition: 0.25s;
-        }
-        .formula-card.track {
-            border-color: var(--purple);
-            background: rgba(76, 29, 149, 0.03);
-        }
-        .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .f-title {
-            font-size: 0.88rem;
-            font-weight: 800;
-            color: #78350f;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .math-hero { background: #ffffff; border: 1px solid #e2d9cc; border-radius: 8px; padding: 10px 8px; margin: 8px 0 6px 0; text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03); min-height: 48px; display: flex; align-items: center; justify-content: center; }
+        .math-row { display: inline-flex; align-items: center; justify-content: center; font-family: "Cambria Math", "Latin Modern Math", serif; font-size: 0.94rem; color: #0f172a; font-weight: bold; flex-wrap: wrap; gap: 4px; row-gap: 8px; }
+        .bracket { font-size: 1.25em; font-weight: 400; color: #334155; }
+        .hl-k { color: var(--gold); font-weight: 900; }
+        .hl-c { color: var(--purple-dark); font-weight: 900; }
+        .weight-exp { color: #dc2626; background: #fef2f2; border: 1px solid #fecdd3; padding: 1px 4px; border-radius: 4px; font-size: 0.72em; font-weight: 900; vertical-align: super; margin-left: 1px; font-family: "SF Mono", monospace; }
 
-        .math-hero {
-            background: #ffffff;
-            border: 1px solid #e2d9cc;
-            border-radius: 8px;
-            padding: 10px 8px;
-            margin: 8px 0 6px 0;
-            text-align: center;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .math-row {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-family: "Cambria Math", "Latin Modern Math", "Times New Roman", serif;
-            font-size: 0.94rem;
-            color: #0f172a;
-            font-weight: bold;
-            flex-wrap: wrap;
-            gap: 4px;
-            row-gap: 8px;
-        }
-        .frac {
-            display: inline-flex;
-            flex-direction: column;
-            vertical-align: middle;
-            text-align: center;
-            padding: 0 3px;
-            font-size: 0.85em;
-        }
-        .frac .num {
-            border-bottom: 1.5px solid currentColor;
-            padding-bottom: 1px;
-        }
-        .frac .den {
-            padding-top: 1px;
-        }
+        .toggle-group { display: flex; gap: 2px; background: rgba(0, 0, 0, 0.06); border-radius: 4px; padding: 2px; }
+        .toggle-btn { border: none; background: transparent; padding: 3px 8px; font-size: 0.65rem; font-weight: 700; border-radius: 3px; cursor: pointer; color: #64748b; transition: 0.15s; }
+        .toggle-btn.active { background: var(--gold); color: #fff; }
+        .toggle-btn.purple.active { background: var(--purple-dark); color: #fff; }
 
-        .sqrt {
-            display: inline-flex;
-            align-items: center;
-            vertical-align: middle;
-        }
-        .sqrt .rad-deg {
-            font-size: 0.55em;
-            transform: translate(3px, -5px);
-            margin-right: -2px;
-            font-weight: 900;
-        }
-        .sqrt .rad-sym {
-            font-size: 1.25em;
-            margin-right: 1px;
-            transform: translateY(1px);
-        }
-        .sqrt .rad-body {
-            border-top: 1.5px solid currentColor;
-            padding-top: 1px;
-            padding-left: 2px;
-            padding-right: 3px;
-        }
+        .mode-badge { font-size: 0.62rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; background: rgba(184, 134, 11, 0.15); color: #78350f; transition: 0.3s; }
+        .mode-badge.track { background: rgba(76, 29, 149, 0.15); color: var(--purple); }
 
-        .bracket {
-            font-size: 1.25em;
-            font-weight: 400;
-            color: #334155;
-        }
-        .hl-k {
-            color: var(--gold);
-            font-weight: 900;
-        }
-        .hl-c {
-            color: var(--purple-dark);
-            font-weight: 900;
-        }
+        .five-col { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 6px; }
+        @media(max-width:550px) { .five-col { gap: 2px; font-size: 0.7rem; } }
+        .col-item { display: flex; flex-direction: column; align-items: center; padding: 4px 2px; border-radius: 4px; background: rgba(255, 255, 255, 0.3); border: 2px solid transparent; min-height: 44px; justify-content: center; transition: 0.15s; }
+        .col-item .tag { font-size: 0.6rem; font-weight: 600; color: #78350f; }
+        .col-item .val { font-size: 0.95rem; font-weight: bold; color: var(--gold); }
+        .col-item .val.corrected { color: var(--purple); }
+        .col-item.clickable { cursor: pointer; }
+        .col-item.clickable:hover { background: rgba(124, 58, 237, 0.08); }
+        .col-item.anchor { border-color: var(--anchor); background: var(--glow); box-shadow: 0 0 12px var(--glow); }
+        .col-item .hint { font-size: 0.5rem; color: var(--anchor); font-weight: 700; opacity: 0; transition: 0.2s; margin-top: 1px; }
+        .col-item.anchor .hint { opacity: 1; }
 
-        .weight-exp {
-            color: #dc2626;
-            background: #fef2f2;
-            border: 1px solid #fecdd3;
-            padding: 1px 4px;
-            border-radius: 4px;
-            font-size: 0.72em;
-            font-weight: 900;
-            vertical-align: super;
-            margin-left: 1px;
-            font-family: "SF Mono", monospace;
-        }
+        .status { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 0.7rem; color: #94a3b8; margin-top: 6px; }
+        .status .hl { color: var(--purple); font-weight: 700; }
 
-        .toggle-group {
-            display: flex;
-            gap: 2px;
-            background: rgba(0, 0, 0, 0.06);
-            border-radius: 4px;
-            padding: 2px;
-        }
-        .toggle-btn {
-            border: none;
-            background: transparent;
-            padding: 3px 8px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            border-radius: 3px;
-            cursor: pointer;
-            color: #64748b;
-            transition: 0.15s;
-        }
-        .toggle-btn.active {
-            background: var(--gold);
-            color: #fff;
-        }
-        .toggle-btn.purple.active {
-            background: var(--purple-dark);
-            color: #fff;
-        }
-        .toggle-btn.green.active {
-            background: var(--root-green);
-            color: #fff;
-        }
+        .chart-section { background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(120, 100, 70, 0.25); border-radius: 6px; padding: 12px; margin-top: 14px; }
+        .chart-header { font-size: 0.85rem; font-weight: bold; color: var(--blue-dark); margin-bottom: 10px; }
+        .interactive-chart-grid { display: grid; grid-template-columns: 220px 1fr; gap: 12px; align-items: center; }
+        @media(max-width:750px) { .interactive-chart-grid { grid-template-columns: 1fr; } }
 
-        .mode-badge {
-            font-size: 0.62rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            background: rgba(184, 134, 11, 0.15);
-            color: #78350f;
-            transition: 0.3s;
-        }
-        .mode-badge.track {
-            background: rgba(76, 29, 149, 0.15);
-            color: var(--purple);
-        }
+        .slider-control-card { background: rgba(255, 255, 255, 0.65); border: 1px solid rgba(2, 132, 199, 0.2); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .ctrl-row { display: flex; flex-direction: column; gap: 2px; }
+        .ctrl-head { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; font-weight: bold; color: var(--blue-dark); }
+        .ctrl-input-num { width: 76px; padding: 2px 4px; font-size: 0.82rem; font-weight: bold; text-align: right; border: 1px solid rgba(2, 132, 199, 0.3); border-radius: 3px; outline: none; background: #fff; color: var(--blue-dark); }
+        .ctrl-range { width: 100%; cursor: pointer; accent-color: var(--blue); margin-top: 2px; }
 
-        .five-col {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
-            margin-top: 6px;
-        }
-        @media(max-width:550px) {
-            .five-col {
-                gap: 2px;
-                font-size: 0.7rem;
-            }
-        }
-        .col-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 4px 2px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid transparent;
-            min-height: 44px;
-            justify-content: center;
-            transition: 0.15s;
-        }
-        .col-item .tag {
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: #78350f;
-        }
-        .col-item .val {
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--gold);
-        }
-        .col-item .val.corrected {
-            color: var(--purple);
-        }
-        .col-item.clickable {
-            cursor: pointer;
-        }
-        .col-item.clickable:hover {
-            background: rgba(124, 58, 237, 0.08);
-        }
-        .col-item.anchor {
-            border-color: var(--anchor);
-            background: var(--glow);
-            box-shadow: 0 0 12px var(--glow);
-        }
-        .col-item .hint {
-            font-size: 0.5rem;
-            color: var(--anchor);
-            font-weight: 700;
-            opacity: 0;
-            transition: 0.2s;
-            margin-top: 1px;
-        }
-        .col-item.anchor .hint {
-            opacity: 1;
-        }
+        .canvas-container { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 4px; position: relative; padding: 8px 6px; }
+        canvas { width: 100%; height: 250px; display: block; }
 
-        .status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 4px;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            margin-top: 6px;
-        }
-        .status .hl {
-            color: var(--purple);
-            font-weight: 700;
-        }
+        .chart-legend-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+        @media(max-width:600px) { .chart-legend-grid { grid-template-columns: 1fr 1fr; } }
+        .legend-box { background: rgba(255, 255, 255, 0.7); border-radius: 4px; padding: 5px 8px; border: 1px solid rgba(0, 0, 0, 0.05); font-size: 0.65rem; display: flex; flex-direction: column; gap: 1px; }
+        .legend-box.t-max { border-left: 3px solid #7c3aed; }
+        .legend-box.t-bal { border-left: 3px dashed #a855f7; }
+        .legend-box.s-max { border-left: 3px solid #0284c7; }
+        .legend-box.s-bal { border-left: 3px dashed #38bdf8; }
+        .legend-val { font-size: 0.85rem; font-weight: bold; font-family: monospace; }
 
-        .chart-section {
-            background: rgba(255, 255, 255, 0.45);
-            border: 1px solid rgba(120, 100, 70, 0.25);
-            border-radius: 6px;
-            padding: 12px;
-            margin-top: 14px;
-        }
-        .chart-header {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--blue);
-            margin-bottom: 10px;
-        }
-        .interactive-chart-grid {
-            display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 12px;
-            align-items: center;
-        }
-        @media(max-width:750px) {
-            .interactive-chart-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        .steps { background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(180, 83, 9, 0.2); border-radius: 6px; padding: 8px 10px; margin-top: 12px; font-size: 0.85rem; }
+        .steps .title { font-size: 0.8rem; font-weight: bold; color: #78350f; margin-bottom: 6px; }
 
-        .slider-control-card {
-            background: rgba(255, 255, 255, 0.65);
-            border: 1px solid rgba(30, 58, 138, 0.2);
-            border-radius: 6px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .ctrl-row {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .ctrl-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.72rem;
-            font-weight: bold;
-            color: var(--blue);
-        }
-        .ctrl-input-num {
-            width: 76px;
-            padding: 2px 4px;
-            font-size: 0.82rem;
-            font-weight: bold;
-            text-align: right;
-            border: 1px solid rgba(30, 58, 138, 0.3);
-            border-radius: 3px;
-            outline: none;
-            background: #fff;
-            color: var(--blue);
-        }
-        .ctrl-range {
-            width: 100%;
-            cursor: pointer;
-            accent-color: var(--blue);
-            margin-top: 2px;
-        }
+        .step-stage { font-size: 0.72rem; font-weight: 800; color: #fff; padding: 3px 8px; border-radius: 4px; margin: 10px 0 4px 0; display: inline-block; }
+        .step-stage.cun { background: var(--blue); }
+        .step-stage.cm { background: var(--gold); }
+        .step-stage.cun.track { background: var(--purple); }
 
-        .canvas-container {
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 4px;
-            position: relative;
-            padding: 8px 6px;
-        }
-        canvas {
-            width: 100%;
-            height: 250px;
-            display: block;
-        }
+        .step-line { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: #334155; flex-wrap: wrap; font-size: 0.78rem; }
+        .step-num { display: inline-flex; align-items: center; justify-content: center; background: var(--gold); color: #fff; font-size: 0.65rem; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; }
+        .step-num.purple { background: var(--purple); }
+        .step-num.blue { background: var(--blue); }
+        .step-label { font-weight: 600; color: #475569; }
+        .step-formula { font-family: monospace; background: rgba(0, 0, 0, 0.04); padding: 1px 5px; border-radius: 3px; }
+        .step-result { font-weight: bold; color: var(--gold); }
+        .step-result.purple { color: var(--purple); }
+        .step-result.blue { color: var(--blue); }
 
-        .chart-legend-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            margin-top: 10px;
-        }
-        @media(max-width:600px) {
-            .chart-legend-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        .legend-box {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 4px;
-            padding: 5px 8px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: 0.65rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-        }
-        .legend-box.t-max {
-            border-left: 3px solid #7c3aed;
-        }
-        .legend-box.t-bal {
-            border-left: 3px dashed #a855f7;
-        }
-        .legend-box.s-max {
-            border-left: 3px solid #1e3a8a;
-        }
-        .legend-box.s-bal {
-            border-left: 3px dashed #3b82f6;
-        }
-        .legend-val {
-            font-size: 0.85rem;
-            font-weight: bold;
-            font-family: monospace;
-        }
-
-        .steps {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(180, 83, 9, 0.2);
-            border-radius: 6px;
-            padding: 8px 10px;
-            margin-top: 12px;
-            font-size: 0.85rem;
-        }
-        .steps .title {
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: #78350f;
-            margin-bottom: 6px;
-        }
-
-        .step-stage {
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin: 10px 0 4px 0;
-            display: inline-block;
-        }
-        .step-stage.cun {
-            background: var(--blue);
-        }
-        .step-stage.cm {
-            background: var(--gold);
-        }
-        .step-stage.cun.track {
-            background: var(--purple);
-        }
-        .step-stage.cun.root {
-            background: var(--root-green);
-        }
-
-        .step-line {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 0;
-            color: #334155;
-            flex-wrap: wrap;
-            font-size: 0.78rem;
-        }
-        .step-num {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--gold);
-            color: #fff;
-            font-size: 0.65rem;
-            font-weight: bold;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .step-num.purple {
-            background: var(--purple);
-        }
-        .step-num.green {
-            background: var(--root-green);
-        }
-        .step-label {
-            font-weight: 600;
-            color: #475569;
-        }
-        .step-formula {
-            font-family: monospace;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 1px 5px;
-            border-radius: 3px;
-        }
-        .step-result {
-            font-weight: bold;
-            color: var(--gold);
-        }
-        .step-result.purple {
-            color: var(--purple);
-        }
-        .step-result.green {
-            color: var(--root-green);
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 14px;
-            font-size: 0.82rem;
-            color: #475569;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding-top: 10px;
-            border-top: 1px dashed rgba(0, 0, 0, 0.08);
-        }
-        .footer-left {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .footer-left .desc {
-            font-size: 0.75rem;
-        }
-        .footer-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .footer-right .sig {
-            font-weight: bold;
-            color: var(--blue);
-            font-size: 0.85rem;
-        }
-        .correction-badge {
-            background: var(--purple);
-            color: #fff;
-            font-size: 0.6rem;
-            font-weight: 700;
-            padding: 1px 8px;
-            border-radius: 10px;
-            margin-left: 6px;
-        }
-        .anchor-label {
-            font-size: 0.6rem;
-            color: var(--anchor);
-            font-weight: 700;
-            background: rgba(124, 58, 237, 0.12);
-            padding: 0 6px;
-            border-radius: 3px;
-            margin-left: 4px;
-        }
-        sup,
-        sub {
-            font-size: 0.72em;
-        }
+        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.82rem; color: #475569; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px dashed rgba(0, 0, 0, 0.08); }
+        .footer-left { display: flex; flex-direction: column; gap: 2px; }
+        .footer-left .desc { font-size: 0.75rem; }
+        .footer-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .footer-right .sig { font-weight: bold; color: var(--blue-dark); font-size: 0.85rem; }
+        .correction-badge { background: var(--purple); color: #fff; font-size: 0.6rem; font-weight: 700; padding: 1px 8px; border-radius: 10px; margin-left: 6px; }
+        .anchor-label { font-size: 0.6rem; color: var(--anchor); font-weight: 700; background: rgba(124, 58, 237, 0.12); padding: 0 6px; border-radius: 3px; margin-left: 4px; }
+        sup, sub { font-size: 0.72em; }
     </style>
 </head>
 <body>
     <div class="card">
 
         <div class="header">
-            <span class="date">2026.8.23 8.29</span>
+            <span class="date">2026.8.25 21:07</span>
             <span>同身寸 · 表达法</span>
-            <span class="badge">双希尔神经对称版</span>
+            <span class="badge" style="background:var(--blue-dark);">xlm</span>
             <a href="https://xidaohai.github.io/tsc.png" class="k-link">说明</a>
         </div>
 
-        <!-- ===== 顶部输入面板 (2x2四宫格) + 跟枪独立模块 ===== -->
+        <!-- ===== 顶部输入面板 ===== -->
         <div class="top-row">
             <div class="input-panel">
                 <div class="input-group">
@@ -797,12 +186,12 @@
 
             <div class="track-module">
                 <div>
-                    <div class="title">【跟枪模式】 正反双希尔对称模型</div>
-                    <div class="expr-main">Max = 2.05 · 6.35 · [x<sub>c</sub><sup>0.25</sup>]<sup>60%</sup> · [Base<sub>Y</sub>]<sup>25%</sup> · [Base<sub>Z</sub>]<sup>15%</sup></div>
+                    <div class="title">【跟枪模式】 三轴纯开方模型</div>
+                    <div class="expr-main">Max = 2.05 · 16.40 · [(x<sub>c</sub>)<sup>0.25</sup>]<sup>50%</sup> · [(y<sub>c</sub>)<sup>0.25</sup>]<sup>25%</sup> · [(z)<sup>-0.5</sup>]<sup>25%</sup></div>
                     <div class="expr-subs" style="margin-top:2px;">
                         <div>• <strong>X轴开方</strong>：Base<sub>X</sub> = (x<sub>c</sub>)<sup>0.250</sup></div>
-                        <div>• <strong>Y轴正希尔</strong>：Base<sub>Y</sub> = 1 + 3.75 · [ y<sub>c</sub><sup>4.0</sup> / (y<sub>c</sub><sup>4.0</sup> + 5.0<sup>4.0</sup>) ]</div>
-                        <div>• <strong>Z轴反希尔</strong>：Base<sub>Z</sub> = 1 + 3.00 · [ 135.0<sup>5.0</sup> / (z<sup>5.0</sup> + 135.0<sup>5.0</sup>) ]</div>
+                        <div>• <strong>Y轴开方</strong>：Base<sub>Y</sub> = (y<sub>c</sub>)<sup>0.250</sup></div>
+                        <div>• <strong>Z轴反比衰减</strong>：Base<sub>Z</sub> = (z)<sup>-0.500</sup></div>
                     </div>
                     <div class="tag" style="margin-top:2px;">得数 = 基准最大值 ｜ 均衡 = 75% ｜ 最小值 = 50%</div>
                 </div>
@@ -834,15 +223,10 @@
                     <div class="f-title">
                         <span id="fTitle">普通模式</span>
                         <span class="mode-badge" id="modeBadge">普通模式</span>
-                        <span class="mode-badge" style="background:var(--root-green);color:#fff;" id="algoBadge">希尔门限版</span>
+                        <span class="mode-badge" style="background:#0284c7;color:#fff;">纯开方架构</span>
                     </div>
                 </div>
                 <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
-                    <!-- 纯净双算法切换 -->
-                    <div class="toggle-group" id="algoToggleGroup">
-                        <button class="toggle-btn green active" id="btn-algo-hill" onclick="setAlgo('hill')">希尔门限版</button>
-                        <button class="toggle-btn" id="btn-algo-power" onclick="setAlgo('power')">纯开方版</button>
-                    </div>
                     <!-- 普通 vs 跟枪 切换 -->
                     <div class="toggle-group">
                         <button class="toggle-btn active" id="btn-mode-std" onclick="setMode('standard')">普通</button>
@@ -858,7 +242,7 @@
 
             <!-- 矢量根号公式展示栏 -->
             <div class="math-hero" id="fExpr">
-                <!-- JS 动态渲染 -->
+                <!-- JS动态渲染 -->
             </div>
 
             <!-- 五档基准 -->
@@ -921,7 +305,7 @@
 
                         <div class="ctrl-row" style="border-top:1px dashed rgba(0,0,0,0.06);padding-top:6px;">
                             <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:#64748b;">
-                                <span>当前算法: <strong id="algo-name-display" style="color:var(--root-green);">希尔门限版</strong></span>
+                                <span>当前算法: <strong style="color:#0284c7;">双轴/三轴纯开方</strong></span>
                                 <span>y/x: <strong id="ratio-display" style="color:var(--purple);">0.350</strong></span>
                             </div>
                         </div>
@@ -942,12 +326,12 @@
                         <span class="legend-val" id="lbl-t-bal" style="color:#a855f7;">-- cm</span>
                     </div>
                     <div class="legend-box s-max">
-                        <span style="color:#1e3a8a; font-weight:bold;">[当前最大·实线]</span>
-                        <span class="legend-val" id="lbl-s-max" style="color:#1e3a8a;">-- cm</span>
+                        <span style="color:#0284c7; font-weight:bold;">[普通最大·实线]</span>
+                        <span class="legend-val" id="lbl-s-max" style="color:#0284c7;">-- cm</span>
                     </div>
                     <div class="legend-box s-bal">
-                        <span style="color:#3b82f6; font-weight:bold;">[当前均衡·虚线]</span>
-                        <span class="legend-val" id="lbl-s-bal" style="color:#3b82f6;">-- cm</span>
+                        <span style="color:#38bdf8; font-weight:bold;">[普通均衡·虚线]</span>
+                        <span class="legend-val" id="lbl-s-bal" style="color:#38bdf8;">-- cm</span>
                     </div>
                 </div>
             </div>
@@ -962,7 +346,7 @@
         <!-- ===== 页脚 ===== -->
         <div class="footer">
             <div class="footer-left">
-                <div class="desc" id="footerDesc"><strong>正反双希尔对称架构已生效</strong></div>
+                <div class="desc" id="footerDesc"><strong>双轴/三轴纯开方多项式体系已生效</strong></div>
             </div>
             <div class="footer-right">
                 <span class="sig">作者：西岛海</span>
@@ -974,32 +358,18 @@
     <script>
         const PI = Math.PI;
 
-        // ---- 1. 最新【跟枪模式】核心参数 (正反双希尔对称无死区版) ----
+        // ---- 1. 最新【跟枪模式】核心参数 (XYZ 纯开方) ----
         const TRACK = {
-            C: 6.35,
-            Wx: 0.600,
-            Wy: 0.250,
-            Wz: 0.150,
+            C: 16.40,
             Px: 0.250,
-            Gy: 3.75,
-            Ny: 4.0,
-            Yc0: 5.0,
-            Gz: 3.00,
-            Nz: 5.00,
-            Z0: 135.0
+            Py: 0.250,
+            Pz: -0.500,
+            Wx: 0.500,
+            Wy: 0.250,
+            Wz: 0.250
         };
 
-        // ---- 2. 普通模式核心参数 ----
-        const ROOT_HILL = {
-            C: 1.75,
-            px: 0.500,
-            Gy: 2.00,
-            Ny: 2.5,
-            Yo: 45.0,
-            Wx: 0.666,
-            Wy: 0.334
-        };
-
+        // ---- 2. 普通模式核心参数 (仅保留纯开方版) ----
         const ROOT_POWER = {
             C: 1.66,
             px: 0.500,
@@ -1009,7 +379,6 @@
         };
 
         let currentMode = 'standard';
-        let currentAlgo = 'hill';
         let currentUnit = 'cm';
         let currentAnchor = 'q2';
 
@@ -1017,51 +386,25 @@
         const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
         const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
 
-        // ---- 核心跟枪计算模型 (正反双希尔对称) ----
+        // ---- 核心跟枪计算模型 (XYZ纯开方) ----
         function calcTracking(x, y, z, k) {
             const xc = Math.max(0.001, x / k);
             const yc = Math.max(0.001, y / k);
+            const z_val = Math.max(0.1, z); // 防 0 产生负指数 Infinity 报错
+
             const Base_X = Math.pow(xc, TRACK.Px);
-
-            // Y轴：正希尔激活
-            const y_pow = Math.pow(yc, TRACK.Ny);
-            const y0_pow = Math.pow(TRACK.Yc0, TRACK.Ny);
-            const hill_ratio_y = y_pow / (y_pow + y0_pow);
-            const Base_Y = 1.0 + TRACK.Gy * hill_ratio_y;
-
-            // Z轴：反希尔抑制
-            z = Math.max(0.1, Math.min(180, z));
-            const z_pow = Math.pow(z, TRACK.Nz);
-            const z0_pow = Math.pow(TRACK.Z0, TRACK.Nz);
-            const hill_ratio_z = z0_pow / (z_pow + z0_pow);
-            const Base_Z = 1.0 + TRACK.Gz * hill_ratio_z;
+            const Base_Y = Math.pow(yc, TRACK.Py);
+            const Base_Z = Math.pow(z_val, TRACK.Pz);
 
             const wX = Math.pow(Base_X, TRACK.Wx);
             const wY = Math.pow(Base_Y, TRACK.Wy);
             const wZ = Math.pow(Base_Z, TRACK.Wz);
+            
             const raw = wX * wY * wZ;
             const Max_cm = k * TRACK.C * raw;
             const Max_cun = Max_cm / k;
-            return { xc, yc, Base_X, Base_Y, Base_Z, hill_ratio_y, hill_ratio_z, wX, wY, wZ, raw, Max_cm, Max_cun };
-        }
-
-        // ---- 普通模式：希尔门限版 ----
-        function calcRootHill(x, y, k) {
-            const { C, px, Gy, Ny, Yo, Wx, Wy } = ROOT_HILL;
-            const xc = Math.max(0.001, x / k);
-            const yc = Math.max(0.001, y / k);
-            const baseX = Math.pow(xc, px);
-
-            const y_pow = Math.pow(yc, Ny);
-            const y0_pow = Math.pow(Yo, Ny);
-            const hill_ratio = y_pow / (y_pow + y0_pow);
-            const baseY = 1.0 + Gy * hill_ratio;
-
-            const wX = Math.pow(baseX, Wx);
-            const wY = Math.pow(baseY, Wy);
-            const raw = wX * wY;
-            const out_cm = k * C * raw;
-            return { xc, yc, baseX, baseY, hill_ratio, wX, wY, raw, out_cm, out_cun: out_cm / k };
+            
+            return { xc, yc, Base_X, Base_Y, Base_Z, wX, wY, wZ, raw, Max_cm, Max_cun };
         }
 
         // ---- 普通模式：纯开方版 ----
@@ -1079,43 +422,6 @@
             return { xc, yc, baseX, baseY, wX, wY, raw, out_cm, out_cun: out_cm / k };
         }
 
-        function computeFullOutput(x, y, k, algo) {
-            if (algo === 'hill') {
-                const r = calcRootHill(x, y, k);
-                return { val_cm: r.out_cm, val_cun: r.out_cun, isHill: true, data: r };
-            } else {
-                const r = calcRootPower(x, y, k);
-                return { val_cm: r.out_cm, val_cun: r.out_cun, isPower: true, data: r };
-            }
-        }
-
-        function setAlgo(algo) {
-            currentAlgo = algo;
-            document.getElementById('btn-algo-hill').classList.toggle('active', algo === 'hill');
-            document.getElementById('btn-algo-power').classList.toggle('active', algo === 'power');
-
-            const badge = document.getElementById('algoBadge');
-            const nameDisplay = document.getElementById('algo-name-display');
-
-            if (algo === 'hill') {
-                badge.textContent = '希尔门限版';
-                badge.style.background = 'var(--root-green)';
-                if (nameDisplay) {
-                    nameDisplay.textContent = '希尔门限版';
-                    nameDisplay.style.color = 'var(--root-green)';
-                }
-            } else {
-                badge.textContent = '纯开方版';
-                badge.style.background = '#0284c7';
-                if (nameDisplay) {
-                    nameDisplay.textContent = '纯开方版';
-                    nameDisplay.style.color = '#0284c7';
-                }
-            }
-            updateDisplays();
-            calculate();
-        }
-
         function setMode(mode) {
             currentMode = mode;
             const isStd = mode === 'standard';
@@ -1128,19 +434,6 @@
 
             document.getElementById('fTitle').textContent = isStd ? '普通模式' : '跟枪模式';
             document.getElementById('formulaCard').className = 'formula-card' + (isStd ? '' : ' track');
-            document.getElementById('algoToggleGroup').style.display = isStd ? 'flex' : 'none';
-
-            const nameDisplay = document.getElementById('algo-name-display');
-            if (!isStd) {
-                document.getElementById('algoBadge').textContent = '正反双希尔';
-                document.getElementById('algoBadge').style.background = 'var(--purple)';
-                if (nameDisplay) {
-                    nameDisplay.textContent = '跟枪模式';
-                    nameDisplay.style.color = 'var(--purple)';
-                }
-            } else {
-                setAlgo(currentAlgo);
-            }
 
             updateDisplays();
             calculate();
@@ -1154,58 +447,35 @@
             if (!isStd) {
                 exprElem.innerHTML = `
                     <div class="math-row">
-                        <span>Max(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">6.35</span> · </span>
+                        <span>Max(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">16.40</span> · </span>
                         <span class="bracket">[</span>
-                        <span class="sqrt"><span class="rad-deg">4</span><span class="rad-sym">√</span><span class="rad-body">x<sub>c</sub></span></span>
-                        <span class="bracket">]</span><span class="weight-exp">60.0%</span>
+                        <span>(x<sub>c</sub>)<sup>0.250</sup></span>
+                        <span class="bracket">]</span><span class="weight-exp">50.0%</span>
                         <span>·</span>
                         <span class="bracket">[</span>
-                        <span>1 + 3.75 · </span>
-                        <div class="frac"><span class="num">y<sub>c</sub><sup>4.0</sup></span><span class="den">y<sub>c</sub><sup>4.0</sup> + 5.0<sup>4.0</sup></span></div>
+                        <span>(y<sub>c</sub>)<sup>0.250</sup></span>
                         <span class="bracket">]</span><span class="weight-exp">25.0%</span>
                         <span>·</span>
                         <span class="bracket">[</span>
-                        <span>1 + 3.00 · </span>
-                        <div class="frac"><span class="num">135.0<sup>5.0</sup></span><span class="den">z<sup>5.0</sup> + 135.0<sup>5.0</sup></span></div>
-                        <span class="bracket">]</span><span class="weight-exp">15.0%</span>
+                        <span>(z)<sup>-0.500</sup></span>
+                        <span class="bracket">]</span><span class="weight-exp">25.0%</span>
                     </div>
                 `;
-                footerDesc.innerHTML =
-                    `<strong>跟枪模式（正反双希尔对称版）</strong>：Max(cm) = 2.05 · 6.35 · [(x_c)^0.25]^60% · [Base_Y]^25% · [Base_Z]^15%`;
-                return;
-            }
-
-            if (currentAlgo === 'hill') {
-                exprElem.innerHTML = `
-                    <div class="math-row">
-                        <span>Output(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">1.75</span> · </span>
-                        <span class="bracket">[</span>
-                        <span class="sqrt"><span class="rad-sym">√</span><span class="rad-body">x<sub>c</sub></span></span>
-                        <span class="bracket">]</span><span class="weight-exp">66.6%</span>
-                        <span>·</span>
-                        <span class="bracket">[</span>
-                        <span>1 + 2.00 · </span>
-                        <div class="frac"><span class="num">y<sub>c</sub><sup>2.5</sup></span><span class="den">y<sub>c</sub><sup>2.5</sup> + 45.0<sup>2.5</sup></span></div>
-                        <span class="bracket">]</span><span class="weight-exp">33.4%</span>
-                    </div>
-                `;
-                footerDesc.innerHTML =
-                    `<strong>普通模式（希尔门限版）</strong>：Output(cm) = 2.05 · 1.75 · [√x_c]^66.6% · [1 + 2.00·(y_c^2.5 / (y_c^2.5 + 45^2.5))]^33.4%`;
+                footerDesc.innerHTML = `<strong>跟枪模式（三轴纯开方乘积版）</strong>：Max(cm) = 2.05 · 16.40 · (x_c)^0.125 · (y_c)^0.0625 · (z)^-0.125`;
             } else {
                 exprElem.innerHTML = `
                     <div class="math-row">
                         <span>Output(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">1.66</span> · </span>
                         <span class="bracket">[</span>
-                        <span class="sqrt"><span class="rad-sym">√</span><span class="rad-body">x<sub>c</sub></span></span>
+                        <span>(x<sub>c</sub>)<sup>0.500</sup></span>
                         <span class="bracket">]</span><span class="weight-exp">66.6%</span>
                         <span>·</span>
                         <span class="bracket">[</span>
-                        <span class="sqrt"><span class="rad-deg">4</span><span class="rad-sym">√</span><span class="rad-body">y<sub>c</sub></span></span>
+                        <span>(y<sub>c</sub>)<sup>0.250</sup></span>
                         <span class="bracket">]</span><span class="weight-exp">33.4%</span>
                     </div>
                 `;
-                footerDesc.innerHTML =
-                    `<strong>普通模式（纯开方版）</strong>：Output(cm) = 2.05 · 1.66 · [√x_c]^66.6% · [(y_c)^0.25]^33.4%`;
+                footerDesc.innerHTML = `<strong>普通模式（双轴纯开方乘积版）</strong>：Output(cm) = 2.05 · 1.66 · [(x_c)^0.5]^66.6% · [(y_c)^0.25]^33.4%`;
             }
         }
 
@@ -1352,14 +622,14 @@
             const isTrack = currentMode === 'tracking';
             const unitStr = isCun ? 'cun' : 'cm';
 
-            // 1. 跟枪模式输出
+            // 1. 跟枪模式输出 (XYZ纯开方)
             const trk = calcTracking(x, y, z, k);
             const trk_max_cm = trk.Max_cm;
             const trk_bal_cm = trk_max_cm * 0.75;
 
-            // 2. 当前普通模式输出
-            const stdCurrent = computeFullOutput(x, y, k, currentAlgo);
-            const std_bal_cm = stdCurrent.val_cm;
+            // 2. 当前普通模式输出 (纯开方版)
+            const stdCurrent = calcRootPower(x, y, k);
+            const std_bal_cm = stdCurrent.out_cm;
             const std_max_cm = std_bal_cm * (4 / 3);
 
             document.getElementById('lbl-t-max').textContent = trk_max_cm.toFixed(2) + ' cm';
@@ -1381,10 +651,10 @@
                 updateDisplayValues(baseVals);
 
                 stepsHtml = `
-                    <div class="step-stage cun track">【第一阶段：进入寸空间计算 (正反双希尔)】</div>
-                    <div class="step-line"><span class="step-num purple">1</span><span class="step-label">物理量转寸</span><span class="step-formula">x_c = ${x} ÷ ${k} = ${trk.xc.toFixed(2)} 寸 ｜ y_c = ${y} ÷ ${k} = ${trk.yc.toFixed(2)} 寸 ｜ 视界 Z = ${z}°</span></div>
-                    <div class="step-line"><span class="step-num purple">2</span><span class="step-label">三轴独立基底计算</span><span class="step-formula">Base_X = (${trk.xc.toFixed(2)})<sup>${TRACK.Px}</sup> = ${trk.Base_X.toFixed(3)}<br>Base_Y (正希尔) = 1 + ${TRACK.Gy}·[(${trk.yc.toFixed(2)})<sup>4</sup> / ((${trk.yc.toFixed(2)})<sup>4</sup> + ${TRACK.Yc0}<sup>4</sup>)] = 1 + ${TRACK.Gy}·${trk.hill_ratio_y.toFixed(4)} = ${trk.Base_Y.toFixed(3)}<br>Base_Z (反希尔) = 1 + ${TRACK.Gz}·[${TRACK.Z0}<sup>5</sup> / (${z}<sup>5</sup> + ${TRACK.Z0}<sup>5</sup>)] = 1 + ${TRACK.Gz}·${trk.hill_ratio_z.toFixed(4)} = ${trk.Base_Z.toFixed(3)}</span></div>
-                    <div class="step-line"><span class="step-num purple">3</span><span class="step-label">独立权重加权融合</span><span class="step-formula">融合值 = [Base_X]<sup>60.0%</sup> × [Base_Y]<sup>25.0%</sup> × [Base_Z]<sup>15.0%</sup> = [${trk.Base_X.toFixed(3)}]<sup>0.60</sup> × [${trk.Base_Y.toFixed(3)}]<sup>0.25</sup> × [${trk.Base_Z.toFixed(3)}]<sup>0.15</sup> = ${trk.raw.toFixed(4)}</span></div>
+                    <div class="step-stage cun track">【第一阶段：进入寸空间计算 (三轴纯开方)】</div>
+                    <div class="step-line"><span class="step-num purple">1</span><span class="step-label">物理量转换</span><span class="step-formula">x_c = ${x} ÷ ${k} = ${trk.xc.toFixed(2)} 寸 ｜ y_c = ${y} ÷ ${k} = ${trk.yc.toFixed(2)} 寸 ｜ 视界 Z = ${z}°</span></div>
+                    <div class="step-line"><span class="step-num purple">2</span><span class="step-label">独立基底指数</span><span class="step-formula">Base_X = (${trk.xc.toFixed(2)})<sup>${TRACK.Px}</sup> = ${trk.Base_X.toFixed(3)}<br>Base_Y = (${trk.yc.toFixed(2)})<sup>${TRACK.Py}</sup> = ${trk.Base_Y.toFixed(3)}<br>Base_Z = (${Math.max(0.1, z)})<sup>${TRACK.Pz}</sup> = ${trk.Base_Z.toFixed(3)}</span></div>
+                    <div class="step-line"><span class="step-num purple">3</span><span class="step-label">连乘外层加权</span><span class="step-formula">融合值 = [Base_X]<sup>50.0%</sup> × [Base_Y]<sup>25.0%</sup> × [Base_Z]<sup>25.0%</sup> = [${trk.Base_X.toFixed(3)}]<sup>0.50</sup> × [${trk.Base_Y.toFixed(3)}]<sup>0.25</sup> × [${trk.Base_Z.toFixed(3)}]<sup>0.25</sup> = ${trk.raw.toFixed(4)}</span></div>
 
                     <div class="step-stage cm">【第二阶段：还原为物理距离 (cm/360°)】</div>
                     <div class="step-line"><span class="step-num purple">4</span><span class="step-label">量纲还原</span><span class="step-formula">Max(cm) = 同身寸k(${k}) × 纲量尺C(${TRACK.C}) × 融合值(${trk.raw.toFixed(4)}) = ${(k * TRACK.C).toFixed(3)} × ${trk.raw.toFixed(4)}</span><span>=</span><span class="step-result purple">${trk_max_cm.toFixed(2)} cm/360°</span></div>
@@ -1394,7 +664,7 @@
                     </div>
                 `;
             } else {
-                baseVal = isCun ? stdCurrent.val_cun : stdCurrent.val_cm;
+                baseVal = isCun ? stdCurrent.out_cun : stdCurrent.out_cm;
                 const activeRatios = RATIOS_STD;
                 const baseVals = {};
                 for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
@@ -1402,39 +672,21 @@
                 }
                 updateDisplayValues(baseVals);
 
-                if (currentAlgo === 'hill') {
-                    const rd = stdCurrent.data;
-                    const { C, px, Gy, Ny, Yo, Wx, Wy } = ROOT_HILL;
-                    stepsHtml = `
-                        <div class="step-stage cun root">【第一阶段：进入寸空间计算 (希尔门限)】</div>
-                        <div class="step-line"><span class="step-num green">1</span><span class="step-label">物理量转寸</span><span class="step-formula">x_c = ${x} ÷ ${k} = ${rd.xc.toFixed(2)} 寸 ｜ y_c = ${y} ÷ ${k} = ${rd.yc.toFixed(2)} 寸</span></div>
-                        <div class="step-line"><span class="step-num green">2</span><span class="step-label">双轴独立基底计算</span><span class="step-formula">Base_X = (${rd.xc.toFixed(2)})<sup>${px}</sup> = ${rd.baseX.toFixed(3)}<br>Base_Y = 1 + ${Gy}·[(${rd.yc.toFixed(2)})<sup>${Ny}</sup> / ((${rd.yc.toFixed(2)})<sup>${Ny}</sup> + ${Yo}<sup>${Ny}</sup>)] = 1 + ${Gy}·${rd.hill_ratio.toFixed(4)} = ${rd.baseY.toFixed(3)}</span></div>
-                        <div class="step-line"><span class="step-num green">3</span><span class="step-label">独立权重加权融合</span><span class="step-formula">融合值 = [Base_X]<sup>66.6%</sup> × [Base_Y]<sup>33.4%</sup> = [${rd.baseX.toFixed(3)}]<sup>0.666</sup> × [${rd.baseY.toFixed(3)}]<sup>0.334</sup> = ${rd.raw.toFixed(4)}</span></div>
+                const rd = stdCurrent;
+                const { C, px, py, Wx, Wy } = ROOT_POWER;
+                stepsHtml = `
+                    <div class="step-stage cun" style="background:#0284c7;">【第一阶段：进入寸空间计算 (双轴开方)】</div>
+                    <div class="step-line"><span class="step-num blue">1</span><span class="step-label">物理量转寸</span><span class="step-formula">x_c = ${x} ÷ ${k} = ${rd.xc.toFixed(2)} 寸 ｜ y_c = ${y} ÷ ${k} = ${rd.yc.toFixed(2)} 寸</span></div>
+                    <div class="step-line"><span class="step-num blue">2</span><span class="step-label">双轴开方基底</span><span class="step-formula">Base_X = (${rd.xc.toFixed(2)})<sup>${px}</sup> = ${rd.baseX.toFixed(3)}<br>Base_Y = (${rd.yc.toFixed(2)})<sup>${py}</sup> = ${rd.baseY.toFixed(3)}</span></div>
+                    <div class="step-line"><span class="step-num blue">3</span><span class="step-label">独立权重加权</span><span class="step-formula">融合值 = [Base_X]<sup>66.6%</sup> × [Base_Y]<sup>33.4%</sup> = [${rd.baseX.toFixed(3)}]<sup>0.666</sup> × [${rd.baseY.toFixed(3)}]<sup>0.334</sup> = ${rd.raw.toFixed(4)}</span></div>
 
-                        <div class="step-stage cm">【第二阶段：还原为物理距离 (cm/360°)】</div>
-                        <div class="step-line"><span class="step-num green">4</span><span class="step-label">量纲还原</span><span class="step-formula">Output(cm) = k(${k}) × C(${C}) × 融合值(${rd.raw.toFixed(4)}) = ${(k*C).toFixed(3)} × ${rd.raw.toFixed(4)}</span><span>=</span><span class="step-result green">${rd.out_cm.toFixed(2)} cm/360°</span></div>
-                        <div class="step-line" style="color:var(--root-green);font-weight:700;border-top:1px dashed rgba(0,0,0,0.06);margin-top:4px;padding-top:4px;">
-                            <span>🎯 希尔门限基准均衡值 = ${baseVal.toFixed(2)} ${unitStr}</span>
-                            <span style="color:#64748b;font-weight:400;font-size:0.75rem;">(最大值 4/3 = ${(baseVal*4/3).toFixed(2)}, 最小值 2/3 = ${(baseVal*2/3).toFixed(2)})</span>
-                        </div>
-                    `;
-                } else {
-                    const rd = stdCurrent.data;
-                    const { C, px, py, Wx, Wy } = ROOT_POWER;
-                    stepsHtml = `
-                        <div class="step-stage cun" style="background:#0284c7;">【第一阶段：进入寸空间计算 (纯开方)】</div>
-                        <div class="step-line"><span class="step-num" style="background:#0284c7;">1</span><span class="step-label">物理量转寸</span><span class="step-formula">x_c = ${x} ÷ ${k} = ${rd.xc.toFixed(2)} 寸 ｜ y_c = ${y} ÷ ${k} = ${rd.yc.toFixed(2)} 寸</span></div>
-                        <div class="step-line"><span class="step-num" style="background:#0284c7;">2</span><span class="step-label">双轴开方基底</span><span class="step-formula">Base_X = (${rd.xc.toFixed(2)})<sup>${px}</sup> = ${rd.baseX.toFixed(3)}<br>Base_Y = (${rd.yc.toFixed(2)})<sup>${py}</sup> = ${rd.baseY.toFixed(3)}</span></div>
-                        <div class="step-line"><span class="step-num" style="background:#0284c7;">3</span><span class="step-label">独立权重加权融合</span><span class="step-formula">融合值 = [Base_X]<sup>66.6%</sup> × [Base_Y]<sup>33.4%</sup> = [${rd.baseX.toFixed(3)}]<sup>0.666</sup> × [${rd.baseY.toFixed(3)}]<sup>0.334</sup> = ${rd.raw.toFixed(4)}</span></div>
-
-                        <div class="step-stage cm">【第二阶段：还原为物理距离 (cm/360°)】</div>
-                        <div class="step-line"><span class="step-num" style="background:#0284c7;">4</span><span class="step-label">量纲还原</span><span class="step-formula">Output(cm) = k(${k}) × C(${C}) × 融合值(${rd.raw.toFixed(4)}) = ${(k*C).toFixed(3)} × ${rd.raw.toFixed(4)}</span><span>=</span><span class="step-result" style="color:#0284c7;">${rd.out_cm.toFixed(2)} cm/360°</span></div>
-                        <div class="step-line" style="color:#0284c7;font-weight:700;border-top:1px dashed rgba(0,0,0,0.06);margin-top:4px;padding-top:4px;">
-                            <span>🎯 纯开方基准均衡值 = ${baseVal.toFixed(2)} ${unitStr}</span>
-                            <span style="color:#64748b;font-weight:400;font-size:0.75rem;">(最大值 4/3 = ${(baseVal*4/3).toFixed(2)}, 最小值 2/3 = ${(baseVal*2/3).toFixed(2)})</span>
-                        </div>
-                    `;
-                }
+                    <div class="step-stage cm">【第二阶段：还原为物理距离 (cm/360°)】</div>
+                    <div class="step-line"><span class="step-num blue">4</span><span class="step-label">量纲还原</span><span class="step-formula">Output(cm) = k(${k}) × C(${C}) × 融合值(${rd.raw.toFixed(4)}) = ${(k*C).toFixed(3)} × ${rd.raw.toFixed(4)}</span><span>=</span><span class="step-result blue">${rd.out_cm.toFixed(2)} cm/360°</span></div>
+                    <div class="step-line" style="color:#0284c7;font-weight:700;border-top:1px dashed rgba(0,0,0,0.06);margin-top:4px;padding-top:4px;">
+                        <span>🎯 普通基准均衡值 = ${baseVal.toFixed(2)} ${unitStr}</span>
+                        <span style="color:#64748b;font-weight:400;font-size:0.75rem;">(最大值 4/3 = ${(baseVal*4/3).toFixed(2)}, 最小值 2/3 = ${(baseVal*2/3).toFixed(2)})</span>
+                    </div>
+                `;
             }
 
             document.getElementById('stepsNatural').innerHTML = stepsHtml;
@@ -1490,8 +742,8 @@
 
             for (let x_plot = 0; x_plot <= maxX; x_plot += 100) {
                 const r_trk = calcTracking(x_plot, y_in, z_in, k);
-                const r_cur = computeFullOutput(x_plot, y_in, k, currentAlgo);
-                maxY = Math.max(maxY, r_trk.Max_cm, r_cur.val_cm * (4 / 3));
+                const r_cur = calcRootPower(x_plot, y_in, k);
+                maxY = Math.max(maxY, r_trk.Max_cm, r_cur.out_cm * (4 / 3));
             }
             maxY = Math.max(90, maxY * 1.15);
 
@@ -1527,9 +779,9 @@
                 ctx.fillText(xVal, p.px, h - pad.bottom + 12);
             }
 
-            // 普通模式曲线
-            const stdLineColor = (currentAlgo === 'hill') ? '#0d7c3f' : '#0284c7';
-            const stdMaxLineColor = (currentAlgo === 'hill') ? '#047857' : '#0369a1';
+            // 普通模式曲线 (深蓝 #0284c7)
+            const stdLineColor = '#0284c7';
+            const stdMaxLineColor = '#0369a1';
 
             ctx.strokeStyle = stdLineColor;
             ctx.lineWidth = 1.6;
@@ -1537,8 +789,8 @@
             ctx.beginPath();
             let first = true;
             for (let xp = 0; xp <= maxX; xp += 40) {
-                const r = computeFullOutput(xp, y_in, k, currentAlgo);
-                const p = toPx(xp, r.val_cm);
+                const r = calcRootPower(xp, y_in, k);
+                const p = toPx(xp, r.out_cm);
                 if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
@@ -1549,13 +801,13 @@
             ctx.beginPath();
             first = true;
             for (let xp = 0; xp <= maxX; xp += 40) {
-                const r = computeFullOutput(xp, y_in, k, currentAlgo);
-                const p = toPx(xp, r.val_cm * (4 / 3));
+                const r = calcRootPower(xp, y_in, k);
+                const p = toPx(xp, r.out_cm * (4 / 3));
                 if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
 
-            // 跟枪模式曲线
+            // 跟枪模式曲线 (紫色)
             ctx.strokeStyle = '#a855f7';
             ctx.lineWidth = 1.6;
             ctx.setLineDash([4, 3]);
@@ -1640,13 +892,6 @@
             document.getElementById('anchorDisplay').textContent = '均衡';
             document.getElementById('anchorName').textContent = '均衡';
 
-            const nameDisplay = document.getElementById('algo-name-display');
-            if (nameDisplay) {
-                nameDisplay.textContent = '希尔门限版';
-                nameDisplay.style.color = 'var(--root-green)';
-            }
-
-            setAlgo('hill');
             syncFromTop();
             updateDisplays();
         }
