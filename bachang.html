@@ -215,7 +215,7 @@
 
     <div id="crosshair"></div>
     
-    <!-- 顶部极简 HUD (角度高精度化置于 FOV 之后) -->
+    <!-- 顶部极简 HUD -->
     <div id="top-hud">
         <div class="hud-card">
             <div>DPI: <span class="hud-val" id="hud-dpi">800</span></div>
@@ -292,7 +292,7 @@
                     </div>
                 </div>
 
-                <div class="divider"></div> <!-- 防混淆分隔线 -->
+                <div class="divider"></div>
 
                 <!-- CM/360° 预设选项 -->
                 <div class="cm-presets">
@@ -318,12 +318,11 @@
                     </div>
                 </div>
 
-                <div class="divider"></div> <!-- 防混淆分隔线 -->
+                <div class="divider"></div>
 
                 <div class="row">
                     <label>水平 FOV</label>
                     <div class="presets-row">
-                        <!-- 新增了 10度和60度选项 -->
                         <button class="preset-pill" id="btn-fov-10" onclick="syncFov(10)">10°</button>
                         <button class="preset-pill" id="btn-fov-60" onclick="syncFov(60)">60°</button>
                         <button class="preset-pill" id="btn-fov-90" onclick="syncFov(90)">90°</button>
@@ -384,7 +383,6 @@
         // =========================================================
         const ISO_INCH_TO_CM = 2.54;
 
-        // 赤橙黄绿青蓝紫白黑 9种纯色块定义
         const COLOR_PRESETS_CROSSHAIR = [
             { name: '赤', hex: '#ef4444' },
             { name: '橙', hex: '#f97316' },
@@ -461,7 +459,7 @@
         }
 
         // =========================================================
-        // 3. Three.js 场景构建
+        // 3. Three.js 场景构建 + 【高通透·大范围全域离散方块薄云】
         // =========================================================
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
@@ -505,24 +503,44 @@
         const skyMesh = new THREE.Mesh(skyGeo, skyMat);
         scene.add(skyMesh);
 
+        // =========================================================
+        // 【核心改进】：轻薄、极简、大范围离散散落方块云 (无肉团感)
+        // =========================================================
         const cloudGroup = new THREE.Group();
         scene.add(cloudGroup);
-        const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.68 });
 
-        for (let i = 0; i < 15; i++) {
-            const angle = (i / 15) * Math.PI * 2 + (Math.random() * 0.4 - 0.2);
-            const dist = 75 + Math.random() * 65; 
-            const x = Math.sin(angle) * dist;
-            const z = -Math.cos(angle) * dist;
-            const y = 48 + Math.random() * 20;
-            const w = 24 + Math.random() * 20;
-            const h = 2.5 + Math.random() * 1.5;
-            const d = 16 + Math.random() * 18;
+        // 半透明薄积云材质 (高透光性，不挡视野)
+        const cloudMat = new THREE.MeshLambertMaterial({ 
+            color: 0xffffff, 
+            transparent: true, 
+            opacity: 0.58,
+            depthWrite: false 
+        });
+
+        // 生成 28 片宽域离散薄片云，彻底分散到 360° 天空各处
+        const numClouds = 28;
+        for (let i = 0; i < numClouds; i++) {
+            const angle = (i / numClouds) * Math.PI * 2 + (Math.random() * 0.35 - 0.17);
+            const dist = 55 + Math.random() * 85; // 55米到140米大范围离散分布
+            const altitude = 42 + Math.random() * 26; // 42m ~ 68m 多层立体高度
+            
+            // 细长、轻薄的扁平矩形云片（厚度仅 0.8m ~ 1.4m，彻底消除肉团感）
+            const w = 15 + Math.random() * 25;
+            const h = 0.8 + Math.random() * 0.6;
+            const d = 8 + Math.random() * 14;
 
             const geo = new THREE.BoxGeometry(w, h, d);
             const mesh = new THREE.Mesh(geo, cloudMat);
-            mesh.position.set(x, y, z);
-            mesh.userData = { angle, dist, speed: 0.0015 + Math.random() * 0.002 };
+            
+            mesh.position.set(Math.sin(angle) * dist, altitude, -Math.cos(angle) * dist);
+            mesh.rotation.y = (Math.random() * 0.2); // 轻微偏角营造自然感
+            
+            mesh.userData = { 
+                angle: angle, 
+                dist: dist, 
+                altitude: altitude, 
+                speed: 0.0010 + Math.random() * 0.0012 
+            };
             cloudGroup.add(mesh);
         }
 
@@ -618,26 +636,22 @@
         }
 
         // =========================================================
-        // 4. 双精度视角控制与准星射线判定 (即时计算 3 位小数角度)
+        // 4. 双精度视角控制与准星射线判定
         // =========================================================
         let yaw = 0.0;
         let pitch = 0.0;
 
         document.addEventListener('mousemove', (e) => {
             if (document.pointerLockElement === document.body) {
-                // 原生精算：直接用 Float64 双精度将 movement 转化为弧度
                 yaw -= e.movementX * radiansPerCount;
                 pitch -= e.movementY * radiansPerCount;
                 
-                // 俯仰角限位
                 pitch = Math.max(-Math.PI / 2 + 0.001, Math.min(Math.PI / 2 - 0.001, pitch));
-                // 防止万向锁与超大数溢出，保证在 0~2π 内循环 (这是保精度的神来之笔)
                 yaw = yaw % (Math.PI * 2);
 
                 const euler = new THREE.Euler(pitch, yaw, 0, 'YXZ');
                 camera.quaternion.setFromEuler(euler);
 
-                // 更新左上角实时角度显示 (0.000° ~ 360.000°)
                 let currentDeg = ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
                 document.getElementById('hud-angle').innerText = currentDeg.toFixed(3);
             }
@@ -647,7 +661,6 @@
         const centerVec = new THREE.Vector2(0, 0);
         const crosshairEl = document.getElementById('crosshair');
 
-        // 准星变色机制：支持自定义纯色块与昼夜默认
         function updateCrosshairUI(onTarget) {
             let color;
             if (config.customCrosshair.enabled) {
@@ -754,7 +767,7 @@
                                 <button class="step-btn" id="btn-t${i}-rng-plus">+</button>
                             </div>
                         </div>
-                        <div style="font-size:0.56rem;color:${t.color};margin-bottom:3px;">(填 45° 即在 45° 总角跨度内来回移动)</div>
+                        <div style="font-size:0.56rem;color:${t.color};margin-bottom:3px;">(特别说明：填 45° 即在 45° 总角跨度内来回移动)</div>
                         <div class="row">
                             <label style="color:${t.color};">• 角速度 (°/s)</label>
                             <div class="stepper-box">
@@ -892,7 +905,6 @@
             mesh.castShadow = true;
             scene.add(mesh);
 
-            // 【默认化处理】A球 0度，B球 22.5度，剩下的依次隔开
             let defaultDeg = 0.0;
             if (i === 1) defaultDeg = 22.5;
             else if (i > 1) defaultDeg = (i * 15) - 30;
@@ -1032,46 +1044,6 @@
             updateScene();
         }
 
-        // =========================================================
-        // UI 色块初始化与挂载
-        // =========================================================
-        function initCrosshairColorSwatches() {
-            const defContainer = document.getElementById('swatches-default');
-            const tgtContainer = document.getElementById('swatches-target');
-
-            COLOR_PRESETS_CROSSHAIR.forEach(c => {
-                const b1 = document.createElement('div');
-                b1.className = 'swatch-btn' + (c.hex === config.customCrosshair.defaultColor ? ' active' : '');
-                b1.style.background = c.hex;
-                b1.title = c.name;
-                b1.onclick = () => {
-                    config.customCrosshair.defaultColor = c.hex;
-                    defContainer.querySelectorAll('.swatch-btn').forEach(el => el.classList.remove('active'));
-                    b1.classList.add('active');
-                    updateCrosshairUI(false);
-                };
-                defContainer.appendChild(b1);
-
-                const b2 = document.createElement('div');
-                b2.className = 'swatch-btn' + (c.hex === config.customCrosshair.targetColor ? ' active' : '');
-                b2.style.background = c.hex;
-                b2.title = c.name;
-                b2.onclick = () => {
-                    config.customCrosshair.targetColor = c.hex;
-                    tgtContainer.querySelectorAll('.swatch-btn').forEach(el => el.classList.remove('active'));
-                    b2.classList.add('active');
-                    updateCrosshairUI(false);
-                };
-                tgtContainer.appendChild(b2);
-            });
-
-            document.getElementById('inp-custom-crosshair').addEventListener('change', (e) => {
-                config.customCrosshair.enabled = e.target.checked;
-                document.getElementById('crosshair-custom-box').style.display = config.customCrosshair.enabled ? 'block' : 'none';
-                updateCrosshairUI(false);
-            });
-        }
-
         function bindSyncGlobal(idRange, idNum, keyConfig, parentObj = config, isCmSlider = false) {
             const rng = idRange ? document.getElementById(idRange) : null;
             const num = document.getElementById(idNum);
@@ -1145,6 +1117,43 @@
             });
         });
 
+        function initCrosshairColorSwatches() {
+            const defContainer = document.getElementById('swatches-default');
+            const tgtContainer = document.getElementById('swatches-target');
+
+            COLOR_PRESETS_CROSSHAIR.forEach(c => {
+                const b1 = document.createElement('div');
+                b1.className = 'swatch-btn' + (c.hex === config.customCrosshair.defaultColor ? ' active' : '');
+                b1.style.background = c.hex;
+                b1.title = c.name;
+                b1.onclick = () => {
+                    config.customCrosshair.defaultColor = c.hex;
+                    defContainer.querySelectorAll('.swatch-btn').forEach(el => el.classList.remove('active'));
+                    b1.classList.add('active');
+                    updateCrosshairUI(false);
+                };
+                defContainer.appendChild(b1);
+
+                const b2 = document.createElement('div');
+                b2.className = 'swatch-btn' + (c.hex === config.customCrosshair.targetColor ? ' active' : '');
+                b2.style.background = c.hex;
+                b2.title = c.name;
+                b2.onclick = () => {
+                    config.customCrosshair.targetColor = c.hex;
+                    tgtContainer.querySelectorAll('.swatch-btn').forEach(el => el.classList.remove('active'));
+                    b2.classList.add('active');
+                    updateCrosshairUI(false);
+                };
+                tgtContainer.appendChild(b2);
+            });
+
+            document.getElementById('inp-custom-crosshair').addEventListener('change', (e) => {
+                config.customCrosshair.enabled = e.target.checked;
+                document.getElementById('crosshair-custom-box').style.display = config.customCrosshair.enabled ? 'block' : 'none';
+                updateCrosshairUI(false);
+            });
+        }
+
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.fov = hFovToVfov(config.fovHorizontal, camera.aspect);
@@ -1161,12 +1170,15 @@
         const hudFps = document.getElementById('hud-fps');
 
         function updatePhysics(dt) {
+            // 云层高空慢速漂移 (全域 360° 均匀离散慢速旋转)
             cloudGroup.children.forEach(c => {
                 c.userData.angle += c.userData.speed * dt;
                 c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
                 c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
+                c.position.y = c.userData.altitude;
             });
 
+            // 动态多目标运动迭代器
             config.targets.forEach(t => {
                 if (!t.mesh.visible) return;
                 
@@ -1222,7 +1234,6 @@
         updateScene();
         animate(performance.now());
 
-        // F11 提示框 3秒倒计时去高光
         setTimeout(() => {
             const f11Box = document.getElementById('f11-box');
             if (f11Box) f11Box.classList.remove('f11-highlight');
