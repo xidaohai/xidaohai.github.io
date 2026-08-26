@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>万能靶场 · V1纯净简易版 (西岛海)</title>
+    <title>测验靶场 · V1纯净版 (西岛海)</title>
     <!-- 引入 Three.js 核心渲染库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
@@ -141,11 +141,6 @@
         .theme-toggle-btn:hover, .drag-btn:hover { background: #e0f2fe; border-color: #0284c7; }
         .drag-btn.active { background: #e0f2fe; color: #0284c7; border-color: #0284c7; }
 
-        .note-tip {
-            font-size: 0.6rem; color: #0369a1; background: #e0f2fe; padding: 3px 6px;
-            border-radius: 3px; margin-bottom: 4px; font-weight: 600;
-        }
-
         .section { margin-bottom: 6px; border-bottom: 1px dashed rgba(0,0,0,0.06); padding-bottom: 6px; }
         .section-title { font-size: 0.7rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; }
         
@@ -162,7 +157,7 @@
         .dpi-pill.active, .cm-pill.active, .preset-pill.active { background: #0284c7; color: #ffffff; border-color: #0284c7; }
         .presets-row { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 0; align-items: center; }
 
-        /* 防混淆精美分隔线 */
+        /* 分隔线 */
         .divider { height: 1.5px; background: rgba(2, 132, 199, 0.12); margin: 6px 0; border-radius: 1px; }
 
         /* 准星纯色块选择组件 */
@@ -201,7 +196,8 @@
             padding: 8px; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: 0.15s;
             margin-top: 4px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2); letter-spacing: 0.5px;
         }
-        .btn-start:hover { background: #0369a1; }
+        .btn-start:hover:not(:disabled) { background: #0369a1; }
+        .btn-start:disabled { background: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; }
 
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: auto; }
         .btn-action {
@@ -249,7 +245,7 @@
         </div>
         <div class="rel-desc">
             • <strong>DPI</strong> 为硬件采样密度；<strong>CM/360°</strong> 为旋转物理位移。<br>
-            • 双精度 Float64 直通底层驱动脉冲，彻底规避低速慢挪丢点与“大数吃小数”现象，保持极限精度。
+            • 物理与 JS 退出彻底解耦，引入 300ms 安全防抖与 Zero-GC 架构，彻底消灭队列阻塞。
         </div>
     </div>
 
@@ -292,7 +288,7 @@
                     </div>
                 </div>
 
-                <div class="divider"></div> <!-- 防混淆分隔线 -->
+                <div class="divider"></div>
 
                 <!-- CM/360° 预设选项 -->
                 <div class="cm-presets">
@@ -318,7 +314,7 @@
                     </div>
                 </div>
 
-                <div class="divider"></div> <!-- 防混淆分隔线 -->
+                <div class="divider"></div>
 
                 <div class="row">
                     <label>水平 FOV</label>
@@ -335,7 +331,7 @@
                     </div>
                 </div>
 
-                <div class="divider"></div> <!-- 防混淆分隔线 -->
+                <div class="divider"></div>
 
                 <!-- 站立眼高锁定与微调 (默认1.625m) -->
                 <div class="row">
@@ -413,7 +409,7 @@
             cmPer360: 50.0,
             fovHorizontal: 103,
             theme: 'day',
-            viewHeight: 1.625, // 【标准眼高】：严格锁定为 1.625m
+            viewHeight: 1.625,
             customCrosshair: {
                 enabled: false,
                 defaultColor: '#ef4444',
@@ -473,7 +469,7 @@
         }
 
         // =========================================================
-        // 3. Three.js 场景构建 + 【视平线标线】
+        // 3. Three.js 场景构建
         // =========================================================
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
@@ -558,9 +554,7 @@
         grid.position.y = 0.001;
         scene.add(grid);
 
-        // =========================================================
-        // 【视平线标线 (1.625m 水平参照线)】
-        // =========================================================
+        // 视平线标线
         let horizonLine, thinLine;
 
         function updateHorizon(height) {
@@ -659,7 +653,6 @@
             config.targets.forEach(t => {
                 const r = (t.sizeCm / 100) / 2;
                 t.mesh.scale.set(r, r, r);
-                // 小球位置：基准视高 1.625m + 用户自定义的垂直偏移
                 t.mesh.position.y = config.viewHeight + (t.yOffset || 0);
             });
             camera.position.y = config.viewHeight;
@@ -669,31 +662,40 @@
         }
 
         // =========================================================
-        // 4. 双精度视角控制与准星射线判定
+        // 4. 双精度视角控制 (零 GC + 瞬时异常过滤)
         // =========================================================
         let yaw = 0.0;
         let pitch = 0.0;
+        const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
         document.addEventListener('mousemove', (e) => {
             if (document.pointerLockElement === document.body) {
-                yaw -= e.movementX * radiansPerCount;
-                pitch -= e.movementY * radiansPerCount;
+                const movementX = e.movementX;
+                const movementY = e.movementY;
+
+                // 过滤 Chromium 光标回中假跳跃
+                if (Math.abs(movementX) > 1200 || Math.abs(movementY) > 1200) {
+                    return;
+                }
+
+                yaw -= movementX * radiansPerCount;
+                pitch -= movementY * radiansPerCount;
                 
                 pitch = Math.max(-Math.PI / 2 + 0.001, Math.min(Math.PI / 2 - 0.001, pitch));
                 yaw = yaw % (Math.PI * 2);
 
-                const euler = new THREE.Euler(pitch, yaw, 0, 'YXZ');
-                camera.quaternion.setFromEuler(euler);
-
-                let currentDeg = ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
-                document.getElementById('hud-angle').innerText = currentDeg.toFixed(3);
+                cameraEuler.set(pitch, yaw, 0);
+                camera.quaternion.setFromEuler(cameraEuler);
             }
         });
 
         const raycaster = new THREE.Raycaster();
         const centerVec = new THREE.Vector2(0, 0);
         const crosshairEl = document.getElementById('crosshair');
+        let currentCrosshairColor = '';
+        let currentOnTargetState = false;
 
+        // 仅在状态改变时更新样式，避免每帧触发全页重绘
         function updateCrosshairUI(onTarget) {
             let color;
             if (config.customCrosshair.enabled) {
@@ -706,8 +708,16 @@
                     color = onTarget ? '#00d2ff' : '#ef4444';
                 }
             }
-            document.documentElement.style.setProperty('--crosshair-color', color);
-            crosshairEl.classList.toggle('on-target', onTarget);
+
+            if (color !== currentCrosshairColor) {
+                currentCrosshairColor = color;
+                document.documentElement.style.setProperty('--crosshair-color', color);
+            }
+
+            if (onTarget !== currentOnTargetState) {
+                currentOnTargetState = onTarget;
+                crosshairEl.classList.toggle('on-target', onTarget);
+            }
         }
 
         function checkAim() {
@@ -744,7 +754,7 @@
         });
 
         // =========================================================
-        // 5. 动态目标构建与垂直偏移绑定
+        // 5. 动态目标构建
         // =========================================================
         const container1 = document.getElementById('targets-container-1');
         const container2 = document.getElementById('targets-container-2');
@@ -791,7 +801,6 @@
                             <button class="step-btn" id="btn-t${i}-a-plus">+</button>
                         </div>
                     </div>
-                    <!-- 垂直偏移设置 (支持高低落差模拟) -->
                     <div class="row">
                         <label>上下 (m)</label>
                         <input type="range" id="inp-t${i}-y-r" min="-2" max="4" step="0.05" value="${t.yOffset || 0}">
@@ -893,7 +902,6 @@
                 updateAngle(t.centerDeg + (e.deltaY < 0 ? 0.25 : -0.25));
             }, { passive: false });
 
-            // 垂直偏移 (yOffset)
             const y_rng = document.getElementById(`inp-t${i}-y-r`);
             const y_num = document.getElementById(`inp-t${i}-y`);
             const y_minus = document.getElementById(`btn-t${i}-y-minus`);
@@ -1068,13 +1076,49 @@
             }
         });
 
-        btnLock.addEventListener('click', async () => {
+        // 300ms 锁定申请防抖，抚平高频连续误点
+        let isLocking = false;
+
+        btnLock.addEventListener('click', () => {
+            if (document.pointerLockElement === document.body) return;
+            if (isLocking) return;
+
+            isLocking = true;
+            setTimeout(() => { isLocking = false; }, 300);
+
             try {
-                await document.body.requestPointerLock({ unadjustedMovement: true });
+                const promise = document.body.requestPointerLock({ unadjustedMovement: true });
+                if (promise && promise.catch) {
+                    promise.catch((err) => {
+                        console.warn("Raw pointer lock blocked, falling back to standard lock...", err);
+                        if (document.pointerLockElement !== document.body) {
+                            try {
+                                document.body.requestPointerLock();
+                            } catch (fallbackErr) {
+                                console.error("Standard lock failed as well:", fallbackErr);
+                            }
+                        }
+                    });
+                }
             } catch (err) {
-                document.body.requestPointerLock();
+                try {
+                    document.body.requestPointerLock();
+                } catch (e) {}
             }
         });
+
+        // 拦截 ESC，防止 Chromium 内部累积退出手势标记
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.code === 'Escape') {
+                if (isStickToCursor) {
+                    isStickToCursor = false;
+                    dragBtn.classList.remove('active');
+                    dragBtn.innerText = '移动窗口';
+                }
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
 
         document.addEventListener('pointerlockchange', () => {
             if (document.pointerLockElement === document.body) {
@@ -1243,12 +1287,14 @@
         });
 
         // =========================================================
-        // 7. 物理运动引擎 (等角速度罗盘算法) + 渲染主循环
+        // 7. 物理运动引擎 + 渲染主循环
         // =========================================================
         let lastTime = performance.now();
         let lastFrameTime = performance.now();
         let frameCount = 0;
         const hudFps = document.getElementById('hud-fps');
+        const hudAngle = document.getElementById('hud-angle');
+        let lastRenderedAngle = -999;
 
         function updatePhysics(dt) {
             cloudGroup.children.forEach(c => {
@@ -1277,7 +1323,6 @@
                 const rad = (targetDeg * Math.PI) / 180;
                 t.mesh.position.x = t.distMeters * Math.sin(rad);
                 t.mesh.position.z = -t.distMeters * Math.cos(rad);
-                // 垂直位置 = 站立眼高 1.625m + 单独垂直偏移
                 t.mesh.position.y = config.viewHeight + (t.yOffset || 0);
             });
         }
@@ -1289,6 +1334,13 @@
             lastFrameTime = now;
 
             updatePhysics(dt);
+
+            // 帧循环同步更新角度文本
+            let currentDeg = ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
+            if (Math.abs(currentDeg - lastRenderedAngle) > 0.001) {
+                lastRenderedAngle = currentDeg;
+                hudAngle.innerText = currentDeg.toFixed(3);
+            }
 
             frameCount++;
             if (now - lastTime >= 400) {
@@ -1303,7 +1355,7 @@
         }
 
         // =========================================================
-        // 8. 简易版初始化启动 (纯净无冗余)
+        // 8. 初始化启动
         // =========================================================
         initCrosshairColorSwatches();
         addNewTarget(); // A: 0°

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>万能靶场 ·人偶版 (西岛海)</title>
+    <title>测验靶场 · V2人偶版 (西岛海)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -456,8 +456,13 @@
             box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
             letter-spacing: 0.5px;
         }
-        .btn-start:hover {
+        .btn-start:hover:not(:disabled) {
             background: #0369a1;
+        }
+        .btn-start:disabled {
+            background: #cbd5e1 !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed;
         }
 
         .action-grid {
@@ -509,7 +514,7 @@
     <div id="bottom-right-hud">
         <div class="rel-title">物理精算映射原理 (底层互通)</div>
         <div class="rel-formula">360°总点数 N = (cm ÷ 2.54) × DPI<br />鼠标单点弧度 Δθ = 2π / N</div>
-        <div class="rel-desc">• <strong>DPI</strong> 为硬件采样密度；<strong>CM/360°</strong> 为旋转物理位移。<br />• 采用 Float64 双精度原生直通，视高 1.625m 严格对齐 CS:GO/瓦罗兰特眼高。</div>
+        <div class="rel-desc">• <strong>DPI</strong> 为硬件采样密度；<strong>CM/360°</strong> 为旋转物理位移。<br />• 物理与 JS 退出彻底解耦，引入 300ms 安全防抖与 Zero-GC 架构，彻底消灭队列阻塞。</div>
     </div>
 
     <div id="canvas-container"></div>
@@ -593,7 +598,7 @@
                         <button class="step-btn" onclick="stepValGlobal('inp-fov', 1)">+</button>
                     </div>
                 </div>
-                <!-- 玩家视高调节 (默认精确 1.625m) -->
+                <!-- 玩家视高调节 -->
                 <div class="row" style="margin-top: 6px; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 6px;">
                     <label>玩家视高 (眼高/m)</label>
                     <input type="range" id="inp-height-r" min="0.5" max="3.0" step="0.005" value="1.625" />
@@ -660,7 +665,7 @@
             targetShape: 'dummy',
             customCrosshair: { enabled: false, defaultColor: '#ef4444', targetColor: '#00d2ff' },
             targets: [],
-            viewHeight: 1.625 // 【严格锁定】：CS / 瓦罗兰特官方站立标准眼高 1.625m
+            viewHeight: 1.625 
         };
 
         const PRESET_COLORS = ['#ea580c', '#0284c7', '#10b981', '#8b5cf6', '#f43f5e', '#f59e0b', '#14b8a6', '#ec4899', '#06b6d4'];
@@ -668,7 +673,6 @@
         let radiansPerCount = 0.0;
         let totalCounts360 = 0;
         
-        // 【关键物理常量】：假人头部中心到地面的严格比例系数 (1.625 / 0.115 ≈ 14.1304)
         const DUMMY_BASE_OFFSET = 14.130435; 
 
         function updateSensitivity() {
@@ -881,12 +885,12 @@
             const headGeo = new THREE.SphereGeometry(1.0, 32, 32);
             const head = new THREE.Mesh(headGeo, headMat);
             head.scale.set(1.0, 1.28, 1.0);
-            head.position.set(0, 0.0, 0); // 头部中心为 0,0,0
+            head.position.set(0, 0.0, 0); 
             head.castShadow = true;
             head.userData.part = 'head';
             group.add(head);
 
-            // 虚线下半轮廓 (绝对等径贴合头部)
+            // 虚线下半轮廓
             const dashPts = [];
             for (let a = -Math.PI * 0.05; a >= -Math.PI * 0.95; a -= 0.04) {
                 dashPts.push(new THREE.Vector3(1.00 * Math.cos(a), 1.28 * Math.sin(a), 1.01));
@@ -898,13 +902,13 @@
             dashLine.userData.ignoreRaycast = true;
             group.add(dashLine);
 
-            // 身躯长方体：向下延伸至 -14.13 (完全贴地，绝无漂浮与穿模)
+            // 身躯
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
-            const bodyHeight = 13.58; // 顶部从 -0.55 切入，底部到 -14.13
+            const bodyHeight = 13.58; 
             const bodyCylGeo = new THREE.CylinderGeometry(1.9, 1.9, bodyHeight, 16);
             const bodyBox = new THREE.Mesh(bodyCylGeo, bodyMat);
             bodyBox.scale.set(3.38 / 3.8, 1.0, 2.2 / 3.8);
-            bodyBox.position.set(0, -0.55 - (bodyHeight / 2), 0); // 中心位于 -7.34
+            bodyBox.position.set(0, -0.55 - (bodyHeight / 2), 0); 
             bodyBox.castShadow = true;
             bodyBox.userData.part = 'body';
             group.add(bodyBox);
@@ -936,18 +940,16 @@
             const isDummy = config.targetShape === 'dummy';
 
             config.targets.forEach(t => {
-                const r = (t.sizeCm / 100) / 2; // 基准半径
+                const r = (t.sizeCm / 100) / 2; 
                 const headVerticalRadius = r * 1.28;
 
                 t.sphereMesh.visible = isSphere;
                 t.dummyGroup.visible = isDummy;
 
                 if (isSphere) {
-                    // 小球中心严格对齐玩家当前眼高 (1.625m)
                     t.sphereMesh.scale.set(headVerticalRadius, headVerticalRadius, headVerticalRadius);
                     t.rootGroup.position.y = config.viewHeight + (t.yOffset || 0);
                 } else {
-                    // 假人脚底严格落在 0.000m 地表，头部中心锁定在 1.625m
                     t.dummyGroup.scale.set(r, r, r);
                     t.rootGroup.position.y = (DUMMY_BASE_OFFSET * r) + (t.yOffset || 0);
                 }
@@ -960,27 +962,36 @@
         }
 
         // =============================================================
-        //  6. 双精度视角 & 准星射线
+        //  6. 双精度视角 & 准星射线 (零 GC + 异常位移过滤)
         // =============================================================
         let yaw = 0.0,
             pitch = 0.0;
+        const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
         document.addEventListener('mousemove', (e) => {
             if (document.pointerLockElement === document.body) {
-                yaw -= e.movementX * radiansPerCount;
-                pitch -= e.movementY * radiansPerCount;
+                const movementX = e.movementX;
+                const movementY = e.movementY;
+
+                // 过滤 Chromium 在光标回中时的瞬时异常跳跃数据
+                if (Math.abs(movementX) > 1200 || Math.abs(movementY) > 1200) {
+                    return;
+                }
+
+                yaw -= movementX * radiansPerCount;
+                pitch -= movementY * radiansPerCount;
                 pitch = Math.max(-Math.PI / 2 + 0.001, Math.min(Math.PI / 2 - 0.001, pitch));
                 yaw = yaw % (Math.PI * 2);
-                const euler = new THREE.Euler(pitch, yaw, 0, 'YXZ');
-                camera.quaternion.setFromEuler(euler);
-                let deg = ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
-                document.getElementById('hud-angle').innerText = deg.toFixed(3);
+                cameraEuler.set(pitch, yaw, 0);
+                camera.quaternion.setFromEuler(cameraEuler);
             }
         });
 
         const raycaster = new THREE.Raycaster();
         const centerVec = new THREE.Vector2(0, 0);
         const crosshairEl = document.getElementById('crosshair');
+        let currentCrosshairColor = '';
+        let currentOnTargetState = false;
 
         function updateCrosshairUI(onTarget) {
             let color;
@@ -990,9 +1001,19 @@
                 const isSunset = config.theme === 'sunset';
                 color = onTarget ? (isSunset ? '#000000' : '#00d2ff') : (isSunset ? '#ffffff' : '#ef4444');
             }
-            document.documentElement.style.setProperty('--crosshair-color', color);
-            crosshairEl.classList.toggle('on-target', onTarget);
+
+            if (color !== currentCrosshairColor) {
+                currentCrosshairColor = color;
+                document.documentElement.style.setProperty('--crosshair-color', color);
+            }
+
+            if (onTarget !== currentOnTargetState) {
+                currentOnTargetState = onTarget;
+                crosshairEl.classList.toggle('on-target', onTarget);
+            }
         }
+
+        const activeRaycastObjects = [];
 
         function checkAim() {
             if (document.pointerLockElement !== document.body) {
@@ -1001,28 +1022,35 @@
             }
             raycaster.setFromCamera(centerVec, camera);
 
-            let meshes = [];
-            config.targets.forEach(t => {
-                if (config.targetShape === 'sphere') {
-                    if (t.sphereMesh.visible) meshes.push(t.sphereMesh);
+            activeRaycastObjects.length = 0;
+            const isSphere = (config.targetShape === 'sphere');
+
+            for (let i = 0; i < config.targets.length; i++) {
+                const t = config.targets[i];
+                if (isSphere) {
+                    if (t.sphereMesh.visible) activeRaycastObjects.push(t.sphereMesh);
                 } else {
                     if (t.dummyGroup.visible) {
-                        t.dummyGroup.children.forEach(child => {
+                        const children = t.dummyGroup.children;
+                        for (let j = 0; j < children.length; j++) {
+                            const child = children[j];
                             if (child.isMesh && child.userData.part && !child.userData.ignoreRaycast) {
-                                meshes.push(child);
+                                activeRaycastObjects.push(child);
                             }
-                        });
+                        }
                     }
                 }
-            });
+            }
 
-            const intersects = raycaster.intersectObjects(meshes, false);
+            const intersects = raycaster.intersectObjects(activeRaycastObjects, false);
             if (intersects.length > 0) {
                 updateCrosshairUI(true);
                 let hitTarget = null;
                 let hitPart = 'body';
-                let hitObject = intersects[0].object;
-                for (let t of config.targets) {
+                const hitObject = intersects[0].object;
+                
+                for (let i = 0; i < config.targets.length; i++) {
+                    const t = config.targets[i];
                     if (t.rootGroup === hitObject.parent || t.rootGroup === hitObject.parent?.parent) {
                         hitTarget = t;
                         break;
@@ -1265,7 +1293,7 @@
             if (i === 1) defaultDeg = 22.5;
             else if (i > 1) defaultDeg = (i * 15) - 30;
 
-            const size = 23; // 标准 CS 头部尺度 (23cm)
+            const size = 23; 
             const newTarget = {
                 id: id,
                 sizeCm: size,
@@ -1362,11 +1390,50 @@
             }
         });
 
-        btnLock.addEventListener('click', async () => {
-            try { await document.body.requestPointerLock({ unadjustedMovement: true }); } catch (_) { 
-                document.body.requestPointerLock(); 
+        // 300ms 锁定申请防抖
+        let isLocking = false;
+
+        btnLock.addEventListener('click', () => {
+            if (document.pointerLockElement === document.body) return;
+            if (isLocking) return;
+
+            isLocking = true;
+            setTimeout(() => { isLocking = false; }, 300);
+
+            try {
+                const promise = document.body.requestPointerLock({ unadjustedMovement: true });
+                if (promise && promise.catch) {
+                    promise.catch((err) => {
+                        console.warn("Raw pointer lock blocked, falling back to standard lock...", err);
+                        if (document.pointerLockElement !== document.body) {
+                            try {
+                                document.body.requestPointerLock();
+                            } catch (fallbackErr) {
+                                console.error("Standard lock failed as well:", fallbackErr);
+                            }
+                        }
+                    });
+                }
+            } catch (_) { 
+                try {
+                    document.body.requestPointerLock(); 
+                } catch (e) {}
             }
         });
+
+        // 拦截 ESC 键阻止默认手势压栈
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.code === 'Escape') {
+                if (isStick) {
+                    isStick = false;
+                    dragBtn.classList.remove('active');
+                    dragBtn.innerText = '移动窗口';
+                }
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+
         document.addEventListener('pointerlockchange', () => {
             if (document.pointerLockElement === document.body) {
                 panel.style.opacity = '0';
@@ -1527,6 +1594,8 @@
             lastFrame = performance.now(),
             frameCnt = 0;
         const hudFps = document.getElementById('hud-fps');
+        const hudAngle = document.getElementById('hud-angle');
+        let lastRenderedAngle = -999;
 
         function updatePhysics(dt) {
             cloudGroup.children.forEach(c => {
@@ -1552,7 +1621,6 @@
                 t.rootGroup.position.x = t.distMeters * Math.sin(rad);
                 t.rootGroup.position.z = -t.distMeters * Math.cos(rad);
 
-                // 假人始终正向朝向相机
                 if (config.targetShape === 'dummy' && t.dummyGroup.visible) {
                     const dx = camera.position.x - t.rootGroup.position.x;
                     const dz = camera.position.z - t.rootGroup.position.z;
@@ -1566,6 +1634,14 @@
             const dt = Math.min((now - lastFrame) / 1000, 0.1);
             lastFrame = now;
             updatePhysics(dt);
+
+            // 帧循环中同步更新角度文本
+            const currentDeg = ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
+            if (Math.abs(currentDeg - lastRenderedAngle) > 0.001) {
+                lastRenderedAngle = currentDeg;
+                hudAngle.innerText = currentDeg.toFixed(3);
+            }
+
             frameCnt++;
             if (now - lastTime >= 400) {
                 hudFps.innerText = Math.round((frameCnt * 1000) / (now - lastTime));
@@ -1579,12 +1655,10 @@
         // =============================================================
         //  10. 启动初始化
         // =============================================================
-        // 初始视高严格锁定在 1.625m
         config.viewHeight = 1.625;
         document.getElementById('inp-height-r').value = 1.625;
         document.getElementById('inp-height').value = "1.625";
 
-        // 纠正初始 CM/360 滑块位置匹配 50.00
         const initCmRatio = Math.pow((config.cmPer360 - 0.5) / 10000, 1 / 3.2);
         document.getElementById('inp-cm-r').value = Math.round(initCmRatio * 1000);
 
