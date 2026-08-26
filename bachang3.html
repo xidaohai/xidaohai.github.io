@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>练习靶场 · (西岛海)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
     <style>
         * {
             box-sizing: border-box;
@@ -32,7 +33,9 @@
             align-items: center;
             justify-content: center;
         }
-        #cross-h, #cross-v, #cross-dot {
+        #cross-h,
+        #cross-v,
+        #cross-dot {
             position: absolute;
             background: var(--cross-color, #ef4444);
             transition: none;
@@ -52,7 +55,8 @@
         .mode-cross #cross-dot {
             display: none !important;
         }
-        .mode-dot #cross-h, .mode-dot #cross-v {
+        .mode-dot #cross-h,
+        .mode-dot #cross-v {
             display: none !important;
         }
         .mode-dot #cross-dot {
@@ -92,11 +96,28 @@
             gap: 16px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
         }
-        .hud-val { color: #0284c7; font-weight: 900; }
-        .score-val { color: #059669; font-weight: 900; font-size: 0.86rem; }
-        .time-val { color: #ea580c; font-weight: 900; font-size: 0.86rem; }
-        .fps-val { color: #16a34a; font-weight: 900; }
-        .poll-val { color: #7c3aed; font-weight: 900; }
+        .hud-val {
+            color: #0284c7;
+            font-weight: 900;
+        }
+        .score-val {
+            color: #059669;
+            font-weight: 900;
+            font-size: 0.86rem;
+        }
+        .time-val {
+            color: #ea580c;
+            font-weight: 900;
+            font-size: 0.86rem;
+        }
+        .fps-val {
+            color: #16a34a;
+            font-weight: 900;
+        }
+        .poll-val {
+            color: #7c3aed;
+            font-weight: 900;
+        }
         .f11-card {
             padding: 7px 16px;
             font-size: 0.8rem;
@@ -111,11 +132,66 @@
             box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
         }
 
-        /* ----- 作者信息卡片 ----- */
-        #author-card {
+        /* ----- 作者卡片 + 球体颜色选择器 (左下) ----- */
+        #left-bottom-group {
             position: absolute;
             bottom: 16px;
             left: 16px;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        #ball-color-picker {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            padding: 6px 10px 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        #ball-color-picker .picker-label {
+            font-size: 0.6rem;
+            font-weight: 900;
+            color: #334155;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #ball-color-picker .picker-label span {
+            font-size: 0.7rem;
+        }
+        .ball-swatches-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 3px;
+        }
+        .ball-swatch-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+            flex-shrink: 0;
+        }
+        .ball-swatch-btn:hover {
+            transform: scale(1.2);
+            border-color: #0284c7;
+        }
+        .ball-swatch-btn.active {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 2px #0284c7, 0 0 0 4px rgba(2, 132, 199, 0.2);
+            transform: scale(1.1);
+        }
+
+        #author-card {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(16px);
             padding: 6px 14px 6px 6px;
@@ -126,7 +202,6 @@
             gap: 10px;
             text-decoration: none;
             color: inherit;
-            z-index: 5;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
             transition: transform 0.15s, background 0.15s, border-color 0.15s;
             cursor: pointer;
@@ -149,9 +224,20 @@
             justify-content: center;
             box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
         }
-        .author-meta { display: flex; flex-direction: column; }
-        .author-name { font-size: 0.76rem; font-weight: 900; color: #0f172a; }
-        .author-tag { font-size: 0.6rem; color: #64748b; font-weight: bold; }
+        .author-meta {
+            display: flex;
+            flex-direction: column;
+        }
+        .author-name {
+            font-size: 0.76rem;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        .author-tag {
+            font-size: 0.6rem;
+            color: #64748b;
+            font-weight: bold;
+        }
 
         /* ----- 右下说明与配置栏 ----- */
         #bottom-right-container {
@@ -203,7 +289,12 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
             pointer-events: none;
         }
-        .rel-title { font-size: 0.74rem; font-weight: 900; color: #0284c7; margin-bottom: 4px; }
+        .rel-title {
+            font-size: 0.74rem;
+            font-weight: 900;
+            color: #0284c7;
+            margin-bottom: 4px;
+        }
         .rel-formula {
             font-size: 0.68rem;
             font-weight: 700;
@@ -214,7 +305,11 @@
             margin-bottom: 4px;
             line-height: 1.4;
         }
-        .rel-desc { font-size: 0.64rem; color: #64748b; line-height: 1.4; }
+        .rel-desc {
+            font-size: 0.64rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
 
         /* ================= 调参控制台通用样式 ================= */
         .glass-panel {
@@ -229,8 +324,13 @@
             max-height: 88vh;
             overflow-y: auto;
         }
-        .glass-panel::-webkit-scrollbar { width: 4px; }
-        .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .glass-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .glass-panel::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
 
         #draggable-panel {
             position: absolute;
@@ -272,7 +372,11 @@
             background: #0284c7;
             border-radius: 2px;
         }
-        .header-actions { display: flex; gap: 5px; align-items: center; }
+        .header-actions {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
         .header-btn {
             background: #ffffff;
             border: 1px solid #cbd5e1;
@@ -284,8 +388,16 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .header-btn:hover { background: #e0f2fe; border-color: #0284c7; color: #0284c7; }
-        .header-btn.active { background: #0284c7; color: #ffffff; border-color: #0284c7; }
+        .header-btn:hover {
+            background: #e0f2fe;
+            border-color: #0284c7;
+            color: #0284c7;
+        }
+        .header-btn.active {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #0284c7;
+        }
 
         .mode-nav-tabs {
             display: flex;
@@ -358,11 +470,21 @@
             gap: 4px;
             margin-bottom: 6px;
         }
-        .preset-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-        .preset-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-        .preset-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-        .preset-grid.cols-7 { grid-template-columns: repeat(7, 1fr); }
-        .preset-grid.cols-8 { grid-template-columns: repeat(4, 1fr); }
+        .preset-grid.cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .preset-grid.cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .preset-grid.cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .preset-grid.cols-7 {
+            grid-template-columns: repeat(7, 1fr);
+        }
+        .preset-grid.cols-8 {
+            grid-template-columns: repeat(4, 1fr);
+        }
 
         .pill-btn {
             border: 1px solid #cbd5e1;
@@ -430,7 +552,9 @@
             justify-content: center;
             transition: background 0.1s;
         }
-        .step-btn:hover { background: #e0f2fe; }
+        .step-btn:hover {
+            background: #e0f2fe;
+        }
         .num-input {
             width: 54px;
             height: 22px;
@@ -479,11 +603,37 @@
             cursor: pointer;
             transition: transform 0.1s, border-color 0.1s;
         }
-        .swatch-btn:hover { transform: scale(1.15); border-color: #0284c7; }
+        .swatch-btn:hover {
+            transform: scale(1.15);
+            border-color: #0284c7;
+        }
         .swatch-btn.active {
             border-color: #0284c7;
             box-shadow: 0 0 0 1.5px #0284c7;
             transform: scale(1.1);
+        }
+
+        /* 动态漂移大开关 */
+        #btn-dynamic-toggle {
+            font-size: 0.78rem !important;
+            font-weight: 900 !important;
+            padding: 6px 14px !important;
+            border-radius: 6px !important;
+            border: 2px solid #94a3b8 !important;
+            background: #e2e8f0 !important;
+            color: #475569 !important;
+            transition: all 0.2s ease !important;
+            letter-spacing: 0.3px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        }
+        #btn-dynamic-toggle:hover {
+            transform: scale(1.02);
+        }
+        #btn-dynamic-toggle.active {
+            background: #22c55e !important;
+            color: #ffffff !important;
+            border-color: #16a34a !important;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35) !important;
         }
 
         .btn-start {
@@ -509,7 +659,10 @@
         #progress-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(4px);
             z-index: 100;
@@ -533,7 +686,10 @@
         #result-modal {
             display: none;
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(8px);
             z-index: 200;
@@ -551,19 +707,51 @@
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.8);
         }
-        .result-title { font-size: 1.25rem; font-weight: 900; color: #0f172a; }
-        .result-subtitle { font-size: 0.72rem; color: #64748b; margin: 3px 0 10px; }
-        .score-large { font-size: 3.2rem; font-weight: 900; color: #0284c7; line-height: 1; margin-bottom: 12px; }
+        .result-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        .result-subtitle {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin: 3px 0 10px;
+        }
+        .score-large {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: #0284c7;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
         .result-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
             margin-bottom: 14px;
         }
-        .res-box { background: #f1f5f9; padding: 8px; border-radius: 6px; }
-        .res-label { font-size: 0.62rem; color: #64748b; font-weight: 700; }
-        .res-val { font-size: 1.1rem; font-weight: 900; }
-        .res-meta { display: flex; justify-content: center; gap: 14px; font-size: 0.65rem; color: #64748b; margin-bottom: 16px; }
+        .res-box {
+            background: #f1f5f9;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .res-label {
+            font-size: 0.62rem;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .res-val {
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
+        .res-meta {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            font-size: 0.65rem;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
         .btn-restart {
             background: #0284c7;
             color: #fff;
@@ -575,7 +763,54 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .btn-restart:hover { background: #0369a1; }
+        .btn-restart:hover {
+            background: #0369a1;
+        }
+
+        @media (max-width: 820px) {
+            #draggable-panel {
+                left: 10px;
+                top: 62px;
+                width: 340px;
+            }
+            #right-panel {
+                right: 10px;
+                top: 62px;
+                width: 280px;
+            }
+            #bottom-right-container {
+                width: 260px;
+            }
+            #ball-color-picker .ball-swatch-btn {
+                width: 18px;
+                height: 18px;
+            }
+        }
+        @media (max-width: 600px) {
+            #draggable-panel {
+                left: 6px;
+                top: 56px;
+                width: calc(100vw - 12px);
+                max-height: 48vh;
+            }
+            #right-panel {
+                display: none;
+            }
+            #bottom-right-container {
+                width: 200px;
+                bottom: 70px;
+            }
+            #ball-color-picker .ball-swatch-btn {
+                width: 16px;
+                height: 16px;
+            }
+            .hud-card {
+                font-size: 0.6rem;
+                padding: 4px 10px;
+                gap: 8px;
+                flex-wrap: wrap;
+            }
+        }
     </style>
 </head>
 <body>
@@ -603,14 +838,22 @@
         </div>
     </div>
 
-    <!-- 作者卡片 -->
-    <a href="https://space.bilibili.com/1534330" target="_blank" id="author-card" title="点击访问作者B站空间">
-        <div class="author-avatar-badge">海</div>
-        <div class="author-meta">
-            <span class="author-name">作者：西岛海</span>
-            <span class="author-tag">xlm</span>
+    <!-- 左下：球体颜色 + 作者卡片 -->
+    <div id="left-bottom-group">
+        <!-- 球体颜色选择器 -->
+        <div id="ball-color-picker">
+            <div class="picker-label"><span></span> 球体颜色</div>
+            <div class="ball-swatches-grid" id="swatches-ball"></div>
         </div>
-    </a>
+        <!-- 作者卡片 -->
+        <a href="https://space.bilibili.com/1534330" target="_blank" id="author-card" title="点击访问作者B站空间">
+            <div class="author-avatar-badge">海</div>
+            <div class="author-meta">
+                <span class="author-name">作者：西岛海</span>
+                <span class="author-tag">xlm</span>
+            </div>
+        </a>
+    </div>
 
     <!-- 右下说明与配置栏 -->
     <div id="bottom-right-container">
@@ -705,20 +948,18 @@
             <div class="section-card">
                 <div class="section-header">
                     <span class="section-label">动态漂移 (Dynamic)</span>
-                    <button class="pill-btn" id="btn-dynamic-toggle" style="padding:2px 10px;">状态: 关闭</button>
+                    <button class="pill-btn" id="btn-dynamic-toggle" style="padding:6px 14px;">🔘 动态漂移: 关闭</button>
                 </div>
-                <div class="preset-grid cols-4" style="margin-bottom:6px;">
-                    <button class="pill-btn" data-val="15" onclick="setSixshotSpeed(15)">15°/s</button>
-                    <button class="pill-btn active" data-val="30" onclick="setSixshotSpeed(30)">30°/s</button>
-                    <button class="pill-btn" data-val="60" onclick="setSixshotSpeed(60)">60°/s</button>
-                    <button class="pill-btn" data-val="120" onclick="setSixshotSpeed(120)">120°/s</button>
+                <div class="preset-grid cols-2" style="margin-bottom:6px;">
+                    <button class="pill-btn active" data-val="12.5" onclick="setSixshotSpeed(12.5)">12.5°/s</button>
+                    <button class="pill-btn" data-val="25" onclick="setSixshotSpeed(25)">25°/s</button>
                 </div>
                 <div class="ctrl-row">
                     <label>角速度 (°/s)</label>
-                    <input type="range" id="inp-speed-r" min="1" max="300" step="1" value="30" />
+                    <input type="range" id="inp-speed-r" min="1" max="300" step="1" value="12.5" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-speed', -1)">−</button>
-                        <input type="number" class="num-input" id="inp-speed" value="30.0" step="1" min="0.1" />
+                        <input type="number" class="num-input" id="inp-speed" value="12.50" step="1" min="0.1" />
                         <button class="step-btn" onclick="stepValGlobal('inp-speed', 1)">+</button>
                     </div>
                 </div>
@@ -784,18 +1025,16 @@
                 <div class="section-header">
                     <span class="section-label">运动速度 & 活动范围</span>
                 </div>
-                <div class="preset-grid cols-4" style="margin-bottom:4px;">
-                    <button class="pill-btn" data-val="15" onclick="setTrackingSpeed(15)">15°/s</button>
-                    <button class="pill-btn active" data-val="30" onclick="setTrackingSpeed(30)">30°/s</button>
-                    <button class="pill-btn" data-val="60" onclick="setTrackingSpeed(60)">60°/s</button>
-                    <button class="pill-btn" data-val="120" onclick="setTrackingSpeed(120)">120°/s</button>
+                <div class="preset-grid cols-2" style="margin-bottom:4px;">
+                    <button class="pill-btn active" data-val="12.5" onclick="setTrackingSpeed(12.5)">12.5°/s</button>
+                    <button class="pill-btn" data-val="25" onclick="setTrackingSpeed(25)">25°/s</button>
                 </div>
                 <div class="ctrl-row" style="margin-bottom:6px;">
                     <label>角速度 (°/s)</label>
-                    <input type="range" id="inp-track-speed-r" min="1" max="300" step="1" value="30" />
+                    <input type="range" id="inp-track-speed-r" min="1" max="300" step="1" value="12.5" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-track-speed', -1)">−</button>
-                        <input type="number" class="num-input" id="inp-track-speed" value="30.00" step="1" min="0.1" />
+                        <input type="number" class="num-input" id="inp-track-speed" value="12.50" step="1" min="0.1" />
                         <button class="step-btn" onclick="stepValGlobal('inp-track-speed', 1)">+</button>
                     </div>
                 </div>
@@ -986,15 +1225,18 @@
             },
             dynamic: {
                 enabled: false,
-                speedDegPerSec: 30.0
+                speedDegPerSec: 12.5
             },
             tracking: {
                 motionType: 'fly',
                 angleRange: 90.0,
-                speedDegPerSec: 30.0,
+                speedDegPerSec: 12.5,
                 targetSizeCm: 25.0
             }
         };
+
+        // 球体颜色独立存储（用户选择）
+        let selectedBallColor = null; // null 表示跟随主题
 
         let depthLockSixshot = true;
         let depthLockTracking = true;
@@ -1023,8 +1265,10 @@
         function updateSensitivity() {
             totalCounts360 = (config.cmPer360 / ISO_INCH_TO_CM) * config.dpi;
             radiansPerCount = (Math.PI * 2) / totalCounts360;
-            document.querySelectorAll('.dpi-pill').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === config.dpi));
-            document.querySelectorAll('.cm-pill').forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - config.cmPer360) < 0.01));
+            document.querySelectorAll('.dpi-pill').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === config
+            .dpi));
+            document.querySelectorAll('.cm-pill').forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.dataset
+                .val) - config.cmPer360) < 0.01));
             saveToLocalStorage();
         }
 
@@ -1191,7 +1435,8 @@
                 const wallH = actualMaxY - actualMinY;
                 const wallCenterY = (actualMinY + actualMaxY) / 2;
 
-                const wallMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false });
+                const wallMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.07,
+                    side: THREE.DoubleSide, depthWrite: false });
                 const wallMesh = new THREE.Mesh(new THREE.PlaneGeometry(squareSize, wallH), wallMat);
                 wallMesh.position.set(0, wallCenterY, -D);
                 spawnWallGroup.add(wallMesh);
@@ -1216,7 +1461,8 @@
                 const wallH = actualMaxY - actualMinY;
                 const wallCenterY = (actualMinY + actualMaxY) / 2;
 
-                const wallMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false });
+                const wallMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.08,
+                    side: THREE.DoubleSide, depthWrite: false });
                 const wallMesh = new THREE.Mesh(new THREE.PlaneGeometry(halfW * 2, wallH), wallMat);
                 wallMesh.position.set(0, wallCenterY, -D);
                 spawnWallGroup.add(wallMesh);
@@ -1241,7 +1487,8 @@
                 const actualH = actualMaxY - actualMinY;
                 const wallCenterY = (actualMinY + actualMaxY) / 2;
 
-                const wallMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false });
+                const wallMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.08,
+                    side: THREE.DoubleSide, depthWrite: false });
                 const wallMesh = new THREE.Mesh(new THREE.PlaneGeometry(halfW * 2, actualH), wallMat);
                 wallMesh.position.set(0, wallCenterY, -D);
                 spawnWallGroup.add(wallMesh);
@@ -1266,7 +1513,8 @@
                 const wallH = actualMaxY - actualMinY;
                 const wallCenterY = (actualMinY + actualMaxY) / 2;
 
-                const curvedMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false });
+                const curvedMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.08,
+                    side: THREE.DoubleSide, depthWrite: false });
                 const curvedMesh = new THREE.Mesh(
                     new THREE.CylinderGeometry(D, D, wallH, 48, 1, true, startAngle, totalAngleRad),
                     curvedMat
@@ -1292,26 +1540,38 @@
                         const y = Math.max(0.05, cy - d * Math.tan(maxPitch));
                         arcPoints.push(new THREE.Vector3(x, y, z));
                     }
-                    spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arcPoints), guideMat));
+                    spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(arcPoints),
+                    guideMat));
                 });
             }
         }
 
         // =========================================================
-        // 5. 靶标系统与主题材质切换
+        // 5. 靶标系统与材质
         // =========================================================
         const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
 
-        function createTargetMaterial(isSunset) {
-            const colorHex = isSunset ? 0x0284c7 : 0xea580c;
+        // 根据主题或用户选择创建材质
+        function createTargetMaterial(hexColor) {
             return new THREE.MeshStandardMaterial({
-                color: colorHex,
+                color: hexColor,
                 roughness: 0.2,
                 metalness: 0.1
             });
         }
 
-        let targetMat = createTargetMaterial(false);
+        function getDefaultBallColor() {
+            return config.theme === 'sunset' ? 0x0284c7 : 0xea580c;
+        }
+
+        function getActiveBallColor() {
+            if (selectedBallColor) {
+                return parseInt(selectedBallColor.replace('#', ''), 16);
+            }
+            return getDefaultBallColor();
+        }
+
+        let targetMat = createTargetMaterial(getActiveBallColor());
         const trackingHighlightMat = new THREE.MeshStandardMaterial({
             color: 0x22c55e,
             roughness: 0.1,
@@ -1322,19 +1582,43 @@
 
         let sixTargets = [];
         const trackingState = {
-            x: 0, y: 0, z: -10,
+            x: 0,
+            y: 0,
+            z: -10,
             dist: 10.0,
-            yaw: 0, pitch: 0,
-            vx: 0, vy: 0, vz: 0,
-            vYaw: 0, vPitch: 0, vDist: 0,
+            yaw: 0,
+            pitch: 0,
+            vx: 0,
+            vy: 0,
+            vz: 0,
+            vYaw: 0,
+            vPitch: 0,
+            vDist: 0,
             changeDirTimer: 0,
             strafeDir: 1
         };
 
+        // 核心：更新所有靶标的材质颜色（保留高亮状态）
         function updateTargetThemeMaterial() {
-            const isSunset = (config.theme === 'sunset');
-            targetMat = createTargetMaterial(isSunset);
-            sixTargets.forEach(t => { t.mesh.material = targetMat; });
+            const hexColor = getActiveBallColor();
+            const newMat = createTargetMaterial(hexColor);
+            targetMat = newMat;
+            // 只更新非高亮状态的靶标（即材质不是 trackingHighlightMat 的）
+            sixTargets.forEach(t => {
+                if (t.mesh.material !== trackingHighlightMat) {
+                    t.mesh.material = targetMat;
+                }
+            });
+        }
+
+        // 强制全部更新（用于初始化或重置）
+        function forceUpdateAllTargetMaterials() {
+            const hexColor = getActiveBallColor();
+            const newMat = createTargetMaterial(hexColor);
+            targetMat = newMat;
+            sixTargets.forEach(t => {
+                t.mesh.material = targetMat;
+            });
         }
 
         function initTargets() {
@@ -1374,12 +1658,11 @@
             return { minX, maxX, minY, maxY, r };
         }
 
-        // 核心：实时应用角速度到场上目标（即拉即变）
         function applySixshotSpeedRealtime() {
             const D = config.depthSixshot;
-            const currentSpeed = (config.dynamic.enabled && (gameState === 'playing' || gameState === 'starting'))
-                ? (config.dynamic.speedDegPerSec * (Math.PI / 180) * D)
-                : 0;
+            const currentSpeed = (config.dynamic.enabled && (gameState === 'playing' || gameState === 'starting')) ?
+                (config.dynamic.speedDegPerSec * (Math.PI / 180) * D) :
+                0;
             sixTargets.forEach(t => {
                 t.speed = currentSpeed;
                 const len = Math.hypot(t.dirX, t.dirY);
@@ -1435,7 +1718,8 @@
         function respawnSixshotTarget(t) {
             const { minX, maxX, minY, maxY, r } = getSafeBoundsSixshot();
             const D = config.depthSixshot;
-            let fx, fy, valid = false, attempts = 0;
+            let fx, fy, valid = false,
+                attempts = 0;
             while (!valid && attempts < 50) {
                 attempts++;
                 fx = minX + Math.random() * (maxX - minX);
@@ -1451,10 +1735,13 @@
             t.z = -D;
             t.mesh.position.set(fx, fy, -D);
             t.mesh.visible = true;
+            // 重置材质为当前球体颜色
+            t.mesh.material = targetMat;
             const angle = Math.random() * 2 * Math.PI;
             t.dirX = Math.cos(angle);
             t.dirY = Math.sin(angle);
-            t.speed = (config.dynamic.enabled && gameState === 'playing') ? (config.dynamic.speedDegPerSec * Math.PI / 180 * D) : 0;
+            t.speed = (config.dynamic.enabled && gameState === 'playing') ? (config.dynamic.speedDegPerSec * Math.PI / 180 *
+                D) : 0;
         }
 
         function respawnTrackingTarget() {
@@ -1529,16 +1816,19 @@
             t.y = trackingState.y;
             t.z = trackingState.z;
             t.mesh.visible = true;
+            t.mesh.material = targetMat;
         }
 
         function respawnAllTargets() {
             if (config.mode === 'sixshot') {
                 for (let i = 0; i < targetCount && i < sixTargets.length; i++) respawnSixshotTarget(sixTargets[i]);
-                for (let i = targetCount; i < sixTargets.length; i++) { sixTargets[i].mesh.visible = false; sixTargets[i].speed = 0; }
+                for (let i = targetCount; i < sixTargets.length; i++) { sixTargets[i].mesh.visible = false;
+                    sixTargets[i].speed = 0; }
                 applySixshotSpeedRealtime();
             } else {
                 respawnTrackingTarget();
-                for (let i = 1; i < sixTargets.length; i++) { sixTargets[i].mesh.visible = false; sixTargets[i].speed = 0; }
+                for (let i = 1; i < sixTargets.length; i++) { sixTargets[i].mesh.visible = false;
+                    sixTargets[i].speed = 0; }
                 applyTrackingSpeedRealtime();
             }
         }
@@ -1627,7 +1917,6 @@
             saveToLocalStorage();
         }
 
-        // 无上限角速度设置
         function setTrackingSpeed(val) {
             val = Math.max(0.1, val);
             config.tracking.speedDegPerSec = val;
@@ -1642,7 +1931,7 @@
         function setSixshotSpeed(val) {
             val = Math.max(0.1, val);
             config.dynamic.speedDegPerSec = val;
-            document.getElementById('inp-speed').value = val.toFixed(1);
+            document.getElementById('inp-speed').value = val.toFixed(2);
             document.getElementById('inp-speed-r').value = val;
             document.querySelectorAll('#section-sixshot-group [data-val]').forEach(b =>
                 b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - val) < 0.1));
@@ -1724,7 +2013,8 @@
         // =========================================================
         // 7. 准星、射击与平滑峰值轮询率捕获引擎
         // =========================================================
-        let yaw = 0.0, pitch = 0.0;
+        let yaw = 0.0,
+            pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
         window.addEventListener('pointermove', (e) => {
@@ -1738,7 +2028,8 @@
             pollCount += batch;
 
             if (document.pointerLockElement === document.body) {
-                const mx = e.movementX, my = e.movementY;
+                const mx = e.movementX,
+                    my = e.movementY;
                 if (Math.abs(mx) > 1500 || Math.abs(my) > 1500) return;
                 yaw -= mx * radiansPerCount;
                 pitch -= my * radiansPerCount;
@@ -1760,7 +2051,8 @@
                 crosshairContainer.className = 'mode-dot';
                 document.documentElement.style.setProperty('--cross-size', `${c.size}px`);
                 const dot = document.getElementById('cross-dot');
-                if (dot) { dot.style.width = c.size + 'px'; dot.style.height = c.size + 'px'; }
+                if (dot) { dot.style.width = c.size + 'px';
+                    dot.style.height = c.size + 'px'; }
             } else {
                 crosshairContainer.className = 'mode-cross';
                 document.documentElement.style.setProperty('--cross-size', `${c.size}px`);
@@ -1810,7 +2102,10 @@
         window.addEventListener('mouseup', (e) => {
             if (e.button === 0) {
                 isMouseDown = false;
-                if (config.mode === 'tracking' && sixTargets[0]) sixTargets[0].mesh.material = targetMat;
+                if (config.mode === 'tracking' && sixTargets[0]) {
+                    // 恢复为球体颜色
+                    sixTargets[0].mesh.material = targetMat;
+                }
             }
         });
 
@@ -1824,7 +2119,8 @@
                 document.getElementById('hud-acc').innerText = `${acc}%`;
             } else {
                 document.getElementById('hud-score').innerText = score.toFixed(1);
-                const acc = trackingFiringTime > 0.05 ? ((trackingOnTargetTime / trackingFiringTime) * 100).toFixed(1) : '100.0';
+                const acc = trackingFiringTime > 0.05 ? ((trackingOnTargetTime / trackingFiringTime) * 100).toFixed(1) :
+                    '100.0';
                 document.getElementById('hud-acc').innerText = `${acc}%`;
             }
         }
@@ -1843,23 +2139,33 @@
         function setPanelsVisibility(visible) {
             const opacity = visible ? '1' : '0';
             const pointerEvents = visible ? 'auto' : 'none';
-            if (panel) { panel.style.opacity = opacity; panel.style.pointerEvents = pointerEvents; }
-            if (rightPanel) { rightPanel.style.opacity = opacity; rightPanel.style.pointerEvents = pointerEvents; }
-            if (brContainer) { brContainer.style.opacity = opacity; brContainer.style.pointerEvents = pointerEvents; }
+            if (panel) { panel.style.opacity = opacity;
+                panel.style.pointerEvents = pointerEvents; }
+            if (rightPanel) { rightPanel.style.opacity = opacity;
+                rightPanel.style.pointerEvents = pointerEvents; }
+            if (brContainer) { brContainer.style.opacity = opacity;
+                brContainer.style.pointerEvents = pointerEvents; }
         }
 
         function resetToIdle() {
-            if (startTimeoutId) { clearTimeout(startTimeoutId); startTimeoutId = null; }
+            if (startTimeoutId) { clearTimeout(startTimeoutId);
+                startTimeoutId = null; }
             gameState = 'idle';
             isMouseDown = false;
-            sixTargets.forEach(t => { t.mesh.visible = false; t.mesh.material = targetMat; t.speed = 0; });
+            sixTargets.forEach(t => { t.mesh.visible = false;
+                t.mesh.material = targetMat;
+                t.speed = 0; });
             if (progressOverlay) progressOverlay.style.display = 'none';
-            if (progressBar) { progressBar.style.transition = 'none'; progressBar.style.width = '0%'; }
+            if (progressBar) { progressBar.style.transition = 'none';
+                progressBar.style.width = '0%'; }
             if (resultModal) resultModal.style.display = 'none';
             setPanelsVisibility(true);
             if (document.pointerLockElement === document.body) document.exitPointerLock();
-            score = 0; hits = 0; misses = 0;
-            trackingFiringTime = 0; trackingOnTargetTime = 0;
+            score = 0;
+            hits = 0;
+            misses = 0;
+            trackingFiringTime = 0;
+            trackingOnTargetTime = 0;
             timeLeft = 49.0;
             updateHUDStats();
             document.getElementById('hud-time').innerText = '49.0';
@@ -1867,7 +2173,8 @@
 
         function finishChallenge() {
             if (gameState === 'finished') return;
-            if (startTimeoutId) { clearTimeout(startTimeoutId); startTimeoutId = null; }
+            if (startTimeoutId) { clearTimeout(startTimeoutId);
+                startTimeoutId = null; }
             gameState = 'finished';
             isMouseDown = false;
             if (document.pointerLockElement === document.body) document.exitPointerLock();
@@ -1892,7 +2199,8 @@
                 document.getElementById('res-meta-size').innerText = config.targetSizeCm;
                 document.getElementById('res-meta-dist').innerText = getCurrentDepth().toFixed(1);
             } else {
-                const acc = trackingFiringTime > 0.05 ? ((trackingOnTargetTime / trackingFiringTime) * 100).toFixed(1) : '0.0';
+                const acc = trackingFiringTime > 0.05 ? ((trackingOnTargetTime / trackingFiringTime) * 100).toFixed(1) :
+                    '0.0';
                 const coverage = ((trackingOnTargetTime / 49.0) * 100).toFixed(1);
                 let modeName = '平面漫游';
                 if (config.tracking.motionType === 'strafe') modeName = '视平线折返';
@@ -1911,7 +2219,8 @@
                 document.getElementById('res-lbl-4').innerText = '全程覆盖率';
                 document.getElementById('res-val-4').innerText = `${coverage}%`;
                 document.getElementById('res-meta-size').innerText = config.tracking.targetSizeCm;
-                document.getElementById('res-meta-dist').innerText = (config.tracking.motionType === 'free3d') ? '5~15(动态)' : getCurrentDepth().toFixed(1);
+                document.getElementById('res-meta-dist').innerText = (config.tracking.motionType === 'free3d') ?
+                    '5~15(动态)' : getCurrentDepth().toFixed(1);
             }
             document.getElementById('res-meta-fov').innerText = config.fovHorizontal;
             if (resultModal) resultModal.style.display = 'flex';
@@ -1924,12 +2233,16 @@
             isLocking = true;
             setTimeout(() => { isLocking = false; }, 300);
             if (resultModal) resultModal.style.display = 'none';
-            score = 0; hits = 0; misses = 0;
-            trackingFiringTime = 0; trackingOnTargetTime = 0;
+            score = 0;
+            hits = 0;
+            misses = 0;
+            trackingFiringTime = 0;
+            trackingOnTargetTime = 0;
             timeLeft = 49.0;
             updateHUDStats();
             document.getElementById('hud-time').innerText = '49.0';
-            sixTargets.forEach(t => { t.mesh.visible = false; t.speed = 0; });
+            sixTargets.forEach(t => { t.mesh.visible = false;
+                t.speed = 0; });
             gameState = 'starting';
             if (progressOverlay) progressOverlay.style.display = 'flex';
             if (progressBar) {
@@ -1948,7 +2261,8 @@
             } catch (e) { try { document.body.requestPointerLock(); } catch (err) { resetToIdle(); } }
             startTimeoutId = setTimeout(() => {
                 if (progressOverlay) progressOverlay.style.display = 'none';
-                if (gameState === 'starting') { gameState = 'playing'; respawnAllTargets(); }
+                if (gameState === 'starting') { gameState = 'playing';
+                    respawnAllTargets(); }
             }, 135);
         }
 
@@ -1960,8 +2274,11 @@
 
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                if (isStick) { isStick = false; dragBtn.classList.remove('active'); dragBtn.innerText = '移动窗口'; }
-                if (resultModal && resultModal.style.display === 'flex') { resultModal.style.display = 'none'; resetToIdle(); }
+                if (isStick) { isStick = false;
+                    dragBtn.classList.remove('active');
+                    dragBtn.innerText = '移动窗口'; }
+                if (resultModal && resultModal.style.display === 'flex') { resultModal.style.display = 'none';
+                    resetToIdle(); }
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -1984,13 +2301,31 @@
         const btnDynamicToggle = document.getElementById('btn-dynamic-toggle');
 
         btnLock.addEventListener('click', startChallenge);
+
+        // 动态漂移大开关 - 显眼样式
         btnDynamicToggle.addEventListener('click', () => {
             config.dynamic.enabled = !config.dynamic.enabled;
-            btnDynamicToggle.textContent = config.dynamic.enabled ? '状态: 开启' : '状态: 关闭';
-            btnDynamicToggle.classList.toggle('active', config.dynamic.enabled);
+            if (config.dynamic.enabled) {
+                btnDynamicToggle.textContent = '🔘 动态漂移: 开启';
+                btnDynamicToggle.classList.add('active');
+            } else {
+                btnDynamicToggle.textContent = '🔘 动态漂移: 关闭';
+                btnDynamicToggle.classList.remove('active');
+            }
             applySixshotSpeedRealtime();
             saveToLocalStorage();
         });
+
+        // 初始化动态开关状态
+        (function initDynamicToggle() {
+            if (config.dynamic.enabled) {
+                btnDynamicToggle.textContent = '🔘 动态漂移: 开启';
+                btnDynamicToggle.classList.add('active');
+            } else {
+                btnDynamicToggle.textContent = '🔘 动态漂移: 关闭';
+                btnDynamicToggle.classList.remove('active');
+            }
+        })();
 
         function applyTheme(theme) {
             config.theme = theme;
@@ -2006,7 +2341,12 @@
                 ambientLight.color.setHex(0xffffff);
                 ambientLight.groundColor.setHex(0xe2e8f0);
             }
-            updateTargetThemeMaterial();
+            // 如果没有用户选择的球体颜色，则跟随主题更新
+            if (!selectedBallColor) {
+                forceUpdateAllTargetMaterials();
+            }
+            // 更新球体颜色选择器的激活状态
+            updateBallSwatchesActive();
             saveToLocalStorage();
         }
 
@@ -2015,7 +2355,10 @@
             applyTheme(nextTheme);
         });
 
-        let isDragging = false, isStick = false, offX = 0, offY = 0;
+        let isDragging = false,
+            isStick = false,
+            offX = 0,
+            offY = 0;
         handle.addEventListener('mousedown', (e) => {
             if (e.target === dragBtn || e.target === btnTheme || e.target.classList.contains('mode-nav-btn')) return;
             isDragging = true;
@@ -2065,6 +2408,7 @@
             updateScene();
         }
 
+        // 准星颜色
         function initCrosshairColorSwatches() {
             const ctn = document.getElementById('swatches-crosshair');
             ctn.innerHTML = '';
@@ -2083,6 +2427,51 @@
             });
         }
 
+        // ---- 球体颜色选择器 ----
+        function initBallColorSwatches() {
+            const ctn = document.getElementById('swatches-ball');
+            ctn.innerHTML = '';
+            COLOR_PRESETS_CROSSHAIR.forEach(c => {
+                const b = document.createElement('div');
+                b.className = 'ball-swatch-btn';
+                b.style.background = c.hex;
+                b.title = c.name;
+                // 激活状态：如果用户选择了该颜色，或者该颜色是默认颜色且未选择
+                const isDefault = (c.hex === '#ea580c' || c.hex === '#0284c7');
+                const isActive = (selectedBallColor === c.hex) ||
+                    (!selectedBallColor && isDefault && (
+                        (config.theme === 'day' && c.hex === '#ea580c') ||
+                        (config.theme === 'sunset' && c.hex === '#0284c7')
+                    ));
+                if (isActive) b.classList.add('active');
+                b.onclick = () => {
+                    selectedBallColor = c.hex;
+                    // 更新所有靶标材质
+                    forceUpdateAllTargetMaterials();
+                    // 更新激活状态
+                    updateBallSwatchesActive();
+                    saveToLocalStorage();
+                };
+                ctn.appendChild(b);
+            });
+        }
+
+        function updateBallSwatchesActive() {
+            const ctn = document.getElementById('swatches-ball');
+            const btns = ctn.querySelectorAll('.ball-swatch-btn');
+            btns.forEach((b, idx) => {
+                const hex = COLOR_PRESETS_CROSSHAIR[idx].hex;
+                const isDefault = (hex === '#ea580c' || hex === '#0284c7');
+                const isActive = (selectedBallColor === hex) ||
+                    (!selectedBallColor && isDefault && (
+                        (config.theme === 'day' && hex === '#ea580c') ||
+                        (config.theme === 'sunset' && hex === '#0284c7')
+                    ));
+                b.classList.toggle('active', isActive);
+            });
+        }
+
+        // 双向绑定
         function bindSyncGlobal(idRange, idNum, keyConfig, parentObj = config, isCmSlider = false) {
             const rng = idRange ? document.getElementById(idRange) : null;
             const num = document.getElementById(idNum);
@@ -2169,7 +2558,8 @@
             btn.addEventListener('click', () => {
                 const val = parseFloat(btn.dataset.val);
                 document.getElementById('inp-cm').value = val.toFixed(2);
-                document.getElementById('inp-cm-r').value = Math.round(Math.pow((val - 0.5) / 10000, 1 / 3.2) * 1000);
+                document.getElementById('inp-cm-r').value = Math.round(Math.pow((val - 0.5) / 10000, 1 / 3.2) *
+                    1000);
                 config.cmPer360 = val;
                 updateSensitivity();
             });
@@ -2196,6 +2586,7 @@
                     config,
                     depthLockSixshot,
                     depthLockTracking,
+                    selectedBallColor,
                     timestamp: Date.now()
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(fullConfig));
@@ -2211,7 +2602,8 @@
                 data: {
                     config,
                     depthLockSixshot,
-                    depthLockTracking
+                    depthLockTracking,
+                    selectedBallColor
                 }
             };
             const jsonStr = JSON.stringify(dataToExport, null, 2);
@@ -2263,18 +2655,24 @@
             }
             if (typeof imported.depthLockSixshot === 'boolean') depthLockSixshot = !imported.depthLockSixshot;
             if (typeof imported.depthLockTracking === 'boolean') depthLockTracking = !imported.depthLockTracking;
+            if (imported.selectedBallColor) {
+                selectedBallColor = imported.selectedBallColor;
+            } else {
+                selectedBallColor = null;
+            }
             toggleDepthLock('sixshot');
             toggleDepthLock('tracking');
 
             document.getElementById('inp-dpi').value = config.dpi;
             document.getElementById('inp-dpi-r').value = config.dpi;
             document.getElementById('inp-cm').value = config.cmPer360.toFixed(2);
-            document.getElementById('inp-cm-r').value = Math.round(Math.pow((config.cmPer360 - 0.5) / 10000, 1 / 3.2) * 1000);
+            document.getElementById('inp-cm-r').value = Math.round(Math.pow((config.cmPer360 - 0.5) / 10000, 1 / 3.2) *
+                1000);
             document.getElementById('inp-fov').value = config.fovHorizontal.toFixed(2);
 
             document.getElementById('inp-size').value = config.targetSizeCm.toFixed(2);
             document.getElementById('inp-size-r').value = config.targetSizeCm;
-            document.getElementById('inp-speed').value = config.dynamic.speedDegPerSec.toFixed(1);
+            document.getElementById('inp-speed').value = config.dynamic.speedDegPerSec.toFixed(2);
             document.getElementById('inp-speed-r').value = config.dynamic.speedDegPerSec;
 
             document.getElementById('inp-depth-sixshot').value = config.depthSixshot.toFixed(2);
@@ -2294,16 +2692,25 @@
             document.getElementById('inp-cross-thick').value = config.crosshair.thick.toFixed(2);
             document.getElementById('inp-cross-thick-r').value = config.crosshair.thick;
 
-            btnDynamicToggle.textContent = config.dynamic.enabled ? '状态: 开启' : '状态: 关闭';
-            btnDynamicToggle.classList.toggle('active', config.dynamic.enabled);
+            // 动态开关
+            if (config.dynamic.enabled) {
+                btnDynamicToggle.textContent = '🔘 动态漂移: 开启';
+                btnDynamicToggle.classList.add('active');
+            } else {
+                btnDynamicToggle.textContent = '🔘 动态漂移: 关闭';
+                btnDynamicToggle.classList.remove('active');
+            }
 
             initCrosshairColorSwatches();
+            initBallColorSwatches();
             setCrosshairType(config.crosshair.type);
             applyTheme(config.theme || 'day');
             setTrackingMotionType(config.tracking.motionType || 'fly');
             switchTrainMode(config.mode || 'sixshot');
             updateSensitivity();
             updateScene();
+            forceUpdateAllTargetMaterials();
+            updateBallSwatchesActive();
         }
 
         function resetToDefaultSettings() {
@@ -2355,22 +2762,31 @@
                         t.x += t.dirX * t.speed * dt;
                         t.y += t.dirY * t.speed * dt;
 
-                        if (t.x < minX) { t.x = minX; t.dirX = Math.abs(t.dirX); }
-                        else if (t.x > maxX) { t.x = maxX; t.dirX = -Math.abs(t.dirX); }
-                        if (t.y < minY) { t.y = minY; t.dirY = Math.abs(t.dirY); }
-                        else if (t.y > maxY) { t.y = maxY; t.dirY = -Math.abs(t.dirY); }
+                        if (t.x < minX) { t.x = minX;
+                            t.dirX = Math.abs(t.dirX); } else if (t.x > maxX) { t.x = maxX;
+                            t.dirX = -Math.abs(t.dirX); }
+                        if (t.y < minY) { t.y = minY;
+                            t.dirY = Math.abs(t.dirY); } else if (t.y > maxY) { t.y = maxY;
+                            t.dirY = -Math.abs(t.dirY); }
                     }
 
                     const visible = sixTargets.filter(t => t.mesh.visible);
                     for (let i = 0; i < visible.length; i++) {
                         for (let j = i + 1; j < visible.length; j++) {
-                            const a = visible[i], b = visible[j];
-                            const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy);
+                            const a = visible[i],
+                                b = visible[j];
+                            const dx = b.x - a.x,
+                                dy = b.y - a.y,
+                                dist = Math.hypot(dx, dy);
                             const minDist = r * 2;
                             if (dist < minDist && dist > 0.001) {
-                                const overlap = (minDist - dist) / 2, nx = dx / dist, ny = dy / dist;
-                                a.x -= nx * overlap; a.y -= ny * overlap;
-                                b.x += nx * overlap; b.y += ny * overlap;
+                                const overlap = (minDist - dist) / 2,
+                                    nx = dx / dist,
+                                    ny = dy / dist;
+                                a.x -= nx * overlap;
+                                a.y -= ny * overlap;
+                                b.x += nx * overlap;
+                                b.y += ny * overlap;
 
                                 const dvx = a.dirX * a.speed - b.dirX * b.speed;
                                 const dvy = a.dirY * a.speed - b.dirY * b.speed;
@@ -2380,9 +2796,12 @@
                                     a.dirY -= dvn * ny / (a.speed || 1);
                                     b.dirX += dvn * nx / (b.speed || 1);
                                     b.dirY += dvn * ny / (b.speed || 1);
-                                    const la = Math.hypot(a.dirX, a.dirY) || 1, lb = Math.hypot(b.dirX, b.dirY) || 1;
-                                    a.dirX /= la; a.dirY /= la;
-                                    b.dirX /= lb; b.dirY /= lb;
+                                    const la = Math.hypot(a.dirX, a.dirY) || 1,
+                                        lb = Math.hypot(b.dirX, b.dirY) || 1;
+                                    a.dirX /= la;
+                                    a.dirY /= la;
+                                    b.dirX /= lb;
+                                    b.dirY /= lb;
                                 }
                             }
                         }
@@ -2407,10 +2826,14 @@
 
                         trackingState.x += trackingState.vx * dt;
                         trackingState.y += trackingState.vy * dt;
-                        if (trackingState.x < -halfW) { trackingState.x = -halfW; trackingState.vx = Math.abs(trackingState.vx); }
-                        else if (trackingState.x > halfW) { trackingState.x = halfW; trackingState.vx = -Math.abs(trackingState.vx); }
-                        if (trackingState.y < actualMinY) { trackingState.y = actualMinY; trackingState.vy = Math.abs(trackingState.vy); }
-                        else if (trackingState.y > actualMaxY) { trackingState.y = actualMaxY; trackingState.vy = -Math.abs(trackingState.vy); }
+                        if (trackingState.x < -halfW) { trackingState.x = -halfW;
+                            trackingState.vx = Math.abs(trackingState.vx); } else if (trackingState.x > halfW) { trackingState
+                                .x = halfW;
+                            trackingState.vx = -Math.abs(trackingState.vx); }
+                        if (trackingState.y < actualMinY) { trackingState.y = actualMinY;
+                            trackingState.vy = Math.abs(trackingState.vy); } else if (trackingState.y > actualMaxY) { trackingState
+                                .y = actualMaxY;
+                            trackingState.vy = -Math.abs(trackingState.vy); }
 
                         trackingState.changeDirTimer -= dt;
                         if (trackingState.changeDirTimer <= 0) {
@@ -2425,8 +2848,9 @@
                         trackingState.y = cy;
                         trackingState.vx = trackingState.strafeDir * linearSpeed;
                         trackingState.x += trackingState.vx * dt;
-                        if (trackingState.x < -halfW) { trackingState.x = -halfW; trackingState.strafeDir = 1; }
-                        else if (trackingState.x > halfW) { trackingState.x = halfW; trackingState.strafeDir = -1; }
+                        if (trackingState.x < -halfW) { trackingState.x = -halfW;
+                            trackingState.strafeDir = 1; } else if (trackingState.x > halfW) { trackingState.x = halfW;
+                            trackingState.strafeDir = -1; }
 
                         trackingState.changeDirTimer -= dt;
                         if (trackingState.changeDirTimer <= 0) {
@@ -2582,6 +3006,7 @@
         // 12. 初始化与加载快照
         // =========================================================
         initCrosshairColorSwatches();
+        initBallColorSwatches();
         updateCrosshairStyle();
 
         try {
@@ -2594,6 +3019,8 @@
 
         initTargets();
         updateScene();
+        forceUpdateAllTargetMaterials();
+        updateBallSwatchesActive();
         animate(performance.now());
 
         setTimeout(() => {
