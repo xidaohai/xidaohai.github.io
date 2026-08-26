@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>测验靶场 · V2人偶版 (西岛海)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
     <style>
         :root {
             --crosshair-color: #ef4444;
@@ -665,15 +666,15 @@
             targetShape: 'dummy',
             customCrosshair: { enabled: false, defaultColor: '#ef4444', targetColor: '#00d2ff' },
             targets: [],
-            viewHeight: 1.625 
+            viewHeight: 1.625
         };
 
         const PRESET_COLORS = ['#ea580c', '#0284c7', '#10b981', '#8b5cf6', '#f43f5e', '#f59e0b', '#14b8a6', '#ec4899', '#06b6d4'];
 
         let radiansPerCount = 0.0;
         let totalCounts360 = 0;
-        
-        const DUMMY_BASE_OFFSET = 14.130435; 
+
+        const DUMMY_BASE_OFFSET = 14.130435;
 
         function updateSensitivity() {
             totalCounts360 = (config.cmPer360 / ISO_INCH_TO_CM) * config.dpi;
@@ -681,8 +682,10 @@
             document.getElementById('hud-dpi').innerText = config.dpi;
             document.getElementById('hud-cm').innerText = config.cmPer360.toFixed(2);
             document.getElementById('hud-fov').innerText = Math.round(config.fovHorizontal);
-            document.querySelectorAll('.dpi-pill').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === config.dpi));
-            document.querySelectorAll('.cm-pill').forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - config.cmPer360) < 0.01));
+            document.querySelectorAll('.dpi-pill').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === config
+                .dpi));
+            document.querySelectorAll('.cm-pill').forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.dataset
+                .val) - config.cmPer360) < 0.01));
         }
 
         function hFovToVfov(hFov, aspect) {
@@ -694,7 +697,7 @@
         // =============================================================
         //  2. Web Audio 打击音效
         // =============================================================
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
 
         function playHitFeedback(part) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -885,7 +888,7 @@
             const headGeo = new THREE.SphereGeometry(1.0, 32, 32);
             const head = new THREE.Mesh(headGeo, headMat);
             head.scale.set(1.0, 1.28, 1.0);
-            head.position.set(0, 0.0, 0); 
+            head.position.set(0, 0.0, 0);
             head.castShadow = true;
             head.userData.part = 'head';
             group.add(head);
@@ -904,11 +907,11 @@
 
             // 身躯
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
-            const bodyHeight = 13.58; 
+            const bodyHeight = 13.58;
             const bodyCylGeo = new THREE.CylinderGeometry(1.9, 1.9, bodyHeight, 16);
             const bodyBox = new THREE.Mesh(bodyCylGeo, bodyMat);
             bodyBox.scale.set(3.38 / 3.8, 1.0, 2.2 / 3.8);
-            bodyBox.position.set(0, -0.55 - (bodyHeight / 2), 0); 
+            bodyBox.position.set(0, -0.55 - (bodyHeight / 2), 0);
             bodyBox.castShadow = true;
             bodyBox.userData.part = 'body';
             group.add(bodyBox);
@@ -940,7 +943,7 @@
             const isDummy = config.targetShape === 'dummy';
 
             config.targets.forEach(t => {
-                const r = (t.sizeCm / 100) / 2; 
+                const r = (t.sizeCm / 100) / 2;
                 const headVerticalRadius = r * 1.28;
 
                 t.sphereMesh.visible = isSphere;
@@ -1048,7 +1051,7 @@
                 let hitTarget = null;
                 let hitPart = 'body';
                 const hitObject = intersects[0].object;
-                
+
                 for (let i = 0; i < config.targets.length; i++) {
                     const t = config.targets[i];
                     if (t.rootGroup === hitObject.parent || t.rootGroup === hitObject.parent?.parent) {
@@ -1180,12 +1183,12 @@
         function setupDynamicTargetBindings(t, i) {
             const sR = document.getElementById(`inp-t${i}-s-r`),
                 sN = document.getElementById(`inp-t${i}-s`);
-            const updS = (v) => { 
+            const updS = (v) => {
                 let val = Math.max(0.1, parseFloat(v) || 23);
                 sR.value = val;
                 sN.value = val.toFixed(2);
                 t.sizeCm = val;
-                updateScene(); 
+                updateScene();
             };
             sR.addEventListener('input', e => updS(e.target.value));
             sN.addEventListener('change', e => updS(e.target.value));
@@ -1196,12 +1199,12 @@
 
             const zR = document.getElementById(`inp-t${i}-z-r`),
                 zN = document.getElementById(`inp-t${i}-z`);
-            const updZ = (v) => { 
+            const updZ = (v) => {
                 let val = Math.max(0.1, parseFloat(v) || 10);
                 zR.value = val;
                 zN.value = val.toFixed(2);
                 t.distMeters = val;
-                updateScene(); 
+                updateScene();
             };
             zR.addEventListener('input', e => updZ(e.target.value));
             zN.addEventListener('change', e => updZ(e.target.value));
@@ -1212,12 +1215,12 @@
 
             const aR = document.getElementById(`inp-t${i}-a-r`),
                 aN = document.getElementById(`inp-t${i}-a`);
-            const updA = (v) => { 
+            const updA = (v) => {
                 let val = Math.max(-180, Math.min(180, parseFloat(v) || 0));
                 aR.value = val;
                 aN.value = val.toFixed(2);
                 t.centerDeg = val;
-                updateScene(); 
+                updateScene();
             };
             aR.addEventListener('input', e => updA(e.target.value));
             aN.addEventListener('change', e => updA(e.target.value));
@@ -1228,12 +1231,12 @@
 
             const yR = document.getElementById(`inp-t${i}-y-r`),
                 yN = document.getElementById(`inp-t${i}-y`);
-            const updY = (v) => { 
+            const updY = (v) => {
                 let val = parseFloat(v) || 0;
                 yR.value = val;
                 yN.value = val.toFixed(2);
                 t.yOffset = val;
-                updateScene(); 
+                updateScene();
             };
             yR.addEventListener('input', e => updY(e.target.value));
             yN.addEventListener('change', e => updY(e.target.value));
@@ -1248,10 +1251,10 @@
             });
 
             const rN = document.getElementById(`inp-t${i}-rng`);
-            const updRng = (v) => { 
+            const updRng = (v) => {
                 let val = Math.max(0.1, parseFloat(v) || 22.5);
                 rN.value = val.toFixed(2);
-                t.move.totalSpanDeg = val; 
+                t.move.totalSpanDeg = val;
             };
             rN.addEventListener('change', e => updRng(e.target.value));
             document.getElementById(`btn-t${i}-rng-minus`).addEventListener('click', () => updRng(t.move.totalSpanDeg - 0.25));
@@ -1260,10 +1263,10 @@
                 updRng(t.move.totalSpanDeg + (e.deltaY < 0 ? 0.25 : -0.25)); }, { passive: false });
 
             const spN = document.getElementById(`inp-t${i}-spd`);
-            const updSpd = (v) => { 
+            const updSpd = (v) => {
                 let val = Math.max(0.1, parseFloat(v) || 25);
                 spN.value = val.toFixed(2);
-                t.move.speedDeg = val; 
+                t.move.speedDeg = val;
             };
             spN.addEventListener('change', e => updSpd(e.target.value));
             document.getElementById(`btn-t${i}-spd-minus`).addEventListener('click', () => updSpd(t.move.speedDeg - 0.25));
@@ -1293,7 +1296,7 @@
             if (i === 1) defaultDeg = 22.5;
             else if (i > 1) defaultDeg = (i * 15) - 30;
 
-            const size = 23; 
+            const size = 23;
             const newTarget = {
                 id: id,
                 sizeCm: size,
@@ -1383,10 +1386,10 @@
             dragBtn.innerText = isStick ? '放置' : '移动窗口';
         });
         document.addEventListener('click', (e) => {
-            if (isStick && e.target !== dragBtn) { 
+            if (isStick && e.target !== dragBtn) {
                 isStick = false;
                 dragBtn.classList.remove('active');
-                dragBtn.innerText = '移动窗口'; 
+                dragBtn.innerText = '移动窗口';
             }
         });
 
@@ -1414,9 +1417,9 @@
                         }
                     });
                 }
-            } catch (_) { 
+            } catch (_) {
                 try {
-                    document.body.requestPointerLock(); 
+                    document.body.requestPointerLock();
                 } catch (e) {}
             }
         });
@@ -1491,7 +1494,8 @@
             });
             document.getElementById('inp-custom-crosshair').addEventListener('change', (e) => {
                 config.customCrosshair.enabled = e.target.checked;
-                document.getElementById('crosshair-custom-box').style.display = config.customCrosshair.enabled ? 'block' : 'none';
+                document.getElementById('crosshair-custom-box').style.display = config.customCrosshair.enabled ? 'block' :
+                    'none';
                 updateCrosshairUI(false);
             });
         }
@@ -1608,12 +1612,12 @@
                 if (t.move.enabled) {
                     const half = t.move.totalSpanDeg / 2;
                     t.move.currentOffsetDeg += t.move.dir * t.move.speedDeg * dt;
-                    if (t.move.currentOffsetDeg >= half) { 
+                    if (t.move.currentOffsetDeg >= half) {
                         t.move.currentOffsetDeg = half;
-                        t.move.dir = -1; 
-                    } else if (t.move.currentOffsetDeg <= -half) { 
+                        t.move.dir = -1;
+                    } else if (t.move.currentOffsetDeg <= -half) {
                         t.move.currentOffsetDeg = -half;
-                        t.move.dir = 1; 
+                        t.move.dir = 1;
                     }
                     targetDeg += t.move.currentOffsetDeg;
                 }
@@ -1653,14 +1657,24 @@
         }
 
         // =============================================================
-        //  10. 启动初始化
+        //  10. 启动初始化 —— ★★ 修复：从输入框同步默认 CM/360° ★★
         // =============================================================
+        // 强制从 inp-cm 读取初始值，同步到 config.cmPer360 和滑块 inp-cm-r
+        (function syncInitialCm() {
+            const cmInput = document.getElementById('inp-cm');
+            const cmRng = document.getElementById('inp-cm-r');
+            const initVal = parseFloat(cmInput.value);
+            if (!isNaN(initVal) && initVal > 0) {
+                config.cmPer360 = initVal;
+                // 计算滑块对应值（与 bindSyncGlobal 中的映射一致）
+                const ratio = Math.pow((initVal - 0.5) / 10000, 1 / 3.2);
+                if (cmRng) cmRng.value = Math.round(ratio * 1000);
+            }
+        })();
+
         config.viewHeight = 1.625;
         document.getElementById('inp-height-r').value = 1.625;
         document.getElementById('inp-height').value = "1.625";
-
-        const initCmRatio = Math.pow((config.cmPer360 - 0.5) / 10000, 1 / 3.2);
-        document.getElementById('inp-cm-r').value = Math.round(initCmRatio * 1000);
 
         initCrosshairColorSwatches();
         addNewTarget(); // A: 0°
@@ -1668,7 +1682,7 @@
 
         setTargetShape('dummy');
 
-        updateSensitivity();
+        updateSensitivity(); // 现在 config.cmPer360 已正确，会高亮匹配的预设按钮
         updateScene();
         animate(performance.now());
 
