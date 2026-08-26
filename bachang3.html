@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>万能靶场 · Sixshot 挑战版 (西岛海)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        body {
+            overflow: hidden;
+            background-color: #f8fafc;
+            font-family: "Microsoft YaHei", "微软雅黑", -apple-system, sans-serif;
+            width: 100vw;
+            height: 100vh;
+        }
+        #crosshair-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #cross-h,
+        #cross-v,
+        #cross-dot {
+            position: absolute;
+            background: var(--cross-color, #ef4444);
+            transition: none;
+        }
+        .mode-cross #cross-h {
+            width: calc(var(--cross-size, 8px) * 2 + var(--cross-thick, 2px));
+            height: var(--cross-thick, 2px);
+            border-radius: 0;
+            display: block;
+        }
+        .mode-cross #cross-v {
+            height: calc(var(--cross-size, 8px) * 2 + var(--cross-thick, 2px));
+            width: var(--cross-thick, 2px);
+            border-radius: 0;
+            display: block;
+        }
+        .mode-cross #cross-dot {
+            display: none !important;
+        }
+        .mode-dot #cross-h,
+        .mode-dot #cross-v {
+            display: none !important;
+        }
+        .mode-dot #cross-dot {
+            width: var(--cross-size, 8px);
+            height: var(--cross-size, 8px);
+            border-radius: 50% !important;
+            display: block !important;
+            background: var(--cross-color, #ef4444);
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        #top-hud {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .hud-card {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px);
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #334155;
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            display: flex;
+            gap: 14px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        .hud-val {
+            color: #0284c7;
+            font-weight: 900;
+        }
+        .score-val {
+            color: #059669;
+            font-weight: 900;
+            font-size: 0.8rem;
+        }
+        .time-val {
+            color: #ea580c;
+            font-weight: 900;
+            font-size: 0.8rem;
+        }
+        .fps-val {
+            color: #16a34a;
+            font-weight: 900;
+        }
+        .f11-card {
+            padding: 6px 16px;
+            font-size: 0.82rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.8s, color 0.8s, border-color 0.8s, box-shadow 0.8s;
+        }
+        .f11-highlight {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+            border-color: #f87171 !important;
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.5) !important;
+        }
+        #author-card {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px);
+            padding: 8px 18px 8px 8px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: inherit;
+            z-index: 5;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
+            transition: transform 0.15s, background 0.15s, border-color 0.15s;
+            cursor: pointer;
+        }
+        #author-card:hover {
+            transform: translateY(-2.5px);
+            background: rgba(255, 255, 255, 0.88);
+            border-color: #0284c7;
+        }
+        .author-avatar-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .author-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .author-name {
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        .author-tag {
+            font-size: 0.58rem;
+            color: #64748b;
+            font-weight: bold;
+        }
+        #bottom-right-hud {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            width: 330px;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px);
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-left: 3px solid #0284c7;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+            pointer-events: none;
+            z-index: 5;
+            font-family: "SimSun", "STSong", "Songti SC", serif;
+        }
+        .rel-title {
+            font-size: 0.74rem;
+            font-weight: 900;
+            color: #0284c7;
+            margin-bottom: 4px;
+            font-family: "SimSun", "STSong", serif;
+        }
+        .rel-formula {
+            font-family: "Georgia", "SimSun", serif;
+            font-size: 0.72rem;
+            font-weight: bold;
+            color: #0f172a;
+            background: rgba(2, 132, 199, 0.06);
+            padding: 3px 6px;
+            border-radius: 3px;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+        .rel-desc {
+            font-size: 0.64rem;
+            color: #64748b;
+            line-height: 1.45;
+        }
+        #draggable-panel {
+            position: absolute;
+            left: 18px;
+            top: 60px;
+            width: 350px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            border-top: 4px solid #0284c7;
+            border-radius: 6px;
+            padding: 12px 14px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.05);
+            z-index: 20;
+            transition: opacity 0.15s;
+            max-height: 88vh;
+            overflow-y: auto;
+        }
+        #draggable-panel::-webkit-scrollbar {
+            width: 3px;
+        }
+        #draggable-panel::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            cursor: move;
+        }
+        .panel-title {
+            font-size: 0.84rem;
+            font-weight: 900;
+            color: #0284c7;
+            letter-spacing: 0.05em;
+        }
+        .header-actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .theme-toggle-btn,
+        .drag-btn {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: #475569;
+            padding: 2px 7px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .theme-toggle-btn:hover,
+        .drag-btn:hover {
+            background: #e0f2fe;
+            border-color: #0284c7;
+        }
+        .drag-btn.active {
+            background: #e0f2fe;
+            color: #0284c7;
+            border-color: #0284c7;
+        }
+        .note-tip {
+            font-size: 0.6rem;
+            color: #0369a1;
+            background: #e0f2fe;
+            padding: 4px 6px;
+            border-radius: 3px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        .section {
+            margin-bottom: 6px;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.06);
+            padding-bottom: 6px;
+        }
+        .section-title {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            gap: 4px;
+        }
+        .row label {
+            font-size: 0.66rem;
+            font-weight: 700;
+            color: #475569;
+            width: 115px;
+            flex-shrink: 0;
+        }
+        .dpi-presets,
+        .cm-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-bottom: 5px;
+        }
+        .dpi-pill,
+        .cm-pill,
+        .preset-pill {
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 3px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .dpi-pill:hover,
+        .cm-pill:hover,
+        .preset-pill:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+            background: #f0f9ff;
+        }
+        .dpi-pill.active,
+        .cm-pill.active,
+        .preset-pill.active {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #0284c7;
+        }
+        .presets-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            margin-bottom: 0;
+            align-items: center;
+        }
+        .divider {
+            height: 1.5px;
+            background: rgba(2, 132, 199, 0.12);
+            margin: 6px 0;
+            border-radius: 1px;
+        }
+        .color-swatches-grid {
+            display: flex;
+            gap: 3px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+        .swatch-btn {
+            width: 17px;
+            height: 17px;
+            border-radius: 2px;
+            border: 1.5px solid #cbd5e1;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.1s;
+        }
+        .swatch-btn:hover {
+            transform: scale(1.18);
+            border-color: #0284c7;
+        }
+        .swatch-btn.active {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 1.5px #0284c7;
+            transform: scale(1.15);
+        }
+        .stepper-box {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .step-btn {
+            width: 17px;
+            height: 19px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #0284c7;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 2px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .step-btn:hover {
+            background: #e0f2fe;
+            border-color: #0284c7;
+        }
+        .num-input {
+            width: 58px;
+            padding: 2px 2px;
+            border: 1px solid #cbd5e1;
+            border-radius: 2px;
+            font-family: "Microsoft YaHei", sans-serif;
+            font-size: 0.72rem;
+            font-weight: bold;
+            text-align: right;
+            color: #0284c7;
+            outline: none;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .num-input:focus {
+            border-color: #0284c7;
+        }
+        .row input[type="range"] {
+            flex: 1;
+            accent-color: #0284c7;
+            cursor: pointer;
+            height: 4px;
+            min-width: 55px;
+        }
+
+        .btn-start {
+            width: 100%;
+            background: #0284c7;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.95rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 6px;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+        }
+        .btn-start:hover {
+            background: #0369a1;
+        }
+
+        #progress-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #progress-bar-container {
+            width: 280px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.30);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #0284c7;
+            border-radius: 2px;
+            transition: width 0.15s ease;
+        }
+
+        #result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+        .result-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            padding: 32px 40px;
+            border-radius: 16px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        .result-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+        .score-large {
+            font-size: 3.6rem;
+            font-weight: 900;
+            color: #0284c7;
+        }
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .res-box {
+            background: rgba(241, 245, 249, 0.8);
+            padding: 10px 8px;
+            border-radius: 6px;
+        }
+        .res-label {
+            font-size: 0.6rem;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .res-val {
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+        .res-meta {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            font-size: 0.65rem;
+            color: #64748b;
+            margin: 10px 0 16px;
+        }
+        .btn-restart {
+            background: #0284c7;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 28px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-restart:hover {
+            background: #0369a1;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="crosshair-container" class="mode-cross">
+        <div id="cross-h"></div>
+        <div id="cross-v"></div>
+        <div id="cross-dot"></div>
+    </div>
+
+    <div id="top-hud">
+        <div class="hud-card">
+            <div>倒计时: <span class="time-val" id="hud-time">49.0</span>s</div>
+            <div>得分: <span class="score-val" id="hud-score">0</span></div>
+            <div>命中: <span class="hud-val" id="hud-hits">0</span></div>
+            <div>失误: <span class="hud-val" id="hud-misses" style="color:#ef4444;">0</span></div>
+            <div>命中率: <span class="hud-val" id="hud-acc">100%</span></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <div class="hud-card f11-card f11-highlight" id="f11-box">F11全屏</div>
+            <div class="hud-card"><div>FPS: <span class="fps-val" id="hud-fps">--</span></div></div>
+        </div>
+    </div>
+
+    <a href="https://space.bilibili.com/1534330" target="_blank" id="author-card" title="点击访问">
+        <div class="author-avatar-badge">海</div>
+        <div class="author-meta">
+            <span class="author-name">作者：西岛海</span>
+            <span class="author-tag">Sixshot · 动力学内核</span>
+        </div>
+    </a>
+
+    <div id="bottom-right-hud">
+        <div class="rel-title">Sixshot 物理生成原理</div>
+        <div class="rel-formula">• 面前 45° 绝对水平视平线正方形区域<br />• 始终恒定 6 靶，防堆叠粘连算法</div>
+        <div class="rel-desc">• <strong>命中 +1 分</strong> ｜ <strong>空枪脱靶 -1 分</strong> ｜ 49秒限时。<br />• Unadjusted Raw Input 搭配 300ms 安全防抖与 Zero-GC 架构，彻底消灭视角跳变与卡顿。</div>
+    </div>
+
+    <div id="progress-overlay">
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div id="result-modal">
+        <div class="result-card">
+            <div class="result-title">🎯 挑战结算报告</div>
+            <div class="result-subtitle">Sixshot 49秒限时模式已完成</div>
+            <div class="score-large" id="res-score">0</div>
+            <div class="result-grid">
+                <div class="res-box"><div class="res-label">有效命中</div><div class="res-val" id="res-hits" style="color:#059669;">0</div></div>
+                <div class="res-box"><div class="res-label">空枪脱靶</div><div class="res-val" id="res-misses" style="color:#ef4444;">0</div></div>
+                <div class="res-box"><div class="res-label">射击命中率</div><div class="res-val" id="res-acc">100%</div></div>
+                <div class="res-box"><div class="res-label">击杀速率</div><div class="res-val" id="res-kps">0.0/s</div></div>
+            </div>
+            <div class="res-meta">
+                <span>球径: <span id="res-meta-size">15</span>cm</span>
+                <span>深度: <span id="res-meta-dist">10</span>m</span>
+                <span>FOV: <span id="res-meta-fov">103</span>°</span>
+            </div>
+            <button class="btn-restart" onclick="restartChallenge()">再次挑战 (锁定鼠标)</button>
+        </div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div id="draggable-panel">
+        <div class="panel-column">
+            <div class="panel-header" id="panel-handle">
+                <span class="panel-title">Sixshot 挑战调参台</span>
+                <div class="header-actions">
+                    <button class="theme-toggle-btn" id="btn-theme-toggle">日落暮色</button>
+                    <button class="drag-btn" id="btn-drag-toggle">移动窗口</button>
+                </div>
+            </div>
+            <div class="note-tip">设定：面前 45° 视平线正方形区域 ｜ 0.135s 启动延迟 ｜ 恒定 6 靶 (125cm时自动3靶)</div>
+
+            <div class="section">
+                <div class="section-title"><span>[ Sixshot 靶标参数 ]</span></div>
+                <div class="presets-row" style="margin-bottom:5px;">
+                    <span style="font-size:0.6rem;color:#475569;font-weight:bold;margin-right:4px;">小球尺寸预设:</span>
+                    <button class="preset-pill" onclick="syncTargetSize(15)">15cm</button>
+                    <button class="preset-pill" onclick="syncTargetSize(25)">25cm</button>
+                    <button class="preset-pill" onclick="syncTargetSize(35)">35cm</button>
+                    <button class="preset-pill" onclick="syncTargetSize(125)">125cm</button>
+                </div>
+                <div class="row">
+                    <label>小球直径 (cm)</label>
+                    <input type="range" id="inp-size-r" min="10" max="200" step="0.5" value="15.0" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepValGlobal('inp-size', -0.25)">−</button>
+                        <input type="number" class="num-input" id="inp-size" value="15.00" step="0.01" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-size', 0.25)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">
+                    <span>[ 准星形态与定制 ]</span>
+                    <div class="presets-row" style="margin-bottom:0;">
+                        <button class="preset-pill active" id="btn-cross-type" onclick="setCrosshairType('cross')">十字</button>
+                        <button class="preset-pill" id="btn-dot-type" onclick="setCrosshairType('dot')">实心圆点</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <label id="lbl-cross-size">十字臂长 (px)</label>
+                    <input type="range" id="inp-cross-size-r" min="1" max="50" step="0.5" value="8" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepValGlobal('inp-cross-size', -0.25)">−</button>
+                        <input type="number" class="num-input" id="inp-cross-size" value="8.00" step="0.25" max="50" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-cross-size', 0.25)">+</button>
+                    </div>
+                </div>
+                <div class="row" id="row-cross-thick">
+                    <label>线条粗细 (px)</label>
+                    <input type="range" id="inp-cross-thick-r" min="1" max="10" step="0.5" value="2" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepValGlobal('inp-cross-thick', -0.25)">−</button>
+                        <input type="number" class="num-input" id="inp-cross-thick" value="2.00" step="0.25" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-cross-thick', 0.25)">+</button>
+                    </div>
+                </div>
+                <div style="margin-top:6px;">
+                    <div style="font-size:0.62rem;font-weight:bold;color:#475569;margin-bottom:2px;">准星纯色锁定 (赤橙黄绿青蓝紫白黑):</div>
+                    <div class="color-swatches-grid" id="swatches-crosshair"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><span>[ 物理外设标定 ]</span></div>
+                <div class="dpi-presets">
+                    <button class="dpi-pill" data-val="200">200</button>
+                    <button class="dpi-pill" data-val="400">400</button>
+                    <button class="dpi-pill active" data-val="800">800</button>
+                    <button class="dpi-pill" data-val="1000">1000</button>
+                    <button class="dpi-pill" data-val="1200">1200</button>
+                    <button class="dpi-pill" data-val="1600">1600</button>
+                    <button class="dpi-pill" data-val="2400">2400</button>
+                    <button class="dpi-pill" data-val="3200">3200</button>
+                </div>
+                <div class="row">
+                    <label>鼠标 DPI</label>
+                    <input type="range" id="inp-dpi-r" min="50" max="6400" step="50" value="800" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepValGlobal('inp-dpi', -50)">−</button>
+                        <input type="number" class="num-input" id="inp-dpi" value="800" min="50" max="32000" step="1" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-dpi', 50)">+</button>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="cm-presets">
+                    <!-- 这里您可以自由修改 data-val，页面加载时会自动同步输入框的初始值 -->
+                    <button class="cm-pill" data-val="25">25</button>
+                    <button class="cm-pill" data-val="35">35</button>
+                    <button class="cm-pill" data-val="45">45</button>
+                    <button class="cm-pill active" data-val="55">55</button>
+                    <button class="cm-pill" data-val="65">65</button>
+                    <button class="cm-pill" data-val="75">75</button>
+                    <button class="cm-pill" data-val="85">85</button>
+                </div>
+                <div class="row">
+                    <label>CM / 360°</label>
+                    <input type="range" id="inp-cm-r" min="1" max="1000" step="1" value="408" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepValGlobal('inp-cm', -0.25)">−</button>
+                        <!-- 修改这里的 value 即可改变页面加载时的默认 CM/360° 值 -->
+                        <input type="number" class="num-input" id="inp-cm" value="55.00" min="0.1" max="10000" step="0.01" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-cm', 0.25)">+</button>
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="row">
+                    <label>水平 FOV</label>
+                    <div class="presets-row">
+                        <button class="preset-pill" id="btn-fov-10" onclick="syncFov(10)">10°</button>
+                        <button class="preset-pill" id="btn-fov-60" onclick="syncFov(60)">60°</button>
+                        <button class="preset-pill" id="btn-fov-90" onclick="syncFov(90)">90°</button>
+                        <button class="preset-pill active" id="btn-fov-103" onclick="syncFov(103)">103°</button>
+                    </div>
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepValGlobal('inp-fov', -1)">−</button>
+                        <input type="number" class="num-input" id="inp-fov" value="103.00" step="0.01" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-fov', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-start" id="btn-lock">🚀 开始 Sixshot (0.135s后诞生)</button>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================
+        // 1. 全局配置
+        // =========================================================
+        const ISO_INCH_TO_CM = 2.54;
+
+        const COLOR_PRESETS_CROSSHAIR = [
+            { name: '赤', hex: '#ef4444' },
+            { name: '橙', hex: '#f97316' },
+            { name: '黄', hex: '#eab308' },
+            { name: '绿', hex: '#22c55e' },
+            { name: '青', hex: '#06b6d4' },
+            { name: '蓝', hex: '#3b82f6' },
+            { name: '紫', hex: '#a855f7' },
+            { name: '白', hex: '#ffffff' },
+            { name: '黑', hex: '#000000' }
+        ];
+
+        const config = {
+            dpi: 800,
+            cmPer360: 50.0, // 初始值，稍后会被 inp-cm 的值覆盖
+            fovHorizontal: 103,
+            theme: 'day',
+            viewHeight: 1.625,
+            targetSizeCm: 15.0,
+            spawnDistMeters: 10.0,
+            crosshair: {
+                type: 'cross',
+                size: 8,
+                thick: 2,
+                color: '#ef4444'
+            }
+        };
+
+        let gameState = 'idle';
+        let timeLeft = 49.0;
+        let score = 0;
+        let hits = 0;
+        let misses = 0;
+
+        let radiansPerCount = 0;
+        let totalCounts360 = 0;
+
+        let targetCount = 6;
+        let startTimeoutId = null;
+
+        function updateSensitivity() {
+            totalCounts360 = (config.cmPer360 / ISO_INCH_TO_CM) * config.dpi;
+            radiansPerCount = (Math.PI * 2) / totalCounts360;
+            document.querySelectorAll('.dpi-pill').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === config
+                .dpi));
+            document.querySelectorAll('.cm-pill').forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.dataset
+                .val) - config.cmPer360) < 0.01));
+        }
+
+        function hFovToVfov(hFov, aspect) {
+            const hRad = (hFov * Math.PI) / 180;
+            const vRad = 2 * Math.atan(Math.tan(hRad / 2) / aspect);
+            return (vRad * 180) / Math.PI;
+        }
+
+        function syncTargetSize(v) {
+            document.getElementById('inp-size').value = v.toFixed(2);
+            document.getElementById('inp-size-r').value = v;
+            config.targetSizeCm = v;
+            const newCount = (Math.abs(v - 125) < 0.01) ? 3 : 6;
+            if (newCount !== targetCount) {
+                targetCount = newCount;
+                updateTargetVisibility();
+                if (gameState === 'playing' || gameState === 'starting') {
+                    respawnAllTargets();
+                }
+            }
+            updateTargetScale();
+            document.querySelector('.note-tip').innerHTML =
+                `设定：面前 45° 视平线正方形区域 ｜ 0.135s 启动延迟 ｜ 恒定 ${targetCount} 靶 (125cm时自动3靶)`;
+        }
+
+        // =========================================================
+        // 2. 音效系统
+        // =========================================================
+        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+
+        function playHitSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createGain ? audioCtx.createOscillator() : null;
+            if (!osc) return;
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1700, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.06);
+        }
+
+        function playMissSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createGain ? audioCtx.createOscillator() : null;
+            if (!osc) return;
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.06);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.07);
+        }
+
+        // =========================================================
+        // 3. Three.js 场景渲染内核
+        // =========================================================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000);
+        camera.position.set(0, config.viewHeight, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        function createSkyTexture(theme) {
+            const c = document.createElement('canvas');
+            c.width = 16;
+            c.height = 1024;
+            const ctx = c.getContext('2d');
+            const g = ctx.createLinearGradient(0, 0, 0, 1024);
+            if (theme === 'day') {
+                g.addColorStop(0.0, '#003bf3');
+                g.addColorStop(0.22, '#1d4ed8');
+                g.addColorStop(0.50, '#38bdf8');
+                g.addColorStop(0.80, '#bae6fd');
+                g.addColorStop(0.95, '#f0f9ff');
+                g.addColorStop(1.0, '#ffffff');
+            } else {
+                g.addColorStop(0.0, '#312e81');
+                g.addColorStop(0.35, '#6366f1');
+                g.addColorStop(0.65, '#f43f5e');
+                g.addColorStop(0.85, '#fdba74');
+                g.addColorStop(1.0, '#fff7ed');
+            }
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 16, 1024);
+            return new THREE.CanvasTexture(c);
+        }
+
+        const skyGeo = new THREE.SphereGeometry(180, 32, 16);
+        const skyMat = new THREE.MeshBasicMaterial({ map: createSkyTexture('day'), side: THREE.BackSide });
+        const skyMesh = new THREE.Mesh(skyGeo, skyMat);
+        scene.add(skyMesh);
+
+        const cloudGroup = new THREE.Group();
+        scene.add(cloudGroup);
+        const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.68 });
+        for (let i = 0; i < 15; i++) {
+            const angle = (i / 15) * Math.PI * 2 + (Math.random() * 0.4 - 0.2);
+            const dist = 75 + Math.random() * 65;
+            const x = Math.sin(angle) * dist;
+            const z = -Math.cos(angle) * dist;
+            const y = 48 + Math.random() * 20;
+            const w = 24 + Math.random() * 20;
+            const h = 2.5 + Math.random() * 1.5;
+            const d = 16 + Math.random() * 18;
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mesh = new THREE.Mesh(geo, cloudMat);
+            mesh.position.set(x, y, z);
+            mesh.userData = { angle, dist, speed: 0.0015 + Math.random() * 0.002, altitude: y };
+            cloudGroup.add(mesh);
+        }
+
+        const ambientLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 0.95);
+        scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        sunLight.position.set(30, 60, 30);
+        sunLight.castShadow = true;
+        scene.add(sunLight);
+
+        const floorGeo = new THREE.PlaneGeometry(300, 300);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.1, metalness: 0.02 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        const grid = new THREE.GridHelper(300, 150, 0x94a3b8, 0xe2e8f0);
+        grid.position.y = 0.001;
+        scene.add(grid);
+
+        // =========================================================
+        // 4. 正方形生成墙
+        // =========================================================
+        const spawnWallGroup = new THREE.Group();
+        scene.add(spawnWallGroup);
+
+        function updateSpawnWall() {
+            spawnWallGroup.clear();
+            const D = config.spawnDistMeters;
+            const halfAngleRad = (22.5 * Math.PI) / 180;
+            const squareSize = 2 * D * Math.tan(halfAngleRad);
+            const wallGeo = new THREE.PlaneGeometry(squareSize, squareSize);
+            const wallMat = new THREE.MeshBasicMaterial({
+                color: 0x38bdf8,
+                transparent: true,
+                opacity: 0.15,
+                side: THREE.DoubleSide,
+                wireframe: true
+            });
+            const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+            wallMesh.position.set(0, config.viewHeight, -D);
+            spawnWallGroup.add(wallMesh);
+        }
+
+        // =========================================================
+        // 5. Sixshot 6靶系统
+        // =========================================================
+        const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
+        const targetMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.2, metalness: 0.1 });
+
+        let sixTargets = [];
+
+        function initSixshotTargets() {
+            sixTargets.forEach(t => scene.remove(t.mesh));
+            sixTargets = [];
+            for (let i = 0; i < 6; i++) {
+                const mesh = new THREE.Mesh(sphereGeo, targetMat);
+                mesh.castShadow = true;
+                mesh.visible = false;
+                scene.add(mesh);
+                sixTargets.push({ mesh, x: 0, y: 0, z: 0 });
+            }
+            updateTargetScale();
+            updateTargetVisibility();
+            updateSpawnWall();
+        }
+
+        function updateTargetVisibility() {
+            for (let i = 0; i < sixTargets.length; i++) {
+                sixTargets[i].mesh.visible = (i < targetCount && (gameState === 'playing' || gameState === 'interrupted'));
+            }
+        }
+
+        function respawnAllTargets() {
+            for (let i = 0; i < targetCount && i < sixTargets.length; i++) {
+                respawnTarget(sixTargets[i]);
+            }
+            for (let i = targetCount; i < sixTargets.length; i++) {
+                sixTargets[i].mesh.visible = false;
+            }
+        }
+
+        function respawnTarget(targetObj) {
+            const D = config.spawnDistMeters;
+            const r = (config.targetSizeCm / 100) / 2;
+            const halfAngleRad = (22.5 * Math.PI) / 180;
+            const squareSize = 2 * D * Math.tan(halfAngleRad);
+            const margin = r + 0.05;
+            const minX = -squareSize / 2 + margin;
+            const maxX = squareSize / 2 - margin;
+            const minY = config.viewHeight - (squareSize / 2) + margin;
+            const maxY = config.viewHeight + (squareSize / 2) - margin;
+
+            let valid = false;
+            let attempts = 0;
+            let fx = 0,
+                fy = 0,
+                fz = 0;
+
+            while (!valid && attempts < 50) {
+                attempts++;
+                fx = minX + Math.random() * (maxX - minX);
+                fy = Math.max(r, minY + Math.random() * (maxY - minY));
+                fz = -D;
+                valid = true;
+                for (const other of sixTargets) {
+                    if (other === targetObj || !other.mesh.visible) continue;
+                    if (Math.hypot(other.x - fx, other.y - fy, other.z - fz) < r * 3.2) {
+                        valid = false;
+                        break;
+                    }
+                }
+            }
+
+            targetObj.x = fx;
+            targetObj.y = fy;
+            targetObj.z = fz;
+            targetObj.mesh.position.set(fx, fy, fz);
+            targetObj.mesh.visible = true;
+        }
+
+        function updateTargetScale() {
+            const r = (config.targetSizeCm / 100) / 2;
+            sixTargets.forEach(t => t.mesh.scale.set(r, r, r));
+        }
+
+        function updateScene() {
+            camera.position.y = config.viewHeight;
+            camera.fov = hFovToVfov(config.fovHorizontal, window.innerWidth / window.innerHeight);
+            camera.updateProjectionMatrix();
+            updateTargetScale();
+            updateSpawnWall();
+        }
+
+        // =========================================================
+        // 6. 视角控制 (零 GC 垃圾回收架构 + 异常位移过滤)
+        // =========================================================
+        let yaw = 0.0;
+        let pitch = 0.0;
+        const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+        document.addEventListener('mousemove', (e) => {
+            if (document.pointerLockElement === document.body) {
+                const movementX = e.movementX;
+                const movementY = e.movementY;
+
+                if (Math.abs(movementX) > 1200 || Math.abs(movementY) > 1200) {
+                    return;
+                }
+
+                yaw -= movementX * radiansPerCount;
+                pitch -= movementY * radiansPerCount;
+                pitch = Math.max(-Math.PI / 2 + 0.001, Math.min(Math.PI / 2 - 0.001, pitch));
+                yaw = yaw % (Math.PI * 2);
+
+                cameraEuler.set(pitch, yaw, 0);
+                camera.quaternion.setFromEuler(cameraEuler);
+            }
+        });
+
+        const raycaster = new THREE.Raycaster();
+        const centerVec = new THREE.Vector2(0, 0);
+        const crosshairContainer = document.getElementById('crosshair-container');
+
+        function updateCrosshairStyle() {
+            const c = config.crosshair;
+            document.documentElement.style.setProperty('--cross-color', c.color);
+
+            if (c.type === 'dot') {
+                crosshairContainer.className = 'mode-dot';
+                document.documentElement.style.setProperty('--cross-size', `${c.size}px`);
+                const dot = document.getElementById('cross-dot');
+                if (dot) {
+                    dot.style.width = c.size + 'px';
+                    dot.style.height = c.size + 'px';
+                    dot.style.borderRadius = '50%';
+                }
+            } else {
+                crosshairContainer.className = 'mode-cross';
+                document.documentElement.style.setProperty('--cross-size', `${c.size}px`);
+                document.documentElement.style.setProperty('--cross-thick', `${c.thick}px`);
+            }
+        }
+
+        function setCrosshairType(type) {
+            config.crosshair.type = type;
+            document.getElementById('btn-cross-type').classList.toggle('active', type === 'cross');
+            document.getElementById('btn-dot-type').classList.toggle('active', type === 'dot');
+
+            const lbl = document.getElementById('lbl-cross-size');
+            lbl.innerText = type === 'cross' ? '十字臂长 (px)' : '圆点直径 (px)';
+            document.getElementById('row-cross-thick').style.display = type === 'cross' ? 'flex' : 'none';
+            updateCrosshairStyle();
+        }
+
+        function checkAim() {
+            if (document.pointerLockElement !== document.body) return null;
+            raycaster.setFromCamera(centerVec, camera);
+            const activeMeshes = sixTargets.filter(t => t.mesh.visible).map(t => t.mesh);
+            const intersects = raycaster.intersectObjects(activeMeshes);
+            return intersects.length > 0 ? intersects[0].object : null;
+        }
+
+        window.addEventListener('mousedown', (e) => {
+            if (document.pointerLockElement === document.body && e.button === 0 && gameState === 'playing') {
+                const hitObj = checkAim();
+                if (hitObj) {
+                    hits++;
+                    score += 1;
+                    playHitSound();
+                    const tObj = sixTargets.find(t => t.mesh === hitObj);
+                    if (tObj) respawnTarget(tObj);
+                } else {
+                    misses++;
+                    score = Math.max(0, score - 1);
+                    playMissSound();
+                }
+                updateHUDStats();
+            }
+        });
+
+        function updateHUDStats() {
+            document.getElementById('hud-score').innerText = score;
+            document.getElementById('hud-hits').innerText = hits;
+            document.getElementById('hud-misses').innerText = misses;
+            const total = hits + misses;
+            const acc = total > 0 ? ((hits / total) * 100).toFixed(1) : '100.0';
+            document.getElementById('hud-acc').innerText = `${acc}%`;
+        }
+
+        // =========================================================
+        // 7. 状态机生命周期控制 (终极防崩溃加固)
+        // =========================================================
+        const resultModal = document.getElementById('result-modal');
+        const progressOverlay = document.getElementById('progress-overlay');
+        const progressBar = document.getElementById('progress-bar');
+        const panel = document.getElementById('draggable-panel');
+        const btnLock = document.getElementById('btn-lock');
+
+        function resetToIdle() {
+            if (startTimeoutId) {
+                clearTimeout(startTimeoutId);
+                startTimeoutId = null;
+            }
+            gameState = 'idle';
+
+            sixTargets.forEach(t => t.mesh.visible = false);
+            spawnWallGroup.visible = true;
+
+            if (progressOverlay) progressOverlay.style.display = 'none';
+            if (progressBar) {
+                progressBar.style.transition = 'none';
+                progressBar.style.width = '0%';
+            }
+            if (resultModal) resultModal.style.display = 'none';
+
+            panel.style.opacity = '1';
+            panel.style.pointerEvents = 'auto';
+
+            if (document.pointerLockElement === document.body) {
+                document.exitPointerLock();
+            }
+
+            score = 0;
+            hits = 0;
+            misses = 0;
+            timeLeft = 49.0;
+            updateHUDStats();
+            document.getElementById('hud-time').innerText = '49.0';
+        }
+
+        function finishChallenge() {
+            if (gameState === 'finished') return;
+            if (startTimeoutId) {
+                clearTimeout(startTimeoutId);
+                startTimeoutId = null;
+            }
+            gameState = 'finished';
+
+            if (document.pointerLockElement === document.body) {
+                document.exitPointerLock();
+            }
+
+            spawnWallGroup.visible = true;
+            if (progressOverlay) progressOverlay.style.display = 'none';
+
+            const total = hits + misses;
+            const acc = total > 0 ? ((hits / total) * 100).toFixed(1) : '0.0';
+            const kps = (hits / 49.0).toFixed(2);
+
+            document.getElementById('res-score').innerText = score;
+            document.getElementById('res-hits').innerText = hits;
+            document.getElementById('res-misses').innerText = misses;
+            document.getElementById('res-acc').innerText = `${acc}%`;
+            document.getElementById('res-kps').innerText = `${kps}/s`;
+
+            document.getElementById('res-meta-size').innerText = config.targetSizeCm;
+            document.getElementById('res-meta-dist').innerText = config.spawnDistMeters;
+            document.getElementById('res-meta-fov').innerText = config.fovHorizontal;
+
+            if (resultModal) resultModal.style.display = 'flex';
+        }
+
+        let isLocking = false;
+
+        function startChallenge() {
+            if (isLocking) return;
+            isLocking = true;
+            setTimeout(() => { isLocking = false; }, 300);
+
+            if (resultModal) resultModal.style.display = 'none';
+            score = 0;
+            hits = 0;
+            misses = 0;
+            timeLeft = 49.0;
+            updateHUDStats();
+            document.getElementById('hud-time').innerText = '49.0';
+
+            sixTargets.forEach(t => t.mesh.visible = false);
+            spawnWallGroup.visible = false;
+
+            gameState = 'starting';
+
+            if (progressOverlay) progressOverlay.style.display = 'flex';
+            if (progressBar) {
+                progressBar.style.transition = 'none';
+                progressBar.style.width = '0%';
+                void progressBar.offsetHeight;
+                progressBar.style.transition = 'width 0.135s cubic-bezier(0.4, 0, 0.2, 1)';
+                progressBar.style.width = '100%';
+            }
+
+            try {
+                const promise = document.body.requestPointerLock({
+                    unadjustedMovement: true
+                });
+                if (promise && promise.catch) {
+                    promise.catch((err) => {
+                        console.warn("Raw pointer lock blocked, falling back to standard...", err);
+                        if (document.pointerLockElement !== document.body) {
+                            try {
+                                document.body.requestPointerLock();
+                            } catch (fallbackErr) {
+                                resetToIdle();
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                try {
+                    document.body.requestPointerLock();
+                } catch (err) {
+                    resetToIdle();
+                }
+            }
+
+            startTimeoutId = setTimeout(() => {
+                if (progressOverlay) progressOverlay.style.display = 'none';
+                if (gameState === 'starting') {
+                    gameState = 'playing';
+                    respawnAllTargets();
+                }
+            }, 135);
+        }
+
+        function restartChallenge() {
+            if (resultModal) resultModal.style.display = 'none';
+            resetToIdle();
+            startChallenge();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.code === 'Escape') {
+                if (isStick) {
+                    isStick = false;
+                    dragBtn.classList.remove('active');
+                    dragBtn.innerText = '移动窗口';
+                }
+                if (resultModal && resultModal.style.display === 'flex') {
+                    resultModal.style.display = 'none';
+                    resetToIdle();
+                }
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === document.body) {
+                panel.style.opacity = '0';
+                panel.style.pointerEvents = 'none';
+            } else {
+                panel.style.opacity = '1';
+                panel.style.pointerEvents = 'auto';
+                if (gameState === 'playing' || gameState === 'starting') {
+                    resetToIdle();
+                }
+            }
+        });
+
+        document.addEventListener('pointerlockerror', () => {
+            if (gameState === 'starting' || gameState === 'playing') {
+                resetToIdle();
+            }
+        });
+
+        // =========================================================
+        // 8. UI 面板交互与参数绑定
+        // =========================================================
+        const handle = document.getElementById('panel-handle');
+        const dragBtn = document.getElementById('btn-drag-toggle');
+        const btnTheme = document.getElementById('btn-theme-toggle');
+
+        btnLock.addEventListener('click', startChallenge);
+
+        btnTheme.addEventListener('click', () => {
+            config.theme = config.theme === 'day' ? 'sunset' : 'day';
+            btnTheme.innerText = config.theme === 'day' ? '日落暮色' : '天青日间';
+            skyMesh.material.map = createSkyTexture(config.theme);
+            skyMesh.material.needsUpdate = true;
+            if (config.theme === 'sunset') {
+                floorMat.color.setHex(0xfaf5ff);
+                ambientLight.color.setHex(0xffedd5);
+                ambientLight.groundColor.setHex(0xf3e8ff);
+            } else {
+                floorMat.color.setHex(0xf8fafc);
+                ambientLight.color.setHex(0xffffff);
+                ambientLight.groundColor.setHex(0xe2e8f0);
+            }
+        });
+
+        let isDragging = false,
+            isStick = false,
+            offX = 0,
+            offY = 0;
+        handle.addEventListener('mousedown', (e) => {
+            if (e.target === dragBtn || e.target === btnTheme) return;
+            isDragging = true;
+            offX = e.clientX - panel.offsetLeft;
+            offY = e.clientY - panel.offsetTop;
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                panel.style.left = `${Math.max(10, Math.min(window.innerWidth - 380, e.clientX - offX))}px`;
+                panel.style.top = `${Math.max(10, Math.min(window.innerHeight - 300, e.clientY - offY))}px`;
+            } else if (isStick) {
+                panel.style.left = `${Math.max(10, Math.min(window.innerWidth - 380, e.clientX - 160))}px`;
+                panel.style.top = `${Math.max(10, Math.min(window.innerHeight - 300, e.clientY - 20))}px`;
+            }
+        });
+        document.addEventListener('mouseup', () => { isDragging = false; });
+        dragBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isStick = !isStick;
+            dragBtn.classList.toggle('active', isStick);
+            dragBtn.innerText = isStick ? '放置' : '移动窗口';
+        });
+        document.addEventListener('click', (e) => {
+            if (isStick && e.target !== dragBtn) {
+                isStick = false;
+                dragBtn.classList.remove('active');
+                dragBtn.innerText = '移动窗口';
+            }
+        });
+
+        function stepValGlobal(idNum, delta) {
+            const input = document.getElementById(idNum);
+            if (!input) return;
+            let val = parseFloat(input.value) || 0;
+            val = Math.round((val + delta) * 1000) / 1000;
+            if (idNum === 'inp-cross-size') {
+                val = Math.min(50, Math.max(1, val));
+            }
+            input.value = val.toFixed(2);
+            input.dispatchEvent(new Event('change'));
+        }
+
+        function syncFov(v) {
+            config.fovHorizontal = v;
+            document.getElementById('inp-fov').value = v.toFixed(2);
+            document.querySelectorAll('#btn-fov-10, #btn-fov-60, #btn-fov-90, #btn-fov-103')
+                .forEach(b => b.classList.toggle('active', parseFloat(b.textContent) === v));
+            updateScene();
+        }
+
+        function initCrosshairColorSwatches() {
+            const container2 = document.getElementById('swatches-crosshair');
+            COLOR_PRESETS_CROSSHAIR.forEach(c => {
+                const b = document.createElement('div');
+                b.className = 'swatch-btn' + (c.hex === config.crosshair.color ? ' active' : '');
+                b.style.background = c.hex;
+                b.title = c.name;
+                b.onclick = () => {
+                    config.crosshair.color = c.hex;
+                    container2.querySelectorAll('.swatch-btn').forEach(el => el.classList.remove('active'));
+                    b.classList.add('active');
+                    updateCrosshairStyle();
+                };
+                container2.appendChild(b);
+            });
+        }
+
+        function bindSyncGlobal(idRange, idNum, keyConfig, parentObj = config, isCmSlider = false) {
+            const rng = idRange ? document.getElementById(idRange) : null;
+            const num = document.getElementById(idNum);
+            if (!num) return;
+
+            num.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY < 0 ? 0.25 : -0.25;
+                let val = parseFloat(num.value) || 0;
+                val = Math.round((val + delta) * 100) / 100;
+                if (idNum === 'inp-cross-size') {
+                    val = Math.min(50, Math.max(1, val));
+                }
+                num.value = val.toFixed(2);
+                num.dispatchEvent(new Event('change'));
+            }, { passive: false });
+
+            if (isCmSlider && rng) {
+                rng.addEventListener('input', (e) => {
+                    const ratio = parseFloat(e.target.value) / 1000;
+                    let cmVal = Math.pow(ratio, 3.2) * 10000 + 0.5;
+                    cmVal = Math.round(cmVal * 100) / 100;
+                    num.value = cmVal.toFixed(2);
+                    parentObj[keyConfig] = cmVal;
+                    updateSensitivity();
+                });
+                num.addEventListener('change', (e) => {
+                    let v = Math.max(0.1, Math.min(10000, parseFloat(e.target.value) || 50.0));
+                    num.value = v.toFixed(2);
+                    parentObj[keyConfig] = v;
+                    if (rng) {
+                        const ratio = Math.pow((v - 0.5) / 10000, 1 / 3.2);
+                        rng.value = Math.round(ratio * 1000);
+                    }
+                    updateSensitivity();
+                });
+                return;
+            }
+
+            const updateVal = (val) => {
+                let v = parseFloat(val);
+                if (isNaN(v)) return;
+                if (idNum === 'inp-cross-size') {
+                    v = Math.min(50, Math.max(1, v));
+                }
+                if (rng) rng.value = v;
+                num.value = v.toFixed(2);
+                parentObj[keyConfig] = v;
+                updateSensitivity();
+                updateScene();
+                if (keyConfig === 'size' || keyConfig === 'thick') updateCrosshairStyle();
+                if (keyConfig === 'targetSizeCm' && (gameState === 'playing' || gameState === 'interrupted')) {
+                    respawnAllTargets();
+                }
+            };
+
+            if (rng) rng.addEventListener('input', (e) => updateVal(e.target.value));
+            num.addEventListener('change', (e) => updateVal(e.target.value));
+        }
+
+        bindSyncGlobal('inp-dpi-r', 'inp-dpi', 'dpi');
+        bindSyncGlobal('inp-cm-r', 'inp-cm', 'cmPer360', config, true);
+        document.getElementById('inp-fov').addEventListener('change', function() {
+            let v = parseFloat(this.value);
+            if (!isNaN(v) && v > 0) {
+                config.fovHorizontal = v;
+                updateScene();
+                document.querySelectorAll('#btn-fov-10, #btn-fov-60, #btn-fov-90, #btn-fov-103')
+                    .forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - v) < 0.1));
+            }
+        });
+        bindSyncGlobal('inp-size-r', 'inp-size', 'targetSizeCm');
+        bindSyncGlobal('inp-cross-size-r', 'inp-cross-size', 'size', config.crosshair);
+        bindSyncGlobal('inp-cross-thick-r', 'inp-cross-thick', 'thick', config.crosshair);
+
+        document.querySelectorAll('.dpi-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const val = parseInt(btn.dataset.val);
+                document.getElementById('inp-dpi').value = val;
+                document.getElementById('inp-dpi-r').value = val;
+                config.dpi = val;
+                updateSensitivity();
+            });
+        });
+
+        document.querySelectorAll('.cm-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const val = parseFloat(btn.dataset.val);
+                document.getElementById('inp-cm').value = val.toFixed(2);
+                document.getElementById('inp-cm-r').value = Math.round(Math.pow((val - 0.5) / 10000, 1 / 3.2) *
+                1000);
+                config.cmPer360 = val;
+                updateSensitivity();
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.fov = hFovToVfov(config.fovHorizontal, camera.aspect);
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // =========================================================
+        // 9. 渲染循环 (高稳定性)
+        // =========================================================
+        let lastTime = performance.now();
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        const hudFps = document.getElementById('hud-fps');
+        const hudTime = document.getElementById('hud-time');
+
+        function updatePhysics(dt) {
+            cloudGroup.children.forEach(c => {
+                c.userData.angle += c.userData.speed * dt;
+                c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
+                c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
+                c.position.y = c.userData.altitude;
+            });
+
+            if (gameState === 'playing') {
+                timeLeft -= dt;
+                if (timeLeft <= 0) {
+                    timeLeft = 0;
+                    hudTime.innerText = '0.0';
+                    finishChallenge();
+                } else {
+                    hudTime.innerText = timeLeft.toFixed(1);
+                }
+            }
+        }
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+            const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+            lastFrameTime = now;
+            updatePhysics(dt);
+
+            frameCount++;
+            if (now - lastTime >= 400) {
+                hudFps.innerText = Math.round((frameCount * 1000) / (now - lastTime));
+                frameCount = 0;
+                lastTime = now;
+            }
+            renderer.render(scene, camera);
+        }
+
+        // =========================================================
+        // 10. 初始化 —— 修复预设按钮 active 状态与输入框同步
+        // =========================================================
+        initCrosshairColorSwatches();
+        updateCrosshairStyle();
+
+        // ★★★ 关键修复：从 inp-cm 读取初始值，同步 config.cmPer360 ★★★
+        const initialCm = parseFloat(document.getElementById('inp-cm').value);
+        if (!isNaN(initialCm) && initialCm > 0) {
+            config.cmPer360 = initialCm;
+            // 同步滑块 inp-cm-r 的值
+            const rng = document.getElementById('inp-cm-r');
+            if (rng) {
+                const ratio = Math.pow((initialCm - 0.5) / 10000, 1 / 3.2);
+                rng.value = Math.round(ratio * 1000);
+            }
+        }
+        updateSensitivity(); // 此时会正确激活与 config.cmPer360 匹配的预设按钮
+
+        initSixshotTargets();
+        updateScene();
+        animate(performance.now());
+
+        setTimeout(() => {
+            const f11Box = document.getElementById('f11-box');
+            if (f11Box) f11Box.classList.remove('f11-highlight');
+        }, 3000);
+
+        // 暴露全局方法
+        window.syncTargetSize = syncTargetSize;
+        window.setCrosshairType = setCrosshairType;
+        window.syncFov = syncFov;
+        window.stepValGlobal = stepValGlobal;
+        window.restartChallenge = restartChallenge;
+        window.startChallenge = startChallenge;
+        window.resetToIdle = resetToIdle;
+    </script>
+</body>
+</html>
