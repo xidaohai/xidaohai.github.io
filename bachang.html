@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>万能靶场</title>
+    <title>万能靶场 · V1纯净简易版 (西岛海)</title>
     <!-- 引入 Three.js 核心渲染库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
@@ -48,7 +48,7 @@
         .hud-val { color: #1e3a8a; font-weight: 900; }
         .fps-val { color: #16a34a; font-weight: 900; }
 
-        /* 右上角双倍大小全屏提示框 */
+        /* 右上角全屏提示框 */
         .f11-card {
             padding: 6px 16px;
             font-size: 0.82rem;
@@ -215,7 +215,7 @@
 
     <div id="crosshair"></div>
     
-    <!-- 顶部极简 HUD (角度高精度化置于 FOV 之后) -->
+    <!-- 顶部极简 HUD -->
     <div id="top-hud">
         <div class="hud-card">
             <div>DPI: <span class="hud-val" id="hud-dpi">800</span></div>
@@ -323,7 +323,6 @@
                 <div class="row">
                     <label>水平 FOV</label>
                     <div class="presets-row">
-                        <!-- 新增了 10度和60度选项 -->
                         <button class="preset-pill" id="btn-fov-10" onclick="syncFov(10)">10°</button>
                         <button class="preset-pill" id="btn-fov-60" onclick="syncFov(60)">60°</button>
                         <button class="preset-pill" id="btn-fov-90" onclick="syncFov(90)">90°</button>
@@ -333,6 +332,19 @@
                         <button class="step-btn" onclick="stepValGlobal('inp-fov', -1)">−</button>
                         <input type="number" class="num-input" id="inp-fov" value="103.00" step="0.01">
                         <button class="step-btn" onclick="stepValGlobal('inp-fov', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="divider"></div> <!-- 防混淆分隔线 -->
+
+                <!-- 站立眼高锁定与微调 (默认1.625m) -->
+                <div class="row">
+                    <label>站立眼高 (m)</label>
+                    <input type="range" id="inp-height-r" min="0.5" max="3.0" step="0.005" value="1.625">
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepValGlobal('inp-height', -0.025)">−</button>
+                        <input type="number" class="num-input" id="inp-height" value="1.625" min="0.5" max="3.0" step="0.005">
+                        <button class="step-btn" onclick="stepValGlobal('inp-height', 0.025)">+</button>
                     </div>
                 </div>
             </div>
@@ -380,11 +392,10 @@
 
     <script>
         // =========================================================
-        // 1. 国际标准化高精度灵敏度换算
+        // 1. 国际标准化高精度灵敏度换算 (默认 800DPI, 50cm/360°, 103° FOV, 1.625m 眼高)
         // =========================================================
         const ISO_INCH_TO_CM = 2.54;
 
-        // 赤橙黄绿青蓝紫白黑 9种纯色块定义
         const COLOR_PRESETS_CROSSHAIR = [
             { name: '赤', hex: '#ef4444' },
             { name: '橙', hex: '#f97316' },
@@ -402,6 +413,7 @@
             cmPer360: 50.0,
             fovHorizontal: 103,
             theme: 'day',
+            viewHeight: 1.625, // 【标准眼高】：严格锁定为 1.625m
             customCrosshair: {
                 enabled: false,
                 defaultColor: '#ef4444',
@@ -461,13 +473,13 @@
         }
 
         // =========================================================
-        // 3. Three.js 场景构建
+        // 3. Three.js 场景构建 + 【视平线标线】
         // =========================================================
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
 
         const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000);
-        camera.position.set(0, 1.6, 0);
+        camera.position.set(0, config.viewHeight, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -505,9 +517,10 @@
         const skyMesh = new THREE.Mesh(skyGeo, skyMat);
         scene.add(skyMesh);
 
+        // 散落方块云
         const cloudGroup = new THREE.Group();
         scene.add(cloudGroup);
-        const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.68 });
+        const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.68 });
 
         for (let i = 0; i < 15; i++) {
             const angle = (i / 15) * Math.PI * 2 + (Math.random() * 0.4 - 0.2);
@@ -545,6 +558,40 @@
         grid.position.y = 0.001;
         scene.add(grid);
 
+        // =========================================================
+        // 【视平线标线 (1.625m 水平参照线)】
+        // =========================================================
+        let horizonLine, thinLine;
+
+        function updateHorizon(height) {
+            if (horizonLine) scene.remove(horizonLine);
+            if (thinLine) scene.remove(thinLine);
+            const radius = 48;
+            const pts = [];
+            const segs = 72;
+            for (let i = 0; i <= segs; i++) {
+                const theta = (i / segs) * Math.PI * 2;
+                pts.push(new THREE.Vector3(radius * Math.cos(theta), height, radius * Math.sin(theta)));
+            }
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const mat = new THREE.LineDashedMaterial({
+                color: 0xffffff,
+                dashSize: 0.45,
+                gapSize: 0.3,
+                transparent: true,
+                opacity: 0.5
+            });
+            horizonLine = new THREE.Line(geo, mat);
+            horizonLine.computeLineDistances();
+            scene.add(horizonLine);
+
+            const thinMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.15 });
+            thinLine = new THREE.Line(geo.clone(), thinMat);
+            scene.add(thinLine);
+        }
+        updateHorizon(config.viewHeight);
+
+        // 360° 罗盘标尺
         const COMPASS_RADIUS = 48;
         const compassGroup = new THREE.Group();
         scene.add(compassGroup);
@@ -612,32 +659,32 @@
             config.targets.forEach(t => {
                 const r = (t.sizeCm / 100) / 2;
                 t.mesh.scale.set(r, r, r);
+                // 小球位置：基准视高 1.625m + 用户自定义的垂直偏移
+                t.mesh.position.y = config.viewHeight + (t.yOffset || 0);
             });
+            camera.position.y = config.viewHeight;
             camera.fov = hFovToVfov(config.fovHorizontal, window.innerWidth / window.innerHeight);
             camera.updateProjectionMatrix();
+            updateHorizon(config.viewHeight);
         }
 
         // =========================================================
-        // 4. 双精度视角控制与准星射线判定 (即时计算 3 位小数角度)
+        // 4. 双精度视角控制与准星射线判定
         // =========================================================
         let yaw = 0.0;
         let pitch = 0.0;
 
         document.addEventListener('mousemove', (e) => {
             if (document.pointerLockElement === document.body) {
-                // 原生精算：直接用 Float64 双精度将 movement 转化为弧度
                 yaw -= e.movementX * radiansPerCount;
                 pitch -= e.movementY * radiansPerCount;
                 
-                // 俯仰角限位
                 pitch = Math.max(-Math.PI / 2 + 0.001, Math.min(Math.PI / 2 - 0.001, pitch));
-                // 防止万向锁与超大数溢出，保证在 0~2π 内循环 (这是保精度的神来之笔)
                 yaw = yaw % (Math.PI * 2);
 
                 const euler = new THREE.Euler(pitch, yaw, 0, 'YXZ');
                 camera.quaternion.setFromEuler(euler);
 
-                // 更新左上角实时角度显示 (0.000° ~ 360.000°)
                 let currentDeg = ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
                 document.getElementById('hud-angle').innerText = currentDeg.toFixed(3);
             }
@@ -647,7 +694,6 @@
         const centerVec = new THREE.Vector2(0, 0);
         const crosshairEl = document.getElementById('crosshair');
 
-        // 准星变色机制：支持自定义纯色块与昼夜默认
         function updateCrosshairUI(onTarget) {
             let color;
             if (config.customCrosshair.enabled) {
@@ -698,7 +744,7 @@
         });
 
         // =========================================================
-        // 5. 动态多目标构建系统与即时局部事件绑定
+        // 5. 动态目标构建与垂直偏移绑定
         // =========================================================
         const container1 = document.getElementById('targets-container-1');
         const container2 = document.getElementById('targets-container-2');
@@ -719,7 +765,7 @@
                         </label>
                     </div>
                     <div class="row">
-                        <label>大小/直径 (cm)</label>
+                        <label>大小 (cm)</label>
                         <input type="range" id="inp-t${i}-s-r" min="1" max="150" step="0.5" value="${t.sizeCm}">
                         <div class="stepper-box">
                             <button class="step-btn" id="btn-t${i}-s-minus">−</button>
@@ -728,7 +774,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label>深度距离 (m)</label>
+                        <label>前后 (m)</label>
                         <input type="range" id="inp-t${i}-z-r" min="1" max="50" step="0.5" value="${t.distMeters}">
                         <div class="stepper-box">
                             <button class="step-btn" id="btn-t${i}-z-minus">−</button>
@@ -737,12 +783,22 @@
                         </div>
                     </div>
                     <div class="row">
-                        <label>中心基础角度 (°)</label>
+                        <label>左右 (°)</label>
                         <input type="range" id="inp-t${i}-a-r" min="-90" max="90" step="0.5" value="${t.centerDeg}">
                         <div class="stepper-box">
                             <button class="step-btn" id="btn-t${i}-a-minus">−</button>
                             <input type="number" class="num-input" id="inp-t${i}-a" value="${t.centerDeg.toFixed(2)}" step="0.01">
                             <button class="step-btn" id="btn-t${i}-a-plus">+</button>
+                        </div>
+                    </div>
+                    <!-- 垂直偏移设置 (支持高低落差模拟) -->
+                    <div class="row">
+                        <label>上下 (m)</label>
+                        <input type="range" id="inp-t${i}-y-r" min="-2" max="4" step="0.05" value="${t.yOffset || 0}">
+                        <div class="stepper-box">
+                            <button class="step-btn" id="btn-t${i}-y-minus">−</button>
+                            <input type="number" class="num-input" id="inp-t${i}-y" value="${(t.yOffset || 0).toFixed(2)}" step="0.05">
+                            <button class="step-btn" id="btn-t${i}-y-plus">+</button>
                         </div>
                     </div>
                     <div id="t${i}-move-box" class="move-subbox" style="display:${t.move.enabled ? 'block' : 'none'};">
@@ -754,7 +810,7 @@
                                 <button class="step-btn" id="btn-t${i}-rng-plus">+</button>
                             </div>
                         </div>
-                        <div style="font-size:0.56rem;color:${t.color};margin-bottom:3px;">(填 45° 即在 45° 总角跨度内来回移动)</div>
+                        <div style="font-size:0.56rem;color:${t.color};margin-bottom:3px;">(特别说明：填 45° 即在 45° 总角跨度内来回移动)</div>
                         <div class="row">
                             <label style="color:${t.color};">• 角速度 (°/s)</label>
                             <div class="stepper-box">
@@ -837,6 +893,26 @@
                 updateAngle(t.centerDeg + (e.deltaY < 0 ? 0.25 : -0.25));
             }, { passive: false });
 
+            // 垂直偏移 (yOffset)
+            const y_rng = document.getElementById(`inp-t${i}-y-r`);
+            const y_num = document.getElementById(`inp-t${i}-y`);
+            const y_minus = document.getElementById(`btn-t${i}-y-minus`);
+            const y_plus = document.getElementById(`btn-t${i}-y-plus`);
+
+            const updateY = (val) => {
+                let v = parseFloat(val) || 0.0;
+                y_rng.value = v; y_num.value = v.toFixed(2);
+                t.yOffset = v; updateScene();
+            };
+            y_rng.addEventListener('input', (e) => updateY(e.target.value));
+            y_num.addEventListener('change', (e) => updateY(e.target.value));
+            y_minus.addEventListener('click', () => updateY((t.yOffset || 0) - 0.05));
+            y_plus.addEventListener('click', () => updateY((t.yOffset || 0) + 0.05));
+            y_num.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                updateY((t.yOffset || 0) + (e.deltaY < 0 ? 0.05 : -0.05));
+            }, { passive: false });
+
             document.getElementById(`inp-t${i}-move`).addEventListener('change', (e) => {
                 t.move.enabled = e.target.checked;
                 document.getElementById(`t${i}-move-box`).style.display = t.move.enabled ? 'block' : 'none';
@@ -892,7 +968,6 @@
             mesh.castShadow = true;
             scene.add(mesh);
 
-            // 【默认化处理】A球 0度，B球 22.5度，剩下的依次隔开
             let defaultDeg = 0.0;
             if (i === 1) defaultDeg = 22.5;
             else if (i > 1) defaultDeg = (i * 15) - 30;
@@ -902,6 +977,7 @@
                 sizeCm: i === 1 ? 12.0 : 15.0,
                 distMeters: 10.0,
                 centerDeg: defaultDeg,
+                yOffset: 0.0,
                 color: colorStr,
                 mesh: mesh,
                 move: { 
@@ -1013,8 +1089,8 @@
         function stepValGlobal(idNum, delta) {
             const input = document.getElementById(idNum);
             let val = parseFloat(input.value) || 0;
-            val = Math.round((val + delta) * 100) / 100;
-            input.value = val.toFixed(2);
+            val = Math.round((val + delta) * 1000) / 1000;
+            input.value = val.toFixed(3);
             input.dispatchEvent(new Event('change'));
         }
 
@@ -1032,9 +1108,6 @@
             updateScene();
         }
 
-        // =========================================================
-        // UI 色块初始化与挂载
-        // =========================================================
         function initCrosshairColorSwatches() {
             const defContainer = document.getElementById('swatches-default');
             const tgtContainer = document.getElementById('swatches-target');
@@ -1118,6 +1191,23 @@
             num.addEventListener('change', (e) => updateVal(e.target.value));
         }
 
+        // 视高调整绑定 (默认 1.625m)
+        const heightR = document.getElementById('inp-height-r');
+        const heightN = document.getElementById('inp-height');
+        const updateHeight = (v) => {
+            let val = Math.max(0.5, Math.min(3.0, parseFloat(v) || 1.625));
+            heightR.value = val;
+            heightN.value = val.toFixed(3);
+            config.viewHeight = val;
+            updateScene();
+        };
+        heightR.addEventListener('input', e => updateHeight(e.target.value));
+        heightN.addEventListener('change', e => updateHeight(e.target.value));
+        heightN.addEventListener('wheel', e => {
+            e.preventDefault();
+            updateHeight(config.viewHeight + (e.deltaY < 0 ? 0.025 : -0.025));
+        }, { passive: false });
+
         bindSyncGlobal('inp-dpi-r', 'inp-dpi', 'dpi');
         bindSyncGlobal('inp-cm-r', 'inp-cm', 'cmPer360', config, true);
         bindSyncGlobal('inp-fov-r', 'inp-fov', 'fovHorizontal');
@@ -1187,7 +1277,8 @@
                 const rad = (targetDeg * Math.PI) / 180;
                 t.mesh.position.x = t.distMeters * Math.sin(rad);
                 t.mesh.position.z = -t.distMeters * Math.cos(rad);
-                t.mesh.position.y = 1.6;
+                // 垂直位置 = 站立眼高 1.625m + 单独垂直偏移
+                t.mesh.position.y = config.viewHeight + (t.yOffset || 0);
             });
         }
 
@@ -1212,7 +1303,7 @@
         }
 
         // =========================================================
-        // 8. 初始化默认目标与启动渲染
+        // 8. 简易版初始化启动 (纯净无冗余)
         // =========================================================
         initCrosshairColorSwatches();
         addNewTarget(); // A: 0°
@@ -1222,7 +1313,6 @@
         updateScene();
         animate(performance.now());
 
-        // F11 提示框 3秒倒计时去高光
         setTimeout(() => {
             const f11Box = document.getElementById('f11-box');
             if (f11Box) f11Box.classList.remove('f11-highlight');
