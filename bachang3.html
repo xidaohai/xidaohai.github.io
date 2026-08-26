@@ -153,7 +153,7 @@
         .author-name { font-size: 0.76rem; font-weight: 900; color: #0f172a; }
         .author-tag { font-size: 0.6rem; color: #64748b; font-weight: bold; }
 
-        /* ----- 右下配置与说明整合面板 ----- */
+        /* ----- 右下说明与配置栏 ----- */
         #bottom-right-container {
             position: absolute;
             bottom: 16px;
@@ -203,12 +203,7 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
             pointer-events: none;
         }
-        .rel-title {
-            font-size: 0.74rem;
-            font-weight: 900;
-            color: #0284c7;
-            margin-bottom: 4px;
-        }
+        .rel-title { font-size: 0.74rem; font-weight: 900; color: #0284c7; margin-bottom: 4px; }
         .rel-formula {
             font-size: 0.68rem;
             font-weight: 700;
@@ -219,11 +214,7 @@
             margin-bottom: 4px;
             line-height: 1.4;
         }
-        .rel-desc {
-            font-size: 0.64rem;
-            color: #64748b;
-            line-height: 1.4;
-        }
+        .rel-desc { font-size: 0.64rem; color: #64748b; line-height: 1.4; }
 
         /* ================= 调参控制台通用样式 ================= */
         .glass-panel {
@@ -256,7 +247,6 @@
             z-index: 19;
         }
 
-        /* 标题头 */
         .panel-header {
             display: flex;
             justify-content: space-between;
@@ -297,7 +287,6 @@
         .header-btn:hover { background: #e0f2fe; border-color: #0284c7; color: #0284c7; }
         .header-btn.active { background: #0284c7; color: #ffffff; border-color: #0284c7; }
 
-        /* 模式切换大标签 */
         .mode-nav-tabs {
             display: flex;
             background: #e2e8f0;
@@ -337,7 +326,6 @@
             border-left: 2.5px solid #0284c7;
         }
 
-        /* 模块分区块 */
         .section-card {
             background: rgba(248, 250, 252, 0.85);
             border: 1px solid #e2e8f0;
@@ -365,7 +353,6 @@
             font-weight: normal;
         }
 
-        /* 预设网格 / 分段器系统 */
         .preset-grid {
             display: grid;
             gap: 4px;
@@ -402,7 +389,6 @@
             box-shadow: 0 1px 4px rgba(2, 132, 199, 0.2);
         }
 
-        /* 参数滑块与输入组合行 */
         .ctrl-row {
             display: flex;
             align-items: center;
@@ -412,7 +398,7 @@
             font-size: 0.68rem;
             font-weight: 700;
             color: #475569;
-            width: 72px;
+            width: 76px;
             flex-shrink: 0;
         }
         .ctrl-row input[type="range"] {
@@ -446,7 +432,7 @@
         }
         .step-btn:hover { background: #e0f2fe; }
         .num-input {
-            width: 52px;
+            width: 54px;
             height: 22px;
             border: none;
             border-left: 1px solid #e2e8f0;
@@ -460,7 +446,6 @@
             background: #ffffff;
         }
 
-        /* 锁头按钮 */
         .lock-btn {
             background: #f1f5f9;
             border: 1px solid #cbd5e1;
@@ -481,7 +466,6 @@
             color: #d97706;
         }
 
-        /* 颜色色块网格 */
         .color-swatches-grid {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
@@ -502,7 +486,6 @@
             transform: scale(1.1);
         }
 
-        /* 开始按钮 */
         .btn-start {
             width: 100%;
             background: linear-gradient(135deg, #0284c7, #0369a1);
@@ -523,7 +506,6 @@
             box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
         }
 
-        /* 进度条与结算窗口 */
         #progress-overlay {
             display: none;
             position: fixed;
@@ -725,17 +707,19 @@
                     <span class="section-label">动态漂移 (Dynamic)</span>
                     <button class="pill-btn" id="btn-dynamic-toggle" style="padding:2px 10px;">状态: 关闭</button>
                 </div>
-                <div class="preset-grid cols-2" style="margin-bottom:6px;">
-                    <button class="pill-btn" data-val="12.5" onclick="setSixshotSpeed(12.5)">慢速 (12.5°/s)</button>
-                    <button class="pill-btn active" data-val="25" onclick="setSixshotSpeed(25)">标准 (25.0°/s)</button>
+                <div class="preset-grid cols-4" style="margin-bottom:6px;">
+                    <button class="pill-btn" data-val="15" onclick="setSixshotSpeed(15)">15°/s</button>
+                    <button class="pill-btn active" data-val="30" onclick="setSixshotSpeed(30)">30°/s</button>
+                    <button class="pill-btn" data-val="60" onclick="setSixshotSpeed(60)">60°/s</button>
+                    <button class="pill-btn" data-val="120" onclick="setSixshotSpeed(120)">120°/s</button>
                 </div>
                 <div class="ctrl-row">
                     <label>角速度 (°/s)</label>
-                    <input type="range" id="inp-speed-r" min="0.5" max="50" step="0.5" value="25" />
+                    <input type="range" id="inp-speed-r" min="1" max="300" step="1" value="30" />
                     <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-speed', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-speed" value="25.0" step="0.5" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-speed', 0.5)">+</button>
+                        <button class="step-btn" onclick="stepValGlobal('inp-speed', -1)">−</button>
+                        <input type="number" class="num-input" id="inp-speed" value="30.0" step="1" min="0.1" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-speed', 1)">+</button>
                     </div>
                 </div>
             </div>
@@ -800,17 +784,19 @@
                 <div class="section-header">
                     <span class="section-label">运动速度 & 活动范围</span>
                 </div>
-                <div class="preset-grid cols-2" style="margin-bottom:4px;">
-                    <button class="pill-btn" id="btn-track-spd-12" onclick="setTrackingSpeed(12.5)">慢速 (12.5°/s)</button>
-                    <button class="pill-btn active" id="btn-track-spd-25" onclick="setTrackingSpeed(25)">标准 (25.0°/s)</button>
+                <div class="preset-grid cols-4" style="margin-bottom:4px;">
+                    <button class="pill-btn" data-val="15" onclick="setTrackingSpeed(15)">15°/s</button>
+                    <button class="pill-btn active" data-val="30" onclick="setTrackingSpeed(30)">30°/s</button>
+                    <button class="pill-btn" data-val="60" onclick="setTrackingSpeed(60)">60°/s</button>
+                    <button class="pill-btn" data-val="120" onclick="setTrackingSpeed(120)">120°/s</button>
                 </div>
                 <div class="ctrl-row" style="margin-bottom:6px;">
                     <label>角速度 (°/s)</label>
-                    <input type="range" id="inp-track-speed-r" min="0.5" max="60" step="0.5" value="25" />
+                    <input type="range" id="inp-track-speed-r" min="1" max="300" step="1" value="30" />
                     <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-speed', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-track-speed" value="25.00" step="0.5" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-speed', 0.5)">+</button>
+                        <button class="step-btn" onclick="stepValGlobal('inp-track-speed', -1)">−</button>
+                        <input type="number" class="num-input" id="inp-track-speed" value="30.00" step="1" min="0.1" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-track-speed', 1)">+</button>
                     </div>
                 </div>
 
@@ -1000,12 +986,12 @@
             },
             dynamic: {
                 enabled: false,
-                speedDegPerSec: 25.0
+                speedDegPerSec: 30.0
             },
             tracking: {
                 motionType: 'fly',
                 angleRange: 90.0,
-                speedDegPerSec: 25.0,
+                speedDegPerSec: 30.0,
                 targetSizeCm: 25.0
             }
         };
@@ -1388,6 +1374,64 @@
             return { minX, maxX, minY, maxY, r };
         }
 
+        // 核心：实时应用角速度到场上目标（即拉即变）
+        function applySixshotSpeedRealtime() {
+            const D = config.depthSixshot;
+            const currentSpeed = (config.dynamic.enabled && (gameState === 'playing' || gameState === 'starting'))
+                ? (config.dynamic.speedDegPerSec * (Math.PI / 180) * D)
+                : 0;
+            sixTargets.forEach(t => {
+                t.speed = currentSpeed;
+                const len = Math.hypot(t.dirX, t.dirY);
+                if (len > 0.001) {
+                    t.dirX /= len;
+                    t.dirY /= len;
+                } else {
+                    const ang = Math.random() * Math.PI * 2;
+                    t.dirX = Math.cos(ang);
+                    t.dirY = Math.sin(ang);
+                }
+            });
+        }
+
+        function applyTrackingSpeedRealtime() {
+            const D = (config.tracking.motionType === 'free3d') ? trackingState.dist : config.depthTracking;
+            const speedRad = (config.tracking.speedDegPerSec * Math.PI) / 180;
+            const linearSpeed = speedRad * D;
+
+            if (config.tracking.motionType === 'fly') {
+                const len = Math.hypot(trackingState.vx, trackingState.vy);
+                if (len > 0.001) {
+                    trackingState.vx = (trackingState.vx / len) * linearSpeed;
+                    trackingState.vy = (trackingState.vy / len) * linearSpeed;
+                } else {
+                    trackingState.vx = linearSpeed;
+                    trackingState.vy = 0;
+                }
+            } else if (config.tracking.motionType === 'strafe') {
+                const sign = trackingState.strafeDir >= 0 ? 1 : -1;
+                trackingState.vx = sign * linearSpeed;
+            } else if (config.tracking.motionType === 'surround') {
+                const len = Math.hypot(trackingState.vYaw, trackingState.vPitch);
+                if (len > 0.001) {
+                    trackingState.vYaw = (trackingState.vYaw / len) * speedRad;
+                    trackingState.vPitch = (trackingState.vPitch / len) * (speedRad * 0.7);
+                } else {
+                    trackingState.vYaw = speedRad;
+                    trackingState.vPitch = 0;
+                }
+            } else if (config.tracking.motionType === 'free3d') {
+                const len = Math.hypot(trackingState.vYaw, trackingState.vPitch);
+                if (len > 0.001) {
+                    trackingState.vYaw = (trackingState.vYaw / len) * speedRad;
+                    trackingState.vPitch = (trackingState.vPitch / len) * (speedRad * 0.6);
+                } else {
+                    trackingState.vYaw = speedRad;
+                    trackingState.vPitch = 0;
+                }
+            }
+        }
+
         function respawnSixshotTarget(t) {
             const { minX, maxX, minY, maxY, r } = getSafeBoundsSixshot();
             const D = config.depthSixshot;
@@ -1491,9 +1535,11 @@
             if (config.mode === 'sixshot') {
                 for (let i = 0; i < targetCount && i < sixTargets.length; i++) respawnSixshotTarget(sixTargets[i]);
                 for (let i = targetCount; i < sixTargets.length; i++) { sixTargets[i].mesh.visible = false; sixTargets[i].speed = 0; }
+                applySixshotSpeedRealtime();
             } else {
                 respawnTrackingTarget();
                 for (let i = 1; i < sixTargets.length; i++) { sixTargets[i].mesh.visible = false; sixTargets[i].speed = 0; }
+                applyTrackingSpeedRealtime();
             }
         }
 
@@ -1581,13 +1627,26 @@
             saveToLocalStorage();
         }
 
+        // 无上限角速度设置
         function setTrackingSpeed(val) {
-            val = Math.min(60, Math.max(0.5, val));
+            val = Math.max(0.1, val);
             config.tracking.speedDegPerSec = val;
             document.getElementById('inp-track-speed').value = val.toFixed(2);
             document.getElementById('inp-track-speed-r').value = val;
-            document.getElementById('btn-track-spd-12').classList.toggle('active', Math.abs(val - 12.5) < 0.1);
-            document.getElementById('btn-track-spd-25').classList.toggle('active', Math.abs(val - 25.0) < 0.1);
+            document.querySelectorAll('#section-tracking-group [data-val]').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - val) < 0.1));
+            applyTrackingSpeedRealtime();
+            saveToLocalStorage();
+        }
+
+        function setSixshotSpeed(val) {
+            val = Math.max(0.1, val);
+            config.dynamic.speedDegPerSec = val;
+            document.getElementById('inp-speed').value = val.toFixed(1);
+            document.getElementById('inp-speed-r').value = val;
+            document.querySelectorAll('#section-sixshot-group [data-val]').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - val) < 0.1));
+            applySixshotSpeedRealtime();
             saveToLocalStorage();
         }
 
@@ -1601,15 +1660,6 @@
             });
             updateTargetScale();
             if (gameState === 'playing') respawnAllTargets();
-            saveToLocalStorage();
-        }
-
-        function setSixshotSpeed(val) {
-            config.dynamic.speedDegPerSec = val;
-            document.getElementById('inp-speed').value = val.toFixed(1);
-            document.getElementById('inp-speed-r').value = val;
-            document.querySelectorAll('#section-sixshot-group [data-val]').forEach(b =>
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - val) < 0.1));
             saveToLocalStorage();
         }
 
@@ -1637,6 +1687,7 @@
             document.getElementById('inp-depth-sixshot').value = val.toFixed(2);
             document.getElementById('inp-depth-sixshot-r').value = val;
             updateSpawnWall();
+            applySixshotSpeedRealtime();
             if (gameState === 'playing' || gameState === 'starting') respawnAllTargets();
             saveToLocalStorage();
         }
@@ -1647,6 +1698,7 @@
             document.getElementById('inp-depth-tracking').value = val.toFixed(2);
             document.getElementById('inp-depth-tracking-r').value = val;
             updateSpawnWall();
+            applyTrackingSpeedRealtime();
             if (gameState === 'playing') respawnAllTargets();
             saveToLocalStorage();
         }
@@ -1806,11 +1858,8 @@
             if (resultModal) resultModal.style.display = 'none';
             setPanelsVisibility(true);
             if (document.pointerLockElement === document.body) document.exitPointerLock();
-            score = 0;
-            hits = 0;
-            misses = 0;
-            trackingFiringTime = 0;
-            trackingOnTargetTime = 0;
+            score = 0; hits = 0; misses = 0;
+            trackingFiringTime = 0; trackingOnTargetTime = 0;
             timeLeft = 49.0;
             updateHUDStats();
             document.getElementById('hud-time').innerText = '49.0';
@@ -1939,7 +1988,7 @@
             config.dynamic.enabled = !config.dynamic.enabled;
             btnDynamicToggle.textContent = config.dynamic.enabled ? '状态: 开启' : '状态: 关闭';
             btnDynamicToggle.classList.toggle('active', config.dynamic.enabled);
-            if (gameState === 'playing' && config.mode === 'sixshot') respawnAllTargets();
+            applySixshotSpeedRealtime();
             saveToLocalStorage();
         });
 
@@ -1996,9 +2045,9 @@
             let val = parseFloat(input.value) || 0;
             val = Math.round((val + delta) * 1000) / 1000;
             if (idNum === 'inp-cross-size') val = Math.min(50, Math.max(1, val));
-            if (idNum === 'inp-speed') val = Math.min(50, Math.max(0.5, val));
+            if (idNum === 'inp-speed') val = Math.max(0.1, val);
             if (idNum === 'inp-track-angle') val = Math.min(180, Math.max(10, val));
-            if (idNum === 'inp-track-speed') val = Math.min(60, Math.max(0.5, val));
+            if (idNum === 'inp-track-speed') val = Math.max(0.1, val);
             if (idNum === 'inp-depth-sixshot') val = Math.min(30, Math.max(3, val));
             if (idNum === 'inp-depth-tracking') val = Math.min(30, Math.max(3, val));
             if (idNum === 'inp-fov') val = Math.min(140, Math.max(10, val));
@@ -2079,7 +2128,8 @@
                 updateScene();
                 if (keyConfig === 'size' || keyConfig === 'thick') updateCrosshairStyle();
                 if (keyConfig === 'angleRange') setTrackingAngle(v);
-                if (keyConfig === 'speedDegPerSec' && parentObj === config.tracking) setTrackingSpeed(v);
+                if (idNum === 'inp-speed') setSixshotSpeed(v);
+                if (idNum === 'inp-track-speed') setTrackingSpeed(v);
                 if (keyConfig === 'targetSizeCm') updateTargetScale();
                 if (idNum === 'inp-depth-sixshot') setDepthSixshot(v);
                 if (idNum === 'inp-depth-tracking') setDepthTracking(v);
@@ -2091,6 +2141,7 @@
         bindSyncGlobal('inp-dpi-r', 'inp-dpi', 'dpi');
         bindSyncGlobal('inp-cm-r', 'inp-cm', 'cmPer360', config, true);
         bindSyncGlobal('inp-size-r', 'inp-size', 'targetSizeCm');
+        bindSyncGlobal('inp-speed-r', 'inp-speed', 'speedDegPerSec', config.dynamic);
         bindSyncGlobal('inp-cross-size-r', 'inp-cross-size', 'size', config.crosshair);
         bindSyncGlobal('inp-cross-thick-r', 'inp-cross-thick', 'thick', config.crosshair);
         bindSyncGlobal('inp-track-angle-r', 'inp-track-angle', 'angleRange', config.tracking);
@@ -2295,13 +2346,21 @@
                 if (config.mode === 'sixshot' && config.dynamic.enabled) {
                     const { minX, maxX, minY, maxY } = getSafeBoundsSixshot();
                     const r = (config.targetSizeCm / 100) / 2;
+                    const D = config.depthSixshot;
+                    const currentLinearSpeed = config.dynamic.speedDegPerSec * (Math.PI / 180) * D;
+
                     for (const t of sixTargets) {
                         if (!t.mesh.visible) continue;
+                        t.speed = currentLinearSpeed;
                         t.x += t.dirX * t.speed * dt;
                         t.y += t.dirY * t.speed * dt;
-                        if (t.x < minX) { t.x = minX; t.dirX = -t.dirX; } else if (t.x > maxX) { t.x = maxX; t.dirX = -t.dirX; }
-                        if (t.y < minY) { t.y = minY; t.dirY = -t.dirY; } else if (t.y > maxY) { t.y = maxY; t.dirY = -t.dirY; }
+
+                        if (t.x < minX) { t.x = minX; t.dirX = Math.abs(t.dirX); }
+                        else if (t.x > maxX) { t.x = maxX; t.dirX = -Math.abs(t.dirX); }
+                        if (t.y < minY) { t.y = minY; t.dirY = Math.abs(t.dirY); }
+                        else if (t.y > maxY) { t.y = maxY; t.dirY = -Math.abs(t.dirY); }
                     }
+
                     const visible = sixTargets.filter(t => t.mesh.visible);
                     for (let i = 0; i < visible.length; i++) {
                         for (let j = i + 1; j < visible.length; j++) {
@@ -2312,17 +2371,18 @@
                                 const overlap = (minDist - dist) / 2, nx = dx / dist, ny = dy / dist;
                                 a.x -= nx * overlap; a.y -= ny * overlap;
                                 b.x += nx * overlap; b.y += ny * overlap;
+
                                 const dvx = a.dirX * a.speed - b.dirX * b.speed;
                                 const dvy = a.dirY * a.speed - b.dirY * b.speed;
                                 const dvn = dvx * nx + dvy * ny;
                                 if (dvn < 0) {
-                                    a.dirX -= 2 * dvn * nx / (a.speed + 0.001);
-                                    a.dirY -= 2 * dvn * ny / (a.speed + 0.001);
-                                    b.dirX += 2 * dvn * nx / (b.speed + 0.001);
-                                    b.dirY += 2 * dvn * ny / (b.speed + 0.001);
-                                    const la = Math.hypot(a.dirX, a.dirY), lb = Math.hypot(b.dirX, b.dirY);
-                                    if (la > 0.001) { a.dirX /= la; a.dirY /= la; }
-                                    if (lb > 0.001) { b.dirX /= lb; b.dirY /= lb; }
+                                    a.dirX -= dvn * nx / (a.speed || 1);
+                                    a.dirY -= dvn * ny / (a.speed || 1);
+                                    b.dirX += dvn * nx / (b.speed || 1);
+                                    b.dirY += dvn * ny / (b.speed || 1);
+                                    const la = Math.hypot(a.dirX, a.dirY) || 1, lb = Math.hypot(b.dirX, b.dirY) || 1;
+                                    a.dirX /= la; a.dirY /= la;
+                                    b.dirX /= lb; b.dirY /= lb;
                                 }
                             }
                         }
@@ -2332,8 +2392,8 @@
 
                 // Tracking 跟枪
                 if (config.mode === 'tracking') {
-                    const D = config.depthTracking,
-                        cy = config.viewHeight,
+                    const D = (config.tracking.motionType === 'free3d') ? trackingState.dist : config.depthTracking;
+                    const cy = config.viewHeight,
                         r = (config.tracking.targetSizeCm / 100) / 2;
                     const speedRad = (config.tracking.speedDegPerSec * Math.PI) / 180,
                         linearSpeed = speedRad * D;
@@ -2363,7 +2423,8 @@
                         const clampedAngle = Math.min(150, config.tracking.angleRange);
                         const halfW = D * Math.tan((clampedAngle / 2) * (Math.PI / 180)) - r;
                         trackingState.y = cy;
-                        trackingState.x += trackingState.strafeDir * linearSpeed * dt;
+                        trackingState.vx = trackingState.strafeDir * linearSpeed;
+                        trackingState.x += trackingState.vx * dt;
                         if (trackingState.x < -halfW) { trackingState.x = -halfW; trackingState.strafeDir = 1; }
                         else if (trackingState.x > halfW) { trackingState.x = halfW; trackingState.strafeDir = -1; }
 
