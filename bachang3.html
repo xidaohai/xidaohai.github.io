@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>练习靶场 · (西岛海)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -56,34 +55,19 @@
             gap: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
-        .hud-val {
-            color: #0284c7;
-            font-weight: 900;
-        }
-        .score-val {
-            color: #059669;
-            font-weight: 900;
-            font-size: 0.86rem;
-        }
-        .time-val {
-            color: #ea580c;
-            font-weight: 900;
-            font-size: 0.86rem;
-        }
-        .fps-val {
-            color: #16a34a;
-            font-weight: 900;
-        }
-        .poll-val {
-            color: #7c3aed;
-            font-weight: 900;
-        }
+        .hud-val { color: #0284c7; font-weight: 900; }
+        .score-val { color: #059669; font-weight: 900; font-size: 0.86rem; }
+        .time-val { color: #ea580c; font-weight: 900; font-size: 0.86rem; }
+        .fps-val { color: #16a34a; font-weight: 900; }
+        .poll-val { color: #7c3aed; font-weight: 900; }
         .f11-card {
             padding: 7px 16px;
             font-size: 0.8rem;
             font-weight: 900;
             letter-spacing: 0.5px;
             transition: all 0.5s;
+            cursor: pointer;
+            pointer-events: auto;
         }
         .f11-highlight {
             background: #ef4444 !important;
@@ -178,20 +162,9 @@
             justify-content: center;
             box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
         }
-        .author-meta {
-            display: flex;
-            flex-direction: column;
-        }
-        .author-name {
-            font-size: 0.74rem;
-            font-weight: 900;
-            color: #0f172a;
-        }
-        .author-tag {
-            font-size: 0.58rem;
-            color: #64748b;
-            font-weight: bold;
-        }
+        .author-meta { display: flex; flex-direction: column; }
+        .author-name { font-size: 0.74rem; font-weight: 900; color: #0f172a; }
+        .author-tag { font-size: 0.58rem; color: #64748b; font-weight: bold; }
         #bottom-right-container {
             position: absolute;
             bottom: 16px;
@@ -241,12 +214,7 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
             pointer-events: none;
         }
-        .rel-title {
-            font-size: 0.74rem;
-            font-weight: 900;
-            color: #0284c7;
-            margin-bottom: 4px;
-        }
+        .rel-title { font-size: 0.74rem; font-weight: 900; color: #0284c7; margin-bottom: 4px; }
         .rel-formula {
             font-size: 0.68rem;
             font-weight: 700;
@@ -257,11 +225,7 @@
             margin-bottom: 4px;
             line-height: 1.4;
         }
-        .rel-desc {
-            font-size: 0.64rem;
-            color: #64748b;
-            line-height: 1.4;
-        }
+        .rel-desc { font-size: 0.64rem; color: #64748b; line-height: 1.4; }
         .glass-panel {
             background: rgba(255, 255, 255, 0.62);
             backdrop-filter: blur(28px) saturate(190%);
@@ -274,13 +238,8 @@
             max-height: calc(100vh - 80px);
             overflow-y: auto;
         }
-        .glass-panel::-webkit-scrollbar {
-            width: 4px;
-        }
-        .glass-panel::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
+        .glass-panel::-webkit-scrollbar { width: 4px; }
+        .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         #draggable-panel {
             position: absolute;
             left: 18px;
@@ -342,16 +301,8 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .header-btn:hover {
-            background: #e0f2fe;
-            border-color: #0284c7;
-            color: #0284c7;
-        }
-        .header-btn.active {
-            background: #0284c7;
-            color: #ffffff;
-            border-color: #0284c7;
-        }
+        .header-btn:hover { background: #e0f2fe; border-color: #0284c7; color: #0284c7; }
+        .header-btn.active { background: #0284c7; color: #ffffff; border-color: #0284c7; }
         .mode-nav-tabs {
             display: flex;
             background: rgba(226, 232, 240, 0.7);
@@ -412,34 +363,14 @@
             align-items: center;
             gap: 4px;
         }
-        .section-sub {
-            font-size: 0.6rem;
-            color: #94a3b8;
-            font-weight: normal;
-        }
-        .preset-grid {
-            display: grid;
-            gap: 4px;
-            margin-bottom: 6px;
-        }
-        .preset-grid.cols-2 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .preset-grid.cols-3 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-        .preset-grid.cols-4 {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        .preset-grid.cols-5 {
-            grid-template-columns: repeat(5, 1fr);
-        }
-        .preset-grid.cols-7 {
-            grid-template-columns: repeat(7, 1fr);
-        }
-        .preset-grid.cols-8 {
-            grid-template-columns: repeat(4, 1fr);
-        }
+        .section-sub { font-size: 0.6rem; color: #94a3b8; font-weight: normal; }
+        .preset-grid { display: grid; gap: 4px; margin-bottom: 6px; }
+        .preset-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .preset-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .preset-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+        .preset-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
+        .preset-grid.cols-7 { grid-template-columns: repeat(7, 1fr); }
+        .preset-grid.cols-8 { grid-template-columns: repeat(4, 1fr); }
         .pill-btn {
             border: 1px solid #cbd5e1;
             background: rgba(255, 255, 255, 0.85);
@@ -453,11 +384,7 @@
             text-align: center;
             white-space: nowrap;
         }
-        .pill-btn:hover {
-            border-color: #0284c7;
-            color: #0284c7;
-            background: #f0f9ff;
-        }
+        .pill-btn:hover { border-color: #0284c7; color: #0284c7; background: #f0f9ff; }
         .pill-btn.active {
             background: #0284c7 !important;
             color: #ffffff !important;
@@ -507,9 +434,7 @@
             justify-content: center;
             transition: background 0.1s;
         }
-        .step-btn:hover {
-            background: #e0f2fe;
-        }
+        .step-btn:hover { background: #e0f2fe; }
         .num-input {
             width: 54px;
             height: 22px;
@@ -538,11 +463,7 @@
             font-weight: 700;
             transition: 0.15s;
         }
-        .lock-btn.unlocked {
-            background: #fffbeb;
-            border-color: #f59e0b;
-            color: #d97706;
-        }
+        .lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
         #btn-dynamic-toggle {
             font-size: 0.74rem !important;
             font-weight: 900 !important;
@@ -628,51 +549,14 @@
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.8);
         }
-        .result-title {
-            font-size: 1.25rem;
-            font-weight: 900;
-            color: #0f172a;
-        }
-        .result-subtitle {
-            font-size: 0.72rem;
-            color: #64748b;
-            margin: 3px 0 10px;
-        }
-        .score-large {
-            font-size: 3.2rem;
-            font-weight: 900;
-            color: #0284c7;
-            line-height: 1;
-            margin-bottom: 12px;
-        }
-        .result-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-        .res-box {
-            background: #f1f5f9;
-            padding: 8px;
-            border-radius: 6px;
-        }
-        .res-label {
-            font-size: 0.62rem;
-            color: #64748b;
-            font-weight: 700;
-        }
-        .res-val {
-            font-size: 1.1rem;
-            font-weight: 900;
-        }
-        .res-meta {
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-            font-size: 0.65rem;
-            color: #64748b;
-            margin-bottom: 16px;
-        }
+        .result-title { font-size: 1.25rem; font-weight: 900; color: #0f172a; }
+        .result-subtitle { font-size: 0.72rem; color: #64748b; margin: 3px 0 10px; }
+        .score-large { font-size: 3.2rem; font-weight: 900; color: #0284c7; line-height: 1; margin-bottom: 12px; }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+        .res-box { background: #f1f5f9; padding: 8px; border-radius: 6px; }
+        .res-label { font-size: 0.62rem; color: #64748b; font-weight: 700; }
+        .res-val { font-size: 1.1rem; font-weight: 900; }
+        .res-meta { display: flex; justify-content: center; gap: 14px; font-size: 0.65rem; color: #64748b; margin-bottom: 16px; }
         .btn-restart {
             background: #0284c7;
             color: #fff;
@@ -684,99 +568,20 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .btn-restart:hover {
-            background: #0369a1;
-        }
-        .height-hint {
-            font-size: 0.6rem;
-            color: #64748b;
-            margin-left: 6px;
-            font-weight: 400;
-        }
-        .height-hint strong {
-            color: #0284c7;
-            font-weight: 700;
-        }
-        @media (max-width: 820px) {
-            #draggable-panel {
-                width: 340px;
-                left: 10px;
-                top: 50px;
-                max-height: calc(100vh - 70px);
-            }
-            #right-panel {
-                width: 260px;
-                right: 10px;
-                top: 50px;
-                max-height: calc(100vh - 70px);
-            }
-            #bottom-right-container {
-                width: 260px;
-            }
-            .hud-card {
-                font-size: 0.65rem;
-                padding: 5px 10px;
-                gap: 8px;
-                flex-wrap: wrap;
-            }
-            #top-hud {
-                flex-wrap: wrap;
-                gap: 6px;
-            }
-        }
-        @media (max-width: 640px) {
-            #draggable-panel {
-                width: 92vw;
-                left: 4vw;
-                top: 48px;
-                max-height: calc(100vh - 60px);
-                padding: 10px 12px;
-            }
-            #right-panel {
-                display: none;
-            }
-            #bottom-right-container {
-                width: 92vw;
-                right: 4vw;
-                bottom: 10px;
-            }
-            #bottom-right-hud {
-                padding: 6px 10px;
-            }
-            .hud-card {
-                font-size: 0.58rem;
-                padding: 4px 8px;
-                gap: 6px;
-            }
-            .panel-title {
-                font-size: 0.74rem;
-            }
-            .preset-grid.cols-5 {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .preset-grid.cols-7 {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            .preset-grid.cols-8 {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            .ctrl-row label {
-                width: 60px;
-                font-size: 0.6rem;
-            }
-            .num-input {
-                width: 44px;
-                font-size: 0.64rem;
-            }
-            .step-btn {
-                width: 18px;
-                height: 20px;
-                font-size: 0.7rem;
-            }
-            #left-bottom-group {
-                bottom: 80px;
-                left: 10px;
-            }
+        .btn-restart:hover { background: #0369a1; }
+        .height-hint { font-size: 0.6rem; color: #64748b; margin-left: 6px; font-weight: 400; }
+        .height-hint strong { color: #0284c7; font-weight: 700; }
+        
+        .speed-calc-hint {
+            font-size: 0.62rem;
+            color: #0369a1;
+            background: rgba(224, 242, 254, 0.75);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            font-weight: 600;
+            line-height: 1.35;
+            border-left: 2.5px solid #0284c7;
         }
     </style>
 </head>
@@ -794,7 +599,7 @@
             <div title="高精硬件轮询率（平滑峰值捕获）">轮询率: <span class="poll-val" id="hud-poll">--</span> Hz</div>
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <div class="hud-card f11-card f11-highlight" id="f11-box">F11全屏</div>
+            <div class="hud-card f11-card f11-highlight" id="f11-box" title="点击可直接切换全屏">F11全屏</div>
             <div class="hud-card"><div>FPS: <span class="fps-val" id="hud-fps">--</span></div></div>
         </div>
     </div>
@@ -805,7 +610,7 @@
             <div class="swatches-grid-9" id="swatches-wall"></div>
         </div>
         <div class="palette-card" id="ball-color-picker">
-            <div class="palette-label">目标球体颜色</div>
+            <div class="palette-label"><span>🎯</span> 目标球体颜色</div>
             <div class="swatches-grid-9" id="swatches-ball"></div>
         </div>
         <a href="https://space.bilibili.com/1534330" target="_blank" id="author-card" title="点击访问作者B站空间">
@@ -839,7 +644,7 @@
 
     <div id="result-modal">
         <div class="result-card">
-            <div class="result-title" id="res-title">挑战结算报告</div>
+            <div class="result-title" id="res-title">🎯 挑战结算报告</div>
             <div class="result-subtitle" id="res-subtitle">49秒限时训练已完成</div>
             <div class="score-large" id="res-score">0</div>
             <div class="result-grid">
@@ -878,7 +683,7 @@
 
         <div class="section-card">
             <div class="section-header">
-                <span class="section-label">视觉高度 (Eye Height) <span class="height-hint">对应身高 ≈ <span id="height-estimate">1.75</span> m</span></span>
+                <span class="section-label">👁️ 视觉高度 (Eye Height) <span class="height-hint">对应身高 ≈ <span id="height-estimate">1.75</span> m</span></span>
                 <span class="section-sub">可穿模</span>
             </div>
             <div class="note-tip" style="margin-bottom:6px; font-size:0.6rem; padding:4px 8px;">
@@ -906,7 +711,7 @@
         <div id="section-sixshot-group">
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">目标球径 (Size)</span>
+                    <span class="section-label">🎯 目标球径 (Size)</span>
                     <span class="section-sub">125cm 自动切换为 3 靶</span>
                 </div>
                 <div class="preset-grid cols-4" id="sixshot-size-presets">
@@ -928,8 +733,8 @@
 
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">动态漂移 (Dynamic)</span>
-                    <button class="pill-btn" id="btn-dynamic-toggle">动态漂移: 关闭</button>
+                    <span class="section-label">⚡ 动态漂移 (Dynamic)</span>
+                    <button class="pill-btn" id="btn-dynamic-toggle">🔘 动态漂移: 关闭</button>
                 </div>
                 <div class="preset-grid cols-4" style="margin-bottom:6px;">
                     <button class="pill-btn active" data-val="12.5" onclick="setSixshotSpeed(12.5)">12.5°/s</button>
@@ -946,11 +751,12 @@
                         <button class="step-btn" onclick="stepValGlobal('inp-speed', 1)">+</button>
                     </div>
                 </div>
+                <div class="speed-calc-hint" id="sixshot-dynamic-hint" style="display:none;"></div>
             </div>
 
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">生成区域角度</span>
+                    <span class="section-label">🌐 生成区域角度</span>
                     <span class="section-sub">视场水平范围</span>
                 </div>
                 <div class="preset-grid cols-4" style="margin-bottom:6px;">
@@ -971,7 +777,7 @@
 
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">生成深度 (Depth)</span>
+                    <span class="section-label">📏 生成深度 (Depth)</span>
                     <button class="lock-btn" id="lock-sixshot-depth" onclick="toggleDepthLock('sixshot')" title="点击解锁/锁定深度">🔒 已锁定</button>
                 </div>
                 <div class="ctrl-row">
@@ -989,9 +795,10 @@
         <!-- Tracking 专属配置 -->
         <div id="section-tracking-group" style="display:none;">
 
+            <!-- ① 目标球径 -->
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">目标球径 (Size)</span>
+                    <span class="section-label">🎯 目标球径 (Size)</span>
                 </div>
                 <div class="preset-grid cols-4" id="tracking-size-presets">
                     <button class="pill-btn" id="btn-tsize-15" onclick="syncTrackingTargetSize(15)">15 cm</button>
@@ -1010,9 +817,10 @@
                 </div>
             </div>
 
+            <!-- ② 运动速度 (含实时物理换算提示) -->
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">运动速度 (Speed)</span>
+                    <span class="section-label">⚡ 运动速度 (Speed)</span>
                 </div>
                 <div class="preset-grid cols-3" style="margin-bottom:4px;">
                     <button class="pill-btn active" data-val="12.5" onclick="setTrackingSpeed(12.5)">12.5°/s</button>
@@ -1028,11 +836,14 @@
                         <button class="step-btn" onclick="stepValGlobal('inp-track-speed', 1)">+</button>
                     </div>
                 </div>
+                <!-- 实时线速度与行程计算提示 -->
+                <div class="speed-calc-hint" id="tracking-speed-hint"></div>
             </div>
 
+            <!-- ③ 活动范围 -->
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">活动范围 (Angle Range)</span>
+                    <span class="section-label">🌐 活动范围 (Angle Range)</span>
                 </div>
                 <div class="preset-grid cols-4" style="margin-bottom:4px;">
                     <button class="pill-btn" data-angle="45" onclick="setTrackingAngle(45)">45°</button>
@@ -1051,31 +862,33 @@
                 </div>
             </div>
 
+            <!-- ④ 运动轨迹 -->
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">运动轨迹 (Pattern)</span>
+                    <span class="section-label">🌀 运动轨迹 (Pattern)</span>
                 </div>
                 <div class="preset-grid cols-2">
-                    <button class="pill-btn active" id="btn-track-fly" onclick="setTrackingPattern('fly')">无规则乱飞</button>
-                    <button class="pill-btn" id="btn-track-strafe" onclick="setTrackingPattern('strafe')">水平折返</button>
+                    <button class="pill-btn active" id="btn-track-fly" onclick="setTrackingPattern('fly')">🌀 无规则乱飞</button>
+                    <button class="pill-btn" id="btn-track-strafe" onclick="setTrackingPattern('strafe')">↔ 水平折返</button>
                 </div>
             </div>
 
+            <!-- ⑤ 空间形态 -->
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">空间形态 (Space)</span>
+                    <span class="section-label">📐 空间形态 (Space)</span>
                 </div>
                 <div class="preset-grid cols-3">
-                    <button class="pill-btn active" id="btn-space-wall" onclick="setTrackingSpace('wall')">直面墙</button>
-                    <button class="pill-btn" id="btn-space-curve" onclick="setTrackingSpace('curve')">环形曲面</button>
-                    <button class="pill-btn" id="btn-space-free3d" onclick="setTrackingSpace('free3d')">3D自由深度</button>
+                    <button class="pill-btn active" id="btn-space-wall" onclick="setTrackingSpace('wall')">▢ 直面墙</button>
+                    <button class="pill-btn" id="btn-space-curve" onclick="setTrackingSpace('curve')">◯ 环形曲面</button>
+                    <button class="pill-btn" id="btn-space-free3d" onclick="setTrackingSpace('free3d')">🟧 3D自由深度</button>
                 </div>
             </div>
 
-            <!-- 变向周期预设 (移除"大步折返") -->
+            <!-- ⑥ 变向周期与随机折返 -->
             <div class="section-card">
                 <div class="section-header">
-                    <span class="section-label">变向周期与随机折返 (Reversal)</span>
+                    <span class="section-label">🔄 变向周期与随机折返 (Reversal)</span>
                     <span class="section-sub">0为到边折返/持续绕圈</span>
                 </div>
                 <div class="preset-grid cols-4" id="strafe-freq-presets" style="margin-bottom:6px;">
@@ -1104,9 +917,10 @@
                 </div>
             </div>
 
+            <!-- ⑦ 生成深度 -->
             <div class="section-card" id="row-tracking-depth-container">
                 <div class="section-header">
-                    <span class="section-label">生成深度 (Depth)</span>
+                    <span class="section-label">📏 生成深度 (Depth)</span>
                     <button class="lock-btn" id="lock-tracking-depth" onclick="toggleDepthLock('tracking')" title="点击解锁/锁定深度">🔒 已锁定</button>
                 </div>
                 <div class="note-tip" style="margin-bottom:6px; font-size:0.58rem; padding:3px 8px;" id="depth-hint-tracking">
@@ -1125,7 +939,7 @@
 
         </div>
 
-        <button class="btn-start" id="btn-lock">开始挑战 (0.135s启动)</button>
+        <button class="btn-start" id="btn-lock">▶ 开始挑战 (0.135s启动)</button>
     </div>
 
     <!-- ========== 右侧面板（准星 + 外设手感） ========== -->
@@ -1326,10 +1140,8 @@
         function updateSensitivity() {
             totalCounts360 = (config.cmPer360 / ISO_INCH_TO_CM) * config.dpi;
             radiansPerCount = (Math.PI * 2) / Math.max(1, totalCounts360);
-            document.querySelectorAll('.dpi-pill').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === config
-                .dpi));
-            document.querySelectorAll('.cm-pill').forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.dataset
-                .val) - config.cmPer360) < 0.01));
+            document.querySelectorAll('.dpi-pill').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === config.dpi));
+            document.querySelectorAll('.cm-pill').forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - config.cmPer360) < 0.01));
             saveToLocalStorage();
         }
 
@@ -1378,7 +1190,7 @@
         // =========================================================
         // 2. 音效系统
         // =========================================================
-        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let lastTrackAudioTime = 0;
 
         function playHitSound() {
@@ -1430,7 +1242,7 @@
         }
 
         // =========================================================
-        // 3. Three.js 场景构建
+        // 3. Three.js 场景构建 & 视口自适应 (修复全屏/缩放BUG)
         // =========================================================
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
@@ -1444,6 +1256,20 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
+
+        // ★★★ 核心修复：全屏切换与窗口 Resize 动态自适应响应 ★★★
+        function onWindowResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            camera.aspect = width / height;
+            camera.fov = hFovToVfov(config.fovHorizontal, camera.aspect);
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        }
+        window.addEventListener('resize', onWindowResize, { passive: true });
+        document.addEventListener('fullscreenchange', onWindowResize);
+        document.addEventListener('webkitfullscreenchange', onWindowResize);
 
         function createSkyTexture(theme) {
             const c = document.createElement('canvas');
@@ -1483,11 +1309,11 @@
             const angle = (i / 15) * Math.PI * 2 + (Math.random() * 0.4 - 0.2);
             const dist = 75 + Math.random() * 65;
             const x = Math.sin(angle) * dist,
-                z = -Math.cos(angle) * dist,
-                y = 48 + Math.random() * 20;
+                  z = -Math.cos(angle) * dist,
+                  y = 48 + Math.random() * 20;
             const w = 24 + Math.random() * 20,
-                h = 2.5 + Math.random() * 1.5,
-                d = 16 + Math.random() * 18;
+                  h = 2.5 + Math.random() * 1.5,
+                  d = 16 + Math.random() * 18;
             const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), cloudMat);
             mesh.position.set(x, y, z);
             mesh.userData = { angle, dist, speed: 0.0015 + Math.random() * 0.002, altitude: y };
@@ -1504,7 +1330,6 @@
         const floorMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.1, metalness: 0.02 });
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), floorMat);
         floor.rotation.x = -Math.PI / 2;
-        floor.position.y = 0;
         floor.receiveShadow = true;
         scene.add(floor);
         scene.add(new THREE.GridHelper(300, 150, 0x94a3b8, 0xe2e8f0));
@@ -1538,8 +1363,7 @@
                 const wallH = actualMaxY - actualMinY;
                 const wallCenterY = (actualMinY + actualMaxY) / 2;
 
-                const wallMat = new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE
-                        .DoubleSide, depthWrite: false });
+                const wallMat = new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false });
                 const wallMesh = new THREE.Mesh(new THREE.PlaneGeometry(squareSize, wallH), wallMat);
                 wallMesh.position.set(0, wallCenterY, -D);
                 wallMesh.renderOrder = -1;
@@ -1575,8 +1399,7 @@
                 const wallH = actualMaxY - actualMinY;
                 const wallCenterY = (actualMinY + actualMaxY) / 2;
 
-                const wallMat = new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE
-                        .DoubleSide, depthWrite: false });
+                const wallMat = new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false });
                 const wallMesh = new THREE.Mesh(new THREE.PlaneGeometry(halfW * 2, wallH), wallMat);
                 wallMesh.position.set(0, wallCenterY, -D);
                 wallMesh.renderOrder = -1;
@@ -1603,18 +1426,15 @@
                 const wallH = actualMaxY - actualMinY;
                 const wallCenterY = (actualMinY + actualMaxY) / 2;
 
-                const curvedMat = new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE
-                        .DoubleSide, depthWrite: false });
-                const curvedMesh = new THREE.Mesh(new THREE.CylinderGeometry(D, D, wallH, 64, 1, true, startAngle,
-                    sweepAngle), curvedMat);
+                const curvedMat = new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false });
+                const curvedMesh = new THREE.Mesh(new THREE.CylinderGeometry(D, D, wallH, 64, 1, true, startAngle, sweepAngle), curvedMat);
                 curvedMesh.position.set(0, wallCenterY, 0);
                 curvedMesh.renderOrder = -1;
                 spawnWallGroup.add(curvedMesh);
 
                 const edgeMat = new THREE.LineBasicMaterial({ color: wallHex, transparent: true, opacity: 0.95 });
                 const segs = isFull360 ? 64 : 48;
-                const topArc = [],
-                    botArc = [];
+                const topArc = [], botArc = [];
                 for (let i = 0; i <= segs; i++) {
                     const theta = startAngle + (i / segs) * sweepAngle;
                     const x = D * Math.sin(theta);
@@ -1625,10 +1445,8 @@
                 spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(topArc), edgeMat));
                 spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(botArc), edgeMat));
                 if (!isFull360) {
-                    spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([botArc[0], topArc[0]]),
-                        edgeMat));
-                    spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([botArc[segs], topArc[
-                    segs]]), edgeMat));
+                    spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([botArc[0], topArc[0]]), edgeMat));
+                    spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([botArc[segs], topArc[segs]]), edgeMat));
                 }
             } else if (space === 'free3d') {
                 const totalAngleRad = (config.tracking.angleRange * Math.PI) / 180;
@@ -1683,18 +1501,11 @@
 
         let sixTargets = [];
         const trackingState = {
-            x: 0,
-            y: 0,
-            z: -10,
+            x: 0, y: 0, z: -10,
             dist: 10.0,
-            yaw: 0,
-            pitch: 0,
-            vx: 0,
-            vy: 0,
-            vz: 0,
-            vYaw: 0,
-            vPitch: 0,
-            vDist: 0,
+            yaw: 0, pitch: 0,
+            vx: 0, vy: 0, vz: 0,
+            vYaw: 0, vPitch: 0, vDist: 0,
             changeDirTimer: 0
         };
 
@@ -1713,8 +1524,7 @@
                 mesh.visible = (i === 0);
                 mesh.renderOrder = 10;
                 scene.add(mesh);
-                sixTargets.push({ mesh, x: 0, y: config.viewHeight, z: -config.depthSixshot, dirX: 1, dirY: 0,
-                speed: 0 });
+                sixTargets.push({ mesh, x: 0, y: config.viewHeight, z: -config.depthSixshot, dirX: 1, dirY: 0, speed: 0 });
             }
             updateTargetScale();
             updateTargetVisibility();
@@ -1731,20 +1541,19 @@
             } else {
                 const activeCount = config.mode === 'sixshot' ? targetCount : 1;
                 for (let i = 0; i < sixTargets.length; i++) {
-                    sixTargets[i].mesh.visible = (i < activeCount && (gameState === 'playing' || gameState ===
-                    'starting'));
+                    sixTargets[i].mesh.visible = (i < activeCount && (gameState === 'playing' || gameState === 'starting'));
                 }
             }
         }
 
         function getSafeBoundsSixshot() {
             const D = config.depthSixshot,
-                r = (config.targetSizeCm / 100) / 2;
+                  r = (config.targetSizeCm / 100) / 2;
             const halfAngleRad = (config.spawnAngleDeg / 2) * Math.PI / 180;
             const squareSize = 2 * D * Math.tan(halfAngleRad);
             const margin = r + 0.05;
             const minX = -squareSize / 2 + margin,
-                maxX = squareSize / 2 - margin;
+                  maxX = squareSize / 2 - margin;
             let bottomY = config.viewHeight - (squareSize / 2);
             if (bottomY < 0.05) bottomY = 0.05;
             const actualMinY = bottomY;
@@ -1770,6 +1579,7 @@
                     t.dirY = Math.sin(ang);
                 }
             });
+            updateSpeedHints();
         }
 
         function applyTrackingSpeedRealtime() {
@@ -1817,6 +1627,7 @@
                     }
                 }
             }
+            updateSpeedHints();
         }
 
         function pickNextStrafeTimer() {
@@ -1860,8 +1671,7 @@
                 }
             } else {
                 trackingState.dist = (space === 'free3d') ? baseD + Math.random() * 8.0 : baseD;
-                trackingState.yaw = isFull360 ? (Math.random() * 2 - 1) * Math.PI : (Math.random() * 2 - 1) * (halfAngleRad *
-                    0.7);
+                trackingState.yaw = isFull360 ? (Math.random() * 2 - 1) * Math.PI : (Math.random() * 2 - 1) * (halfAngleRad * 0.7);
                 trackingState.pitch = isFly ? (Math.random() * 2 - 1) * (maxPitch * 0.4) : 0;
 
                 if (isFly) {
@@ -1932,10 +1742,7 @@
         function respawnSixshotTarget(t) {
             const { minX, maxX, minY, maxY, r } = getSafeBoundsSixshot();
             const D = config.depthSixshot;
-            let fx = 0,
-                fy = 0,
-                valid = false,
-                attempts = 0;
+            let fx = 0, fy = 0, valid = false, attempts = 0;
             while (!valid && attempts < 50) {
                 attempts++;
                 fx = minX + Math.random() * (maxX - minX);
@@ -1958,8 +1765,7 @@
             const angle = Math.random() * 2 * Math.PI;
             t.dirX = Math.cos(angle);
             t.dirY = Math.sin(angle);
-            t.speed = (config.dynamic.enabled && gameState === 'playing') ? (config.dynamic.speedDegPerSec * Math.PI / 180 *
-                D) : 0;
+            t.speed = (config.dynamic.enabled && gameState === 'playing') ? (config.dynamic.speedDegPerSec * Math.PI / 180 * D) : 0;
         }
 
         function updateTargetScale() {
@@ -1968,12 +1774,44 @@
             sixTargets.forEach(t => t.mesh.scale.set(r, r, r));
         }
 
+        function updateSpeedHints() {
+            const tHint = document.getElementById('tracking-speed-hint');
+            if (tHint) {
+                const D = config.depthTracking;
+                const speedRad = (config.tracking.speedDegPerSec * Math.PI) / 180;
+                const linearSpeed = speedRad * D;
+                const clampedAngle = Math.min(170, config.tracking.angleRange);
+                const linearSpan = 2 * D * Math.tan((clampedAngle / 2) * Math.PI / 180);
+
+                if (config.tracking.space === 'wall') {
+                    tHint.innerHTML = `📐 <strong>直面墙平面直线横移：</strong>距离 <strong>${D.toFixed(1)}m</strong> 对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，水平行程 ≈ <strong>${linearSpan.toFixed(2)} m</strong>`;
+                } else if (config.tracking.space === 'curve') {
+                    tHint.innerHTML = `◯ <strong>环形曲面圆周围绕：</strong>距离 <strong>${D.toFixed(1)}m</strong> 对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，围绕跨度 <strong>${config.tracking.angleRange}°</strong>`;
+                } else if (config.tracking.space === 'free3d') {
+                    tHint.innerHTML = `🟧 <strong>3D自由深度立体机动：</strong>靶子在 <strong>${D.toFixed(1)} ~ ${(D + 10).toFixed(1)}m</strong> 纵深内推进拉远，基准角速 <strong>${config.tracking.speedDegPerSec}°/s</strong>`;
+                }
+            }
+
+            const sHint = document.getElementById('sixshot-dynamic-hint');
+            if (sHint) {
+                if (config.dynamic.enabled) {
+                    const D = config.depthSixshot;
+                    const v = D * (config.dynamic.speedDegPerSec * Math.PI / 180);
+                    sHint.style.display = 'block';
+                    sHint.innerHTML = `⚡ <strong>动态漂移已开启：</strong>距离 <strong>${D.toFixed(1)}m</strong> 对应平面弹跳线速 ≈ <strong>${v.toFixed(2)} m/s</strong>`;
+                } else {
+                    sHint.style.display = 'none';
+                }
+            }
+        }
+
         function updateScene() {
             camera.position.y = config.viewHeight;
             camera.fov = hFovToVfov(config.fovHorizontal, window.innerWidth / window.innerHeight);
             camera.updateProjectionMatrix();
             updateTargetScale();
             updateSpawnWall();
+            updateSpeedHints();
             saveToLocalStorage();
             const est = (config.viewHeight / 0.93).toFixed(2);
             const estElem = document.getElementById('height-estimate');
@@ -2003,8 +1841,7 @@
                 document.getElementById('lbl-acc').innerText = '命中率';
             } else {
                 const patternDesc = config.tracking.pattern === 'fly' ? '无规则乱飞' : '水平折返';
-                const spaceDesc = config.tracking.space === 'wall' ? '直面墙' : config.tracking.space === 'curve' ? '环形曲面' :
-                    '3D自由深度';
+                const spaceDesc = config.tracking.space === 'wall' ? '直面墙' : config.tracking.space === 'curve' ? '环形曲面' : '3D自由深度';
                 document.getElementById('note-tip').innerHTML =
                     `设定：${config.tracking.angleRange}° · ${patternDesc} · ${spaceDesc} ｜ <strong>按住鼠标左键持续跟枪计分</strong>`;
                 document.getElementById('br-title').innerText = 'Tracking 跟枪训练原理';
@@ -2020,6 +1857,7 @@
             updateTargetScale();
             updateTargetVisibility();
             updateSpawnWall();
+            updateSpeedHints();
             saveToLocalStorage();
         }
 
@@ -2063,6 +1901,7 @@
             switchTrainMode('tracking');
             if (gameState === 'playing' || gameState === 'starting') respawnAllTargets();
             updateSpawnWall();
+            updateSpeedHints();
             saveToLocalStorage();
         }
 
@@ -2080,7 +1919,6 @@
             if (inMax) inMax.value = max.toFixed(2);
             if (rngMax) rngMax.value = max;
 
-            // 更新激活状态（移除大步折返判断）
             document.querySelectorAll('#strafe-freq-presets .pill-btn').forEach(b => {
                 const txt = b.textContent;
                 const isActive = (max === 0 && txt.includes('到边')) ||
@@ -2142,6 +1980,7 @@
             document.querySelectorAll('#section-tracking-group [data-angle]').forEach(b =>
                 b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - config.tracking.angleRange) < 0.5));
             updateSpawnWall();
+            updateSpeedHints();
             if (gameState === 'playing') respawnAllTargets();
             saveToLocalStorage();
         }
@@ -2361,7 +2200,7 @@
         }
 
         // =========================================================
-        // stepValGlobal 与直接响应系统
+        // stepValGlobal
         // =========================================================
         function stepValGlobal(id, stepAmount) {
             const input = document.getElementById(id);
@@ -2596,7 +2435,7 @@
                 const total = hits + misses,
                     acc = total > 0 ? ((hits / total) * 100).toFixed(1) : '0.0',
                     kps = (hits / 49.0).toFixed(2);
-                document.getElementById('res-title').innerText = 'Sixshot 结算报告';
+                document.getElementById('res-title').innerText = '🎯 Sixshot 结算报告';
                 document.getElementById('res-subtitle').innerText = 'Sixshot 49秒限时模式已完成';
                 document.getElementById('res-score').innerText = score.toFixed(0);
                 document.getElementById('res-lbl-1').innerText = '有效命中';
@@ -2616,7 +2455,7 @@
                 const pDesc = config.tracking.pattern === 'fly' ? '乱飞' : '折返';
                 const sDesc = config.tracking.space === 'wall' ? '直面墙' : config.tracking.space === 'curve' ? '环形曲面' :
                     '3D自由深度';
-                document.getElementById('res-title').innerText = '跟枪追踪结算报告';
+                document.getElementById('res-title').innerText = '⚡ 跟枪追踪结算报告';
                 document.getElementById('res-subtitle').innerText =
                     `Tracking · ${config.tracking.angleRange}° · ${pDesc}+${sDesc}`;
                 document.getElementById('res-score').innerText = score.toFixed(1);
@@ -2731,7 +2570,7 @@
 
         btnDynamicToggle.addEventListener('click', () => {
             config.dynamic.enabled = !config.dynamic.enabled;
-            btnDynamicToggle.textContent = config.dynamic.enabled ? '动态漂移: 开启' : '动态漂移: 关闭';
+            btnDynamicToggle.textContent = config.dynamic.enabled ? '🔘 动态漂移: 开启' : '🔘 动态漂移: 关闭';
             btnDynamicToggle.classList.toggle('active', config.dynamic.enabled);
             applySixshotSpeedRealtime();
             saveToLocalStorage();
@@ -2919,7 +2758,7 @@
         function exportConfigFile() {
             const dataToExport = {
                 title: "xdh练习靶场设定配置",
-                version: "2.5",
+                version: "2.6",
                 author: "西岛海",
                 exportTime: new Date().toLocaleString(),
                 data: {
@@ -2975,8 +2814,7 @@
                 if (imported.config.dynamic) Object.assign(config.dynamic, imported.config.dynamic);
                 if (imported.config.tracking) {
                     Object.assign(config.tracking, imported.config.tracking);
-                    if (imported.config.tracking.strafeInterval !== undefined && config.tracking.strafeMinInterval ===
-                        undefined) {
+                    if (imported.config.tracking.strafeInterval !== undefined && config.tracking.strafeMinInterval === undefined) {
                         config.tracking.strafeMinInterval = imported.config.tracking.strafeInterval;
                         config.tracking.strafeMaxInterval = imported.config.tracking.strafeInterval;
                     }
@@ -3045,10 +2883,8 @@
                 b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - config.targetSizeCm) < 0.1);
             });
             document.querySelectorAll('#tracking-size-presets .pill-btn').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - config.tracking.targetSizeCm) <
-                    0.1);
+                b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - config.tracking.targetSizeCm) < 0.1);
             });
-            // 更新变向周期预设激活状态（移除大步折返判断）
             document.querySelectorAll('#strafe-freq-presets .pill-btn').forEach(b => {
                 const txt = b.textContent;
                 const isActive = (maxFreq === 0 && txt.includes('到边')) ||
@@ -3058,23 +2894,19 @@
                 b.classList.toggle('active', isActive);
             });
             document.querySelectorAll('#section-sixshot-group [data-val]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - config.dynamic.speedDegPerSec) <
-                    0.1);
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - config.dynamic.speedDegPerSec) < 0.1);
             });
             document.querySelectorAll('#section-sixshot-group [data-angle]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - (config.spawnAngleDeg || 45)) <
-                    0.5);
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - (config.spawnAngleDeg || 45)) < 0.5);
             });
             document.querySelectorAll('#draggable-panel [data-h]').forEach(b => {
                 b.classList.toggle('active', Math.abs(parseFloat(b.dataset.h) - config.viewHeight) < 0.01);
             });
             document.querySelectorAll('#section-tracking-group [data-val]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - config.tracking.speedDegPerSec) <
-                    0.1);
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - config.tracking.speedDegPerSec) < 0.1);
             });
             document.querySelectorAll('#section-tracking-group [data-angle]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - config.tracking.angleRange) <
-                    0.5);
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - config.tracking.angleRange) < 0.5);
             });
             document.querySelectorAll('.dpi-pill').forEach(b => {
                 b.classList.toggle('active', parseInt(b.dataset.val) === config.dpi);
@@ -3087,7 +2919,7 @@
             });
 
             if (btnDynamicToggle) {
-                btnDynamicToggle.textContent = config.dynamic.enabled ? '动态漂移: 开启' : '动态漂移: 关闭';
+                btnDynamicToggle.textContent = config.dynamic.enabled ? '🔘 动态漂移: 开启' : '🔘 动态漂移: 关闭';
                 btnDynamicToggle.classList.toggle('active', config.dynamic.enabled);
             }
 
@@ -3102,8 +2934,7 @@
             applyTheme(config.theme || 'day');
 
             const syncDepthLockUI = (mode, locked) => {
-                const lockBtn = document.getElementById(mode === 'sixshot' ? 'lock-sixshot-depth' :
-                'lock-tracking-depth');
+                const lockBtn = document.getElementById(mode === 'sixshot' ? 'lock-sixshot-depth' : 'lock-tracking-depth');
                 const inp = document.getElementById(mode === 'sixshot' ? 'inp-depth-sixshot' : 'inp-depth-tracking');
                 const rng = document.getElementById(mode === 'sixshot' ? 'inp-depth-sixshot-r' : 'inp-depth-tracking-r');
                 if (lockBtn) {
@@ -3151,8 +2982,8 @@
             lastFrameTime = performance.now(),
             frameCount = 0;
         const hudFps = document.getElementById('hud-fps'),
-            hudTime = document.getElementById('hud-time'),
-            hudPoll = document.getElementById('hud-poll');
+              hudTime = document.getElementById('hud-time'),
+              hudPoll = document.getElementById('hud-poll');
 
         function updatePhysics(dt) {
             cloudGroup.children.forEach(c => {
@@ -3185,27 +3016,22 @@
                         t.x += t.dirX * t.speed * dt;
                         t.y += t.dirY * t.speed * dt;
 
-                        if (t.x < minX) { t.x = minX;
-                            t.dirX = Math.abs(t.dirX); } else if (t.x > maxX) { t.x = maxX;
-                            t.dirX = -Math.abs(t.dirX); }
-                        if (t.y < minY) { t.y = minY;
-                            t.dirY = Math.abs(t.dirY); } else if (t.y > maxY) { t.y = maxY;
-                            t.dirY = -Math.abs(t.dirY); }
+                        if (t.x < minX) { t.x = minX; t.dirX = Math.abs(t.dirX); }
+                        else if (t.x > maxX) { t.x = maxX; t.dirX = -Math.abs(t.dirX); }
+                        if (t.y < minY) { t.y = minY; t.dirY = Math.abs(t.dirY); }
+                        else if (t.y > maxY) { t.y = maxY; t.dirY = -Math.abs(t.dirY); }
                     }
 
                     const visible = sixTargets.filter(t => t.mesh.visible);
                     for (let i = 0; i < visible.length; i++) {
                         for (let j = i + 1; j < visible.length; j++) {
-                            const a = visible[i],
-                                b = visible[j];
-                            const dx = b.x - a.x,
-                                dy = b.y - a.y,
-                                dist = Math.hypot(dx, dy);
+                            const a = visible[i], b = visible[j];
+                            const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy);
                             const minDist = r * 2;
                             if (dist < minDist && dist > 0.001) {
                                 const overlap = (minDist - dist) / 2,
-                                    nx = dx / dist,
-                                    ny = dy / dist;
+                                      nx = dx / dist,
+                                      ny = dy / dist;
                                 a.x -= nx * overlap;
                                 a.y -= ny * overlap;
                                 b.x += nx * overlap;
@@ -3220,7 +3046,7 @@
                                     b.dirX += dvn * nx / (b.speed || 1);
                                     b.dirY += dvn * ny / (b.speed || 1);
                                     const la = Math.hypot(a.dirX, a.dirY) || 1,
-                                        lb = Math.hypot(b.dirX, b.dirY) || 1;
+                                          lb = Math.hypot(b.dirX, b.dirY) || 1;
                                     a.dirX /= la;
                                     a.dirY /= la;
                                     b.dirX /= lb;
@@ -3471,6 +3297,7 @@
             } catch (e) {}
         }
 
+        // 注册全局挂载函数
         window.syncTargetSize = syncTargetSize;
         window.setCrosshairType = setCrosshairType;
         window.syncFov = syncFov;
@@ -3508,6 +3335,18 @@
         setCrosshairType(config.crosshair.type);
         updateCrosshairStyle();
 
+        // 绑定全屏点击快速切换
+        const f11Box = document.getElementById('f11-box');
+        if (f11Box) {
+            f11Box.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(() => {});
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+                }
+            });
+        }
+
         try {
             const savedRaw = localStorage.getItem(STORAGE_KEY);
             if (savedRaw) {
@@ -3522,10 +3361,10 @@
         updateScene();
         forceUpdateAllTargetMaterials();
         updateDepthHint();
+        updateSpeedHints();
         animate(performance.now());
 
         setTimeout(() => {
-            const f11Box = document.getElementById('f11-box');
             if (f11Box) f11Box.classList.remove('f11-highlight');
         }, 3000);
     </script>
