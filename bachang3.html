@@ -1411,6 +1411,8 @@
 
         function setValF(id, v, f = 2) { const e = getEl(id); if (e) e.value = Number(v).toFixed(f); }
 
+        function setVal(id, v) { const e = getEl(id); if (e) e.value = v; }
+
         function pickNextStrafeTimer() {
             const mn = CFG.tracking.strafeMinInterval,
                 mx = CFG.tracking.strafeMaxInterval;
@@ -1746,12 +1748,10 @@
 
         function updateTargetVisibility() {
             const active = CFG.mode === 'sixshot' ? STATE.targetCount : 1;
-            // idle 状态下也显示靶子（预览模式）
             const show = (STATE.game === 'playing' || STATE.game === 'starting' || STATE.game === 'idle');
             for (let i = 0; i < sixTargets.length; i++) {
                 sixTargets[i].mesh.visible = i < active && show;
             }
-            // armed 状态下也显示
             if (STATE.game === 'armed') {
                 for (let i = 0; i < sixTargets.length; i++) {
                     sixTargets[i].mesh.visible = i < active;
@@ -2003,10 +2003,9 @@
                 c.position.y = c.userData.altitude;
             });
 
-            // ---- Sixshot 物理 (预览与实战速度一致) ----
+            // ---- Sixshot 物理 ----
             if (CFG.mode === 'sixshot') {
                 const D = CFG.depthSixshot;
-                // 速度由 dynamic.enabled 统一控制，不区分 idle/playing
                 const currentSpeed = (CFG.dynamic.enabled) ? CFG.dynamic.speedDegPerSec * Math.PI / 180 * D : 0;
 
                 const b = getSixshotBounds();
@@ -2024,7 +2023,7 @@
                         t.dirY = -Math.abs(t.dirY); }
                 }
 
-                // 防堆叠（所有可见状态都执行，保证预览与实战一致）
+                // 防堆叠
                 const vis = sixTargets.filter(t => t.mesh.visible);
                 for (let i = 0; i < vis.length; i++) {
                     for (let j = i + 1; j < vis.length; j++) {
@@ -2066,7 +2065,7 @@
                 }
             }
 
-            // ---- Tracking 物理 (预览与实战速度一致) ----
+            // ---- Tracking 物理 ----
             if (CFG.mode === 'tracking') {
                 const ts = STATE.tracking,
                     space = CFG.tracking.space,
@@ -2087,7 +2086,6 @@
                     const minY = Math.max(0.05 + r, cy - halfH),
                         maxY = cy + halfH;
 
-                    // 直接使用全速，无预览减速
                     ts.x += ts.vx * dt;
                     ts.y += ts.vy * dt;
 
@@ -2098,7 +2096,6 @@
                         ts.vy = Math.abs(ts.vy); } else if (ts.y > maxY) { ts.y = maxY;
                         ts.vy = -Math.abs(ts.vy); }
 
-                    // 变向逻辑在所有状态下生效（预览与实战一致）
                     if (CFG.tracking.strafeMaxInterval > 0) {
                         ts.changeDirTimer -= dt;
                         if (ts.changeDirTimer <= 0) {
@@ -2110,7 +2107,6 @@
                         }
                     }
                 } else {
-                    // 角度更新（全速）
                     ts.yaw += ts.vYaw * dt;
                     ts.pitch += ts.vPitch * dt;
 
@@ -2135,7 +2131,6 @@
                             ts.vDist = -Math.abs(ts.vDist); }
                     }
 
-                    // 变向逻辑在所有状态下生效
                     if (CFG.tracking.strafeMaxInterval > 0) {
                         ts.changeDirTimer -= dt;
                         if (ts.changeDirTimer <= 0) {
@@ -2218,27 +2213,69 @@
         }
 
         // ============================================================
-        // 9. 输入与 HUD
+        // 9. 输入：灵敏度 / DPI / CM360 / 鼠标 / HUD / 输入分发
         // ============================================================
         let radiansPerCount = 0,
             totalCounts360 = 0;
 
+        // 复用欧拉对象，避免高频鼠标输入时频繁 new 造成 GC 抖动
+        const _viewEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+        function applyViewRotation() {
+            _viewEuler.set(STATE.pitch, STATE.yaw, 0);
+            camera.quaternion.setFromEuler(_viewEuler);
+        }
+
         function updateSensitivity() {
             totalCounts360 = (CFG.cmPer360 / ISO_INCH_TO_CM) * CFG.dpi;
             radiansPerCount = (Math.PI * 2) / Math.max(1, totalCounts360);
-            document.querySelectorAll('.dpi-pill').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val) === CFG
-                .dpi));
-            document.querySelectorAll('.cm-pill').forEach(b => b.classList.toggle('active', Math.abs(parseFloat(b.dataset
-                .val) - CFG.cmPer360) < 0.01));
+            document.querySelectorAll('.dpi-pill').forEach(b =>
+                b.classList.toggle('active', parseInt(b.dataset.val) === CFG.dpi));
+            document.querySelectorAll('.cm-pill').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.cmPer360) < 0.01));
             saveToLocalStorage();
         }
 
-        // 重置视角到靶场中心
         function resetViewToCenter() {
             STATE.yaw = 0;
             STATE.pitch = 0;
-            const euler = new THREE.Euler(STATE.pitch, STATE.yaw, 0, 'YXZ');
-            camera.quaternion.setFromEuler(euler);
+            applyViewRotation();
+        }
+
+        function setDpiPreset(val) {
+            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
+            CFG.dpi = val;
+            setVal('inp-dpi', val);
+            const rng = getEl('inp-dpi-r');
+            if (rng) rng.value = val;
+            updateSensitivity();
+        }
+
+        function setDpiManual(val) {
+            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
+            CFG.dpi = Math.max(1, Math.round(val));
+            setVal('inp-dpi', CFG.dpi);
+            const rng = getEl('inp-dpi-r');
+            if (rng) rng.value = CFG.dpi;
+            updateSensitivity();
+        }
+
+        function setCmPreset(val) {
+            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
+            CFG.cmPer360 = val;
+            setValF('inp-cm', CFG.cmPer360);
+            const rng = getEl('inp-cm-r');
+            if (rng) rng.value = CFG.cmPer360;
+            updateSensitivity();
+        }
+
+        function setCmManual(val) {
+            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
+            CFG.cmPer360 = Math.max(0.1, val);
+            setValF('inp-cm', CFG.cmPer360);
+            const rng = getEl('inp-cm-r');
+            if (rng) rng.value = CFG.cmPer360;
+            updateSensitivity();
         }
 
         window.addEventListener('pointermove', (e) => {
@@ -2254,14 +2291,12 @@
                 STATE.pitch -= dy * radiansPerCount;
                 STATE.pitch = clamp(STATE.pitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
                 STATE.yaw = STATE.yaw % (Math.PI * 2);
-                const euler = new THREE.Euler(STATE.pitch, STATE.yaw, 0, 'YXZ');
-                camera.quaternion.setFromEuler(euler);
+                applyViewRotation();
             }
         }, { passive: true });
 
         window.addEventListener('mousedown', (e) => {
             if (document.pointerLockElement === document.body && e.button === 0) {
-                // 准备状态 → 触发倒计时
                 if (STATE.game === 'armed') {
                     startCountdown();
                     return;
@@ -2308,6 +2343,47 @@
             }
         }
 
+        // ---- 数字输入统一分发：新增输入框只需在此表加一行 ----
+        const NUM_INPUT_HANDLERS = {
+            'inp-view-height': setViewHeight,
+            'inp-fov': syncFov,
+            'inp-dpi': setDpiManual,
+            'inp-cm': setCmManual,
+            'inp-size': syncTargetSize,
+            'inp-speed': setSixshotSpeed,
+            'inp-spawn-angle': syncSpawnAngle,
+            'inp-depth-sixshot': setDepthSixshot,
+            'inp-track-size': syncTrackingTargetSize,
+            'inp-track-speed': setTrackingSpeed,
+            'inp-track-angle': setTrackingAngle,
+            'inp-depth-tracking': setDepthTracking,
+            'inp-track-freq-min': setStrafeMin,
+            'inp-track-freq-max': setStrafeMax
+        };
+
+        function dispatchNumInput(id, val) {
+            if (id.startsWith('inp-cross-')) {
+                syncCrosshair(id.replace('inp-cross-', ''), val);
+                return;
+            }
+            const handler = NUM_INPUT_HANDLERS[id];
+            if (handler) handler(parseFloat(val));
+        }
+
+        function stepValGlobal(id, step) {
+            const input = getEl(id);
+            if (!input) return;
+            const mn = parseFloat(input.getAttribute('min')) || 0,
+                mx = parseFloat(input.getAttribute('max')) || 1000;
+            let val = (parseFloat(input.value) || 0) + step;
+            val = clamp(val, mn, mx);
+            const isDec = step % 1 !== 0;
+            input.value = isDec ? val.toFixed(2) : Math.round(val);
+            const rng = getEl(id + '-r');
+            if (rng) rng.value = val;
+            dispatchNumInput(id, input.value);
+        }
+
         // ============================================================
         // 10. 挑战生命周期
         // ============================================================
@@ -2322,7 +2398,6 @@
             brContainer = getEl('bottom-right-container'),
             btnLock = getEl('btn-lock');
 
-        // ---- 按钮冷却控制 ----
         let _btnEnableTimer = null;
 
         function disableStartButton() {
@@ -2368,10 +2443,8 @@
             STATE.isMouseDown = false;
             STATE.isLocking = false;
 
-            // 重置速度
             sixTargets.forEach(t => { t.speed = 0; });
 
-            // 重新生成靶子（idle 预览模式）
             if (CFG.mode === 'sixshot') {
                 for (let i = 0; i < STATE.targetCount && i < sixTargets.length; i++) {
                     respawnSixshotTarget(sixTargets[i]);
@@ -2390,7 +2463,6 @@
 
             updateTargetVisibility();
 
-            // 隐藏覆盖层
             if (progressOverlay) progressOverlay.style.display = 'none';
             if (progressBar) { progressBar.style.transition = 'none';
                 progressBar.style.width = '0%'; }
@@ -2399,7 +2471,6 @@
             setPanelsVisibility(true);
             if (document.pointerLockElement === document.body) document.exitPointerLock();
 
-            // 重置数据
             STATE.score = 0;
             STATE.hits = 0;
             STATE.misses = 0;
@@ -2409,11 +2480,9 @@
             updateHUDStats();
             getEl('hud-time').innerText = '49.0';
 
-            // 重置按钮
             disableStartButton();
             scheduleEnableButton(BUTTON_COOLDOWN);
 
-            // 重置视角到中心
             resetViewToCenter();
         }
 
@@ -2514,7 +2583,6 @@
             }, 135);
         }
 
-        // 核心：开始挑战
         function startChallenge() {
             if (STATE.isLocking) return;
             if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
@@ -2522,7 +2590,6 @@
 
             STATE.isLocking = true;
 
-            // 先重置到空闲，再重新配置
             resetToIdle();
             STATE.isLocking = true;
 
@@ -2537,7 +2604,6 @@
 
             resetViewToCenter();
 
-            // 生成靶子预览（armed 状态）
             if (CFG.mode === 'sixshot') {
                 for (let i = 0; i < STATE.targetCount && i < sixTargets.length; i++) {
                     respawnSixshotTarget(sixTargets[i]);
@@ -2595,7 +2661,6 @@
             setTimeout(startChallenge, 80);
         }
 
-        // ESC 处理
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (STATE.isStick) {
@@ -2616,7 +2681,6 @@
             }
         }, true);
 
-        // 指针锁定变化
         document.addEventListener('pointerlockchange', () => {
             const locked = document.pointerLockElement === document.body;
             setPanelsVisibility(!locked);
@@ -2697,7 +2761,7 @@
         }
 
         // ============================================================
-        // 12. UI 控制函数 (对外暴露)
+        // 12. UI 控制函数
         // ============================================================
         function switchTrainMode(mode) {
             if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
@@ -3006,72 +3070,6 @@
             updateScene();
         }
 
-        function setDpiPreset(val) {
-            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
-            CFG.dpi = val;
-            setVal('inp-dpi', val);
-            const rng = getEl('inp-dpi-r');
-            if (rng) rng.value = val;
-            updateSensitivity();
-        }
-
-        function setDpiManual(val) {
-            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
-            CFG.dpi = Math.max(1, Math.round(val));
-            setVal('inp-dpi', CFG.dpi);
-            const rng = getEl('inp-dpi-r');
-            if (rng) rng.value = CFG.dpi;
-            updateSensitivity();
-        }
-
-        function setCmPreset(val) {
-            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
-            CFG.cmPer360 = val;
-            setValF('inp-cm', CFG.cmPer360);
-            const rng = getEl('inp-cm-r');
-            if (rng) rng.value = CFG.cmPer360;
-            updateSensitivity();
-        }
-
-        function setCmManual(val) {
-            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
-            CFG.cmPer360 = Math.max(0.1, val);
-            setValF('inp-cm', CFG.cmPer360);
-            const rng = getEl('inp-cm-r');
-            if (rng) rng.value = CFG.cmPer360;
-            updateSensitivity();
-        }
-
-        function stepValGlobal(id, step) {
-            const input = getEl(id);
-            if (!input) return;
-            const mn = parseFloat(input.getAttribute('min')) || 0,
-                mx = parseFloat(input.getAttribute('max')) || 1000;
-            let val = (parseFloat(input.value) || 0) + step;
-            val = clamp(val, mn, mx);
-            const isDec = step % 1 !== 0;
-            input.value = isDec ? val.toFixed(2) : Math.round(val);
-            const rng = getEl(id + '-r');
-            if (rng) rng.value = val;
-
-            if (id.startsWith('inp-cross-')) { const p = id.replace('inp-cross-', '');
-                syncCrosshair(p, input.value); return; }
-            if (id === 'inp-view-height') { setViewHeight(input.value); return; }
-            if (id === 'inp-fov') { syncFov(input.value); return; }
-            if (id === 'inp-dpi') { setDpiManual(input.value); return; }
-            if (id === 'inp-cm') { setCmManual(input.value); return; }
-            if (id === 'inp-size') { syncTargetSize(input.value); return; }
-            if (id === 'inp-speed') { setSixshotSpeed(input.value); return; }
-            if (id === 'inp-spawn-angle') { syncSpawnAngle(input.value); return; }
-            if (id === 'inp-depth-sixshot') { setDepthSixshot(input.value); return; }
-            if (id === 'inp-track-size') { syncTrackingTargetSize(input.value); return; }
-            if (id === 'inp-track-speed') { setTrackingSpeed(input.value); return; }
-            if (id === 'inp-track-angle') { setTrackingAngle(input.value); return; }
-            if (id === 'inp-depth-tracking') { setDepthTracking(input.value); return; }
-            if (id === 'inp-track-freq-min') { setStrafeMin(input.value); return; }
-            if (id === 'inp-track-freq-max') { setStrafeMax(input.value); return; }
-        }
-
         function updateScene() {
             camera.position.y = CFG.viewHeight;
             camera.fov = hFovToVfov(CFG.fovHorizontal, window.innerWidth / window.innerHeight);
@@ -3090,7 +3088,6 @@
         // 13. 颜色调色板
         // ============================================================
         function initColorPalettes() {
-            // 准星
             const cc = getEl('swatches-crosshair');
             if (cc) {
                 cc.innerHTML = '';
@@ -3106,7 +3103,6 @@
                     cc.appendChild(b);
                 });
             }
-            // 墙面
             const cw = getEl('swatches-wall');
             if (cw) {
                 cw.innerHTML = '';
@@ -3123,7 +3119,6 @@
                     cw.appendChild(b);
                 });
             }
-            // 球体
             const cb = getEl('swatches-ball');
             if (cb) {
                 cb.innerHTML = '';
@@ -3140,7 +3135,6 @@
                 });
                 updateBallSwatchesActive();
             }
-            // 命中高亮
             const ch = getEl('swatches-highlight');
             if (ch) {
                 ch.innerHTML = '';
@@ -3214,8 +3208,7 @@
             reader.readAsText(file);
         }
 
-        function applyImportedConfig(imported) {
-            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
+        function mergeImportedConfig(imported) {
             if (imported.config) {
                 Object.assign(CFG, imported.config);
                 if (imported.config.crosshair) Object.assign(CFG.crosshair, imported.config.crosshair);
@@ -3224,71 +3217,70 @@
             }
             if (typeof imported.depthLockSixshot === 'boolean') STATE.depthLockSixshot = imported.depthLockSixshot;
             if (typeof imported.depthLockTracking === 'boolean') STATE.depthLockTracking = imported.depthLockTracking;
+        }
 
-            const syncVal = (id, val) => { setValF(id, val);
-                const rng = getEl(id + '-r'); if (rng) rng.value = val; };
-            syncVal('inp-dpi', CFG.dpi);
-            syncVal('inp-cm', CFG.cmPer360);
-            syncVal('inp-fov', CFG.fovHorizontal);
-            syncVal('inp-size', CFG.targetSizeCm);
-            syncVal('inp-speed', CFG.dynamic.speedDegPerSec);
-            syncVal('inp-spawn-angle', CFG.spawnAngleDeg || 45);
-            syncVal('inp-depth-sixshot', CFG.depthSixshot);
-            syncVal('inp-track-size', CFG.tracking.targetSizeCm);
-            syncVal('inp-track-speed', CFG.tracking.speedDegPerSec);
-            syncVal('inp-track-angle', CFG.tracking.angleRange);
-            syncVal('inp-track-freq-min', CFG.tracking.strafeMinInterval ?? 0.8);
-            syncVal('inp-track-freq-max', CFG.tracking.strafeMaxInterval ?? 1.8);
-            syncVal('inp-depth-tracking', CFG.depthTracking);
-            syncVal('inp-view-height', CFG.viewHeight);
-            syncVal('inp-cross-size', CFG.crosshair.size);
-            syncVal('inp-cross-thick', CFG.crosshair.thick);
-            syncVal('inp-cross-gap', CFG.crosshair.gap ?? 3);
+        function syncNumericInputsFromConfig() {
+            const setNum = (id, val) => {
+                setValF(id, val);
+                const rng = getEl(id + '-r');
+                if (rng) rng.value = val;
+            };
+            setVal('inp-dpi', CFG.dpi);
+            { const r = getEl('inp-dpi-r'); if (r) r.value = CFG.dpi; }
+            setNum('inp-cm', CFG.cmPer360);
+            setNum('inp-fov', CFG.fovHorizontal);
+            setNum('inp-size', CFG.targetSizeCm);
+            setNum('inp-speed', CFG.dynamic.speedDegPerSec);
+            setNum('inp-spawn-angle', CFG.spawnAngleDeg || 45);
+            setNum('inp-depth-sixshot', CFG.depthSixshot);
+            setNum('inp-track-size', CFG.tracking.targetSizeCm);
+            setNum('inp-track-speed', CFG.tracking.speedDegPerSec);
+            setNum('inp-track-angle', CFG.tracking.angleRange);
+            setNum('inp-track-freq-min', CFG.tracking.strafeMinInterval ?? 0.8);
+            setNum('inp-track-freq-max', CFG.tracking.strafeMaxInterval ?? 1.8);
+            setNum('inp-depth-tracking', CFG.depthTracking);
+            setNum('inp-view-height', CFG.viewHeight);
+            setNum('inp-cross-size', CFG.crosshair.size);
+            setNum('inp-cross-thick', CFG.crosshair.thick);
+            setNum('inp-cross-gap', CFG.crosshair.gap ?? 3);
+        }
 
-            document.querySelectorAll('#sixshot-size-presets .pill-btn').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - CFG.targetSizeCm) < 0.1);
-            });
-            document.querySelectorAll('#tracking-size-presets .pill-btn').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - CFG.tracking.targetSizeCm) < 0.1);
-            });
-            document.querySelectorAll('#section-sixshot-group [data-val]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.dynamic.speedDegPerSec) < 0.1);
-            });
-            document.querySelectorAll('#section-sixshot-group [data-angle]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - (CFG.spawnAngleDeg || 45)) < 0.5);
-            });
-            document.querySelectorAll('#draggable-panel [data-h]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.h) - CFG.viewHeight) < 0.01);
-            });
-            document.querySelectorAll('#section-tracking-group [data-val]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.tracking.speedDegPerSec) < 0.1);
-            });
-            document.querySelectorAll('#section-tracking-group [data-angle]').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - CFG.tracking.angleRange) < 0.5);
-            });
-            document.querySelectorAll('.dpi-pill').forEach(b => {
-                b.classList.toggle('active', parseInt(b.dataset.val) === CFG.dpi);
-            });
-            document.querySelectorAll('.cm-pill').forEach(b => {
-                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.cmPer360) < 0.01);
-            });
+        function syncPresetButtonsFromConfig() {
+            document.querySelectorAll('#sixshot-size-presets .pill-btn').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - CFG.targetSizeCm) < 0.1));
+            document.querySelectorAll('#tracking-size-presets .pill-btn').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - CFG.tracking.targetSizeCm) < 0.1));
+            document.querySelectorAll('#section-sixshot-group [data-val]').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.dynamic.speedDegPerSec) < 0.1));
+            document.querySelectorAll('#section-sixshot-group [data-angle]').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - (CFG.spawnAngleDeg || 45)) < 0.5));
+            document.querySelectorAll('#draggable-panel [data-h]').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.h) - CFG.viewHeight) < 0.01));
+            document.querySelectorAll('#section-tracking-group [data-val]').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.tracking.speedDegPerSec) < 0.1));
+            document.querySelectorAll('#section-tracking-group [data-angle]').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - CFG.tracking.angleRange) < 0.5));
+            document.querySelectorAll('.dpi-pill').forEach(b =>
+                b.classList.toggle('active', parseInt(b.dataset.val) === CFG.dpi));
+            document.querySelectorAll('.cm-pill').forEach(b =>
+                b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.cmPer360) < 0.01));
             ['10', '60', '90', '103'].forEach(s => {
                 const b = getEl(`btn-fov-${s}`);
                 if (b) b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - CFG.fovHorizontal) < 0.1);
             });
-
             const dynBtn = getEl('btn-dynamic-toggle');
             if (dynBtn) {
                 dynBtn.textContent = CFG.dynamic.enabled ? '🔘 动态漂移: 开启' : '🔘 动态漂移: 关闭';
                 dynBtn.classList.toggle('active', CFG.dynamic.enabled);
             }
-
             getEl('btn-track-fly').classList.toggle('active', CFG.tracking.pattern === 'fly');
             getEl('btn-track-strafe').classList.toggle('active', CFG.tracking.pattern === 'strafe');
             getEl('btn-space-wall').classList.toggle('active', CFG.tracking.space === 'wall');
             getEl('btn-space-curve').classList.toggle('active', CFG.tracking.space === 'curve');
             getEl('btn-space-free3d').classList.toggle('active', CFG.tracking.space === 'free3d');
+        }
 
+        function syncDepthLocksFromConfig() {
             const syncLock = (mode, locked) => {
                 const btn = getEl(mode === 'sixshot' ? 'lock-sixshot-depth' : 'lock-tracking-depth');
                 const inp = getEl(mode === 'sixshot' ? 'inp-depth-sixshot' : 'inp-depth-tracking');
@@ -3309,7 +3301,14 @@
                 syncLock('tracking', STATE.depthLockTracking);
             }
             updateDepthHint();
+        }
 
+        function applyImportedConfig(imported) {
+            if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return;
+            mergeImportedConfig(imported);
+            syncNumericInputsFromConfig();
+            syncPresetButtonsFromConfig();
+            syncDepthLocksFromConfig();
             initColorPalettes();
             setCrosshairType(CFG.crosshair.type);
             applyTheme(CFG.theme || 'day');
@@ -3405,11 +3404,8 @@
         // ============================================================
         // 18. 初始化
         // ============================================================
-        function init() {
-            initColorPalettes();
-            setCrosshairType(CFG.crosshair.type);
-            updateCrosshairStyle();
-
+        function bindEventListeners() {
+            // F11 全屏
             const f11 = getEl('f11-box');
             if (f11) {
                 f11.addEventListener('click', () => {
@@ -3417,15 +3413,6 @@
                     else if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
                 });
             }
-
-            // 加载存储
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    applyImportedConfig(parsed);
-                }
-            } catch (e) { console.warn('配置加载失败', e); }
 
             // 面板拖拽
             const handle = getEl('panel-handle');
@@ -3476,7 +3463,7 @@
             // 开始按钮
             btnLock.addEventListener('click', startChallenge);
 
-            // 数字输入滚轮
+            // 数字输入（滚轮 + 手动输入）
             document.querySelectorAll('.num-input').forEach(inp => {
                 inp.addEventListener('wheel', (e) => {
                     e.preventDefault();
@@ -3489,44 +3476,12 @@
                     if (isNaN(val)) return;
                     const rng = getEl(inp.id + '-r');
                     if (rng) rng.value = val;
-                    if (inp.id.startsWith('inp-cross-')) { const p = inp.id.replace('inp-cross-', '');
-                        syncCrosshair(p, val); return; }
-                    if (inp.id === 'inp-view-height') { setViewHeight(val); return; }
-                    if (inp.id === 'inp-fov') { syncFov(val); return; }
-                    if (inp.id === 'inp-dpi') { setDpiManual(val); return; }
-                    if (inp.id === 'inp-cm') { setCmManual(val); return; }
-                    if (inp.id === 'inp-size') { syncTargetSize(val); return; }
-                    if (inp.id === 'inp-speed') { setSixshotSpeed(val); return; }
-                    if (inp.id === 'inp-spawn-angle') { syncSpawnAngle(val); return; }
-                    if (inp.id === 'inp-depth-sixshot') { setDepthSixshot(val); return; }
-                    if (inp.id === 'inp-track-size') { syncTrackingTargetSize(val); return; }
-                    if (inp.id === 'inp-track-speed') { setTrackingSpeed(val); return; }
-                    if (inp.id === 'inp-track-angle') { setTrackingAngle(val); return; }
-                    if (inp.id === 'inp-depth-tracking') { setDepthTracking(val); return; }
-                    if (inp.id === 'inp-track-freq-min') { setStrafeMin(val); return; }
-                    if (inp.id === 'inp-track-freq-max') { setStrafeMax(val); return; }
+                    dispatchNumInput(inp.id, val);
                 });
             });
+        }
 
-            // 初始化场景
-            initTargets();
-            resetViewToCenter();
-            updateScene();
-            updateTargetMaterials();
-            updateDepthHint();
-            updateSpeedHints();
-            animate(performance.now());
-
-            // 初始禁用按钮并启动冷却 (1秒)
-            disableStartButton();
-            scheduleEnableButton(BUTTON_COOLDOWN);
-
-            setTimeout(() => {
-                const f = getEl('f11-box');
-                if (f) f.classList.remove('f11-highlight');
-            }, 3000);
-
-            // 挂载全局
+        function mountGlobalFunctions() {
             window.switchTrainMode = switchTrainMode;
             window.setTrackingPattern = setTrackingPattern;
             window.setTrackingSpace = setTrackingSpace;
@@ -3559,6 +3514,46 @@
             window.restartChallenge = restartChallenge;
             window.startChallenge = startChallenge;
             window.resetToIdle = resetToIdle;
+        }
+
+        function init() {
+            initColorPalettes();
+            setCrosshairType(CFG.crosshair.type);
+            updateCrosshairStyle();
+
+            // 加载本地存档
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    applyImportedConfig(parsed);
+                }
+            } catch (e) { console.warn('配置加载失败', e); }
+
+            // 关键：无论是否有存档，都必须计算灵敏度，否则 radiansPerCount 为 0，视角不会转动
+            updateSensitivity();
+
+            bindEventListeners();
+
+            // 初始化场景
+            initTargets();
+            resetViewToCenter();
+            updateScene();
+            updateTargetMaterials();
+            updateDepthHint();
+            updateSpeedHints();
+            animate(performance.now());
+
+            // 初始按钮冷却（1 秒）
+            disableStartButton();
+            scheduleEnableButton(BUTTON_COOLDOWN);
+
+            setTimeout(() => {
+                const f = getEl('f11-box');
+                if (f) f.classList.remove('f11-highlight');
+            }, 3000);
+
+            mountGlobalFunctions();
         }
 
         document.addEventListener('DOMContentLoaded', init);
