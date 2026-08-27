@@ -40,9 +40,11 @@
             align-items: center;
             pointer-events: none;
             z-index: 5;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .hud-card {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(24px) saturate(180%);
             padding: 7px 16px;
             border-radius: 8px;
@@ -54,6 +56,7 @@
             align-items: center;
             gap: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            flex-wrap: wrap;
         }
         .hud-val { color: #0284c7; font-weight: 900; }
         .score-val { color: #059669; font-weight: 900; font-size: 0.86rem; }
@@ -87,7 +90,7 @@
             transition: opacity 0.15s;
         }
         .palette-card {
-            background: rgba(255, 255, 255, 0.62);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(24px) saturate(180%);
             padding: 6px 10px 7px 10px;
             border-radius: 8px;
@@ -130,7 +133,7 @@
             transform: scale(1.1);
         }
         #author-card {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(20px);
             padding: 5px 12px 5px 5px;
             border-radius: 30px;
@@ -165,6 +168,7 @@
         .author-meta { display: flex; flex-direction: column; }
         .author-name { font-size: 0.74rem; font-weight: 900; color: #0f172a; }
         .author-tag { font-size: 0.58rem; color: #64748b; font-weight: bold; }
+
         #bottom-right-container {
             position: absolute;
             bottom: 16px;
@@ -226,8 +230,9 @@
             line-height: 1.4;
         }
         .rel-desc { font-size: 0.64rem; color: #64748b; line-height: 1.4; }
+
         .glass-panel {
-            background: rgba(255, 255, 255, 0.62);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(28px) saturate(190%);
             border: 1px solid rgba(255, 255, 255, 0.75);
             border-top: 3.5px solid #0284c7;
@@ -238,21 +243,60 @@
             max-height: calc(100vh - 80px);
             overflow-y: auto;
         }
-        .glass-panel::-webkit-scrollbar { width: 4px; }
+        .glass-panel::-webkit-scrollbar { width: 4px; height: 4px; }
         .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        /* 主可拖拽面板 */
         #draggable-panel {
             position: absolute;
             left: 18px;
             top: 56px;
-            width: 390px;
             z-index: 20;
             max-height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            width: auto;
+            max-width: 95vw;
         }
+        #draggable-panel .panel-body {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+        .panel-col-main {
+            width: 350px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        /* 跟枪行为参数专属列 */
+        .panel-col-tracking-behavior {
+            width: 340px;
+            flex-shrink: 0;
+            padding-left: 14px;
+            border-left: 1.5px solid rgba(203, 213, 225, 0.75);
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .panel-col-tracking-behavior .section-card {
+            background: rgba(255, 255, 255, 0.75);
+            border-left: 3px solid #7c3aed;
+        }
+        .panel-col-tracking-behavior .section-label {
+            color: #6d28d9;
+        }
+        .panel-col-tracking-behavior .pill-btn.active {
+            background: #7c3aed !important;
+            border-color: #6d28d9 !important;
+            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3) !important;
+        }
+
         #right-panel {
             position: fixed;
             right: 16px;
             top: 56px;
-            width: 310px;
+            width: 320px;
             z-index: 19;
             max-height: calc(100vh - 80px);
             overflow-y: auto;
@@ -284,12 +328,7 @@
             background: #0284c7;
             border-radius: 2px;
         }
-        .header-actions {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+        .header-actions { display: flex; gap: 5px; align-items: center; }
         .header-btn {
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid #cbd5e1;
@@ -303,12 +342,13 @@
         }
         .header-btn:hover { background: #e0f2fe; border-color: #0284c7; color: #0284c7; }
         .header-btn.active { background: #0284c7; color: #ffffff; border-color: #0284c7; }
+
         .mode-nav-tabs {
             display: flex;
             background: rgba(226, 232, 240, 0.7);
             padding: 3px;
             border-radius: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             gap: 3px;
         }
         .mode-nav-btn {
@@ -335,23 +375,23 @@
             background: rgba(224, 242, 254, 0.75);
             padding: 5px 8px;
             border-radius: 4px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: 600;
             line-height: 1.4;
             border-left: 2.5px solid #0284c7;
         }
         .section-card {
-            background: rgba(248, 250, 252, 0.65);
-            border: 1px solid rgba(226, 232, 240, 0.85);
+            background: rgba(248, 250, 252, 0.7);
+            border: 1px solid rgba(226, 232, 240, 0.9);
             border-radius: 6px;
-            padding: 8px 10px;
-            margin-bottom: 8px;
+            padding: 7px 9px;
+            margin-bottom: 6px;
         }
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             flex-wrap: wrap;
             gap: 4px;
         }
@@ -364,16 +404,18 @@
             gap: 4px;
         }
         .section-sub { font-size: 0.6rem; color: #94a3b8; font-weight: normal; }
-        .preset-grid { display: grid; gap: 4px; margin-bottom: 6px; }
+
+        .preset-grid { display: grid; gap: 4px; margin-bottom: 5px; }
         .preset-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
         .preset-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
         .preset-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
         .preset-grid.cols-5 { grid-template-columns: repeat(5, 1fr); }
         .preset-grid.cols-7 { grid-template-columns: repeat(7, 1fr); }
         .preset-grid.cols-8 { grid-template-columns: repeat(4, 1fr); }
+
         .pill-btn {
             border: 1px solid #cbd5e1;
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             color: #475569;
             font-size: 0.64rem;
             font-weight: 800;
@@ -384,24 +426,28 @@
             text-align: center;
             white-space: nowrap;
         }
-        .pill-btn:hover { border-color: #0284c7; color: #0284c7; background: #f0f9ff; }
+        .pill-btn:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+            background: #f0f9ff;
+        }
         .pill-btn.active {
             background: #0284c7 !important;
             color: #ffffff !important;
             border-color: #0284c7 !important;
             box-shadow: 0 1px 4px rgba(2, 132, 199, 0.2);
         }
+
         .ctrl-row {
             display: flex;
             align-items: center;
             gap: 8px;
-            flex-wrap: wrap;
         }
         .ctrl-row label {
-            font-size: 0.68rem;
+            font-size: 0.66rem;
             font-weight: 700;
             color: #475569;
-            width: 78px;
+            width: 76px;
             flex-shrink: 0;
         }
         .ctrl-row input[type="range"] {
@@ -409,7 +455,7 @@
             accent-color: #0284c7;
             cursor: pointer;
             height: 4px;
-            min-width: 50px;
+            min-width: 45px;
         }
         .stepper-box {
             display: flex;
@@ -421,12 +467,12 @@
             flex-shrink: 0;
         }
         .step-btn {
-            width: 20px;
-            height: 22px;
+            width: 18px;
+            height: 20px;
             border: none;
             background: #f8fafc;
             color: #0284c7;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -436,13 +482,13 @@
         }
         .step-btn:hover { background: #e0f2fe; }
         .num-input {
-            width: 54px;
-            height: 22px;
+            width: 52px;
+            height: 20px;
             border: none;
             border-left: 1px solid #e2e8f0;
             border-right: 1px solid #e2e8f0;
             font-family: inherit;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 800;
             text-align: center;
             color: #0284c7;
@@ -453,7 +499,7 @@
             background: rgba(241, 245, 249, 0.8);
             border: 1px solid #cbd5e1;
             border-radius: 4px;
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             cursor: pointer;
             padding: 2px 6px;
             color: #64748b;
@@ -463,12 +509,16 @@
             font-weight: 700;
             transition: 0.15s;
         }
-        .lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
+        .lock-btn.unlocked {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            color: #d97706;
+        }
         #btn-dynamic-toggle {
-            font-size: 0.74rem !important;
+            font-size: 0.7rem !important;
             font-weight: 900 !important;
-            padding: 4px 12px !important;
-            border-radius: 6px !important;
+            padding: 3px 8px !important;
+            border-radius: 4px !important;
             border: 1.5px solid #94a3b8 !important;
             background: rgba(226, 232, 240, 0.85) !important;
             color: #475569 !important;
@@ -486,8 +536,8 @@
             color: #ffffff;
             border: none;
             border-radius: 6px;
-            padding: 10px;
-            font-size: 0.92rem;
+            padding: 9px;
+            font-size: 0.9rem;
             font-weight: 900;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -499,13 +549,11 @@
             background: linear-gradient(135deg, #0369a1, #075985);
             box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
         }
+
         #progress-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(4px);
             z-index: 100;
@@ -513,25 +561,21 @@
             align-items: center;
         }
         #progress-bar-container {
-            width: 280px;
-            height: 4px;
+            width: 280px; height: 4px;
             background: rgba(255, 255, 255, 0.3);
             border-radius: 2px;
             overflow: hidden;
         }
         #progress-bar {
-            height: 100%;
-            width: 0%;
+            height: 100%; width: 0%;
             background: #0284c7;
             border-radius: 2px;
         }
+
         #result-modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(8px);
             z-index: 200;
@@ -556,7 +600,14 @@
         .res-box { background: #f1f5f9; padding: 8px; border-radius: 6px; }
         .res-label { font-size: 0.62rem; color: #64748b; font-weight: 700; }
         .res-val { font-size: 1.1rem; font-weight: 900; }
-        .res-meta { display: flex; justify-content: center; gap: 14px; font-size: 0.65rem; color: #64748b; margin-bottom: 16px; }
+        .res-meta {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            font-size: 0.65rem;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
         .btn-restart {
             background: #0284c7;
             color: #fff;
@@ -571,17 +622,32 @@
         .btn-restart:hover { background: #0369a1; }
         .height-hint { font-size: 0.6rem; color: #64748b; margin-left: 6px; font-weight: 400; }
         .height-hint strong { color: #0284c7; font-weight: 700; }
-        
         .speed-calc-hint {
             font-size: 0.62rem;
             color: #0369a1;
             background: rgba(224, 242, 254, 0.75);
-            padding: 4px 8px;
+            padding: 5px 8px;
             border-radius: 4px;
-            margin-top: 4px;
+            margin-top: 5px;
             font-weight: 600;
-            line-height: 1.35;
+            line-height: 1.4;
             border-left: 2.5px solid #0284c7;
+            word-break: break-word;
+        }
+
+        @media (max-width: 1280px) {
+            #right-panel { width: 290px; }
+        }
+        @media (max-width: 900px) {
+            #draggable-panel .panel-body { flex-direction: column; }
+            .panel-col-tracking-behavior {
+                border-left: none;
+                border-top: 1.5px solid rgba(203, 213, 225, 0.75);
+                padding-left: 0;
+                padding-top: 10px;
+                width: 100%;
+            }
+            .panel-col-main { width: 100%; }
         }
     </style>
 </head>
@@ -600,7 +666,9 @@
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <div class="hud-card f11-card f11-highlight" id="f11-box" title="点击可直接切换全屏">F11全屏</div>
-            <div class="hud-card"><div>FPS: <span class="fps-val" id="hud-fps">--</span></div></div>
+            <div class="hud-card">
+                <div>FPS: <span class="fps-val" id="hud-fps">--</span></div>
+            </div>
         </div>
     </div>
 
@@ -664,7 +732,7 @@
 
     <div id="canvas-container"></div>
 
-    <!-- ========== 左侧调参主面板 ========== -->
+    <!-- ========== 主设定控制面板 ========== -->
     <div id="draggable-panel" class="glass-panel">
         <div class="panel-header" id="panel-handle">
             <span class="panel-title">训练模式与目标配置</span>
@@ -674,280 +742,293 @@
             </div>
         </div>
 
-        <div class="mode-nav-tabs">
-            <button class="mode-nav-btn active" id="tab-mode-sixshot" onclick="switchTrainMode('sixshot')">Sixshot 定点点击</button>
-            <button class="mode-nav-btn" id="tab-mode-tracking" onclick="switchTrainMode('tracking')">Tracking 跟枪追踪</button>
+        <div class="panel-body">
+            <!-- ===== 左列：基础核心配置 ===== -->
+            <div class="panel-col-main">
+                <div class="mode-nav-tabs">
+                    <button class="mode-nav-btn active" id="tab-mode-sixshot" onclick="switchTrainMode('sixshot')">Sixshot 定点点击</button>
+                    <button class="mode-nav-btn" id="tab-mode-tracking" onclick="switchTrainMode('tracking')">Tracking 跟枪追踪</button>
+                </div>
+
+                <div class="note-tip" id="note-tip">设定：45° · 面前 45° 视平线区域 ｜ 0.135s 启动延迟 ｜ 恒定 6 靶</div>
+
+                <!-- 1. 视觉高度 (Eye Height) -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-label">👁️ 视觉高度 (Eye Height) <span class="height-hint">对应身高 ≈ <span id="height-estimate">1.75</span> m</span></span>
+                        <span class="section-sub">可穿模</span>
+                    </div>
+                    <div class="note-tip" style="margin-bottom:5px; font-size:0.58rem; padding:3px 6px;">
+                        <strong>注：</strong>此处为摄像机的<strong>视觉高度</strong>（眼睛位置），而非角色的物理碰撞箱高度。通常比实际身高略低 10~15 cm。
+                    </div>
+                    <div class="preset-grid cols-5" style="margin-bottom:4px;">
+                        <button class="pill-btn" data-h="0.8" onclick="setViewHeight(0.8)">0.8 m</button>
+                        <button class="pill-btn active" data-h="1.625" onclick="setViewHeight(1.625)">1.625 m</button>
+                        <button class="pill-btn" data-h="2.5" onclick="setViewHeight(2.5)">2.5 m</button>
+                        <button class="pill-btn" data-h="4.0" onclick="setViewHeight(4.0)">4.0 m</button>
+                        <button class="pill-btn" data-h="8.0" onclick="setViewHeight(8.0)">8.0 m</button>
+                    </div>
+                    <div class="ctrl-row">
+                        <label>视觉高度 (m)</label>
+                        <input type="range" id="inp-view-height-r" min="0.1" max="10" step="0.05" value="1.625" oninput="setViewHeight(parseFloat(this.value))" />
+                        <div class="stepper-box">
+                            <button class="step-btn" onclick="stepValGlobal('inp-view-height', -0.05)">−</button>
+                            <input type="number" class="num-input" id="inp-view-height" value="1.63" step="0.05" min="0.1" max="10" />
+                            <button class="step-btn" onclick="stepValGlobal('inp-view-height', 0.05)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Sixshot 模式特有设置 ===== -->
+                <div id="section-sixshot-group">
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">🎯 目标球径 (Size)</span>
+                            <span class="section-sub">125cm 自动切换为 3 靶</span>
+                        </div>
+                        <div class="preset-grid cols-4" id="sixshot-size-presets">
+                            <button class="pill-btn active" onclick="syncTargetSize(15)">15 cm</button>
+                            <button class="pill-btn" onclick="syncTargetSize(25)">25 cm</button>
+                            <button class="pill-btn" onclick="syncTargetSize(35)">35 cm</button>
+                            <button class="pill-btn" onclick="syncTargetSize(125)">125 cm</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label>微调大小</label>
+                            <input type="range" id="inp-size-r" min="5" max="200" step="0.5" value="15.0" oninput="syncTargetSize(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-size', -0.5)">−</button>
+                                <input type="number" class="num-input" id="inp-size" value="15.00" step="0.5" min="5" max="200" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-size', 0.5)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">⚡ 动态漂移 (Dynamic)</span>
+                            <button class="pill-btn" id="btn-dynamic-toggle">🔘 动态漂移: 关闭</button>
+                        </div>
+                        <div class="preset-grid cols-4" style="margin-bottom:4px;">
+                            <button class="pill-btn active" data-val="12.5" onclick="setSixshotSpeed(12.5)">12.5°/s</button>
+                            <button class="pill-btn" data-val="25" onclick="setSixshotSpeed(25)">25°/s</button>
+                            <button class="pill-btn" data-val="37.5" onclick="setSixshotSpeed(37.5)">37.5°/s</button>
+                            <button class="pill-btn" data-val="50" onclick="setSixshotSpeed(50)">50°/s</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label>角速度 (°/s)</label>
+                            <input type="range" id="inp-speed-r" min="1" max="300" step="1" value="12.5" oninput="setSixshotSpeed(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-speed', -1)">−</button>
+                                <input type="number" class="num-input" id="inp-speed" value="12.50" step="1" min="0.1" max="300" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-speed', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="speed-calc-hint" id="sixshot-dynamic-hint" style="display:none;"></div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">🌐 生成区域角度</span>
+                            <span class="section-sub">视场水平范围</span>
+                        </div>
+                        <div class="preset-grid cols-4" style="margin-bottom:4px;">
+                            <button class="pill-btn active" data-angle="45" onclick="syncSpawnAngle(45)">45°</button>
+                            <button class="pill-btn" data-angle="67.5" onclick="syncSpawnAngle(67.5)">67.5°</button>
+                            <button class="pill-btn" data-angle="90" onclick="syncSpawnAngle(90)">90°</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label>角度 (°)</label>
+                            <input type="range" id="inp-spawn-angle-r" min="10" max="150" step="0.5" value="45" oninput="syncSpawnAngle(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-spawn-angle', -1)">−</button>
+                                <input type="number" class="num-input" id="inp-spawn-angle" value="45.00" step="0.5" min="10" max="150" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-spawn-angle', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">📏 生成深度 (Depth)</span>
+                            <button class="lock-btn" id="lock-sixshot-depth" onclick="toggleDepthLock('sixshot')" title="点击解锁/锁定深度">🔒 已锁定</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label>目标距离 (m)</label>
+                            <input type="range" id="inp-depth-sixshot-r" min="3" max="30" step="0.5" value="10.0" disabled oninput="setDepthSixshot(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-depth-sixshot', -0.5)">−</button>
+                                <input type="number" class="num-input" id="inp-depth-sixshot" value="10.00" step="0.5" min="3" max="30" disabled />
+                                <button class="step-btn" onclick="stepValGlobal('inp-depth-sixshot', 0.5)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== Tracking 模式特有设置 ===== -->
+                <div id="section-tracking-group" style="display:none;">
+                    <!-- 2. 目标球径 (Size) -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">🎯 目标球径 (Size)</span>
+                        </div>
+                        <div class="preset-grid cols-4" id="tracking-size-presets">
+                            <button class="pill-btn" id="btn-tsize-15" onclick="syncTrackingTargetSize(15)">15 cm</button>
+                            <button class="pill-btn active" id="btn-tsize-25" onclick="syncTrackingTargetSize(25)">25 cm</button>
+                            <button class="pill-btn" id="btn-tsize-35" onclick="syncTrackingTargetSize(35)">35 cm</button>
+                            <button class="pill-btn" id="btn-tsize-125" onclick="syncTrackingTargetSize(125)">125 cm</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label>微调大小</label>
+                            <input type="range" id="inp-track-size-r" min="1" max="500" step="0.5" value="25" oninput="syncTrackingTargetSize(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-track-size', -0.5)">−</button>
+                                <input type="number" class="num-input" id="inp-track-size" value="25.00" step="0.5" min="1" max="500" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-track-size', 0.5)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 运动速度 (Speed) -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">⚡ 运动速度 (Speed)</span>
+                        </div>
+                        <div class="preset-grid cols-3" style="margin-bottom:4px;">
+                            <button class="pill-btn active" data-val="12.5" onclick="setTrackingSpeed(12.5)">12.5°/s</button>
+                            <button class="pill-btn" data-val="25" onclick="setTrackingSpeed(25)">25°/s</button>
+                            <button class="pill-btn" data-val="50" onclick="setTrackingSpeed(50)">50°/s</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label>角速度 (°/s)</label>
+                            <input type="range" id="inp-track-speed-r" min="1" max="300" step="1" value="12.5" oninput="setTrackingSpeed(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-track-speed', -1)">−</button>
+                                <input type="number" class="num-input" id="inp-track-speed" value="12.50" step="1" min="0.1" max="300" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-track-speed', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="speed-calc-hint" id="tracking-speed-hint"></div>
+                    </div>
+
+                    <!-- 4. 活动范围 (Angle Range) -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">🌐 活动范围 (Angle Range)</span>
+                        </div>
+                        <div class="preset-grid cols-4" style="margin-bottom:4px;">
+                            <button class="pill-btn" data-angle="45" onclick="setTrackingAngle(45)">45°</button>
+                            <button class="pill-btn" data-angle="90" onclick="setTrackingAngle(90)">90°</button>
+                            <button class="pill-btn" data-angle="180" onclick="setTrackingAngle(180)">180°</button>
+                            <button class="pill-btn active" data-angle="360" onclick="setTrackingAngle(360)">360°</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label>角度 (°)</label>
+                            <input type="range" id="inp-track-angle-r" min="10" max="360" step="1" value="360" oninput="setTrackingAngle(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-track-angle', -5)">−</button>
+                                <input type="number" class="num-input" id="inp-track-angle" value="360.00" step="1" min="10" max="360" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-track-angle', 5)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. 生成深度 (Depth) -->
+                    <div class="section-card" id="row-tracking-depth-container">
+                        <div class="section-header">
+                            <span class="section-label">📏 生成深度 (Depth)</span>
+                            <button class="lock-btn" id="lock-tracking-depth" onclick="toggleDepthLock('tracking')" title="点击解锁/锁定深度">🔒 已锁定</button>
+                        </div>
+                        <div class="note-tip" style="margin-bottom:4px; font-size:0.58rem; padding:3px 6px;" id="depth-hint-tracking">
+                            <strong>提示：</strong>当前深度固定为 <strong>10.0</strong> m。
+                        </div>
+                        <div class="ctrl-row">
+                            <label>基础深度 (m)</label>
+                            <input type="range" id="inp-depth-tracking-r" min="3" max="30" step="0.5" value="10.0" disabled oninput="setDepthTracking(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-depth-tracking', -0.5)">−</button>
+                                <input type="number" class="num-input" id="inp-depth-tracking" value="10.00" step="0.5" min="3" max="30" disabled />
+                                <button class="step-btn" onclick="stepValGlobal('inp-depth-tracking', 0.5)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 开始挑战按钮 -->
+                <button class="btn-start" id="btn-lock">▶ 开始挑战 (0.135s启动)</button>
+            </div>
+
+            <!-- ===== 右列：跟枪行为专属参数栏 ===== -->
+            <div class="panel-col-tracking-behavior" id="tracking-behavior-col">
+                <div class="section-header" style="margin-bottom:4px;">
+                    <span class="section-label" style="font-size:0.76rem; color:#6d28d9;">🌀 跟枪行为参数 (Tracking Behavior)</span>
+                </div>
+                <div style="font-size:0.6rem; color:#7c3aed; font-weight:bold; margin-bottom:4px;">仅 Tracking 模式生效</div>
+
+                <!-- 运动轨迹 (Pattern) -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-label">🌀 运动轨迹 (Pattern)</span>
+                    </div>
+                    <div class="preset-grid cols-2">
+                        <button class="pill-btn active" id="btn-track-fly" onclick="setTrackingPattern('fly')">🌀 无规则乱飞</button>
+                        <button class="pill-btn" id="btn-track-strafe" onclick="setTrackingPattern('strafe')">↔ 水平折返</button>
+                    </div>
+                </div>
+
+                <!-- 空间形态 (Space) -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-label">📐 空间形态 (Space)</span>
+                    </div>
+                    <div class="preset-grid cols-3">
+                        <button class="pill-btn active" id="btn-space-wall" onclick="setTrackingSpace('wall')">▢ 直面墙</button>
+                        <button class="pill-btn" id="btn-space-curve" onclick="setTrackingSpace('curve')">◯ 环形曲面</button>
+                        <button class="pill-btn" id="btn-space-free3d" onclick="setTrackingSpace('free3d')">🟧 3D自由深度</button>
+                    </div>
+                </div>
+
+                <!-- 变向周期与随机折返 (Reversal) -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-label">🔄 变向周期与随机折返 (Reversal)</span>
+                    </div>
+                    <div class="section-sub" style="margin-bottom:4px;">0为到边折返/持续绕圈</div>
+                    <div class="preset-grid cols-4" id="strafe-freq-presets" style="margin-bottom:6px;">
+                        <button class="pill-btn" onclick="setStrafeRangePreset(0, 0)">到边折返</button>
+                        <button class="pill-btn" onclick="setStrafeRangePreset(0.2, 0.5)">高频AD</button>
+                        <button class="pill-btn active" onclick="setStrafeRangePreset(0.8, 1.8)">常规竞技</button>
+                        <button class="pill-btn" onclick="setStrafeRangePreset(1.2, 1.2)">定长1.2s</button>
+                    </div>
+                    <div class="ctrl-row" style="margin-bottom:4px;">
+                        <label>最小周期 (s)</label>
+                        <input type="range" id="inp-track-freq-min-r" min="0" max="5.0" step="0.1" value="0.8" oninput="setStrafeMin(parseFloat(this.value))" />
+                        <div class="stepper-box">
+                            <button class="step-btn" onclick="stepValGlobal('inp-track-freq-min', -0.1)">−</button>
+                            <input type="number" class="num-input" id="inp-track-freq-min" value="0.80" step="0.1" min="0" max="10" />
+                            <button class="step-btn" onclick="stepValGlobal('inp-track-freq-min', 0.1)">+</button>
+                        </div>
+                    </div>
+                    <div class="ctrl-row">
+                        <label>最大周期 (s)</label>
+                        <input type="range" id="inp-track-freq-max-r" min="0" max="5.0" step="0.1" value="1.8" oninput="setStrafeMax(parseFloat(this.value))" />
+                        <div class="stepper-box">
+                            <button class="step-btn" onclick="stepValGlobal('inp-track-freq-max', -0.1)">−</button>
+                            <input type="number" class="num-input" id="inp-track-freq-max" value="1.80" step="0.1" min="0" max="10" />
+                            <button class="step-btn" onclick="stepValGlobal('inp-track-freq-max', 0.1)">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="note-tip" id="note-tip">面前 45° 视平线区域 ｜ 0.135s 启动延迟 ｜ 恒定 6 靶</div>
-
-        <div class="section-card">
-            <div class="section-header">
-                <span class="section-label">👁️ 视觉高度 (Eye Height) <span class="height-hint">对应身高 ≈ <span id="height-estimate">1.75</span> m</span></span>
-                <span class="section-sub">可穿模</span>
-            </div>
-            <div class="note-tip" style="margin-bottom:6px; font-size:0.6rem; padding:4px 8px;">
-                <strong>注：</strong>此处为摄像机的<strong>视觉高度</strong>（眼睛位置），而非角色的物理碰撞箱高度。通常比实际身高略低 10~15 cm。
-            </div>
-            <div class="preset-grid cols-5" style="margin-bottom:4px;">
-                <button class="pill-btn" data-h="0.8" onclick="setViewHeight(0.8)">0.8 m</button>
-                <button class="pill-btn active" data-h="1.625" onclick="setViewHeight(1.625)">1.625 m</button>
-                <button class="pill-btn" data-h="2.5" onclick="setViewHeight(2.5)">2.5 m</button>
-                <button class="pill-btn" data-h="4.0" onclick="setViewHeight(4.0)">4.0 m</button>
-                <button class="pill-btn" data-h="8.0" onclick="setViewHeight(8.0)">8.0 m</button>
-            </div>
-            <div class="ctrl-row">
-                <label>视觉高度 (m)</label>
-                <input type="range" id="inp-view-height-r" min="0.1" max="10" step="0.05" value="1.625" oninput="setViewHeight(parseFloat(this.value))" />
-                <div class="stepper-box">
-                    <button class="step-btn" onclick="stepValGlobal('inp-view-height', -0.05)">−</button>
-                    <input type="number" class="num-input" id="inp-view-height" value="1.625" step="0.05" min="0.1" max="10" />
-                    <button class="step-btn" onclick="stepValGlobal('inp-view-height', 0.05)">+</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sixshot 专属配置 -->
-        <div id="section-sixshot-group">
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🎯 目标球径 (Size)</span>
-                    <span class="section-sub">125cm 自动切换为 3 靶</span>
-                </div>
-                <div class="preset-grid cols-4" id="sixshot-size-presets">
-                    <button class="pill-btn active" onclick="syncTargetSize(15)">15 cm</button>
-                    <button class="pill-btn" onclick="syncTargetSize(25)">25 cm</button>
-                    <button class="pill-btn" onclick="syncTargetSize(35)">35 cm</button>
-                    <button class="pill-btn" onclick="syncTargetSize(125)">125 cm</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>微调大小</label>
-                    <input type="range" id="inp-size-r" min="5" max="200" step="0.5" value="15.0" oninput="syncTargetSize(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-size', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-size" value="15.00" step="0.5" min="5" max="200" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-size', 0.5)">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">⚡ 动态漂移 (Dynamic)</span>
-                    <button class="pill-btn" id="btn-dynamic-toggle">🔘 动态漂移: 关闭</button>
-                </div>
-                <div class="preset-grid cols-4" style="margin-bottom:6px;">
-                    <button class="pill-btn active" data-val="12.5" onclick="setSixshotSpeed(12.5)">12.5°/s</button>
-                    <button class="pill-btn" data-val="25" onclick="setSixshotSpeed(25)">25°/s</button>
-                    <button class="pill-btn" data-val="37.5" onclick="setSixshotSpeed(37.5)">37.5°/s</button>
-                    <button class="pill-btn" data-val="50" onclick="setSixshotSpeed(50)">50°/s</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>角速度 (°/s)</label>
-                    <input type="range" id="inp-speed-r" min="1" max="300" step="1" value="12.5" oninput="setSixshotSpeed(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-speed', -1)">−</button>
-                        <input type="number" class="num-input" id="inp-speed" value="12.50" step="1" min="0.1" max="300" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-speed', 1)">+</button>
-                    </div>
-                </div>
-                <div class="speed-calc-hint" id="sixshot-dynamic-hint" style="display:none;"></div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🌐 生成区域角度</span>
-                    <span class="section-sub">视场水平范围</span>
-                </div>
-                <div class="preset-grid cols-4" style="margin-bottom:6px;">
-                    <button class="pill-btn active" data-angle="45" onclick="syncSpawnAngle(45)">45°</button>
-                    <button class="pill-btn" data-angle="67.5" onclick="syncSpawnAngle(67.5)">67.5°</button>
-                    <button class="pill-btn" data-angle="90" onclick="syncSpawnAngle(90)">90°</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>角度 (°)</label>
-                    <input type="range" id="inp-spawn-angle-r" min="10" max="150" step="0.5" value="45" oninput="syncSpawnAngle(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-spawn-angle', -1)">−</button>
-                        <input type="number" class="num-input" id="inp-spawn-angle" value="45.00" step="0.5" min="10" max="150" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-spawn-angle', 1)">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">📏 生成深度 (Depth)</span>
-                    <button class="lock-btn" id="lock-sixshot-depth" onclick="toggleDepthLock('sixshot')" title="点击解锁/锁定深度">🔒 已锁定</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>目标距离 (m)</label>
-                    <input type="range" id="inp-depth-sixshot-r" min="3" max="30" step="0.5" value="10.0" disabled oninput="setDepthSixshot(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-depth-sixshot', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-depth-sixshot" value="10.00" step="0.5" min="3" max="30" disabled />
-                        <button class="step-btn" onclick="stepValGlobal('inp-depth-sixshot', 0.5)">+</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tracking 专属配置 -->
-        <div id="section-tracking-group" style="display:none;">
-
-            <!-- ① 目标球径 -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🎯 目标球径 (Size)</span>
-                </div>
-                <div class="preset-grid cols-4" id="tracking-size-presets">
-                    <button class="pill-btn" id="btn-tsize-15" onclick="syncTrackingTargetSize(15)">15 cm</button>
-                    <button class="pill-btn active" id="btn-tsize-25" onclick="syncTrackingTargetSize(25)">25 cm</button>
-                    <button class="pill-btn" id="btn-tsize-35" onclick="syncTrackingTargetSize(35)">35 cm</button>
-                    <button class="pill-btn" id="btn-tsize-125" onclick="syncTrackingTargetSize(125)">125 cm</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>微调大小</label>
-                    <input type="range" id="inp-track-size-r" min="1" max="1000" step="0.5" value="25" oninput="syncTrackingTargetSize(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-size', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-track-size" value="25.00" step="0.5" min="1" max="1000" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-size', 0.5)">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ② 运动速度 (含实时物理换算提示) -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">⚡ 运动速度 (Speed)</span>
-                </div>
-                <div class="preset-grid cols-3" style="margin-bottom:4px;">
-                    <button class="pill-btn active" data-val="12.5" onclick="setTrackingSpeed(12.5)">12.5°/s</button>
-                    <button class="pill-btn" data-val="25" onclick="setTrackingSpeed(25)">25°/s</button>
-                    <button class="pill-btn" data-val="50" onclick="setTrackingSpeed(50)">50°/s</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>角速度 (°/s)</label>
-                    <input type="range" id="inp-track-speed-r" min="1" max="300" step="1" value="12.5" oninput="setTrackingSpeed(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-speed', -1)">−</button>
-                        <input type="number" class="num-input" id="inp-track-speed" value="12.50" step="1" min="0.1" max="300" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-speed', 1)">+</button>
-                    </div>
-                </div>
-                <!-- 实时线速度与行程计算提示 -->
-                <div class="speed-calc-hint" id="tracking-speed-hint"></div>
-            </div>
-
-            <!-- ③ 活动范围 -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🌐 活动范围 (Angle Range)</span>
-                </div>
-                <div class="preset-grid cols-4" style="margin-bottom:4px;">
-                    <button class="pill-btn" data-angle="45" onclick="setTrackingAngle(45)">45°</button>
-                    <button class="pill-btn" data-angle="90" onclick="setTrackingAngle(90)">90°</button>
-                    <button class="pill-btn" data-angle="180" onclick="setTrackingAngle(180)">180°</button>
-                    <button class="pill-btn active" data-angle="360" onclick="setTrackingAngle(360)">360°</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>角度 (°)</label>
-                    <input type="range" id="inp-track-angle-r" min="10" max="360" step="1" value="360" oninput="setTrackingAngle(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-angle', -5)">−</button>
-                        <input type="number" class="num-input" id="inp-track-angle" value="360.00" step="1" min="10" max="360" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-angle', 5)">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ④ 运动轨迹 -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🌀 运动轨迹 (Pattern)</span>
-                </div>
-                <div class="preset-grid cols-2">
-                    <button class="pill-btn active" id="btn-track-fly" onclick="setTrackingPattern('fly')">🌀 无规则乱飞</button>
-                    <button class="pill-btn" id="btn-track-strafe" onclick="setTrackingPattern('strafe')">↔ 水平折返</button>
-                </div>
-            </div>
-
-            <!-- ⑤ 空间形态 -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">📐 空间形态 (Space)</span>
-                </div>
-                <div class="preset-grid cols-3">
-                    <button class="pill-btn active" id="btn-space-wall" onclick="setTrackingSpace('wall')">▢ 直面墙</button>
-                    <button class="pill-btn" id="btn-space-curve" onclick="setTrackingSpace('curve')">◯ 环形曲面</button>
-                    <button class="pill-btn" id="btn-space-free3d" onclick="setTrackingSpace('free3d')">🟧 3D自由深度</button>
-                </div>
-            </div>
-
-            <!-- ⑥ 变向周期与随机折返 -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🔄 变向周期与随机折返 (Reversal)</span>
-                    <span class="section-sub">0为到边折返/持续绕圈</span>
-                </div>
-                <div class="preset-grid cols-4" id="strafe-freq-presets" style="margin-bottom:6px;">
-                    <button class="pill-btn" onclick="setStrafeRangePreset(0, 0)">到边折返</button>
-                    <button class="pill-btn" onclick="setStrafeRangePreset(0.2, 0.5)">高频AD</button>
-                    <button class="pill-btn active" onclick="setStrafeRangePreset(0.8, 1.8)">常规竞技</button>
-                    <button class="pill-btn" onclick="setStrafeRangePreset(1.2, 1.2)">定长1.2s</button>
-                </div>
-                <div class="ctrl-row" style="margin-bottom:5px;">
-                    <label>最小周期 (s)</label>
-                    <input type="range" id="inp-track-freq-min-r" min="0" max="5.0" step="0.1" value="0.8" oninput="setStrafeMin(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-freq-min', -0.1)">−</button>
-                        <input type="number" class="num-input" id="inp-track-freq-min" value="0.80" step="0.1" min="0" max="10" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-freq-min', 0.1)">+</button>
-                    </div>
-                </div>
-                <div class="ctrl-row">
-                    <label>最大周期 (s)</label>
-                    <input type="range" id="inp-track-freq-max-r" min="0" max="5.0" step="0.1" value="1.8" oninput="setStrafeMax(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-freq-max', -0.1)">−</button>
-                        <input type="number" class="num-input" id="inp-track-freq-max" value="1.80" step="0.1" min="0" max="10" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-track-freq-max', 0.1)">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ⑦ 生成深度 -->
-            <div class="section-card" id="row-tracking-depth-container">
-                <div class="section-header">
-                    <span class="section-label">📏 生成深度 (Depth)</span>
-                    <button class="lock-btn" id="lock-tracking-depth" onclick="toggleDepthLock('tracking')" title="点击解锁/锁定深度">🔒 已锁定</button>
-                </div>
-                <div class="note-tip" style="margin-bottom:6px; font-size:0.58rem; padding:3px 8px;" id="depth-hint-tracking">
-                    <strong>提示：</strong>当前深度固定为 <strong>10.0</strong> m。
-                </div>
-                <div class="ctrl-row">
-                    <label>基础深度 (m)</label>
-                    <input type="range" id="inp-depth-tracking-r" min="3" max="30" step="0.5" value="10.0" disabled oninput="setDepthTracking(parseFloat(this.value))" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-depth-tracking', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-depth-tracking" value="10.00" step="0.5" min="3" max="30" disabled />
-                        <button class="step-btn" onclick="stepValGlobal('inp-depth-tracking', 0.5)">+</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <button class="btn-start" id="btn-lock">▶ 开始挑战 (0.135s启动)</button>
     </div>
 
-    <!-- ========== 右侧面板（准星 + 外设手感） ========== -->
+    <!-- ========== 右侧面板（准星 · 硬件手感 · 视场角） ========== -->
     <div id="right-panel" class="glass-panel">
         <div class="panel-header">
-            <span class="panel-title">准星与硬件手感标定</span>
+            <span class="panel-title">准星与手感调优</span>
         </div>
 
+        <!-- 准星形态 -->
         <div class="section-card">
             <div class="section-header">
                 <span class="section-label">准星形态 (Crosshair)</span>
@@ -957,30 +1038,30 @@
                 <button class="pill-btn" id="btn-dot-type" onclick="setCrosshairType('dot')">实心圆点</button>
                 <button class="pill-btn" id="btn-circle-type" onclick="setCrosshairType('circle_hollow')">空心圆环</button>
             </div>
-            <div class="ctrl-row" id="row-cross-size" style="margin-bottom:5px;">
+            <div class="ctrl-row" id="row-cross-size" style="margin-bottom:4px;">
                 <label id="lbl-cross-size">臂长/半径</label>
-                <input type="range" id="inp-cross-size-r" min="1" max="1000" step="0.5" value="8" oninput="syncCrosshair('size', this.value)" />
+                <input type="range" id="inp-cross-size-r" min="1" max="500" step="0.5" value="8" oninput="syncCrosshair('size', this.value)" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-size', -0.5)">−</button>
-                    <input type="number" class="num-input" id="inp-cross-size" value="8.00" step="0.5" min="1" max="1000" />
+                    <input type="number" class="num-input" id="inp-cross-size" value="8.00" step="0.5" min="1" max="500" />
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-size', 0.5)">+</button>
                 </div>
             </div>
-            <div class="ctrl-row" id="row-cross-thick" style="margin-bottom:5px;">
+            <div class="ctrl-row" id="row-cross-thick" style="margin-bottom:4px;">
                 <label>线条粗细</label>
-                <input type="range" id="inp-cross-thick-r" min="1" max="1000" step="0.5" value="2" oninput="syncCrosshair('thick', this.value)" />
+                <input type="range" id="inp-cross-thick-r" min="1" max="50" step="0.5" value="2" oninput="syncCrosshair('thick', this.value)" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-thick', -0.5)">−</button>
-                    <input type="number" class="num-input" id="inp-cross-thick" value="2.00" step="0.5" min="1" max="1000" />
+                    <input type="number" class="num-input" id="inp-cross-thick" value="2.00" step="0.5" min="1" max="50" />
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-thick', 0.5)">+</button>
                 </div>
             </div>
-            <div class="ctrl-row" id="row-cross-gap" style="margin-bottom:6px;">
+            <div class="ctrl-row" id="row-cross-gap" style="margin-bottom:5px;">
                 <label>中心空心</label>
-                <input type="range" id="inp-cross-gap-r" min="0" max="1000" step="0.5" value="3" oninput="syncCrosshair('gap', this.value)" />
+                <input type="range" id="inp-cross-gap-r" min="0" max="50" step="0.5" value="3" oninput="syncCrosshair('gap', this.value)" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-gap', -0.25)">−</button>
-                    <input type="number" class="num-input" id="inp-cross-gap" value="3.00" step="0.25" min="0" max="1000" />
+                    <input type="number" class="num-input" id="inp-cross-gap" value="3.00" step="0.25" min="0" max="50" />
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-gap', 0.25)">+</button>
                 </div>
             </div>
@@ -988,6 +1069,7 @@
             <div class="swatches-grid-9" id="swatches-crosshair"></div>
         </div>
 
+        <!-- 鼠标硬件 DPI -->
         <div class="section-card">
             <div class="section-header">
                 <span class="section-label">鼠标硬件 DPI</span>
@@ -1013,6 +1095,7 @@
             </div>
         </div>
 
+        <!-- 360° 旋转物理周长 -->
         <div class="section-card">
             <div class="section-header">
                 <span class="section-label">360° 旋转物理周长</span>
@@ -1038,6 +1121,7 @@
             </div>
         </div>
 
+        <!-- 水平视场角 -->
         <div class="section-card">
             <div class="section-header">
                 <span class="section-label">水平视场角 (H-FOV)</span>
@@ -1062,7 +1146,7 @@
 
     <script>
         // =========================================================
-        // 1. 全局配置与基础参数
+        // 1. 全局配置与高精手感数学运算
         // =========================================================
         const ISO_INCH_TO_CM = 2.54;
 
@@ -1188,7 +1272,7 @@
         }
 
         // =========================================================
-        // 2. 音效系统
+        // 2. 音效子系统
         // =========================================================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let lastTrackAudioTime = 0;
@@ -1242,7 +1326,7 @@
         }
 
         // =========================================================
-        // 3. Three.js 场景构建 & 视口自适应 (修复全屏/缩放BUG)
+        // 3. Three.js 场景构建 & 视口自适应
         // =========================================================
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
@@ -1257,7 +1341,6 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
-        // ★★★ 核心修复：全屏切换与窗口 Resize 动态自适应响应 ★★★
         function onWindowResize() {
             const width = window.innerWidth;
             const height = window.innerHeight;
@@ -1308,12 +1391,8 @@
         for (let i = 0; i < 15; i++) {
             const angle = (i / 15) * Math.PI * 2 + (Math.random() * 0.4 - 0.2);
             const dist = 75 + Math.random() * 65;
-            const x = Math.sin(angle) * dist,
-                  z = -Math.cos(angle) * dist,
-                  y = 48 + Math.random() * 20;
-            const w = 24 + Math.random() * 20,
-                  h = 2.5 + Math.random() * 1.5,
-                  d = 16 + Math.random() * 18;
+            const x = Math.sin(angle) * dist, z = -Math.cos(angle) * dist, y = 48 + Math.random() * 20;
+            const w = 24 + Math.random() * 20, h = 2.5 + Math.random() * 1.5, d = 16 + Math.random() * 18;
             const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), cloudMat);
             mesh.position.set(x, y, z);
             mesh.userData = { angle, dist, speed: 0.0015 + Math.random() * 0.002, altitude: y };
@@ -1335,7 +1414,7 @@
         scene.add(new THREE.GridHelper(300, 150, 0x94a3b8, 0xe2e8f0));
 
         // =========================================================
-        // 4. 边界与指示墙系统
+        // 4. 边界与指示墙构建
         // =========================================================
         const spawnWallGroup = new THREE.Group();
         scene.add(spawnWallGroup);
@@ -1385,12 +1464,12 @@
             const pattern = config.tracking.pattern;
             const isFly = (pattern === 'fly');
             const isFull360 = config.tracking.angleRange >= 359;
-            const clampedAngle = Math.min(170, config.tracking.angleRange);
-            const halfAngleRad = (clampedAngle / 2) * (Math.PI / 180);
+            const totalSpanRad = (config.tracking.angleRange * Math.PI) / 180;
             const maxPitch = (22.5 * Math.PI) / 180;
 
             if (space === 'wall') {
-                const halfW = D * Math.tan(halfAngleRad);
+                // 弧长展开等效跨度
+                const halfW = (D * totalSpanRad) / 2;
                 const halfH = isFly ? D * Math.tan(maxPitch) : 0.3;
                 let bottomY = cy - halfH;
                 if (bottomY < 0.05) bottomY = 0.05;
@@ -1415,9 +1494,8 @@
                 ];
                 spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(corners), edgeMat));
             } else if (space === 'curve') {
-                const totalAngleRad = (config.tracking.angleRange * Math.PI) / 180;
-                const startAngle = isFull360 ? 0 : Math.PI - (totalAngleRad / 2);
-                const sweepAngle = isFull360 ? Math.PI * 2 : totalAngleRad;
+                const startAngle = isFull360 ? 0 : Math.PI - (totalSpanRad / 2);
+                const sweepAngle = isFull360 ? Math.PI * 2 : totalSpanRad;
                 const halfH = D * Math.tan(maxPitch);
                 let bottomY = cy - halfH;
                 if (bottomY < 0.05) bottomY = 0.05;
@@ -1449,9 +1527,8 @@
                     spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([botArc[segs], topArc[segs]]), edgeMat));
                 }
             } else if (space === 'free3d') {
-                const totalAngleRad = (config.tracking.angleRange * Math.PI) / 180;
-                const startAngle = isFull360 ? 0 : Math.PI - (totalAngleRad / 2);
-                const sweepAngle = isFull360 ? Math.PI * 2 : totalAngleRad;
+                const startAngle = isFull360 ? 0 : Math.PI - (totalSpanRad / 2);
+                const sweepAngle = isFull360 ? Math.PI * 2 : totalSpanRad;
                 const maxPitch2 = (22.5 * Math.PI) / 180;
                 const guideMat = new THREE.LineBasicMaterial({ color: wallHex, transparent: true, opacity: 0.25 });
                 [D, D + 10].forEach(d => {
@@ -1471,7 +1548,7 @@
         }
 
         // =========================================================
-        // 5. 靶标材质与独立球体调色
+        // 5. 靶标材质与独立球体管理
         // =========================================================
         const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
 
@@ -1502,8 +1579,7 @@
         let sixTargets = [];
         const trackingState = {
             x: 0, y: 0, z: -10,
-            dist: 10.0,
-            yaw: 0, pitch: 0,
+            dist: 10.0, yaw: 0, pitch: 0,
             vx: 0, vy: 0, vz: 0,
             vYaw: 0, vPitch: 0, vDist: 0,
             changeDirTimer: 0
@@ -1547,13 +1623,11 @@
         }
 
         function getSafeBoundsSixshot() {
-            const D = config.depthSixshot,
-                  r = (config.targetSizeCm / 100) / 2;
+            const D = config.depthSixshot, r = (config.targetSizeCm / 100) / 2;
             const halfAngleRad = (config.spawnAngleDeg / 2) * Math.PI / 180;
             const squareSize = 2 * D * Math.tan(halfAngleRad);
             const margin = r + 0.05;
-            const minX = -squareSize / 2 + margin,
-                  maxX = squareSize / 2 - margin;
+            const minX = -squareSize / 2 + margin, maxX = squareSize / 2 - margin;
             let bottomY = config.viewHeight - (squareSize / 2);
             if (bottomY < 0.05) bottomY = 0.05;
             const actualMinY = bottomY;
@@ -1648,12 +1722,12 @@
             const space = config.tracking.space;
 
             const isFull360 = config.tracking.angleRange >= 359;
-            const clampedAngle = Math.min(170, config.tracking.angleRange);
+            const totalSpanRad = (config.tracking.angleRange * Math.PI) / 180;
             const maxPitch = (22.5 * Math.PI) / 180;
-            const halfAngleRad = (config.tracking.angleRange / 2) * (Math.PI / 180);
+            const halfAngleRad = totalSpanRad / 2;
 
             if (space === 'wall') {
-                const halfW = baseD * Math.tan((clampedAngle / 2) * (Math.PI / 180)) - r;
+                const halfW = Math.max(0.5, (baseD * totalSpanRad) / 2 - r);
                 const halfH = isFly ? baseD * Math.tan(maxPitch) : 0.3;
                 const actualMinY = Math.max(0.05 + r, cy - halfH);
 
@@ -1780,15 +1854,17 @@
                 const D = config.depthTracking;
                 const speedRad = (config.tracking.speedDegPerSec * Math.PI) / 180;
                 const linearSpeed = speedRad * D;
-                const clampedAngle = Math.min(170, config.tracking.angleRange);
-                const linearSpan = 2 * D * Math.tan((clampedAngle / 2) * Math.PI / 180);
+                const totalSpanRad = (config.tracking.angleRange * Math.PI) / 180;
+                const spanMeters = D * totalSpanRad;
 
                 if (config.tracking.space === 'wall') {
-                    tHint.innerHTML = `📐 <strong>直面墙平面直线横移：</strong>距离 <strong>${D.toFixed(1)}m</strong> 对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，水平行程 ≈ <strong>${linearSpan.toFixed(2)} m</strong>`;
+                    // 直面墙平面等效横移 (弧长展开法，永不发散)
+                    tHint.innerHTML = `📐 <strong>直面墙平面等效横移：</strong>距离 <span style="white-space:nowrap;"><strong>${D.toFixed(1)}m</strong></span> <span style="white-space:nowrap;">对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">等效行程 ≈ <strong>${spanMeters.toFixed(2)}&nbsp;m</strong></span>`;
                 } else if (config.tracking.space === 'curve') {
-                    tHint.innerHTML = `◯ <strong>环形曲面圆周围绕：</strong>距离 <strong>${D.toFixed(1)}m</strong> 对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，围绕跨度 <strong>${config.tracking.angleRange}°</strong>`;
+                    // 环形曲面圆周围绕
+                    tHint.innerHTML = `◯ <strong>环形曲面圆周围绕：</strong>距离 <span style="white-space:nowrap;"><strong>${D.toFixed(1)}m</strong></span> <span style="white-space:nowrap;">对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">弧线行程 ≈ <strong>${spanMeters.toFixed(2)}&nbsp;m</strong></span>`;
                 } else if (config.tracking.space === 'free3d') {
-                    tHint.innerHTML = `🟧 <strong>3D自由深度立体机动：</strong>靶子在 <strong>${D.toFixed(1)} ~ ${(D + 10).toFixed(1)}m</strong> 纵深内推进拉远，基准角速 <strong>${config.tracking.speedDegPerSec}°/s</strong>`;
+                    tHint.innerHTML = `🟧 <strong>3D自由深度立体机动：</strong>靶子在 <span style="white-space:nowrap;"><strong>${D.toFixed(1)} ~ ${(D + 10).toFixed(1)}m</strong></span> 纵深内推进拉远，基准角速 <span style="white-space:nowrap;"><strong>${config.tracking.speedDegPerSec.toFixed(1)}°/s</strong></span>`;
                 }
             }
 
@@ -1798,7 +1874,7 @@
                     const D = config.depthSixshot;
                     const v = D * (config.dynamic.speedDegPerSec * Math.PI / 180);
                     sHint.style.display = 'block';
-                    sHint.innerHTML = `⚡ <strong>动态漂移已开启：</strong>距离 <strong>${D.toFixed(1)}m</strong> 对应平面弹跳线速 ≈ <strong>${v.toFixed(2)} m/s</strong>`;
+                    sHint.innerHTML = `⚡ <strong>动态漂移已开启：</strong>距离 <span style="white-space:nowrap;"><strong>${D.toFixed(1)}m</strong></span> <span style="white-space:nowrap;">对应平面弹跳线速 ≈ <strong>${v.toFixed(2)}&nbsp;m/s</strong></span>`;
                 } else {
                     sHint.style.display = 'none';
                 }
@@ -1819,36 +1895,38 @@
         }
 
         // =========================================================
-        // 6. 模式与配置切换
+        // 6. 模式与配置切换 (严谨布局同步)
         // =========================================================
         function switchTrainMode(mode) {
             config.mode = mode;
             document.getElementById('tab-mode-sixshot').classList.toggle('active', mode === 'sixshot');
             document.getElementById('tab-mode-tracking').classList.toggle('active', mode === 'tracking');
-            document.getElementById('section-sixshot-group').style.display = mode === 'sixshot' ? 'block' : 'none';
-            document.getElementById('section-tracking-group').style.display = mode === 'tracking' ? 'block' : 'none';
+
+            const sixshotGroup = document.getElementById('section-sixshot-group');
+            const trackingGroup = document.getElementById('section-tracking-group');
+            const trackingBehaviorCol = document.getElementById('tracking-behavior-col');
 
             if (mode === 'sixshot') {
-                document.getElementById('note-tip').innerHTML =
-                    `设定：${config.spawnAngleDeg}° 生成区域 ｜ 0.135s 启动延迟 ｜ 恒定 ${targetCount} 靶`;
+                sixshotGroup.style.display = 'block';
+                trackingGroup.style.display = 'none';
+                trackingBehaviorCol.style.display = 'none';
+                document.getElementById('note-tip').innerHTML = `设定：${config.spawnAngleDeg}° 生成区域 ｜ 0.135s 启动延迟 ｜ 恒定 ${targetCount} 靶`;
                 document.getElementById('br-title').innerText = 'Sixshot 物理生成原理';
-                document.getElementById('br-formula').innerHTML =
-                    `• 面前 ${config.spawnAngleDeg}° 水平视平线正方形区域<br />• 始终恒定 6 靶，防堆叠粘连算法`;
-                document.getElementById('br-desc').innerHTML =
-                    '• <strong>命中 +1 分</strong> ｜ <strong>空枪脱靶 -1 分</strong> ｜ 49秒限时。<br />• Raw Input 原生输入防抖机制。';
+                document.getElementById('br-formula').innerHTML = `• 面前 ${config.spawnAngleDeg}° 水平视平线正方形区域<br />• 始终恒定 6 靶，防堆叠粘连算法`;
+                document.getElementById('br-desc').innerHTML = '• <strong>命中 +1 分</strong> ｜ <strong>空枪脱靶 -1 分</strong> ｜ 49秒限时。<br />• Raw Input 原生输入防抖机制。';
                 document.getElementById('hud-hits-box').style.display = 'block';
                 document.getElementById('hud-misses-box').style.display = 'block';
                 document.getElementById('lbl-acc').innerText = '命中率';
             } else {
+                sixshotGroup.style.display = 'none';
+                trackingGroup.style.display = 'block';
+                trackingBehaviorCol.style.display = 'flex';
                 const patternDesc = config.tracking.pattern === 'fly' ? '无规则乱飞' : '水平折返';
                 const spaceDesc = config.tracking.space === 'wall' ? '直面墙' : config.tracking.space === 'curve' ? '环形曲面' : '3D自由深度';
-                document.getElementById('note-tip').innerHTML =
-                    `设定：${config.tracking.angleRange}° · ${patternDesc} · ${spaceDesc} ｜ <strong>按住鼠标左键持续跟枪计分</strong>`;
+                document.getElementById('note-tip').innerHTML = `设定：${config.tracking.angleRange}° · ${patternDesc} · ${spaceDesc} ｜ <strong>按住鼠标左键持续跟枪计分</strong>`;
                 document.getElementById('br-title').innerText = 'Tracking 跟枪训练原理';
-                document.getElementById('br-formula').innerHTML =
-                    `• 活动范围 ${config.tracking.angleRange}° ｜ 形态：${patternDesc} + ${spaceDesc}<br />• 深度 ${config.tracking.space === 'free3d' ? 'D ~ D+10m 动态纵深' : getCurrentDepth().toFixed(1) + 'm 恒定'}`;
-                document.getElementById('br-desc').innerHTML =
-                    '• <strong>按住鼠标 0.1秒 = +0.1分</strong> ｜ 49秒限时。<br />• 实时计算开火有效跟枪率与锁敌覆盖率。';
+                document.getElementById('br-formula').innerHTML = `• 活动范围 ${config.tracking.angleRange}° ｜ 形态：${patternDesc} + ${spaceDesc}<br />• 深度 ${config.tracking.space === 'free3d' ? 'D ~ D+10m 动态纵深' : getCurrentDepth().toFixed(1) + 'm 恒定'}`;
+                document.getElementById('br-desc').innerHTML = '• <strong>按住鼠标 0.1秒 = +0.1分</strong> ｜ 49秒限时。<br />• 实时计算开火有效跟枪率与锁敌覆盖率。';
                 document.getElementById('hud-hits-box').style.display = 'none';
                 document.getElementById('hud-misses-box').style.display = 'none';
                 document.getElementById('lbl-acc').innerText = '跟枪率';
@@ -1966,8 +2044,7 @@
             const hint = document.getElementById('depth-hint-tracking');
             if (!hint) return;
             if (config.tracking.space === 'free3d') {
-                hint.innerHTML =
-                    `<strong>提示：</strong>3D自由深度模式下，靶子在 <strong>${config.depthTracking.toFixed(1)} ~ ${(config.depthTracking + 10).toFixed(1)}</strong> m 范围内作纵深立体运动。`;
+                hint.innerHTML = `<strong>提示：</strong>3D自由深度模式下，靶子在 <strong>${config.depthTracking.toFixed(1)} ~ ${(config.depthTracking + 10).toFixed(1)}</strong> m 范围内作纵深立体运动。`;
             } else {
                 hint.innerHTML = `<strong>提示：</strong>当前深度固定为 <strong>${config.depthTracking.toFixed(1)}</strong> m。`;
             }
@@ -2046,10 +2123,8 @@
             document.querySelectorAll('#section-sixshot-group [data-angle]').forEach(b =>
                 b.classList.toggle('active', Math.abs(parseFloat(b.dataset.angle) - val) < 0.5));
             updateSpawnWall();
-            document.getElementById('note-tip').innerHTML =
-                `设定：${config.spawnAngleDeg}° 生成区域 ｜ 0.135s 启动延迟 ｜ 恒定 ${targetCount} 靶`;
-            document.getElementById('br-formula').innerHTML =
-                `• 面前 ${config.spawnAngleDeg}° 水平视平线正方形区域<br />• 始终恒定 6 靶，防堆叠粘连算法`;
+            document.getElementById('note-tip').innerHTML = `设定：${config.spawnAngleDeg}° 生成区域 ｜ 0.135s 启动延迟 ｜ 恒定 ${targetCount} 靶`;
+            document.getElementById('br-formula').innerHTML = `• 面前 ${config.spawnAngleDeg}° 水平视平线正方形区域<br />• 始终恒定 6 靶，防堆叠粘连算法`;
             if (gameState === 'playing' || gameState === 'starting') respawnAllTargets();
             saveToLocalStorage();
         }
@@ -2116,19 +2191,18 @@
         }
 
         // =========================================================
-        // 7. 准星引擎
+        // 7. 准星渲染引擎
         // =========================================================
         function updateCrosshairStyle() {
-            const container = document.getElementById('crosshair-container');
-            if (!container) return;
+            const crossContainer = document.getElementById('crosshair-container');
+            if (!crossContainer) return;
             const { type, size, thick, gap, outline, color } = config.crosshair;
             const totalDim = Math.max(120, (size + gap + outline) * 4);
             const half = totalDim / 2;
             const strokeCol = '#000000';
             const strokeW = Math.max(0, outline || 1.2);
 
-            let svgHTML =
-                `<svg width="${totalDim}" height="${totalDim}" viewBox="0 0 ${totalDim} ${totalDim}" xmlns="http://www.w3.org/2000/svg">`;
+            let svgHTML = `<svg width="${totalDim}" height="${totalDim}" viewBox="0 0 ${totalDim} ${totalDim}" xmlns="http://www.w3.org/2000/svg">`;
 
             if (type === 'cross') {
                 const rects = [
@@ -2138,12 +2212,10 @@
                     { x: half + gap, y: half - thick / 2, w: size, h: thick }
                 ];
                 rects.forEach(r => {
-                    svgHTML +=
-                        `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${color}" stroke="${strokeCol}" stroke-width="${strokeW}" shape-rendering="crispEdges" />`;
+                    svgHTML += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${color}" stroke="${strokeCol}" stroke-width="${strokeW}" shape-rendering="crispEdges" />`;
                 });
             } else if (type === 'dot') {
-                svgHTML +=
-                    `<circle cx="${half}" cy="${half}" r="${Math.max(1, size)}" fill="${color}" stroke="${strokeCol}" stroke-width="${strokeW}" />`;
+                svgHTML += `<circle cx="${half}" cy="${half}" r="${Math.max(1, size)}" fill="${color}" stroke="${strokeCol}" stroke-width="${strokeW}" />`;
             } else if (type === 'circle_hollow') {
                 const innerR = Math.max(1, gap);
                 const outerR = innerR + thick;
@@ -2151,15 +2223,13 @@
                 const ringW = outerR - innerR;
                 svgHTML += `<circle cx="${half}" cy="${half}" r="${midR}" fill="none" stroke="${color}" stroke-width="${ringW}" />`;
                 if (strokeW > 0) {
-                    svgHTML +=
-                        `<circle cx="${half}" cy="${half}" r="${outerR}" fill="none" stroke="${strokeCol}" stroke-width="${strokeW}" />`;
-                    svgHTML +=
-                        `<circle cx="${half}" cy="${half}" r="${innerR}" fill="none" stroke="${strokeCol}" stroke-width="${strokeW}" />`;
+                    svgHTML += `<circle cx="${half}" cy="${half}" r="${outerR}" fill="none" stroke="${strokeCol}" stroke-width="${strokeW}" />`;
+                    svgHTML += `<circle cx="${half}" cy="${half}" r="${innerR}" fill="none" stroke="${strokeCol}" stroke-width="${strokeW}" />`;
                 }
             }
 
             svgHTML += `</svg>`;
-            container.innerHTML = svgHTML;
+            crossContainer.innerHTML = svgHTML;
             saveToLocalStorage();
         }
 
@@ -2200,7 +2270,7 @@
         }
 
         // =========================================================
-        // stepValGlobal
+        // 8. 统一全局步进器逻辑 (数值输入与滚轮)
         // =========================================================
         function stepValGlobal(id, stepAmount) {
             const input = document.getElementById(id);
@@ -2217,95 +2287,49 @@
             input.value = newVal;
 
             const rangeInput = document.getElementById(id + '-r');
-            if (rangeInput) {
-                rangeInput.value = val;
-            }
+            if (rangeInput) rangeInput.value = val;
 
             if (id.startsWith('inp-cross-')) {
                 const prop = id.replace('inp-cross-', '');
                 syncCrosshair(prop, input.value);
                 return;
             }
-            if (id === 'inp-view-height') {
-                setViewHeight(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-fov') {
-                syncFov(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-dpi') {
-                setDpiManual(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-cm') {
-                setCmManual(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-size') {
-                syncTargetSize(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-speed') {
-                setSixshotSpeed(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-spawn-angle') {
-                syncSpawnAngle(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-depth-sixshot') {
-                setDepthSixshot(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-track-size') {
-                syncTrackingTargetSize(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-track-speed') {
-                setTrackingSpeed(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-track-angle') {
-                setTrackingAngle(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-depth-tracking') {
-                setDepthTracking(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-track-freq-min') {
-                setStrafeMin(parseFloat(input.value));
-                return;
-            }
-            if (id === 'inp-track-freq-max') {
-                setStrafeMax(parseFloat(input.value));
-                return;
-            }
+            if (id === 'inp-view-height') { setViewHeight(parseFloat(input.value)); return; }
+            if (id === 'inp-fov') { syncFov(parseFloat(input.value)); return; }
+            if (id === 'inp-dpi') { setDpiManual(parseFloat(input.value)); return; }
+            if (id === 'inp-cm') { setCmManual(parseFloat(input.value)); return; }
+            if (id === 'inp-size') { syncTargetSize(parseFloat(input.value)); return; }
+            if (id === 'inp-speed') { setSixshotSpeed(parseFloat(input.value)); return; }
+            if (id === 'inp-spawn-angle') { syncSpawnAngle(parseFloat(input.value)); return; }
+            if (id === 'inp-depth-sixshot') { setDepthSixshot(parseFloat(input.value)); return; }
+            if (id === 'inp-track-size') { syncTrackingTargetSize(parseFloat(input.value)); return; }
+            if (id === 'inp-track-speed') { setTrackingSpeed(parseFloat(input.value)); return; }
+            if (id === 'inp-track-angle') { setTrackingAngle(parseFloat(input.value)); return; }
+            if (id === 'inp-depth-tracking') { setDepthTracking(parseFloat(input.value)); return; }
+            if (id === 'inp-track-freq-min') { setStrafeMin(parseFloat(input.value)); return; }
+            if (id === 'inp-track-freq-max') { setStrafeMax(parseFloat(input.value)); return; }
         }
 
         // =========================================================
-        // 8. 射击、输入判定与轮询率
+        // 9. 输入监听、Coalesced 微帧累加与无跳帧手感
         // =========================================================
-        let yaw = 0.0,
-            pitch = 0.0;
+        let yaw = 0.0, pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
         window.addEventListener('pointermove', (e) => {
-            let batch = 1;
-            if (typeof e.getCoalescedEvents === 'function') {
-                const coalesced = e.getCoalescedEvents();
-                if (coalesced && coalesced.length > 0) batch = coalesced.length;
-            }
-            pollCount += batch;
+            const events = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
+            pollCount += events.length;
 
             if (document.pointerLockElement === document.body) {
-                const mx = e.movementX,
-                    my = e.movementY;
-                if (Math.abs(mx) > 1500 || Math.abs(my) > 1500) return;
-                yaw -= mx * radiansPerCount;
-                pitch -= my * radiansPerCount;
-                pitch = Math.max(-Math.PI / 2 + 0.001, Math.min(Math.PI / 2 - 0.001, pitch));
+                let dx = 0, dy = 0;
+                for (let i = 0; i < events.length; i++) {
+                    dx += events[i].movementX;
+                    dy += events[i].movementY;
+                }
+                if (Math.abs(dx) > 2000 || Math.abs(dy) > 2000) return;
+                yaw -= dx * radiansPerCount;
+                pitch -= dy * radiansPerCount;
+                pitch = Math.max(-Math.PI / 2 + 0.0001, Math.min(Math.PI / 2 - 0.0001, pitch));
                 yaw = yaw % (Math.PI * 2);
                 cameraEuler.set(pitch, yaw, 0);
                 camera.quaternion.setFromEuler(cameraEuler);
@@ -2358,19 +2382,17 @@
                 document.getElementById('hud-score').innerText = score.toFixed(0);
                 document.getElementById('hud-hits').innerText = hits;
                 document.getElementById('hud-misses').innerText = misses;
-                const total = hits + misses,
-                    acc = total > 0 ? ((hits / total) * 100).toFixed(1) : '100.0';
+                const total = hits + misses, acc = total > 0 ? ((hits / total) * 100).toFixed(1) : '100.0';
                 document.getElementById('hud-acc').innerText = `${acc}%`;
             } else {
                 document.getElementById('hud-score').innerText = score.toFixed(1);
-                const acc = trackingFiringTime > 0.05 ? ((trackingOnTargetTime / trackingFiringTime) * 100).toFixed(1) :
-                    '100.0';
+                const acc = trackingFiringTime > 0.05 ? ((trackingOnTargetTime / trackingFiringTime) * 100).toFixed(1) : '100.0';
                 document.getElementById('hud-acc').innerText = `${acc}%`;
             }
         }
 
         // =========================================================
-        // 9. 挑战生命周期
+        // 10. 挑战生命周期引擎
         // =========================================================
         const resultModal = document.getElementById('result-modal');
         const progressOverlay = document.getElementById('progress-overlay');
@@ -2384,30 +2406,22 @@
         function setPanelsVisibility(visible) {
             const opacity = visible ? '1' : '0';
             const pointerEvents = visible ? 'auto' : 'none';
-            if (panel) { panel.style.opacity = opacity;
-                panel.style.pointerEvents = pointerEvents; }
-            if (rightPanel) { rightPanel.style.opacity = opacity;
-                rightPanel.style.pointerEvents = pointerEvents; }
-            if (leftBottomGroup) { leftBottomGroup.style.opacity = opacity;
-                leftBottomGroup.style.pointerEvents = pointerEvents; }
-            if (brContainer) { brContainer.style.opacity = opacity;
-                brContainer.style.pointerEvents = pointerEvents; }
+            if (panel) { panel.style.opacity = opacity; panel.style.pointerEvents = pointerEvents; }
+            if (rightPanel) { rightPanel.style.opacity = opacity; rightPanel.style.pointerEvents = pointerEvents; }
+            if (leftBottomGroup) { leftBottomGroup.style.opacity = opacity; leftBottomGroup.style.pointerEvents = pointerEvents; }
+            if (brContainer) { brContainer.style.opacity = opacity; brContainer.style.pointerEvents = pointerEvents; }
         }
 
         function resetToIdle() {
-            if (startTimeoutId) { clearTimeout(startTimeoutId);
-                startTimeoutId = null; }
+            if (startTimeoutId) { clearTimeout(startTimeoutId); startTimeoutId = null; }
             gameState = 'idle';
             isMouseDown = false;
 
             updateTargetVisibility();
-            if (config.mode === 'tracking') {
-                respawnTrackingTarget(true);
-            }
+            if (config.mode === 'tracking') respawnTrackingTarget(true);
 
             if (progressOverlay) progressOverlay.style.display = 'none';
-            if (progressBar) { progressBar.style.transition = 'none';
-                progressBar.style.width = '0%'; }
+            if (progressBar) { progressBar.style.transition = 'none'; progressBar.style.width = '0%'; }
             if (resultModal) resultModal.style.display = 'none';
             setPanelsVisibility(true);
             if (document.pointerLockElement === document.body) document.exitPointerLock();
@@ -2423,8 +2437,7 @@
 
         function finishChallenge() {
             if (gameState === 'finished') return;
-            if (startTimeoutId) { clearTimeout(startTimeoutId);
-                startTimeoutId = null; }
+            if (startTimeoutId) { clearTimeout(startTimeoutId); startTimeoutId = null; }
             gameState = 'finished';
             isMouseDown = false;
             if (document.pointerLockElement === document.body) document.exitPointerLock();
@@ -2449,15 +2462,12 @@
                 document.getElementById('res-meta-size').innerText = config.targetSizeCm;
                 document.getElementById('res-meta-dist').innerText = getCurrentDepth().toFixed(1);
             } else {
-                const acc = trackingFiringTime > 0.05 ? ((trackingOnTargetTime / trackingFiringTime) * 100).toFixed(1) :
-                    '0.0';
+                const acc = trackingFiringTime > 0.05 ? ((trackingOnTargetTime / trackingFiringTime) * 100).toFixed(1) : '0.0';
                 const coverage = ((trackingOnTargetTime / 49.0) * 100).toFixed(1);
                 const pDesc = config.tracking.pattern === 'fly' ? '乱飞' : '折返';
-                const sDesc = config.tracking.space === 'wall' ? '直面墙' : config.tracking.space === 'curve' ? '环形曲面' :
-                    '3D自由深度';
+                const sDesc = config.tracking.space === 'wall' ? '直面墙' : config.tracking.space === 'curve' ? '环形曲面' : '3D自由深度';
                 document.getElementById('res-title').innerText = '⚡ 跟枪追踪结算报告';
-                document.getElementById('res-subtitle').innerText =
-                    `Tracking · ${config.tracking.angleRange}° · ${pDesc}+${sDesc}`;
+                document.getElementById('res-subtitle').innerText = `Tracking · ${config.tracking.angleRange}° · ${pDesc}+${sDesc}`;
                 document.getElementById('res-score').innerText = score.toFixed(1);
                 document.getElementById('res-lbl-1').innerText = '有效跟枪时长';
                 document.getElementById('res-val-1').innerText = `${trackingOnTargetTime.toFixed(1)}s`;
@@ -2491,8 +2501,7 @@
             timeLeft = 49.0;
             updateHUDStats();
             document.getElementById('hud-time').innerText = '49.0';
-            sixTargets.forEach(t => { t.mesh.visible = false;
-                t.speed = 0; });
+            sixTargets.forEach(t => { t.mesh.visible = false; t.speed = 0; });
             gameState = 'starting';
             if (progressOverlay) progressOverlay.style.display = 'flex';
             if (progressBar) {
@@ -2559,7 +2568,7 @@
         });
 
         // =========================================================
-        // 10. UI 交互与事件绑定
+        // 11. UI 交互与面板拖拽
         // =========================================================
         const handle = document.getElementById('panel-handle');
         const dragBtn = document.getElementById('btn-drag-toggle');
@@ -2568,13 +2577,15 @@
 
         btnLock.addEventListener('click', startChallenge);
 
-        btnDynamicToggle.addEventListener('click', () => {
-            config.dynamic.enabled = !config.dynamic.enabled;
-            btnDynamicToggle.textContent = config.dynamic.enabled ? '🔘 动态漂移: 开启' : '🔘 动态漂移: 关闭';
-            btnDynamicToggle.classList.toggle('active', config.dynamic.enabled);
-            applySixshotSpeedRealtime();
-            saveToLocalStorage();
-        });
+        if (btnDynamicToggle) {
+            btnDynamicToggle.addEventListener('click', () => {
+                config.dynamic.enabled = !config.dynamic.enabled;
+                btnDynamicToggle.textContent = config.dynamic.enabled ? '🔘 动态漂移: 开启' : '🔘 动态漂移: 关闭';
+                btnDynamicToggle.classList.toggle('active', config.dynamic.enabled);
+                applySixshotSpeedRealtime();
+                saveToLocalStorage();
+            });
+        }
 
         function applyTheme(theme) {
             config.theme = theme;
@@ -2602,10 +2613,7 @@
             applyTheme(nextTheme);
         });
 
-        let isDragging = false,
-            isStick = false,
-            offX = 0,
-            offY = 0;
+        let isDragging = false, isStick = false, offX = 0, offY = 0;
         handle.addEventListener('mousedown', (e) => {
             if (e.target === dragBtn || e.target === btnTheme || e.target.classList.contains('mode-nav-btn')) return;
             isDragging = true;
@@ -2614,10 +2622,10 @@
         });
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
-                panel.style.left = `${Math.max(10, Math.min(window.innerWidth - 410, e.clientX - offX))}px`;
+                panel.style.left = `${Math.max(10, Math.min(window.innerWidth - 380, e.clientX - offX))}px`;
                 panel.style.top = `${Math.max(10, Math.min(window.innerHeight - 300, e.clientY - offY))}px`;
             } else if (isStick) {
-                panel.style.left = `${Math.max(10, Math.min(window.innerWidth - 410, e.clientX - 160))}px`;
+                panel.style.left = `${Math.max(10, Math.min(window.innerWidth - 380, e.clientX - 160))}px`;
                 panel.style.top = `${Math.max(10, Math.min(window.innerHeight - 300, e.clientY - 20))}px`;
             }
         });
@@ -2629,7 +2637,6 @@
             dragBtn.innerText = isStick ? '放置' : '移动窗口';
         });
 
-        // 统一为所有 .num-input 注入滚轮与输入监听
         document.querySelectorAll('.num-input').forEach(input => {
             input.addEventListener('wheel', (e) => {
                 e.preventDefault();
@@ -2680,7 +2687,7 @@
         });
 
         // =========================================================
-        // 11. 调色盘初始化
+        // 12. 色板交互
         // =========================================================
         function initAllColorPalettes() {
             const cCross = document.getElementById('swatches-crosshair');
@@ -2753,19 +2760,15 @@
         }
 
         // =========================================================
-        // 12. 配置文件导入导出
+        // 13. 配置导入导出
         // =========================================================
         function exportConfigFile() {
             const dataToExport = {
                 title: "xdh练习靶场设定配置",
-                version: "2.6",
+                version: "2.7",
                 author: "西岛海",
                 exportTime: new Date().toLocaleString(),
-                data: {
-                    config,
-                    depthLockSixshot,
-                    depthLockTracking
-                }
+                data: { config, depthLockSixshot, depthLockTracking }
             };
             const jsonStr = JSON.stringify(dataToExport, null, 2);
             const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8;' });
@@ -2814,10 +2817,6 @@
                 if (imported.config.dynamic) Object.assign(config.dynamic, imported.config.dynamic);
                 if (imported.config.tracking) {
                     Object.assign(config.tracking, imported.config.tracking);
-                    if (imported.config.tracking.strafeInterval !== undefined && config.tracking.strafeMinInterval === undefined) {
-                        config.tracking.strafeMinInterval = imported.config.tracking.strafeInterval;
-                        config.tracking.strafeMaxInterval = imported.config.tracking.strafeInterval;
-                    }
                 }
             }
 
@@ -2976,14 +2975,12 @@
         }
 
         // =========================================================
-        // 13. 主循环与物理运动引擎
+        // 14. 物理运动引擎与主动画循环
         // =========================================================
-        let lastTime = performance.now(),
-            lastFrameTime = performance.now(),
-            frameCount = 0;
+        let lastTime = performance.now(), lastFrameTime = performance.now(), frameCount = 0;
         const hudFps = document.getElementById('hud-fps'),
-              hudTime = document.getElementById('hud-time'),
-              hudPoll = document.getElementById('hud-poll');
+            hudTime = document.getElementById('hud-time'),
+            hudPoll = document.getElementById('hud-poll');
 
         function updatePhysics(dt) {
             cloudGroup.children.forEach(c => {
@@ -3029,13 +3026,9 @@
                             const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy);
                             const minDist = r * 2;
                             if (dist < minDist && dist > 0.001) {
-                                const overlap = (minDist - dist) / 2,
-                                      nx = dx / dist,
-                                      ny = dy / dist;
-                                a.x -= nx * overlap;
-                                a.y -= ny * overlap;
-                                b.x += nx * overlap;
-                                b.y += ny * overlap;
+                                const overlap = (minDist - dist) / 2, nx = dx / dist, ny = dy / dist;
+                                a.x -= nx * overlap; a.y -= ny * overlap;
+                                b.x += nx * overlap; b.y += ny * overlap;
 
                                 const dvx = a.dirX * a.speed - b.dirX * b.speed;
                                 const dvy = a.dirY * a.speed - b.dirY * b.speed;
@@ -3045,12 +3038,9 @@
                                     a.dirY -= dvn * ny / (a.speed || 1);
                                     b.dirX += dvn * nx / (b.speed || 1);
                                     b.dirY += dvn * ny / (b.speed || 1);
-                                    const la = Math.hypot(a.dirX, a.dirY) || 1,
-                                          lb = Math.hypot(b.dirX, b.dirY) || 1;
-                                    a.dirX /= la;
-                                    a.dirY /= la;
-                                    b.dirX /= lb;
-                                    b.dirY /= lb;
+                                    const la = Math.hypot(a.dirX, a.dirY) || 1, lb = Math.hypot(b.dirX, b.dirY) || 1;
+                                    a.dirX /= la; a.dirY /= la;
+                                    b.dirX /= lb; b.dirY /= lb;
                                 }
                             }
                         }
@@ -3070,12 +3060,12 @@
                     const speedRad = (config.tracking.speedDegPerSec * Math.PI) / 180;
                     const linearSpeed = speedRad * baseD;
                     const isFull360 = config.tracking.angleRange >= 359;
-                    const clampedAngle = Math.min(170, config.tracking.angleRange);
-                    const halfAngleRad = (config.tracking.angleRange / 2) * (Math.PI / 180);
+                    const totalSpanRad = (config.tracking.angleRange * Math.PI) / 180;
+                    const halfAngleRad = totalSpanRad / 2;
                     const maxPitch = (22.5 * Math.PI) / 180;
 
                     if (space === 'wall') {
-                        const halfW = baseD * Math.tan((clampedAngle / 2) * (Math.PI / 180)) - r;
+                        const halfW = Math.max(0.5, (baseD * totalSpanRad) / 2 - r);
                         const halfH = isFly ? baseD * Math.tan(maxPitch) : 0.3;
                         const actualMinY = Math.max(0.05 + r, cy - halfH);
                         const actualMaxY = cy + halfH;
@@ -3281,7 +3271,7 @@
         }
 
         // =========================================================
-        // 14. 系统初始化
+        // 15. 系统初始化与本地数据存储
         // =========================================================
         const STORAGE_KEY = 'XDH_AIM_TRAINER_CONFIG_V2';
 
@@ -3297,7 +3287,6 @@
             } catch (e) {}
         }
 
-        // 注册全局挂载函数
         window.syncTargetSize = syncTargetSize;
         window.setCrosshairType = setCrosshairType;
         window.syncFov = syncFov;
@@ -3335,7 +3324,6 @@
         setCrosshairType(config.crosshair.type);
         updateCrosshairStyle();
 
-        // 绑定全屏点击快速切换
         const f11Box = document.getElementById('f11-box');
         if (f11Box) {
             f11Box.addEventListener('click', () => {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>测验靶场 · V2人偶定制版 (西岛海)</title>
+    <title>测验靶场 · (西岛海)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -171,17 +171,28 @@
         }
         .rel-desc { font-size: 0.64rem; color: #64748b; line-height: 1.4; }
 
-        #draggable-panel {
-            position: absolute;
+        /* 左侧面板（目标控制） */
+        #left-panel {
+            position: fixed;
             left: 18px;
             top: 56px;
-            display: flex;
-            gap: 12px;
-            align-items: flex-start;
+            width: 380px;
             z-index: 20;
             transition: opacity 0.15s;
             max-height: 88vh;
         }
+
+        /* 右侧面板（设置面板） */
+        #right-panel {
+            position: fixed;
+            right: 18px;
+            top: 56px;
+            width: 380px;
+            z-index: 19;
+            transition: opacity 0.15s;
+            max-height: 88vh;
+        }
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(28px) saturate(190%);
@@ -190,7 +201,6 @@
             border-radius: 10px;
             padding: 12px 14px;
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
-            width: 380px;
             max-height: 88vh;
             overflow-y: auto;
             display: flex;
@@ -288,7 +298,6 @@
             box-shadow: 0 1px 4px rgba(2, 132, 199, 0.2);
         }
 
-        /* 显眼的运动开关按钮 */
         .btn-move-toggle {
             font-size: 0.68rem;
             font-weight: 900;
@@ -390,9 +399,10 @@
         .hint-speed-formula {
             font-size: 0.58rem;
             color: #0284c7;
-            margin-top: 2px;
+            margin-top: 4px;
             font-weight: 600;
-            line-height: 1.3;
+            line-height: 1.4;
+            word-break: break-word;
         }
 
         .swatches-grid-9 {
@@ -459,6 +469,13 @@
             color: #0284c7;
             background: #f0f9ff;
         }
+
+        .target-list-item {
+            margin-bottom: 6px;
+        }
+        .target-list-item:last-child {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
@@ -491,138 +508,140 @@
 
     <div id="canvas-container"></div>
 
-    <div id="draggable-panel">
-        <div class="glass-panel" id="panel-col-1">
-            <div class="panel-header" id="panel-handle">
-                <span class="panel-title">测验台【支持滚轮微调】</span>
-                <div class="header-actions">
-                    <button class="header-btn" id="btn-theme-toggle">日落暮色</button>
-                    <button class="header-btn" id="btn-drag-toggle">移动窗口</button>
-                </div>
+    <!-- 左侧主面板：形态切换 + 目标列表 + 操作 -->
+    <div class="glass-panel" id="left-panel">
+        <div class="panel-header" id="panel-handle">
+            <span class="panel-title">目标控制</span>
+            <div class="header-actions">
+                <button class="header-btn" id="btn-theme-toggle">日落暮色</button>
+                <button class="header-btn" id="btn-drag-toggle">移动窗口</button>
             </div>
-
-            <!-- 形态切换 -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🎯 目标形态切换</span>
-                </div>
-                <div class="preset-grid cols-2">
-                    <button class="pill-btn" id="btn-type-sphere" onclick="setTargetShape('sphere')">小球标靶</button>
-                    <button class="pill-btn active" id="btn-type-dummy" onclick="setTargetShape('dummy')">高精人偶假人</button>
-                </div>
-            </div>
-
-            <!-- 物理外设标定（割线严格分隔） -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🖱️ 物理外设与灵敏度</span>
-                </div>
-
-                <!-- 1. 鼠标 DPI -->
-                <div class="preset-grid cols-8" id="dpi-presets">
-                    <button class="pill-btn dpi-pill" data-val="200">200</button>
-                    <button class="pill-btn dpi-pill" data-val="400">400</button>
-                    <button class="pill-btn dpi-pill active" data-val="800">800</button>
-                    <button class="pill-btn dpi-pill" data-val="1000">1000</button>
-                    <button class="pill-btn dpi-pill" data-val="1200">1200</button>
-                    <button class="pill-btn dpi-pill" data-val="1600">1600</button>
-                    <button class="pill-btn dpi-pill" data-val="2400">2400</button>
-                    <button class="pill-btn dpi-pill" data-val="3200">3200</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>鼠标 DPI</label>
-                    <input type="range" id="inp-dpi-r" min="50" max="6400" step="50" value="800" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-dpi', -50)">−</button>
-                        <input type="number" class="num-input" id="inp-dpi" value="800" min="50" max="32000" step="1" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-dpi', 50)">+</button>
-                    </div>
-                </div>
-
-                <div class="divider"></div>
-
-                <!-- 2. CM / 360° -->
-                <div class="preset-grid cols-7">
-                    <button class="pill-btn cm-pill" data-val="25">25</button>
-                    <button class="pill-btn cm-pill active" data-val="50">50</button>
-                    <button class="pill-btn cm-pill" data-val="55">55</button>
-                    <button class="pill-btn cm-pill" data-val="65">65</button>
-                    <button class="pill-btn cm-pill" data-val="75">75</button>
-                    <button class="pill-btn cm-pill" data-val="85">85</button>
-                    <button class="pill-btn cm-pill" data-val="100">100</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>CM / 360°</label>
-                    <input type="range" id="inp-cm-r" min="1" max="1000" step="1" value="189" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-cm', -0.25)">−</button>
-                        <input type="number" class="num-input" id="inp-cm" value="50.00" min="0.1" max="10000" step="0.01">
-                        <button class="step-btn" onclick="stepValGlobal('inp-cm', 0.25)">+</button>
-                    </div>
-                </div>
-
-                <div class="divider"></div>
-
-                <!-- 3. 水平 FOV -->
-                <div class="preset-grid cols-4">
-                    <button class="pill-btn" id="btn-fov-10" onclick="syncFov(10)">10°</button>
-                    <button class="pill-btn" id="btn-fov-60" onclick="syncFov(60)">60°</button>
-                    <button class="pill-btn" id="btn-fov-90" onclick="syncFov(90)">90°</button>
-                    <button class="pill-btn active" id="btn-fov-103" onclick="syncFov(103)">103°</button>
-                </div>
-                <div class="ctrl-row">
-                    <label>水平 FOV</label>
-                    <input type="range" id="inp-fov-r" min="10" max="140" step="1" value="103" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-fov', -1)">−</button>
-                        <input type="number" class="num-input" id="inp-fov" value="103.00" step="0.5" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-fov', 1)">+</button>
-                    </div>
-                </div>
-
-                <div class="divider"></div>
-
-                <!-- 4. 玩家视高 -->
-                <div class="ctrl-row">
-                    <label>玩家视高 (m)</label>
-                    <input type="range" id="inp-height-r" min="0.5" max="3.0" step="0.005" value="1.625" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-height', -0.025)">−</button>
-                        <input type="number" class="num-input" id="inp-height" value="1.625" min="0.5" max="3.0" step="0.005" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-height', 0.025)">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 准星设置 -->
-            <div class="section-card">
-                <div class="section-header">
-                    <span class="section-label">🎨 准星调色</span>
-                    <label style="margin-left:auto;display:flex;align-items:center;gap:3px;cursor:pointer;font-size:0.62rem;color:#0284c7;font-weight:bold;">
-                        <input type="checkbox" id="inp-custom-crosshair" /> 自定义颜色
-                    </label>
-                </div>
-                <div id="crosshair-custom-box" class="move-subbox" style="display:none;">
-                    <div style="font-size:0.62rem;font-weight:bold;color:#475569;margin-bottom:2px;">默认静止准星颜色:</div>
-                    <div class="swatches-grid-9" id="swatches-default"></div>
-                    <div style="font-size:0.62rem;font-weight:bold;color:#475569;margin-top:6px;margin-bottom:2px;">瞄准命中高亮颜色:</div>
-                    <div class="swatches-grid-9" id="swatches-target"></div>
-                </div>
-            </div>
-
-            <div id="targets-container-1"></div>
-
-            <div class="action-grid">
-                <button class="btn-action" onclick="addNewTarget()">➕ 添加新目标</button>
-                <button class="btn-action" onclick="removeLastTarget()" style="color:#ef4444;">➖ 删除末尾目标</button>
-            </div>
-
-            <button class="btn-start" id="btn-lock">进入靶场 (锁定鼠标)</button>
         </div>
 
-        <div class="glass-panel" id="panel-col-2" style="display:none;">
-            <div class="panel-header"><span class="panel-title">超量目标控制</span></div>
-            <div id="targets-container-2"></div>
+        <!-- 形态切换（置顶于左面板） -->
+        <div class="section-card">
+            <div class="section-header">
+                <span class="section-label">🎯 目标形态切换</span>
+            </div>
+            <div class="preset-grid cols-2">
+                <button class="pill-btn" id="btn-type-sphere" onclick="setTargetShape('sphere')">小球标靶</button>
+                <button class="pill-btn active" id="btn-type-dummy" onclick="setTargetShape('dummy')">高精人偶假人</button>
+            </div>
+        </div>
+
+        <div id="targets-container-1"></div>
+
+        <div class="action-grid">
+            <button class="btn-action" onclick="addNewTarget()">➕ 添加新目标</button>
+            <button class="btn-action" onclick="removeLastTarget()" style="color:#ef4444;">➖ 删除末尾目标</button>
+        </div>
+
+        <button class="btn-start" id="btn-lock">进入靶场 (锁定鼠标)</button>
+    </div>
+
+    <!-- 右侧独立面板：物理外设 & 准星设置 -->
+    <div class="glass-panel" id="right-panel">
+        <div class="panel-header">
+            <span class="panel-title">⚙️ 设置面板</span>
+            <span style="font-size:0.6rem; color:#94a3b8;">滚轮微调</span>
+        </div>
+
+        <!-- 物理外设标定 -->
+        <div class="section-card">
+            <div class="section-header">
+                <span class="section-label">🖱️ 物理外设与灵敏度</span>
+            </div>
+
+            <!-- 鼠标 DPI -->
+            <div class="preset-grid cols-8" id="dpi-presets">
+                <button class="pill-btn dpi-pill" data-val="200">200</button>
+                <button class="pill-btn dpi-pill" data-val="400">400</button>
+                <button class="pill-btn dpi-pill active" data-val="800">800</button>
+                <button class="pill-btn dpi-pill" data-val="1000">1000</button>
+                <button class="pill-btn dpi-pill" data-val="1200">1200</button>
+                <button class="pill-btn dpi-pill" data-val="1600">1600</button>
+                <button class="pill-btn dpi-pill" data-val="2400">2400</button>
+                <button class="pill-btn dpi-pill" data-val="3200">3200</button>
+            </div>
+            <div class="ctrl-row">
+                <label>鼠标 DPI</label>
+                <input type="range" id="inp-dpi-r" min="50" max="6400" step="50" value="800" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('inp-dpi', -50)">−</button>
+                    <input type="number" class="num-input" id="inp-dpi" value="800" min="50" max="32000" step="1" />
+                    <button class="step-btn" onclick="stepValGlobal('inp-dpi', 50)">+</button>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- CM / 360° -->
+            <div class="preset-grid cols-7">
+                <button class="pill-btn cm-pill" data-val="25">25</button>
+                <button class="pill-btn cm-pill active" data-val="50">50</button>
+                <button class="pill-btn cm-pill" data-val="55">55</button>
+                <button class="pill-btn cm-pill" data-val="65">65</button>
+                <button class="pill-btn cm-pill" data-val="75">75</button>
+                <button class="pill-btn cm-pill" data-val="85">85</button>
+                <button class="pill-btn cm-pill" data-val="100">100</button>
+            </div>
+            <div class="ctrl-row">
+                <label>CM / 360°</label>
+                <input type="range" id="inp-cm-r" min="1" max="1000" step="1" value="189" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('inp-cm', -0.25)">−</button>
+                    <input type="number" class="num-input" id="inp-cm" value="50.00" min="0.1" max="10000" step="0.01">
+                    <button class="step-btn" onclick="stepValGlobal('inp-cm', 0.25)">+</button>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 水平 FOV -->
+            <div class="preset-grid cols-4">
+                <button class="pill-btn" id="btn-fov-10" onclick="syncFov(10)">10°</button>
+                <button class="pill-btn" id="btn-fov-60" onclick="syncFov(60)">60°</button>
+                <button class="pill-btn" id="btn-fov-90" onclick="syncFov(90)">90°</button>
+                <button class="pill-btn active" id="btn-fov-103" onclick="syncFov(103)">103°</button>
+            </div>
+            <div class="ctrl-row">
+                <label>水平 FOV</label>
+                <input type="range" id="inp-fov-r" min="10" max="140" step="1" value="103" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('inp-fov', -1)">−</button>
+                    <input type="number" class="num-input" id="inp-fov" value="103.00" step="0.5" />
+                    <button class="step-btn" onclick="stepValGlobal('inp-fov', 1)">+</button>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 玩家视高 -->
+            <div class="ctrl-row">
+                <label>玩家视高 (m)</label>
+                <input type="range" id="inp-height-r" min="0.5" max="3.0" step="0.005" value="1.625" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('inp-height', -0.025)">−</button>
+                    <input type="number" class="num-input" id="inp-height" value="1.625" min="0.5" max="3.0" step="0.005" />
+                    <button class="step-btn" onclick="stepValGlobal('inp-height', 0.025)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 准星设置 -->
+        <div class="section-card">
+            <div class="section-header">
+                <span class="section-label">🎨 准星调色</span>
+                <label style="margin-left:auto;display:flex;align-items:center;gap:3px;cursor:pointer;font-size:0.62rem;color:#0284c7;font-weight:bold;">
+                    <input type="checkbox" id="inp-custom-crosshair" /> 自定义颜色
+                </label>
+            </div>
+            <div id="crosshair-custom-box" class="move-subbox" style="display:none;">
+                <div style="font-size:0.62rem;font-weight:bold;color:#475569;margin-bottom:2px;">默认静止准星颜色:</div>
+                <div class="swatches-grid-9" id="swatches-default"></div>
+                <div style="font-size:0.62rem;font-weight:bold;color:#475569;margin-top:6px;margin-bottom:2px;">瞄准命中高亮颜色:</div>
+                <div class="swatches-grid-9" id="swatches-target"></div>
+            </div>
         </div>
     </div>
 
@@ -844,7 +863,7 @@
         }
 
         // =============================================================
-        //  4. 假人与标靶几何体（严格保持原版基准 & 接地平齐）
+        //  4. 假人与标靶几何体
         // =============================================================
         const sphereGeo = new THREE.SphereGeometry(1, 48, 48);
 
@@ -862,7 +881,7 @@
             const bodyDepth = Math.max(0.15, bodyWidth * (2.2 / 3.38));
             const neckGap = (t.neckGapCm || 6.325) / 100;
 
-            // 头部 (以头部中心为原点 (0, 0, 0))
+            // 头部
             const headMat = new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.25 });
             const headGeo = new THREE.SphereGeometry(1, 32, 32);
             const head = new THREE.Mesh(headGeo, headMat);
@@ -940,7 +959,7 @@
         }
 
         // =============================================================
-        //  5. 视角旋转 & 准星系统（白天默认黑，瞄准高亮）
+        //  5. 视角旋转 & 准星系统
         // =============================================================
         let yaw = 0.0, pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -1061,17 +1080,14 @@
         //  6. 动态多目标管理与 UI 绑定
         // =============================================================
         const container1 = document.getElementById('targets-container-1');
-        const container2 = document.getElementById('targets-container-2');
-        const col2 = document.getElementById('panel-col-2');
 
         function rebuildTargetUI() {
             container1.innerHTML = '';
-            container2.innerHTML = '';
             const isDummy = config.targetShape === 'dummy';
 
             config.targets.forEach((t, i) => {
                 const card = document.createElement('div');
-                card.className = 'section-card';
+                card.className = 'section-card target-list-item';
                 card.style.marginTop = '6px';
 
                 let dimensionControlsHTML = '';
@@ -1127,7 +1143,6 @@
                     `;
                 }
 
-                // 显眼的运动开关按钮 + 角速度/角跨度界面
                 card.innerHTML = `
                     <div class="section-header">
                         <span class="section-label" style="color:${t.color};">🎯 目标 ${t.id} ${isDummy ? '(假人)' : '(球靶)'}</span>
@@ -1166,7 +1181,6 @@
                         </div>
                     </div>
 
-                    <!-- 运动控制子面板 (全部统一为角速度 °/s 与 角跨度 °) -->
                     <div id="t${i}-move-box" class="move-subbox" style="display:${t.move.enabled ? 'block' : 'none'};">
                         <div class="preset-grid cols-2" style="margin-bottom:6px;">
                             <button class="pill-btn ${t.move.mode === 'linear' ? 'active' : ''}" id="btn-t${i}-m-linear">↔ 平面直线横移</button>
@@ -1176,7 +1190,7 @@
                             <label style="color:${t.color};">• 摆动角跨 (°)</label>
                             <div class="stepper-box">
                                 <button class="step-btn" id="btn-t${i}-rng-minus">−</button>
-                                <input type="number" class="num-input" id="inp-t${i}-rng" value="${t.move.totalSpanDeg.toFixed(2)}" step="1.0" />
+                                <input type="number" class="num-input" id="inp-t${i}-rng" value="${t.move.totalSpanDeg.toFixed(2)}" min="0.1" max="360" step="1.0" />
                                 <button class="step-btn" id="btn-t${i}-rng-plus">+</button>
                             </div>
                         </div>
@@ -1184,7 +1198,7 @@
                             <label style="color:${t.color};">• 移动角速 (°/s)</label>
                             <div class="stepper-box">
                                 <button class="step-btn" id="btn-t${i}-spd-minus">−</button>
-                                <input type="number" class="num-input" id="inp-t${i}-spd" value="${t.move.speedDeg.toFixed(2)}" step="1.0" />
+                                <input type="number" class="num-input" id="inp-t${i}-spd" value="${t.move.speedDeg.toFixed(2)}" min="0.1" max="360" step="1.0" />
                                 <button class="step-btn" id="btn-t${i}-spd-plus">+</button>
                             </div>
                         </div>
@@ -1192,13 +1206,10 @@
                     </div>
                 `;
 
-                if (i < 3) container1.appendChild(card);
-                else container2.appendChild(card);
+                container1.appendChild(card);
                 setupDynamicTargetBindings(t, i);
                 updateTargetSpeedHint(t, i);
             });
-
-            col2.style.display = config.targets.length > 3 ? 'flex' : 'none';
             updateScene();
         }
 
@@ -1207,18 +1218,20 @@
             if (!hint) return;
             const D = t.distMeters;
             const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
-            const linearSpan = 2 * D * Math.tan((t.move.totalSpanDeg / 2) * Math.PI / 180);
+            // 依据规范统一采用弧长展开等效法 S = D * θ_rad，杜绝 228.60m 发散异常
+            const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
+            const linearSpan = D * totalSpanRad;
+            
             if (t.move.mode === 'linear') {
-                hint.innerHTML = `• 平面直线折返：当前 ${D.toFixed(1)}m 对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，直线行程 ≈ <strong>${linearSpan.toFixed(2)} m</strong>`;
+                hint.innerHTML = `• 平面直线横移：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">等效行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
             } else {
-                hint.innerHTML = `• 弧形围绕巡航：当前 ${D.toFixed(1)}m 对应弧线速度 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>`;
+                hint.innerHTML = `• 弧形角度围绕：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">弧线行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
             }
         }
 
         function setupDynamicTargetBindings(t, i) {
             const isDummy = config.targetShape === 'dummy';
 
-            // 整体大小等比缩放
             const sR = document.getElementById(`inp-t${i}-s-r`), sN = document.getElementById(`inp-t${i}-s`);
             const updS = (v) => {
                 let val = Math.max(1.0, parseFloat(v) || 23.0);
@@ -1313,7 +1326,6 @@
             document.getElementById(`btn-t${i}-y-plus`).addEventListener('click', () => updY((t.yOffset || 0) + 0.05));
             yN.addEventListener('wheel', e => { e.preventDefault(); updY((t.yOffset || 0) + (e.deltaY < 0 ? 0.05 : -0.05)); }, { passive: false });
 
-            // 显眼的运动开关监听
             const btnMoveToggle = document.getElementById(`btn-t${i}-move-toggle`);
             btnMoveToggle.addEventListener('click', () => {
                 t.move.enabled = !t.move.enabled;
@@ -1322,7 +1334,6 @@
                 document.getElementById(`t${i}-move-box`).style.display = t.move.enabled ? 'block' : 'none';
             });
 
-            // 移动模式切换 (Linear vs Orbit)
             const btnLinear = document.getElementById(`btn-t${i}-m-linear`);
             const btnOrbit = document.getElementById(`btn-t${i}-m-orbit`);
 
@@ -1342,7 +1353,7 @@
 
             const rN = document.getElementById(`inp-t${i}-rng`);
             const updRng = (v) => {
-                let val = Math.max(0.1, parseFloat(v) || 1.0);
+                let val = Math.max(0.1, Math.min(360, parseFloat(v) || 1.0));
                 rN.value = val.toFixed(2);
                 t.move.totalSpanDeg = val;
                 updateTargetSpeedHint(t, i);
@@ -1354,7 +1365,7 @@
 
             const spN = document.getElementById(`inp-t${i}-spd`);
             const updSpd = (v) => {
-                let val = Math.max(0.1, parseFloat(v) || 1.0);
+                let val = Math.max(0.1, Math.min(360, parseFloat(v) || 1.0));
                 spN.value = val.toFixed(2);
                 t.move.speedDeg = val;
                 updateTargetSpeedHint(t, i);
@@ -1432,7 +1443,8 @@
         // =============================================================
         //  7. 全局设置、面板拖拽、主题切换
         // =============================================================
-        const panel = document.getElementById('draggable-panel');
+        const leftPanel = document.getElementById('left-panel');
+        const rightPanel = document.getElementById('right-panel');
         const handle = document.getElementById('panel-handle');
         const dragBtn = document.getElementById('btn-drag-toggle');
         const btnLock = document.getElementById('btn-lock');
@@ -1459,16 +1471,16 @@
         handle.addEventListener('mousedown', (e) => {
             if (e.target === dragBtn || e.target === btnTheme) return;
             isDragging = true;
-            offX = e.clientX - panel.offsetLeft;
-            offY = e.clientY - panel.offsetTop;
+            offX = e.clientX - leftPanel.offsetLeft;
+            offY = e.clientY - leftPanel.offsetTop;
         });
         document.addEventListener('mousemove', (e) => {
             if (isDragging) {
-                panel.style.left = Math.max(10, Math.min(window.innerWidth - 400, e.clientX - offX)) + 'px';
-                panel.style.top = Math.max(10, Math.min(window.innerHeight - 300, e.clientY - offY)) + 'px';
+                leftPanel.style.left = Math.max(10, Math.min(window.innerWidth - 400, e.clientX - offX)) + 'px';
+                leftPanel.style.top = Math.max(10, Math.min(window.innerHeight - 300, e.clientY - offY)) + 'px';
             } else if (isStick) {
-                panel.style.left = Math.max(10, Math.min(window.innerWidth - 400, e.clientX - 160)) + 'px';
-                panel.style.top = Math.max(10, Math.min(window.innerHeight - 300, e.clientY - 20)) + 'px';
+                leftPanel.style.left = Math.max(10, Math.min(window.innerWidth - 400, e.clientX - 160)) + 'px';
+                leftPanel.style.top = Math.max(10, Math.min(window.innerHeight - 300, e.clientY - 20)) + 'px';
             }
         });
         document.addEventListener('mouseup', () => { isDragging = false; });
@@ -1513,20 +1525,18 @@
         }, true);
 
         document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement === document.body) {
-                panel.style.opacity = '0';
-                panel.style.pointerEvents = 'none';
-            } else {
-                panel.style.opacity = '1';
-                panel.style.pointerEvents = 'auto';
-            }
+            const isLocked = (document.pointerLockElement === document.body);
+            leftPanel.style.opacity = isLocked ? '0' : '1';
+            leftPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
+            rightPanel.style.opacity = isLocked ? '0' : '1';
+            rightPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
         });
 
         function stepValGlobal(id, delta) {
             const inp = document.getElementById(id);
             let v = parseFloat(inp.value) || 0;
             v = Math.round((v + delta) * 1000) / 1000;
-            inp.value = v.toFixed(3);
+            inp.value = (id.includes('hw') || id.includes('hh') || id.includes('bw') || id.includes('bh') || id.includes('-s')) ? v.toFixed(1) : (id.includes('height') ? v.toFixed(3) : v.toFixed(2));
             inp.dispatchEvent(new Event('change'));
         }
 
@@ -1665,7 +1675,7 @@
         });
 
         // =============================================================
-        //  8. 物理横移/围绕运动引擎 (统一基于角速度 & 角跨度运算)
+        //  8. 物理横移/围绕运动引擎 (弧长展开等效法，永不发散)
         // =============================================================
         let lastTime = performance.now(), lastFrame = performance.now(), frameCnt = 0;
         const hudFps = document.getElementById('hud-fps');
@@ -1686,8 +1696,9 @@
 
                 if (t.move.enabled) {
                     if (t.move.mode === 'linear') {
-                        // 1. 平面直线横移 (基于角跨度与角速度换算为直线位移)
-                        const linearHalfSpan = D * Math.tan((t.move.totalSpanDeg / 2) * Math.PI / 180);
+                        // 弧长等效直线法：半行程 = D * (半角弧度)
+                        const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
+                        const linearHalfSpan = (D * totalSpanRad) / 2;
                         const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
 
                         t.move.currentLinearOffset += t.move.dir * linearSpeed * dt;
@@ -1707,7 +1718,7 @@
                         t.rootGroup.position.x = baseX + tanX * t.move.currentLinearOffset;
                         t.rootGroup.position.z = baseZ + tanZ * t.move.currentLinearOffset;
                     } else {
-                        // 2. 弧形角度围绕
+                        // 弧形角度围绕
                         const halfDeg = t.move.totalSpanDeg / 2;
                         t.move.currentOffsetDeg += t.move.dir * t.move.speedDeg * dt;
                         if (t.move.currentOffsetDeg >= halfDeg) {
@@ -1775,7 +1786,7 @@
         document.getElementById('inp-height').value = "1.625";
 
         initCrosshairColorSwatches();
-        addNewTarget(); // A: 0° (正前方，头部中心在 y=1.625)
+        addNewTarget(); // A: 0° (正前方)
         addNewTarget(); // B: 20°
 
         setTargetShape('dummy');
