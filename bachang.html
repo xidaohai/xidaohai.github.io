@@ -549,8 +549,8 @@
                 <span class="section-label">目标形态切换</span>
             </div>
             <div class="preset-grid cols-2">
-                <button class="pill-btn" id="btn-type-sphere" onclick="setTargetShape('sphere')">小球标靶</button>
-                <button class="pill-btn active" id="btn-type-dummy" onclick="setTargetShape('dummy')">高精人偶假人</button>
+                <button class="pill-btn" id="btn-type-sphere" onclick="setTargetShape('sphere')">小球</button>
+                <button class="pill-btn active" id="btn-type-dummy" onclick="setTargetShape('dummy')">人偶</button>
             </div>
         </div>
 
@@ -579,10 +579,10 @@
             <div class="preset-grid cols-8" id="dpi-presets">
                 <button class="pill-btn dpi-pill" data-val="200">200</button>
                 <button class="pill-btn dpi-pill" data-val="400">400</button>
-                <button class="pill-btn dpi-pill active" data-val="800">800</button>
+                <button class="pill-btn dpi-pill" data-val="800">800</button>
                 <button class="pill-btn dpi-pill" data-val="1000">1000</button>
                 <button class="pill-btn dpi-pill" data-val="1200">1200</button>
-                <button class="pill-btn dpi-pill" data-val="1600">1600</button>
+                <button class="pill-btn dpi-pill active" data-val="1600">1600</button>
                 <button class="pill-btn dpi-pill" data-val="2400">2400</button>
                 <button class="pill-btn dpi-pill" data-val="3200">3200</button>
             </div>
@@ -600,8 +600,8 @@
 
             <div class="preset-grid cols-7">
                 <button class="pill-btn cm-pill active" data-val="25">25</button>
-                <button class="pill-btn cm-pill" data-val="500">500</button>
-                <button class="pill-btn cm-pill" data-val="1000">1000</button>
+                <button class="pill-btn cm-pill" data-val="750">750</button>
+                <button class="pill-btn cm-pill" data-val="1500">1500</button>
                 <button class="pill-btn cm-pill" data-val="2000">2000</button>
                 <button class="pill-btn cm-pill" data-val="3000">3000</button>
                 <button class="pill-btn cm-pill" data-val="4000">4000</button>
@@ -680,6 +680,8 @@
         // 1. 配置与常量
         // ============================================================
         const ISO_INCH_TO_CM = 2.54;
+        // 直线平移的方位角几何上限：半角 ±67.5°（合计 135°），超过会 tan 发散导致目标飞走
+        const LINEAR_MAX_HALF_DEG = 67.5;
 
         const COLOR_PRESETS_CROSSHAIR = [
             { name: '黑', hex: '#000000' }, { name: '白', hex: '#ffffff' }, { name: '赤', hex: '#ef4444' },
@@ -690,7 +692,7 @@
         const PRESET_COLORS = ['#ea580c', '#0284c7', '#10b981', '#8b5cf6', '#f43f5e', '#f59e0b', '#14b8a6', '#ec4899', '#06b6d4'];
 
         const config = {
-            dpi: 800,
+            dpi: 1600,
             cmPer360: 25.0,
             fovHorizontal: 103,
             theme: 'day',
@@ -1109,7 +1111,9 @@
                 } else {
                     const bodyH = t.bodyHeightCm / 100;
                     const neckGap = (t.neckGapCm || 6.325) / 100;
-                    t.rootGroup.position.y = neckGap + bodyH + (t.yOffset || 0);
+                    // 站立高度（身体底部贴地），移动中不会掉下去
+                    t.groundY = neckGap + bodyH + (t.yOffset || 0);
+                    t.rootGroup.position.y = t.groundY;
                 }
             });
 
@@ -1383,6 +1387,13 @@
                             <button class="pill-btn ${t.move.mode === 'linear' ? 'active' : ''}" id="btn-t${i}-m-linear">平面直线横移</button>
                             <button class="pill-btn ${t.move.mode === 'orbit' ? 'active' : ''}" id="btn-t${i}-m-orbit">弧形角度围绕</button>
                         </div>
+                        <div class="ctrl-row" id="va-t${i}-row" style="margin-top:4px;">
+                            <label style="color:${t.color};">• 方位角范围</label>
+                            <button class="btn-move-toggle ${t.move.visualAngleLock ? 'active-move' : ''}" id="btn-t${i}-va-toggle">
+                                ${t.move.visualAngleLock ? '与弧形一致: 开' : '与弧形一致: 关'}
+                            </button>
+                            <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">速度不变 · 上限 ±67.5°(合计135°)</span>
+                        </div>
                         <div class="ctrl-row">
                             <label style="color:${t.color};">• 摆动角跨 (°)</label>
                             <div class="stepper-box">
@@ -1414,11 +1425,14 @@
             const hint = getEl(`lbl-t${i}-hint`);
             if (!hint) return;
             const D = t.distMeters;
-            const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
+            const linearSpeed = D * (t.move.speedDeg * Math.PI / 180); // 恒定线速（所有情况不变）
             const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
             const linearSpan = D * totalSpanRad;
 
-            if (t.move.mode === 'linear') {
+            if (t.move.mode === 'linear' && t.move.visualAngleLock) {
+                const effHalf = Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG);
+                hint.innerHTML = `• 方位角范围与弧形一致：移动速度恒定 <strong>${linearSpeed.toFixed(2)} m/s</strong>，最远点方位角 ±${effHalf.toFixed(1)}°（直线上限 ±67.5°，合计 135°）`;
+            } else if (t.move.mode === 'linear') {
                 hint.innerHTML = `• 平面直线横移：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">等效行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
             } else {
                 hint.innerHTML = `• 弧形角度围绕：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">弧线行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
@@ -1587,16 +1601,34 @@
 
             // 运动模式
             const btnLinear = getEl(`btn-t${i}-m-linear`), btnOrbit = getEl(`btn-t${i}-m-orbit`);
+
+            // 方位角范围与弧形一致开关（仅直线横移生效）
+            const vaRow = getEl(`va-t${i}-row`);
+            const vaToggle = getEl(`btn-t${i}-va-toggle`);
+            const refreshVAVisibility = () => {
+                if (vaRow) vaRow.style.display = t.move.mode === 'linear' ? 'flex' : 'none';
+            };
+            if (vaToggle) {
+                vaToggle.addEventListener('click', () => {
+                    t.move.visualAngleLock = !t.move.visualAngleLock;
+                    vaToggle.classList.toggle('active-move', t.move.visualAngleLock);
+                    vaToggle.innerHTML = t.move.visualAngleLock ? '与弧形一致: 开' : '与弧形一致: 关';
+                    updateTargetSpeedHint(t, i);
+                });
+            }
+
             btnLinear.addEventListener('click', () => {
                 t.move.mode = 'linear';
                 btnLinear.classList.add('active');
                 btnOrbit.classList.remove('active');
+                refreshVAVisibility();
                 updateTargetSpeedHint(t, i);
             });
             btnOrbit.addEventListener('click', () => {
                 t.move.mode = 'orbit';
                 btnOrbit.classList.add('active');
                 btnLinear.classList.remove('active');
+                refreshVAVisibility();
                 updateTargetSpeedHint(t, i);
             });
 
@@ -1667,9 +1699,11 @@
                 sphereMesh,
                 dummyGroup,
                 yOffset: 0,
+                groundY: 0,            // 站立高度，防止掉下去
                 move: {
                     enabled: false,
                     mode: 'linear',
+                    visualAngleLock: false,  // 方位角范围与弧形一致：速度不变，仅最远点方位角对齐
                     speedDeg: 25.0,
                     totalSpanDeg: 45.0,
                     dir: 1,
@@ -1908,9 +1942,19 @@
 
                 if (t.move.enabled) {
                     if (t.move.mode === 'linear') {
+                        // ---- 平面直线横移：恒线速，移动速度所有情况不变 ----
                         const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
-                        const linearHalfSpan = (D * totalSpanRad) / 2;
-                        const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
+                        let linearHalfSpan;
+                        if (t.move.visualAngleLock) {
+                            // 方位角范围与弧形一致：半行程 = D·tan(半角)，但半角 clamp 到 ±67.5°（合计135°）
+                            // 直线平移几何上到不了更大方位角，超限会 tan 发散
+                            const effHalfRad = Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG) * Math.PI / 180;
+                            const tanHalf = Math.tan(effHalfRad);
+                            linearHalfSpan = D * (isFinite(tanHalf) ? Math.abs(tanHalf) : 8);
+                        } else {
+                            linearHalfSpan = (D * totalSpanRad) / 2; // 原行为：弧长近似行程
+                        }
+                        const linearSpeed = D * (t.move.speedDeg * Math.PI / 180); // 恒定线速
 
                         t.move.currentLinearOffset += t.move.dir * linearSpeed * dt;
                         if (t.move.currentLinearOffset >= linearHalfSpan) {
@@ -1929,6 +1973,7 @@
                         t.rootGroup.position.x = baseX + tanX * t.move.currentLinearOffset;
                         t.rootGroup.position.z = baseZ + tanZ * t.move.currentLinearOffset;
                     } else {
+                        // ---- 弧形角度围绕（不变）----
                         const halfDeg = t.move.totalSpanDeg / 2;
                         t.move.currentOffsetDeg += t.move.dir * t.move.speedDeg * dt;
                         if (t.move.currentOffsetDeg >= halfDeg) {
@@ -1951,6 +1996,8 @@
                     const dx = camera.position.x - t.rootGroup.position.x;
                     const dz = camera.position.z - t.rootGroup.position.z;
                     t.rootGroup.rotation.y = Math.atan2(dx, dz);
+                    // 防止假人掉下去：移动中始终保持站立高度（身体底部贴地）
+                    t.rootGroup.position.y = t.groundY;
                 }
             });
         }
