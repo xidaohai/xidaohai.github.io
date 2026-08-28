@@ -1406,10 +1406,38 @@
             return mesh;
         }
 
+        // ★ 核心修改：切换形态时同步尺寸，使小球直径等于假人头高（上下直径）
         function setTargetShape(shape) {
+            const oldShape = config.targetShape;
+            if (oldShape === shape) return; // 无需切换
             config.targetShape = shape;
             getEl('btn-type-sphere').classList.toggle('active', shape === 'sphere');
             getEl('btn-type-dummy').classList.toggle('active', shape === 'dummy');
+
+            // 从假人切换到小球：小球直径 = 假人头高（上下直径）
+            if (oldShape === 'dummy' && shape === 'sphere') {
+                config.targets.forEach(t => {
+                    // 头高 = 29.44 * (t.sizeCm / 23.0)
+                    const headHeight = 29.44 * (t.sizeCm / 23.0);
+                    t.sizeCm = headHeight; // 球直径 = 头高
+                });
+            }
+            // 从小球切换到假人：假人头高 = 小球直径，保持比例
+            else if (oldShape === 'sphere' && shape === 'dummy') {
+                config.targets.forEach(t => {
+                    // 使头高 = 球直径，即 29.44 * (newSizeCm / 23.0) = t.sizeCm
+                    const newSizeCm = t.sizeCm * 23.0 / 29.44;
+                    t.sizeCm = newSizeCm;
+                    const ratio = newSizeCm / 23.0;
+                    t.headWidthCm = 23.0 * ratio;
+                    t.headHeightCm = 29.44 * ratio;
+                    t.bodyWidthCm = 38.87 * ratio;
+                    t.bodyHeightCm = 156.17 * ratio;
+                    t.neckGapCm = 6.325 * ratio;
+                    rebuildMannequinMesh(t);
+                });
+            }
+
             updateScene();
             rebuildTargetUI();
         }
