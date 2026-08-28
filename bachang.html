@@ -211,7 +211,6 @@
             line-height: 1.4;
         }
 
-        /* ----- 调试模式 toggle ----- */
         .debug-toggle {
             position: relative;
             display: inline-block;
@@ -266,7 +265,6 @@
             font-size: 0.8rem;
         }
 
-        /* ----- 自定义悬浮提示 (tooltip) ----- */
         .help-icon {
             display: inline-flex;
             align-items: center;
@@ -289,7 +287,6 @@
             color: #0284c7;
             background: rgba(2, 132, 199, 0.06);
         }
-        /* 自定义 tooltip 气泡 */
         .help-icon .tooltip-text {
             visibility: hidden;
             opacity: 0;
@@ -328,7 +325,6 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        /* 调试模式指示器 (准星上方) */
         #debug-indicator {
             position: absolute;
             top: 50%;
@@ -740,7 +736,6 @@
             margin-bottom: 0;
         }
 
-        /* 调试模式激活时的水平参考线 (视觉辅助) */
         #debug-horizon-guide {
             position: absolute;
             top: 50%;
@@ -907,7 +902,7 @@
                 <input type="range" id="inp-cm-r" min="1" max="1000" step="1" value="189" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cm', -0.25)">−</button>
-                    <input type="number" class="num-input" id="inp-cm" value="50.00" min="0.1" max="10000" step="0.01">
+                    <input type="number" class="num-input" id="inp-cm" value="50.00" min="0.1" step="0.01">
                     <button class="step-btn" onclick="stepValGlobal('inp-cm', 0.25)">+</button>
                 </div>
             </div>
@@ -977,6 +972,12 @@
         const ISO_INCH_TO_CM = 2.54;
         const LINEAR_MAX_HALF_DEG = 67.5;
 
+        // ★ 核心修改：CM/360° 上限从 10000 提升至 1000000（实际等同“无上限”）
+        const CM_MAX = 1000000;
+        const CM_MIN = 0.1;
+        const CM_SLIDER_MAX = 1000;
+        const CM_EXP = 3.2;
+
         const COLOR_PRESETS_CROSSHAIR = [
             { name: '黑', hex: '#000000' }, { name: '白', hex: '#ffffff' }, { name: '赤', hex: '#ef4444' },
             { name: '橙', hex: '#f97316' }, { name: '黄', hex: '#eab308' }, { name: '绿', hex: '#22c55e' },
@@ -1013,19 +1014,15 @@
             return (2 * Math.atan(Math.tan(hRad / 2) / aspect) * 180) / Math.PI;
         }
 
-        const CM_SLIDER_MAX = 1000,
-            CM_MIN = 0.5,
-            CM_MAX = 10000,
-            CM_EXP = 3.2;
-
+        // 滑块 ↔ CM 映射（指数，适配 0.1 ~ 1000000）
         function cmToSlider(cm) {
-            const ratio = Math.pow(Math.max(0, cm - CM_MIN) / CM_MAX, 1 / CM_EXP);
+            const ratio = Math.pow(Math.max(0, cm - CM_MIN) / (CM_MAX - CM_MIN), 1 / CM_EXP);
             return Math.round(clamp(ratio, 0, 1) * CM_SLIDER_MAX);
         }
 
         function sliderToCm(r) {
             const ratio = clamp(parseFloat(r) / CM_SLIDER_MAX, 0, 1);
-            return Math.pow(ratio, CM_EXP) * CM_MAX + CM_MIN;
+            return Math.pow(ratio, CM_EXP) * (CM_MAX - CM_MIN) + CM_MIN;
         }
 
         // ============================================================
@@ -1061,7 +1058,8 @@
         }
 
         function setCm(v) {
-            const val = clamp(parseFloat(v) || 50, 0.1, 10000);
+            // ★ 核心修改：上限改用 CM_MAX（1000000），彻底解锁
+            const val = clamp(parseFloat(v) || 50, CM_MIN, CM_MAX);
             config.cmPer360 = val;
             setNum('inp-cm', val, 2);
             const r = getEl('inp-cm-r');
@@ -1449,10 +1447,8 @@
             pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
-        // 调试模式状态
         let debugMode = false;
 
-        // 调试模式开关
         const debugToggle = getEl('debug-mode-toggle');
         const debugIndicator = getEl('debug-indicator');
         const debugHorizonGuide = getEl('debug-horizon-guide');
@@ -1460,12 +1456,10 @@
         if (debugToggle) {
             debugToggle.addEventListener('change', function() {
                 debugMode = this.checked;
-                // 切换时，重置 pitch 到水平，确保视角水平
                 if (debugMode) {
                     pitch = 0;
                     cameraEuler.set(pitch, yaw, 0);
                     camera.quaternion.setFromEuler(cameraEuler);
-                    // 显示指示器
                     debugIndicator.classList.add('active');
                     debugHorizonGuide.classList.add('active');
                 } else {
@@ -1473,7 +1467,6 @@
                     debugHorizonGuide.classList.remove('active');
                 }
             });
-            // 确保初始状态关闭
             debugToggle.checked = false;
             debugMode = false;
             debugIndicator.classList.remove('active');
@@ -1492,10 +1485,7 @@
             if (Math.abs(dx) > 2500 || Math.abs(dy) > 2500) return;
 
             if (debugMode) {
-                // 调试模式：Y轴移动 → 水平旋转 (yaw)，X轴移动 → 垂直旋转 (pitch 但锁定为0)
-                // 垂直移动鼠标 → 水平旋转视角；水平移动鼠标被忽略（pitch锁定）
                 yaw -= dy * radiansPerCount;
-                // 强制锁定 pitch 为 0（水平）
                 pitch = 0;
             } else {
                 yaw -= dx * radiansPerCount;
