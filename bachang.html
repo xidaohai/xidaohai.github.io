@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>测验靶场 · (西岛海)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
     <style>
         :root {
             --crosshair-color: #000000;
@@ -87,8 +88,14 @@
             gap: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
-        .hud-val { color: #0284c7; font-weight: 900; }
-        .fps-val { color: #16a34a; font-weight: 900; }
+        .hud-val {
+            color: #0284c7;
+            font-weight: 900;
+        }
+        .fps-val {
+            color: #16a34a;
+            font-weight: 900;
+        }
 
         .f11-card {
             padding: 7px 16px;
@@ -143,15 +150,26 @@
             justify-content: center;
             box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
         }
-        .author-meta { display: flex; flex-direction: column; }
-        .author-name { font-size: 0.76rem; font-weight: 900; color: #0f172a; }
-        .author-tag { font-size: 0.58rem; color: #64748b; font-weight: bold; }
+        .author-meta {
+            display: flex;
+            flex-direction: column;
+        }
+        .author-name {
+            font-size: 0.76rem;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        .author-tag {
+            font-size: 0.58rem;
+            color: #64748b;
+            font-weight: bold;
+        }
 
         #bottom-right-hud {
             position: absolute;
             bottom: 16px;
             right: 16px;
-            width: 320px;
+            width: 340px;
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(24px) saturate(180%);
             padding: 10px 14px;
@@ -162,7 +180,21 @@
             pointer-events: none;
             z-index: 5;
         }
-        .rel-title { font-size: 0.74rem; font-weight: 900; color: #0284c7; margin-bottom: 4px; }
+        #bottom-right-hud .debug-section {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(226, 232, 240, 0.6);
+        }
+        .rel-title {
+            font-size: 0.74rem;
+            font-weight: 900;
+            color: #0284c7;
+            margin-bottom: 4px;
+        }
         .rel-formula {
             font-size: 0.68rem;
             font-weight: 700;
@@ -173,7 +205,154 @@
             margin-bottom: 4px;
             line-height: 1.4;
         }
-        .rel-desc { font-size: 0.64rem; color: #64748b; line-height: 1.4; }
+        .rel-desc {
+            font-size: 0.64rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        /* ----- 调试模式 toggle ----- */
+        .debug-toggle {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .debug-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .debug-toggle .slider {
+            position: absolute;
+            inset: 0;
+            background: #cbd5e1;
+            border-radius: 22px;
+            transition: background 0.25s;
+        }
+        .debug-toggle .knob {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: #ffffff;
+            border-radius: 50%;
+            transition: transform 0.25s, box-shadow 0.25s;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+        }
+        .debug-toggle input:checked+.slider {
+            background: #0284c7;
+        }
+        .debug-toggle input:checked+.slider+.knob {
+            transform: translateX(18px);
+        }
+        .debug-toggle input:checked+.slider {
+            box-shadow: 0 0 6px rgba(2, 132, 199, 0.35);
+        }
+
+        .debug-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .debug-label .debug-icon {
+            font-size: 0.8rem;
+        }
+
+        /* ----- 自定义悬浮提示 (tooltip) ----- */
+        .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1.5px solid #94a3b8;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: 900;
+            cursor: help;
+            flex-shrink: 0;
+            pointer-events: auto;
+            transition: border-color 0.2s, color 0.2s, background 0.2s;
+            position: relative;
+        }
+        .help-icon:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+            background: rgba(2, 132, 199, 0.06);
+        }
+        /* 自定义 tooltip 气泡 */
+        .help-icon .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            width: 260px;
+            background: #0f172a;
+            color: #f1f5f9;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 14px;
+            position: absolute;
+            z-index: 100;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%) translateY(6px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            line-height: 1.5;
+            pointer-events: none;
+            white-space: normal;
+            word-break: break-word;
+        }
+        .help-icon .tooltip-text::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #0f172a;
+        }
+        .help-icon:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 调试模式指示器 (准星上方) */
+        #debug-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, calc(-50% - 56px));
+            pointer-events: none;
+            z-index: 9;
+            font-size: 0.9rem;
+            font-weight: 900;
+            color: #ef4444;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            padding: 6px 18px;
+            border-radius: 20px;
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            opacity: 0;
+            transition: opacity 0.3s;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        #debug-indicator.active {
+            opacity: 1;
+        }
 
         #left-panel {
             position: fixed;
@@ -209,8 +388,13 @@
             flex-direction: column;
             gap: 8px;
         }
-        .glass-panel::-webkit-scrollbar { width: 4px; }
-        .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .glass-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .glass-panel::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
 
         .panel-header {
             display: flex;
@@ -237,7 +421,11 @@
             background: #0284c7;
             border-radius: 2px;
         }
-        .header-actions { display: flex; gap: 5px; align-items: center; }
+        .header-actions {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
         .header-btn {
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid #cbd5e1;
@@ -249,8 +437,16 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .header-btn:hover { background: #e0f2fe; border-color: #0284c7; color: #0284c7; }
-        .header-btn.active { background: #0284c7; color: #ffffff; border-color: #0284c7; }
+        .header-btn:hover {
+            background: #e0f2fe;
+            border-color: #0284c7;
+            color: #0284c7;
+        }
+        .header-btn.active {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #0284c7;
+        }
 
         .section-card {
             background: rgba(248, 250, 252, 0.65);
@@ -273,11 +469,23 @@
             gap: 4px;
         }
 
-        .preset-grid { display: grid; gap: 4px; margin-bottom: 6px; }
-        .preset-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-        .preset-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
-        .preset-grid.cols-8 { grid-template-columns: repeat(4, 1fr); }
-        .preset-grid.cols-7 { grid-template-columns: repeat(7, 1fr); }
+        .preset-grid {
+            display: grid;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+        .preset-grid.cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .preset-grid.cols-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .preset-grid.cols-8 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .preset-grid.cols-7 {
+            grid-template-columns: repeat(7, 1fr);
+        }
 
         .pill-btn {
             border: 1px solid #cbd5e1;
@@ -292,7 +500,11 @@
             text-align: center;
             white-space: nowrap;
         }
-        .pill-btn:hover { border-color: #0284c7; color: #0284c7; background: #f0f9ff; }
+        .pill-btn:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+            background: #f0f9ff;
+        }
         .pill-btn.active {
             background: #0284c7 !important;
             color: #ffffff !important;
@@ -314,7 +526,10 @@
             align-items: center;
             gap: 4px;
         }
-        .btn-move-toggle:hover { border-color: #0284c7; color: #0284c7; }
+        .btn-move-toggle:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+        }
         .btn-move-toggle.active-move {
             background: #22c55e !important;
             border-color: #16a34a !important;
@@ -336,7 +551,10 @@
             font-weight: 700;
             transition: 0.15s;
         }
-        .lock-btn:hover { border-color: #0284c7; color: #0284c7; }
+        .lock-btn:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+        }
         .lock-btn.unlocked {
             background: #fffbeb;
             border-color: #f59e0b;
@@ -349,7 +567,9 @@
             gap: 8px;
             margin-bottom: 4px;
         }
-        .ctrl-row:last-child { margin-bottom: 0; }
+        .ctrl-row:last-child {
+            margin-bottom: 0;
+        }
         .ctrl-row label {
             font-size: 0.68rem;
             font-weight: 700;
@@ -364,7 +584,10 @@
             height: 4px;
             min-width: 50px;
         }
-        .ctrl-row input[type="range"]:disabled { cursor: not-allowed; opacity: 0.4; }
+        .ctrl-row input[type="range"]:disabled {
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
         .stepper-box {
             display: flex;
             align-items: center;
@@ -387,8 +610,13 @@
             justify-content: center;
             transition: background 0.1s;
         }
-        .step-btn:hover { background: #e0f2fe; }
-        .step-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .step-btn:hover {
+            background: #e0f2fe;
+        }
+        .step-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
         .num-input {
             width: 54px;
             height: 22px;
@@ -403,7 +631,9 @@
             outline: none;
             background: #ffffff;
         }
-        .num-input:disabled { color: #94a3b8; }
+        .num-input:disabled {
+            color: #94a3b8;
+        }
 
         .divider {
             height: 1px;
@@ -443,7 +673,10 @@
             transition: transform 0.1s, border-color 0.1s;
             flex-shrink: 0;
         }
-        .round-swatch-btn:hover { transform: scale(1.2); border-color: #0284c7; }
+        .round-swatch-btn:hover {
+            transform: scale(1.2);
+            border-color: #0284c7;
+        }
         .round-swatch-btn.active {
             border-color: #0284c7;
             box-shadow: 0 0 0 2px #0284c7, 0 0 0 3px rgba(2, 132, 199, 0.2);
@@ -500,13 +733,56 @@
             background: #f0f9ff;
         }
 
-        .target-list-item { margin-bottom: 6px; }
-        .target-list-item:last-child { margin-bottom: 0; }
+        .target-list-item {
+            margin-bottom: 6px;
+        }
+        .target-list-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 调试模式激活时的水平参考线 (视觉辅助) */
+        #debug-horizon-guide {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1.5px;
+            background: rgba(239, 68, 68, 0.35);
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity 0.4s;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.12);
+        }
+        #debug-horizon-guide.active {
+            opacity: 1;
+        }
+        #debug-horizon-guide::before,
+        #debug-horizon-guide::after {
+            content: '◀';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.6rem;
+            color: rgba(239, 68, 68, 0.45);
+        }
+        #debug-horizon-guide::before {
+            left: 6px;
+        }
+        #debug-horizon-guide::after {
+            right: 6px;
+            content: '▶';
+        }
     </style>
 </head>
 <body>
 
+    <!-- 准星 -->
     <div id="crosshair"></div>
+    <!-- 调试水平参考线 -->
+    <div id="debug-horizon-guide"></div>
+    <!-- 调试模式指示器 (准星上方) -->
+    <div id="debug-indicator">轴向已互换</div>
 
     <div id="top-hud">
         <div class="hud-card">
@@ -526,15 +802,34 @@
         <div class="author-meta"><span class="author-name">作者：西岛海</span><span class="author-tag">xlm</span></div>
     </a>
 
+    <!-- 右下角 HUD + 调试模式 -->
     <div id="bottom-right-hud">
         <div class="rel-title">物理精算映射原理 (底层互通)</div>
         <div class="rel-formula">360°总点数 N = (cm ÷ 2.54) × DPI<br />鼠标单点弧度 Δθ = 2π / N</div>
-        <div class="rel-desc">• <strong>DPI</strong> 为采样率；<strong>CM/360°</strong> 为物理位移标定。<br />• 初始状态假人头部严格锁定视平线 $1.625\text{m}$，准星直指正中眉心。</div>
+        <div class="rel-desc">• <strong>DPI</strong> 为采样率；<strong>CM/360°</strong> 为物理位移标定。<br />• 初始状态假人头部严格锁定视平线 1.625m，准星直指正中眉心。</div>
+
+        <!-- 调试模式 (新增) -->
+        <div class="debug-section">
+            <span class="debug-label">
+                <span class="debug-icon">🔬</span> 调试模式
+            </span>
+            <label class="debug-toggle" id="debug-toggle-label">
+                <input type="checkbox" id="debug-mode-toggle" />
+                <span class="slider"></span>
+                <span class="knob"></span>
+            </label>
+            <span class="help-icon">
+                ?
+                <span class="tooltip-text">
+                    当用尺子竖直测量鼠标。建议：真实DPI测量后填入此网页，CM/360°选择40。然后开始竖着移动鼠标10cm，看看是否能到90°。如果偏差较大，则浏览器不支持或有其他问题。
+                </span>
+            </span>
+        </div>
     </div>
 
     <div id="canvas-container"></div>
 
-    <!-- 左侧主面板：形态切换 + 目标列表 + 操作 -->
+    <!-- 左侧主面板 -->
     <div class="glass-panel" id="left-panel">
         <div class="panel-header" id="panel-handle">
             <span class="panel-title">目标控制</span>
@@ -564,7 +859,7 @@
         <button class="btn-start" id="btn-lock">进入靶场 (锁定鼠标)</button>
     </div>
 
-    <!-- 右侧独立面板：物理外设 & 准星设置 -->
+    <!-- 右侧独立面板 -->
     <div class="glass-panel" id="right-panel">
         <div class="panel-header">
             <span class="panel-title">设置面板</span>
@@ -600,12 +895,12 @@
 
             <div class="preset-grid cols-7">
                 <button class="pill-btn cm-pill active" data-val="25">25</button>
+                <button class="pill-btn cm-pill" data-val="40">40</button>
                 <button class="pill-btn cm-pill" data-val="750">750</button>
                 <button class="pill-btn cm-pill" data-val="1500">1500</button>
                 <button class="pill-btn cm-pill" data-val="2000">2000</button>
                 <button class="pill-btn cm-pill" data-val="3000">3000</button>
                 <button class="pill-btn cm-pill" data-val="4000">4000</button>
-                <button class="pill-btn cm-pill" data-val="5000">5000</button>
             </div>
             <div class="ctrl-row">
                 <label>CM / 360°</label>
@@ -680,7 +975,6 @@
         // 1. 配置与常量
         // ============================================================
         const ISO_INCH_TO_CM = 2.54;
-        // 直线平移的方位角几何上限：半角 ±67.5°（合计 135°），超过会 tan 发散导致目标飞走
         const LINEAR_MAX_HALF_DEG = 67.5;
 
         const COLOR_PRESETS_CROSSHAIR = [
@@ -707,8 +1001,11 @@
         // 2. 工具函数
         // ============================================================
         function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+
         function rand(min, max) { return min + Math.random() * (max - min); }
+
         function getEl(id) { return document.getElementById(id); }
+
         function setNum(id, v, digits = 2) { const e = getEl(id); if (e) e.value = Number(v).toFixed(digits); }
 
         function hFovToVfov(hFov, aspect) {
@@ -716,12 +1013,16 @@
             return (2 * Math.atan(Math.tan(hRad / 2) / aspect) * 180) / Math.PI;
         }
 
-        // CM 滑杆指数映射：低 cm 区间分辨率更高（25~100 是常用区）
-        const CM_SLIDER_MAX = 1000, CM_MIN = 0.5, CM_MAX = 10000, CM_EXP = 3.2;
+        const CM_SLIDER_MAX = 1000,
+            CM_MIN = 0.5,
+            CM_MAX = 10000,
+            CM_EXP = 3.2;
+
         function cmToSlider(cm) {
             const ratio = Math.pow(Math.max(0, cm - CM_MIN) / CM_MAX, 1 / CM_EXP);
             return Math.round(clamp(ratio, 0, 1) * CM_SLIDER_MAX);
         }
+
         function sliderToCm(r) {
             const ratio = clamp(parseFloat(r) / CM_SLIDER_MAX, 0, 1);
             return Math.pow(ratio, CM_EXP) * CM_MAX + CM_MIN;
@@ -737,7 +1038,9 @@
             totalCounts360 = (config.cmPer360 / ISO_INCH_TO_CM) * config.dpi;
             radiansPerCount = (Math.PI * 2) / Math.max(1, totalCounts360);
 
-            const elDpi = getEl('hud-dpi'), elCm = getEl('hud-cm'), elFov = getEl('hud-fov');
+            const elDpi = getEl('hud-dpi'),
+                elCm = getEl('hud-cm'),
+                elFov = getEl('hud-fov');
             if (elDpi) elDpi.innerText = config.dpi;
             if (elCm) elCm.innerText = config.cmPer360.toFixed(2);
             if (elFov) elFov.innerText = Math.round(config.fovHorizontal);
@@ -752,7 +1055,8 @@
             const val = clamp(Math.round(parseFloat(v) || 800), 50, 32000);
             config.dpi = val;
             setNum('inp-dpi', val, 0);
-            const r = getEl('inp-dpi-r'); if (r) r.value = clamp(val, 50, 6400);
+            const r = getEl('inp-dpi-r');
+            if (r) r.value = clamp(val, 50, 6400);
             updateSensitivity();
         }
 
@@ -760,7 +1064,8 @@
             const val = clamp(parseFloat(v) || 50, 0.1, 10000);
             config.cmPer360 = val;
             setNum('inp-cm', val, 2);
-            const r = getEl('inp-cm-r'); if (r) r.value = cmToSlider(val);
+            const r = getEl('inp-cm-r');
+            if (r) r.value = cmToSlider(val);
             updateSensitivity();
         }
 
@@ -768,7 +1073,8 @@
             const val = clamp(parseFloat(v) || 103, 10, 140);
             config.fovHorizontal = val;
             setNum('inp-fov', val, 2);
-            const r = getEl('inp-fov-r'); if (r) r.value = val;
+            const r = getEl('inp-fov-r');
+            if (r) r.value = val;
             ['10', '60', '90', '103'].forEach(s => {
                 const b = getEl('btn-fov-' + s);
                 if (b) b.classList.toggle('active', Math.abs(parseFloat(b.textContent) - val) < 0.01);
@@ -781,7 +1087,8 @@
             const val = clamp(parseFloat(v) || 1.625, 0.5, 3.0);
             config.viewHeight = val;
             setNum('inp-height', val, 3);
-            const r = getEl('inp-height-r'); if (r) r.value = val;
+            const r = getEl('inp-height-r');
+            if (r) r.value = val;
             updateScene();
         }
 
@@ -789,7 +1096,8 @@
             const val = clamp(parseFloat(v) || 1, 0.1, 1);
             config.crosshairOpacity = val;
             setNum('inp-crosshair-opacity', val, 2);
-            const r = getEl('inp-crosshair-opacity-r'); if (r) r.value = val;
+            const r = getEl('inp-crosshair-opacity-r');
+            if (r) r.value = val;
             document.documentElement.style.setProperty('--crosshair-opacity', val);
         }
 
@@ -817,7 +1125,7 @@
         // ============================================================
         // 4. 音频反馈
         // ============================================================
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
 
         function playHitFeedback(part) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -836,7 +1144,7 @@
         }
 
         // ============================================================
-        // 5. 场景构建（天空 / 云 / 光照 / 地面 / 地平线 / 罗盘）
+        // 5. 场景构建
         // ============================================================
         const container = getEl('canvas-container');
         const scene = new THREE.Scene();
@@ -882,7 +1190,6 @@
         );
         scene.add(skyMesh);
 
-        // 云层：与练习靶场完全一致的环形公转云
         const cloudGroup = new THREE.Group();
         scene.add(cloudGroup);
         const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.68 });
@@ -917,7 +1224,9 @@
         grid.position.y = 0.001;
         scene.add(grid);
 
-        let horizonLine = null, thinLine = null;
+        let horizonLine = null,
+            thinLine = null;
+
         function updateHorizon(height) {
             if (horizonLine) {
                 scene.remove(horizonLine);
@@ -940,7 +1249,11 @@
             }
             const geo = new THREE.BufferGeometry().setFromPoints(pts);
             const mat = new THREE.LineDashedMaterial({
-                color: 0xffffff, dashSize: 0.45, gapSize: 0.3, transparent: true, opacity: 0.5
+                color: 0xffffff,
+                dashSize: 0.45,
+                gapSize: 0.3,
+                transparent: true,
+                opacity: 0.5
             });
             horizonLine = new THREE.Line(geo, mat);
             horizonLine.computeLineDistances();
@@ -952,7 +1265,6 @@
         }
         updateHorizon(config.viewHeight);
 
-        // 罗盘刻度
         const compassGroup = new THREE.Group();
         scene.add(compassGroup);
 
@@ -984,8 +1296,10 @@
 
         for (let deg = 0; deg < 360; deg += 22.5) {
             const rad = (deg * Math.PI) / 180;
-            const x = 48 * Math.sin(rad), z = -48 * Math.cos(rad);
-            const isCardinal = (deg % 90 === 0), isSemi = (deg % 45 === 0);
+            const x = 48 * Math.sin(rad),
+                z = -48 * Math.cos(rad);
+            const isCardinal = (deg % 90 === 0),
+                isSemi = (deg % 45 === 0);
             const lm = new THREE.LineBasicMaterial({ color: isCardinal ? 0x0284c7 : (isSemi ? 0x64748b : 0x94a3b8) });
             const pts = [new THREE.Vector3(x, 0.01, z), new THREE.Vector3(x, isCardinal ? 5.5 : (isSemi ? 4.0 : 2.5), z)];
             compassGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lm));
@@ -1000,7 +1314,7 @@
         }
 
         // ============================================================
-        // 6. 假人与球体模型（共享几何体，高分段去棱角）
+        // 6. 假人与球体模型
         // ============================================================
         const SPHERE_GEO = new THREE.SphereGeometry(1, 48, 48);
         const HEAD_GEO = new THREE.SphereGeometry(1, 48, 48);
@@ -1027,10 +1341,9 @@
             const bodyHeight = t.bodyHeightCm / 100;
             const bodyDepth = Math.max(0.15, bodyWidth * (2.2 / 3.38));
             const neckGap = (t.neckGapCm || 6.325) / 100;
-            const headOffX = (t.headOffsetX || 0) / 100; // 头部左右偏移（+右 / -左，相对假人朝向）
-            const headOffY = (t.headOffsetY || 0) / 100; // 头部上下偏移（+上抬 / -沉入）
+            const headOffX = (t.headOffsetX || 0) / 100;
+            const headOffY = (t.headOffsetY || 0) / 100;
 
-            // 头部（必须 scale，否则是半径 1 米的单位球）
             const headMat = new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.25 });
             const head = new THREE.Mesh(HEAD_GEO, headMat);
             head.scale.set(headRadiusX, headRadiusY, headRadiusX);
@@ -1039,17 +1352,19 @@
             head.userData.part = 'head';
             t.dummyGroup.add(head);
 
-            // 白色虚线：头部被身体遮挡的轮廓（X光式 depthTest:false，随头部偏移实时重算）
-            const rx = headRadiusX, ry = headRadiusY;
-            const bodyTopRel = -neckGap - headOffY; // 身体顶面相对头中心的高度
+            const rx = headRadiusX,
+                ry = headRadiusY;
+            const bodyTopRel = -neckGap - headOffY;
             const p = bodyTopRel / ry;
-            let a0 = 0, a1 = 0;
+            let a0 = 0,
+                a1 = 0;
             if (p >= 1) {
-                a1 = Math.PI * 2;                    // 完全沉入 → 整个轮廓透出
+                a1 = Math.PI * 2;
             } else if (p <= -1) {
-                a0 = 0; a1 = 0;                      // 完全离开 → 不画
+                a0 = 0;
+                a1 = 0;
             } else {
-                a0 = Math.PI - Math.asin(p);         // 部分遮挡 → 画被挡的下缘
+                a0 = Math.PI - Math.asin(p);
                 a1 = Math.PI * 2 + Math.asin(p);
             }
             if (a1 - a0 > 0.001) {
@@ -1059,8 +1374,14 @@
                 }
                 const dashGeo = new THREE.BufferGeometry().setFromPoints(dashPts);
                 const dashMat = new THREE.LineDashedMaterial({
-                    color: 0xffffff, dashSize: 0.025, gapSize: 0.018, linewidth: 2,
-                    transparent: true, opacity: 0.9, depthTest: false, depthWrite: false
+                    color: 0xffffff,
+                    dashSize: 0.025,
+                    gapSize: 0.018,
+                    linewidth: 2,
+                    transparent: true,
+                    opacity: 0.9,
+                    depthTest: false,
+                    depthWrite: false
                 });
                 const dashLine = new THREE.Line(dashGeo, dashMat);
                 dashLine.computeLineDistances();
@@ -1070,7 +1391,6 @@
                 t.dummyGroup.add(dashLine);
             }
 
-            // 身体
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
             const body = new THREE.Mesh(BODY_GEO, bodyMat);
             body.scale.set(bodyWidth, bodyHeight, bodyDepth);
@@ -1111,7 +1431,6 @@
                 } else {
                     const bodyH = t.bodyHeightCm / 100;
                     const neckGap = (t.neckGapCm || 6.325) / 100;
-                    // 站立高度（身体底部贴地），移动中不会掉下去
                     t.groundY = neckGap + bodyH + (t.yOffset || 0);
                     t.rootGroup.position.y = t.groundY;
                 }
@@ -1124,24 +1443,65 @@
         }
 
         // ============================================================
-        // 7. 视角移动与准星判定（coalesced 原始输入）
+        // 7. 视角移动与准星判定（含调试模式）
         // ============================================================
-        let yaw = 0.0, pitch = 0.0;
+        let yaw = 0.0,
+            pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+        // 调试模式状态
+        let debugMode = false;
+
+        // 调试模式开关
+        const debugToggle = getEl('debug-mode-toggle');
+        const debugIndicator = getEl('debug-indicator');
+        const debugHorizonGuide = getEl('debug-horizon-guide');
+
+        if (debugToggle) {
+            debugToggle.addEventListener('change', function() {
+                debugMode = this.checked;
+                // 切换时，重置 pitch 到水平，确保视角水平
+                if (debugMode) {
+                    pitch = 0;
+                    cameraEuler.set(pitch, yaw, 0);
+                    camera.quaternion.setFromEuler(cameraEuler);
+                    // 显示指示器
+                    debugIndicator.classList.add('active');
+                    debugHorizonGuide.classList.add('active');
+                } else {
+                    debugIndicator.classList.remove('active');
+                    debugHorizonGuide.classList.remove('active');
+                }
+            });
+            // 确保初始状态关闭
+            debugToggle.checked = false;
+            debugMode = false;
+            debugIndicator.classList.remove('active');
+            debugHorizonGuide.classList.remove('active');
+        }
 
         window.addEventListener('pointermove', (e) => {
             if (document.pointerLockElement !== document.body) return;
             const events = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
-            let dx = 0, dy = 0;
+            let dx = 0,
+                dy = 0;
             for (const ev of events) {
                 dx += ev.movementX || 0;
                 dy += ev.movementY || 0;
             }
             if (Math.abs(dx) > 2500 || Math.abs(dy) > 2500) return;
 
-            yaw -= dx * radiansPerCount;
-            pitch -= dy * radiansPerCount;
-            pitch = clamp(pitch, -Math.PI / 2 + 0.001, Math.PI / 2 - 0.001);
+            if (debugMode) {
+                // 调试模式：Y轴移动 → 水平旋转 (yaw)，X轴移动 → 垂直旋转 (pitch 但锁定为0)
+                // 垂直移动鼠标 → 水平旋转视角；水平移动鼠标被忽略（pitch锁定）
+                yaw -= dy * radiansPerCount;
+                // 强制锁定 pitch 为 0（水平）
+                pitch = 0;
+            } else {
+                yaw -= dx * radiansPerCount;
+                pitch -= dy * radiansPerCount;
+                pitch = clamp(pitch, -Math.PI / 2 + 0.001, Math.PI / 2 - 0.001);
+            }
             yaw = yaw % (Math.PI * 2);
             cameraEuler.set(pitch, yaw, 0);
             camera.quaternion.setFromEuler(cameraEuler);
@@ -1425,28 +1785,33 @@
             const hint = getEl(`lbl-t${i}-hint`);
             if (!hint) return;
             const D = t.distMeters;
-            const linearSpeed = D * (t.move.speedDeg * Math.PI / 180); // 恒定线速（所有情况不变）
+            const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
             const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
             const linearSpan = D * totalSpanRad;
 
             if (t.move.mode === 'linear' && t.move.visualAngleLock) {
                 const effHalf = Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG);
-                hint.innerHTML = `• 方位角范围与弧形一致：移动速度恒定 <strong>${linearSpeed.toFixed(2)} m/s</strong>，最远点方位角 ±${effHalf.toFixed(1)}°（直线上限 ±67.5°，合计 135°）`;
+                hint.innerHTML =
+                    `• 方位角范围与弧形一致：移动速度恒定 <strong>${linearSpeed.toFixed(2)} m/s</strong>，最远点方位角 ±${effHalf.toFixed(1)}°（直线上限 ±67.5°，合计 135°）`;
             } else if (t.move.mode === 'linear') {
-                hint.innerHTML = `• 平面直线横移：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">等效行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
+                hint.innerHTML =
+                    `• 平面直线横移：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">等效行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
             } else {
-                hint.innerHTML = `• 弧形角度围绕：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">弧线行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
+                hint.innerHTML =
+                    `• 弧形角度围绕：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">弧线行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
             }
         }
 
         function setupDynamicTargetBindings(t, i) {
             const isDummy = config.targetShape === 'dummy';
 
-            // 总尺寸
-            const sR = getEl(`inp-t${i}-s-r`), sN = getEl(`inp-t${i}-s`);
+            const sR = getEl(`inp-t${i}-s-r`),
+                sN = getEl(`inp-t${i}-s`);
             bindControl({
-                numEl: sN, rangeEl: sR,
-                btnMinus: getEl(`btn-t${i}-s-minus`), btnPlus: getEl(`btn-t${i}-s-plus`),
+                numEl: sN,
+                rangeEl: sR,
+                btnMinus: getEl(`btn-t${i}-s-minus`),
+                btnPlus: getEl(`btn-t${i}-s-plus`),
                 step: 0.5,
                 apply: (v) => {
                     const val = Math.max(1.0, parseFloat(v) || 23.0);
@@ -1473,7 +1838,6 @@
                 }
             });
 
-            // 假人各维度
             if (isDummy) {
                 const bindDim = (prop, idSuffix, stepVal) => {
                     const inp = getEl(`inp-t${i}-${idSuffix}`);
@@ -1496,24 +1860,28 @@
                 bindDim('bodyWidthCm', 'bw', 1.0);
                 bindDim('bodyHeightCm', 'bh', 1.0);
 
-                // ---- 头部锁定 + 独立偏移（上下/左右共用同一把锁）----
                 const lockBtn = getEl(`btn-t${i}-headlock`);
-                const hyR = getEl(`inp-t${i}-hy-r`), hyN = getEl(`inp-t${i}-hy`);
-                const hyMinus = getEl(`btn-t${i}-hy-minus`), hyPlus = getEl(`btn-t${i}-hy-plus`);
-                const hxR = getEl(`inp-t${i}-hx-r`), hxN = getEl(`inp-t${i}-hx`);
-                const hxMinus = getEl(`btn-t${i}-hx-minus`), hxPlus = getEl(`btn-t${i}-hx-plus`);
+                const hyR = getEl(`inp-t${i}-hy-r`),
+                    hyN = getEl(`inp-t${i}-hy`);
+                const hyMinus = getEl(`btn-t${i}-hy-minus`),
+                    hyPlus = getEl(`btn-t${i}-hy-plus`);
+                const hxR = getEl(`inp-t${i}-hx-r`),
+                    hxN = getEl(`inp-t${i}-hx`);
+                const hxMinus = getEl(`btn-t${i}-hx-minus`),
+                    hxPlus = getEl(`btn-t${i}-hx-plus`);
 
                 const setHeadLock = (locked) => {
                     t.headLocked = locked;
                     lockBtn.innerHTML = locked ? '🔒 已锁定' : '🔓 已解锁';
                     lockBtn.classList.toggle('unlocked', !locked);
                     [hyR, hyN, hyMinus, hyPlus, hxR, hxN, hxMinus, hxPlus].forEach(el => el.disabled = locked);
-                    // 锁定时恢复头身完全绑定（上下/左右偏移归零）
                     if (locked && ((t.headOffsetX || 0) !== 0 || (t.headOffsetY || 0) !== 0)) {
                         t.headOffsetX = 0;
                         t.headOffsetY = 0;
-                        hyR.value = 0; hyN.value = '0.0';
-                        hxR.value = 0; hxN.value = '0.0';
+                        hyR.value = 0;
+                        hyN.value = '0.0';
+                        hxR.value = 0;
+                        hxN.value = '0.0';
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
@@ -1521,76 +1889,90 @@
                 lockBtn.addEventListener('click', () => setHeadLock(!t.headLocked));
 
                 bindControl({
-                    numEl: hyN, rangeEl: hyR,
-                    btnMinus: hyMinus, btnPlus: hyPlus,
+                    numEl: hyN,
+                    rangeEl: hyR,
+                    btnMinus: hyMinus,
+                    btnPlus: hyPlus,
                     step: 0.5,
                     apply: (v) => {
                         const val = clamp(parseFloat(v) || 0, -40, 40);
-                        hyR.value = val; hyN.value = val.toFixed(1);
+                        hyR.value = val;
+                        hyN.value = val.toFixed(1);
                         t.headOffsetY = val;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
                 bindControl({
-                    numEl: hxN, rangeEl: hxR,
-                    btnMinus: hxMinus, btnPlus: hxPlus,
+                    numEl: hxN,
+                    rangeEl: hxR,
+                    btnMinus: hxMinus,
+                    btnPlus: hxPlus,
                     step: 0.5,
                     apply: (v) => {
                         const val = clamp(parseFloat(v) || 0, -40, 40);
-                        hxR.value = val; hxN.value = val.toFixed(1);
+                        hxR.value = val;
+                        hxN.value = val.toFixed(1);
                         t.headOffsetX = val;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
-                setHeadLock(t.headLocked); // 确保初始禁用状态与数据一致
+                setHeadLock(t.headLocked);
             }
 
-            // 距离
-            const zR = getEl(`inp-t${i}-z-r`), zN = getEl(`inp-t${i}-z`);
+            const zR = getEl(`inp-t${i}-z-r`),
+                zN = getEl(`inp-t${i}-z`);
             bindControl({
-                numEl: zN, rangeEl: zR,
-                btnMinus: getEl(`btn-t${i}-z-minus`), btnPlus: getEl(`btn-t${i}-z-plus`),
+                numEl: zN,
+                rangeEl: zR,
+                btnMinus: getEl(`btn-t${i}-z-minus`),
+                btnPlus: getEl(`btn-t${i}-z-plus`),
                 step: 0.25,
                 apply: (v) => {
                     const val = Math.max(0.1, parseFloat(v) || 10);
-                    zR.value = val; zN.value = val.toFixed(2);
+                    zR.value = val;
+                    zN.value = val.toFixed(2);
                     t.distMeters = val;
                     updateScene();
                     updateTargetSpeedHint(t, i);
                 }
             });
 
-            // 方位
-            const aR = getEl(`inp-t${i}-a-r`), aN = getEl(`inp-t${i}-a`);
+            const aR = getEl(`inp-t${i}-a-r`),
+                aN = getEl(`inp-t${i}-a`);
             bindControl({
-                numEl: aN, rangeEl: aR,
-                btnMinus: getEl(`btn-t${i}-a-minus`), btnPlus: getEl(`btn-t${i}-a-plus`),
+                numEl: aN,
+                rangeEl: aR,
+                btnMinus: getEl(`btn-t${i}-a-minus`),
+                btnPlus: getEl(`btn-t${i}-a-plus`),
                 step: 0.25,
                 apply: (v) => {
                     const val = clamp(parseFloat(v) || 0, -180, 180);
-                    aR.value = val; aN.value = val.toFixed(2);
+                    aR.value = val;
+                    aN.value = val.toFixed(2);
                     t.centerDeg = val;
                     updateScene();
                 }
             });
 
-            // 上下微调
-            const yR = getEl(`inp-t${i}-y-r`), yN = getEl(`inp-t${i}-y`);
+            const yR = getEl(`inp-t${i}-y-r`),
+                yN = getEl(`inp-t${i}-y`);
             bindControl({
-                numEl: yN, rangeEl: yR,
-                btnMinus: getEl(`btn-t${i}-y-minus`), btnPlus: getEl(`btn-t${i}-y-plus`),
+                numEl: yN,
+                rangeEl: yR,
+                btnMinus: getEl(`btn-t${i}-y-minus`),
+                btnPlus: getEl(`btn-t${i}-y-plus`),
                 step: 0.05,
                 apply: (v) => {
                     const val = parseFloat(v) || 0;
-                    yR.value = val; yN.value = val.toFixed(2);
+                    yR.value = val;
+                    yN.value = val.toFixed(2);
                     t.yOffset = val;
                     updateScene();
                 }
             });
 
-            // 运动开关
             const btnMoveToggle = getEl(`btn-t${i}-move-toggle`);
             btnMoveToggle.addEventListener('click', () => {
                 t.move.enabled = !t.move.enabled;
@@ -1599,10 +1981,8 @@
                 getEl(`t${i}-move-box`).style.display = t.move.enabled ? 'block' : 'none';
             });
 
-            // 运动模式
-            const btnLinear = getEl(`btn-t${i}-m-linear`), btnOrbit = getEl(`btn-t${i}-m-orbit`);
-
-            // 方位角范围与弧形一致开关（仅直线横移生效）
+            const btnLinear = getEl(`btn-t${i}-m-linear`),
+                btnOrbit = getEl(`btn-t${i}-m-orbit`);
             const vaRow = getEl(`va-t${i}-row`);
             const vaToggle = getEl(`btn-t${i}-va-toggle`);
             const refreshVAVisibility = () => {
@@ -1632,11 +2012,11 @@
                 updateTargetSpeedHint(t, i);
             });
 
-            // 摆动角跨
             const rN = getEl(`inp-t${i}-rng`);
             bindControl({
                 numEl: rN,
-                btnMinus: getEl(`btn-t${i}-rng-minus`), btnPlus: getEl(`btn-t${i}-rng-plus`),
+                btnMinus: getEl(`btn-t${i}-rng-minus`),
+                btnPlus: getEl(`btn-t${i}-rng-plus`),
                 step: 1.0,
                 apply: (v) => {
                     const val = clamp(parseFloat(v) || 1.0, 0.1, 360);
@@ -1646,11 +2026,11 @@
                 }
             });
 
-            // 移动角速
             const spN = getEl(`inp-t${i}-spd`);
             bindControl({
                 numEl: spN,
-                btnMinus: getEl(`btn-t${i}-spd-minus`), btnPlus: getEl(`btn-t${i}-spd-plus`),
+                btnMinus: getEl(`btn-t${i}-spd-minus`),
+                btnPlus: getEl(`btn-t${i}-spd-plus`),
                 step: 1.0,
                 apply: (v) => {
                     const val = clamp(parseFloat(v) || 1.0, 0.1, 360);
@@ -1689,9 +2069,9 @@
                 bodyWidthCm: 38.87,
                 bodyHeightCm: 156.17,
                 neckGapCm: 6.325,
-                headLocked: true,      // 头部与身体绑定
-                headOffsetX: 0,        // 解锁后可独立左右偏移（cm，+右/-左）
-                headOffsetY: 0,        // 解锁后可独立上下偏移（cm，+上抬/-沉入）
+                headLocked: true,
+                headOffsetX: 0,
+                headOffsetY: 0,
                 distMeters: 10,
                 centerDeg: defaultDeg,
                 color,
@@ -1699,11 +2079,11 @@
                 sphereMesh,
                 dummyGroup,
                 yOffset: 0,
-                groundY: 0,            // 站立高度，防止掉下去
+                groundY: 0,
                 move: {
                     enabled: false,
                     mode: 'linear',
-                    visualAngleLock: false,  // 方位角范围与弧形一致：速度不变，仅最远点方位角对齐
+                    visualAngleLock: false,
                     speedDeg: 25.0,
                     totalSpanDeg: 45.0,
                     dir: 1,
@@ -1721,7 +2101,8 @@
             const t = config.targets.pop();
             t.rootGroup.traverse(child => {
                 disposeMaterialOnly(child);
-                if (child.geometry && child.geometry !== HEAD_GEO && child.geometry !== BODY_GEO && child.geometry !== SPHERE_GEO) {
+                if (child.geometry && child.geometry !== HEAD_GEO && child.geometry !== BODY_GEO && child.geometry !==
+                    SPHERE_GEO) {
                     child.geometry.dispose();
                 }
             });
@@ -1730,7 +2111,7 @@
         }
 
         // ============================================================
-        // 9. 生命周期（锁定 / 冷却 / 拖拽 / 主题 / F11）
+        // 9. 生命周期
         // ============================================================
         const leftPanel = getEl('left-panel');
         const rightPanel = getEl('right-panel');
@@ -1740,7 +2121,10 @@
         const btnTheme = getEl('btn-theme-toggle');
 
         let lockCooldownTimer = null;
-        let isDragging = false, isStick = false, offX = 0, offY = 0;
+        let isDragging = false,
+            isStick = false,
+            offX = 0,
+            offY = 0;
         let isLocking = false;
 
         function triggerLockCooldown() {
@@ -1884,7 +2268,8 @@
         }
 
         function initCrosshairColorSwatches() {
-            const defC = getEl('swatches-default'), tgtC = getEl('swatches-target');
+            const defC = getEl('swatches-default'),
+                tgtC = getEl('swatches-target');
             COLOR_PRESETS_CROSSHAIR.forEach(c => {
                 const b1 = document.createElement('div');
                 b1.className = 'round-swatch-btn' + (c.hex === config.customCrosshair.defaultColor ? ' active' : '');
@@ -1920,13 +2305,14 @@
         // ============================================================
         // 11. 物理引擎与动画循环
         // ============================================================
-        let lastTime = performance.now(), lastFrame = performance.now(), frameCnt = 0;
+        let lastTime = performance.now(),
+            lastFrame = performance.now(),
+            frameCnt = 0;
         const hudFps = getEl('hud-fps');
         const hudAngle = getEl('hud-angle');
         let lastRenderedAngle = -999;
 
         function updatePhysics(dt) {
-            // 云层公转（与练习靶场一致）
             cloudGroup.children.forEach(c => {
                 c.userData.angle += c.userData.speed * dt;
                 c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
@@ -1942,19 +2328,16 @@
 
                 if (t.move.enabled) {
                     if (t.move.mode === 'linear') {
-                        // ---- 平面直线横移：恒线速，移动速度所有情况不变 ----
                         const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
                         let linearHalfSpan;
                         if (t.move.visualAngleLock) {
-                            // 方位角范围与弧形一致：半行程 = D·tan(半角)，但半角 clamp 到 ±67.5°（合计135°）
-                            // 直线平移几何上到不了更大方位角，超限会 tan 发散
                             const effHalfRad = Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG) * Math.PI / 180;
                             const tanHalf = Math.tan(effHalfRad);
                             linearHalfSpan = D * (isFinite(tanHalf) ? Math.abs(tanHalf) : 8);
                         } else {
-                            linearHalfSpan = (D * totalSpanRad) / 2; // 原行为：弧长近似行程
+                            linearHalfSpan = (D * totalSpanRad) / 2;
                         }
-                        const linearSpeed = D * (t.move.speedDeg * Math.PI / 180); // 恒定线速
+                        const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
 
                         t.move.currentLinearOffset += t.move.dir * linearSpeed * dt;
                         if (t.move.currentLinearOffset >= linearHalfSpan) {
@@ -1973,7 +2356,6 @@
                         t.rootGroup.position.x = baseX + tanX * t.move.currentLinearOffset;
                         t.rootGroup.position.z = baseZ + tanZ * t.move.currentLinearOffset;
                     } else {
-                        // ---- 弧形角度围绕（不变）----
                         const halfDeg = t.move.totalSpanDeg / 2;
                         t.move.currentOffsetDeg += t.move.dir * t.move.speedDeg * dt;
                         if (t.move.currentOffsetDeg >= halfDeg) {
@@ -1996,7 +2378,6 @@
                     const dx = camera.position.x - t.rootGroup.position.x;
                     const dz = camera.position.z - t.rootGroup.position.z;
                     t.rootGroup.rotation.y = Math.atan2(dx, dz);
-                    // 防止假人掉下去：移动中始终保持站立高度（身体底部贴地）
                     t.rootGroup.position.y = t.groundY;
                 }
             });
@@ -2047,8 +2428,8 @@
             bindPanelAndLock();
             initThemeAndF11();
 
-            addNewTarget(); // A: 0° 正前方
-            addNewTarget(); // B: 20°
+            addNewTarget();
+            addNewTarget();
             setTargetShape('dummy');
             updateCrosshairUI(false);
             updateScene();
