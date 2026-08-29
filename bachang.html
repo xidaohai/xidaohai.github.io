@@ -169,25 +169,34 @@
             position: absolute;
             bottom: 16px;
             right: 16px;
-            width: 340px;
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(24px) saturate(180%);
-            padding: 10px 14px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-left: 3.5px solid #0284c7;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-            pointer-events: none;
-            z-index: 5;
+            width: 360px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(28px) saturate(190%);
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            border-left: 4px solid #0284c7;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+            z-index: 22;
+            transition: opacity 0.15s;
         }
-        #bottom-right-hud .debug-section {
-            pointer-events: auto;
+        #bottom-right-hud::-webkit-scrollbar {
+            width: 4px;
+        }
+        #bottom-right-hud::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .debug-section {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-top: 8px;
             padding-top: 8px;
-            border-top: 1px solid rgba(226, 232, 240, 0.6);
+            border-top: 1px solid rgba(226, 232, 240, 0.8);
         }
         .rel-title {
             font-size: 0.74rem;
@@ -214,8 +223,8 @@
         .debug-toggle {
             position: relative;
             display: inline-block;
-            width: 40px;
-            height: 22px;
+            width: 38px;
+            height: 20px;
             flex-shrink: 0;
             cursor: pointer;
         }
@@ -228,15 +237,15 @@
             position: absolute;
             inset: 0;
             background: #cbd5e1;
-            border-radius: 22px;
+            border-radius: 20px;
             transition: background 0.25s;
         }
         .debug-toggle .knob {
             position: absolute;
             top: 2px;
             left: 2px;
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             background: #ffffff;
             border-radius: 50%;
             transition: transform 0.25s, box-shadow 0.25s;
@@ -261,25 +270,20 @@
             gap: 4px;
             white-space: nowrap;
         }
-        .debug-label .debug-icon {
-            font-size: 0.8rem;
-        }
 
         .help-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             border: 1.5px solid #94a3b8;
             color: #94a3b8;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 900;
             cursor: help;
             flex-shrink: 0;
-            pointer-events: auto;
-            transition: border-color 0.2s, color 0.2s, background 0.2s;
             position: relative;
         }
         .help-icon:hover {
@@ -473,6 +477,9 @@
         .preset-grid.cols-2 {
             grid-template-columns: repeat(2, 1fr);
         }
+        .preset-grid.cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
         .preset-grid.cols-4 {
             grid-template-columns: repeat(4, 1fr);
         }
@@ -509,9 +516,9 @@
         }
 
         .btn-move-toggle {
-            font-size: 0.68rem;
+            font-size: 0.66rem;
             font-weight: 900;
-            padding: 3px 10px;
+            padding: 3px 8px;
             border-radius: 20px;
             border: 1.5px solid #cbd5e1;
             background: rgba(255, 255, 255, 0.9);
@@ -591,6 +598,7 @@
             border-radius: 4px;
             overflow: hidden;
             background: #ffffff;
+            flex-shrink: 0;
         }
         .step-btn {
             width: 19px;
@@ -605,6 +613,7 @@
             align-items: center;
             justify-content: center;
             transition: background 0.1s;
+            flex-shrink: 0;
         }
         .step-btn:hover {
             background: #e0f2fe;
@@ -768,15 +777,113 @@
             right: 6px;
             content: '▶';
         }
+
+        #advanced-panel-container {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1.5px dashed rgba(203, 213, 225, 0.9);
+        }
+        .adv-section-title {
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        .adv-badge {
+            font-size: 0.55rem;
+            background: #e0f2fe;
+            color: #0284c7;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: 800;
+        }
+        .size-lock-btn {
+            font-size: 0.55rem;
+            padding: 1px 6px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            background: rgba(255, 255, 255, 0.8);
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.15s;
+            font-weight: 700;
+            white-space: nowrap;
+            margin-left: 4px;
+        }
+        .size-lock-btn:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+        }
+        .size-lock-btn.active-lock {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #0284c7;
+        }
+        .size-lock-btn.unlocked {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            color: #d97706;
+        }
+        .dim-label {
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: #64748b;
+            width: 14px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .dim-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .dim-row .stepper-box {
+            flex: 1;
+            min-width: 0;
+        }
+        .dim-row .num-input {
+            width: 44px;
+            font-size: 0.65rem;
+        }
+        .dim-row .step-btn {
+            width: 16px;
+            height: 20px;
+            font-size: 0.7rem;
+        }
+        .dim-row label {
+            font-size: 0.6rem;
+            width: 28px;
+            flex-shrink: 0;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .dim-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 2px;
+        }
+        .dim-group-title {
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 准星 -->
     <div id="crosshair"></div>
-    <!-- 调试水平参考线 -->
     <div id="debug-horizon-guide"></div>
-    <!-- 调试模式指示器 (准星上方) -->
     <div id="debug-indicator">轴向已互换</div>
 
     <div id="top-hud">
@@ -797,18 +904,14 @@
         <div class="author-meta"><span class="author-name">作者：西岛海</span><span class="author-tag">xlm</span></div>
     </a>
 
-    <!-- 右下角 HUD + 调试模式 -->
     <div id="bottom-right-hud">
         <div class="rel-title">物理精算映射原理 (底层互通)</div>
         <div class="rel-formula">360°总点数 N = (cm ÷ 2.54) × DPI<br />鼠标单点弧度 Δθ = 2π / N</div>
         <div class="rel-desc">• <strong>DPI</strong> 为采样率；<strong>CM/360°</strong> 为物理位移标定。<br />• 初始状态假人头部严格锁定视平线 1.625m，准星直指正中眉心。</div>
 
-        <!-- 调试模式 (新增) -->
         <div class="debug-section">
-            <span class="debug-label">
-                <span class="debug-icon">🔬</span> 调试模式
-            </span>
-            <label class="debug-toggle" id="debug-toggle-label">
+            <span class="debug-label">调试模式</span>
+            <label class="debug-toggle">
                 <input type="checkbox" id="debug-mode-toggle" />
                 <span class="slider"></span>
                 <span class="knob"></span>
@@ -819,6 +922,74 @@
                     当用尺子竖直测量鼠标。建议：真实DPI测量后填入此网页，CM/360°选择40。然后开始竖着移动鼠标10cm，看看是否能到90°。如果偏差较大，则浏览器不支持或有其他问题。
                 </span>
             </span>
+        </div>
+
+        <div class="debug-section" style="margin-top:6px; padding-top:6px;">
+            <span class="debug-label" style="color:#0369a1;">高级模式 (行走与箱子)</span>
+            <label class="debug-toggle" style="margin-left:auto;">
+                <input type="checkbox" id="advanced-mode-toggle" />
+                <span class="slider"></span>
+                <span class="knob"></span>
+            </label>
+        </div>
+
+        <div id="advanced-panel-container">
+            <div class="section-card">
+                <div class="adv-section-title">
+                    <span>行走与机动系统</span>
+                    <button class="btn-move-toggle" id="btn-toggle-walk">行走: 关闭</button>
+                </div>
+
+                <div id="walk-sub-controls" style="display:none; margin-top:4px;">
+                    <div class="ctrl-row">
+                        <label>行走速度 (m/s)</label>
+                        <input type="range" id="inp-walk-spd-r" min="1.0" max="25.0" step="0.2" value="7.5" />
+                        <div class="stepper-box">
+                            <button class="step-btn" onclick="stepValGlobal('inp-walk-spd', -0.5)">−</button>
+                            <input type="number" class="num-input" id="inp-walk-spd" value="7.50" step="0.2" />
+                            <button class="step-btn" onclick="stepValGlobal('inp-walk-spd', 0.5)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="ctrl-row" style="margin-top:4px;">
+                        <label>垂直飞行权限</label>
+                        <button class="btn-move-toggle" id="btn-toggle-fly">可以飞: 关闭</button>
+                    </div>
+
+                    <div id="fly-sub-controls" style="display:none; margin-top:4px;">
+                        <div class="ctrl-row">
+                            <label>飞行升降速</label>
+                            <input type="range" id="inp-fly-spd-r" min="1.0" max="30.0" step="0.5" value="7.5" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-fly-spd', -0.5)">−</button>
+                                <input type="number" class="num-input" id="inp-fly-spd" value="7.50" step="0.5" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-fly-spd', 0.5)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="font-size:0.58rem; color:#64748b; margin-top:6px; line-height:1.5; background:rgba(2,132,199,0.05); padding:5px 6px; border-radius:4px;">
+                        • <strong>移动按键</strong>：前进 <code style="color:#0284c7;font-weight:bold;">W</code> ；后退 <code style="color:#0284c7;font-weight:bold;">S</code> ；向左 <code style="color:#0284c7;font-weight:bold;">A</code> ；向右 <code style="color:#0284c7;font-weight:bold;">D</code><br />
+                        • <strong>飞行升降</strong>：上升 <code style="color:#16a34a;font-weight:bold;">空格 (Space)</code> ；下降 <code style="color:#ef4444;font-weight:bold;">左侧 Shift (ShiftLeft)</code>
+                    </div>
+
+                    <button class="btn-action" style="width:100%; margin-top:6px;" onclick="resetPlayerPosition()">重置回初始站位</button>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="adv-section-title">
+                    <span>镜之边缘风格箱子</span>
+                    <span class="adv-badge" id="lbl-box-count">0 / 9 个</span>
+                </div>
+
+                <div id="boxes-container"></div>
+
+                <div class="action-grid" style="margin-top:6px;">
+                    <button class="btn-action" onclick="addNewBox()">+ 添加箱子</button>
+                    <button class="btn-action" onclick="removeLastBox()" style="color:#ef4444;">- 删除末尾箱子</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -971,8 +1142,6 @@
         // ============================================================
         const ISO_INCH_TO_CM = 2.54;
         const LINEAR_MAX_HALF_DEG = 67.5;
-
-        // ★ 核心修改：CM/360° 上限从 10000 提升至 1000000（实际等同“无上限”）
         const CM_MAX = 1000000;
         const CM_MIN = 0.1;
         const CM_SLIDER_MAX = 1000;
@@ -982,6 +1151,12 @@
             { name: '黑', hex: '#000000' }, { name: '白', hex: '#ffffff' }, { name: '赤', hex: '#ef4444' },
             { name: '橙', hex: '#f97316' }, { name: '黄', hex: '#eab308' }, { name: '绿', hex: '#22c55e' },
             { name: '青', hex: '#06b6d4' }, { name: '蓝', hex: '#3b82f6' }, { name: '紫', hex: '#a855f7' }
+        ];
+
+        const ME_BOX_PALETTE = [
+            { name: '绯红', hex: '#ef4444' }, { name: '极速橙', hex: '#f97316' }, { name: '跃影黄', hex: '#eab308' },
+            { name: '疾风绿', hex: '#10b981' }, { name: '跑酷青', hex: '#06b6d4' }, { name: '天境蓝', hex: '#3b82f6' },
+            { name: '霓虹紫', hex: '#8b5cf6' }, { name: '质感灰', hex: '#94a3b8' }, { name: '深曜黑', hex: '#1e293b' }
         ];
 
         const PRESET_COLORS = ['#ea580c', '#0284c7', '#10b981', '#8b5cf6', '#f43f5e', '#f59e0b', '#14b8a6', '#ec4899', '#06b6d4'];
@@ -995,7 +1170,16 @@
             crosshairOpacity: 1.0,
             customCrosshair: { enabled: false, defaultColor: '#000000', targetColor: '#0284c7' },
             targets: [],
-            viewHeight: 1.625
+            boxes: [],
+            viewHeight: 1.625,
+            advanced: {
+                enabled: false,
+                walkEnabled: false,
+                walkSpeed: 7.5,
+                flyEnabled: false,
+                flySpeed: 7.5,
+                playerPos: new THREE.Vector3(0, 0, 0)
+            }
         };
 
         // ============================================================
@@ -1014,7 +1198,6 @@
             return (2 * Math.atan(Math.tan(hRad / 2) / aspect) * 180) / Math.PI;
         }
 
-        // 滑块 ↔ CM 映射（指数，适配 0.1 ~ 1000000）
         function cmToSlider(cm) {
             const ratio = Math.pow(Math.max(0, cm - CM_MIN) / (CM_MAX - CM_MIN), 1 / CM_EXP);
             return Math.round(clamp(ratio, 0, 1) * CM_SLIDER_MAX);
@@ -1023,6 +1206,10 @@
         function sliderToCm(r) {
             const ratio = clamp(parseFloat(r) / CM_SLIDER_MAX, 0, 1);
             return Math.pow(ratio, CM_EXP) * (CM_MAX - CM_MIN) + CM_MIN;
+        }
+
+        function getPlayerCurrentYawDeg() {
+            return ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
         }
 
         // ============================================================
@@ -1058,7 +1245,6 @@
         }
 
         function setCm(v) {
-            // ★ 核心修改：上限改用 CM_MAX（1000000），彻底解锁
             const val = clamp(parseFloat(v) || 50, CM_MIN, CM_MAX);
             config.cmPer360 = val;
             setNum('inp-cm', val, 2);
@@ -1101,12 +1287,30 @@
 
         function syncFov(v) { setFov(v); }
 
+        function setWalkSpeed(v) {
+            const val = clamp(parseFloat(v) || 7.5, 0.5, 30.0);
+            config.advanced.walkSpeed = val;
+            setNum('inp-walk-spd', val, 2);
+            const r = getEl('inp-walk-spd-r');
+            if (r) r.value = val;
+        }
+
+        function setFlySpeed(v) {
+            const val = clamp(parseFloat(v) || 7.5, 0.5, 50.0);
+            config.advanced.flySpeed = val;
+            setNum('inp-fly-spd', val, 2);
+            const r = getEl('inp-fly-spd-r');
+            if (r) r.value = val;
+        }
+
         const GLOBAL_NUM_HANDLERS = {
             'inp-dpi': setDpi,
             'inp-cm': setCm,
             'inp-fov': setFov,
             'inp-height': setHeight,
-            'inp-crosshair-opacity': setCrosshairOpacity
+            'inp-crosshair-opacity': setCrosshairOpacity,
+            'inp-walk-spd': setWalkSpeed,
+            'inp-fly-spd': setFlySpeed
         };
 
         function dispatchGlobalInput(id, v) {
@@ -1130,9 +1334,9 @@
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            const freq = (part === 'head') ? 1250 : 880;
+            const freq = (part === 'head') ? 1250 : (part === 'box' ? 520 : 880);
             osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(freq + 400, audioCtx.currentTime + 0.06);
+            osc.frequency.exponentialRampToValueAtTime(freq + (part === 'box' ? 120 : 400), audioCtx.currentTime + 0.06);
             gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
             osc.connect(gain);
@@ -1312,11 +1516,13 @@
         }
 
         // ============================================================
-        // 6. 假人与球体模型
+        // 6. 目标模型与形态 (重构：支持头部/身体 长宽高独立 + 锁定)
         // ============================================================
         const SPHERE_GEO = new THREE.SphereGeometry(1, 48, 48);
         const HEAD_GEO = new THREE.SphereGeometry(1, 48, 48);
         const BODY_GEO = new THREE.CylinderGeometry(0.5, 0.5, 1, 48);
+        const BOX_UNIT_GEO = new THREE.BoxGeometry(1, 1, 1);
+        const BOX_UNIT_EDGES = new THREE.EdgesGeometry(BOX_UNIT_GEO);
 
         function disposeMaterialOnly(obj) {
             if (obj.material) {
@@ -1325,6 +1531,7 @@
             }
         }
 
+        // ========== 核心重构：rebuildMannequinMesh 支持 headDepthCm / bodyDepthCm ==========
         function rebuildMannequinMesh(t) {
             while (t.dummyGroup.children.length) {
                 const obj = t.dummyGroup.children[0];
@@ -1333,35 +1540,39 @@
                 t.dummyGroup.remove(obj);
             }
 
-            const headRadiusX = (t.headWidthCm / 100) / 2;
-            const headRadiusY = (t.headHeightCm / 100) / 2;
-            const bodyWidth = t.bodyWidthCm / 100;
-            const bodyHeight = t.bodyHeightCm / 100;
-            const bodyDepth = Math.max(0.15, bodyWidth * (2.2 / 3.38));
+            // 头部：宽 (X) / 高 (Y) / 深 (Z) 完全独立，默认锁定状态 headDepthCm = headWidthCm
+            const headRX = (t.headWidthCm || 23) / 100 / 2;
+            const headRY = (t.headHeightCm || 29.44) / 100 / 2;
+            const headRZ = (t.headDepthCm !== undefined ? t.headDepthCm : (t.headWidthCm || 23)) / 100 / 2;
+
+            const bodyW = (t.bodyWidthCm || 38.87) / 100;
+            const bodyH = (t.bodyHeightCm || 156.17) / 100;
+            // 身体深度：若未定义则用宽度*比例，否则用独立值
+            const bodyD = (t.bodyDepthCm !== undefined ? t.bodyDepthCm : (t.bodyWidthCm || 38.87) * (2.2 / 3.38)) / 100;
+
             const neckGap = (t.neckGapCm || 6.325) / 100;
             const headOffX = (t.headOffsetX || 0) / 100;
             const headOffY = (t.headOffsetY || 0) / 100;
 
+            // ---- 头部 (椭球) ----
             const headMat = new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.25 });
             const head = new THREE.Mesh(HEAD_GEO, headMat);
-            head.scale.set(headRadiusX, headRadiusY, headRadiusX);
+            head.scale.set(headRX, headRY, headRZ);
             head.position.set(headOffX, headOffY, 0);
             head.castShadow = true;
             head.userData.part = 'head';
             t.dummyGroup.add(head);
 
-            const rx = headRadiusX,
-                ry = headRadiusY;
+            // ---- 颈部虚线 ----
+            const rx = headRX,
+                ry = headRY;
             const bodyTopRel = -neckGap - headOffY;
             const p = bodyTopRel / ry;
             let a0 = 0,
                 a1 = 0;
-            if (p >= 1) {
-                a1 = Math.PI * 2;
-            } else if (p <= -1) {
-                a0 = 0;
-                a1 = 0;
-            } else {
+            if (p >= 1) a1 = Math.PI * 2;
+            else if (p <= -1) { a0 = 0;
+                a1 = 0; } else {
                 a0 = Math.PI - Math.asin(p);
                 a1 = Math.PI * 2 + Math.asin(p);
             }
@@ -1389,10 +1600,11 @@
                 t.dummyGroup.add(dashLine);
             }
 
+            // ---- 身体 (椭圆柱) ----
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
             const body = new THREE.Mesh(BODY_GEO, bodyMat);
-            body.scale.set(bodyWidth, bodyHeight, bodyDepth);
-            body.position.set(0, -(neckGap + bodyHeight / 2), 0);
+            body.scale.set(bodyW, bodyH, bodyD);
+            body.position.set(0, -(neckGap + bodyH / 2), 0);
             body.castShadow = true;
             body.userData.part = 'body';
             t.dummyGroup.add(body);
@@ -1406,40 +1618,127 @@
             return mesh;
         }
 
-        // ★ 核心修改：切换形态时同步尺寸，使小球直径等于假人头高（上下直径）
         function setTargetShape(shape) {
             const oldShape = config.targetShape;
-            if (oldShape === shape) return; // 无需切换
+            if (oldShape === shape) return;
             config.targetShape = shape;
             getEl('btn-type-sphere').classList.toggle('active', shape === 'sphere');
             getEl('btn-type-dummy').classList.toggle('active', shape === 'dummy');
 
-            // 从假人切换到小球：小球直径 = 假人头高（上下直径）
             if (oldShape === 'dummy' && shape === 'sphere') {
                 config.targets.forEach(t => {
-                    // 头高 = 29.44 * (t.sizeCm / 23.0)
                     const headHeight = 29.44 * (t.sizeCm / 23.0);
-                    t.sizeCm = headHeight; // 球直径 = 头高
+                    t.sizeCm = headHeight;
                 });
-            }
-            // 从小球切换到假人：假人头高 = 小球直径，保持比例
-            else if (oldShape === 'sphere' && shape === 'dummy') {
+            } else if (oldShape === 'sphere' && shape === 'dummy') {
                 config.targets.forEach(t => {
-                    // 使头高 = 球直径，即 29.44 * (newSizeCm / 23.0) = t.sizeCm
                     const newSizeCm = t.sizeCm * 23.0 / 29.44;
                     t.sizeCm = newSizeCm;
                     const ratio = newSizeCm / 23.0;
                     t.headWidthCm = 23.0 * ratio;
                     t.headHeightCm = 29.44 * ratio;
+                    t.headDepthCm = 23.0 * ratio; // 默认深=宽
                     t.bodyWidthCm = 38.87 * ratio;
                     t.bodyHeightCm = 156.17 * ratio;
+                    t.bodyDepthCm = 38.87 * ratio * (2.2 / 3.38);
                     t.neckGapCm = 6.325 * ratio;
                     rebuildMannequinMesh(t);
                 });
             }
-
             updateScene();
             rebuildTargetUI();
+        }
+
+        // ============================================================
+        // 7. 镜之边缘箱子与空间世界锚定
+        // ============================================================
+        function updateBoxMesh(box) {
+            const sx = Math.max(0.1, box.lenX);
+            const sy = Math.max(0.1, box.heightY);
+            const sz = Math.max(0.1, box.widthZ);
+
+            box.mesh.scale.set(sx, sy, sz);
+            box.edgeLine.scale.set(sx * 1.002, sy * 1.002, sz * 1.002);
+            box.mesh.material.color.set(box.color);
+
+            if (!box.anchorPos) {
+                box.anchorPos = config.advanced.playerPos.clone();
+                box.anchorYawDeg = getPlayerCurrentYawDeg();
+            }
+
+            const totalDeg = (box.anchorYawDeg || 0) + box.centerDeg;
+            const rad = (totalDeg * Math.PI) / 180;
+            const anchor = box.anchorPos;
+            const x = anchor.x + box.distMeters * Math.sin(rad);
+            const z = anchor.z - box.distMeters * Math.cos(rad);
+            const y = (sy / 2) + anchor.y + (box.yOffset || 0);
+
+            box.group.position.set(x, y, z);
+        }
+
+        function createMirrorEdgeBoxObject(boxData) {
+            const group = new THREE.Group();
+            const mat = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(boxData.color),
+                roughness: 0.28,
+                metalness: 0.1
+            });
+            const mesh = new THREE.Mesh(BOX_UNIT_GEO, mat);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.userData.part = 'box';
+            mesh.userData.boxRef = boxData;
+            group.add(mesh);
+
+            const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2, transparent: true, opacity: 0.85 });
+            const edgeLine = new THREE.LineSegments(BOX_UNIT_EDGES, edgeMat);
+            edgeLine.userData.ignoreRaycast = true;
+            group.add(edgeLine);
+
+            scene.add(group);
+            boxData.group = group;
+            boxData.mesh = mesh;
+            boxData.edgeLine = edgeLine;
+
+            updateBoxMesh(boxData);
+        }
+
+        // ============================================================
+        // 8. 碰撞检测与场景解耦更新
+        // ============================================================
+        function checkCollisionWithBoxes(tx, ty, tz, radius, halfHeight = 0) {
+            for (const box of config.boxes) {
+                if (!box.group) continue;
+                const bx = box.group.position.x;
+                const by = box.group.position.y;
+                const bz = box.group.position.z;
+                const hx = box.lenX / 2;
+                const hy = box.heightY / 2;
+                const hz = box.widthZ / 2;
+
+                const bMinX = bx - hx,
+                    bMaxX = bx + hx;
+                const bMinY = by - hy,
+                    bMaxY = by + hy;
+                const bMinZ = bz - hz,
+                    bMaxZ = bz + hz;
+
+                const tMinX = tx - radius,
+                    tMaxX = tx + radius;
+                const tMinY = ty - halfHeight,
+                    tMaxY = ty + halfHeight;
+                const tMinZ = tz - radius,
+                    tMaxZ = tz + radius;
+
+                const overlapX = (tMinX <= bMaxX && tMaxX >= bMinX);
+                const overlapY = (tMinY <= bMaxY && tMaxY >= bMinY);
+                const overlapZ = (tMinZ <= bMaxZ && tMaxZ >= bMinZ);
+
+                if (overlapX && overlapY && overlapZ) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         function updateScene() {
@@ -1450,31 +1749,55 @@
                 t.sphereMesh.visible = isSphere;
                 t.dummyGroup.visible = isDummy;
 
+                if (!t.anchorPos) {
+                    t.anchorPos = config.advanced.playerPos.clone();
+                    t.anchorYawDeg = getPlayerCurrentYawDeg();
+                }
+                const anchor = t.anchorPos;
+
                 if (isSphere) {
                     const r = (t.sizeCm / 100) / 2;
                     t.sphereMesh.scale.set(r, r, r);
-                    t.rootGroup.position.y = config.viewHeight + (t.yOffset || 0);
+                    t.rootGroup.position.y = config.viewHeight + anchor.y + (t.yOffset || 0);
                 } else {
                     const bodyH = t.bodyHeightCm / 100;
                     const neckGap = (t.neckGapCm || 6.325) / 100;
                     t.groundY = neckGap + bodyH + (t.yOffset || 0);
-                    t.rootGroup.position.y = t.groundY;
+                    t.rootGroup.position.y = t.groundY + anchor.y;
+                }
+
+                if (!t.move.enabled) {
+                    const totalDeg = (t.anchorYawDeg || 0) + t.centerDeg;
+                    const centerRad = (totalDeg * Math.PI) / 180;
+                    t.rootGroup.position.x = anchor.x + t.distMeters * Math.sin(centerRad);
+                    t.rootGroup.position.z = anchor.z - t.distMeters * Math.cos(centerRad);
+
+                    if (isDummy && t.dummyGroup.visible) {
+                        const dx = anchor.x - t.rootGroup.position.x;
+                        const dz = anchor.z - t.rootGroup.position.z;
+                        t.rootGroup.rotation.y = Math.atan2(dx, dz);
+                    }
                 }
             });
 
-            camera.position.y = config.viewHeight;
+            config.boxes.forEach(b => updateBoxMesh(b));
+
+            camera.position.set(
+                config.advanced.playerPos.x,
+                config.viewHeight + config.advanced.playerPos.y,
+                config.advanced.playerPos.z
+            );
             camera.fov = hFovToVfov(config.fovHorizontal, window.innerWidth / window.innerHeight);
             camera.updateProjectionMatrix();
             updateHorizon(config.viewHeight);
         }
 
         // ============================================================
-        // 7. 视角移动与准星判定（含调试模式）
+        // 9. 输入、视角与准星判定
         // ============================================================
         let yaw = 0.0,
             pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-
         let debugMode = false;
 
         const debugToggle = getEl('debug-mode-toggle');
@@ -1495,11 +1818,20 @@
                     debugHorizonGuide.classList.remove('active');
                 }
             });
-            debugToggle.checked = false;
-            debugMode = false;
-            debugIndicator.classList.remove('active');
-            debugHorizonGuide.classList.remove('active');
         }
+
+        const ALLOWED_KEYS = new Set(['KeyW', 'KeyS', 'KeyA', 'KeyD', 'Space', 'ShiftLeft']);
+        const keysDown = new Set();
+        window.addEventListener('keydown', (e) => {
+            if (ALLOWED_KEYS.has(e.code)) {
+                keysDown.add(e.code);
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (ALLOWED_KEYS.has(e.code)) {
+                keysDown.delete(e.code);
+            }
+        });
 
         window.addEventListener('pointermove', (e) => {
             if (document.pointerLockElement !== document.body) return;
@@ -1573,12 +1905,16 @@
                 }
             }
 
+            for (const b of config.boxes) {
+                if (b.mesh && b.mesh.visible) activeRaycastObjects.push(b.mesh);
+            }
+
             const intersects = raycaster.intersectObjects(activeRaycastObjects, false);
             if (intersects.length > 0) {
                 updateCrosshairUI(true);
                 const hitObject = intersects[0].object;
                 let hitTarget = null;
-                let hitPart = 'body';
+                let hitPart = hitObject.userData.part || 'body';
 
                 for (const t of config.targets) {
                     if (t.rootGroup === hitObject.parent || t.rootGroup === hitObject.parent?.parent) {
@@ -1586,11 +1922,7 @@
                         break;
                     }
                 }
-                if (hitTarget) {
-                    if (hitObject.userData.part) hitPart = hitObject.userData.part;
-                    return { target: hitTarget, part: hitPart, object: hitObject };
-                }
-                return null;
+                return { target: hitTarget, part: hitPart, object: hitObject };
             } else {
                 updateCrosshairUI(false);
                 return null;
@@ -1601,16 +1933,20 @@
             if (document.pointerLockElement === document.body && e.button === 0) {
                 const hitResult = checkAim();
                 if (hitResult) {
-                    const { target, part } = hitResult;
+                    const { target, part, object } = hitResult;
                     playHitFeedback(part);
-                    if (part === 'head') {
+                    if (part === 'head' && target) {
                         const headMesh = target.dummyGroup.children.find(c => c.userData.part === 'head' && c.isMesh);
                         if (headMesh) {
                             const origColor = headMesh.material.color.getHex();
                             headMesh.material.color.setHex(0xffffff);
                             setTimeout(() => { headMesh.material.color.setHex(origColor); }, 80);
                         }
-                    } else {
+                    } else if (part === 'box') {
+                        const origColor = object.material.color.getHex();
+                        object.material.color.setHex(0xffffff);
+                        setTimeout(() => { object.material.color.setHex(origColor); }, 70);
+                    } else if (target) {
                         const base = target.rootGroup.scale.x;
                         target.rootGroup.scale.setScalar(base * 1.18);
                         setTimeout(() => target.rootGroup.scale.setScalar(base), 70);
@@ -1620,9 +1956,10 @@
         });
 
         // ============================================================
-        // 8. 动态目标管理与 UI 绑定
+        // 10. 目标 UI 构建与控制 (重构：长宽高 + 锁定)
         // ============================================================
         const container1 = getEl('targets-container-1');
+        const boxesContainer = getEl('boxes-container');
 
         function bindControl({ numEl, rangeEl = null, btnMinus = null, btnPlus = null, step = 1, apply }) {
             if (btnMinus) btnMinus.addEventListener('click', () => apply((parseFloat(numEl.value) || 0) - step));
@@ -1646,6 +1983,10 @@
 
                 let dimensionControlsHTML = '';
                 if (isDummy) {
+                    // ---- 假人：等比总缩放 + 头部/身体 长宽高独立 (带锁定) ----
+                    const hLocked = t.headSizeLocked !== undefined ? t.headSizeLocked : true;
+                    const bLocked = t.bodySizeLocked !== undefined ? t.bodySizeLocked : true;
+
                     dimensionControlsHTML = `
                         <div class="ctrl-row">
                             <label>等比总缩放 (cm)</label>
@@ -1656,32 +1997,65 @@
                                 <button class="step-btn" id="btn-t${i}-s-plus">+</button>
                             </div>
                         </div>
-                        <div class="ctrl-row">
-                            <label>头部宽/高(cm)</label>
-                            <div class="stepper-box" style="flex:1;">
-                                <button class="step-btn" id="btn-t${i}-hw-minus">−</button>
-                                <input type="number" class="num-input" style="flex:1;width:auto;" id="inp-t${i}-hw" value="${t.headWidthCm.toFixed(1)}" step="0.5" title="头宽" />
-                                <button class="step-btn" id="btn-t${i}-hw-plus">+</button>
+
+                        <div class="dim-group">
+                            <div class="dim-group-title">
+                                <span style="color:${t.color};">● 头部 (长×宽×高)</span>
+                                <button class="size-lock-btn ${hLocked ? 'active-lock' : 'unlocked'}" id="btn-t${i}-hsize-lock">
+                                    ${hLocked ? '🔒 锁定' : '🔓 解锁'}
+                                </button>
                             </div>
-                            <div class="stepper-box" style="flex:1;">
-                                <button class="step-btn" id="btn-t${i}-hh-minus">−</button>
-                                <input type="number" class="num-input" style="flex:1;width:auto;" id="inp-t${i}-hh" value="${t.headHeightCm.toFixed(1)}" step="0.5" title="头高" />
-                                <button class="step-btn" id="btn-t${i}-hh-plus">+</button>
+                            <div class="dim-row">
+                                <label>宽</label>
+                                <div class="stepper-box">
+                                    <button class="step-btn" id="btn-t${i}-hw-minus">−</button>
+                                    <input type="number" class="num-input" id="inp-t${i}-hw" value="${t.headWidthCm.toFixed(1)}" step="0.5" />
+                                    <button class="step-btn" id="btn-t${i}-hw-plus">+</button>
+                                </div>
+                                <label>高</label>
+                                <div class="stepper-box">
+                                    <button class="step-btn" id="btn-t${i}-hh-minus">−</button>
+                                    <input type="number" class="num-input" id="inp-t${i}-hh" value="${t.headHeightCm.toFixed(1)}" step="0.5" />
+                                    <button class="step-btn" id="btn-t${i}-hh-plus">+</button>
+                                </div>
+                                <label>深</label>
+                                <div class="stepper-box">
+                                    <button class="step-btn" id="btn-t${i}-hd-minus">−</button>
+                                    <input type="number" class="num-input" id="inp-t${i}-hd" value="${(t.headDepthCm !== undefined ? t.headDepthCm : t.headWidthCm).toFixed(1)}" step="0.5" />
+                                    <button class="step-btn" id="btn-t${i}-hd-plus">+</button>
+                                </div>
                             </div>
                         </div>
-                        <div class="ctrl-row">
-                            <label>身体宽/高(cm)</label>
-                            <div class="stepper-box" style="flex:1;">
-                                <button class="step-btn" id="btn-t${i}-bw-minus">−</button>
-                                <input type="number" class="num-input" style="flex:1;width:auto;" id="inp-t${i}-bw" value="${t.bodyWidthCm.toFixed(1)}" step="1" title="身宽" />
-                                <button class="step-btn" id="btn-t${i}-bw-plus">+</button>
+
+                        <div class="dim-group">
+                            <div class="dim-group-title">
+                                <span style="color:#64748b;">● 身体 (长×宽×高)</span>
+                                <button class="size-lock-btn ${bLocked ? 'active-lock' : 'unlocked'}" id="btn-t${i}-bsize-lock">
+                                    ${bLocked ? '🔒 锁定' : '🔓 解锁'}
+                                </button>
                             </div>
-                            <div class="stepper-box" style="flex:1;">
-                                <button class="step-btn" id="btn-t${i}-bh-minus">−</button>
-                                <input type="number" class="num-input" style="flex:1;width:auto;" id="inp-t${i}-bh" value="${t.bodyHeightCm.toFixed(1)}" step="1" title="身高" />
-                                <button class="step-btn" id="btn-t${i}-bh-plus">+</button>
+                            <div class="dim-row">
+                                <label>宽</label>
+                                <div class="stepper-box">
+                                    <button class="step-btn" id="btn-t${i}-bw-minus">−</button>
+                                    <input type="number" class="num-input" id="inp-t${i}-bw" value="${t.bodyWidthCm.toFixed(1)}" step="1" />
+                                    <button class="step-btn" id="btn-t${i}-bw-plus">+</button>
+                                </div>
+                                <label>高</label>
+                                <div class="stepper-box">
+                                    <button class="step-btn" id="btn-t${i}-bh-minus">−</button>
+                                    <input type="number" class="num-input" id="inp-t${i}-bh" value="${t.bodyHeightCm.toFixed(1)}" step="1" />
+                                    <button class="step-btn" id="btn-t${i}-bh-plus">+</button>
+                                </div>
+                                <label>深</label>
+                                <div class="stepper-box">
+                                    <button class="step-btn" id="btn-t${i}-bd-minus">−</button>
+                                    <input type="number" class="num-input" id="inp-t${i}-bd" value="${(t.bodyDepthCm !== undefined ? t.bodyDepthCm : t.bodyWidthCm * (2.2/3.38)).toFixed(1)}" step="1" />
+                                    <button class="step-btn" id="btn-t${i}-bd-plus">+</button>
+                                </div>
                             </div>
                         </div>
+
                         <div class="ctrl-row">
                             <label>头部锁定</label>
                             <button class="lock-btn ${t.headLocked ? '' : 'unlocked'}" id="btn-t${i}-headlock">
@@ -1770,7 +2144,7 @@
                             <button class="btn-move-toggle ${t.move.visualAngleLock ? 'active-move' : ''}" id="btn-t${i}-va-toggle">
                                 ${t.move.visualAngleLock ? '与弧形一致: 开' : '与弧形一致: 关'}
                             </button>
-                            <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">速度不变 · 上限 ±67.5°(合计135°)</span>
+                            <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">速度不变 · 上限 ±67.5°</span>
                         </div>
                         <div class="ctrl-row">
                             <label style="color:${t.color};">• 摆动角跨 (°)</label>
@@ -1799,30 +2173,11 @@
             updateScene();
         }
 
-        function updateTargetSpeedHint(t, i) {
-            const hint = getEl(`lbl-t${i}-hint`);
-            if (!hint) return;
-            const D = t.distMeters;
-            const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
-            const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
-            const linearSpan = D * totalSpanRad;
-
-            if (t.move.mode === 'linear' && t.move.visualAngleLock) {
-                const effHalf = Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG);
-                hint.innerHTML =
-                    `• 方位角范围与弧形一致：移动速度恒定 <strong>${linearSpeed.toFixed(2)} m/s</strong>，最远点方位角 ±${effHalf.toFixed(1)}°（直线上限 ±67.5°，合计 135°）`;
-            } else if (t.move.mode === 'linear') {
-                hint.innerHTML =
-                    `• 平面直线横移：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">等效行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
-            } else {
-                hint.innerHTML =
-                    `• 弧形角度围绕：当前 ${D.toFixed(1)}m <span style="white-space:nowrap;">对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)}&nbsp;m/s</strong></span>，<span style="white-space:nowrap;">弧线行程 ≈ <strong>${linearSpan.toFixed(2)}&nbsp;m</strong></span>`;
-            }
-        }
-
+        // ========== 绑定目标控件 (含长宽高锁定逻辑) ==========
         function setupDynamicTargetBindings(t, i) {
             const isDummy = config.targetShape === 'dummy';
 
+            // ---- 等比总缩放 ----
             const sR = getEl(`inp-t${i}-s-r`),
                 sN = getEl(`inp-t${i}-s`);
             bindControl({
@@ -1841,14 +2196,25 @@
                         const ratio = val / 23.0;
                         t.headWidthCm = 23.0 * ratio;
                         t.headHeightCm = 29.44 * ratio;
+                        t.headDepthCm = 23.0 * ratio;
                         t.bodyWidthCm = 38.87 * ratio;
                         t.bodyHeightCm = 156.17 * ratio;
+                        t.bodyDepthCm = 38.87 * ratio * (2.2 / 3.38);
                         t.neckGapCm = 6.325 * ratio;
 
-                        getEl(`inp-t${i}-hw`).value = t.headWidthCm.toFixed(1);
-                        getEl(`inp-t${i}-hh`).value = t.headHeightCm.toFixed(1);
-                        getEl(`inp-t${i}-bw`).value = t.bodyWidthCm.toFixed(1);
-                        getEl(`inp-t${i}-bh`).value = t.bodyHeightCm.toFixed(1);
+                        // 刷新UI显示
+                        const hw = getEl(`inp-t${i}-hw`);
+                        const hh = getEl(`inp-t${i}-hh`);
+                        const hd = getEl(`inp-t${i}-hd`);
+                        const bw = getEl(`inp-t${i}-bw`);
+                        const bh = getEl(`inp-t${i}-bh`);
+                        const bd = getEl(`inp-t${i}-bd`);
+                        if (hw) hw.value = t.headWidthCm.toFixed(1);
+                        if (hh) hh.value = t.headHeightCm.toFixed(1);
+                        if (hd) hd.value = t.headDepthCm.toFixed(1);
+                        if (bw) bw.value = t.bodyWidthCm.toFixed(1);
+                        if (bh) bh.value = t.bodyHeightCm.toFixed(1);
+                        if (bd) bd.value = t.bodyDepthCm.toFixed(1);
 
                         rebuildMannequinMesh(t);
                     }
@@ -1857,27 +2223,171 @@
             });
 
             if (isDummy) {
-                const bindDim = (prop, idSuffix, stepVal) => {
-                    const inp = getEl(`inp-t${i}-${idSuffix}`);
-                    bindControl({
-                        numEl: inp,
-                        btnMinus: getEl(`btn-t${i}-${idSuffix}-minus`),
-                        btnPlus: getEl(`btn-t${i}-${idSuffix}-plus`),
-                        step: stepVal,
-                        apply: (v) => {
-                            const val = Math.max(1.0, parseFloat(v) || 10);
-                            inp.value = val.toFixed(1);
-                            t[prop] = val;
-                            rebuildMannequinMesh(t);
-                            updateScene();
-                        }
-                    });
-                };
-                bindDim('headWidthCm', 'hw', 0.5);
-                bindDim('headHeightCm', 'hh', 0.5);
-                bindDim('bodyWidthCm', 'bw', 1.0);
-                bindDim('bodyHeightCm', 'bh', 1.0);
+                // ---- 头部 宽/高/深 ----
+                const hwN = getEl(`inp-t${i}-hw`),
+                    hhN = getEl(`inp-t${i}-hh`),
+                    hdN = getEl(`inp-t${i}-hd`);
+                const hwMinus = getEl(`btn-t${i}-hw-minus`),
+                    hwPlus = getEl(`btn-t${i}-hw-plus`);
+                const hhMinus = getEl(`btn-t${i}-hh-minus`),
+                    hhPlus = getEl(`btn-t${i}-hh-plus`);
+                const hdMinus = getEl(`btn-t${i}-hd-minus`),
+                    hdPlus = getEl(`btn-t${i}-hd-plus`);
 
+                // 头部尺寸锁定按钮
+                const hLockBtn = getEl(`btn-t${i}-hsize-lock`);
+                const setHeadSizeLock = (locked) => {
+                    t.headSizeLocked = locked;
+                    hLockBtn.className = `size-lock-btn ${locked ? 'active-lock' : 'unlocked'}`;
+                    hLockBtn.innerHTML = locked ? '🔒 锁定' : '🔓 解锁';
+                    // 锁定：深度跟随宽度
+                    if (locked) {
+                        t.headDepthCm = t.headWidthCm;
+                        if (hdN) hdN.value = t.headDepthCm.toFixed(1);
+                        rebuildMannequinMesh(t);
+                        updateScene();
+                    }
+                };
+                if (hLockBtn) {
+                    hLockBtn.addEventListener('click', () => {
+                        setHeadSizeLock(!t.headSizeLocked);
+                    });
+                }
+
+                // 头部宽度
+                bindControl({
+                    numEl: hwN,
+                    btnMinus: hwMinus,
+                    btnPlus: hwPlus,
+                    step: 0.5,
+                    apply: (v) => {
+                        const val = Math.max(0.5, parseFloat(v) || 23);
+                        hwN.value = val.toFixed(1);
+                        t.headWidthCm = val;
+                        if (t.headSizeLocked) {
+                            t.headDepthCm = val;
+                            if (hdN) hdN.value = val.toFixed(1);
+                        }
+                        rebuildMannequinMesh(t);
+                        updateScene();
+                    }
+                });
+
+                // 头部高度
+                bindControl({
+                    numEl: hhN,
+                    btnMinus: hhMinus,
+                    btnPlus: hhPlus,
+                    step: 0.5,
+                    apply: (v) => {
+                        const val = Math.max(0.5, parseFloat(v) || 29.44);
+                        hhN.value = val.toFixed(1);
+                        t.headHeightCm = val;
+                        rebuildMannequinMesh(t);
+                        updateScene();
+                    }
+                });
+
+                // 头部深度 (仅在解锁时可用，但始终可调)
+                bindControl({
+                    numEl: hdN,
+                    btnMinus: hdMinus,
+                    btnPlus: hdPlus,
+                    step: 0.5,
+                    apply: (v) => {
+                        const val = Math.max(0.5, parseFloat(v) || 23);
+                        hdN.value = val.toFixed(1);
+                        t.headDepthCm = val;
+                        // 如果锁定状态，自动修正宽度同步
+                        if (t.headSizeLocked) {
+                            t.headWidthCm = val;
+                            if (hwN) hwN.value = val.toFixed(1);
+                        }
+                        rebuildMannequinMesh(t);
+                        updateScene();
+                    }
+                });
+
+                // ---- 身体 宽/高/深 ----
+                const bwN = getEl(`inp-t${i}-bw`),
+                    bhN = getEl(`inp-t${i}-bh`),
+                    bdN = getEl(`inp-t${i}-bd`);
+                const bwMinus = getEl(`btn-t${i}-bw-minus`),
+                    bwPlus = getEl(`btn-t${i}-bw-plus`);
+                const bhMinus = getEl(`btn-t${i}-bh-minus`),
+                    bhPlus = getEl(`btn-t${i}-bh-plus`);
+                const bdMinus = getEl(`btn-t${i}-bd-minus`),
+                    bdPlus = getEl(`btn-t${i}-bd-plus`);
+
+                const bLockBtn = getEl(`btn-t${i}-bsize-lock`);
+                const setBodySizeLock = (locked) => {
+                    t.bodySizeLocked = locked;
+                    bLockBtn.className = `size-lock-btn ${locked ? 'active-lock' : 'unlocked'}`;
+                    bLockBtn.innerHTML = locked ? '🔒 锁定' : '🔓 解锁';
+                    if (locked) {
+                        t.bodyDepthCm = t.bodyWidthCm * (2.2 / 3.38);
+                        if (bdN) bdN.value = t.bodyDepthCm.toFixed(1);
+                        rebuildMannequinMesh(t);
+                        updateScene();
+                    }
+                };
+                if (bLockBtn) {
+                    bLockBtn.addEventListener('click', () => {
+                        setBodySizeLock(!t.bodySizeLocked);
+                    });
+                }
+
+                bindControl({
+                    numEl: bwN,
+                    btnMinus: bwMinus,
+                    btnPlus: bwPlus,
+                    step: 1.0,
+                    apply: (v) => {
+                        const val = Math.max(0.5, parseFloat(v) || 38.87);
+                        bwN.value = val.toFixed(1);
+                        t.bodyWidthCm = val;
+                        if (t.bodySizeLocked) {
+                            t.bodyDepthCm = val * (2.2 / 3.38);
+                            if (bdN) bdN.value = t.bodyDepthCm.toFixed(1);
+                        }
+                        rebuildMannequinMesh(t);
+                        updateScene();
+                    }
+                });
+
+                bindControl({
+                    numEl: bhN,
+                    btnMinus: bhMinus,
+                    btnPlus: bhPlus,
+                    step: 1.0,
+                    apply: (v) => {
+                        const val = Math.max(0.5, parseFloat(v) || 156.17);
+                        bhN.value = val.toFixed(1);
+                        t.bodyHeightCm = val;
+                        rebuildMannequinMesh(t);
+                        updateScene();
+                    }
+                });
+
+                bindControl({
+                    numEl: bdN,
+                    btnMinus: bdMinus,
+                    btnPlus: bdPlus,
+                    step: 1.0,
+                    apply: (v) => {
+                        const val = Math.max(0.5, parseFloat(v) || 25.3);
+                        bdN.value = val.toFixed(1);
+                        t.bodyDepthCm = val;
+                        if (t.bodySizeLocked) {
+                            t.bodyWidthCm = val / (2.2 / 3.38);
+                            if (bwN) bwN.value = t.bodyWidthCm.toFixed(1);
+                        }
+                        rebuildMannequinMesh(t);
+                        updateScene();
+                    }
+                });
+
+                // ---- 头部偏移锁定 (原有) ----
                 const lockBtn = getEl(`btn-t${i}-headlock`);
                 const hyR = getEl(`inp-t${i}-hy-r`),
                     hyN = getEl(`inp-t${i}-hy`);
@@ -1937,8 +2447,15 @@
                     }
                 });
                 setHeadLock(t.headLocked);
+
+                // 初始化深度默认值
+                if (t.headDepthCm === undefined) t.headDepthCm = t.headWidthCm;
+                if (t.bodyDepthCm === undefined) t.bodyDepthCm = t.bodyWidthCm * (2.2 / 3.38);
+                if (t.headSizeLocked === undefined) t.headSizeLocked = true;
+                if (t.bodySizeLocked === undefined) t.bodySizeLocked = true;
             }
 
+            // ---- 前后距离 ----
             const zR = getEl(`inp-t${i}-z-r`),
                 zN = getEl(`inp-t${i}-z`);
             bindControl({
@@ -1952,11 +2469,16 @@
                     zR.value = val;
                     zN.value = val.toFixed(2);
                     t.distMeters = val;
+                    if (!t.move.enabled) {
+                        t.anchorPos = config.advanced.playerPos.clone();
+                        t.anchorYawDeg = getPlayerCurrentYawDeg();
+                    }
                     updateScene();
                     updateTargetSpeedHint(t, i);
                 }
             });
 
+            // ---- 左右方位 ----
             const aR = getEl(`inp-t${i}-a-r`),
                 aN = getEl(`inp-t${i}-a`);
             bindControl({
@@ -1970,10 +2492,15 @@
                     aR.value = val;
                     aN.value = val.toFixed(2);
                     t.centerDeg = val;
+                    if (!t.move.enabled) {
+                        t.anchorPos = config.advanced.playerPos.clone();
+                        t.anchorYawDeg = getPlayerCurrentYawDeg();
+                    }
                     updateScene();
                 }
             });
 
+            // ---- 上下微调 ----
             const yR = getEl(`inp-t${i}-y-r`),
                 yN = getEl(`inp-t${i}-y`);
             bindControl({
@@ -1987,18 +2514,62 @@
                     yR.value = val;
                     yN.value = val.toFixed(2);
                     t.yOffset = val;
+                    if (!t.move.enabled) {
+                        t.anchorPos = config.advanced.playerPos.clone();
+                        t.anchorYawDeg = getPlayerCurrentYawDeg();
+                    }
                     updateScene();
                 }
             });
 
+            // ---- 运动开关 ----
             const btnMoveToggle = getEl(`btn-t${i}-move-toggle`);
             btnMoveToggle.addEventListener('click', () => {
                 t.move.enabled = !t.move.enabled;
+
+                if (t.move.enabled) {
+                    const targetX = t.rootGroup.position.x;
+                    const targetY = t.rootGroup.position.y;
+                    const targetZ = t.rootGroup.position.z;
+                    const px = config.advanced.playerPos.x;
+                    const pz = config.advanced.playerPos.z;
+                    let dx = targetX - px;
+                    let dz = targetZ - pz;
+                    let dist = Math.hypot(dx, dz);
+                    if (dist < 0.001) {
+                        dist = t.distMeters || 10;
+                        const rad = ((t.anchorYawDeg || 0) * Math.PI) / 180;
+                        dx = dist * Math.sin(rad);
+                        dz = -dist * Math.cos(rad);
+                    }
+                    const sightAngleRad = Math.atan2(dx, -dz);
+
+                    t.motion = {
+                        centerX: targetX,
+                        centerY: targetY,
+                        centerZ: targetZ,
+                        originPlayerPos: new THREE.Vector3(px, 0, pz),
+                        tangentX: Math.cos(sightAngleRad),
+                        tangentZ: Math.sin(sightAngleRad),
+                        baseRad: sightAngleRad,
+                        radius: dist,
+                        fixedRotationY: Math.atan2(-dx, -dz)
+                    };
+                    t.move.currentLinearOffset = 0;
+                    t.move.currentOffsetDeg = 0;
+                    t.move.dir = 1;
+
+                    if (config.targetShape === 'dummy' && t.dummyGroup.visible) {
+                        t.rootGroup.rotation.y = t.motion.fixedRotationY;
+                    }
+                }
+
                 btnMoveToggle.classList.toggle('active-move', t.move.enabled);
                 btnMoveToggle.innerHTML = t.move.enabled ? '运动: 开启' : '运动: 关闭';
                 getEl(`t${i}-move-box`).style.display = t.move.enabled ? 'block' : 'none';
             });
 
+            // ---- 运动模式 ----
             const btnLinear = getEl(`btn-t${i}-m-linear`),
                 btnOrbit = getEl(`btn-t${i}-m-orbit`);
             const vaRow = getEl(`va-t${i}-row`);
@@ -2030,6 +2601,7 @@
                 updateTargetSpeedHint(t, i);
             });
 
+            // ---- 运动参数 ----
             const rN = getEl(`inp-t${i}-rng`);
             bindControl({
                 numEl: rN,
@@ -2059,6 +2631,30 @@
             });
         }
 
+        function updateTargetSpeedHint(t, i) {
+            const hint = getEl(`lbl-t${i}-hint`);
+            if (!hint) return;
+            const D = t.distMeters;
+            const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
+            const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
+            const linearSpan = D * totalSpanRad;
+
+            if (t.move.mode === 'linear' && t.move.visualAngleLock) {
+                const effHalf = Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG);
+                hint.innerHTML =
+                    `• 方位角范围与弧形一致：移动速度恒定 <strong>${linearSpeed.toFixed(2)} m/s</strong>，最远点方位角 ±${effHalf.toFixed(1)}°（直线上限 ±67.5°）`;
+            } else if (t.move.mode === 'linear') {
+                hint.innerHTML =
+                    `• 平面直线横移：当前 ${D.toFixed(1)}m 对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，行程 ≈ <strong>${linearSpan.toFixed(2)} m</strong>`;
+            } else {
+                hint.innerHTML =
+                    `• 弧形角度围绕：当前 ${D.toFixed(1)}m 对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，弧线行程 ≈ <strong>${linearSpan.toFixed(2)} m</strong>`;
+            }
+        }
+
+        // ============================================================
+        // 11. 目标增删
+        // ============================================================
         function addNewTarget() {
             if (config.targets.length >= 9) { alert("目前支持上限为 9 个目标！"); return; }
             const i = config.targets.length;
@@ -2084,12 +2680,16 @@
                 sizeCm: 23.0,
                 headWidthCm: 23.0,
                 headHeightCm: 29.44,
+                headDepthCm: 23.0, // 新增：头部深度
                 bodyWidthCm: 38.87,
                 bodyHeightCm: 156.17,
+                bodyDepthCm: 38.87 * (2.2 / 3.38), // 新增：身体深度
                 neckGapCm: 6.325,
                 headLocked: true,
                 headOffsetX: 0,
                 headOffsetY: 0,
+                headSizeLocked: true, // 新增：头部尺寸锁定
+                bodySizeLocked: true, // 新增：身体尺寸锁定
                 distMeters: 10,
                 centerDeg: defaultDeg,
                 color,
@@ -2098,6 +2698,9 @@
                 dummyGroup,
                 yOffset: 0,
                 groundY: 0,
+                anchorPos: config.advanced.playerPos.clone(),
+                anchorYawDeg: getPlayerCurrentYawDeg(),
+                motion: null,
                 move: {
                     enabled: false,
                     mode: 'linear',
@@ -2119,8 +2722,7 @@
             const t = config.targets.pop();
             t.rootGroup.traverse(child => {
                 disposeMaterialOnly(child);
-                if (child.geometry && child.geometry !== HEAD_GEO && child.geometry !== BODY_GEO && child.geometry !==
-                    SPHERE_GEO) {
+                if (child.geometry && child.geometry !== HEAD_GEO && child.geometry !== BODY_GEO && child.geometry !== SPHERE_GEO) {
                     child.geometry.dispose();
                 }
             });
@@ -2129,7 +2731,327 @@
         }
 
         // ============================================================
-        // 9. 生命周期
+        // 12. 箱子 UI 渲染与逻辑 (保持不变)
+        // ============================================================
+        function rebuildBoxesUI() {
+            boxesContainer.innerHTML = '';
+            const lblCount = getEl('lbl-box-count');
+            if (lblCount) lblCount.innerText = `${config.boxes.length} / 9 个`;
+
+            config.boxes.forEach((b, i) => {
+                const card = document.createElement('div');
+                card.className = 'section-card';
+                card.style.marginTop = '6px';
+
+                card.innerHTML = `
+                    <div class="section-header">
+                        <span class="section-label" style="color:${b.color};">箱子 ${b.id}</span>
+                        <button class="lock-btn ${b.sizeLocked ? '' : 'unlocked'}" id="btn-box-${i}-lock">
+                            ${b.sizeLocked ? '🔒 尺寸联动' : '🔓 自由长宽高'}
+                        </button>
+                    </div>
+
+                    <div style="font-size:0.6rem; font-weight:bold; color:#64748b; margin-bottom:2px;">跑酷涂装颜色:</div>
+                    <div class="swatches-grid-9" id="box-${i}-swatches" style="margin-bottom:6px;"></div>
+
+                    <div class="ctrl-row">
+                        <label>等比大小 (m)</label>
+                        <input type="range" id="inp-box-${i}-s-r" min="0.2" max="15.0" step="0.1" value="${b.uniformSize}" />
+                        <div class="stepper-box">
+                            <button class="step-btn" id="btn-box-${i}-s-m">−</button>
+                            <input type="number" class="num-input" id="inp-box-${i}-s" value="${b.uniformSize.toFixed(2)}" step="0.1" />
+                            <button class="step-btn" id="btn-box-${i}-s-p">+</button>
+                        </div>
+                    </div>
+
+                    <div class="ctrl-row">
+                        <label>长 X (m)</label>
+                        <input type="range" id="inp-box-${i}-x-r" min="0.2" max="15.0" step="0.1" value="${b.lenX}" ${b.sizeLocked ? 'disabled' : ''} />
+                        <div class="stepper-box">
+                            <button class="step-btn" id="btn-box-${i}-x-m" ${b.sizeLocked ? 'disabled' : ''}>−</button>
+                            <input type="number" class="num-input" id="inp-box-${i}-x" value="${b.lenX.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} />
+                            <button class="step-btn" id="btn-box-${i}-x-p" ${b.sizeLocked ? 'disabled' : ''}>+</button>
+                        </div>
+                    </div>
+
+                    <div class="ctrl-row">
+                        <label>宽 Z (m)</label>
+                        <input type="range" id="inp-box-${i}-z-r" min="0.2" max="15.0" step="0.1" value="${b.widthZ}" ${b.sizeLocked ? 'disabled' : ''} />
+                        <div class="stepper-box">
+                            <button class="step-btn" id="btn-box-${i}-z-m" ${b.sizeLocked ? 'disabled' : ''}>−</button>
+                            <input type="number" class="num-input" id="inp-box-${i}-z" value="${b.widthZ.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} />
+                            <button class="step-btn" id="btn-box-${i}-z-p" ${b.sizeLocked ? 'disabled' : ''}>+</button>
+                        </div>
+                    </div>
+
+                    <div class="ctrl-row">
+                        <label>高 Y (m)</label>
+                        <input type="range" id="inp-box-${i}-y-r" min="0.2" max="15.0" step="0.1" value="${b.heightY}" ${b.sizeLocked ? 'disabled' : ''} />
+                        <div class="stepper-box">
+                            <button class="step-btn" id="btn-box-${i}-y-m" ${b.sizeLocked ? 'disabled' : ''}>−</button>
+                            <input type="number" class="num-input" id="inp-box-${i}-y" value="${b.heightY.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} />
+                            <button class="step-btn" id="btn-box-${i}-y-p" ${b.sizeLocked ? 'disabled' : ''}>+</button>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="ctrl-row">
+                        <label>前后距离 (m)</label>
+                        <input type="range" id="inp-box-${i}-dist-r" min="1" max="60" step="0.5" value="${b.distMeters}" />
+                        <div class="stepper-box">
+                            <button class="step-btn" id="btn-box-${i}-dist-m">−</button>
+                            <input type="number" class="num-input" id="inp-box-${i}-dist" value="${b.distMeters.toFixed(2)}" step="0.5" />
+                            <button class="step-btn" id="btn-box-${i}-dist-p">+</button>
+                        </div>
+                    </div>
+
+                    <div class="ctrl-row">
+                        <label>左右方位 (°)</label>
+                        <input type="range" id="inp-box-${i}-deg-r" min="-180" max="180" step="0.5" value="${b.centerDeg}" />
+                        <div class="stepper-box">
+                            <button class="step-btn" id="btn-box-${i}-deg-m">−</button>
+                            <input type="number" class="num-input" id="inp-box-${i}-deg" value="${b.centerDeg.toFixed(2)}" step="0.5" />
+                            <button class="step-btn" id="btn-box-${i}-deg-p">+</button>
+                        </div>
+                    </div>
+
+                    <div class="ctrl-row">
+                        <label>上下位移 (m)</label>
+                        <input type="range" id="inp-box-${i}-yoff-r" min="-5" max="25" step="0.1" value="${b.yOffset}" />
+                        <div class="stepper-box">
+                            <button class="step-btn" id="btn-box-${i}-yoff-m">−</button>
+                            <input type="number" class="num-input" id="inp-box-${i}-yoff" value="${b.yOffset.toFixed(2)}" step="0.1" />
+                            <button class="step-btn" id="btn-box-${i}-yoff-p">+</button>
+                        </div>
+                    </div>
+                `;
+
+                boxesContainer.appendChild(card);
+                setupBoxControls(b, i);
+            });
+        }
+
+        function setupBoxControls(b, i) {
+            const swatchBox = getEl(`box-${i}-swatches`);
+            ME_BOX_PALETTE.forEach(c => {
+                const btn = document.createElement('div');
+                btn.className = 'round-swatch-btn' + (c.hex === b.color ? ' active' : '');
+                btn.style.background = c.hex;
+                btn.title = c.name;
+                btn.onclick = () => {
+                    b.color = c.hex;
+                    swatchBox.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateBoxMesh(b);
+                    rebuildBoxesUI();
+                };
+                swatchBox.appendChild(btn);
+            });
+
+            const lockBtn = getEl(`btn-box-${i}-lock`);
+            const inpX = getEl(`inp-box-${i}-x`),
+                inpXR = getEl(`inp-box-${i}-x-r`);
+            const inpZ = getEl(`inp-box-${i}-z`),
+                inpZR = getEl(`inp-box-${i}-z-r`);
+            const inpY = getEl(`inp-box-${i}-y`),
+                inpYR = getEl(`inp-box-${i}-y-r`);
+            const btnXm = getEl(`btn-box-${i}-x-m`),
+                btnXp = getEl(`btn-box-${i}-x-p`);
+            const btnZm = getEl(`btn-box-${i}-z-m`),
+                btnZp = getEl(`btn-box-${i}-z-p`);
+            const btnYm = getEl(`btn-box-${i}-y-m`),
+                btnYp = getEl(`btn-box-${i}-y-p`);
+
+            lockBtn.onclick = () => {
+                b.sizeLocked = !b.sizeLocked;
+                lockBtn.innerHTML = b.sizeLocked ? '🔒 尺寸联动' : '🔓 自由长宽高';
+                lockBtn.classList.toggle('unlocked', !b.sizeLocked);
+                [inpX, inpXR, inpZ, inpZR, inpY, inpYR, btnXm, btnXp, btnZm, btnZp, btnYm, btnYp].forEach(el => {
+                    if (el) el.disabled = b.sizeLocked;
+                });
+            };
+
+            const sR = getEl(`inp-box-${i}-s-r`),
+                sN = getEl(`inp-box-${i}-s`);
+            bindControl({
+                numEl: sN,
+                rangeEl: sR,
+                btnMinus: getEl(`btn-box-${i}-s-m`),
+                btnPlus: getEl(`btn-box-${i}-s-p`),
+                step: 0.1,
+                apply: (v) => {
+                    const val = Math.max(0.1, parseFloat(v) || 1.0);
+                    sR.value = val;
+                    sN.value = val.toFixed(2);
+                    b.uniformSize = val;
+                    if (b.sizeLocked) {
+                        b.lenX = val;
+                        b.widthZ = val;
+                        b.heightY = val;
+                        if (inpX) inpX.value = val.toFixed(2);
+                        if (inpXR) inpXR.value = val;
+                        if (inpZ) inpZ.value = val.toFixed(2);
+                        if (inpZR) inpZR.value = val;
+                        if (inpY) inpY.value = val.toFixed(2);
+                        if (inpYR) inpYR.value = val;
+                    }
+                    b.anchorPos = config.advanced.playerPos.clone();
+                    b.anchorYawDeg = getPlayerCurrentYawDeg();
+                    updateBoxMesh(b);
+                }
+            });
+
+            bindControl({
+                numEl: inpX,
+                rangeEl: inpXR,
+                btnMinus: btnXm,
+                btnPlus: btnXp,
+                step: 0.1,
+                apply: (v) => {
+                    b.lenX = Math.max(0.1, parseFloat(v) || 1.0);
+                    inpX.value = b.lenX.toFixed(2);
+                    if (inpXR) inpXR.value = b.lenX;
+                    b.anchorPos = config.advanced.playerPos.clone();
+                    b.anchorYawDeg = getPlayerCurrentYawDeg();
+                    updateBoxMesh(b);
+                }
+            });
+
+            bindControl({
+                numEl: inpZ,
+                rangeEl: inpZR,
+                btnMinus: btnZm,
+                btnPlus: btnZp,
+                step: 0.1,
+                apply: (v) => {
+                    b.widthZ = Math.max(0.1, parseFloat(v) || 1.0);
+                    inpZ.value = b.widthZ.toFixed(2);
+                    if (inpZR) inpZR.value = b.widthZ;
+                    b.anchorPos = config.advanced.playerPos.clone();
+                    b.anchorYawDeg = getPlayerCurrentYawDeg();
+                    updateBoxMesh(b);
+                }
+            });
+
+            bindControl({
+                numEl: inpY,
+                rangeEl: inpYR,
+                btnMinus: btnYm,
+                btnPlus: btnYp,
+                step: 0.1,
+                apply: (v) => {
+                    b.heightY = Math.max(0.1, parseFloat(v) || 1.0);
+                    inpY.value = b.heightY.toFixed(2);
+                    if (inpYR) inpYR.value = b.heightY;
+                    b.anchorPos = config.advanced.playerPos.clone();
+                    b.anchorYawDeg = getPlayerCurrentYawDeg();
+                    updateBoxMesh(b);
+                }
+            });
+
+            const dR = getEl(`inp-box-${i}-dist-r`),
+                dN = getEl(`inp-box-${i}-dist`);
+            bindControl({
+                numEl: dN,
+                rangeEl: dR,
+                btnMinus: getEl(`btn-box-${i}-dist-m`),
+                btnPlus: getEl(`btn-box-${i}-dist-p`),
+                step: 0.5,
+                apply: (v) => {
+                    b.distMeters = Math.max(0.2, parseFloat(v) || 5.0);
+                    dR.value = b.distMeters;
+                    dN.value = b.distMeters.toFixed(2);
+                    b.anchorPos = config.advanced.playerPos.clone();
+                    b.anchorYawDeg = getPlayerCurrentYawDeg();
+                    updateBoxMesh(b);
+                }
+            });
+
+            const degR = getEl(`inp-box-${i}-deg-r`),
+                degN = getEl(`inp-box-${i}-deg`);
+            bindControl({
+                numEl: degN,
+                rangeEl: degR,
+                btnMinus: getEl(`btn-box-${i}-deg-m`),
+                btnPlus: getEl(`btn-box-${i}-deg-p`),
+                step: 0.5,
+                apply: (v) => {
+                    b.centerDeg = clamp(parseFloat(v) || 0, -180, 180);
+                    degR.value = b.centerDeg;
+                    degN.value = b.centerDeg.toFixed(2);
+                    b.anchorPos = config.advanced.playerPos.clone();
+                    b.anchorYawDeg = getPlayerCurrentYawDeg();
+                    updateBoxMesh(b);
+                }
+            });
+
+            const yoffR = getEl(`inp-box-${i}-yoff-r`),
+                yoffN = getEl(`inp-box-${i}-yoff`);
+            bindControl({
+                numEl: yoffN,
+                rangeEl: yoffR,
+                btnMinus: getEl(`btn-box-${i}-yoff-m`),
+                btnPlus: getEl(`btn-box-${i}-yoff-p`),
+                step: 0.1,
+                apply: (v) => {
+                    b.yOffset = parseFloat(v) || 0;
+                    yoffR.value = b.yOffset;
+                    yoffN.value = b.yOffset.toFixed(2);
+                    b.anchorPos = config.advanced.playerPos.clone();
+                    b.anchorYawDeg = getPlayerCurrentYawDeg();
+                    updateBoxMesh(b);
+                }
+            });
+        }
+
+        function addNewBox() {
+            if (config.boxes.length >= 9) { alert("箱子上限为 9 个！"); return; }
+            const i = config.boxes.length;
+            const id = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
+            const color = ME_BOX_PALETTE[i % ME_BOX_PALETTE.length].hex;
+
+            const boxData = {
+                id,
+                color,
+                uniformSize: 2.0,
+                lenX: 2.0,
+                heightY: 2.0,
+                widthZ: 2.0,
+                sizeLocked: true,
+                distMeters: 8.0 + (i * 2.0),
+                centerDeg: (i === 0 ? -25 : (i * 22) - 45),
+                yOffset: 0.0,
+                anchorPos: config.advanced.playerPos.clone(),
+                anchorYawDeg: getPlayerCurrentYawDeg(),
+                group: null,
+                mesh: null,
+                edgeLine: null
+            };
+
+            createMirrorEdgeBoxObject(boxData);
+            config.boxes.push(boxData);
+            rebuildBoxesUI();
+        }
+
+        function removeLastBox() {
+            if (config.boxes.length === 0) return;
+            const b = config.boxes.pop();
+            if (b.group) {
+                scene.remove(b.group);
+                disposeMaterialOnly(b.mesh);
+                disposeMaterialOnly(b.edgeLine);
+            }
+            rebuildBoxesUI();
+        }
+
+        function resetPlayerPosition() {
+            config.advanced.playerPos.set(0, 0, 0);
+            updateScene();
+        }
+
+        // ============================================================
+        // 13. 交互面板与全局事件绑定
         // ============================================================
         const leftPanel = getEl('left-panel');
         const rightPanel = getEl('right-panel');
@@ -2208,8 +3130,6 @@
                         dragBtn.classList.remove('active');
                         dragBtn.innerText = '移动窗口';
                     }
-                    e.preventDefault();
-                    e.stopPropagation();
                 }
             }, true);
 
@@ -2219,6 +3139,11 @@
                 leftPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
                 rightPanel.style.opacity = isLocked ? '0' : '1';
                 rightPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
+                const brHud = getEl('bottom-right-hud');
+                if (brHud) {
+                    brHud.style.opacity = isLocked ? '0' : '1';
+                    brHud.style.pointerEvents = isLocked ? 'none' : 'auto';
+                }
                 if (!isLocked) triggerLockCooldown();
             });
         }
@@ -2250,15 +3175,44 @@
             }
         }
 
-        // ============================================================
-        // 10. 全局输入绑定
-        // ============================================================
+        function initAdvancedMode() {
+            const advToggle = getEl('advanced-mode-toggle');
+            const advContainer = getEl('advanced-panel-container');
+            const btnToggleWalk = getEl('btn-toggle-walk');
+            const walkSub = getEl('walk-sub-controls');
+            const btnToggleFly = getEl('btn-toggle-fly');
+            const flySub = getEl('fly-sub-controls');
+
+            advToggle.addEventListener('change', () => {
+                config.advanced.enabled = advToggle.checked;
+                advContainer.style.display = advToggle.checked ? 'flex' : 'none';
+            });
+
+            btnToggleWalk.addEventListener('click', () => {
+                config.advanced.walkEnabled = !config.advanced.walkEnabled;
+                btnToggleWalk.classList.toggle('active-move', config.advanced.walkEnabled);
+                btnToggleWalk.innerText = config.advanced.walkEnabled ? '行走: 开启' : '行走: 关闭';
+                walkSub.style.display = config.advanced.walkEnabled ? 'block' : 'none';
+            });
+
+            btnToggleFly.addEventListener('click', () => {
+                config.advanced.flyEnabled = !config.advanced.flyEnabled;
+                btnToggleFly.classList.toggle('active-move', config.advanced.flyEnabled);
+                btnToggleFly.innerText = config.advanced.flyEnabled ? '可以飞: 开启' : '可以飞: 关闭';
+                flySub.style.display = config.advanced.flyEnabled ? 'block' : 'none';
+            });
+
+            rebuildBoxesUI();
+        }
+
         const WHEEL_STEP = {
             'inp-dpi': 50,
             'inp-cm': 0.25,
             'inp-fov': 1,
             'inp-height': 0.025,
-            'inp-crosshair-opacity': 0.05
+            'inp-crosshair-opacity': 0.05,
+            'inp-walk-spd': 0.2,
+            'inp-fly-spd': 0.5
         };
 
         function bindGlobalInputs() {
@@ -2278,6 +3232,8 @@
             getEl('inp-fov-r').addEventListener('input', e => setFov(e.target.value));
             getEl('inp-height-r').addEventListener('input', e => setHeight(e.target.value));
             getEl('inp-crosshair-opacity-r').addEventListener('input', e => setCrosshairOpacity(e.target.value));
+            getEl('inp-walk-spd-r').addEventListener('input', e => setWalkSpeed(e.target.value));
+            getEl('inp-fly-spd-r').addEventListener('input', e => setFlySpeed(e.target.value));
 
             document.querySelectorAll('.dpi-pill').forEach(b =>
                 b.addEventListener('click', () => setDpi(parseInt(b.dataset.val))));
@@ -2321,7 +3277,7 @@
         }
 
         // ============================================================
-        // 11. 物理引擎与动画循环
+        // 14. 运动学解耦与渲染主循环
         // ============================================================
         let lastTime = performance.now(),
             lastFrame = performance.now(),
@@ -2338,13 +3294,91 @@
                 c.position.y = c.userData.altitude;
             });
 
+            if (config.advanced.walkEnabled) {
+                const isForward = keysDown.has('KeyW');
+                const isBackward = keysDown.has('KeyS');
+                const isLeft = keysDown.has('KeyA');
+                const isRight = keysDown.has('KeyD');
+
+                let moveX = 0,
+                    moveZ = 0;
+                if (isForward) moveZ -= 1;
+                if (isBackward) moveZ += 1;
+                if (isLeft) moveX -= 1;
+                if (isRight) moveX += 1;
+
+                if (moveX !== 0 || moveZ !== 0) {
+                    const len = Math.hypot(moveX, moveZ);
+                    const nx = moveX / len;
+                    const nz = moveZ / len;
+
+                    const sinY = Math.sin(yaw);
+                    const cosY = Math.cos(yaw);
+
+                    const worldX = (nx * cosY + nz * sinY) * config.advanced.walkSpeed * dt;
+                    const worldZ = (-nx * sinY + nz * cosY) * config.advanced.walkSpeed * dt;
+
+                    const nextPx = config.advanced.playerPos.x + worldX;
+                    const nextPz = config.advanced.playerPos.z + worldZ;
+                    const py = config.viewHeight + config.advanced.playerPos.y;
+
+                    if (!checkCollisionWithBoxes(nextPx, py - (config.viewHeight / 2), nextPz, 0.35, config.viewHeight / 2)) {
+                        config.advanced.playerPos.x = nextPx;
+                        config.advanced.playerPos.z = nextPz;
+                    } else {
+                        if (!checkCollisionWithBoxes(nextPx, py - (config.viewHeight / 2), config.advanced.playerPos.z, 0.35,
+                                config.viewHeight / 2)) {
+                            config.advanced.playerPos.x = nextPx;
+                        } else if (!checkCollisionWithBoxes(config.advanced.playerPos.x, py - (config.viewHeight / 2), nextPz,
+                                0.35, config.viewHeight / 2)) {
+                            config.advanced.playerPos.z = nextPz;
+                        }
+                    }
+                }
+
+                if (config.advanced.flyEnabled) {
+                    const isUp = keysDown.has('Space');
+                    const isDown = keysDown.has('ShiftLeft');
+
+                    let moveY = 0;
+                    if (isUp) moveY += 1;
+                    if (isDown) moveY -= 1;
+
+                    if (moveY !== 0) {
+                        const nextPy = config.advanced.playerPos.y + (moveY * config.advanced.flySpeed * dt);
+                        const totalY = config.viewHeight + nextPy;
+                        if (!checkCollisionWithBoxes(config.advanced.playerPos.x, totalY - (config.viewHeight / 2), config
+                                .advanced.playerPos.z, 0.35, config.viewHeight / 2)) {
+                            config.advanced.playerPos.y = nextPy;
+                        }
+                        if (config.advanced.playerPos.y + config.viewHeight < 0.1) {
+                            config.advanced.playerPos.y = 0.1 - config.viewHeight;
+                        }
+                    }
+                } else {
+                    config.advanced.playerPos.y = 0;
+                }
+
+                camera.position.set(
+                    config.advanced.playerPos.x,
+                    config.viewHeight + config.advanced.playerPos.y,
+                    config.advanced.playerPos.z
+                );
+                if (horizonLine) horizonLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
+                if (thinLine) thinLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
+            }
+
+            // ---- 目标运动 ----
             config.targets.forEach(t => {
                 if (!t.rootGroup.visible) return;
 
-                const centerRad = (t.centerDeg * Math.PI) / 180;
-                const D = t.distMeters;
+                const isSphere = config.targetShape === 'sphere';
+                const radius = isSphere ? (t.sizeCm / 200) : (Math.max(t.bodyWidthCm, t.headWidthCm) / 200);
+                const halfHeight = isSphere ? radius : ((t.bodyHeightCm + t.headHeightCm) / 200);
 
-                if (t.move.enabled) {
+                if (t.move.enabled && t.motion) {
+                    const D = t.motion.radius || t.distMeters;
+
                     if (t.move.mode === 'linear') {
                         const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
                         let linearHalfSpan;
@@ -2357,46 +3391,53 @@
                         }
                         const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
 
-                        t.move.currentLinearOffset += t.move.dir * linearSpeed * dt;
-                        if (t.move.currentLinearOffset >= linearHalfSpan) {
-                            t.move.currentLinearOffset = linearHalfSpan;
-                            t.move.dir = -1;
-                        } else if (t.move.currentLinearOffset <= -linearHalfSpan) {
-                            t.move.currentLinearOffset = -linearHalfSpan;
-                            t.move.dir = 1;
+                        const nextLinearOffset = t.move.currentLinearOffset + t.move.dir * linearSpeed * dt;
+
+                        const candX = t.motion.centerX + t.motion.tangentX * nextLinearOffset;
+                        const candZ = t.motion.centerZ + t.motion.tangentZ * nextLinearOffset;
+                        const candY = t.motion.centerY;
+
+                        if (checkCollisionWithBoxes(candX, candY, candZ, radius, halfHeight)) {
+                            t.move.dir *= -1;
+                        } else {
+                            t.move.currentLinearOffset = nextLinearOffset;
+                            if (t.move.currentLinearOffset >= linearHalfSpan) {
+                                t.move.currentLinearOffset = linearHalfSpan;
+                                t.move.dir = -1;
+                            } else if (t.move.currentLinearOffset <= -linearHalfSpan) {
+                                t.move.currentLinearOffset = -linearHalfSpan;
+                                t.move.dir = 1;
+                            }
+                            t.rootGroup.position.x = candX;
+                            t.rootGroup.position.z = candZ;
+                            t.rootGroup.position.y = candY;
                         }
-
-                        const baseX = D * Math.sin(centerRad);
-                        const baseZ = -D * Math.cos(centerRad);
-                        const tanX = Math.cos(centerRad);
-                        const tanZ = Math.sin(centerRad);
-
-                        t.rootGroup.position.x = baseX + tanX * t.move.currentLinearOffset;
-                        t.rootGroup.position.z = baseZ + tanZ * t.move.currentLinearOffset;
                     } else {
                         const halfDeg = t.move.totalSpanDeg / 2;
-                        t.move.currentOffsetDeg += t.move.dir * t.move.speedDeg * dt;
-                        if (t.move.currentOffsetDeg >= halfDeg) {
-                            t.move.currentOffsetDeg = halfDeg;
-                            t.move.dir = -1;
-                        } else if (t.move.currentOffsetDeg <= -halfDeg) {
-                            t.move.currentOffsetDeg = -halfDeg;
-                            t.move.dir = 1;
-                        }
-                        const curRad = ((t.centerDeg + t.move.currentOffsetDeg) * Math.PI) / 180;
-                        t.rootGroup.position.x = D * Math.sin(curRad);
-                        t.rootGroup.position.z = -D * Math.cos(curRad);
-                    }
-                } else {
-                    t.rootGroup.position.x = D * Math.sin(centerRad);
-                    t.rootGroup.position.z = -D * Math.cos(centerRad);
-                }
+                        const nextOffsetDeg = t.move.currentOffsetDeg + t.move.dir * t.move.speedDeg * dt;
 
-                if (config.targetShape === 'dummy' && t.dummyGroup.visible) {
-                    const dx = camera.position.x - t.rootGroup.position.x;
-                    const dz = camera.position.z - t.rootGroup.position.z;
-                    t.rootGroup.rotation.y = Math.atan2(dx, dz);
-                    t.rootGroup.position.y = t.groundY;
+                        const currentArcRad = t.motion.baseRad + (nextOffsetDeg * Math.PI / 180);
+
+                        const candX = t.motion.originPlayerPos.x + D * Math.sin(currentArcRad);
+                        const candZ = t.motion.originPlayerPos.z - D * Math.cos(currentArcRad);
+                        const candY = t.motion.centerY;
+
+                        if (checkCollisionWithBoxes(candX, candY, candZ, radius, halfHeight)) {
+                            t.move.dir *= -1;
+                        } else {
+                            t.move.currentOffsetDeg = nextOffsetDeg;
+                            if (t.move.currentOffsetDeg >= halfDeg) {
+                                t.move.currentOffsetDeg = halfDeg;
+                                t.move.dir = -1;
+                            } else if (t.move.currentOffsetDeg <= -halfDeg) {
+                                t.move.currentOffsetDeg = -halfDeg;
+                                t.move.dir = 1;
+                            }
+                            t.rootGroup.position.x = candX;
+                            t.rootGroup.position.z = candZ;
+                            t.rootGroup.position.y = candY;
+                        }
+                    }
                 }
             });
         }
@@ -2407,7 +3448,7 @@
             lastFrame = now;
             updatePhysics(dt);
 
-            const currentDeg = ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
+            const currentDeg = getPlayerCurrentYawDeg();
             if (Math.abs(currentDeg - lastRenderedAngle) > 0.001) {
                 lastRenderedAngle = currentDeg;
                 if (hudAngle) hudAngle.innerText = currentDeg.toFixed(3);
@@ -2431,7 +3472,7 @@
         });
 
         // ============================================================
-        // 12. 初始化
+        // 15. 靶场启动入口
         // ============================================================
         function init() {
             setDpi(config.dpi);
@@ -2445,6 +3486,7 @@
             bindGlobalInputs();
             bindPanelAndLock();
             initThemeAndF11();
+            initAdvancedMode();
 
             addNewTarget();
             addNewTarget();
