@@ -54,11 +54,9 @@
         .track-module .title { font-size: 0.85rem; font-weight: 800; color: var(--purple-dark); display: flex; justify-content: space-between; align-items: center; }
         .track-module .expr-main { font-size: 0.74rem; font-weight: 800; color: var(--purple-dark); font-family: "SF Mono", monospace; }
         .track-module .expr-subs { font-size: 0.65rem; color: #475569; line-height: 1.4; font-family: "SF Mono", monospace; }
-        .track-module .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+        .track-module .btn-grid { display: grid; grid-template-columns: 1fr; gap: 6px; margin-top: 4px; }
         .track-module .calc-btn { background: var(--purple-dark); color: #fff; border: none; border-radius: 5px; padding: 5px 8px; font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: 0.15s; text-align: center; }
         .track-module .calc-btn:hover { background: #3b0764; }
-        .track-module .calc-btn.sub-btn { background: #64748b; }
-        .track-module .calc-btn.sub-btn:hover { background: #475569; }
 
         .correction { background: rgba(76, 29, 149, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
         .correction .title { font-size: 0.78rem; font-weight: 800; color: var(--purple-dark); }
@@ -85,7 +83,6 @@
         .toggle-btn { border: none; background: transparent; padding: 3px 8px; font-size: 0.65rem; font-weight: 700; border-radius: 3px; cursor: pointer; color: #64748b; transition: 0.15s; }
         .toggle-btn.active { background: var(--gold); color: #fff; }
         .toggle-btn.purple.active { background: var(--purple-dark); color: #fff; }
-        .toggle-btn.cyan.active { background: #0891b2; color: #fff; }
 
         .mode-badge { font-size: 0.62rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; background: rgba(184, 134, 11, 0.15); color: #78350f; }
         .mode-badge.track { background: rgba(76, 29, 149, 0.15); color: var(--purple); }
@@ -120,11 +117,10 @@
         .canvas-container { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 4px; position: relative; padding: 8px 6px; }
         canvas { width: 100%; height: 250px; display: block; }
 
-        .chart-legend-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+        .chart-legend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
         @media(max-width:600px) { .chart-legend-grid { grid-template-columns: 1fr 1fr; } }
         .legend-box { background: rgba(255, 255, 255, 0.7); border-radius: 4px; padding: 5px 8px; border: 1px solid rgba(0, 0, 0, 0.05); font-size: 0.65rem; display: flex; flex-direction: column; gap: 1px; }
         .legend-box.t3-max { border-left: 3px solid #7c3aed; }
-        .legend-box.t2-max { border-left: 3px solid #0891b2; }
         .legend-box.s-max { border-left: 3px solid #0284c7; }
         .legend-box.s-bal { border-left: 3px dashed #38bdf8; }
         .legend-val { font-size: 0.85rem; font-weight: bold; font-family: monospace; }
@@ -136,18 +132,15 @@
         .step-stage.cun { background: var(--blue); }
         .step-stage.cm { background: var(--gold); }
         .step-stage.cun.track { background: var(--purple); }
-        .step-stage.cun.track2d { background: #0891b2; }
 
         .step-line { display: flex; align-items: center; gap: 6px; padding: 3px 0; color: #334155; flex-wrap: wrap; font-size: 0.78rem; }
         .step-num { display: inline-flex; align-items: center; justify-content: center; background: var(--gold); color: #fff; font-size: 0.65rem; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; }
         .step-num.purple { background: var(--purple); }
-        .step-num.cyan { background: #0891b2; }
         .step-num.blue { background: var(--blue); }
         .step-label { font-weight: 600; color: #475569; }
         .step-formula { font-family: monospace; background: rgba(0, 0, 0, 0.04); padding: 1px 5px; border-radius: 3px; }
         .step-result { font-weight: bold; color: var(--gold); }
         .step-result.purple { color: var(--purple); }
-        .step-result.cyan { color: #0891b2; }
         .step-result.blue { color: var(--blue); }
 
         .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.82rem; color: #475569; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px dashed rgba(0, 0, 0, 0.08); }
@@ -198,17 +191,14 @@
                 <div>
                     <div class="title">
                         <span>【跟枪模式】</span>
-                        <span style="font-size:0.6rem;color:#64748b;font-weight:400;">全精 / 极简</span>
                     </div>
                     <div class="expr-main" id="top-track-preview">Max = 2.05 · 16.40 · (x<sub>c</sub>)<sup>0.125</sup> · (y<sub>c</sub>)<sup>0.0625</sup> · (z)<sup>-0.125</sup></div>
                     <div class="expr-subs" style="margin-top:2px;">
-                        <div>• <strong>全精版</strong>：C=16.40 ｜ 拟合全视角 (0°~180°)</div>
-                        <div>• <strong>极简版</strong>：C=6.40 ｜ <span style="color:#d97706;font-weight:700;">(x<sub>c</sub>)<sup>0.125</sup> · (y<sub>c</sub>)<sup>0.125</sup></span> ｜ 好记速算</div>
+                        <div>• <strong>跟枪</strong>：C=16.40 ｜ 拟合全视角 (0°~180°)</div>
                     </div>
                 </div>
                 <div class="btn-grid">
-                    <button class="calc-btn" onclick="setMode('tracking_3d')">XYZ三轴高精度</button>
-                    <button class="calc-btn sub-btn" onclick="setMode('tracking_2d')">XY双轴简单算</button>
+                    <button class="calc-btn" onclick="setMode('tracking_3d')">跟枪</button>
                 </div>
             </div>
         </div>
@@ -239,14 +229,12 @@
                         <span class="mode-badge" id="modeBadge">普通模式</span>
                         <span id="ttkTag" class="ttk-tag short">短TKK</span>
                     </div>
-                    <span id="precisionBadge" class="warn-tag" style="display:none;">⚠️ 忽略Z轴视角 · 适合速算</span>
                 </div>
                 <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
-                    <!-- 三模式主切换 -->
+                    <!-- 双模式切换 -->
                     <div class="toggle-group">
                         <button class="toggle-btn active" id="btn-mode-std" onclick="setMode('standard')">普通</button>
-                        <button class="toggle-btn purple" id="btn-mode-t3d" onclick="setMode('tracking_3d')">跟枪·全精</button>
-                        <button class="toggle-btn cyan" id="btn-mode-t2d" onclick="setMode('tracking_2d')">跟枪·极简</button>
+                        <button class="toggle-btn purple" id="btn-mode-t3d" onclick="setMode('tracking_3d')">跟枪</button>
                     </div>
                     <!-- cm vs cun 切换 -->
                     <div class="toggle-group">
@@ -334,12 +322,8 @@
 
                 <div class="chart-legend-grid">
                     <div class="legend-box t3-max">
-                        <span style="color:#7c3aed; font-weight:bold;">[跟枪全精]</span>
+                        <span style="color:#7c3aed; font-weight:bold;">[跟枪]</span>
                         <span class="legend-val" id="lbl-t3-max" style="color:#7c3aed;">-- cm</span>
-                    </div>
-                    <div class="legend-box t2-max">
-                        <span style="color:#0891b2; font-weight:bold;">[跟枪极简]</span>
-                        <span class="legend-val" id="lbl-t2-max" style="color:#0891b2;">-- cm</span>
                     </div>
                     <div class="legend-box s-max">
                         <span style="color:#0284c7; font-weight:bold;">[普通最大]</span>
@@ -374,7 +358,7 @@
     <script>
         const PI = Math.PI;
 
-        // ---- 1. 跟枪模式：三轴全精度版 ----
+        // ---- 跟枪模式：三轴全精度版 ----
         const TRACK_3D = {
             C: 16.40,
             Px: 0.250,
@@ -385,16 +369,7 @@
             Wz: 0.250
         };
 
-        // ---- 2. 跟枪模式：双轴极简版 (好记速算) ----
-        const TRACK_2D = {
-            C: 6.40,
-            Px: 0.250,
-            Py: 0.250,
-            Wx: 0.500,
-            Wy: 0.500
-        };
-
-        // ---- 3. 普通模式核心参数 (双轴纯开方) ----
+        // ---- 普通模式核心参数 (双轴纯开方) ----
         const ROOT_POWER = {
             C: 1.66,
             px: 0.500,
@@ -403,7 +378,7 @@
             Wy: 0.334
         };
 
-        let currentMode = 'standard'; // 'standard' | 'tracking_3d' | 'tracking_2d'
+        let currentMode = 'standard'; // 'standard' | 'tracking_3d'
         let currentUnit = 'cm';
         let currentAnchor = 'q2';
 
@@ -411,7 +386,7 @@
         const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
         const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
 
-        // ---- 三轴全精跟枪计算 ----
+        // ---- 跟枪计算 ----
         function calcTracking3D(x, y, z, k) {
             const xc = Math.max(0.001, x / k);
             const yc = Math.max(0.001, y / k);
@@ -429,23 +404,6 @@
             const Max_cm = k * TRACK_3D.C * raw;
             const Max_cun = Max_cm / k;
             return { xc, yc, Base_X, Base_Y, Base_Z, raw, Max_cm, Max_cun };
-        }
-
-        // ---- 双轴极简跟枪计算 ----
-        function calcTracking2D(x, y, k) {
-            const xc = Math.max(0.001, x / k);
-            const yc = Math.max(0.001, y / k);
-
-            const Base_X = Math.pow(xc, TRACK_2D.Px);
-            const Base_Y = Math.pow(yc, TRACK_2D.Py);
-
-            const wX = Math.pow(Base_X, TRACK_2D.Wx);
-            const wY = Math.pow(Base_Y, TRACK_2D.Wy);
-
-            const raw = wX * wY;
-            const Max_cm = k * TRACK_2D.C * raw;
-            const Max_cun = Max_cm / k;
-            return { xc, yc, Base_X, Base_Y, raw, Max_cm, Max_cun };
         }
 
         // ---- 普通模式：纯开方版 ----
@@ -468,10 +426,8 @@
 
             document.getElementById('btn-mode-std').classList.toggle('active', mode === 'standard');
             document.getElementById('btn-mode-t3d').classList.toggle('active', mode === 'tracking_3d');
-            document.getElementById('btn-mode-t2d').classList.toggle('active', mode === 'tracking_2d');
 
             const badge = document.getElementById('modeBadge');
-            const pBadge = document.getElementById('precisionBadge');
             const formulaCard = document.getElementById('formulaCard');
             const modeText = document.getElementById('mode-text-display');
             const ttkTag = document.getElementById('ttkTag');
@@ -479,33 +435,19 @@
             if (mode === 'standard') {
                 badge.textContent = '普通模式';
                 badge.className = 'mode-badge';
-                pBadge.style.display = 'none';
                 document.getElementById('fTitle').textContent = '普通模式';
                 formulaCard.className = 'formula-card';
                 modeText.textContent = '普通模式';
                 modeText.style.color = '#0284c7';
                 ttkTag.textContent = '短TKK';
                 ttkTag.className = 'ttk-tag short';
-            } else if (mode === 'tracking_3d') {
-                badge.textContent = '跟枪·全精版';
-                badge.className = 'mode-badge track';
-                pBadge.style.display = 'none';
-                document.getElementById('fTitle').textContent = '跟枪模式 (三轴)';
-                formulaCard.className = 'formula-card track';
-                modeText.textContent = '跟枪全精版';
-                modeText.style.color = 'var(--purple-dark)';
-                ttkTag.textContent = '长TTK';
-                ttkTag.className = 'ttk-tag long';
             } else {
-                badge.textContent = '跟枪·极简版';
-                badge.className = 'mode-badge';
-                badge.style.background = '#e0f2fe';
-                badge.style.color = '#0369a1';
-                pBadge.style.display = 'inline-block';
-                document.getElementById('fTitle').textContent = '跟枪模式 (双轴)';
+                badge.textContent = '跟枪';
+                badge.className = 'mode-badge track';
+                document.getElementById('fTitle').textContent = '跟枪模式';
                 formulaCard.className = 'formula-card track';
-                modeText.textContent = '跟枪极简版';
-                modeText.style.color = '#0891b2';
+                modeText.textContent = '跟枪';
+                modeText.style.color = 'var(--purple-dark)';
                 ttkTag.textContent = '长TTK';
                 ttkTag.className = 'ttk-tag long';
             }
@@ -520,50 +462,38 @@
 
             if (currentMode === 'tracking_3d') {
                 exprElem.innerHTML = `
-                    <div class="math-row">
-                        <span>Max(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">16.40</span> · </span>
-                        <span class="bracket">[</span>
-                        <span>⁴√(x<sub>c</sub>)</span>
-                        <span class="bracket">]</span><span class="weight-exp">50.0%</span>
-                        <span>·</span>
-                        <span class="bracket">[</span>
-                        <span>⁴√(y<sub>c</sub>)</span>
-                        <span class="bracket">]</span><span class="weight-exp">25.0%</span>
-                        <span>·</span>
-                        <span class="bracket">[</span>
-                        <span>1/√(z)</span>
-                        <span class="bracket">]</span><span class="weight-exp">25.0%</span>
-                    </div>
-                `;
-                footerDesc.innerHTML = `<strong>跟枪全精版</strong>：Max(cm) = 2.05 · 16.40 · (x_c)^0.125 · (y_c)^0.0625 · (z)^-0.125`;
-            } else if (currentMode === 'tracking_2d') {
-                exprElem.innerHTML = `
-                    <div class="math-row">
-                        <span>Max(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">6.40</span> · </span>
-                        <span class="bracket">[</span>
-                        <span>⁴√(x<sub>c</sub>)</span>
-                        <span class="bracket">]</span><span class="weight-exp">50.0%</span>
-                        <span>·</span>
-                        <span class="bracket">[</span>
-                        <span>⁴√(y<sub>c</sub>)</span>
-                        <span class="bracket">]</span><span class="weight-exp">50.0%</span>
-                    </div>
-                `;
-                footerDesc.innerHTML = `<strong>跟枪极简版</strong>：Max(cm) = 2.05 · 6.40 · (x_c)^0.125 · (y_c)^0.125 ｜ <span style="color:#d97706;">好记速算，忽略Z轴</span>`;
+                        <div class="math-row">
+                            <span>Max(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">16.40</span> · </span>
+                            <span class="bracket">[</span>
+                            <span>⁴√(x<sub>c</sub>)</span>
+                            <span class="bracket">]</span><span class="weight-exp">50.0%</span>
+                            <span>·</span>
+                            <span class="bracket">[</span>
+                            <span>⁴√(y<sub>c</sub>)</span>
+                            <span class="bracket">]</span><span class="weight-exp">25.0%</span>
+                            <span>·</span>
+                            <span class="bracket">[</span>
+                            <span>1/√(z)</span>
+                            <span class="bracket">]</span><span class="weight-exp">25.0%</span>
+                        </div>
+                    `;
+                footerDesc.innerHTML =
+                    `<strong>跟枪</strong>：Max(cm) = 2.05 · 16.40 · (x_c)^0.125 · (y_c)^0.0625 · (z)^-0.125`;
             } else {
                 exprElem.innerHTML = `
-                    <div class="math-row">
-                        <span>Output(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">1.66</span> · </span>
-                        <span class="bracket">[</span>
-                        <span>√(x<sub>c</sub>)</span>
-                        <span class="bracket">]</span><span class="weight-exp">66.6%</span>
-                        <span>·</span>
-                        <span class="bracket">[</span>
-                        <span>⁴√(y<sub>c</sub>)</span>
-                        <span class="bracket">]</span><span class="weight-exp">33.4%</span>
-                    </div>
-                `;
-                footerDesc.innerHTML = `<strong>普通模式</strong>：Output(cm) = 2.05 · 1.66 · [(x_c)^0.5]^66.6% · [(y_c)^0.25]^33.4%`;
+                        <div class="math-row">
+                            <span>Output(cm) = <span class="hl-k">k(2.05)</span> · <span class="hl-c">1.66</span> · </span>
+                            <span class="bracket">[</span>
+                            <span>√(x<sub>c</sub>)</span>
+                            <span class="bracket">]</span><span class="weight-exp">66.6%</span>
+                            <span>·</span>
+                            <span class="bracket">[</span>
+                            <span>⁴√(y<sub>c</sub>)</span>
+                            <span class="bracket">]</span><span class="weight-exp">33.4%</span>
+                        </div>
+                    `;
+                footerDesc.innerHTML =
+                    `<strong>普通模式</strong>：Output(cm) = 2.05 · 1.66 · [(x_c)^0.5]^66.6% · [(y_c)^0.25]^33.4%`;
             }
         }
 
@@ -708,13 +638,11 @@
             const isCun = currentUnit === 'cun';
             const unitStr = isCun ? 'cun' : 'cm';
 
-            // 1. 各模式基准计算
+            // 各模式基准计算
             const t3d = calcTracking3D(x, y, z, k);
-            const t2d = calcTracking2D(x, y, k);
             const std = calcRootPower(x, y, k);
 
             document.getElementById('lbl-t3-max').textContent = t3d.Max_cm.toFixed(2) + ' cm';
-            document.getElementById('lbl-t2-max').textContent = t2d.Max_cm.toFixed(2) + ' cm';
             document.getElementById('lbl-s-max').textContent = (std.out_cm * 4 / 3).toFixed(2) + ' cm';
             document.getElementById('lbl-s-bal').textContent = std.out_cm.toFixed(2) + ' cm';
 
@@ -730,7 +658,7 @@
                 updateDisplayValues(baseVals);
 
                 stepsHtml = `
-                        <div class="step-stage cun track">【第一阶段：全精版寸空间计算】</div>
+                        <div class="step-stage cun track">【第一阶段：跟枪寸空间计算】</div>
                         <div class="step-line"><span class="step-num purple">1</span><span class="step-label">物理量转换</span><span class="step-formula">x_c = ${x} ÷ ${k} = ${t3d.xc.toFixed(2)} 寸 ｜ y_c = ${y} ÷ ${k} = ${t3d.yc.toFixed(2)} 寸 ｜ 视界 Z = ${z}°</span></div>
                         <div class="step-line"><span class="step-num purple">2</span><span class="step-label">独立基底指数</span><span class="step-formula">Base_X = (${t3d.xc.toFixed(2)})<sup>0.25</sup> = ${t3d.Base_X.toFixed(3)}<br>Base_Y = (${t3d.yc.toFixed(2)})<sup>0.25</sup> = ${t3d.Base_Y.toFixed(3)}<br>Base_Z = (${Math.max(0.1, z)})<sup>-0.50</sup> = ${t3d.Base_Z.toFixed(3)}</span></div>
                         <div class="step-line"><span class="step-num purple">3</span><span class="step-label">加权连乘融合</span><span class="step-formula">融合值 = [Base_X]<sup>50%</sup> × [Base_Y]<sup>25%</sup> × [Base_Z]<sup>25%</sup> = (x_c)<sup>0.125</sup> · (y_c)<sup>0.0625</sup> · (z)<sup>-0.125</sup> = ${t3d.raw.toFixed(4)}</span></div>
@@ -738,31 +666,9 @@
                         <div class="step-stage cm">【第二阶段：还原物理距离 (cm/360°)】</div>
                         <div class="step-line"><span class="step-num purple">4</span><span class="step-label">量纲还原</span><span class="step-formula">Max(cm) = 同身寸k(${k}) × 纲量尺C(16.40) × 融合值(${t3d.raw.toFixed(4)}) = ${(k * 16.4).toFixed(2)} × ${t3d.raw.toFixed(4)}</span><span>=</span><span class="step-result purple">${t3d.Max_cm.toFixed(2)} cm/360°</span></div>
                         <div class="step-line" style="color:var(--purple-dark);font-weight:700;border-top:1px dashed rgba(0,0,0,0.06);margin-top:4px;padding-top:4px;">
-                            <span>🎯 全精版最大值 = ${baseVal.toFixed(2)} ${unitStr}</span>
+                            <span>🎯 跟枪最大值 = ${baseVal.toFixed(2)} ${unitStr}</span>
                             <span style="color:#64748b;font-weight:400;font-size:0.75rem;">(均衡 75% = ${(baseVal*0.75).toFixed(2)}, 最小值 50% = ${(baseVal*0.5).toFixed(2)})</span>
                         </div>
-                    `;
-            } else if (currentMode === 'tracking_2d') {
-                baseVal = isCun ? t2d.Max_cun : t2d.Max_cm;
-                const baseVals = {};
-                for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
-                    baseVals[key] = baseVal * RATIOS_TRACK[key];
-                }
-                updateDisplayValues(baseVals);
-
-                stepsHtml = `
-                        <div class="step-stage cun track2d">【第一阶段：极简版寸空间计算 (好记速算)】</div>
-                        <div class="step-line"><span class="step-num cyan">1</span><span class="step-label">物理量转换</span><span class="step-formula">x_c = ${x} ÷ ${k} = ${t2d.xc.toFixed(2)} 寸 ｜ y_c = ${y} ÷ ${k} = ${t2d.yc.toFixed(2)} 寸</span></div>
-                        <div class="step-line"><span class="step-num cyan">2</span><span class="step-label">双轴对称开方</span><span class="step-formula">Base_X = ⁴√(${t2d.xc.toFixed(2)}) = ${t2d.Base_X.toFixed(3)} ｜ Base_Y = ⁴√(${t2d.yc.toFixed(2)}) = ${t2d.Base_Y.toFixed(3)}</span></div>
-                        <div class="step-line"><span class="step-num cyan">3</span><span class="step-label">对称半权融合</span><span class="step-formula">融合值 = [Base_X]<sup>50%</sup> × [Base_Y]<sup>50%</sup> = (x_c)<sup>0.1250</sup> × (y_c)<sup>0.1250</sup> = ${t2d.raw.toFixed(4)}</span></div>
-
-                        <div class="step-stage cm">【第二阶段：还原物理距离 (cm/360°)】</div>
-                        <div class="step-line"><span class="step-num cyan">4</span><span class="step-label">量纲还原</span><span class="step-formula">Max(cm) = 同身寸k(${k}) × 极简尺C(6.40) × 融合值(${t2d.raw.toFixed(4)}) = ${(k * 6.4).toFixed(2)} × ${t2d.raw.toFixed(4)}</span><span>=</span><span class="step-result cyan">${t2d.Max_cm.toFixed(2)} cm/360°</span></div>
-                        <div class="step-line" style="color:#0891b2;font-weight:700;border-top:1px dashed rgba(0,0,0,0.06);margin-top:4px;padding-top:4px;">
-                            <span>⚡ 极简版最大值 = ${baseVal.toFixed(2)} ${unitStr}</span>
-                            <span style="color:#64748b;font-weight:400;font-size:0.75rem;">(均衡 75% = ${(baseVal*0.75).toFixed(2)}, 最小值 50% = ${(baseVal*0.5).toFixed(2)})</span>
-                        </div>
-                        <div style="font-size:0.7rem;color:#d97706;margin-top:4px;">💡 说明：极简版忽略 Z 轴视角，适合快速估算；若需全视角精准拟合请切至【全精版】。</div>
                     `;
             } else {
                 baseVal = isCun ? std.out_cun : std.out_cm;
@@ -789,7 +695,7 @@
             }
 
             document.getElementById('stepsNatural').innerHTML = stepsHtml;
-            drawChart(x, y, z, k, t3d.Max_cm, t2d.Max_cm, std.out_cm * 4 / 3, std.out_cm);
+            drawChart(x, y, z, k, t3d.Max_cm, std.out_cm * 4 / 3, std.out_cm);
         }
 
         function updateDisplayValues(baseVals) {
@@ -818,7 +724,7 @@
         }
 
         // ---- 绘制动态响应对比曲线 ----
-        function drawChart(x_in, y_in, z_in, k, t3_max, t2_max, s_max, s_bal) {
+        function drawChart(x_in, y_in, z_in, k, t3_max, s_max, s_bal) {
             const canvas = document.getElementById('compCanvas');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -838,13 +744,12 @@
             ctx.clearRect(0, 0, w, h);
 
             const maxX = 7000;
-            let maxY = Math.max(90, t3_max, t2_max, s_max);
+            let maxY = Math.max(90, t3_max, s_max);
 
             for (let x_plot = 0; x_plot <= maxX; x_plot += 100) {
                 const r3 = calcTracking3D(x_plot, y_in, z_in, k);
-                const r2 = calcTracking2D(x_plot, y_in, k);
                 const rs = calcRootPower(x_plot, y_in, k);
-                maxY = Math.max(maxY, r3.Max_cm, r2.Max_cm, rs.out_cm * (4 / 3));
+                maxY = Math.max(maxY, r3.Max_cm, rs.out_cm * (4 / 3));
             }
             maxY = Math.max(90, maxY * 1.15);
 
@@ -891,24 +796,12 @@
             for (let xp = 0; xp <= maxX; xp += 40) {
                 const r = calcRootPower(xp, y_in, k);
                 const p = toPx(xp, r.out_cm * (4 / 3));
-                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+                if (first) { ctx.moveTo(p.px, p.py);
+                    first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
 
-            // 跟枪极简最大值 (实线)
-            ctx.strokeStyle = '#0891b2';
-            ctx.lineWidth = 1.8;
-            ctx.setLineDash([]);
-            ctx.beginPath();
-            first = true;
-            for (let xp = 0; xp <= maxX; xp += 40) {
-                const r = calcTracking2D(xp, y_in, k);
-                const p = toPx(xp, r.Max_cm);
-                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
-            }
-            ctx.stroke();
-
-            // 跟枪全精最大值 (实线)
+            // 跟枪最大值 (实线)
             ctx.strokeStyle = '#7c3aed';
             ctx.lineWidth = 2.2;
             ctx.setLineDash([]);
@@ -917,7 +810,8 @@
             for (let xp = 0; xp <= maxX; xp += 40) {
                 const r = calcTracking3D(xp, y_in, z_in, k);
                 const p = toPx(xp, r.Max_cm);
-                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+                if (first) { ctx.moveTo(p.px, p.py);
+                    first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
 
@@ -931,24 +825,12 @@
             for (let xp = 0; xp <= maxX; xp += 40) {
                 const r = calcRootPower(xp, y_in, k);
                 const p = toPx(xp, r.out_cm);
-                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+                if (first) { ctx.moveTo(p.px, p.py);
+                    first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
 
-            // 跟枪极简均衡
-            ctx.strokeStyle = '#5eead4';
-            ctx.lineWidth = 1.4;
-            ctx.setLineDash([4, 3]);
-            ctx.beginPath();
-            first = true;
-            for (let xp = 0; xp <= maxX; xp += 40) {
-                const r = calcTracking2D(xp, y_in, k);
-                const p = toPx(xp, r.Max_cm * 0.75);
-                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
-            }
-            ctx.stroke();
-
-            // 跟枪全精均衡
+            // 跟枪均衡
             ctx.strokeStyle = '#a78bfa';
             ctx.lineWidth = 1.6;
             ctx.setLineDash([4, 3]);
@@ -957,7 +839,8 @@
             for (let xp = 0; xp <= maxX; xp += 40) {
                 const r = calcTracking3D(xp, y_in, z_in, k);
                 const p = toPx(xp, r.Max_cm * 0.75);
-                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+                if (first) { ctx.moveTo(p.px, p.py);
+                    first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
             ctx.setLineDash([]);
@@ -967,35 +850,33 @@
                 const p_max = toPx(x_in, t3_max);
                 const p_bal = toPx(x_in, t3_max * 0.75);
                 ctx.fillStyle = '#7c3aed';
-                ctx.beginPath(); ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI); ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI);
+                ctx.fill();
                 ctx.fillStyle = '#a78bfa';
-                ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 4, 0, 2 * PI); ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p_bal.px, p_bal.py, 4, 0, 2 * PI);
+                ctx.fill();
                 ctx.fillStyle = '#7c3aed';
-                ctx.font = 'bold 8.5px sans-serif'; ctx.textAlign = 'left';
-                ctx.fillText(`全精 ${t3_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
+                ctx.font = 'bold 8.5px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`跟枪 ${t3_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
                 ctx.fillStyle = '#a78bfa';
                 ctx.fillText(`均衡 ${(t3_max*0.75).toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
-            } else if (currentMode === 'tracking_2d') {
-                const p_max = toPx(x_in, t2_max);
-                const p_bal = toPx(x_in, t2_max * 0.75);
-                ctx.fillStyle = '#0891b2';
-                ctx.beginPath(); ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI); ctx.fill();
-                ctx.fillStyle = '#5eead4';
-                ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 4, 0, 2 * PI); ctx.fill();
-                ctx.fillStyle = '#0891b2';
-                ctx.font = 'bold 8.5px sans-serif'; ctx.textAlign = 'left';
-                ctx.fillText(`极简 ${t2_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
-                ctx.fillStyle = '#5eead4';
-                ctx.fillText(`均衡 ${(t2_max*0.75).toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
             } else {
                 const p_max = toPx(x_in, s_max);
                 const p_bal = toPx(x_in, s_bal);
                 ctx.fillStyle = '#0284c7';
-                ctx.beginPath(); ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI); ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI);
+                ctx.fill();
                 ctx.fillStyle = '#38bdf8';
-                ctx.beginPath(); ctx.arc(p_bal.px, p_bal.py, 4, 0, 2 * PI); ctx.fill();
+                ctx.beginPath();
+                ctx.arc(p_bal.px, p_bal.py, 4, 0, 2 * PI);
+                ctx.fill();
                 ctx.fillStyle = '#0284c7';
-                ctx.font = 'bold 8.5px sans-serif'; ctx.textAlign = 'left';
+                ctx.font = 'bold 8.5px sans-serif';
+                ctx.textAlign = 'left';
                 ctx.fillText(`普通最大 ${s_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
                 ctx.fillStyle = '#38bdf8';
                 ctx.fillText(`均衡 ${s_bal.toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
