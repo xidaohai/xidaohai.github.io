@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>测验靶场 · (西岛海)</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --crosshair-color: #000000;
@@ -588,9 +587,11 @@
             min-width: 50px;
         }
         .ctrl-row input[type="range"]:disabled {
-            cursor: not-allowed;
-            opacity: 0.4;
+            cursor: not-allowed !important;
+            opacity: 0.35 !important;
+            accent-color: #94a3b8 !important;
         }
+
         .stepper-box {
             display: flex;
             align-items: center;
@@ -599,6 +600,11 @@
             overflow: hidden;
             background: #ffffff;
             flex-shrink: 0;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .stepper-box:has(:disabled) {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
         }
         .step-btn {
             width: 19px;
@@ -619,8 +625,10 @@
             background: #e0f2fe;
         }
         .step-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+            background: #f1f5f9 !important;
+            color: #94a3b8 !important;
         }
         .num-input {
             width: 54px;
@@ -635,9 +643,12 @@
             color: #0284c7;
             outline: none;
             background: #ffffff;
+            transition: background 0.15s, color 0.15s;
         }
         .num-input:disabled {
-            color: #94a3b8;
+            color: #94a3b8 !important;
+            background: #f1f5f9 !important;
+            cursor: not-allowed !important;
         }
 
         .divider {
@@ -804,79 +815,151 @@
             font-weight: 800;
         }
         .size-lock-btn {
-            font-size: 0.55rem;
-            padding: 1px 6px;
-            border-radius: 10px;
+            font-size: 0.6rem;
+            padding: 2px 7px;
+            border-radius: 4px;
             border: 1px solid #cbd5e1;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             color: #64748b;
             cursor: pointer;
-            transition: 0.15s;
+            transition: all 0.15s;
             font-weight: 700;
             white-space: nowrap;
-            margin-left: 4px;
         }
         .size-lock-btn:hover {
             border-color: #0284c7;
             color: #0284c7;
         }
         .size-lock-btn.active-lock {
-            background: #0284c7;
-            color: #ffffff;
-            border-color: #0284c7;
+            background: #e2e8f0;
+            color: #475569;
+            border-color: #cbd5e1;
         }
         .size-lock-btn.unlocked {
             background: #fffbeb;
             border-color: #f59e0b;
             color: #d97706;
         }
-        .dim-label {
-            font-size: 0.6rem;
-            font-weight: 800;
-            color: #64748b;
-            width: 14px;
-            text-align: center;
-            flex-shrink: 0;
+
+        /* ==== 优雅的人偶长宽高 UI 样式 ==== */
+        .dim-group {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 6px;
+            padding: 6px 8px;
+            margin-top: 5px;
+            transition: all 0.2s ease;
         }
-        .dim-row {
+        .dim-group.is-locked {
+            background: rgba(248, 250, 252, 0.45);
+            border-color: rgba(226, 232, 240, 0.6);
+        }
+        .dim-group-header {
             display: flex;
             align-items: center;
-            gap: 4px;
-        }
-        .dim-row .stepper-box {
-            flex: 1;
-            min-width: 0;
-        }
-        .dim-row .num-input {
-            width: 44px;
-            font-size: 0.65rem;
-        }
-        .dim-row .step-btn {
-            width: 16px;
-            height: 20px;
-            font-size: 0.7rem;
-        }
-        .dim-row label {
-            font-size: 0.6rem;
-            width: 28px;
-            flex-shrink: 0;
-            color: #64748b;
-            font-weight: 700;
-        }
-        .dim-group {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            margin-top: 2px;
+            justify-content: space-between;
+            margin-bottom: 5px;
         }
         .dim-group-title {
-            font-size: 0.6rem;
+            font-size: 0.65rem;
             font-weight: 800;
-            color: #475569;
+            color: #334155;
             display: flex;
             align-items: center;
+            gap: 5px;
+        }
+        .dim-indicator-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dim-card-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 6px;
-            margin-bottom: 2px;
+        }
+        .dim-item {
+            background: rgba(241, 245, 249, 0.65);
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 4px 3px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            transition: all 0.15s ease;
+        }
+        .dim-group.is-locked .dim-item {
+            background: rgba(241, 245, 249, 0.35);
+            border-color: #edf2f7;
+        }
+        .dim-item-title {
+            font-size: 0.58rem;
+            font-weight: 800;
+            color: #64748b;
+        }
+        .dim-group.is-locked .dim-item-title {
+            color: #94a3b8;
+        }
+        .mini-stepper {
+            width: 100%;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 3px;
+            background: #ffffff;
+            overflow: hidden;
+            transition: all 0.15s;
+        }
+        .mini-stepper:has(:disabled) {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+        }
+        .mini-stepper .step-btn {
+            width: 15px;
+            height: 100%;
+            font-size: 0.68rem;
+            font-weight: bold;
+            background: #f8fafc;
+            border: none;
+            color: #0284c7;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            padding: 0;
+        }
+        .mini-stepper .step-btn:hover {
+            background: #e0f2fe;
+        }
+        .mini-stepper .step-btn:disabled {
+            background: #f8fafc !important;
+            color: #cbd5e1 !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+        .mini-stepper .num-input {
+            width: 100%;
+            min-width: 0;
+            height: 100%;
+            border: none;
+            border-left: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 0.66rem;
+            font-weight: 800;
+            color: #0284c7;
+            background: #ffffff;
+            outline: none;
+            padding: 0;
+        }
+        .mini-stepper .num-input:disabled {
+            background: #f1f5f9 !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed !important;
         }
     </style>
 </head>
@@ -1186,11 +1269,8 @@
         // 2. 工具函数
         // ============================================================
         function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
-
         function rand(min, max) { return min + Math.random() * (max - min); }
-
         function getEl(id) { return document.getElementById(id); }
-
         function setNum(id, v, digits = 2) { const e = getEl(id); if (e) e.value = Number(v).toFixed(digits); }
 
         function hFovToVfov(hFov, aspect) {
@@ -1320,7 +1400,7 @@
 
         function stepValGlobal(id, delta) {
             const inp = getEl(id);
-            if (!inp) return;
+            if (!inp || inp.disabled) return;
             dispatchGlobalInput(id, (parseFloat(inp.value) || 0) + delta);
         }
 
@@ -1426,8 +1506,7 @@
         grid.position.y = 0.001;
         scene.add(grid);
 
-        let horizonLine = null,
-            thinLine = null;
+        let horizonLine = null, thinLine = null;
 
         function updateHorizon(height) {
             if (horizonLine) {
@@ -1516,7 +1595,7 @@
         }
 
         // ============================================================
-        // 6. 目标模型与形态 (重构：支持头部/身体 长宽高独立 + 锁定)
+        // 6. 目标模型与形态
         // ============================================================
         const SPHERE_GEO = new THREE.SphereGeometry(1, 48, 48);
         const HEAD_GEO = new THREE.SphereGeometry(1, 48, 48);
@@ -1531,7 +1610,6 @@
             }
         }
 
-        // ========== 核心重构：rebuildMannequinMesh 支持 headDepthCm / bodyDepthCm ==========
         function rebuildMannequinMesh(t) {
             while (t.dummyGroup.children.length) {
                 const obj = t.dummyGroup.children[0];
@@ -1540,21 +1618,19 @@
                 t.dummyGroup.remove(obj);
             }
 
-            // 头部：宽 (X) / 高 (Y) / 深 (Z) 完全独立，默认锁定状态 headDepthCm = headWidthCm
             const headRX = (t.headWidthCm || 23) / 100 / 2;
             const headRY = (t.headHeightCm || 29.44) / 100 / 2;
             const headRZ = (t.headDepthCm !== undefined ? t.headDepthCm : (t.headWidthCm || 23)) / 100 / 2;
 
             const bodyW = (t.bodyWidthCm || 38.87) / 100;
             const bodyH = (t.bodyHeightCm || 156.17) / 100;
-            // 身体深度：若未定义则用宽度*比例，否则用独立值
             const bodyD = (t.bodyDepthCm !== undefined ? t.bodyDepthCm : (t.bodyWidthCm || 38.87) * (2.2 / 3.38)) / 100;
 
             const neckGap = (t.neckGapCm || 6.325) / 100;
             const headOffX = (t.headOffsetX || 0) / 100;
             const headOffY = (t.headOffsetY || 0) / 100;
 
-            // ---- 头部 (椭球) ----
+            // 头部
             const headMat = new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.25 });
             const head = new THREE.Mesh(HEAD_GEO, headMat);
             head.scale.set(headRX, headRY, headRZ);
@@ -1563,16 +1639,14 @@
             head.userData.part = 'head';
             t.dummyGroup.add(head);
 
-            // ---- 颈部虚线 ----
-            const rx = headRX,
-                ry = headRY;
+            // 颈部虚线
+            const rx = headRX, ry = headRY;
             const bodyTopRel = -neckGap - headOffY;
             const p = bodyTopRel / ry;
-            let a0 = 0,
-                a1 = 0;
+            let a0 = 0, a1 = 0;
             if (p >= 1) a1 = Math.PI * 2;
-            else if (p <= -1) { a0 = 0;
-                a1 = 0; } else {
+            else if (p <= -1) { a0 = 0; a1 = 0; }
+            else {
                 a0 = Math.PI - Math.asin(p);
                 a1 = Math.PI * 2 + Math.asin(p);
             }
@@ -1600,7 +1674,7 @@
                 t.dummyGroup.add(dashLine);
             }
 
-            // ---- 身体 (椭圆柱) ----
+            // 身体
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
             const body = new THREE.Mesh(BODY_GEO, bodyMat);
             body.scale.set(bodyW, bodyH, bodyD);
@@ -1637,7 +1711,7 @@
                     const ratio = newSizeCm / 23.0;
                     t.headWidthCm = 23.0 * ratio;
                     t.headHeightCm = 29.44 * ratio;
-                    t.headDepthCm = 23.0 * ratio; // 默认深=宽
+                    t.headDepthCm = 23.0 * ratio;
                     t.bodyWidthCm = 38.87 * ratio;
                     t.bodyHeightCm = 156.17 * ratio;
                     t.bodyDepthCm = 38.87 * ratio * (2.2 / 3.38);
@@ -1716,19 +1790,13 @@
                 const hy = box.heightY / 2;
                 const hz = box.widthZ / 2;
 
-                const bMinX = bx - hx,
-                    bMaxX = bx + hx;
-                const bMinY = by - hy,
-                    bMaxY = by + hy;
-                const bMinZ = bz - hz,
-                    bMaxZ = bz + hz;
+                const bMinX = bx - hx, bMaxX = bx + hx;
+                const bMinY = by - hy, bMaxY = by + hy;
+                const bMinZ = bz - hz, bMaxZ = bz + hz;
 
-                const tMinX = tx - radius,
-                    tMaxX = tx + radius;
-                const tMinY = ty - halfHeight,
-                    tMaxY = ty + halfHeight;
-                const tMinZ = tz - radius,
-                    tMaxZ = tz + radius;
+                const tMinX = tx - radius, tMaxX = tx + radius;
+                const tMinY = ty - halfHeight, tMaxY = ty + halfHeight;
+                const tMinZ = tz - radius, tMaxZ = tz + radius;
 
                 const overlapX = (tMinX <= bMaxX && tMaxX >= bMinX);
                 const overlapY = (tMinY <= bMaxY && tMaxY >= bMinY);
@@ -1795,8 +1863,7 @@
         // ============================================================
         // 9. 输入、视角与准星判定
         // ============================================================
-        let yaw = 0.0,
-            pitch = 0.0;
+        let yaw = 0.0, pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
         let debugMode = false;
 
@@ -1836,8 +1903,7 @@
         window.addEventListener('pointermove', (e) => {
             if (document.pointerLockElement !== document.body) return;
             const events = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
-            let dx = 0,
-                dy = 0;
+            let dx = 0, dy = 0;
             for (const ev of events) {
                 dx += ev.movementX || 0;
                 dy += ev.movementY || 0;
@@ -1956,20 +2022,41 @@
         });
 
         // ============================================================
-        // 10. 目标 UI 构建与控制 (重构：长宽高 + 锁定)
+        // 10. 目标 UI 构建与控制 (支持严格禁用与滚轮拦截)
         // ============================================================
         const container1 = getEl('targets-container-1');
         const boxesContainer = getEl('boxes-container');
 
         function bindControl({ numEl, rangeEl = null, btnMinus = null, btnPlus = null, step = 1, apply }) {
-            if (btnMinus) btnMinus.addEventListener('click', () => apply((parseFloat(numEl.value) || 0) - step));
-            if (btnPlus) btnPlus.addEventListener('click', () => apply((parseFloat(numEl.value) || 0) + step));
-            if (rangeEl) rangeEl.addEventListener('input', () => apply(parseFloat(rangeEl.value)));
-            numEl.addEventListener('change', () => apply(parseFloat(numEl.value)));
-            numEl.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                apply((parseFloat(numEl.value) || 0) + (e.deltaY < 0 ? step : -step));
-            }, { passive: false });
+            if (btnMinus) {
+                btnMinus.addEventListener('click', () => {
+                    if (btnMinus.disabled || (numEl && numEl.disabled)) return;
+                    apply((parseFloat(numEl.value) || 0) - step);
+                });
+            }
+            if (btnPlus) {
+                btnPlus.addEventListener('click', () => {
+                    if (btnPlus.disabled || (numEl && numEl.disabled)) return;
+                    apply((parseFloat(numEl.value) || 0) + step);
+                });
+            }
+            if (rangeEl) {
+                rangeEl.addEventListener('input', () => {
+                    if (rangeEl.disabled) return;
+                    apply(parseFloat(rangeEl.value));
+                });
+            }
+            if (numEl) {
+                numEl.addEventListener('change', () => {
+                    if (numEl.disabled) return;
+                    apply(parseFloat(numEl.value));
+                });
+                numEl.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (numEl.disabled) return; // 严格拦截：禁用/锁定状态下不响应滚轮
+                    apply((parseFloat(numEl.value) || 0) + (e.deltaY < 0 ? step : -step));
+                }, { passive: false });
+            }
         }
 
         function rebuildTargetUI() {
@@ -1983,7 +2070,6 @@
 
                 let dimensionControlsHTML = '';
                 if (isDummy) {
-                    // ---- 假人：等比总缩放 + 头部/身体 长宽高独立 (带锁定) ----
                     const hLocked = t.headSizeLocked !== undefined ? t.headSizeLocked : true;
                     const bLocked = t.bodySizeLocked !== undefined ? t.bodySizeLocked : true;
 
@@ -1998,70 +2084,90 @@
                             </div>
                         </div>
 
-                        <div class="dim-group">
-                            <div class="dim-group-title">
-                                <span style="color:${t.color};">● 头部 (长×宽×高)</span>
+                        <!-- 头部尺寸卡片 -->
+                        <div class="dim-group ${hLocked ? 'is-locked' : ''}" id="group-t${i}-head">
+                            <div class="dim-group-header">
+                                <div class="dim-group-title">
+                                    <span class="dim-indicator-dot" style="background:${t.color};"></span>
+                                    <span>头部尺寸 (长×宽×高)</span>
+                                </div>
                                 <button class="size-lock-btn ${hLocked ? 'active-lock' : 'unlocked'}" id="btn-t${i}-hsize-lock">
-                                    ${hLocked ? '🔒 锁定' : '🔓 解锁'}
+                                    ${hLocked ? '🔒 锁定比例' : '🔓 自由微调'}
                                 </button>
                             </div>
-                            <div class="dim-row">
-                                <label>宽</label>
-                                <div class="stepper-box">
-                                    <button class="step-btn" id="btn-t${i}-hw-minus">−</button>
-                                    <input type="number" class="num-input" id="inp-t${i}-hw" value="${t.headWidthCm.toFixed(1)}" step="0.5" />
-                                    <button class="step-btn" id="btn-t${i}-hw-plus">+</button>
+                            <div class="dim-card-grid">
+                                <div class="dim-item">
+                                    <span class="dim-item-title">宽 (X)</span>
+                                    <div class="mini-stepper">
+                                        <button class="step-btn" id="btn-t${i}-hw-minus" ${hLocked ? 'disabled' : ''}>−</button>
+                                        <input type="number" class="num-input" id="inp-t${i}-hw" value="${t.headWidthCm.toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} />
+                                        <button class="step-btn" id="btn-t${i}-hw-plus" ${hLocked ? 'disabled' : ''}>+</button>
+                                    </div>
                                 </div>
-                                <label>高</label>
-                                <div class="stepper-box">
-                                    <button class="step-btn" id="btn-t${i}-hh-minus">−</button>
-                                    <input type="number" class="num-input" id="inp-t${i}-hh" value="${t.headHeightCm.toFixed(1)}" step="0.5" />
-                                    <button class="step-btn" id="btn-t${i}-hh-plus">+</button>
+                                <div class="dim-item">
+                                    <span class="dim-item-title">高 (Y)</span>
+                                    <div class="mini-stepper">
+                                        <button class="step-btn" id="btn-t${i}-hh-minus" ${hLocked ? 'disabled' : ''}>−</button>
+                                        <input type="number" class="num-input" id="inp-t${i}-hh" value="${t.headHeightCm.toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} />
+                                        <button class="step-btn" id="btn-t${i}-hh-plus" ${hLocked ? 'disabled' : ''}>+</button>
+                                    </div>
                                 </div>
-                                <label>深</label>
-                                <div class="stepper-box">
-                                    <button class="step-btn" id="btn-t${i}-hd-minus">−</button>
-                                    <input type="number" class="num-input" id="inp-t${i}-hd" value="${(t.headDepthCm !== undefined ? t.headDepthCm : t.headWidthCm).toFixed(1)}" step="0.5" />
-                                    <button class="step-btn" id="btn-t${i}-hd-plus">+</button>
+                                <div class="dim-item">
+                                    <span class="dim-item-title">深 (Z)</span>
+                                    <div class="mini-stepper">
+                                        <button class="step-btn" id="btn-t${i}-hd-minus" ${hLocked ? 'disabled' : ''}>−</button>
+                                        <input type="number" class="num-input" id="inp-t${i}-hd" value="${(t.headDepthCm !== undefined ? t.headDepthCm : t.headWidthCm).toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} />
+                                        <button class="step-btn" id="btn-t${i}-hd-plus" ${hLocked ? 'disabled' : ''}>+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="dim-group">
-                            <div class="dim-group-title">
-                                <span style="color:#64748b;">● 身体 (长×宽×高)</span>
+                        <!-- 身体尺寸卡片 -->
+                        <div class="dim-group ${bLocked ? 'is-locked' : ''}" id="group-t${i}-body">
+                            <div class="dim-group-header">
+                                <div class="dim-group-title">
+                                    <span class="dim-indicator-dot" style="background:#64748b;"></span>
+                                    <span>身体尺寸 (长×宽×高)</span>
+                                </div>
                                 <button class="size-lock-btn ${bLocked ? 'active-lock' : 'unlocked'}" id="btn-t${i}-bsize-lock">
-                                    ${bLocked ? '🔒 锁定' : '🔓 解锁'}
+                                    ${bLocked ? '🔒 锁定比例' : '🔓 自由微调'}
                                 </button>
                             </div>
-                            <div class="dim-row">
-                                <label>宽</label>
-                                <div class="stepper-box">
-                                    <button class="step-btn" id="btn-t${i}-bw-minus">−</button>
-                                    <input type="number" class="num-input" id="inp-t${i}-bw" value="${t.bodyWidthCm.toFixed(1)}" step="1" />
-                                    <button class="step-btn" id="btn-t${i}-bw-plus">+</button>
+                            <div class="dim-card-grid">
+                                <div class="dim-item">
+                                    <span class="dim-item-title">宽 (X)</span>
+                                    <div class="mini-stepper">
+                                        <button class="step-btn" id="btn-t${i}-bw-minus" ${bLocked ? 'disabled' : ''}>−</button>
+                                        <input type="number" class="num-input" id="inp-t${i}-bw" value="${t.bodyWidthCm.toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} />
+                                        <button class="step-btn" id="btn-t${i}-bw-plus" ${bLocked ? 'disabled' : ''}>+</button>
+                                    </div>
                                 </div>
-                                <label>高</label>
-                                <div class="stepper-box">
-                                    <button class="step-btn" id="btn-t${i}-bh-minus">−</button>
-                                    <input type="number" class="num-input" id="inp-t${i}-bh" value="${t.bodyHeightCm.toFixed(1)}" step="1" />
-                                    <button class="step-btn" id="btn-t${i}-bh-plus">+</button>
+                                <div class="dim-item">
+                                    <span class="dim-item-title">高 (Y)</span>
+                                    <div class="mini-stepper">
+                                        <button class="step-btn" id="btn-t${i}-bh-minus" ${bLocked ? 'disabled' : ''}>−</button>
+                                        <input type="number" class="num-input" id="inp-t${i}-bh" value="${t.bodyHeightCm.toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} />
+                                        <button class="step-btn" id="btn-t${i}-bh-plus" ${bLocked ? 'disabled' : ''}>+</button>
+                                    </div>
                                 </div>
-                                <label>深</label>
-                                <div class="stepper-box">
-                                    <button class="step-btn" id="btn-t${i}-bd-minus">−</button>
-                                    <input type="number" class="num-input" id="inp-t${i}-bd" value="${(t.bodyDepthCm !== undefined ? t.bodyDepthCm : t.bodyWidthCm * (2.2/3.38)).toFixed(1)}" step="1" />
-                                    <button class="step-btn" id="btn-t${i}-bd-plus">+</button>
+                                <div class="dim-item">
+                                    <span class="dim-item-title">深 (Z)</span>
+                                    <div class="mini-stepper">
+                                        <button class="step-btn" id="btn-t${i}-bd-minus" ${bLocked ? 'disabled' : ''}>−</button>
+                                        <input type="number" class="num-input" id="inp-t${i}-bd" value="${(t.bodyDepthCm !== undefined ? t.bodyDepthCm : t.bodyWidthCm * (2.2/3.38)).toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} />
+                                        <button class="step-btn" id="btn-t${i}-bd-plus" ${bLocked ? 'disabled' : ''}>+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="ctrl-row">
-                            <label>头部锁定</label>
+                        <div class="ctrl-row" style="margin-top:6px;">
+                            <label>头部位置锁定</label>
                             <button class="lock-btn ${t.headLocked ? '' : 'unlocked'}" id="btn-t${i}-headlock">
                                 ${t.headLocked ? '🔒 已锁定' : '🔓 已解锁'}
                             </button>
-                            <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">解锁可独立调头</span>
+                            <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">解锁可调头部偏移</span>
                         </div>
                         <div class="ctrl-row">
                             <label>头部上下 (cm)</label>
@@ -2106,7 +2212,7 @@
 
                     ${dimensionControlsHTML}
 
-                    <div class="ctrl-row">
+                    <div class="ctrl-row" style="margin-top:6px;">
                         <label>前后距离 (m)</label>
                         <input type="range" id="inp-t${i}-z-r" min="1" max="50" step="0.5" value="${t.distMeters}" />
                         <div class="stepper-box">
@@ -2173,13 +2279,11 @@
             updateScene();
         }
 
-        // ========== 绑定目标控件 (含长宽高锁定逻辑) ==========
         function setupDynamicTargetBindings(t, i) {
             const isDummy = config.targetShape === 'dummy';
 
-            // ---- 等比总缩放 ----
-            const sR = getEl(`inp-t${i}-s-r`),
-                sN = getEl(`inp-t${i}-s`);
+            // 等比总缩放
+            const sR = getEl(`inp-t${i}-s-r`), sN = getEl(`inp-t${i}-s`);
             bindControl({
                 numEl: sN,
                 rangeEl: sR,
@@ -2194,28 +2298,25 @@
 
                     if (isDummy) {
                         const ratio = val / 23.0;
-                        t.headWidthCm = 23.0 * ratio;
-                        t.headHeightCm = 29.44 * ratio;
-                        t.headDepthCm = 23.0 * ratio;
-                        t.bodyWidthCm = 38.87 * ratio;
-                        t.bodyHeightCm = 156.17 * ratio;
-                        t.bodyDepthCm = 38.87 * ratio * (2.2 / 3.38);
-                        t.neckGapCm = 6.325 * ratio;
-
-                        // 刷新UI显示
-                        const hw = getEl(`inp-t${i}-hw`);
-                        const hh = getEl(`inp-t${i}-hh`);
-                        const hd = getEl(`inp-t${i}-hd`);
-                        const bw = getEl(`inp-t${i}-bw`);
-                        const bh = getEl(`inp-t${i}-bh`);
-                        const bd = getEl(`inp-t${i}-bd`);
-                        if (hw) hw.value = t.headWidthCm.toFixed(1);
-                        if (hh) hh.value = t.headHeightCm.toFixed(1);
-                        if (hd) hd.value = t.headDepthCm.toFixed(1);
-                        if (bw) bw.value = t.bodyWidthCm.toFixed(1);
-                        if (bh) bh.value = t.bodyHeightCm.toFixed(1);
-                        if (bd) bd.value = t.bodyDepthCm.toFixed(1);
-
+                        if (t.headSizeLocked) {
+                            t.headWidthCm = 23.0 * ratio;
+                            t.headHeightCm = 29.44 * ratio;
+                            t.headDepthCm = 23.0 * ratio;
+                            const hw = getEl(`inp-t${i}-hw`), hh = getEl(`inp-t${i}-hh`), hd = getEl(`inp-t${i}-hd`);
+                            if (hw) hw.value = t.headWidthCm.toFixed(1);
+                            if (hh) hh.value = t.headHeightCm.toFixed(1);
+                            if (hd) hd.value = t.headDepthCm.toFixed(1);
+                        }
+                        if (t.bodySizeLocked) {
+                            t.bodyWidthCm = 38.87 * ratio;
+                            t.bodyHeightCm = 156.17 * ratio;
+                            t.bodyDepthCm = 38.87 * ratio * (2.2 / 3.38);
+                            t.neckGapCm = 6.325 * ratio;
+                            const bw = getEl(`inp-t${i}-bw`), bh = getEl(`inp-t${i}-bh`), bd = getEl(`inp-t${i}-bd`);
+                            if (bw) bw.value = t.bodyWidthCm.toFixed(1);
+                            if (bh) bh.value = t.bodyHeightCm.toFixed(1);
+                            if (bd) bd.value = t.bodyDepthCm.toFixed(1);
+                        }
                         rebuildMannequinMesh(t);
                     }
                     updateScene();
@@ -2223,62 +2324,51 @@
             });
 
             if (isDummy) {
-                // ---- 头部 宽/高/深 ----
-                const hwN = getEl(`inp-t${i}-hw`),
-                    hhN = getEl(`inp-t${i}-hh`),
-                    hdN = getEl(`inp-t${i}-hd`);
-                const hwMinus = getEl(`btn-t${i}-hw-minus`),
-                    hwPlus = getEl(`btn-t${i}-hw-plus`);
-                const hhMinus = getEl(`btn-t${i}-hh-minus`),
-                    hhPlus = getEl(`btn-t${i}-hh-plus`);
-                const hdMinus = getEl(`btn-t${i}-hd-minus`),
-                    hdPlus = getEl(`btn-t${i}-hd-plus`);
-
-                // 头部尺寸锁定按钮
+                const hwN = getEl(`inp-t${i}-hw`), hhN = getEl(`inp-t${i}-hh`), hdN = getEl(`inp-t${i}-hd`);
+                const hwMinus = getEl(`btn-t${i}-hw-minus`), hwPlus = getEl(`btn-t${i}-hw-plus`);
+                const hhMinus = getEl(`btn-t${i}-hh-minus`), hhPlus = getEl(`btn-t${i}-hh-plus`);
+                const hdMinus = getEl(`btn-t${i}-hd-minus`), hdPlus = getEl(`btn-t${i}-hd-plus`);
                 const hLockBtn = getEl(`btn-t${i}-hsize-lock`);
+                const groupHead = getEl(`group-t${i}-head`);
+
                 const setHeadSizeLock = (locked) => {
                     t.headSizeLocked = locked;
-                    hLockBtn.className = `size-lock-btn ${locked ? 'active-lock' : 'unlocked'}`;
-                    hLockBtn.innerHTML = locked ? '🔒 锁定' : '🔓 解锁';
-                    // 锁定：深度跟随宽度
+                    if (hLockBtn) {
+                        hLockBtn.className = `size-lock-btn ${locked ? 'active-lock' : 'unlocked'}`;
+                        hLockBtn.innerHTML = locked ? '🔒 锁定比例' : '🔓 自由微调';
+                    }
+                    if (groupHead) groupHead.classList.toggle('is-locked', locked);
+                    [hwN, hwMinus, hwPlus, hhN, hhMinus, hhPlus, hdN, hdMinus, hdPlus].forEach(el => {
+                        if (el) el.disabled = locked;
+                    });
+
                     if (locked) {
-                        t.headDepthCm = t.headWidthCm;
+                        const ratio = t.sizeCm / 23.0;
+                        t.headWidthCm = 23.0 * ratio;
+                        t.headHeightCm = 29.44 * ratio;
+                        t.headDepthCm = 23.0 * ratio;
+                        if (hwN) hwN.value = t.headWidthCm.toFixed(1);
+                        if (hhN) hhN.value = t.headHeightCm.toFixed(1);
                         if (hdN) hdN.value = t.headDepthCm.toFixed(1);
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 };
-                if (hLockBtn) {
-                    hLockBtn.addEventListener('click', () => {
-                        setHeadSizeLock(!t.headSizeLocked);
-                    });
-                }
+                if (hLockBtn) hLockBtn.addEventListener('click', () => setHeadSizeLock(!t.headSizeLocked));
 
-                // 头部宽度
                 bindControl({
-                    numEl: hwN,
-                    btnMinus: hwMinus,
-                    btnPlus: hwPlus,
-                    step: 0.5,
+                    numEl: hwN, btnMinus: hwMinus, btnPlus: hwPlus, step: 0.5,
                     apply: (v) => {
                         const val = Math.max(0.5, parseFloat(v) || 23);
                         hwN.value = val.toFixed(1);
                         t.headWidthCm = val;
-                        if (t.headSizeLocked) {
-                            t.headDepthCm = val;
-                            if (hdN) hdN.value = val.toFixed(1);
-                        }
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
 
-                // 头部高度
                 bindControl({
-                    numEl: hhN,
-                    btnMinus: hhMinus,
-                    btnPlus: hhPlus,
-                    step: 0.5,
+                    numEl: hhN, btnMinus: hhMinus, btnPlus: hhPlus, step: 0.5,
                     apply: (v) => {
                         const val = Math.max(0.5, parseFloat(v) || 29.44);
                         hhN.value = val.toFixed(1);
@@ -2288,78 +2378,64 @@
                     }
                 });
 
-                // 头部深度 (仅在解锁时可用，但始终可调)
                 bindControl({
-                    numEl: hdN,
-                    btnMinus: hdMinus,
-                    btnPlus: hdPlus,
-                    step: 0.5,
+                    numEl: hdN, btnMinus: hdMinus, btnPlus: hdPlus, step: 0.5,
                     apply: (v) => {
                         const val = Math.max(0.5, parseFloat(v) || 23);
                         hdN.value = val.toFixed(1);
                         t.headDepthCm = val;
-                        // 如果锁定状态，自动修正宽度同步
-                        if (t.headSizeLocked) {
-                            t.headWidthCm = val;
-                            if (hwN) hwN.value = val.toFixed(1);
-                        }
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
 
-                // ---- 身体 宽/高/深 ----
-                const bwN = getEl(`inp-t${i}-bw`),
-                    bhN = getEl(`inp-t${i}-bh`),
-                    bdN = getEl(`inp-t${i}-bd`);
-                const bwMinus = getEl(`btn-t${i}-bw-minus`),
-                    bwPlus = getEl(`btn-t${i}-bw-plus`);
-                const bhMinus = getEl(`btn-t${i}-bh-minus`),
-                    bhPlus = getEl(`btn-t${i}-bh-plus`);
-                const bdMinus = getEl(`btn-t${i}-bd-minus`),
-                    bdPlus = getEl(`btn-t${i}-bd-plus`);
-
+                // 身体尺寸控制
+                const bwN = getEl(`inp-t${i}-bw`), bhN = getEl(`inp-t${i}-bh`), bdN = getEl(`inp-t${i}-bd`);
+                const bwMinus = getEl(`btn-t${i}-bw-minus`), bwPlus = getEl(`btn-t${i}-bw-plus`);
+                const bhMinus = getEl(`btn-t${i}-bh-minus`), bhPlus = getEl(`btn-t${i}-bh-plus`);
+                const bdMinus = getEl(`btn-t${i}-bd-minus`), bdPlus = getEl(`btn-t${i}-bd-plus`);
                 const bLockBtn = getEl(`btn-t${i}-bsize-lock`);
+                const groupBody = getEl(`group-t${i}-body`);
+
                 const setBodySizeLock = (locked) => {
                     t.bodySizeLocked = locked;
-                    bLockBtn.className = `size-lock-btn ${locked ? 'active-lock' : 'unlocked'}`;
-                    bLockBtn.innerHTML = locked ? '🔒 锁定' : '🔓 解锁';
+                    if (bLockBtn) {
+                        bLockBtn.className = `size-lock-btn ${locked ? 'active-lock' : 'unlocked'}`;
+                        bLockBtn.innerHTML = locked ? '🔒 锁定比例' : '🔓 自由微调';
+                    }
+                    if (groupBody) groupBody.classList.toggle('is-locked', locked);
+                    [bwN, bwMinus, bwPlus, bhN, bhMinus, bhPlus, bdN, bdMinus, bdPlus].forEach(el => {
+                        if (el) el.disabled = locked;
+                    });
+
                     if (locked) {
-                        t.bodyDepthCm = t.bodyWidthCm * (2.2 / 3.38);
+                        const ratio = t.sizeCm / 23.0;
+                        t.bodyWidthCm = 38.87 * ratio;
+                        t.bodyHeightCm = 156.17 * ratio;
+                        t.bodyDepthCm = 38.87 * ratio * (2.2 / 3.38);
+                        t.neckGapCm = 6.325 * ratio;
+                        if (bwN) bwN.value = t.bodyWidthCm.toFixed(1);
+                        if (bhN) bhN.value = t.bodyHeightCm.toFixed(1);
                         if (bdN) bdN.value = t.bodyDepthCm.toFixed(1);
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 };
-                if (bLockBtn) {
-                    bLockBtn.addEventListener('click', () => {
-                        setBodySizeLock(!t.bodySizeLocked);
-                    });
-                }
+                if (bLockBtn) bLockBtn.addEventListener('click', () => setBodySizeLock(!t.bodySizeLocked));
 
                 bindControl({
-                    numEl: bwN,
-                    btnMinus: bwMinus,
-                    btnPlus: bwPlus,
-                    step: 1.0,
+                    numEl: bwN, btnMinus: bwMinus, btnPlus: bwPlus, step: 1.0,
                     apply: (v) => {
                         const val = Math.max(0.5, parseFloat(v) || 38.87);
                         bwN.value = val.toFixed(1);
                         t.bodyWidthCm = val;
-                        if (t.bodySizeLocked) {
-                            t.bodyDepthCm = val * (2.2 / 3.38);
-                            if (bdN) bdN.value = t.bodyDepthCm.toFixed(1);
-                        }
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
 
                 bindControl({
-                    numEl: bhN,
-                    btnMinus: bhMinus,
-                    btnPlus: bhPlus,
-                    step: 1.0,
+                    numEl: bhN, btnMinus: bhMinus, btnPlus: bhPlus, step: 1.0,
                     apply: (v) => {
                         const val = Math.max(0.5, parseFloat(v) || 156.17);
                         bhN.value = val.toFixed(1);
@@ -2370,58 +2446,47 @@
                 });
 
                 bindControl({
-                    numEl: bdN,
-                    btnMinus: bdMinus,
-                    btnPlus: bdPlus,
-                    step: 1.0,
+                    numEl: bdN, btnMinus: bdMinus, btnPlus: bdPlus, step: 1.0,
                     apply: (v) => {
                         const val = Math.max(0.5, parseFloat(v) || 25.3);
                         bdN.value = val.toFixed(1);
                         t.bodyDepthCm = val;
-                        if (t.bodySizeLocked) {
-                            t.bodyWidthCm = val / (2.2 / 3.38);
-                            if (bwN) bwN.value = t.bodyWidthCm.toFixed(1);
-                        }
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
 
-                // ---- 头部偏移锁定 (原有) ----
+                // 头部位置偏移与锁定
                 const lockBtn = getEl(`btn-t${i}-headlock`);
-                const hyR = getEl(`inp-t${i}-hy-r`),
-                    hyN = getEl(`inp-t${i}-hy`);
-                const hyMinus = getEl(`btn-t${i}-hy-minus`),
-                    hyPlus = getEl(`btn-t${i}-hy-plus`);
-                const hxR = getEl(`inp-t${i}-hx-r`),
-                    hxN = getEl(`inp-t${i}-hx`);
-                const hxMinus = getEl(`btn-t${i}-hx-minus`),
-                    hxPlus = getEl(`btn-t${i}-hx-plus`);
+                const hyR = getEl(`inp-t${i}-hy-r`), hyN = getEl(`inp-t${i}-hy`);
+                const hyMinus = getEl(`btn-t${i}-hy-minus`), hyPlus = getEl(`btn-t${i}-hy-plus`);
+                const hxR = getEl(`inp-t${i}-hx-r`), hxN = getEl(`inp-t${i}-hx`);
+                const hxMinus = getEl(`btn-t${i}-hx-minus`), hxPlus = getEl(`btn-t${i}-hx-plus`);
 
                 const setHeadLock = (locked) => {
                     t.headLocked = locked;
-                    lockBtn.innerHTML = locked ? '🔒 已锁定' : '🔓 已解锁';
-                    lockBtn.classList.toggle('unlocked', !locked);
-                    [hyR, hyN, hyMinus, hyPlus, hxR, hxN, hxMinus, hxPlus].forEach(el => el.disabled = locked);
+                    if (lockBtn) {
+                        lockBtn.innerHTML = locked ? '🔒 已锁定' : '🔓 已解锁';
+                        lockBtn.classList.toggle('unlocked', !locked);
+                    }
+                    [hyR, hyN, hyMinus, hyPlus, hxR, hxN, hxMinus, hxPlus].forEach(el => {
+                        if (el) el.disabled = locked;
+                    });
                     if (locked && ((t.headOffsetX || 0) !== 0 || (t.headOffsetY || 0) !== 0)) {
                         t.headOffsetX = 0;
                         t.headOffsetY = 0;
-                        hyR.value = 0;
-                        hyN.value = '0.0';
-                        hxR.value = 0;
-                        hxN.value = '0.0';
+                        if (hyR) hyR.value = 0;
+                        if (hyN) hyN.value = '0.0';
+                        if (hxR) hxR.value = 0;
+                        if (hxN) hxN.value = '0.0';
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 };
-                lockBtn.addEventListener('click', () => setHeadLock(!t.headLocked));
+                if (lockBtn) lockBtn.addEventListener('click', () => setHeadLock(!t.headLocked));
 
                 bindControl({
-                    numEl: hyN,
-                    rangeEl: hyR,
-                    btnMinus: hyMinus,
-                    btnPlus: hyPlus,
-                    step: 0.5,
+                    numEl: hyN, rangeEl: hyR, btnMinus: hyMinus, btnPlus: hyPlus, step: 0.5,
                     apply: (v) => {
                         const val = clamp(parseFloat(v) || 0, -40, 40);
                         hyR.value = val;
@@ -2432,11 +2497,7 @@
                     }
                 });
                 bindControl({
-                    numEl: hxN,
-                    rangeEl: hxR,
-                    btnMinus: hxMinus,
-                    btnPlus: hxPlus,
-                    step: 0.5,
+                    numEl: hxN, rangeEl: hxR, btnMinus: hxMinus, btnPlus: hxPlus, step: 0.5,
                     apply: (v) => {
                         const val = clamp(parseFloat(v) || 0, -40, 40);
                         hxR.value = val;
@@ -2446,24 +2507,17 @@
                         updateScene();
                     }
                 });
-                setHeadLock(t.headLocked);
 
-                // 初始化深度默认值
-                if (t.headDepthCm === undefined) t.headDepthCm = t.headWidthCm;
-                if (t.bodyDepthCm === undefined) t.bodyDepthCm = t.bodyWidthCm * (2.2 / 3.38);
-                if (t.headSizeLocked === undefined) t.headSizeLocked = true;
-                if (t.bodySizeLocked === undefined) t.bodySizeLocked = true;
+                // 初始化状态
+                setHeadSizeLock(t.headSizeLocked !== undefined ? t.headSizeLocked : true);
+                setBodySizeLock(t.bodySizeLocked !== undefined ? t.bodySizeLocked : true);
+                setHeadLock(t.headLocked !== undefined ? t.headLocked : true);
             }
 
-            // ---- 前后距离 ----
-            const zR = getEl(`inp-t${i}-z-r`),
-                zN = getEl(`inp-t${i}-z`);
+            // 前后距离
+            const zR = getEl(`inp-t${i}-z-r`), zN = getEl(`inp-t${i}-z`);
             bindControl({
-                numEl: zN,
-                rangeEl: zR,
-                btnMinus: getEl(`btn-t${i}-z-minus`),
-                btnPlus: getEl(`btn-t${i}-z-plus`),
-                step: 0.25,
+                numEl: zN, rangeEl: zR, btnMinus: getEl(`btn-t${i}-z-minus`), btnPlus: getEl(`btn-t${i}-z-plus`), step: 0.25,
                 apply: (v) => {
                     const val = Math.max(0.1, parseFloat(v) || 10);
                     zR.value = val;
@@ -2478,15 +2532,10 @@
                 }
             });
 
-            // ---- 左右方位 ----
-            const aR = getEl(`inp-t${i}-a-r`),
-                aN = getEl(`inp-t${i}-a`);
+            // 左右方位
+            const aR = getEl(`inp-t${i}-a-r`), aN = getEl(`inp-t${i}-a`);
             bindControl({
-                numEl: aN,
-                rangeEl: aR,
-                btnMinus: getEl(`btn-t${i}-a-minus`),
-                btnPlus: getEl(`btn-t${i}-a-plus`),
-                step: 0.25,
+                numEl: aN, rangeEl: aR, btnMinus: getEl(`btn-t${i}-a-minus`), btnPlus: getEl(`btn-t${i}-a-plus`), step: 0.25,
                 apply: (v) => {
                     const val = clamp(parseFloat(v) || 0, -180, 180);
                     aR.value = val;
@@ -2500,15 +2549,10 @@
                 }
             });
 
-            // ---- 上下微调 ----
-            const yR = getEl(`inp-t${i}-y-r`),
-                yN = getEl(`inp-t${i}-y`);
+            // 上下微调
+            const yR = getEl(`inp-t${i}-y-r`), yN = getEl(`inp-t${i}-y`);
             bindControl({
-                numEl: yN,
-                rangeEl: yR,
-                btnMinus: getEl(`btn-t${i}-y-minus`),
-                btnPlus: getEl(`btn-t${i}-y-plus`),
-                step: 0.05,
+                numEl: yN, rangeEl: yR, btnMinus: getEl(`btn-t${i}-y-minus`), btnPlus: getEl(`btn-t${i}-y-plus`), step: 0.05,
                 apply: (v) => {
                     const val = parseFloat(v) || 0;
                     yR.value = val;
@@ -2522,7 +2566,7 @@
                 }
             });
 
-            // ---- 运动开关 ----
+            // 运动开关
             const btnMoveToggle = getEl(`btn-t${i}-move-toggle`);
             btnMoveToggle.addEventListener('click', () => {
                 t.move.enabled = !t.move.enabled;
@@ -2569,9 +2613,8 @@
                 getEl(`t${i}-move-box`).style.display = t.move.enabled ? 'block' : 'none';
             });
 
-            // ---- 运动模式 ----
-            const btnLinear = getEl(`btn-t${i}-m-linear`),
-                btnOrbit = getEl(`btn-t${i}-m-orbit`);
+            // 运动模式
+            const btnLinear = getEl(`btn-t${i}-m-linear`), btnOrbit = getEl(`btn-t${i}-m-orbit`);
             const vaRow = getEl(`va-t${i}-row`);
             const vaToggle = getEl(`btn-t${i}-va-toggle`);
             const refreshVAVisibility = () => {
@@ -2601,13 +2644,10 @@
                 updateTargetSpeedHint(t, i);
             });
 
-            // ---- 运动参数 ----
+            // 运动参数
             const rN = getEl(`inp-t${i}-rng`);
             bindControl({
-                numEl: rN,
-                btnMinus: getEl(`btn-t${i}-rng-minus`),
-                btnPlus: getEl(`btn-t${i}-rng-plus`),
-                step: 1.0,
+                numEl: rN, btnMinus: getEl(`btn-t${i}-rng-minus`), btnPlus: getEl(`btn-t${i}-rng-plus`), step: 1.0,
                 apply: (v) => {
                     const val = clamp(parseFloat(v) || 1.0, 0.1, 360);
                     rN.value = val.toFixed(2);
@@ -2618,10 +2658,7 @@
 
             const spN = getEl(`inp-t${i}-spd`);
             bindControl({
-                numEl: spN,
-                btnMinus: getEl(`btn-t${i}-spd-minus`),
-                btnPlus: getEl(`btn-t${i}-spd-plus`),
-                step: 1.0,
+                numEl: spN, btnMinus: getEl(`btn-t${i}-spd-minus`), btnPlus: getEl(`btn-t${i}-spd-plus`), step: 1.0,
                 apply: (v) => {
                     const val = clamp(parseFloat(v) || 1.0, 0.1, 360);
                     spN.value = val.toFixed(2);
@@ -2680,16 +2717,16 @@
                 sizeCm: 23.0,
                 headWidthCm: 23.0,
                 headHeightCm: 29.44,
-                headDepthCm: 23.0, // 新增：头部深度
+                headDepthCm: 23.0,
                 bodyWidthCm: 38.87,
                 bodyHeightCm: 156.17,
-                bodyDepthCm: 38.87 * (2.2 / 3.38), // 新增：身体深度
+                bodyDepthCm: 38.87 * (2.2 / 3.38),
                 neckGapCm: 6.325,
                 headLocked: true,
                 headOffsetX: 0,
                 headOffsetY: 0,
-                headSizeLocked: true, // 新增：头部尺寸锁定
-                bodySizeLocked: true, // 新增：身体尺寸锁定
+                headSizeLocked: true,
+                bodySizeLocked: true,
                 distMeters: 10,
                 centerDeg: defaultDeg,
                 color,
@@ -2731,7 +2768,7 @@
         }
 
         // ============================================================
-        // 12. 箱子 UI 渲染与逻辑 (保持不变)
+        // 12. 镜之边缘箱子 UI
         // ============================================================
         function rebuildBoxesUI() {
             boxesContainer.innerHTML = '';
@@ -2850,36 +2887,40 @@
             });
 
             const lockBtn = getEl(`btn-box-${i}-lock`);
-            const inpX = getEl(`inp-box-${i}-x`),
-                inpXR = getEl(`inp-box-${i}-x-r`);
-            const inpZ = getEl(`inp-box-${i}-z`),
-                inpZR = getEl(`inp-box-${i}-z-r`);
-            const inpY = getEl(`inp-box-${i}-y`),
-                inpYR = getEl(`inp-box-${i}-y-r`);
-            const btnXm = getEl(`btn-box-${i}-x-m`),
-                btnXp = getEl(`btn-box-${i}-x-p`);
-            const btnZm = getEl(`btn-box-${i}-z-m`),
-                btnZp = getEl(`btn-box-${i}-z-p`);
-            const btnYm = getEl(`btn-box-${i}-y-m`),
-                btnYp = getEl(`btn-box-${i}-y-p`);
+            const inpX = getEl(`inp-box-${i}-x`), inpXR = getEl(`inp-box-${i}-x-r`);
+            const inpZ = getEl(`inp-box-${i}-z`), inpZR = getEl(`inp-box-${i}-z-r`);
+            const inpY = getEl(`inp-box-${i}-y`), inpYR = getEl(`inp-box-${i}-y-r`);
+            const btnXm = getEl(`btn-box-${i}-x-m`), btnXp = getEl(`btn-box-${i}-x-p`);
+            const btnZm = getEl(`btn-box-${i}-z-m`), btnZp = getEl(`btn-box-${i}-z-p`);
+            const btnYm = getEl(`btn-box-${i}-y-m`), btnYp = getEl(`btn-box-${i}-y-p`);
 
-            lockBtn.onclick = () => {
-                b.sizeLocked = !b.sizeLocked;
-                lockBtn.innerHTML = b.sizeLocked ? '🔒 尺寸联动' : '🔓 自由长宽高';
-                lockBtn.classList.toggle('unlocked', !b.sizeLocked);
+            const setBoxLock = (locked) => {
+                b.sizeLocked = locked;
+                if (lockBtn) {
+                    lockBtn.innerHTML = locked ? '🔒 尺寸联动' : '🔓 自由长宽高';
+                    lockBtn.classList.toggle('unlocked', !locked);
+                }
                 [inpX, inpXR, inpZ, inpZR, inpY, inpYR, btnXm, btnXp, btnZm, btnZp, btnYm, btnYp].forEach(el => {
-                    if (el) el.disabled = b.sizeLocked;
+                    if (el) el.disabled = locked;
                 });
+                if (locked) {
+                    b.lenX = b.uniformSize;
+                    b.widthZ = b.uniformSize;
+                    b.heightY = b.uniformSize;
+                    if (inpX) inpX.value = b.lenX.toFixed(2);
+                    if (inpXR) inpXR.value = b.lenX;
+                    if (inpZ) inpZ.value = b.widthZ.toFixed(2);
+                    if (inpZR) inpZR.value = b.widthZ;
+                    if (inpY) inpY.value = b.heightY.toFixed(2);
+                    if (inpYR) inpYR.value = b.heightY;
+                    updateBoxMesh(b);
+                }
             };
+            if (lockBtn) lockBtn.onclick = () => setBoxLock(!b.sizeLocked);
 
-            const sR = getEl(`inp-box-${i}-s-r`),
-                sN = getEl(`inp-box-${i}-s`);
+            const sR = getEl(`inp-box-${i}-s-r`), sN = getEl(`inp-box-${i}-s`);
             bindControl({
-                numEl: sN,
-                rangeEl: sR,
-                btnMinus: getEl(`btn-box-${i}-s-m`),
-                btnPlus: getEl(`btn-box-${i}-s-p`),
-                step: 0.1,
+                numEl: sN, rangeEl: sR, btnMinus: getEl(`btn-box-${i}-s-m`), btnPlus: getEl(`btn-box-${i}-s-p`), step: 0.1,
                 apply: (v) => {
                     const val = Math.max(0.1, parseFloat(v) || 1.0);
                     sR.value = val;
@@ -2903,11 +2944,7 @@
             });
 
             bindControl({
-                numEl: inpX,
-                rangeEl: inpXR,
-                btnMinus: btnXm,
-                btnPlus: btnXp,
-                step: 0.1,
+                numEl: inpX, rangeEl: inpXR, btnMinus: btnXm, btnPlus: btnXp, step: 0.1,
                 apply: (v) => {
                     b.lenX = Math.max(0.1, parseFloat(v) || 1.0);
                     inpX.value = b.lenX.toFixed(2);
@@ -2919,11 +2956,7 @@
             });
 
             bindControl({
-                numEl: inpZ,
-                rangeEl: inpZR,
-                btnMinus: btnZm,
-                btnPlus: btnZp,
-                step: 0.1,
+                numEl: inpZ, rangeEl: inpZR, btnMinus: btnZm, btnPlus: btnZp, step: 0.1,
                 apply: (v) => {
                     b.widthZ = Math.max(0.1, parseFloat(v) || 1.0);
                     inpZ.value = b.widthZ.toFixed(2);
@@ -2935,11 +2968,7 @@
             });
 
             bindControl({
-                numEl: inpY,
-                rangeEl: inpYR,
-                btnMinus: btnYm,
-                btnPlus: btnYp,
-                step: 0.1,
+                numEl: inpY, rangeEl: inpYR, btnMinus: btnYm, btnPlus: btnYp, step: 0.1,
                 apply: (v) => {
                     b.heightY = Math.max(0.1, parseFloat(v) || 1.0);
                     inpY.value = b.heightY.toFixed(2);
@@ -2950,14 +2979,9 @@
                 }
             });
 
-            const dR = getEl(`inp-box-${i}-dist-r`),
-                dN = getEl(`inp-box-${i}-dist`);
+            const dR = getEl(`inp-box-${i}-dist-r`), dN = getEl(`inp-box-${i}-dist`);
             bindControl({
-                numEl: dN,
-                rangeEl: dR,
-                btnMinus: getEl(`btn-box-${i}-dist-m`),
-                btnPlus: getEl(`btn-box-${i}-dist-p`),
-                step: 0.5,
+                numEl: dN, rangeEl: dR, btnMinus: getEl(`btn-box-${i}-dist-m`), btnPlus: getEl(`btn-box-${i}-dist-p`), step: 0.5,
                 apply: (v) => {
                     b.distMeters = Math.max(0.2, parseFloat(v) || 5.0);
                     dR.value = b.distMeters;
@@ -2968,14 +2992,9 @@
                 }
             });
 
-            const degR = getEl(`inp-box-${i}-deg-r`),
-                degN = getEl(`inp-box-${i}-deg`);
+            const degR = getEl(`inp-box-${i}-deg-r`), degN = getEl(`inp-box-${i}-deg`);
             bindControl({
-                numEl: degN,
-                rangeEl: degR,
-                btnMinus: getEl(`btn-box-${i}-deg-m`),
-                btnPlus: getEl(`btn-box-${i}-deg-p`),
-                step: 0.5,
+                numEl: degN, rangeEl: degR, btnMinus: getEl(`btn-box-${i}-deg-m`), btnPlus: getEl(`btn-box-${i}-deg-p`), step: 0.5,
                 apply: (v) => {
                     b.centerDeg = clamp(parseFloat(v) || 0, -180, 180);
                     degR.value = b.centerDeg;
@@ -2986,14 +3005,9 @@
                 }
             });
 
-            const yoffR = getEl(`inp-box-${i}-yoff-r`),
-                yoffN = getEl(`inp-box-${i}-yoff`);
+            const yoffR = getEl(`inp-box-${i}-yoff-r`), yoffN = getEl(`inp-box-${i}-yoff`);
             bindControl({
-                numEl: yoffN,
-                rangeEl: yoffR,
-                btnMinus: getEl(`btn-box-${i}-yoff-m`),
-                btnPlus: getEl(`btn-box-${i}-yoff-p`),
-                step: 0.1,
+                numEl: yoffN, rangeEl: yoffR, btnMinus: getEl(`btn-box-${i}-yoff-m`), btnPlus: getEl(`btn-box-${i}-yoff-p`), step: 0.1,
                 apply: (v) => {
                     b.yOffset = parseFloat(v) || 0;
                     yoffR.value = b.yOffset;
@@ -3003,6 +3017,8 @@
                     updateBoxMesh(b);
                 }
             });
+
+            setBoxLock(b.sizeLocked);
         }
 
         function addNewBox() {
@@ -3061,10 +3077,7 @@
         const btnTheme = getEl('btn-theme-toggle');
 
         let lockCooldownTimer = null;
-        let isDragging = false,
-            isStick = false,
-            offX = 0,
-            offY = 0;
+        let isDragging = false, isStick = false, offX = 0, offY = 0;
         let isLocking = false;
 
         function triggerLockCooldown() {
@@ -3219,9 +3232,13 @@
             Object.keys(GLOBAL_NUM_HANDLERS).forEach(id => {
                 const inp = getEl(id);
                 if (!inp) return;
-                inp.addEventListener('change', () => dispatchGlobalInput(id, inp.value));
+                inp.addEventListener('change', () => {
+                    if (inp.disabled) return;
+                    dispatchGlobalInput(id, inp.value);
+                });
                 inp.addEventListener('wheel', (e) => {
                     e.preventDefault();
+                    if (inp.disabled) return; // 拦截禁用项滚轮
                     const step = WHEEL_STEP[id] || parseFloat(inp.getAttribute('step')) || 1;
                     dispatchGlobalInput(id, (parseFloat(inp.value) || 0) + (e.deltaY < 0 ? step : -step));
                 }, { passive: false });
@@ -3242,8 +3259,7 @@
         }
 
         function initCrosshairColorSwatches() {
-            const defC = getEl('swatches-default'),
-                tgtC = getEl('swatches-target');
+            const defC = getEl('swatches-default'), tgtC = getEl('swatches-target');
             COLOR_PRESETS_CROSSHAIR.forEach(c => {
                 const b1 = document.createElement('div');
                 b1.className = 'round-swatch-btn' + (c.hex === config.customCrosshair.defaultColor ? ' active' : '');
@@ -3279,9 +3295,7 @@
         // ============================================================
         // 14. 运动学解耦与渲染主循环
         // ============================================================
-        let lastTime = performance.now(),
-            lastFrame = performance.now(),
-            frameCnt = 0;
+        let lastTime = performance.now(), lastFrame = performance.now(), frameCnt = 0;
         const hudFps = getEl('hud-fps');
         const hudAngle = getEl('hud-angle');
         let lastRenderedAngle = -999;
@@ -3300,8 +3314,7 @@
                 const isLeft = keysDown.has('KeyA');
                 const isRight = keysDown.has('KeyD');
 
-                let moveX = 0,
-                    moveZ = 0;
+                let moveX = 0, moveZ = 0;
                 if (isForward) moveZ -= 1;
                 if (isBackward) moveZ += 1;
                 if (isLeft) moveX -= 1;
@@ -3326,11 +3339,9 @@
                         config.advanced.playerPos.x = nextPx;
                         config.advanced.playerPos.z = nextPz;
                     } else {
-                        if (!checkCollisionWithBoxes(nextPx, py - (config.viewHeight / 2), config.advanced.playerPos.z, 0.35,
-                                config.viewHeight / 2)) {
+                        if (!checkCollisionWithBoxes(nextPx, py - (config.viewHeight / 2), config.advanced.playerPos.z, 0.35, config.viewHeight / 2)) {
                             config.advanced.playerPos.x = nextPx;
-                        } else if (!checkCollisionWithBoxes(config.advanced.playerPos.x, py - (config.viewHeight / 2), nextPz,
-                                0.35, config.viewHeight / 2)) {
+                        } else if (!checkCollisionWithBoxes(config.advanced.playerPos.x, py - (config.viewHeight / 2), nextPz, 0.35, config.viewHeight / 2)) {
                             config.advanced.playerPos.z = nextPz;
                         }
                     }
@@ -3347,8 +3358,7 @@
                     if (moveY !== 0) {
                         const nextPy = config.advanced.playerPos.y + (moveY * config.advanced.flySpeed * dt);
                         const totalY = config.viewHeight + nextPy;
-                        if (!checkCollisionWithBoxes(config.advanced.playerPos.x, totalY - (config.viewHeight / 2), config
-                                .advanced.playerPos.z, 0.35, config.viewHeight / 2)) {
+                        if (!checkCollisionWithBoxes(config.advanced.playerPos.x, totalY - (config.viewHeight / 2), config.advanced.playerPos.z, 0.35, config.viewHeight / 2)) {
                             config.advanced.playerPos.y = nextPy;
                         }
                         if (config.advanced.playerPos.y + config.viewHeight < 0.1) {
@@ -3368,7 +3378,7 @@
                 if (thinLine) thinLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
             }
 
-            // ---- 目标运动 ----
+            // 目标运动
             config.targets.forEach(t => {
                 if (!t.rootGroup.visible) return;
 
