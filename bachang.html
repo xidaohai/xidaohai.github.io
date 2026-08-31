@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>测验靶场 · (西岛海)</title>
+    <title>测量靶场 · (西岛海)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        :root {
-            --crosshair-color: #000000;
-            --crosshair-opacity: 1;
-        }
         * {
             box-sizing: border-box;
             margin: 0;
@@ -24,44 +20,54 @@
             height: 100vh;
         }
 
-        #crosshair {
+        /* ===== 准星容器与通用样式 ===== */
+        #crosshair-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 3px;
-            height: 3px;
-            background: var(--crosshair-color);
-            border-radius: 50%;
             pointer-events: none;
             z-index: 10;
-            opacity: var(--crosshair-opacity, 1);
-            transition: transform 0.08s, background 0.1s, opacity 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.08s ease;
         }
-        #crosshair::before,
-        #crosshair::after {
+        #crosshair-container.on-target {
+            transform: translate(-50%, -50%) scale(1.18);
+        }
+
+        /* 原生经典测量准星样式 */
+        .classic-crosshair-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            position: relative;
+            transition: background-color 0.1s, box-shadow 0.1s;
+        }
+        .classic-crosshair-dot::before,
+        .classic-crosshair-dot::after {
             content: '';
             position: absolute;
-            background: var(--crosshair-color);
-            transition: background 0.1s;
+            background: inherit;
         }
-        #crosshair::before {
+        .classic-crosshair-dot::before {
             top: -6px;
             bottom: -6px;
             left: 1px;
             right: 1px;
         }
-        #crosshair::after {
+        .classic-crosshair-dot::after {
             left: -6px;
             right: -6px;
             top: 1px;
             bottom: 1px;
         }
-        #crosshair.on-target {
-            transform: translate(-50%, -50%) scale(1.6);
-            box-shadow: 0 0 8px var(--crosshair-color);
+        #crosshair-container.on-target .classic-crosshair-dot {
+            box-shadow: 0 0 8px currentColor;
         }
 
+        /* ===== 顶部 HUD ===== */
         #top-hud {
             position: absolute;
             top: 16px;
@@ -74,7 +80,7 @@
             z-index: 5;
         }
         .hud-card {
-            background: rgba(255, 255, 255, 0.62);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(28px) saturate(190%);
             padding: 7px 16px;
             border-radius: 8px;
@@ -95,6 +101,10 @@
             color: #16a34a;
             font-weight: 900;
         }
+        .poll-val {
+            color: #7c3aed;
+            font-weight: 900;
+        }
 
         .f11-card {
             padding: 7px 16px;
@@ -112,11 +122,50 @@
             box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
         }
 
-        #author-card {
+        /* ===== 左下角色板与作者卡片 ===== */
+        #left-bottom-group {
             position: absolute;
             bottom: 16px;
             left: 16px;
-            background: rgba(255, 255, 255, 0.62);
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            transition: opacity 0.15s;
+        }
+        .palette-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(24px) saturate(180%);
+            padding: 7px 12px 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .palette-label {
+            font-size: 0.64rem;
+            font-weight: 900;
+            color: #334155;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #inp-floor-gray-r {
+            background: linear-gradient(to right, #000000 0%, #7e8b9b 50%, #ffffff 100%);
+            height: 6px;
+            border-radius: 3px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+            width: 130px;
+            cursor: pointer;
+        }
+
+        #author-card {
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(24px) saturate(180%);
             padding: 6px 14px 6px 6px;
             border-radius: 30px;
@@ -126,7 +175,6 @@
             gap: 10px;
             text-decoration: none;
             color: inherit;
-            z-index: 5;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
             transition: transform 0.15s, background 0.15s, border-color 0.15s;
             cursor: pointer;
@@ -137,13 +185,13 @@
             border-color: #0284c7;
         }
         .author-avatar-badge {
-            width: 34px;
-            height: 34px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: linear-gradient(135deg, #0284c7, #0369a1);
             color: #ffffff;
             font-weight: 900;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -154,7 +202,7 @@
             flex-direction: column;
         }
         .author-name {
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             font-weight: 900;
             color: #0f172a;
         }
@@ -164,6 +212,7 @@
             font-weight: bold;
         }
 
+        /* ===== 右下角原理与调试 HUD ===== */
         #bottom-right-hud {
             position: absolute;
             bottom: 16px;
@@ -181,13 +230,8 @@
             z-index: 22;
             transition: opacity 0.15s;
         }
-        #bottom-right-hud::-webkit-scrollbar {
-            width: 4px;
-        }
-        #bottom-right-hud::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
+        #bottom-right-hud::-webkit-scrollbar { width: 4px; }
+        #bottom-right-hud::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
         .debug-section {
             display: flex;
@@ -227,11 +271,7 @@
             flex-shrink: 0;
             cursor: pointer;
         }
-        .debug-toggle input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .debug-toggle input { opacity: 0; width: 0; height: 0; }
         .debug-toggle .slider {
             position: absolute;
             inset: 0;
@@ -250,15 +290,9 @@
             transition: transform 0.25s, box-shadow 0.25s;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
         }
-        .debug-toggle input:checked+.slider {
-            background: #0284c7;
-        }
-        .debug-toggle input:checked+.slider+.knob {
-            transform: translateX(18px);
-        }
-        .debug-toggle input:checked+.slider {
-            box-shadow: 0 0 6px rgba(2, 132, 199, 0.35);
-        }
+        .debug-toggle input:checked+.slider { background: #0284c7; }
+        .debug-toggle input:checked+.slider+.knob { transform: translateX(18px); }
+        .debug-toggle input:checked+.slider { box-shadow: 0 0 6px rgba(2, 132, 199, 0.35); }
 
         .debug-label {
             font-size: 0.7rem;
@@ -349,10 +383,9 @@
             letter-spacing: 0.5px;
             white-space: nowrap;
         }
-        #debug-indicator.active {
-            opacity: 1;
-        }
+        #debug-indicator.active { opacity: 1; }
 
+        /* ===== 主控制面板（左 & 右） ===== */
         #left-panel {
             position: fixed;
             left: 18px;
@@ -387,13 +420,8 @@
             flex-direction: column;
             gap: 8px;
         }
-        .glass-panel::-webkit-scrollbar {
-            width: 4px;
-        }
-        .glass-panel::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
+        .glass-panel::-webkit-scrollbar { width: 4px; }
+        .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
         .panel-header {
             display: flex;
@@ -473,21 +501,11 @@
             gap: 4px;
             margin-bottom: 6px;
         }
-        .preset-grid.cols-2 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .preset-grid.cols-3 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-        .preset-grid.cols-4 {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        .preset-grid.cols-8 {
-            grid-template-columns: repeat(4, 1fr);
-        }
-        .preset-grid.cols-7 {
-            grid-template-columns: repeat(7, 1fr);
-        }
+        .preset-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .preset-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .preset-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+        .preset-grid.cols-7 { grid-template-columns: repeat(7, 1fr); }
+        .preset-grid.cols-8 { grid-template-columns: repeat(4, 1fr); }
 
         .pill-btn {
             border: 1px solid #cbd5e1;
@@ -553,15 +571,8 @@
             font-weight: 700;
             transition: 0.15s;
         }
-        .lock-btn:hover {
-            border-color: #0284c7;
-            color: #0284c7;
-        }
-        .lock-btn.unlocked {
-            background: #fffbeb;
-            border-color: #f59e0b;
-            color: #d97706;
-        }
+        .lock-btn:hover { border-color: #0284c7; color: #0284c7; }
+        .lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
 
         .ctrl-row {
             display: flex;
@@ -569,9 +580,7 @@
             gap: 8px;
             margin-bottom: 4px;
         }
-        .ctrl-row:last-child {
-            margin-bottom: 0;
-        }
+        .ctrl-row:last-child { margin-bottom: 0; }
         .ctrl-row label {
             font-size: 0.68rem;
             font-weight: 700;
@@ -621,9 +630,7 @@
             transition: background 0.1s;
             flex-shrink: 0;
         }
-        .step-btn:hover {
-            background: #e0f2fe;
-        }
+        .step-btn:hover { background: #e0f2fe; }
         .step-btn:disabled {
             opacity: 0.5 !important;
             cursor: not-allowed !important;
@@ -686,7 +693,7 @@
             border-radius: 50%;
             border: 2px solid #cbd5e1;
             cursor: pointer;
-            transition: transform 0.1s, border-color 0.1s;
+            transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
             flex-shrink: 0;
         }
         .round-swatch-btn:hover {
@@ -749,12 +756,8 @@
             background: #f0f9ff;
         }
 
-        .target-list-item {
-            margin-bottom: 6px;
-        }
-        .target-list-item:last-child {
-            margin-bottom: 0;
-        }
+        .target-list-item { margin-bottom: 6px; }
+        .target-list-item:last-child { margin-bottom: 0; }
 
         #debug-horizon-guide {
             position: absolute;
@@ -769,25 +772,7 @@
             transition: opacity 0.4s;
             box-shadow: 0 0 8px rgba(239, 68, 68, 0.12);
         }
-        #debug-horizon-guide.active {
-            opacity: 1;
-        }
-        #debug-horizon-guide::before,
-        #debug-horizon-guide::after {
-            content: '◀';
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.6rem;
-            color: rgba(239, 68, 68, 0.45);
-        }
-        #debug-horizon-guide::before {
-            left: 6px;
-        }
-        #debug-horizon-guide::after {
-            right: 6px;
-            content: '▶';
-        }
+        #debug-horizon-guide.active { opacity: 1; }
 
         #advanced-panel-container {
             display: none;
@@ -826,22 +811,11 @@
             font-weight: 700;
             white-space: nowrap;
         }
-        .size-lock-btn:hover {
-            border-color: #0284c7;
-            color: #0284c7;
-        }
-        .size-lock-btn.active-lock {
-            background: #e2e8f0;
-            color: #475569;
-            border-color: #cbd5e1;
-        }
-        .size-lock-btn.unlocked {
-            background: #fffbeb;
-            border-color: #f59e0b;
-            color: #d97706;
-        }
+        .size-lock-btn:hover { border-color: #0284c7; color: #0284c7; }
+        .size-lock-btn.active-lock { background: #e2e8f0; color: #475569; border-color: #cbd5e1; }
+        .size-lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
 
-        /* ==== 优雅的人偶长宽高 UI 样式 ==== */
+        /* 人偶尺寸 UI 样式 */
         .dim-group {
             background: rgba(255, 255, 255, 0.6);
             border: 1px solid rgba(226, 232, 240, 0.9);
@@ -899,9 +873,7 @@
             font-weight: 800;
             color: #64748b;
         }
-        .dim-group.is-locked .dim-item-title {
-            color: #94a3b8;
-        }
+        .dim-group.is-locked .dim-item-title { color: #94a3b8; }
         .mini-stepper {
             width: 100%;
             height: 20px;
@@ -932,9 +904,7 @@
             flex-shrink: 0;
             padding: 0;
         }
-        .mini-stepper .step-btn:hover {
-            background: #e0f2fe;
-        }
+        .mini-stepper .step-btn:hover { background: #e0f2fe; }
         .mini-stepper .step-btn:disabled {
             background: #f8fafc !important;
             color: #cbd5e1 !important;
@@ -965,10 +935,15 @@
 </head>
 <body>
 
-    <div id="crosshair"></div>
+    <!-- 准星容器 (支持 SVG 及经典测量准星) -->
+    <div id="crosshair-container">
+        <div id="crosshair-classic-inner" class="classic-crosshair-dot" style="background:#000000; color:#000000;"></div>
+    </div>
+
     <div id="debug-horizon-guide"></div>
     <div id="debug-indicator">轴向已互换</div>
 
+    <!-- 顶部 HUD (加入高精硬件轮询率) -->
     <div id="top-hud">
         <div class="hud-card">
             <div>DPI: <span class="hud-val" id="hud-dpi">800</span></div>
@@ -978,15 +953,35 @@
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
             <div class="hud-card f11-card f11-highlight" id="f11-box">F11全屏</div>
-            <div class="hud-card"><div>FPS: <span class="fps-val" id="hud-fps">--</span></div></div>
+            <div class="hud-card" style="gap:12px;">
+                <div title="高精硬件轮询率（平滑峰值捕获）">轮询率: <span class="poll-val" id="hud-poll">--</span> Hz</div>
+                <div style="width:1.5px; height:14px; background:#cbd5e1; border-radius:1px;"></div>
+                <div>FPS: <span class="fps-val" id="hud-fps">--</span></div>
+            </div>
         </div>
     </div>
 
-    <a href="https://space.bilibili.com/1534330" target="_blank" id="author-card" title="点击访问作者B站空间">
-        <div class="author-avatar-badge">海</div>
-        <div class="author-meta"><span class="author-name">作者：西岛海</span><span class="author-tag">xlm</span></div>
-    </a>
+    <!-- 左下角组合：地面底色调色板 + 作者卡片 -->
+    <div id="left-bottom-group">
+        <div class="palette-card" id="floor-color-picker">
+            <div class="palette-label" style="justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:4px;"><span>🌐</span> 地面底色</span>
+                <button id="btn-creamy-yellow" class="pill-btn" style="padding:1px 7px; font-size:0.62rem; background:#faeed1; border-color:#e2c896; color:#78350f; font-weight:900;" onclick="setFloorColorPreset('#faeed1')">✨ 柔和奶黄</button>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                <span style="font-size:0.58rem; color:#475569; font-weight:800;">黑</span>
+                <input type="range" id="inp-floor-gray-r" min="0" max="100" step="1" value="97" oninput="onFloorGraySlider(this.value)" />
+                <span style="font-size:0.58rem; color:#475569; font-weight:800;">白</span>
+            </div>
+        </div>
 
+        <a href="https://space.bilibili.com/1534330" target="_blank" id="author-card" title="点击访问作者B站空间">
+            <div class="author-avatar-badge">海</div>
+            <div class="author-meta"><span class="author-name">作者：西岛海</span><span class="author-tag">xlm</span></div>
+        </a>
+    </div>
+
+    <!-- 右下角原理与调试 -->
     <div id="bottom-right-hud">
         <div class="rel-title">物理精算映射原理 (底层互通)</div>
         <div class="rel-formula">360°总点数 N = (cm ÷ 2.54) × DPI<br />鼠标单点弧度 Δθ = 2π / N</div>
@@ -1083,6 +1078,7 @@
         <div class="panel-header" id="panel-handle">
             <span class="panel-title">目标控制</span>
             <div class="header-actions">
+                <button class="header-btn" id="btn-cloud-toggle" onclick="toggleClouds()">☁️ 云朵: 开启</button>
                 <button class="header-btn" id="btn-theme-toggle">日落暮色</button>
                 <button class="header-btn" id="btn-drag-toggle">移动窗口</button>
             </div>
@@ -1108,13 +1104,14 @@
         <button class="btn-start" id="btn-lock">进入靶场 (锁定鼠标)</button>
     </div>
 
-    <!-- 右侧独立面板 -->
+    <!-- 右侧独立面板 (包含完整准星调优系统) -->
     <div class="glass-panel" id="right-panel">
         <div class="panel-header">
-            <span class="panel-title">设置面板</span>
+            <span class="panel-title">设置与准星调优</span>
             <span style="font-size:0.6rem; color:#94a3b8;">滚轮微调</span>
         </div>
 
+        <!-- 物理外设 -->
         <div class="section-card">
             <div class="section-header">
                 <span class="section-label">物理外设与灵敏度</span>
@@ -1192,15 +1189,49 @@
             </div>
         </div>
 
+        <!-- 准星全面配置面板 -->
         <div class="section-card">
             <div class="section-header">
-                <span class="section-label">准星调色</span>
-                <label style="margin-left:auto;display:flex;align-items:center;gap:3px;cursor:pointer;font-size:0.62rem;color:#0284c7;font-weight:bold;">
-                    <input type="checkbox" id="inp-custom-crosshair" /> 自定义颜色
-                </label>
+                <span class="section-label">准星形态与参数</span>
+            </div>
+            <div class="preset-grid cols-4" style="margin-bottom:6px;">
+                <button class="pill-btn active" id="btn-cross-classic" onclick="setCrosshairType('classic')">经典测量</button>
+                <button class="pill-btn" id="btn-cross-cross" onclick="setCrosshairType('cross')">十字准星</button>
+                <button class="pill-btn" id="btn-cross-dot" onclick="setCrosshairType('dot')">实心圆点</button>
+                <button class="pill-btn" id="btn-cross-circle_hollow" onclick="setCrosshairType('circle_hollow')">空心圆环</button>
             </div>
 
-            <div class="ctrl-row" style="margin-bottom:6px;">
+            <div class="ctrl-row" id="row-cross-size">
+                <label id="lbl-cross-size">臂长 / 半径</label>
+                <input type="range" id="inp-cross-size-r" min="1" max="60" step="0.5" value="8" oninput="syncCrosshairProp('size', this.value)" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('inp-cross-size', -0.5)">−</button>
+                    <input type="number" class="num-input" id="inp-cross-size" value="8.00" step="0.5" min="1" max="60" />
+                    <button class="step-btn" onclick="stepValGlobal('inp-cross-size', 0.5)">+</button>
+                </div>
+            </div>
+
+            <div class="ctrl-row" id="row-cross-thick">
+                <label>线条粗细</label>
+                <input type="range" id="inp-cross-thick-r" min="1" max="20" step="0.5" value="2" oninput="syncCrosshairProp('thick', this.value)" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('inp-cross-thick', -0.5)">−</button>
+                    <input type="number" class="num-input" id="inp-cross-thick" value="2.00" step="0.5" min="1" max="20" />
+                    <button class="step-btn" onclick="stepValGlobal('inp-cross-thick', 0.5)">+</button>
+                </div>
+            </div>
+
+            <div class="ctrl-row" id="row-cross-gap">
+                <label>中心间隙</label>
+                <input type="range" id="inp-cross-gap-r" min="0" max="30" step="0.5" value="3" oninput="syncCrosshairProp('gap', this.value)" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('inp-cross-gap', -0.25)">−</button>
+                    <input type="number" class="num-input" id="inp-cross-gap" value="3.00" step="0.25" min="0" max="30" />
+                    <button class="step-btn" onclick="stepValGlobal('inp-cross-gap', 0.25)">+</button>
+                </div>
+            </div>
+
+            <div class="ctrl-row">
                 <label>准星不透明度</label>
                 <input type="range" id="inp-crosshair-opacity-r" min="0.1" max="1" step="0.05" value="1" />
                 <div class="stepper-box">
@@ -1210,10 +1241,19 @@
                 </div>
             </div>
 
+            <div class="divider"></div>
+
+            <div class="section-header" style="margin-bottom:2px;">
+                <span class="section-label">准星调色与瞄准高亮</span>
+                <label style="margin-left:auto; display:flex; align-items:center; gap:3px; cursor:pointer; font-size:0.62rem; color:#0284c7; font-weight:bold;">
+                    <input type="checkbox" id="inp-custom-crosshair" /> 自定义颜色
+                </label>
+            </div>
+
             <div id="crosshair-custom-box" class="move-subbox" style="display:none;">
-                <div style="font-size:0.62rem;font-weight:bold;color:#475569;margin-bottom:2px;">默认静止准星颜色:</div>
+                <div style="font-size:0.62rem; font-weight:bold; color:#475569; margin-bottom:2px;">默认静止准星颜色:</div>
                 <div class="swatches-grid-9" id="swatches-default"></div>
-                <div style="font-size:0.62rem;font-weight:bold;color:#475569;margin-top:6px;margin-bottom:2px;">瞄准命中高亮颜色:</div>
+                <div style="font-size:0.62rem; font-weight:bold; color:#475569; margin-top:6px; margin-bottom:2px;">瞄准/命中目标高亮颜色:</div>
                 <div class="swatches-grid-9" id="swatches-target"></div>
             </div>
         </div>
@@ -1249,9 +1289,22 @@
             cmPer360: 25.0,
             fovHorizontal: 103,
             theme: 'day',
+            cloudsEnabled: true,
+            floorColor: '#f8fafc',
             targetShape: 'dummy',
             crosshairOpacity: 1.0,
-            customCrosshair: { enabled: false, defaultColor: '#000000', targetColor: '#0284c7' },
+            crosshair: {
+                type: 'classic', // 'classic' | 'cross' | 'dot' | 'circle_hollow'
+                size: 8,
+                thick: 2,
+                gap: 3,
+                outline: 1.2
+            },
+            customCrosshair: {
+                enabled: false,
+                defaultColor: '#000000',
+                targetColor: '#0284c7'
+            },
             targets: [],
             boxes: [],
             viewHeight: 1.625,
@@ -1362,7 +1415,8 @@
             setNum('inp-crosshair-opacity', val, 2);
             const r = getEl('inp-crosshair-opacity-r');
             if (r) r.value = val;
-            document.documentElement.style.setProperty('--crosshair-opacity', val);
+            const container = getEl('crosshair-container');
+            if (container) container.style.opacity = val;
         }
 
         function syncFov(v) { setFov(v); }
@@ -1383,6 +1437,104 @@
             if (r) r.value = val;
         }
 
+        // ============================================================
+        // 4. 准星核心渲染引擎 (融合经典与几何 SVG)
+        // ============================================================
+        let lastTargetAimState = false;
+
+        function getActiveCrosshairColor(onTarget) {
+            if (config.customCrosshair.enabled) {
+                return onTarget ? config.customCrosshair.targetColor : config.customCrosshair.defaultColor;
+            }
+            const isSunset = config.theme === 'sunset';
+            return onTarget ? (isSunset ? '#38bdf8' : '#0284c7') : (isSunset ? '#ffffff' : '#000000');
+        }
+
+        function updateCrosshairStyle(onTarget = lastTargetAimState) {
+            lastTargetAimState = onTarget;
+            const container = getEl('crosshair-container');
+            if (!container) return;
+
+            container.classList.toggle('on-target', onTarget);
+            container.style.opacity = config.crosshairOpacity;
+
+            const color = getActiveCrosshairColor(onTarget);
+            const { type, size, thick, gap, outline } = config.crosshair;
+
+            if (type === 'classic') {
+                container.innerHTML = `<div class="classic-crosshair-dot" style="background:${color}; color:${color};"></div>`;
+                return;
+            }
+
+            const dim = Math.max(120, (size + gap + outline) * 4);
+            const half = dim / 2;
+            const sw = Math.max(0, outline || 1.2);
+            let svg = `<svg width="${dim}" height="${dim}" viewBox="0 0 ${dim} ${dim}" xmlns="http://www.w3.org/2000/svg">`;
+
+            if (type === 'cross') {
+                const rects = [
+                    { x: half - thick / 2, y: half - gap - size, w: thick, h: size },
+                    { x: half - thick / 2, y: half + gap, w: thick, h: size },
+                    { x: half - gap - size, y: half - thick / 2, w: size, h: thick },
+                    { x: half + gap, y: half - thick / 2, w: size, h: thick }
+                ];
+                rects.forEach(r => {
+                    svg += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${color}" stroke="#000000" stroke-width="${sw}" shape-rendering="crispEdges" />`;
+                });
+            } else if (type === 'dot') {
+                svg += `<circle cx="${half}" cy="${half}" r="${Math.max(1, size)}" fill="${color}" stroke="#000000" stroke-width="${sw}" />`;
+            } else if (type === 'circle_hollow') {
+                const inner = Math.max(1, gap);
+                const outer = inner + thick;
+                const mid = (inner + outer) / 2;
+                const rw = outer - inner;
+                svg += `<circle cx="${half}" cy="${half}" r="${mid}" fill="none" stroke="${color}" stroke-width="${rw}" />`;
+                if (sw > 0) {
+                    svg += `<circle cx="${half}" cy="${half}" r="${outer}" fill="none" stroke="#000000" stroke-width="${sw}" />`;
+                    svg += `<circle cx="${half}" cy="${half}" r="${inner}" fill="none" stroke="#000000" stroke-width="${sw}" />`;
+                }
+            }
+            svg += `</svg>`;
+            container.innerHTML = svg;
+        }
+
+        function setCrosshairType(type) {
+            config.crosshair.type = type;
+            ['classic', 'cross', 'dot', 'circle_hollow'].forEach(t => {
+                const b = getEl(`btn-cross-${t}`);
+                if (b) b.classList.toggle('active', t === type);
+            });
+
+            const lblSize = getEl('lbl-cross-size');
+            if (lblSize) lblSize.innerText = type === 'cross' ? '臂长 (px)' : (type === 'classic' ? '点距比例' : '半径 (px)');
+
+            const sR = getEl('row-cross-size');
+            const tR = getEl('row-cross-thick');
+            const gR = getEl('row-cross-gap');
+
+            if (type === 'classic') {
+                if (sR) sR.style.display = 'none';
+                if (tR) tR.style.display = 'none';
+                if (gR) gR.style.display = 'none';
+            } else {
+                if (sR) sR.style.display = type === 'circle_hollow' ? 'none' : 'flex';
+                if (tR) tR.style.display = type === 'dot' ? 'none' : 'flex';
+                if (gR) gR.style.display = type === 'dot' ? 'none' : 'flex';
+            }
+
+            updateCrosshairStyle();
+        }
+
+        function syncCrosshairProp(prop, val) {
+            val = parseFloat(val);
+            if (isNaN(val)) return;
+            config.crosshair[prop] = val;
+            setNum(`inp-cross-${prop}`, val, 2);
+            const rng = getEl(`inp-cross-${prop}-r`);
+            if (rng) rng.value = val;
+            updateCrosshairStyle();
+        }
+
         const GLOBAL_NUM_HANDLERS = {
             'inp-dpi': setDpi,
             'inp-cm': setCm,
@@ -1390,7 +1542,10 @@
             'inp-height': setHeight,
             'inp-crosshair-opacity': setCrosshairOpacity,
             'inp-walk-spd': setWalkSpeed,
-            'inp-fly-spd': setFlySpeed
+            'inp-fly-spd': setFlySpeed,
+            'inp-cross-size': v => syncCrosshairProp('size', v),
+            'inp-cross-thick': v => syncCrosshairProp('thick', v),
+            'inp-cross-gap': v => syncCrosshairProp('gap', v)
         };
 
         function dispatchGlobalInput(id, v) {
@@ -1401,13 +1556,16 @@
         function stepValGlobal(id, delta) {
             const inp = getEl(id);
             if (!inp || inp.disabled) return;
-            dispatchGlobalInput(id, (parseFloat(inp.value) || 0) + delta);
+            const current = parseFloat(inp.value) || 0;
+            const min = parseFloat(inp.getAttribute('min')) || -9999;
+            const max = parseFloat(inp.getAttribute('max')) || 9999;
+            dispatchGlobalInput(id, clamp(current + delta, min, max));
         }
 
         // ============================================================
-        // 4. 音频反馈
+        // 5. 音频反馈
         // ============================================================
-        const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playHitFeedback(part) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -1426,7 +1584,7 @@
         }
 
         // ============================================================
-        // 5. 场景构建
+        // 6. 场景构建与视觉系统
         // ============================================================
         const container = getEl('canvas-container');
         const scene = new THREE.Scene();
@@ -1490,6 +1648,16 @@
             cloudGroup.add(mesh);
         }
 
+        function toggleClouds() {
+            config.cloudsEnabled = !config.cloudsEnabled;
+            cloudGroup.visible = config.cloudsEnabled;
+            const btn = getEl('btn-cloud-toggle');
+            if (btn) {
+                btn.textContent = config.cloudsEnabled ? '☁️ 云朵: 开启' : '☁️ 云朵: 关闭';
+                btn.classList.toggle('active', config.cloudsEnabled);
+            }
+        }
+
         const ambientLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 0.95);
         scene.add(ambientLight);
         const sunLight = new THREE.DirectionalLight(0xffffff, 0.7);
@@ -1502,9 +1670,54 @@
         floor.rotation.x = -Math.PI / 2;
         floor.receiveShadow = true;
         scene.add(floor);
-        const grid = new THREE.GridHelper(300, 150, 0x94a3b8, 0xe2e8f0);
-        grid.position.y = 0.001;
-        scene.add(grid);
+
+        let gridHelper = null;
+        function updateFloorAndGrid(hexStr) {
+            config.floorColor = hexStr;
+            const col = new THREE.Color(hexStr);
+            floorMat.color.copy(col);
+
+            const lum = 0.299 * col.r + 0.587 * col.g + 0.114 * col.b;
+            let main, sub;
+            const isCreamy = hexStr.toLowerCase() === '#faeed1' || hexStr.toLowerCase() === '#fdf2d0';
+
+            if (isCreamy) {
+                main = new THREE.Color(0xb0b8c4);
+                sub = new THREE.Color(0xdce2ea);
+            } else if (lum > 0.5) {
+                main = new THREE.Color(lum > 0.8 ? 0x94a3b8 : 0x64748b);
+                sub = new THREE.Color(lum > 0.8 ? 0xdbeafe : 0xa8b4c4);
+                if (col.r > col.b + 0.06) {
+                    main = new THREE.Color(0xa89f91);
+                    sub = new THREE.Color(0xe2dcd0);
+                }
+            } else {
+                main = new THREE.Color(0x64748b);
+                sub = new THREE.Color(lum < 0.2 ? 0x27354a : 0x475569);
+            }
+
+            if (gridHelper) {
+                scene.remove(gridHelper);
+                gridHelper.geometry.dispose();
+                gridHelper.material.dispose();
+            }
+            gridHelper = new THREE.GridHelper(300, 150, main, sub);
+            gridHelper.position.y = 0.001;
+            scene.add(gridHelper);
+
+            const btnC = getEl('btn-creamy-yellow'), rng = getEl('inp-floor-gray-r');
+            if (btnC) btnC.classList.toggle('active', isCreamy);
+            if (rng && !isCreamy) rng.value = Math.round(((col.r + col.g + col.b) / 3) * 100);
+        }
+
+        function setFloorColorPreset(hex) {
+            updateFloorAndGrid(hex);
+        }
+
+        function onFloorGraySlider(val) {
+            const v = Math.round(clamp(parseFloat(val), 0, 100) * 2.55).toString(16).padStart(2, '0');
+            updateFloorAndGrid(`#${v}${v}${v}`);
+        }
 
         let horizonLine = null, thinLine = null;
 
@@ -1595,7 +1808,7 @@
         }
 
         // ============================================================
-        // 6. 目标模型与形态
+        // 7. 目标模型构建
         // ============================================================
         const SPHERE_GEO = new THREE.SphereGeometry(1, 48, 48);
         const HEAD_GEO = new THREE.SphereGeometry(1, 48, 48);
@@ -1630,7 +1843,6 @@
             const headOffX = (t.headOffsetX || 0) / 100;
             const headOffY = (t.headOffsetY || 0) / 100;
 
-            // 头部
             const headMat = new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.25 });
             const head = new THREE.Mesh(HEAD_GEO, headMat);
             head.scale.set(headRX, headRY, headRZ);
@@ -1639,7 +1851,6 @@
             head.userData.part = 'head';
             t.dummyGroup.add(head);
 
-            // 颈部虚线
             const rx = headRX, ry = headRY;
             const bodyTopRel = -neckGap - headOffY;
             const p = bodyTopRel / ry;
@@ -1674,7 +1885,6 @@
                 t.dummyGroup.add(dashLine);
             }
 
-            // 身体
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
             const body = new THREE.Mesh(BODY_GEO, bodyMat);
             body.scale.set(bodyW, bodyH, bodyD);
@@ -1724,7 +1934,7 @@
         }
 
         // ============================================================
-        // 7. 镜之边缘箱子与空间世界锚定
+        // 8. 镜之边缘箱子
         // ============================================================
         function updateBoxMesh(box) {
             const sx = Math.max(0.1, box.lenX);
@@ -1777,9 +1987,6 @@
             updateBoxMesh(boxData);
         }
 
-        // ============================================================
-        // 8. 碰撞检测与场景解耦更新
-        // ============================================================
         function checkCollisionWithBoxes(tx, ty, tz, radius, halfHeight = 0) {
             for (const box of config.boxes) {
                 if (!box.group) continue;
@@ -1798,11 +2005,9 @@
                 const tMinY = ty - halfHeight, tMaxY = ty + halfHeight;
                 const tMinZ = tz - radius, tMaxZ = tz + radius;
 
-                const overlapX = (tMinX <= bMaxX && tMaxX >= bMinX);
-                const overlapY = (tMinY <= bMaxY && tMaxY >= bMinY);
-                const overlapZ = (tMinZ <= bMaxZ && tMaxZ >= bMinZ);
-
-                if (overlapX && overlapY && overlapZ) {
+                if (tMinX <= bMaxX && tMaxX >= bMinX &&
+                    tMinY <= bMaxY && tMaxY >= bMinY &&
+                    tMinZ <= bMaxZ && tMaxZ >= bMinZ) {
                     return true;
                 }
             }
@@ -1861,7 +2066,7 @@
         }
 
         // ============================================================
-        // 9. 输入、视角与准星判定
+        // 9. 输入、轮询率统计与视角移动
         // ============================================================
         let yaw = 0.0, pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -1872,7 +2077,7 @@
         const debugHorizonGuide = getEl('debug-horizon-guide');
 
         if (debugToggle) {
-            debugToggle.addEventListener('change', function() {
+            debugToggle.addEventListener('change', function () {
                 debugMode = this.checked;
                 if (debugMode) {
                     pitch = 0;
@@ -1890,19 +2095,22 @@
         const ALLOWED_KEYS = new Set(['KeyW', 'KeyS', 'KeyA', 'KeyD', 'Space', 'ShiftLeft']);
         const keysDown = new Set();
         window.addEventListener('keydown', (e) => {
-            if (ALLOWED_KEYS.has(e.code)) {
-                keysDown.add(e.code);
-            }
+            if (ALLOWED_KEYS.has(e.code)) keysDown.add(e.code);
         });
         window.addEventListener('keyup', (e) => {
-            if (ALLOWED_KEYS.has(e.code)) {
-                keysDown.delete(e.code);
-            }
+            if (ALLOWED_KEYS.has(e.code)) keysDown.delete(e.code);
         });
 
+        let pollCount = 0;
+        let pollLastCalc = performance.now();
+        let peakPollRate = 0;
+        let pollActiveSamples = 0;
+
         window.addEventListener('pointermove', (e) => {
-            if (document.pointerLockElement !== document.body) return;
             const events = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
+            pollCount += events.length;
+
+            if (document.pointerLockElement !== document.body) return;
             let dx = 0, dy = 0;
             for (const ev of events) {
                 dx += ev.movementX || 0;
@@ -1925,36 +2133,9 @@
 
         const raycaster = new THREE.Raycaster();
         const centerVec = new THREE.Vector2(0, 0);
-        const crosshairEl = getEl('crosshair');
-        let currentCrosshairColor = '';
-        let currentOnTargetState = false;
-
-        function updateCrosshairUI(onTarget) {
-            let color;
-            if (config.customCrosshair.enabled) {
-                color = onTarget ? config.customCrosshair.targetColor : config.customCrosshair.defaultColor;
-            } else {
-                const isSunset = config.theme === 'sunset';
-                color = onTarget ? (isSunset ? '#38bdf8' : '#0284c7') : (isSunset ? '#ffffff' : '#000000');
-            }
-
-            if (color !== currentCrosshairColor) {
-                currentCrosshairColor = color;
-                document.documentElement.style.setProperty('--crosshair-color', color);
-            }
-            if (onTarget !== currentOnTargetState) {
-                currentOnTargetState = onTarget;
-                crosshairEl.classList.toggle('on-target', onTarget);
-            }
-        }
-
         const activeRaycastObjects = [];
 
         function checkAim() {
-            if (document.pointerLockElement !== document.body) {
-                updateCrosshairUI(false);
-                return null;
-            }
             raycaster.setFromCamera(centerVec, camera);
             activeRaycastObjects.length = 0;
             const isSphere = (config.targetShape === 'sphere');
@@ -1977,7 +2158,7 @@
 
             const intersects = raycaster.intersectObjects(activeRaycastObjects, false);
             if (intersects.length > 0) {
-                updateCrosshairUI(true);
+                updateCrosshairStyle(true);
                 const hitObject = intersects[0].object;
                 let hitTarget = null;
                 let hitPart = hitObject.userData.part || 'body';
@@ -1990,7 +2171,7 @@
                 }
                 return { target: hitTarget, part: hitPart, object: hitObject };
             } else {
-                updateCrosshairUI(false);
+                updateCrosshairStyle(false);
                 return null;
             }
         }
@@ -2022,7 +2203,7 @@
         });
 
         // ============================================================
-        // 10. 目标 UI 构建与控制 (支持严格禁用与滚轮拦截)
+        // 10. 目标 UI 构建与控制
         // ============================================================
         const container1 = getEl('targets-container-1');
         const boxesContainer = getEl('boxes-container');
@@ -2053,7 +2234,7 @@
                 });
                 numEl.addEventListener('wheel', (e) => {
                     e.preventDefault();
-                    if (numEl.disabled) return; // 严格拦截：禁用/锁定状态下不响应滚轮
+                    if (numEl.disabled) return;
                     apply((parseFloat(numEl.value) || 0) + (e.deltaY < 0 ? step : -step));
                 }, { passive: false });
             }
@@ -2282,7 +2463,6 @@
         function setupDynamicTargetBindings(t, i) {
             const isDummy = config.targetShape === 'dummy';
 
-            // 等比总缩放
             const sR = getEl(`inp-t${i}-s-r`), sN = getEl(`inp-t${i}-s`);
             bindControl({
                 numEl: sN,
@@ -2389,7 +2569,6 @@
                     }
                 });
 
-                // 身体尺寸控制
                 const bwN = getEl(`inp-t${i}-bw`), bhN = getEl(`inp-t${i}-bh`), bdN = getEl(`inp-t${i}-bd`);
                 const bwMinus = getEl(`btn-t${i}-bw-minus`), bwPlus = getEl(`btn-t${i}-bw-plus`);
                 const bhMinus = getEl(`btn-t${i}-bh-minus`), bhPlus = getEl(`btn-t${i}-bh-plus`);
@@ -2456,7 +2635,6 @@
                     }
                 });
 
-                // 头部位置偏移与锁定
                 const lockBtn = getEl(`btn-t${i}-headlock`);
                 const hyR = getEl(`inp-t${i}-hy-r`), hyN = getEl(`inp-t${i}-hy`);
                 const hyMinus = getEl(`btn-t${i}-hy-minus`), hyPlus = getEl(`btn-t${i}-hy-plus`);
@@ -2508,13 +2686,11 @@
                     }
                 });
 
-                // 初始化状态
                 setHeadSizeLock(t.headSizeLocked !== undefined ? t.headSizeLocked : true);
                 setBodySizeLock(t.bodySizeLocked !== undefined ? t.bodySizeLocked : true);
                 setHeadLock(t.headLocked !== undefined ? t.headLocked : true);
             }
 
-            // 前后距离
             const zR = getEl(`inp-t${i}-z-r`), zN = getEl(`inp-t${i}-z`);
             bindControl({
                 numEl: zN, rangeEl: zR, btnMinus: getEl(`btn-t${i}-z-minus`), btnPlus: getEl(`btn-t${i}-z-plus`), step: 0.25,
@@ -2532,7 +2708,6 @@
                 }
             });
 
-            // 左右方位
             const aR = getEl(`inp-t${i}-a-r`), aN = getEl(`inp-t${i}-a`);
             bindControl({
                 numEl: aN, rangeEl: aR, btnMinus: getEl(`btn-t${i}-a-minus`), btnPlus: getEl(`btn-t${i}-a-plus`), step: 0.25,
@@ -2549,7 +2724,6 @@
                 }
             });
 
-            // 上下微调
             const yR = getEl(`inp-t${i}-y-r`), yN = getEl(`inp-t${i}-y`);
             bindControl({
                 numEl: yN, rangeEl: yR, btnMinus: getEl(`btn-t${i}-y-minus`), btnPlus: getEl(`btn-t${i}-y-plus`), step: 0.05,
@@ -2566,7 +2740,6 @@
                 }
             });
 
-            // 运动开关
             const btnMoveToggle = getEl(`btn-t${i}-move-toggle`);
             btnMoveToggle.addEventListener('click', () => {
                 t.move.enabled = !t.move.enabled;
@@ -2613,7 +2786,6 @@
                 getEl(`t${i}-move-box`).style.display = t.move.enabled ? 'block' : 'none';
             });
 
-            // 运动模式
             const btnLinear = getEl(`btn-t${i}-m-linear`), btnOrbit = getEl(`btn-t${i}-m-orbit`);
             const vaRow = getEl(`va-t${i}-row`);
             const vaToggle = getEl(`btn-t${i}-va-toggle`);
@@ -2644,7 +2816,6 @@
                 updateTargetSpeedHint(t, i);
             });
 
-            // 运动参数
             const rN = getEl(`inp-t${i}-rng`);
             bindControl({
                 numEl: rN, btnMinus: getEl(`btn-t${i}-rng-minus`), btnPlus: getEl(`btn-t${i}-rng-plus`), step: 1.0,
@@ -2689,9 +2860,6 @@
             }
         }
 
-        // ============================================================
-        // 11. 目标增删
-        // ============================================================
         function addNewTarget() {
             if (config.targets.length >= 9) { alert("目前支持上限为 9 个目标！"); return; }
             const i = config.targets.length;
@@ -2768,7 +2936,7 @@
         }
 
         // ============================================================
-        // 12. 镜之边缘箱子 UI
+        // 11. 镜之边缘箱子 UI
         // ============================================================
         function rebuildBoxesUI() {
             boxesContainer.innerHTML = '';
@@ -3067,10 +3235,11 @@
         }
 
         // ============================================================
-        // 13. 交互面板与全局事件绑定
+        // 12. 交互面板与全局事件绑定
         // ============================================================
         const leftPanel = getEl('left-panel');
         const rightPanel = getEl('right-panel');
+        const leftBottom = getEl('left-bottom-group');
         const handle = getEl('panel-handle');
         const dragBtn = getEl('btn-drag-toggle');
         const btnLock = getEl('btn-lock');
@@ -3095,7 +3264,7 @@
 
         function bindPanelAndLock() {
             handle.addEventListener('mousedown', (e) => {
-                if (e.target === dragBtn || e.target === btnTheme) return;
+                if (e.target === dragBtn || e.target === btnTheme || e.target === getEl('btn-cloud-toggle')) return;
                 isDragging = true;
                 offX = e.clientX - leftPanel.offsetLeft;
                 offY = e.clientY - leftPanel.offsetTop;
@@ -3152,6 +3321,10 @@
                 leftPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
                 rightPanel.style.opacity = isLocked ? '0' : '1';
                 rightPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
+                if (leftBottom) {
+                    leftBottom.style.opacity = isLocked ? '0' : '1';
+                    leftBottom.style.pointerEvents = isLocked ? 'none' : 'auto';
+                }
                 const brHud = getEl('bottom-right-hud');
                 if (brHud) {
                     brHud.style.opacity = isLocked ? '0' : '1';
@@ -3176,7 +3349,7 @@
                     ambientLight.color.setHex(0xffffff);
                     ambientLight.groundColor.setHex(0xe2e8f0);
                 }
-                updateCrosshairUI(false);
+                updateCrosshairStyle();
             });
 
             const f11 = getEl('f11-box');
@@ -3225,7 +3398,10 @@
             'inp-height': 0.025,
             'inp-crosshair-opacity': 0.05,
             'inp-walk-spd': 0.2,
-            'inp-fly-spd': 0.5
+            'inp-fly-spd': 0.5,
+            'inp-cross-size': 0.5,
+            'inp-cross-thick': 0.5,
+            'inp-cross-gap': 0.25
         };
 
         function bindGlobalInputs() {
@@ -3238,7 +3414,7 @@
                 });
                 inp.addEventListener('wheel', (e) => {
                     e.preventDefault();
-                    if (inp.disabled) return; // 拦截禁用项滚轮
+                    if (inp.disabled) return;
                     const step = WHEEL_STEP[id] || parseFloat(inp.getAttribute('step')) || 1;
                     dispatchGlobalInput(id, (parseFloat(inp.value) || 0) + (e.deltaY < 0 ? step : -step));
                 }, { passive: false });
@@ -3269,7 +3445,7 @@
                     config.customCrosshair.defaultColor = c.hex;
                     defC.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
                     b1.classList.add('active');
-                    updateCrosshairUI(false);
+                    updateCrosshairStyle();
                 };
                 defC.appendChild(b1);
 
@@ -3281,32 +3457,35 @@
                     config.customCrosshair.targetColor = c.hex;
                     tgtC.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
                     b2.classList.add('active');
-                    updateCrosshairUI(false);
+                    updateCrosshairStyle();
                 };
                 tgtC.appendChild(b2);
             });
             getEl('inp-custom-crosshair').addEventListener('change', (e) => {
                 config.customCrosshair.enabled = e.target.checked;
                 getEl('crosshair-custom-box').style.display = config.customCrosshair.enabled ? 'block' : 'none';
-                updateCrosshairUI(false);
+                updateCrosshairStyle();
             });
         }
 
         // ============================================================
-        // 14. 运动学解耦与渲染主循环
+        // 13. 运动学与主渲染循环
         // ============================================================
         let lastTime = performance.now(), lastFrame = performance.now(), frameCnt = 0;
         const hudFps = getEl('hud-fps');
         const hudAngle = getEl('hud-angle');
+        const hudPoll = getEl('hud-poll');
         let lastRenderedAngle = -999;
 
         function updatePhysics(dt) {
-            cloudGroup.children.forEach(c => {
-                c.userData.angle += c.userData.speed * dt;
-                c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
-                c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
-                c.position.y = c.userData.altitude;
-            });
+            if (config.cloudsEnabled) {
+                cloudGroup.children.forEach(c => {
+                    c.userData.angle += c.userData.speed * dt;
+                    c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
+                    c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
+                    c.position.y = c.userData.altitude;
+                });
+            }
 
             if (config.advanced.walkEnabled) {
                 const isForward = keysDown.has('KeyW');
@@ -3378,7 +3557,7 @@
                 if (thinLine) thinLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
             }
 
-            // 目标运动
+            // 目标摆动与位移更新
             config.targets.forEach(t => {
                 if (!t.rootGroup.visible) return;
 
@@ -3470,6 +3649,22 @@
                 frameCnt = 0;
                 lastTime = now;
             }
+
+            // 轮询率捕获计算
+            if (now - pollLastCalc >= 400) {
+                const elapsed = (now - pollLastCalc) / 1000;
+                const inst = Math.round(pollCount / elapsed);
+                if (inst > 120) {
+                    peakPollRate = Math.max(peakPollRate, inst);
+                    if (hudPoll) hudPoll.innerText = peakPollRate;
+                    pollActiveSamples++;
+                } else if (pollActiveSamples === 0) {
+                    if (hudPoll) hudPoll.innerText = '--';
+                }
+                pollCount = 0;
+                pollLastCalc = now;
+            }
+
             checkAim();
             renderer.render(scene, camera);
         }
@@ -3482,7 +3677,7 @@
         });
 
         // ============================================================
-        // 15. 靶场启动入口
+        // 14. 启动与初始化
         // ============================================================
         function init() {
             setDpi(config.dpi);
@@ -3493,15 +3688,19 @@
             updateSensitivity();
 
             initCrosshairColorSwatches();
+            setCrosshairType(config.crosshair.type);
+            updateCrosshairStyle();
+
             bindGlobalInputs();
             bindPanelAndLock();
             initThemeAndF11();
             initAdvancedMode();
 
+            updateFloorAndGrid(config.floorColor);
+
             addNewTarget();
             addNewTarget();
             setTargetShape('dummy');
-            updateCrosshairUI(false);
             updateScene();
             animate(performance.now());
 
