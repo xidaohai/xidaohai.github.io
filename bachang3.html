@@ -85,7 +85,7 @@
             box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
         }
 
-        /* ===== 左下角色板组 ===== */
+        /* ===== 左下角作者卡片组 ===== */
         #left-bottom-group {
             position: absolute;
             bottom: 16px;
@@ -96,49 +96,6 @@
             align-items: flex-start;
             gap: 6px;
             transition: opacity 0.15s;
-        }
-        .palette-card {
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(24px) saturate(180%);
-            padding: 6px 10px 7px 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-        .palette-label {
-            font-size: 0.62rem;
-            font-weight: 900;
-            color: #334155;
-            letter-spacing: 0.3px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .swatches-grid-9 {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            gap: 3px;
-        }
-        .round-swatch-btn {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid #cbd5e1;
-            cursor: pointer;
-            transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
-            flex-shrink: 0;
-        }
-        .round-swatch-btn:hover {
-            transform: scale(1.2);
-            border-color: #0284c7;
-        }
-        .round-swatch-btn.active {
-            border-color: #0284c7;
-            box-shadow: 0 0 0 2px #0284c7, 0 0 0 4px rgba(2, 132, 199, 0.2);
-            transform: scale(1.1);
         }
 
         /* ===== 作者卡片 ===== */
@@ -293,7 +250,7 @@
             box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3) !important;
         }
 
-        /* ===== 右列色板组（紧贴训练模式与目标配置） ===== */
+        /* ===== 右列色板组 ===== */
         .panel-col-palette {
             width: 250px;
             flex-shrink: 0;
@@ -302,6 +259,47 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
+        }
+        .palette-card {
+            background: rgba(248, 250, 252, 0.75);
+            padding: 6px 10px 7px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .palette-label {
+            font-size: 0.64rem;
+            font-weight: 900;
+            color: #334155;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .swatches-grid-9 {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 3px;
+        }
+        .round-swatch-btn {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+            flex-shrink: 0;
+        }
+        .round-swatch-btn:hover {
+            transform: scale(1.2);
+            border-color: #0284c7;
+        }
+        .round-swatch-btn.active {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 2px #0284c7, 0 0 0 4px rgba(2, 132, 199, 0.2);
+            transform: scale(1.1);
         }
 
         /* ===== 右侧面板 ===== */
@@ -591,10 +589,11 @@
 
         #inp-floor-gray-r {
             background: linear-gradient(to right, #000000 0%, #7e8b9b 50%, #ffffff 100%);
-            height: 6px;
+            height: 5px;
             border-radius: 3px;
             border: 1px solid #cbd5e1;
             outline: none;
+            flex: 1;
         }
 
         /* ===== 进度覆盖层 ===== */
@@ -834,20 +833,8 @@
         </div>
     </div>
 
-    <!-- 左下角（保留地面底色 + 作者卡片） -->
+    <!-- 左下角（仅作者卡片） -->
     <div id="left-bottom-group">
-        <!-- 地面底色调色板 -->
-        <div class="palette-card" id="floor-color-picker" style="width: 206px;">
-            <div class="palette-label" style="justify-content:space-between;align-items:center;">
-                <span style="display:flex;align-items:center;gap:4px;"><span>🌐</span> 地面底色</span>
-                <button id="btn-creamy-yellow" class="pill-btn" style="padding:1px 7px;font-size:0.62rem;background:#faeed1;border-color:#e2c896;color:#78350f;font-weight:900;border-radius:4px;cursor:pointer;" onclick="setFloorColorPreset('#faeed1')">✨ 柔和奶黄</button>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
-                <span style="font-size:0.58rem;color:#475569;font-weight:800;">黑</span>
-                <input type="range" id="inp-floor-gray-r" min="0" max="100" step="1" value="97" oninput="onFloorGraySlider(this.value)" />
-                <span style="font-size:0.58rem;color:#475569;font-weight:800;">白</span>
-            </div>
-        </div>
         <a href="https://space.bilibili.com/1534330" target="_blank" id="author-card" title="访问作者B站空间">
             <div class="author-avatar-badge">海</div>
             <div class="author-meta">
@@ -941,7 +928,7 @@
                 <div class="ctrl-row">
                     <label title="最左边瞬起瞬落断层感，最右边月球低重力慢动作">自然跳 (时间感)</label>
                     <input type="range" id="inp-jump-nature-r" min="0" max="100" step="1" value="35" oninput="setJumpNature(parseFloat(this.value))" />
-                    <span id="lbl-jump-nature" style="font-size:0.62rem;font-weight:900;color:#0284c7;width:52px;text-align:35%;">35%</span>
+                    <span id="lbl-jump-nature" style="font-size:0.62rem;font-weight:900;color:#0284c7;width:52px;text-align:center;">35%</span>
                 </div>
 
                 <!-- 空中变向开关 -->
@@ -1377,7 +1364,7 @@
                 </div>
             </div>
 
-            <!-- 右列：色板组（紧贴训练模式与目标配置） -->
+            <!-- 右列：色板组（包含环境、天空、地面底色与准星颜色） -->
             <div class="panel-col-palette" id="palette-col">
                 <div class="palette-card">
                     <div class="palette-label" style="justify-content:space-between;align-items:center;">
@@ -1396,6 +1383,18 @@
                 <div class="palette-card" id="highlight-color-picker">
                     <div class="palette-label"><span>✨</span> 命中高亮颜色</div>
                     <div class="swatches-grid-9" id="swatches-highlight"></div>
+                </div>
+                <!-- 归纳进右列色板组最下方的地面底色调色板 -->
+                <div class="palette-card" id="floor-color-picker">
+                    <div class="palette-label" style="justify-content:space-between;align-items:center;">
+                        <span style="display:flex;align-items:center;gap:4px;"><span>🌐</span> 地面底色</span>
+                        <button id="btn-creamy-yellow" class="pill-btn" style="padding:1px 7px;font-size:0.62rem;background:#faeed1;border-color:#e2c896;color:#78350f;font-weight:900;border-radius:4px;cursor:pointer;" onclick="setFloorColorPreset('#faeed1')">✨ 柔和奶黄</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;margin-top:2px;">
+                        <span style="font-size:0.58rem;color:#475569;font-weight:800;">黑</span>
+                        <input type="range" id="inp-floor-gray-r" min="0" max="100" step="1" value="97" oninput="onFloorGraySlider(this.value)" />
+                        <span style="font-size:0.58rem;color:#475569;font-weight:800;">白</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1699,7 +1698,7 @@
         }
 
         // ============================================================
-        // 3. 音效系统（爆头、打身与空枪独立音效）
+        // 3. 音效系统
         // ============================================================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let lastTrackAudioTime = 0;
@@ -1860,7 +1859,7 @@
 
         function setFloorColorPreset(hex) { if (STATE.game !== 'playing' && STATE.game !== 'starting' && STATE.game !== 'armed') updateFloorAndGrid(hex); }
         function onFloorGraySlider(val) {
-            if (STATE.game === 'playing' || STATE.game === 'starting' || STATE.game === 'armed') return;
+            if (STATE.game === 'playing' || STATE.game === 'starting' || STATE.game === 'playing') return;
             const v = Math.round(clamp(parseFloat(val), 0, 100) * 2.55).toString(16).padStart(2, '0');
             updateFloorAndGrid(`#${v}${v}${v}`);
         }
@@ -1938,7 +1937,6 @@
                 const wallW = 40;
                 const wallH = 30;
 
-                // 不透明实体掩体墙
                 const solidMat = new THREE.MeshStandardMaterial({
                     color: wallHex,
                     roughness: 0.35,
@@ -1958,14 +1956,12 @@
                 rWall.receiveShadow = true;
                 spawnWallGroup.add(rWall);
 
-                // 墙体轮廓边框线
                 const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 });
                 const lPts = [new THREE.Vector3(-gap / 2, 0, -wallDepth + 0.01), new THREE.Vector3(-gap / 2, wallH, -wallDepth + 0.01)];
                 const rPts = [new THREE.Vector3(gap / 2, 0, -wallDepth + 0.01), new THREE.Vector3(gap / 2, wallH, -wallDepth + 0.01)];
                 spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lPts), edgeMat));
                 spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rPts), edgeMat));
 
-                // 目标移动高度落差范围 —— 灰色虚线轨道
                 const rangeY = CFG.holding.rangeY;
                 if (rangeY > 0) {
                     const topY = CFG.holding.baseY + rangeY / 2;
@@ -2164,10 +2160,50 @@
             }
         }
 
-        function getHoldingTargetRadius() {
+        /**
+         * 基于玩家视点与掩体墙缝左右边缘，计算目标在目标深度上完全不可见的精确 X 边界
+         */
+        function calculateHoldingVisualBounds() {
             const h = CFG.holding;
-            if (h.shape === 'sphere') return (h.sizeCm / 200);
-            return Math.max(h.headWidthCm || 23.0, h.bodyWidthCm || 38.87) / 200;
+            const camX = MOVE_STATE.x || 0;
+            const camZ = MOVE_STATE.z || 0;
+            const wallDepth = Math.max(0.1, h.wallDepth || 15.0);
+            const targetDepth = Math.max(0.1, h.depth || 15.5);
+            const gap = h.gapWidth;
+
+            // 视线投射比例
+            const scaleFactor = Math.max(0.001, (targetDepth - camZ) / (wallDepth - camZ));
+            const leftSightLimitX = camX + (-gap / 2 - camX) * scaleFactor;
+            const rightSightLimitX = camX + (gap / 2 - camX) * scaleFactor;
+
+            let leftBoundaryMin = 0;
+            let rightBoundaryMax = 0;
+
+            if (h.shape === 'sphere') {
+                const r = (h.sizeCm / 100) / 2;
+                leftBoundaryMin = leftSightLimitX - r;
+                rightBoundaryMax = rightSightLimitX + r;
+            } else {
+                // 头部参数
+                const hrx = (h.headWidthCm || 23.0) / 200;
+                const headOffX = (h.headOffsetX || 0) / 100;
+                const headLeftBound = leftSightLimitX - headOffX - hrx;
+                const headRightBound = rightSightLimitX - headOffX + hrx;
+
+                // 身体参数
+                const bodyHalfW = ((h.bodyWidthCm || 38.87) / 100) / 2;
+                const bodyLeftBound = leftSightLimitX - bodyHalfW;
+                const bodyRightBound = rightSightLimitX + bodyHalfW;
+
+                // 包络极限：必须当所有部件都进入墙后才完全看不见
+                leftBoundaryMin = Math.min(headLeftBound, bodyLeftBound);
+                rightBoundaryMax = Math.max(headRightBound, bodyRightBound);
+            }
+
+            return {
+                leftHideX: leftBoundaryMin - 0.05,
+                rightHideX: rightBoundaryMax + 0.05
+            };
         }
 
         function respawnHoldingTarget() {
@@ -2186,9 +2222,8 @@
             sh.y = Math.max(floorLim, targetY);
 
             sh.z = -h.depth;
-            const r = getHoldingTargetRadius();
-            const startX = (h.gapWidth / 2 + r + 0.1);
-            sh.x = sh.dir === 1 ? -startX : startX;
+            const bounds = calculateHoldingVisualBounds();
+            sh.x = sh.dir === 1 ? bounds.leftHideX : bounds.rightHideX;
 
             holdingTarget.rootGroup.position.set(sh.x, sh.y, sh.z);
             holdingTarget.rootGroup.visible = true;
@@ -2507,9 +2542,9 @@
                     sh.x += sh.dir * h.speed * dt;
                     holdingTarget.rootGroup.position.x = sh.x;
 
-                    const r = getHoldingTargetRadius();
-                    const endX = (h.gapWidth / 2 + r + 0.02);
-                    if ((sh.dir === 1 && sh.x >= endX) || (sh.dir === -1 && sh.x <= -endX)) {
+                    // 精准视线死角消失判定
+                    const bounds = calculateHoldingVisualBounds();
+                    if ((sh.dir === 1 && sh.x >= bounds.rightHideX) || (sh.dir === -1 && sh.x <= bounds.leftHideX)) {
                         sh.state = 'waiting';
                         sh.timer = pickNextHoldingTimer();
                         holdingTarget.rootGroup.visible = false;
@@ -3282,12 +3317,43 @@
         // ============================================================
         function bindEventListeners() {
             const handle = getEl('panel-handle'), dragBtn = getEl('btn-drag-toggle');
-            handle.addEventListener('mousedown', (e) => { if (e.target === dragBtn || e.target === getEl('btn-theme-toggle') || e.target.classList.contains('mode-nav-btn')) return; STATE.isDragging = true; STATE.offX = e.clientX - panel.offsetLeft; STATE.offY = e.clientY - panel.offsetTop; });
-            document.addEventListener('mousemove', (e) => { if (STATE.isDragging) { panel.style.left = `${clamp(e.clientX - STATE.offX, 10, window.innerWidth - 380)}px`; panel.style.top = `${clamp(e.clientY - STATE.offY, 10, window.innerHeight - 300)}px`; } else if (STATE.isStick) { panel.style.left = `${clamp(e.clientX - 160, 10, window.innerWidth - 380)}px`; panel.style.top = `${clamp(e.clientY - 20, 10, window.innerHeight - 300)}px`; } });
+            handle.addEventListener('mousedown', (e) => { 
+                if (e.target === dragBtn || e.target === getEl('btn-theme-toggle') || e.target.classList.contains('mode-nav-btn')) return; 
+                STATE.isDragging = true; 
+                STATE.offX = e.clientX - panel.offsetLeft; 
+                STATE.offY = e.clientY - panel.offsetTop; 
+            });
+            document.addEventListener('mousemove', (e) => { 
+                if (STATE.isDragging) { 
+                    panel.style.left = `${clamp(e.clientX - STATE.offX, 10, window.innerWidth - 380)}px`; 
+                    panel.style.top = `${clamp(e.clientY - STATE.offY, 10, window.innerHeight - 300)}px`; 
+                } else if (STATE.isStick) { 
+                    panel.style.left = `${clamp(e.clientX - 160, 10, window.innerWidth - 380)}px`; 
+                    panel.style.top = `${clamp(e.clientY - 20, 10, window.innerHeight - 300)}px`; 
+                } 
+            });
             document.addEventListener('mouseup', () => { STATE.isDragging = false; });
-            dragBtn.addEventListener('click', (e) => { e.stopPropagation(); STATE.isStick = !STATE.isStick; dragBtn.classList.toggle('active', STATE.isStick); dragBtn.innerText = STATE.isStick ? '放置' : '移动窗口'; });
-            const dynBtn = getEl('btn-dynamic-toggle'); if (dynBtn) { dynBtn.addEventListener('click', () => { if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return; CFG.dynamic.enabled = !CFG.dynamic.enabled; dynBtn.textContent = CFG.dynamic.enabled ? '🔘 动态漂移: 开启' : '🔘 动态漂移: 关闭'; dynBtn.classList.toggle('active', CFG.dynamic.enabled); applySixshotSpeed(); saveToLocalStorage(); }); }
-            getEl('btn-theme-toggle').addEventListener('click', () => { if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return; applyTheme(CFG.theme === 'day' ? 'sunset' : 'day'); });
+            dragBtn.addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                STATE.isStick = !STATE.isStick; 
+                dragBtn.classList.toggle('active', STATE.isStick); 
+                dragBtn.innerText = STATE.isStick ? '放置' : '移动窗口'; 
+            });
+            const dynBtn = getEl('btn-dynamic-toggle'); 
+            if (dynBtn) { 
+                dynBtn.addEventListener('click', () => { 
+                    if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return; 
+                    CFG.dynamic.enabled = !CFG.dynamic.enabled; 
+                    dynBtn.textContent = CFG.dynamic.enabled ? '🔘 动态漂移: 开启' : '🔘 动态漂移: 关闭'; 
+                    dynBtn.classList.toggle('active', CFG.dynamic.enabled); 
+                    applySixshotSpeed(); 
+                    saveToLocalStorage(); 
+                }); 
+            }
+            getEl('btn-theme-toggle').addEventListener('click', () => { 
+                if (STATE.game === 'armed' || STATE.game === 'starting' || STATE.game === 'playing') return; 
+                applyTheme(CFG.theme === 'day' ? 'sunset' : 'day'); 
+            });
             btnLock.addEventListener('click', startChallenge);
 
             // 事件委托：兼容动态生成的 .num-input
@@ -3305,24 +3371,111 @@
                 if (!inp || inp.disabled) return;
                 const val = parseFloat(inp.value);
                 if (isNaN(val)) return;
-                const rng = getEl(inp.id + '-r'); if (rng) rng.value = val;
+                const rng = getEl(inp.id + '-r'); 
+                if (rng) rng.value = val;
                 dispatchNumInput(inp.id, val);
             });
+
+            const f11Box = getEl('f11-box');
+            if (f11Box) {
+                f11Box.addEventListener('click', () => {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen().catch(() => {});
+                    } else {
+                        document.exitFullscreen().catch(() => {});
+                    }
+                });
+            }
         }
 
         function mountGlobalFunctions() {
-            window.switchTrainMode = switchTrainMode; window.setTrackingPattern = setTrackingPattern; window.setTrackingSpace = setTrackingSpace; window.setStrafeRangePreset = setStrafeRangePreset; window.setStrafeMin = setStrafeMin; window.setStrafeMax = setStrafeMax; window.setTrackingAngle = setTrackingAngle; window.setTrackingSpeed = setTrackingSpeed; window.syncTrackingTargetSize = syncTrackingTargetSize; window.setSixshotSpeed = setSixshotSpeed; window.setSixshotDynamicMode = setSixshotDynamicMode; window.toggleDepthLock = toggleDepthLock; window.exportConfigFile = exportConfigFile; window.triggerImportDialog = triggerImportDialog; window.handleConfigFileImport = handleConfigFileImport; window.resetToDefaultSettings = resetToDefaultSettings; window.updateCrosshairStyle = updateCrosshairStyle; window.syncCrosshair = syncCrosshair; window.syncSpawnAngle = syncSpawnAngle; window.setViewHeight = setViewHeight; window.setDpiPreset = v => { CFG.dpi = v; setVal('inp-dpi', v); const r = getEl('inp-dpi-r'); if (r) r.value = v; updateSensitivity(); }; window.setDpiManual = v => { CFG.dpi = Math.max(1, Math.round(v)); setVal('inp-dpi', CFG.dpi); const r = getEl('inp-dpi-r'); if (r) r.value = CFG.dpi; updateSensitivity(); }; window.setCmPreset = v => { CFG.cmPer360 = v; setValF('inp-cm', v); const r = getEl('inp-cm-r'); if (r) r.value = v; updateSensitivity(); }; window.setCmManual = v => { CFG.cmPer360 = Math.max(0.1, v); setValF('inp-cm', CFG.cmPer360); const r = getEl('inp-cm-r'); if (r) r.value = CFG.cmPer360; updateSensitivity(); }; window.setDepthSixshot = setDepthSixshot; window.setDepthTracking = setDepthTracking; window.syncTargetSize = syncTargetSize; window.setCrosshairType = setCrosshairType; window.syncFov = syncFov; window.stepValGlobal = stepValGlobal; window.restartChallenge = restartChallenge; window.startChallenge = startChallenge; window.resetToIdle = resetToIdle; window.setFloorColorPreset = setFloorColorPreset; window.onFloorGraySlider = onFloorGraySlider; window.toggleMovementEnabled = toggleMovementEnabled; window.toggleAirControl = toggleAirControl; window.toggleClouds = toggleClouds; window.setMoveSpeed = v => { CFG.movement.speed = Math.max(0.1, v); setValF('inp-move-speed', CFG.movement.speed); const r = getEl('inp-move-speed-r'); if (r) r.value = CFG.movement.speed; saveToLocalStorage(); }; window.setCrouchSpeed = v => { CFG.movement.crouchSpeed = Math.max(0.1, v); setValF('inp-crouch-speed', CFG.movement.crouchSpeed); const r = getEl('inp-crouch-speed-r'); if (r) r.value = CFG.movement.crouchSpeed; saveToLocalStorage(); }; window.setJumpHeight = v => { CFG.movement.jumpHeight = Math.max(0.05, v); setValF('inp-jump-height', CFG.movement.jumpHeight); const r = getEl('inp-jump-height-r'); if (r) r.value = CFG.movement.jumpHeight; saveToLocalStorage(); }; window.setJumpNature = v => { CFG.movement.jumpNature = clamp(v, 0, 100); const r = getEl('inp-jump-nature-r'); if (r) r.value = CFG.movement.jumpNature; const l = getEl('lbl-jump-nature'); if (l) l.innerText = `${Math.round(CFG.movement.jumpNature)}%`; saveToLocalStorage(); }; window.setCrouchDepth = v => { CFG.movement.crouchDepth = Math.max(0.05, v); setValF('inp-crouch-depth', CFG.movement.crouchDepth); const r = getEl('inp-crouch-depth-r'); if (r) r.value = CFG.movement.crouchDepth; saveToLocalStorage(); }; window.setCrouchNature = v => { CFG.movement.crouchNature = clamp(v, 0, 100); const r = getEl('inp-crouch-nature-r'); if (r) r.value = CFG.movement.crouchNature; const l = getEl('lbl-crouch-nature'); if (l) l.innerText = `${Math.round(CFG.movement.crouchNature)}%`; saveToLocalStorage(); }; window.startRebind = startRebind; window.resetMovementKeys = resetMovementKeys;
-            window.setHoldingShape = setHoldingShape; window.setHoldingGap = setHoldingGap; window.setHoldingWallDepth = setHoldingWallDepth; window.setHoldingDepth = setHoldingDepth; window.setHoldingSpeed = setHoldingSpeed; window.setHoldingIntervalMin = setHoldingIntervalMin; window.setHoldingIntervalMax = setHoldingIntervalMax; window.setHoldIntervalPreset = setHoldIntervalPreset; window.setHoldingDirection = setHoldingDirection; window.setHoldingBaseY = setHoldingBaseY; window.setHoldingRangeY = setHoldingRangeY; window.toggleHoldingLock = toggleHoldingLock; window.updateHoldingDummy = updateHoldingDummy;
+            window.switchTrainMode = switchTrainMode; 
+            window.setTrackingPattern = setTrackingPattern; 
+            window.setTrackingSpace = setTrackingSpace; 
+            window.setStrafeRangePreset = setStrafeRangePreset; 
+            window.setStrafeMin = setStrafeMin; 
+            window.setStrafeMax = setStrafeMax; 
+            window.setTrackingAngle = setTrackingAngle; 
+            window.setTrackingSpeed = setTrackingSpeed; 
+            window.syncTrackingTargetSize = syncTrackingTargetSize; 
+            window.setSixshotSpeed = setSixshotSpeed; 
+            window.setSixshotDynamicMode = setSixshotDynamicMode; 
+            window.toggleDepthLock = toggleDepthLock; 
+            window.exportConfigFile = exportConfigFile; 
+            window.triggerImportDialog = triggerImportDialog; 
+            window.handleConfigFileImport = handleConfigFileImport; 
+            window.resetToDefaultSettings = resetToDefaultSettings; 
+            window.updateCrosshairStyle = updateCrosshairStyle; 
+            window.syncCrosshair = syncCrosshair; 
+            window.syncSpawnAngle = syncSpawnAngle; 
+            window.setViewHeight = setViewHeight; 
+            window.setDpiPreset = v => { CFG.dpi = v; setVal('inp-dpi', v); const r = getEl('inp-dpi-r'); if (r) r.value = v; updateSensitivity(); }; 
+            window.setDpiManual = v => { CFG.dpi = Math.max(1, Math.round(v)); setVal('inp-dpi', CFG.dpi); const r = getEl('inp-dpi-r'); if (r) r.value = CFG.dpi; updateSensitivity(); }; 
+            window.setCmPreset = v => { CFG.cmPer360 = v; setValF('inp-cm', v); const r = getEl('inp-cm-r'); if (r) r.value = v; updateSensitivity(); }; 
+            window.setCmManual = v => { CFG.cmPer360 = Math.max(0.1, v); setValF('inp-cm', CFG.cmPer360); const r = getEl('inp-cm-r'); if (r) r.value = CFG.cmPer360; updateSensitivity(); }; 
+            window.setDepthSixshot = setDepthSixshot; 
+            window.setDepthTracking = setDepthTracking; 
+            window.syncTargetSize = syncTargetSize; 
+            window.setCrosshairType = setCrosshairType; 
+            window.syncFov = syncFov; 
+            window.stepValGlobal = stepValGlobal; 
+            window.restartChallenge = restartChallenge; 
+            window.startChallenge = startChallenge; 
+            window.resetToIdle = resetToIdle; 
+            window.setFloorColorPreset = setFloorColorPreset; 
+            window.onFloorGraySlider = onFloorGraySlider; 
+            window.toggleMovementEnabled = toggleMovementEnabled; 
+            window.toggleAirControl = toggleAirControl; 
+            window.toggleClouds = toggleClouds; 
+            window.setMoveSpeed = v => { CFG.movement.speed = Math.max(0.1, v); setValF('inp-move-speed', CFG.movement.speed); const r = getEl('inp-move-speed-r'); if (r) r.value = CFG.movement.speed; saveToLocalStorage(); }; 
+            window.setCrouchSpeed = v => { CFG.movement.crouchSpeed = Math.max(0.1, v); setValF('inp-crouch-speed', CFG.movement.crouchSpeed); const r = getEl('inp-crouch-speed-r'); if (r) r.value = CFG.movement.crouchSpeed; saveToLocalStorage(); }; 
+            window.setJumpHeight = v => { CFG.movement.jumpHeight = Math.max(0.05, v); setValF('inp-jump-height', CFG.movement.jumpHeight); const r = getEl('inp-jump-height-r'); if (r) r.value = CFG.movement.jumpHeight; saveToLocalStorage(); }; 
+            window.setJumpNature = v => { CFG.movement.jumpNature = clamp(v, 0, 100); const r = getEl('inp-jump-nature-r'); if (r) r.value = CFG.movement.jumpNature; const l = getEl('lbl-jump-nature'); if (l) l.innerText = `${Math.round(CFG.movement.jumpNature)}%`; saveToLocalStorage(); }; 
+            window.setCrouchDepth = v => { CFG.movement.crouchDepth = Math.max(0.05, v); setValF('inp-crouch-depth', CFG.movement.crouchDepth); const r = getEl('inp-crouch-depth-r'); if (r) r.value = CFG.movement.crouchDepth; saveToLocalStorage(); }; 
+            window.setCrouchNature = v => { CFG.movement.crouchNature = clamp(v, 0, 100); const r = getEl('inp-crouch-nature-r'); if (r) r.value = CFG.movement.crouchNature; const l = getEl('lbl-crouch-nature'); if (l) l.innerText = `${Math.round(CFG.movement.crouchNature)}%`; saveToLocalStorage(); }; 
+            window.startRebind = startRebind; 
+            window.resetMovementKeys = resetMovementKeys;
+            window.setHoldingShape = setHoldingShape; 
+            window.setHoldingGap = setHoldingGap; 
+            window.setHoldingWallDepth = setHoldingWallDepth; 
+            window.setHoldingDepth = setHoldingDepth; 
+            window.setHoldingSpeed = setHoldingSpeed; 
+            window.setHoldingIntervalMin = setHoldingIntervalMin; 
+            window.setHoldingIntervalMax = setHoldingIntervalMax; 
+            window.setHoldIntervalPreset = setHoldIntervalPreset; 
+            window.setHoldingDirection = setHoldingDirection; 
+            window.setHoldingBaseY = setHoldingBaseY; 
+            window.setHoldingRangeY = setHoldingRangeY; 
+            window.toggleHoldingLock = toggleHoldingLock; 
+            window.updateHoldingDummy = updateHoldingDummy;
         }
 
         let lastFrameTime2 = performance.now(), fpsTime = performance.now(), fpsCount = 0;
         function animate(now) {
             requestAnimationFrame(animate);
-            const dt = Math.min((now - lastFrameTime2) / 1000, 0.1); lastFrameTime2 = now;
+            const dt = Math.min((now - lastFrameTime2) / 1000, 0.1); 
+            lastFrameTime2 = now;
             updatePhysics(dt);
             fpsCount++;
-            if (now - fpsTime >= 400) { const f = getEl('hud-fps'); if (f) f.innerText = Math.round((fpsCount * 1000) / (now - fpsTime)); fpsCount = 0; fpsTime = now; }
-            if (now - STATE.pollLastCalc >= 400) { const elapsed = (now - STATE.pollLastCalc) / 1000, inst = Math.round(STATE.pollCount / elapsed); if (inst > 120) { STATE.peakPollRate = Math.max(STATE.peakPollRate, inst); getEl('hud-poll').innerText = STATE.peakPollRate; STATE.pollActiveSamples++; } else if (STATE.pollActiveSamples === 0) { getEl('hud-poll').innerText = '--'; } STATE.pollCount = 0; STATE.pollLastCalc = now; }
+            if (now - fpsTime >= 400) { 
+                const f = getEl('hud-fps'); 
+                if (f) f.innerText = Math.round((fpsCount * 1000) / (now - fpsTime)); 
+                fpsCount = 0; 
+                fpsTime = now; 
+            }
+            if (now - STATE.pollLastCalc >= 400) { 
+                const elapsed = (now - STATE.pollLastCalc) / 1000;
+                const inst = Math.round(STATE.pollCount / elapsed); 
+                if (inst > 120) { 
+                    STATE.peakPollRate = Math.max(STATE.peakPollRate, inst); 
+                    getEl('hud-poll').innerText = STATE.peakPollRate; 
+                    STATE.pollActiveSamples++; 
+                } else if (STATE.pollActiveSamples === 0) { 
+                    getEl('hud-poll').innerText = '--'; 
+                } 
+                STATE.pollCount = 0; 
+                STATE.pollLastCalc = now; 
+            }
             renderer.render(scene, camera);
         }
 
