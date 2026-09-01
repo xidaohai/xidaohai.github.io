@@ -1,3 +1,4 @@
+--- START OF FILE index.html ---
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -6,7 +7,7 @@
     <title>西岛海 · 三阶校准法</title>
     <link rel="icon" href="https://xidaohai.github.io/miaozhun.ico" type="image/x-icon">
     
-    <!-- 引入标准轻量 CDN 图标库与动画引擎，彻底消除冗余乱码 -->
+    <!-- 引入标准轻量 CDN 图标库与动画引擎 -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
@@ -31,7 +32,7 @@
             --text-muted: #787fa4;
             
             --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
-            --shadow-float: 0 10px 35px rgba(0, 0, 0, 0.5);
+            --shadow-float: 0 12px 40px rgba(0, 0, 0, 0.55);
             --radius: 10px;
             --header-h: 115px;
         }
@@ -49,7 +50,7 @@
             position: relative;
         }
 
-        /* --- 完美保留原始科技感背景纹理 (PC 端全屏固定平铺，手机端自动省略) --- */
+        /* --- 原始科技感背景图案 (PC 端全屏固定平铺，手机端自动省略) --- */
         body::before {
             content: '';
             position: fixed;
@@ -190,6 +191,7 @@
             gap: 5px;
             white-space: nowrap;
             transition: all 0.2s;
+            cursor: pointer;
         }
         .nav-item:hover, .nav-item.active {
             color: #fff;
@@ -496,13 +498,157 @@
             box-shadow: 0 2px 8px rgba(248, 113, 113, 0.4);
         }
 
-        /* 图片灯箱放大浮层 */
-        #imageOverlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
-            z-index: 4000; display: none; place-items: center; padding: 20px;
-            cursor: zoom-out;
+        /* --- 沉浸式居中阅读/预览弹层 (TXT/PDF/图片 站内半出去查看) --- */
+        #previewModal {
+            position: fixed;
+            inset: 0;
+            z-index: 4000;
+            background: rgba(8, 9, 18, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: none;
+            place-items: center;
+            padding: 20px;
         }
-        #imageOverlay img { max-width: 95%; max-height: 90%; border-radius: 8px; border: 2px solid var(--primary); box-shadow: var(--shadow-float); }
+
+        .preview-dialog {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-float);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 900px;
+            height: 85vh;
+            max-height: 850px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .preview-header {
+            padding: 12px 18px;
+            background: rgba(0, 0, 0, 0.35);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .preview-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 右上角专用【复制】按钮 */
+        .btn-copy {
+            background: rgba(74, 144, 226, 0.15);
+            border: 1px solid var(--primary);
+            color: var(--text-main);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-copy:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-copy.copied {
+            background: var(--success) !important;
+            border-color: var(--success) !important;
+            color: #fff !important;
+        }
+
+        .btn-close-preview {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+            width: 30px; height: 30px;
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-close-preview:hover {
+            background: rgba(248, 113, 113, 0.2);
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .preview-body {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: var(--bg-sub);
+            padding: 16px;
+        }
+
+        /* TXT 显示区 */
+        .txt-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: var(--text-main);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 18px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        /* PDF 视窗 */
+        .pdf-container {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+            border-radius: 6px;
+        }
+
+        /* 图片预览区 */
+        .img-container {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: var(--shadow-card);
+        }
 
         /* ==============================================================
            【移动端 / 手机端专属响应式（背景省略，分类全平铺）】
@@ -579,6 +725,11 @@
 
             .formula-bar { flex-direction: column; align-items: flex-start; }
             .formula-content { text-align: left; margin-top: 4px; }
+
+            /* 弹层自适应手机高度 */
+            .preview-dialog { height: 92vh; max-height: none; }
+            .preview-header { padding: 10px 14px; }
+            .txt-container { padding: 12px; font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -629,28 +780,28 @@
                 <!-- 入门路线 -->
                 <div class="nav-panel" data-group="onboarding">
                     <a href="https://www.bilibili.com/video/BV1Qr2xBVEy2" target="_blank" rel="noopener" class="nav-item tutorial-highlight"><i data-lucide="film"></i>教程</a>
-                    <a href="/zg.png" class="nav-item image-preview"><i data-lucide="book-open"></i>总纲</a>
-                    <a href="/dg.pdf" target="_blank" class="nav-item"><i data-lucide="book-open"></i>三阶大纲</a>
+                    <a href="/zg.png" class="nav-item previewable"><i data-lucide="book-open"></i>总纲</a>
+                    <a href="/dg.pdf" class="nav-item previewable"><i data-lucide="book-open"></i>三阶大纲</a>
                     <a href="#mini-gallery" class="nav-item"><i data-lucide="split"></i>算法之间如何选择</a>
                 </div>
 
-                <!-- 公式库 (图片均在灯箱优雅打开) -->
+                <!-- 公式库 -->
                 <div class="nav-panel" data-group="formula">
-                    <a href="/gs1.png" class="nav-item image-preview">各类</a>
-                    <a href="/gs2.png" class="nav-item image-preview">表达法旧公式 1</a>
-                    <a href="/bdfgs1.png" class="nav-item image-preview">表达法旧公式 2</a>
-                    <a href="/bdfgs2.png" class="nav-item image-preview">表达法旧公式 3</a>
-                    <a href="/bdfgs3.jpg" class="nav-item image-preview">表达法新公式</a>
-                    <a href="/bdfgs4.png" class="nav-item image-preview">表达法新公式 极简化</a>
-                    <a href="/gs33.png" class="nav-item image-preview">瞄准框架 第一章</a>
-                    <a href="/gs22.png" class="nav-item image-preview">瞄准框架 第二章</a>
-                    <a href="/gs11.png" class="nav-item image-preview">对枪经验</a>
+                    <a href="/gs1.png" class="nav-item previewable">各类</a>
+                    <a href="/gs2.png" class="nav-item previewable">表达法旧公式 1</a>
+                    <a href="/bdfgs1.png" class="nav-item previewable">表达法旧公式 2</a>
+                    <a href="/bdfgs2.png" class="nav-item previewable">表达法旧公式 3</a>
+                    <a href="/bdfgs3.jpg" class="nav-item previewable">表达法新公式</a>
+                    <a href="/bdfgs4.png" class="nav-item previewable">表达法新公式 极简化</a>
+                    <a href="/gs33.png" class="nav-item previewable">瞄准框架 第一章</a>
+                    <a href="/gs22.png" class="nav-item previewable">瞄准框架 第二章</a>
+                    <a href="/gs11.png" class="nav-item previewable">对枪经验</a>
                 </div>
 
                 <!-- fov/mdh/开镜 -->
                 <div class="nav-panel" data-group="mdh">
                     <a href="/mdh.html" class="nav-item">基础介绍</a>
-                    <a href="/ts.png" class="nav-item image-preview">基础介绍 图示</a>
+                    <a href="/ts.png" class="nav-item previewable">基础介绍 图示</a>
                     <a href="/tl.html" class="nav-item">讨论</a>
                     <a href="/mdhvs2.mhtml" class="nav-item">viewspeedv2</a>
                     <a href="/mdhcs.mhtml" class="nav-item">关于CS当中的MDH</a>
@@ -671,8 +822,8 @@
                     <a href="/bdfs.html" class="nav-item"><i data-lucide="scroll-text"></i>表达法 手部校准工具</a>
                     <a href="/yxf.html" class="nav-item featured"><i data-lucide="ruler"></i>优选法</a>
                     <a href="/zgf.html" class="nav-item"><i data-lucide="plus"></i>正改法</a>
-                    <a href="/huan.txt" target="_blank" class="nav-item"><i data-lucide="rotate-ccw"></i>还原手感</a>
-                    <a href="/cf.txt" target="_blank" class="nav-item">CF 灵敏</a>
+                    <a href="/huan.txt" class="nav-item previewable"><i data-lucide="rotate-ccw"></i>还原手感</a>
+                    <a href="/cf.txt" class="nav-item previewable">CF 灵敏</a>
                     <a href="#widget-quick-x" class="nav-item"><i data-lucide="table-2"></i>极敏四分法</a>
                 </div>
 
@@ -687,9 +838,9 @@
 
                 <!-- 作者内容 -->
                 <div class="nav-panel" data-group="author">
-                    <a href="/js.txt" target="_blank" class="nav-item"><i data-lucide="user-round"></i>作者介绍</a>
+                    <a href="/js.txt" class="nav-item previewable"><i data-lucide="user-round"></i>作者介绍</a>
                     <a href="/jsmv.mp4" target="_blank" class="nav-item"><i data-lucide="video"></i>作者 MV</a>
-                    <a href="/xzdz.txt" target="_blank" class="nav-item"><i data-lucide="scroll-text"></i>瞄准手稿</a>
+                    <a href="/xzdz.txt" class="nav-item previewable"><i data-lucide="scroll-text"></i>瞄准手稿</a>
                     <a href="/yy.html" class="nav-item"><i data-lucide="music-2"></i>音乐</a>
                     <a href="/sanmen.html" class="nav-item"><i data-lucide="brain"></i>三门思维训练</a>
                 </div>
@@ -703,10 +854,10 @@
                     <a href="/aj.html" class="nav-item">艾灸</a>
                     <a href="/buxie.html" class="nav-item">补泄</a>
                     <span class="nav-group-divider">/</span>
-                    <a href="/wcsd.png" class="nav-item image-preview">危刺深度1</a>
-                    <a href="/wcsd2.jpg" class="nav-item image-preview">危刺深度2</a>
-                    <a href="/wcsd3.jpg" class="nav-item image-preview">危刺深度3</a>
-                    <a href="/wcsd4.jpg" class="nav-item image-preview">危刺深度4</a>
+                    <a href="/wcsd.png" class="nav-item previewable">危刺深度1</a>
+                    <a href="/wcsd2.jpg" class="nav-item previewable">危刺深度2</a>
+                    <a href="/wcsd3.jpg" class="nav-item previewable">危刺深度3</a>
+                    <a href="/wcsd4.jpg" class="nav-item previewable">危刺深度4</a>
                     <a href="/jcwz.html" class="nav-item">禁刺位置</a>
                 </div>
             </div>
@@ -899,8 +1050,8 @@
                     <span style="background-color: #f1c40f; color: #1a1a2a; padding: 2px 8px; border-radius: 4px; font-weight: bold;">算法之间如何选择？</span>
                 </div>
                 <div class="gallery-container" id="gallery-container">
-                    <img src="https://xidaohai.github.io/qubie2.png" alt="图1" class="gallery-thumb">
-                    <img src="https://xidaohai.github.io/qubie.png" alt="图2" class="gallery-thumb">
+                    <img src="https://xidaohai.github.io/qubie2.png" alt="图1" class="gallery-thumb previewable">
+                    <img src="https://xidaohai.github.io/qubie.png" alt="图2" class="gallery-thumb previewable">
                 </div>
             </div>
 
@@ -929,15 +1080,34 @@
                 <a href="https://space.bilibili.com/1124699971" target="_blank" class="author-link">助力：软沙</a>
                 <span>/</span>
                 <a href="https://space.bilibili.com/1534330" target="_blank" class="author-link">作者：西岛海</a>
-                <a href="/juan.png" target="_blank" class="donate-btn" title="点击赞助作者">赞</a>
+                <a href="/juan.png" class="donate-btn previewable" title="点击赞助作者">赞</a>
             </div>
         </aside>
 
     </div>
 
-    <!-- 图片灯箱浮层 (点击任意图片链接/缩略图弹出) -->
-    <div id="imageOverlay">
-        <img id="overlayImage" src="" alt="预览图">
+    <!-- 站内居中预览阅读弹层 (TXT/PDF/图片 专属“半出去”模式，带右上角复制功能) -->
+    <div id="previewModal">
+        <div class="preview-dialog">
+            <div class="preview-header">
+                <div class="preview-title" id="previewTitle">
+                    <i data-lucide="file-text"></i>
+                    <span id="previewTitleText">阅读内容</span>
+                </div>
+                <div class="preview-actions">
+                    <button class="btn-copy" id="previewCopyBtn" title="复制内容到剪贴板">
+                        <i data-lucide="copy"></i>
+                        <span>复制</span>
+                    </button>
+                    <button class="btn-close-preview" id="previewCloseBtn" title="关闭">
+                        <i data-lucide="x"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="preview-body" id="previewBody">
+                <!-- 动态填充内容：图片 / TXT / PDF -->
+            </div>
+        </div>
     </div>
 
     <!-- 逻辑脚本 -->
@@ -961,6 +1131,9 @@
         let phase3Count = 0;
         const FULL_CIRCLE_DEGREE = 360; 
         const INCH_TO_CM_FACTOR = 2.54; 
+
+        // 存储当前预览的纯文本或链接，用于一键复制
+        let currentPreviewCopyData = "";
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -995,10 +1168,10 @@
 
             // 音频组件
             setupAudio();
-            // 画廊与图片灯箱
-            setupGallery();
             // 顶栏分类切换
             setupNavigation();
+            // 绑定所有 TXT / PDF / 图片的居中半出去弹层与复制
+            setupUniversalPreview();
         });
 
         function closeModal() {
@@ -1247,25 +1420,6 @@
             });
         }
 
-        function setupGallery() {
-            const overlay = document.getElementById('imageOverlay');
-            const overlayImg = document.getElementById('overlayImage');
-
-            // 针对缩略图以及带有 .image-preview 类的图片链接进行灯箱拦截预览，不跳转外部页面
-            document.querySelectorAll('.gallery-thumb, a.image-preview, a[href$=".png"], a[href$=".jpg"], a[href$=".jpeg"]').forEach(el => {
-                el.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const src = this.tagName === 'IMG' ? this.src : this.getAttribute('href');
-                    overlayImg.src = src;
-                    overlay.style.display = 'flex';
-                });
-            });
-
-            overlay.addEventListener('click', function() {
-                this.style.display = 'none';
-            });
-        }
-
         function setupNavigation() {
             const tabs = document.querySelectorAll('.collection-tab[data-group]');
             const panels = document.querySelectorAll('.nav-panel[data-group]');
@@ -1278,6 +1432,96 @@
                 });
             });
         }
+
+        // --- 全能“半出去”居中预览窗 (支持 TXT 读取、PDF 嵌入、图片查看与一键复制) ---
+        function setupUniversalPreview() {
+            const modal = document.getElementById('previewModal');
+            const body = document.getElementById('previewBody');
+            const titleText = document.getElementById('previewTitleText');
+            const copyBtn = document.getElementById('previewCopyBtn');
+            const closeBtn = document.getElementById('previewCloseBtn');
+
+            function openModal() {
+                modal.style.display = 'grid';
+                copyBtn.classList.remove('copied');
+                copyBtn.querySelector('span').textContent = '复制';
+                lucide.createIcons();
+            }
+
+            function closeModal() {
+                modal.style.display = 'none';
+                body.innerHTML = '';
+                currentPreviewCopyData = '';
+            }
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            // 点击复制按钮事件
+            copyBtn.addEventListener('click', () => {
+                if (!currentPreviewCopyData) return;
+                navigator.clipboard.writeText(currentPreviewCopyData).then(() => {
+                    copyBtn.classList.add('copied');
+                    copyBtn.querySelector('span').textContent = '已复制 ✓';
+                    setTimeout(() => {
+                        copyBtn.classList.remove('copied');
+                        copyBtn.querySelector('span').textContent = '复制';
+                    }, 2000);
+                }).catch(() => {
+                    alert('复制失败，请手动选择文本');
+                });
+            });
+
+            // 监听所有带 .previewable 或者属于 txt/pdf/图片的链接与缩略图
+            document.querySelectorAll('a.previewable, img.previewable, a[href$=".txt"], a[href$=".pdf"], a[href$=".png"], a[href$=".jpg"], a[href$=".jpeg"]').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const src = this.tagName === 'IMG' ? this.src : this.getAttribute('href');
+                    const textLabel = this.textContent.trim() || '文件预览';
+                    titleText.textContent = textLabel;
+
+                    body.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem;">正在加载内容...</div>';
+                    openModal();
+
+                    if (src.endsWith('.txt')) {
+                        // 异步获取 TXT 并居中排版展示
+                        fetch(src)
+                            .then(res => {
+                                if (!res.ok) throw new Error('网络错误');
+                                return res.text();
+                            })
+                            .then(txt => {
+                                currentPreviewCopyData = txt;
+                                body.innerHTML = `<pre class="txt-container">${escapeHtml(txt)}</pre>`;
+                            })
+                            .catch(() => {
+                                currentPreviewCopyData = src;
+                                body.innerHTML = `<div style="color:var(--danger); text-align:center;">无法直接加载文本，点击复制链接：<br>${src}</div>`;
+                            });
+                    } else if (src.endsWith('.pdf')) {
+                        // PDF 嵌入预览
+                        currentPreviewCopyData = window.location.origin + src;
+                        body.innerHTML = `<iframe src="${src}" class="pdf-container"></iframe>`;
+                    } else {
+                        // 图片居中预览
+                        currentPreviewCopyData = window.location.origin + src;
+                        body.innerHTML = `<img src="${src}" class="img-container" alt="${textLabel}">`;
+                    }
+                });
+            });
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
     </script>
 </body>
 </html>
+--- END OF FILE index.html ---
