@@ -6,34 +6,34 @@
     <title>西岛海 · 三阶校准法</title>
     <link rel="icon" href="https://xidaohai.github.io/miaozhun.ico" type="image/x-icon">
     
-    <!-- 引入标准轻量 CDN 图标库与动画引擎，剔除数万字符硬编码 -->
+    <!-- 引入标准轻量 CDN 图标库与动画引擎，彻底消除冗余乱码 -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
     <style>
         :root {
-            --bg-body: #131422;
-            --bg-card: #1d1e30;
-            --bg-card-hover: #26273d;
-            --bg-sub: rgba(10, 11, 20, 0.45);
-            --border: #2f324d;
-            --border-focus: #4a90e2;
+            --bg-body: #141524;
+            --bg-card: #1e2034;
+            --bg-card-hover: #272a45;
+            --bg-sub: rgba(12, 13, 24, 0.6);
+            --border: #313552;
+            --border-light: rgba(255, 255, 255, 0.08);
             
             --primary: #4a90e2;
-            --primary-glow: rgba(74, 144, 226, 0.28);
+            --primary-glow: rgba(74, 144, 226, 0.3);
             --accent: #00d2d3;
             --warning: #f1c40f;
             --success: #10b981;
             --danger: #f87171;
             
             --text-main: #f1f2fc;
-            --text-sub: #b0b5d0;
-            --text-muted: #757b9e;
+            --text-sub: #b2b7d4;
+            --text-muted: #787fa4;
             
             --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
             --shadow-float: 0 10px 35px rgba(0, 0, 0, 0.5);
             --radius: 10px;
-            --header-h: 112px;
+            --header-h: 115px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -46,22 +46,31 @@
             -webkit-font-smoothing: antialiased;
             padding-top: var(--header-h);
             min-height: 100vh;
+            position: relative;
         }
 
-        body.tool-view-open { overflow: hidden; }
+        /* --- 完美保留原始科技感背景纹理 (PC 端全屏固定平铺，手机端自动省略) --- */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.04"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="45" fill="none" stroke="white" stroke-width="0.5"/><circle cx="20" cy="20" r="5" fill="white"/><circle cx="80" cy="80" r="5" fill="white"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+            z-index: 0;
+        }
 
-        /* 滚动条美化 */
+        /* 滚动条 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.15); }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-        /* --- 顶部全局导航栏 (PC 端大气舒展，手机端平铺换行) --- */
+        /* --- 顶部全局导航栏 --- */
         .site-header {
             position: fixed;
             top: 0; left: 0; width: 100%;
             z-index: 1000;
-            background: rgba(19, 20, 34, 0.96);
+            background: rgba(20, 21, 36, 0.96);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border);
@@ -151,7 +160,7 @@
         /* 二级子菜单面板 */
         .nav-secondary-row {
             background: rgba(0, 0, 0, 0.25);
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            border-top: 1px solid var(--border-light);
             padding: 6px 24px;
         }
 
@@ -164,7 +173,7 @@
             display: none;
             gap: 6px;
             align-items: center;
-            flex-wrap: wrap; /* 手机端自然平铺换行 */
+            flex-wrap: wrap;
         }
         .nav-panel.active { display: flex; }
 
@@ -193,7 +202,7 @@
         .nav-item svg { width: 13px; height: 13px; }
         .nav-group-divider { color: var(--text-muted); font-size: 0.75rem; user-select: none; }
 
-        /* --- 页面主布局结构 (PC 端阔绰三栏，中间主舞台) --- */
+        /* --- 页面主布局结构 (PC 端阔绰三栏，层次舒展) --- */
         .layout-container {
             max-width: 1520px;
             margin: 0 auto;
@@ -202,6 +211,8 @@
             grid-template-columns: 290px minmax(0, 1fr) 320px;
             gap: 24px;
             align-items: start;
+            position: relative;
+            z-index: 1;
         }
 
         .pro-card {
@@ -279,7 +290,7 @@
             padding: 9px 12px;
             border-radius: 6px;
             width: 100%;
-            font-size: 16px; /* 防止移动端弹起键盘时缩放页面 */
+            font-size: 16px;
             outline: none;
             font-family: inherit;
             transition: border 0.2s, box-shadow 0.2s;
@@ -324,7 +335,7 @@
         }
         .btn-action:hover { background: var(--primary); border-color: var(--primary); transform: translateY(-1px); }
 
-        /* --- 核心比对区网格 (PC 端宽敞三列展开) --- */
+        /* --- 核心比对区网格 (PC 展开三列，间距大气) --- */
         .value-grid {
             display: grid;
             grid-template-columns: 1fr 1.18fr 1fr;
@@ -485,42 +496,16 @@
             box-shadow: 0 2px 8px rgba(248, 113, 113, 0.4);
         }
 
-        /* 外部嵌套工具 Workspace Iframe */
-        .secondary-workspace {
-            position: fixed;
-            inset: var(--header-h) 0 0 0;
-            background: var(--bg-body);
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-        }
-        .secondary-workspace[hidden] { display: none; }
-        .workspace-toolbar {
-            padding: 10px 20px;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .workspace-back {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 12px; border-radius: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            color: #fff; text-decoration: none; font-size: 0.82rem;
-        }
-        .tool-frame { flex: 1; width: 100%; border: none; background: #fff; }
-
-        /* 图片放大模态窗 */
+        /* 图片灯箱放大浮层 */
         #imageOverlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.92);
             z-index: 4000; display: none; place-items: center; padding: 20px;
+            cursor: zoom-out;
         }
         #imageOverlay img { max-width: 95%; max-height: 90%; border-radius: 8px; border: 2px solid var(--primary); box-shadow: var(--shadow-float); }
 
         /* ==============================================================
-           【移动端 / 手机端专属响应式（全平铺自适应，无需左右滑）】
+           【移动端 / 手机端专属响应式（背景省略，分类全平铺）】
            ============================================================== */
         @media (max-width: 1024px) {
             .layout-container {
@@ -536,6 +521,9 @@
         @media (max-width: 900px) {
             :root { --header-h: auto; }
             body { padding-top: 0; }
+
+            /* 手机端按需省略背景图案 */
+            body::before { display: none !important; }
 
             .site-header { position: relative; }
 
@@ -591,8 +579,6 @@
 
             .formula-bar { flex-direction: column; align-items: flex-start; }
             .formula-content { text-align: left; margin-top: 4px; }
-
-            .secondary-workspace { inset: 0; }
         }
     </style>
 </head>
@@ -643,28 +629,28 @@
                 <!-- 入门路线 -->
                 <div class="nav-panel" data-group="onboarding">
                     <a href="https://www.bilibili.com/video/BV1Qr2xBVEy2" target="_blank" rel="noopener" class="nav-item tutorial-highlight"><i data-lucide="film"></i>教程</a>
-                    <a href="/zg.png" class="nav-item"><i data-lucide="book-open"></i>总纲</a>
-                    <a href="/dg.pdf" class="nav-item"><i data-lucide="book-open"></i>三阶大纲</a>
+                    <a href="/zg.png" class="nav-item image-preview"><i data-lucide="book-open"></i>总纲</a>
+                    <a href="/dg.pdf" target="_blank" class="nav-item"><i data-lucide="book-open"></i>三阶大纲</a>
                     <a href="#mini-gallery" class="nav-item"><i data-lucide="split"></i>算法之间如何选择</a>
                 </div>
 
-                <!-- 公式库 -->
+                <!-- 公式库 (图片均在灯箱优雅打开) -->
                 <div class="nav-panel" data-group="formula">
-                    <a href="/gs1.png" class="nav-item">各类</a>
-                    <a href="/gs2.png" class="nav-item">表达法旧公式 1</a>
-                    <a href="/bdfgs1.png" class="nav-item">表达法旧公式 2</a>
-                    <a href="/bdfgs2.png" class="nav-item">表达法旧公式 3</a>
-                    <a href="/bdfgs3.jpg" class="nav-item">表达法新公式</a>
-                    <a href="/bdfgs4.png" class="nav-item">表达法新公式 极简化</a>
-                    <a href="/gs33.png" class="nav-item">瞄准框架 第一章</a>
-                    <a href="/gs22.png" class="nav-item">瞄准框架 第二章</a>
-                    <a href="/gs11.png" class="nav-item">对枪经验</a>
+                    <a href="/gs1.png" class="nav-item image-preview">各类</a>
+                    <a href="/gs2.png" class="nav-item image-preview">表达法旧公式 1</a>
+                    <a href="/bdfgs1.png" class="nav-item image-preview">表达法旧公式 2</a>
+                    <a href="/bdfgs2.png" class="nav-item image-preview">表达法旧公式 3</a>
+                    <a href="/bdfgs3.jpg" class="nav-item image-preview">表达法新公式</a>
+                    <a href="/bdfgs4.png" class="nav-item image-preview">表达法新公式 极简化</a>
+                    <a href="/gs33.png" class="nav-item image-preview">瞄准框架 第一章</a>
+                    <a href="/gs22.png" class="nav-item image-preview">瞄准框架 第二章</a>
+                    <a href="/gs11.png" class="nav-item image-preview">对枪经验</a>
                 </div>
 
                 <!-- fov/mdh/开镜 -->
                 <div class="nav-panel" data-group="mdh">
                     <a href="/mdh.html" class="nav-item">基础介绍</a>
-                    <a href="/ts.png" class="nav-item">基础介绍 图示</a>
+                    <a href="/ts.png" class="nav-item image-preview">基础介绍 图示</a>
                     <a href="/tl.html" class="nav-item">讨论</a>
                     <a href="/mdhvs2.mhtml" class="nav-item">viewspeedv2</a>
                     <a href="/mdhcs.mhtml" class="nav-item">关于CS当中的MDH</a>
@@ -685,8 +671,8 @@
                     <a href="/bdfs.html" class="nav-item"><i data-lucide="scroll-text"></i>表达法 手部校准工具</a>
                     <a href="/yxf.html" class="nav-item featured"><i data-lucide="ruler"></i>优选法</a>
                     <a href="/zgf.html" class="nav-item"><i data-lucide="plus"></i>正改法</a>
-                    <a href="/huan.txt" class="nav-item"><i data-lucide="rotate-ccw"></i>还原手感</a>
-                    <a href="/cf.txt" class="nav-item">CF 灵敏</a>
+                    <a href="/huan.txt" target="_blank" class="nav-item"><i data-lucide="rotate-ccw"></i>还原手感</a>
+                    <a href="/cf.txt" target="_blank" class="nav-item">CF 灵敏</a>
                     <a href="#widget-quick-x" class="nav-item"><i data-lucide="table-2"></i>极敏四分法</a>
                 </div>
 
@@ -701,9 +687,9 @@
 
                 <!-- 作者内容 -->
                 <div class="nav-panel" data-group="author">
-                    <a href="/js.txt" class="nav-item"><i data-lucide="user-round"></i>作者介绍</a>
-                    <a href="/jsmv.mp4" class="nav-item"><i data-lucide="video"></i>作者 MV</a>
-                    <a href="/xzdz.txt" class="nav-item"><i data-lucide="scroll-text"></i>瞄准手稿</a>
+                    <a href="/js.txt" target="_blank" class="nav-item"><i data-lucide="user-round"></i>作者介绍</a>
+                    <a href="/jsmv.mp4" target="_blank" class="nav-item"><i data-lucide="video"></i>作者 MV</a>
+                    <a href="/xzdz.txt" target="_blank" class="nav-item"><i data-lucide="scroll-text"></i>瞄准手稿</a>
                     <a href="/yy.html" class="nav-item"><i data-lucide="music-2"></i>音乐</a>
                     <a href="/sanmen.html" class="nav-item"><i data-lucide="brain"></i>三门思维训练</a>
                 </div>
@@ -717,27 +703,17 @@
                     <a href="/aj.html" class="nav-item">艾灸</a>
                     <a href="/buxie.html" class="nav-item">补泄</a>
                     <span class="nav-group-divider">/</span>
-                    <a href="/wcsd.png" class="nav-item">危刺深度1</a>
-                    <a href="/wcsd2.jpg" class="nav-item">危刺深度2</a>
-                    <a href="/wcsd3.jpg" class="nav-item">危刺深度3</a>
-                    <a href="/wcsd4.jpg" class="nav-item">危刺深度4</a>
+                    <a href="/wcsd.png" class="nav-item image-preview">危刺深度1</a>
+                    <a href="/wcsd2.jpg" class="nav-item image-preview">危刺深度2</a>
+                    <a href="/wcsd3.jpg" class="nav-item image-preview">危刺深度3</a>
+                    <a href="/wcsd4.jpg" class="nav-item image-preview">危刺深度4</a>
                     <a href="/jcwz.html" class="nav-item">禁刺位置</a>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- 工作台 Iframe 子视图 -->
-    <div class="secondary-workspace" id="secondaryWorkspace" hidden>
-        <div class="workspace-toolbar">
-            <button class="workspace-back" id="workspaceBackBtn"><i data-lucide="arrow-left"></i><span>返回控制台</span></button>
-            <div id="workspaceTitle" style="font-size: 0.85rem; font-weight: 700;">工具加载中...</div>
-            <a href="#" target="_blank" id="openExternalBtn" class="workspace-back" title="新标签打开"><i data-lucide="external-link"></i></a>
-        </div>
-        <iframe class="tool-frame" id="toolFrame" src="about:blank"></iframe>
-    </div>
-
-    <!-- 主体容器 (PC 端阔绰三栏，手机端整齐顺畅排列) -->
+    <!-- 主体容器 (PC 阔绰三栏，手机端整齐顺畅排列) -->
     <div class="layout-container">
         
         <!-- 左侧辅助栏 -->
@@ -959,7 +935,7 @@
 
     </div>
 
-    <!-- 灯箱全屏查看 -->
+    <!-- 图片灯箱浮层 (点击任意图片链接/缩略图弹出) -->
     <div id="imageOverlay">
         <img id="overlayImage" src="" alt="预览图">
     </div>
@@ -1019,9 +995,9 @@
 
             // 音频组件
             setupAudio();
-            // 画廊
+            // 画廊与图片灯箱
             setupGallery();
-            // 顶栏分类与外部页面内嵌逻辑
+            // 顶栏分类切换
             setupNavigation();
         });
 
@@ -1272,15 +1248,19 @@
         }
 
         function setupGallery() {
-            const thumbs = document.querySelectorAll('.gallery-thumb');
             const overlay = document.getElementById('imageOverlay');
             const overlayImg = document.getElementById('overlayImage');
-            thumbs.forEach(img => {
-                img.addEventListener('click', function() {
-                    overlayImg.src = this.src;
-                    overlay.style.display = 'grid';
+
+            // 针对缩略图以及带有 .image-preview 类的图片链接进行灯箱拦截预览，不跳转外部页面
+            document.querySelectorAll('.gallery-thumb, a.image-preview, a[href$=".png"], a[href$=".jpg"], a[href$=".jpeg"]').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const src = this.tagName === 'IMG' ? this.src : this.getAttribute('href');
+                    overlayImg.src = src;
+                    overlay.style.display = 'flex';
                 });
             });
+
             overlay.addEventListener('click', function() {
                 this.style.display = 'none';
             });
@@ -1289,10 +1269,6 @@
         function setupNavigation() {
             const tabs = document.querySelectorAll('.collection-tab[data-group]');
             const panels = document.querySelectorAll('.nav-panel[data-group]');
-            const workspace = document.getElementById('secondaryWorkspace');
-            const toolFrame = document.getElementById('toolFrame');
-            const workspaceTitle = document.getElementById('workspaceTitle');
-            const openExternalBtn = document.getElementById('openExternalBtn');
 
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1300,26 +1276,6 @@
                     tabs.forEach(t => t.classList.toggle('active', t === tab));
                     panels.forEach(p => p.classList.toggle('active', p.dataset.group === group));
                 });
-            });
-
-            // 拦截外部 HTML/MHTML 工具在应用内工作台中无缝打开
-            document.querySelectorAll('.nav-panel a[href$=".html"], .nav-panel a[href$=".mhtml"]').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    const href = link.getAttribute('href');
-                    if (href.startsWith('http') && !href.includes('xidaohai.github.io')) return;
-                    e.preventDefault();
-                    workspace.hidden = false;
-                    toolFrame.src = href;
-                    workspaceTitle.textContent = link.textContent.trim();
-                    openExternalBtn.href = href;
-                    document.body.classList.add('tool-view-open');
-                });
-            });
-
-            document.getElementById('workspaceBackBtn').addEventListener('click', () => {
-                workspace.hidden = true;
-                toolFrame.src = 'about:blank';
-                document.body.classList.remove('tool-view-open');
             });
         }
     </script>
