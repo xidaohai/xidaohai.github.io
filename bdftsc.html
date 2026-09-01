@@ -179,7 +179,7 @@
             align-items: center;
         }
         .track-module .expr-main {
-            font-size: 0.85rem;   /* 增大预览公式字体 */
+            font-size: 0.85rem;
             font-weight: 800;
             color: var(--purple-dark);
             font-family: "SF Mono", monospace;
@@ -337,7 +337,7 @@
             align-items: center;
             justify-content: center;
             font-family: "Cambria Math", "Latin Modern Math", serif;
-            font-size: 1.05rem;   /* 增大主公式字体 */
+            font-size: 1.05rem;
             color: #0f172a;
             font-weight: bold;
             flex-wrap: wrap;
@@ -841,7 +841,8 @@
                 </div>
                 <div class="input-group">
                     <label>z (目标移动范围°):</label>
-                    <input type="number" id="input-z" value="90" min="0" max="180" step="1" oninput="syncFromTop()">
+                    <!-- 移除 max 限制，仅保留 min=0.1 -->
+                    <input type="number" id="input-z" value="90" min="0.1" step="1" oninput="syncFromTop()">
                 </div>
                 <div class="input-group">
                     <label>大众同身寸（不用管）</label>
@@ -944,6 +945,7 @@
                                 <span>x (目标)</span>
                                 <input type="number" class="ctrl-input-num" id="side-input-x" value="2000" step="10" oninput="syncFromSide('x')">
                             </div>
+                            <!-- x 范围保持 0~7000 -->
                             <input type="range" class="ctrl-range" id="side-range-x" min="0" max="7000" step="10" value="2000" oninput="syncFromRange('x')">
                         </div>
 
@@ -952,15 +954,17 @@
                                 <span>y (固定拉枪)</span>
                                 <input type="number" class="ctrl-input-num" id="side-input-y" value="700" step="10" oninput="syncFromSide('y')">
                             </div>
+                            <!-- y 范围保持 0~2000 -->
                             <input type="range" class="ctrl-range" id="side-range-y" min="0" max="2000" step="10" value="700" oninput="syncFromRange('y')">
                         </div>
 
                         <div class="ctrl-row">
                             <div class="ctrl-head">
-                                <span>z (视角角度°)</span>
-                                <input type="number" class="ctrl-input-num" id="side-input-z" value="90" min="0" max="180" step="1" oninput="syncFromSide('z')">
+                                <span>z (目标移动范围°)</span>
+                                <input type="number" class="ctrl-input-num" id="side-input-z" value="90" min="0.1" step="1" oninput="syncFromSide('z')">
                             </div>
-                            <input type="range" class="ctrl-range" id="side-range-z" min="0" max="180" step="1" value="90" oninput="syncFromRange('z')">
+                            <!-- 移除 max 限制，改为 1000 以便滑动，用户可手动输入更大值 -->
+                            <input type="range" class="ctrl-range" id="side-range-z" min="0.1" max="1000" step="1" value="90" oninput="syncFromRange('z')">
                         </div>
 
                         <div class="ctrl-row" style="border-top:1px dashed rgba(0,0,0,0.06);padding-top:6px;">
@@ -1029,7 +1033,7 @@
         function calcTracking(x, y, z, sub) {
             const x_safe = Math.max(0.001, x);
             const y_safe = Math.max(0.001, y);
-            const z_safe = Math.max(0.1, z);
+            const z_safe = Math.max(0.1, z);   // 防止除零，下限 0.1
             let result;
             if (sub === 'simple') {
                 result = 44 * Math.pow(x_safe, 0.125) * Math.pow(z_safe, -0.125);
@@ -1044,7 +1048,6 @@
             document.getElementById('btn-mode-std').classList.toggle('active', mode === 'standard');
             document.getElementById('btn-mode-t3d').classList.toggle('active', mode === 'tracking_3d');
 
-            // 始终显示跟枪按钮
             const trackBtns = document.getElementById('track-btn-grid');
             const topPreview = document.getElementById('top-track-preview');
             const hint = document.getElementById('track-mode-hint');
@@ -1057,10 +1060,8 @@
                 hint.textContent = '• 跟枪模式已激活，选择下方公式';
                 statusTag.textContent = '激活';
                 statusTag.className = 'mode-status-tag active';
-                // 子模式按钮高亮
                 document.getElementById('btn-track-simple').classList.toggle('active', trackSubMode === 'simple');
                 document.getElementById('btn-track-full').classList.toggle('active', trackSubMode === 'full');
-                // 移除禁用样式
                 document.getElementById('btn-track-simple').classList.remove('disabled-btn');
                 document.getElementById('btn-track-full').classList.remove('disabled-btn');
             } else {
@@ -1112,23 +1113,19 @@
         }
 
         function setTrackSub(sub) {
-            // 如果当前不是跟枪模式，自动切换到跟枪模式
             if (currentMode !== 'tracking_3d') {
                 setMode('tracking_3d');
             }
-            // 设置子模式
             trackSubMode = sub;
             document.getElementById('btn-track-simple').classList.toggle('active', sub === 'simple');
             document.getElementById('btn-track-full').classList.toggle('active', sub === 'full');
             document.getElementById('track-sub-label').textContent = sub === 'simple' ? '极简' : '完整';
             updateTrackPreview();
-            // 更新提示（确保显示激活状态）
             const hint = document.getElementById('track-mode-hint');
             hint.textContent = '• 跟枪模式已激活，选择下方公式';
             const statusTag = document.getElementById('track-status-tag');
             statusTag.textContent = '激活';
             statusTag.className = 'mode-status-tag active';
-            // 更新显示与计算
             updateDisplays();
             calculate();
         }
@@ -1154,35 +1151,37 @@
             }
         }
 
+        // ---- 同步函数：移除所有对 z 的上限限制 ----
         function syncFromTop() {
             let x = parseFloat(document.getElementById('input-x').value) || 0;
             let y = parseFloat(document.getElementById('input-y').value) || 0;
-            let z = parseFloat(document.getElementById('input-z').value) || 0;
-            x = Math.min(7000, Math.max(0, x));
-            y = Math.min(2000, Math.max(0, y));
-            z = Math.min(180, Math.max(0, z));
+            let z = parseFloat(document.getElementById('input-z').value) || 0.1;
+            x = Math.max(0, x);        // 只保留下限，无上限
+            y = Math.max(0, y);
+            z = Math.max(0.1, z);      // 仅保留下限
+            // 同时限制过大值避免滑块溢出？我们允许任意大，但滑块最大值1000，手动输入不受限。
             document.getElementById('side-input-x').value = x;
-            document.getElementById('side-range-x').value = x;
+            document.getElementById('side-range-x').value = Math.min(x, 7000); // 滑块上限7000
             document.getElementById('side-input-y').value = y;
-            document.getElementById('side-range-y').value = y;
+            document.getElementById('side-range-y').value = Math.min(y, 2000);
             document.getElementById('side-input-z').value = z;
-            document.getElementById('side-range-z').value = z;
+            document.getElementById('side-range-z').value = Math.min(z, 1000); // 滑块上限1000
             calculate();
         }
 
         function syncFromSide(type) {
             if (type === 'x') {
                 let v = parseFloat(document.getElementById('side-input-x').value) || 0;
-                document.getElementById('input-x').value = Math.min(7000, Math.max(0, v));
-                document.getElementById('side-range-x').value = v;
+                document.getElementById('input-x').value = Math.max(0, v);
+                document.getElementById('side-range-x').value = Math.min(v, 7000);
             } else if (type === 'y') {
                 let v = parseFloat(document.getElementById('side-input-y').value) || 0;
-                document.getElementById('input-y').value = Math.min(2000, Math.max(0, v));
-                document.getElementById('side-range-y').value = v;
+                document.getElementById('input-y').value = Math.max(0, v);
+                document.getElementById('side-range-y').value = Math.min(v, 2000);
             } else if (type === 'z') {
-                let v = parseFloat(document.getElementById('side-input-z').value) || 0;
-                document.getElementById('input-z').value = Math.min(180, Math.max(0, v));
-                document.getElementById('side-range-z').value = v;
+                let v = parseFloat(document.getElementById('side-input-z').value) || 0.1;
+                document.getElementById('input-z').value = Math.max(0.1, v);
+                document.getElementById('side-range-z').value = Math.min(v, 1000);
             }
             calculate();
         }
@@ -1197,7 +1196,7 @@
                 document.getElementById('input-y').value = v;
                 document.getElementById('side-input-y').value = v;
             } else if (type === 'z') {
-                const v = parseFloat(document.getElementById('side-range-z').value) || 0;
+                const v = parseFloat(document.getElementById('side-range-z').value) || 0.1;
                 document.getElementById('input-z').value = v;
                 document.getElementById('side-input-z').value = v;
             }
@@ -1253,7 +1252,7 @@
         function calculate() {
             const x = parseFloat(document.getElementById('input-x').value) || 0;
             const y = parseFloat(document.getElementById('input-y').value) || 0;
-            const z = parseFloat(document.getElementById('input-z').value) || 0;
+            const z = parseFloat(document.getElementById('input-z').value) || 0.1;
             syncUI();
 
             const ratio = x > 0 ? (y / x) : 0;
@@ -1527,15 +1526,12 @@
             document.getElementById('btn-track-simple').classList.add('active');
             document.getElementById('track-sub-label').textContent = '极简';
 
-            // 确保跟枪按钮始终显示
             document.getElementById('track-btn-grid').style.display = 'grid';
 
-            // 默认状态：普通模式
             currentMode = 'standard';
             document.getElementById('btn-mode-std').classList.add('active');
             document.getElementById('btn-mode-t3d').classList.remove('active');
 
-            // 右上角展示跟枪公式（普通模式下仅展示）
             updateTrackPreview();
             document.getElementById('track-mode-hint').textContent = '• 普通模式下跟枪公式仅作展示';
             document.getElementById('track-status-tag').textContent = '展示';
@@ -1546,7 +1542,6 @@
             document.getElementById('anchorDisplay').textContent = '均衡';
             document.getElementById('anchorName').textContent = '均衡';
 
-            // 初始化主区域显示
             updateDisplays();
             syncFromTop();
             calculate();
