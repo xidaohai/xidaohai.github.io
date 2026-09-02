@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPI 误差纠正计算器</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-main: #c9d1d9;
+            --text-sub: #8b949e;
+            --border-color: #30363d;
+            --accent-color: #58a6ff;
+            --input-bg: #0d1117;
+            --formula-bg: #11161d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 28px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            text-align: center;
+            margin-bottom: 24px;
+            color: #f0f6fc;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 14px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: #f0f6fc;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+        }
+
+        .result-card {
+            margin-top: 24px;
+            padding: 18px;
+            background-color: rgba(22, 27, 34, 0.5);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .result-label {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, monospace;
+        }
+
+        /* 公式卡片样式 */
+        .formula-card {
+            margin-top: 20px;
+            padding: 16px;
+            background-color: var(--formula-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .formula-title {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+        }
+
+        .formula-math {
+            font-size: 0.95rem;
+            color: #f0f6fc;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 0.9em;
+            padding: 0 4px;
+        }
+
+        .numerator {
+            border-bottom: 1px solid var(--text-sub);
+            padding-bottom: 2px;
+            color: #79c0ff;
+        }
+
+        .denominator {
+            padding-top: 2px;
+            color: #ffa657;
+        }
+
+        .text-target {
+            color: #d2a8ff;
+            font-weight: 500;
+        }
+
+        .footer {
+            margin-top: 22px;
+            text-align: right;
+            font-size: 0.8rem;
+        }
+
+        .footer a {
+            color: var(--text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>DPI 误差纠正计算器</h2>
+
+    <div class="input-group">
+        <label for="actualDpi">鼠标实际真实 DPI</label>
+        <input type="number" id="actualDpi" value="2400" placeholder="例如: 2400">
+    </div>
+
+    <div class="input-group">
+        <label for="inputDpi">软件/练枪软件中填错的 DPI</label>
+        <input type="number" id="inputDpi" value="2434" placeholder="例如: 2434">
+    </div>
+
+    <div class="input-group">
+        <label for="targetCm">填错设置下得出的 cm/360°</label>
+        <input type="number" id="targetCm" value="30" placeholder="例如: 30">
+    </div>
+
+    <div class="result-card">
+        <div class="result-label">实际物理转身距离</div>
+        <div class="result-value" id="realCm">30.425 cm/360°</div>
+    </div>
+
+    <div class="formula-card">
+        <div class="formula-title">计算公式 (Calculation Formula)</div>
+        <div class="formula-math">
+            <span class="text-target">实际cm/360°灵敏度</span> = <span class="text-target">填错DPI下的cm/360°灵敏度</span> × 
+            <div class="fraction">
+                <span class="numerator">填错的 DPI</span>
+                <span class="denominator">实际的 DPI</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <a id="authorLink" href="https://space.bilibili.com/1534330" target="_blank">作者：西岛海</a>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const actualDpi = parseFloat(document.getElementById('actualDpi').value);
+        const inputDpi = parseFloat(document.getElementById('inputDpi').value);
+        const targetCm = parseFloat(document.getElementById('targetCm').value);
+
+        const realCmEl = document.getElementById('realCm');
+
+        if (actualDpi > 0 && inputDpi > 0 && targetCm > 0) {
+            const realCm = targetCm * (inputDpi / actualDpi);
+            realCmEl.innerText = realCm.toFixed(3) + " cm/360°";
+        } else {
+            realCmEl.innerText = "-- cm/360°";
+        }
+    }
+
+    document.getElementById('actualDpi').addEventListener('input', calculate);
+    document.getElementById('inputDpi').addEventListener('input', calculate);
+    document.getElementById('targetCm').addEventListener('input', calculate);
+
+    calculate();
+</script>
+
+</body>
+</html>
