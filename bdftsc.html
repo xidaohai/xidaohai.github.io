@@ -105,15 +105,10 @@
 
         .top-row {
             display: grid;
-            grid-template-columns: 1fr 1.35fr;
+            grid-template-columns: 1fr;
             gap: 10px;
             margin-bottom: 12px;
             align-items: stretch;
-        }
-        @media (max-width:740px) {
-            .top-row {
-                grid-template-columns: 1fr;
-            }
         }
 
         .input-panel {
@@ -157,75 +152,6 @@
             color: #64748b;
             cursor: not-allowed;
             border-color: #d1d5db;
-        }
-
-        .track-module {
-            background: rgba(76, 29, 149, 0.04);
-            border: 1.5px solid var(--purple);
-            border-radius: 8px;
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: 4px;
-            height: 100%;
-        }
-        .track-module .title {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--purple-dark);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .track-module .expr-main {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--purple-dark);
-            font-family: "SF Mono", monospace;
-            min-height: 1.8em;
-        }
-        .track-module .expr-subs {
-            font-size: 0.65rem;
-            color: #475569;
-            line-height: 1.4;
-            font-family: "SF Mono", monospace;
-        }
-        .track-module .btn-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-top: 4px;
-        }
-        .track-module .calc-btn {
-            background: var(--purple-dark);
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 8px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: 0.15s;
-            text-align: center;
-        }
-        .track-module .calc-btn:hover {
-            background: #3b0764;
-        }
-        .track-module .calc-btn.sub {
-            background: #8b5cf6;
-        }
-        .track-module .calc-btn.sub:hover {
-            background: #7c3aed;
-        }
-        .track-module .calc-btn.active {
-            background: #1e40af;
-            box-shadow: 0 0 0 2px #93c5fd;
-        }
-        .track-module .calc-btn.disabled-btn {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
         }
 
         .correction {
@@ -344,49 +270,26 @@
             gap: 4px;
             row-gap: 8px;
         }
-        .bracket {
-            font-size: 1.25em;
-            font-weight: 400;
-            color: #334155;
-        }
-        .hl-k {
-            color: var(--gold);
-            font-weight: 900;
-        }
-        .hl-c {
-            color: var(--purple-dark);
-            font-weight: 900;
-        }
-        .weight-exp {
-            color: #dc2626;
-            background: #fef2f2;
-            border: 1px solid #fecdd3;
-            padding: 1px 4px;
-            border-radius: 4px;
-            font-size: 0.72em;
-            font-weight: 900;
-            vertical-align: super;
-            margin-left: 1px;
-            font-family: "SF Mono", monospace;
-        }
 
         .toggle-group {
             display: flex;
-            gap: 2px;
+            gap: 4px;
             background: rgba(0, 0, 0, 0.06);
-            border-radius: 4px;
-            padding: 2px;
+            border-radius: 6px;
+            padding: 4px;
         }
         .toggle-btn {
             border: none;
             background: transparent;
-            padding: 3px 8px;
-            font-size: 0.65rem;
+            padding: 8px 18px;
+            font-size: 0.9rem;
             font-weight: 700;
-            border-radius: 3px;
+            border-radius: 4px;
             cursor: pointer;
-            color: #64748b;
+            color: #475569;
             transition: 0.15s;
+            line-height: 1.2;
+            white-space: nowrap;
         }
         .toggle-btn.active {
             background: var(--gold);
@@ -631,9 +534,6 @@
         .step-stage.cun {
             background: var(--blue);
         }
-        .step-stage.cm {
-            background: var(--gold);
-        }
         .step-stage.cun.track {
             background: var(--purple);
         }
@@ -736,8 +636,7 @@
             border-radius: 3px;
             margin-left: 4px;
         }
-        sup,
-        sub {
+        sup, sub {
             font-size: 0.72em;
         }
         .ttk-tag {
@@ -758,13 +657,15 @@
             color: #6d28d9;
         }
 
+        /* 修复 tooltip-container 撑满宽度，防止 grid 对齐塌陷 */
         .tooltip-container {
             position: relative;
-            display: inline-block;
+            display: block;
+            width: 100%;
         }
         .tooltip-container .tooltip-text {
             visibility: hidden;
-            width: 260px;
+            width: 240px;
             background-color: #ffffff;
             color: #1e293b;
             text-align: left;
@@ -775,8 +676,7 @@
             position: absolute;
             z-index: 100;
             bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 0;
             opacity: 0;
             transition: opacity 0.25s;
             font-weight: 400;
@@ -788,8 +688,7 @@
             content: "";
             position: absolute;
             top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 20px;
             border-width: 6px;
             border-style: solid;
             border-color: #ffffff transparent transparent transparent;
@@ -799,23 +698,11 @@
             opacity: 1;
         }
 
-        .mode-status-tag {
-            display: inline-block;
-            font-size: 0.6rem;
-            font-weight: 700;
-            padding: 1px 8px;
-            border-radius: 10px;
-            background: #e2e8f0;
-            color: #475569;
-            margin-left: 4px;
+        #std-sub-toggle, #track-sub-toggle {
+            display: flex;
         }
-        .mode-status-tag.active {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        .mode-status-tag.preview {
-            background: #f1f5f9;
-            color: #64748b;
+        #track-sub-toggle {
+            display: none;
         }
     </style>
 </head>
@@ -823,52 +710,32 @@
     <div class="card">
 
         <div class="header">
-            <span class="date">2026.9.1</span>
+            <span class="date">2026.9.2</span>
             <span>同身寸 · 收束法</span>
             <span class="badge" style="background:var(--blue-dark);">xlm</span>
-            <a href="https://xidaohai.github.io/tsc.png" class="k-link">【说明】？</a>
+            <a href="https://xidaohai.github.io/tsc.png" target="_blank" rel="noopener noreferrer" class="k-link">【说明】？</a>
         </div>
 
         <div class="top-row">
             <div class="input-panel">
                 <div class="input-group">
-                    <label>x (目标大小测量):</label>
+                    <label for="input-x">x (目标大小测量):</label>
                     <input type="number" id="input-x" value="2000" step="any" oninput="syncFromTop()">
                 </div>
                 <div class="input-group">
-                    <label>y (常用拉枪距离):</label>
+                    <label for="input-y">y (常用拉枪距离):</label>
                     <input type="number" id="input-y" value="700" step="any" oninput="syncFromTop()">
                 </div>
                 <div class="input-group">
-                    <label>z (目标移动范围°):</label>
-                    <!-- 移除 max 限制，仅保留 min=0.1 -->
-                    <input type="number" id="input-z" value="90" min="0.1" step="1" oninput="syncFromTop()">
+                    <label for="input-z">z (目标移动范围°):</label>
+                    <input type="number" id="input-z" value="90" min="1" step="1" oninput="syncFromTop()">
                 </div>
                 <div class="input-group">
-                    <label>大众同身寸（不用管）</label>
+                    <label for="input-tsc">大众同身寸（参考基准）</label>
                     <div class="tooltip-container">
-                        <input type="number" id="input-tsc" value="2" step="0.01" disabled style="background:#f1f5f9;color:#64748b;cursor:not-allowed;">
+                        <input type="number" id="input-tsc" value="2" step="0.01" disabled>
                         <span class="tooltip-text">如何在不同年代确定所谓的最小单位1呢？就是拇指宽度分成一半且取大众均值。此实际长度为"1"。</span>
                     </div>
-                </div>
-            </div>
-
-            <!-- 跟枪模式框架：始终显示两个公式 -->
-            <div class="track-module">
-                <div>
-                    <div class="title">
-                        <span>【跟枪模式】</span>
-                        <span style="font-size:0.65rem;font-weight:400;color:#64748b;" id="track-sub-label">极简</span>
-                        <span class="mode-status-tag" id="track-status-tag">展示</span>
-                    </div>
-                    <div class="expr-main" id="top-track-preview">跟枪公式将在此显示</div>
-                    <div class="expr-subs" style="margin-top:2px;">
-                        <div id="track-mode-hint">• 当前为普通模式，跟枪公式仅作展示</div>
-                    </div>
-                </div>
-                <div class="btn-grid" id="track-btn-grid">
-                    <button class="calc-btn sub active" id="btn-track-simple" onclick="setTrackSub('simple')">极简</button>
-                    <button class="calc-btn sub" id="btn-track-full" onclick="setTrackSub('full')">完整</button>
                 </div>
             </div>
         </div>
@@ -876,15 +743,15 @@
         <div class="correction">
             <div><span class="title">✧ 个人修正系数</span><span class="sub">点击下方数值设锚点 · 步长 0.25%</span></div>
             <div class="row">
-                <button class="step-btn" onclick="adjustCorrection(-0.25)">−</button>
-                <input type="number" id="input-correct" value="0" step="0.25" min="-10" max="10" oninput="onCorrectionInput();">
+                <button type="button" class="step-btn" onclick="adjustCorrection(-0.25)">−</button>
+                <input type="number" id="input-correct" value="0.00" step="0.25" min="-10" max="10" oninput="onCorrectionInputLive()" onchange="onCorrectionChange()">
                 <span class="pct" style="color:var(--purple);font-weight:bold;font-size:0.8rem;">%</span>
-                <button class="step-btn" onclick="adjustCorrection(0.25)">+</button>
+                <button type="button" class="step-btn" onclick="adjustCorrection(0.25)">+</button>
             </div>
             <input class="slider" id="correct-slider" type="range" min="-10" max="10" step="0.25" value="0" oninput="onSliderInput();">
             <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:#94a3b8;padding:0 2px;">
                 <span>−10%</span>
-                <span id="correction-display" style="font-weight:bold;color:var(--purple);">0%</span>
+                <span id="correction-display" style="font-weight:bold;color:var(--purple);">0.00%</span>
                 <span>+10%</span>
             </div>
         </div>
@@ -895,13 +762,23 @@
                     <div class="f-title">
                         <span id="fTitle">普通模式</span>
                         <span class="mode-badge" id="modeBadge">普通模式</span>
-                        <span id="ttkTag" class="ttk-tag short">短TKK</span>
+                        <span id="ttkTag" class="ttk-tag short">短TTK</span>
                     </div>
                 </div>
                 <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
                     <div class="toggle-group">
-                        <button class="toggle-btn active" id="btn-mode-std" onclick="setMode('standard')">普通</button>
-                        <button class="toggle-btn purple" id="btn-mode-t3d" onclick="setMode('tracking_3d')">跟枪</button>
+                        <button type="button" class="toggle-btn active" id="btn-mode-std" onclick="setMode('standard')">普通</button>
+                        <button type="button" class="toggle-btn purple" id="btn-mode-t3d" onclick="setMode('tracking_3d')">跟枪</button>
+                    </div>
+                    <!-- 普通子切换 -->
+                    <div class="toggle-group" id="std-sub-toggle">
+                        <button type="button" class="toggle-btn" id="btn-std-simple" onclick="setStdSub('simple')">极简</button>
+                        <button type="button" class="toggle-btn active" id="btn-std-full" onclick="setStdSub('full')">完整</button>
+                    </div>
+                    <!-- 跟枪子切换 -->
+                    <div class="toggle-group" id="track-sub-toggle">
+                        <button type="button" class="toggle-btn track-sub active" id="btn-track-simple" onclick="setTrackSub('simple')">极简</button>
+                        <button type="button" class="toggle-btn track-sub" id="btn-track-full" onclick="setTrackSub('full')">完整</button>
                     </div>
                     <span style="font-size:0.65rem;font-weight:700;color:#64748b;background:#f1f5f9;padding:3px 8px;border-radius:4px;">cm</span>
                 </div>
@@ -919,7 +796,7 @@
 
             <div style="margin-top:10px;border-top:1.5px dashed rgba(76,29,149,0.25);padding-top:8px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
-                    <span style="font-weight:bold;color:var(--purple);font-size:0.85rem;">✧ 修正后 <span class="correction-badge" id="correction-badge">±0%</span></span>
+                    <span style="font-weight:bold;color:var(--purple);font-size:0.85rem;">✧ 修正后 <span class="correction-badge" id="correction-badge">±0.00%</span></span>
                     <span style="font-size:0.7rem;color:#94a3b8;">锚点: <span class="anchor-label" id="anchorName">均衡</span> <span style="margin-left:6px;font-size:0.6rem;color:#94a3b8;">点击数值切换</span></span>
                 </div>
                 <div class="five-col" id="correctedRow">
@@ -945,7 +822,6 @@
                                 <span>x (目标)</span>
                                 <input type="number" class="ctrl-input-num" id="side-input-x" value="2000" step="10" oninput="syncFromSide('x')">
                             </div>
-                            <!-- x 范围保持 0~7000 -->
                             <input type="range" class="ctrl-range" id="side-range-x" min="0" max="7000" step="10" value="2000" oninput="syncFromRange('x')">
                         </div>
 
@@ -954,17 +830,15 @@
                                 <span>y (固定拉枪)</span>
                                 <input type="number" class="ctrl-input-num" id="side-input-y" value="700" step="10" oninput="syncFromSide('y')">
                             </div>
-                            <!-- y 范围保持 0~2000 -->
                             <input type="range" class="ctrl-range" id="side-range-y" min="0" max="2000" step="10" value="700" oninput="syncFromRange('y')">
                         </div>
 
                         <div class="ctrl-row">
                             <div class="ctrl-head">
                                 <span>z (目标移动范围°)</span>
-                                <input type="number" class="ctrl-input-num" id="side-input-z" value="90" min="0.1" step="1" oninput="syncFromSide('z')">
+                                <input type="number" class="ctrl-input-num" id="side-input-z" value="90" min="1" step="1" oninput="syncFromSide('z')">
                             </div>
-                            <!-- 移除 max 限制，改为 1000 以便滑动，用户可手动输入更大值 -->
-                            <input type="range" class="ctrl-range" id="side-range-z" min="0.1" max="1000" step="1" value="90" oninput="syncFromRange('z')">
+                            <input type="range" class="ctrl-range" id="side-range-z" min="1" max="1000" step="1" value="90" oninput="syncFromRange('z')">
                         </div>
 
                         <div class="ctrl-row" style="border-top:1px dashed rgba(0,0,0,0.06);padding-top:6px;">
@@ -982,7 +856,7 @@
 
                 <div class="chart-legend-grid">
                     <div class="legend-box t3-max">
-                        <span style="color:#7c3aed; font-weight:bold;">[跟枪]</span>
+                        <span style="color:#7c3aed; font-weight:bold;">[跟枪基准]</span>
                         <span class="legend-val" id="lbl-t3-max" style="color:#7c3aed;">-- cm</span>
                     </div>
                     <div class="legend-box s-max">
@@ -1018,100 +892,90 @@
 
         let currentMode = 'standard';
         let trackSubMode = 'simple';
+        let stdSubMode = 'full';
         let currentAnchor = 'q2';
 
         const RATIOS_STD = { half: 2 / 3, q1: 5 / 6, q2: 1, q3: 7 / 6, base: 4 / 3 };
         const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
         const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
 
-        function calcStandard(x) {
+        // ---- 普通模式 ----
+        function calcStandard(x, y) {
             const x_safe = Math.max(0, x);
-            const result = 4 * Math.pow(x_safe, 1 / 3);
-            return { result };
+            const y_safe = Math.max(0.001, y);
+            if (stdSubMode === 'simple') {
+                const coeff = Math.E + Math.SQRT2;
+                return { result: coeff * Math.pow(x_safe, 1 / 3) };
+            } else {
+                return { result: 1.08 * Math.pow(x_safe, 1 / 3) * Math.pow(y_safe, 0.25) };
+            }
         }
 
+        // ---- 跟枪模式 ----
         function calcTracking(x, y, z, sub) {
             const x_safe = Math.max(0.001, x);
             const y_safe = Math.max(0.001, y);
-            const z_safe = Math.max(0.1, z);   // 防止除零，下限 0.1
-            let result;
+            const z_safe = Math.max(0.1, z);
             if (sub === 'simple') {
-                result = 44 * Math.pow(x_safe, 0.125) * Math.pow(z_safe, -0.125);
+                return { result: 44 * Math.pow(x_safe, 0.125) * Math.pow(z_safe, -0.125) };
             } else {
-                result = 29.29 * Math.pow(x_safe, 0.125) * Math.pow(y_safe, 0.0625) * Math.pow(z_safe, -0.125);
+                return { result: 29.29 * Math.pow(x_safe, 0.125) * Math.pow(y_safe, 0.0625) * Math.pow(z_safe, -0.125) };
             }
-            return { result };
         }
 
+        // ---- 切换模式 ----
         function setMode(mode) {
             currentMode = mode;
             document.getElementById('btn-mode-std').classList.toggle('active', mode === 'standard');
             document.getElementById('btn-mode-t3d').classList.toggle('active', mode === 'tracking_3d');
 
-            const trackBtns = document.getElementById('track-btn-grid');
-            const topPreview = document.getElementById('top-track-preview');
-            const hint = document.getElementById('track-mode-hint');
-            const statusTag = document.getElementById('track-status-tag');
-
-            trackBtns.style.display = 'grid';
-            updateTrackPreview();
-
-            if (mode === 'tracking_3d') {
-                hint.textContent = '• 跟枪模式已激活，选择下方公式';
-                statusTag.textContent = '激活';
-                statusTag.className = 'mode-status-tag active';
-                document.getElementById('btn-track-simple').classList.toggle('active', trackSubMode === 'simple');
-                document.getElementById('btn-track-full').classList.toggle('active', trackSubMode === 'full');
-                document.getElementById('btn-track-simple').classList.remove('disabled-btn');
-                document.getElementById('btn-track-full').classList.remove('disabled-btn');
-            } else {
-                hint.textContent = '• 普通模式下跟枪公式仅作展示';
-                statusTag.textContent = '展示';
-                statusTag.className = 'mode-status-tag preview';
-                document.getElementById('btn-track-simple').classList.toggle('active', trackSubMode === 'simple');
-                document.getElementById('btn-track-full').classList.toggle('active', trackSubMode === 'full');
-                document.getElementById('btn-track-simple').classList.remove('disabled-btn');
-                document.getElementById('btn-track-full').classList.remove('disabled-btn');
-            }
-
-            const badge = document.getElementById('modeBadge');
-            const formulaCard = document.getElementById('formulaCard');
-            const modeText = document.getElementById('mode-text-display');
-            const ttkTag = document.getElementById('ttkTag');
+            const stdToggle = document.getElementById('std-sub-toggle');
+            const trackToggle = document.getElementById('track-sub-toggle');
 
             if (mode === 'standard') {
+                stdToggle.style.display = 'flex';
+                trackToggle.style.display = 'none';
+                const badge = document.getElementById('modeBadge');
                 badge.textContent = '普通模式';
                 badge.className = 'mode-badge';
                 document.getElementById('fTitle').textContent = '普通模式';
-                formulaCard.className = 'formula-card';
-                modeText.textContent = '普通模式';
-                modeText.style.color = '#0284c7';
-                ttkTag.textContent = '短TKK';
-                ttkTag.className = 'ttk-tag short';
+                document.getElementById('formulaCard').className = 'formula-card';
+                document.getElementById('mode-text-display').textContent = '普通模式';
+                document.getElementById('mode-text-display').style.color = '#0284c7';
+                document.getElementById('ttkTag').textContent = '短TTK';
+                document.getElementById('ttkTag').className = 'ttk-tag short';
+                document.getElementById('btn-std-simple').classList.toggle('active', stdSubMode === 'simple');
+                document.getElementById('btn-std-full').classList.toggle('active', stdSubMode === 'full');
             } else {
+                stdToggle.style.display = 'none';
+                trackToggle.style.display = 'flex';
+                const badge = document.getElementById('modeBadge');
                 badge.textContent = '跟枪';
                 badge.className = 'mode-badge track';
                 document.getElementById('fTitle').textContent = '跟枪模式';
-                formulaCard.className = 'formula-card track';
-                modeText.textContent = '跟枪';
-                modeText.style.color = 'var(--purple-dark)';
-                ttkTag.textContent = '长TTK';
-                ttkTag.className = 'ttk-tag long';
+                document.getElementById('formulaCard').className = 'formula-card track';
+                document.getElementById('mode-text-display').textContent = '跟枪';
+                document.getElementById('mode-text-display').style.color = 'var(--purple-dark)';
+                document.getElementById('ttkTag').textContent = '长TTK';
+                document.getElementById('ttkTag').className = 'ttk-tag long';
+                document.getElementById('btn-track-simple').classList.toggle('active', trackSubMode === 'simple');
+                document.getElementById('btn-track-full').classList.toggle('active', trackSubMode === 'full');
             }
 
             updateDisplays();
             calculate();
         }
 
-        function updateTrackPreview() {
-            const topPreview = document.getElementById('top-track-preview');
-            if (trackSubMode === 'simple') {
-                topPreview.textContent = '44 · x^0.125 · Z^-0.125';
-            } else {
-                topPreview.textContent = '29.29 · x^0.125 · y^0.0625 · Z^-0.125';
-            }
+        // ---- 普通子模式切换 ----
+        function setStdSub(sub) {
+            stdSubMode = sub;
+            document.getElementById('btn-std-simple').classList.toggle('active', sub === 'simple');
+            document.getElementById('btn-std-full').classList.toggle('active', sub === 'full');
+            updateDisplays();
+            calculate();
         }
 
+        // ---- 跟枪子模式切换 ----
         function setTrackSub(sub) {
             if (currentMode !== 'tracking_3d') {
                 setMode('tracking_3d');
@@ -1119,17 +983,11 @@
             trackSubMode = sub;
             document.getElementById('btn-track-simple').classList.toggle('active', sub === 'simple');
             document.getElementById('btn-track-full').classList.toggle('active', sub === 'full');
-            document.getElementById('track-sub-label').textContent = sub === 'simple' ? '极简' : '完整';
-            updateTrackPreview();
-            const hint = document.getElementById('track-mode-hint');
-            hint.textContent = '• 跟枪模式已激活，选择下方公式';
-            const statusTag = document.getElementById('track-status-tag');
-            statusTag.textContent = '激活';
-            statusTag.className = 'mode-status-tag active';
             updateDisplays();
             calculate();
         }
 
+        // ---- 更新公式显示 ----
         function updateDisplays() {
             const exprElem = document.getElementById('fExpr');
             const footerDesc = document.getElementById('footerDesc');
@@ -1137,35 +995,40 @@
             if (currentMode === 'tracking_3d') {
                 if (trackSubMode === 'simple') {
                     exprElem.innerHTML =
-                        `<div class="math-row"><span>Max = 44 · x<sup>0.125</sup> · Z<sup>−0.125</sup></span></div>`;
-                    footerDesc.innerHTML = `<strong>跟枪极简</strong>：44 · x^0.125 · Z^-0.125`;
+                        `<div class="math-row"><span>Max = 44 · x<sup>0.125</sup> · z<sup>−0.125</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>跟枪极简</strong>：44 · x<sup>0.125</sup> · z<sup>−0.125</sup>`;
                 } else {
                     exprElem.innerHTML =
-                        `<div class="math-row"><span>Max = 29.29 · x<sup>0.125</sup> · y<sup>0.0625</sup> · Z<sup>−0.125</sup></span></div>`;
-                    footerDesc.innerHTML = `<strong>跟枪完整</strong>：29.29 · x^0.125 · y^0.0625 · Z^-0.125`;
+                        `<div class="math-row"><span>Max = 29.29 · x<sup>0.125</sup> · y<sup>0.0625</sup> · z<sup>−0.125</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>跟枪完整</strong>：29.29 · x<sup>0.125</sup> · y<sup>0.0625</sup> · z<sup>−0.125</sup>`;
                 }
             } else {
-                exprElem.innerHTML =
-                    `<div class="math-row"><span>Output = 4 · x<sup>0.333</sup></span></div>`;
-                footerDesc.innerHTML = `<strong>普通模式</strong>：4 · x^0.333`;
+                if (stdSubMode === 'simple') {
+                    exprElem.innerHTML =
+                        `<div class="math-row"><span>Output = (e + √2) · x<sup>1/3</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>普通极简</strong>：(e + √2) · x<sup>1/3</sup>`;
+                } else {
+                    exprElem.innerHTML =
+                        `<div class="math-row"><span>Output = 1.08 · x<sup>1/3</sup> · y<sup>0.25</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>普通完整</strong>：1.08 · x<sup>1/3</sup> · y<sup>0.25</sup>`;
+                }
             }
         }
 
-        // ---- 同步函数：移除所有对 z 的上限限制 ----
+        // ---- 同步函数 ----
         function syncFromTop() {
             let x = parseFloat(document.getElementById('input-x').value) || 0;
             let y = parseFloat(document.getElementById('input-y').value) || 0;
-            let z = parseFloat(document.getElementById('input-z').value) || 0.1;
-            x = Math.max(0, x);        // 只保留下限，无上限
+            let z = parseFloat(document.getElementById('input-z').value) || 1;
+            x = Math.max(0, x);
             y = Math.max(0, y);
-            z = Math.max(0.1, z);      // 仅保留下限
-            // 同时限制过大值避免滑块溢出？我们允许任意大，但滑块最大值1000，手动输入不受限。
+            z = Math.max(1, z);
             document.getElementById('side-input-x').value = x;
-            document.getElementById('side-range-x').value = Math.min(x, 7000); // 滑块上限7000
+            document.getElementById('side-range-x').value = Math.min(x, 7000);
             document.getElementById('side-input-y').value = y;
             document.getElementById('side-range-y').value = Math.min(y, 2000);
             document.getElementById('side-input-z').value = z;
-            document.getElementById('side-range-z').value = Math.min(z, 1000); // 滑块上限1000
+            document.getElementById('side-range-z').value = Math.min(z, 1000);
             calculate();
         }
 
@@ -1179,8 +1042,8 @@
                 document.getElementById('input-y').value = Math.max(0, v);
                 document.getElementById('side-range-y').value = Math.min(v, 2000);
             } else if (type === 'z') {
-                let v = parseFloat(document.getElementById('side-input-z').value) || 0.1;
-                document.getElementById('input-z').value = Math.max(0.1, v);
+                let v = parseFloat(document.getElementById('side-input-z').value) || 1;
+                document.getElementById('input-z').value = Math.max(1, v);
                 document.getElementById('side-range-z').value = Math.min(v, 1000);
             }
             calculate();
@@ -1196,7 +1059,7 @@
                 document.getElementById('input-y').value = v;
                 document.getElementById('side-input-y').value = v;
             } else if (type === 'z') {
-                const v = parseFloat(document.getElementById('side-range-z').value) || 0.1;
+                const v = parseFloat(document.getElementById('side-range-z').value) || 1;
                 document.getElementById('input-z').value = v;
                 document.getElementById('side-input-z').value = v;
             }
@@ -1210,7 +1073,19 @@
             calculate();
         }
 
-        function onCorrectionInput() {
+        // 修复：用户在输入中时不强行覆写输入框字符串，允许键入负号 '-' 和小数点
+        function onCorrectionInputLive() {
+            const raw = document.getElementById('input-correct').value;
+            if (raw === '-' || raw === '' || raw === '.') return;
+            let v = parseFloat(raw);
+            if (isNaN(v)) return;
+            v = Math.max(-10, Math.min(10, v));
+            document.getElementById('correct-slider').value = v;
+            syncUI();
+            calculate();
+        }
+
+        function onCorrectionChange() {
             let v = parseFloat(document.getElementById('input-correct').value) || 0;
             v = Math.max(-10, Math.min(10, v));
             v = Math.round(v / 0.25) * 0.25;
@@ -1242,26 +1117,25 @@
 
         function setAnchor(key) {
             currentAnchor = key;
-            document.querySelectorAll('#correctedRow .col-item').forEach(el => el.classList.toggle('anchor', el.dataset.key ===
-                key));
+            document.querySelectorAll('#correctedRow .col-item').forEach(el => el.classList.toggle('anchor', el.dataset.key === key));
             document.getElementById('anchorDisplay').textContent = KEY_NAMES[key];
             document.getElementById('anchorName').textContent = KEY_NAMES[key];
             calculate();
         }
 
+        // ---- 主计算 ----
         function calculate() {
             const x = parseFloat(document.getElementById('input-x').value) || 0;
             const y = parseFloat(document.getElementById('input-y').value) || 0;
-            const z = parseFloat(document.getElementById('input-z').value) || 0.1;
+            const z = parseFloat(document.getElementById('input-z').value) || 1;
             syncUI();
 
             const ratio = x > 0 ? (y / x) : 0;
             document.getElementById('ratio-display').textContent = ratio.toFixed(3);
 
-            let stdResult = 0,
-                trackResult = 0;
+            let stdResult = 0, trackResult = 0;
             if (currentMode === 'standard') {
-                stdResult = calcStandard(x).result;
+                stdResult = calcStandard(x, y).result;
             } else {
                 trackResult = calcTracking(x, y, z, trackSubMode).result;
             }
@@ -1269,19 +1143,16 @@
             const corrPct = parseFloat(document.getElementById('input-correct').value) || 0;
             const factor = 1 + corrPct / 100;
 
-            let t3_max = 0,
-                s_max = 0,
-                s_bal = 0;
+            let t3_max = 0, s_max = 0, s_bal = 0;
             if (currentMode === 'tracking_3d') {
                 t3_max = trackResult;
-                const stdBase = calcStandard(x).result;
+                const stdBase = calcStandard(x, y).result;
                 s_max = stdBase * 4 / 3;
                 s_bal = stdBase;
             } else {
                 s_bal = stdResult;
                 s_max = stdResult * 4 / 3;
-                const trackTmp = calcTracking(x, y, z, 'simple').result;
-                t3_max = trackTmp;
+                t3_max = calcTracking(x, y, z, trackSubMode).result;
             }
 
             document.getElementById('lbl-t3-max').textContent = t3_max.toFixed(2) + ' cm';
@@ -1296,18 +1167,23 @@
             }
             updateDisplayValues(baseVals, factor, ratios);
 
+            // 步骤推导（已修复上标格式统一）
             let stepsHtml = '';
             if (currentMode === 'standard') {
+                const subName = stdSubMode === 'simple' ? '极简' : '完整';
+                let formulaStr = stdSubMode === 'simple' ?
+                    `(e + √2) · ${x}<sup>1/3</sup>` :
+                    `1.08 · ${x}<sup>1/3</sup> · ${y}<sup>0.25</sup>`;
                 stepsHtml = `
-                    <div class="step-stage cun" style="background:#0284c7;">普通模式</div>
-                    <div class="step-line"><span class="step-num blue">1</span><span class="step-label">直接计算</span><span class="step-formula">Output = 4 · ${x}^0.333</span></div>
+                    <div class="step-stage cun" style="background:#0284c7;">普通 · ${subName}</div>
+                    <div class="step-line"><span class="step-num blue">1</span><span class="step-label">公式</span><span class="step-formula">${formulaStr}</span></div>
                     <div class="step-line"><span class="step-num blue">2</span><span class="step-label">结果</span><span class="step-result blue">${stdResult.toFixed(2)} cm</span></div>
                 `;
             } else {
                 const subName = trackSubMode === 'simple' ? '极简' : '完整';
                 const formula = trackSubMode === 'simple' ?
-                    `44 · ${x}^0.125 · ${z}^-0.125` :
-                    `29.29 · ${x}^0.125 · ${y}^0.0625 · ${z}^-0.125`;
+                    `44 · ${x}<sup>0.125</sup> · ${z}<sup>−0.125</sup>` :
+                    `29.29 · ${x}<sup>0.125</sup> · ${y}<sup>0.0625</sup> · ${z}<sup>−0.125</sup>`;
                 stepsHtml = `
                     <div class="step-stage cun track">跟枪 · ${subName}</div>
                     <div class="step-line"><span class="step-num purple">1</span><span class="step-label">公式</span><span class="step-formula">${formula}</span></div>
@@ -1339,6 +1215,7 @@
             document.getElementById('corr-base').innerText = corrVals.base.toFixed(2);
         }
 
+        // ---- 绘图 ----
         function drawChart(x_in, y_in, z_in, t3_max, s_max, s_bal) {
             const canvas = document.getElementById('compCanvas');
             if (!canvas) return;
@@ -1359,7 +1236,7 @@
             const maxX = 7000;
             let maxY = Math.max(90, t3_max, s_max);
             for (let x_plot = 0; x_plot <= maxX; x_plot += 100) {
-                const std = calcStandard(x_plot);
+                const std = calcStandard(x_plot, y_in);
                 const stdMax = std.result * 4 / 3;
                 const trackSimple = calcTracking(x_plot, y_in, z_in, 'simple').result;
                 const trackFull = calcTracking(x_plot, y_in, z_in, 'full').result;
@@ -1406,10 +1283,9 @@
             ctx.beginPath();
             let first = true;
             for (let xp = 0; xp <= maxX; xp += 40) {
-                const r = calcStandard(xp);
+                const r = calcStandard(xp, y_in);
                 const p = toPx(xp, r.result * 4 / 3);
-                if (first) { ctx.moveTo(p.px, p.py);
-                    first = false; } else { ctx.lineTo(p.px, p.py); }
+                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
 
@@ -1420,13 +1296,13 @@
             ctx.beginPath();
             first = true;
             for (let xp = 0; xp <= maxX; xp += 40) {
-                const r = calcStandard(xp);
+                const r = calcStandard(xp, y_in);
                 const p = toPx(xp, r.result);
-                if (first) { ctx.moveTo(p.px, p.py);
-                    first = false; } else { ctx.lineTo(p.px, p.py); }
+                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
 
+            // 跟枪曲线
             ctx.setLineDash([]);
             if (currentMode === 'tracking_3d') {
                 ctx.strokeStyle = '#7c3aed';
@@ -1436,8 +1312,7 @@
                 for (let xp = 0; xp <= maxX; xp += 40) {
                     const r = calcTracking(xp, y_in, z_in, trackSubMode);
                     const p = toPx(xp, r.result);
-                    if (first) { ctx.moveTo(p.px, p.py);
-                        first = false; } else { ctx.lineTo(p.px, p.py); }
+                    if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
                 }
                 ctx.stroke();
 
@@ -1449,8 +1324,7 @@
                 for (let xp = 0; xp <= maxX; xp += 40) {
                     const r = calcTracking(xp, y_in, z_in, trackSubMode);
                     const p = toPx(xp, r.result * 0.75);
-                    if (first) { ctx.moveTo(p.px, p.py);
-                        first = false; } else { ctx.lineTo(p.px, p.py); }
+                    if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
                 }
                 ctx.stroke();
                 ctx.setLineDash([]);
@@ -1461,15 +1335,15 @@
                 ctx.beginPath();
                 first = true;
                 for (let xp = 0; xp <= maxX; xp += 40) {
-                    const r = calcTracking(xp, y_in, z_in, 'simple');
+                    const r = calcTracking(xp, y_in, z_in, trackSubMode);
                     const p = toPx(xp, r.result);
-                    if (first) { ctx.moveTo(p.px, p.py);
-                        first = false; } else { ctx.lineTo(p.px, p.py); }
+                    if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
                 }
                 ctx.stroke();
                 ctx.setLineDash([]);
             }
 
+            // 绘制关键点与标签
             if (currentMode === 'tracking_3d') {
                 const p_max = toPx(x_in, t3_max);
                 const p_bal = toPx(x_in, t3_max * 0.75);
@@ -1506,6 +1380,7 @@
                 ctx.fillText(`均衡 ${s_bal.toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
             }
 
+            // 绘制当前指示垂线并增加文本边界安全 Clamp
             const p_v = toPx(x_in, 0);
             ctx.strokeStyle = 'rgba(0,0,0,0.1)';
             ctx.setLineDash([2, 3]);
@@ -1517,25 +1392,26 @@
             ctx.setLineDash([]);
             ctx.fillStyle = '#64748b';
             ctx.font = '8px monospace';
+            const clampedTextX = Math.max(pad.left + 50, Math.min(w - pad.right - 50, p_v.px));
             ctx.textAlign = 'center';
-            ctx.fillText(`X=${x_in} | y=${y_in} | z=${z_in}°`, p_v.px, h - pad.bottom + 16);
+            ctx.fillText(`X=${x_in} | y=${y_in} | z=${z_in}°`, clampedTextX, h - pad.bottom + 16);
         }
 
+        // ---- 初始化 ----
         function initAll() {
             document.getElementById('input-tsc').value = '2';
+            stdSubMode = 'full';
+            document.getElementById('btn-std-full').classList.add('active');
+            document.getElementById('btn-std-simple').classList.remove('active');
+            trackSubMode = 'simple';
             document.getElementById('btn-track-simple').classList.add('active');
-            document.getElementById('track-sub-label').textContent = '极简';
-
-            document.getElementById('track-btn-grid').style.display = 'grid';
+            document.getElementById('btn-track-full').classList.remove('active');
 
             currentMode = 'standard';
             document.getElementById('btn-mode-std').classList.add('active');
             document.getElementById('btn-mode-t3d').classList.remove('active');
-
-            updateTrackPreview();
-            document.getElementById('track-mode-hint').textContent = '• 普通模式下跟枪公式仅作展示';
-            document.getElementById('track-status-tag').textContent = '展示';
-            document.getElementById('track-status-tag').className = 'mode-status-tag preview';
+            document.getElementById('std-sub-toggle').style.display = 'flex';
+            document.getElementById('track-sub-toggle').style.display = 'none';
 
             const anchorEl = document.querySelector('#correctedRow .col-item[data-key="q2"]');
             if (anchorEl) anchorEl.classList.add('anchor');
@@ -1547,8 +1423,8 @@
             calculate();
         }
 
+        // 仅保留 DOMContentLoaded，杜绝双重调用
         window.addEventListener('DOMContentLoaded', initAll);
-        window.addEventListener('load', initAll);
         window.addEventListener('resize', calculate);
     </script>
 </body>
