@@ -7,19 +7,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         /* ============================================================
-           1. 全局设计规范与现代科技拟态系统
+           1. 全局科技拟态设计规范
            ============================================================ */
         :root {
             --primary: #0284c7;
             --primary-hover: #0369a1;
             --primary-light: rgba(2, 132, 199, 0.08);
             --border-glass: rgba(255, 255, 255, 0.85);
-            --bg-glass: rgba(255, 255, 255, 0.72);
+            --bg-glass: rgba(255, 255, 255, 0.75);
             --shadow-glass: 0 16px 40px rgba(0, 0, 0, 0.06);
             --text-main: #0f172a;
             --text-sub: #334155;
             --text-muted: #64748b;
-            --crosshair-color: #ef4444; /* 核心准星颜色变量 */
+            --crosshair-color: #ef4444;
         }
 
         * {
@@ -38,7 +38,6 @@
             height: 100vh;
         }
 
-        /* 3D 画布容器 */
         #canvas-container {
             position: fixed;
             top: 0;
@@ -55,7 +54,6 @@
             height: 100% !important;
         }
 
-        /* 电竞对称精密矢量图标类 */
         .icon {
             display: inline-flex;
             align-items: center;
@@ -71,9 +69,17 @@
             flex-shrink: 0;
         }
         .icon-sm { width: 12px; height: 12px; stroke-width: 1.8; }
-        .icon-lg { width: 16px; height: 16px; stroke-width: 1.9; }
 
-        /* 准星容器 (双通道穿透，100%即时变色) */
+        .dir-arrow-txt {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-weight: 900;
+            font-size: 0.92rem;
+            line-height: 1;
+            color: currentColor;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
         #crosshair-container {
             position: fixed;
             top: 50%;
@@ -91,7 +97,6 @@
             overflow: visible;
         }
 
-        /* 顶部 HUD */
         #top-hud {
             position: absolute;
             top: 16px;
@@ -127,6 +132,22 @@
         .fps-val { color: #16a34a; font-weight: 900; }
         .poll-val { color: #7c3aed; font-weight: 900; }
 
+        /* 模式切换卡片与重开卡片 */
+        .interactive-hud-card {
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .interactive-hud-card:hover {
+            transform: translateY(-1px);
+            border-color: var(--primary);
+            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.15);
+        }
+        .mode-tag-free {
+            color: #16a34a !important;
+        }
+
         .f11-card {
             padding: 7px 16px;
             font-size: 0.78rem;
@@ -146,7 +167,6 @@
             box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
         }
 
-        /* 左下角作者卡片 */
         #left-bottom-group {
             position: absolute;
             bottom: 16px;
@@ -194,7 +214,6 @@
         .author-name { font-size: 0.74rem; font-weight: 900; color: #0f172a; }
         .author-tag { font-size: 0.58rem; color: #64748b; font-weight: bold; }
 
-        /* 右下角控制模块 */
         #bottom-right-container {
             position: absolute;
             bottom: 16px;
@@ -271,7 +290,6 @@
         }
         .rel-desc { font-size: 0.64rem; color: #64748b; line-height: 1.4; }
 
-        /* 玻璃面板通用 */
         .glass-panel {
             background: var(--bg-glass);
             backdrop-filter: blur(28px) saturate(190%);
@@ -288,7 +306,6 @@
         .glass-panel::-webkit-scrollbar { width: 4px; height: 4px; }
         .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
-        /* 主控制面板 */
         #draggable-panel {
             position: absolute;
             left: 18px;
@@ -324,7 +341,6 @@
             gap: 6px;
         }
 
-        /* 右侧面板 */
         #right-panel {
             position: fixed;
             right: 16px;
@@ -379,7 +395,6 @@
             gap: 4px;
         }
         .header-btn:hover { background: #e0f2fe; border-color: var(--primary); color: var(--primary); }
-        .header-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
         .mode-nav-tabs {
             display: flex;
@@ -596,7 +611,6 @@
             color: #d97706;
         }
 
-        /* 镜之边缘黑白渐变滑条 */
         #inp-floor-gray-r {
             background: linear-gradient(to right, #000000 0%, #7e8b9b 50%, #ffffff 100%);
             height: 5px;
@@ -656,7 +670,6 @@
             background: none;
         }
 
-        /* 假人解剖级长宽高 UI 样式 */
         .dim-group {
             background: rgba(255, 255, 255, 0.6);
             border: 1px solid rgba(226, 232, 240, 0.9);
@@ -771,7 +784,6 @@
         .size-lock-btn.active-lock { background: #e2e8f0; color: #475569; border-color: #cbd5e1; }
         .size-lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
 
-        /* 开始按钮 */
         .btn-start {
             width: 100%;
             background: linear-gradient(135deg, var(--primary), var(--primary-hover));
@@ -805,7 +817,6 @@
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
         }
 
-        /* 进度遮罩与结果模态 */
         #progress-overlay {
             display: none;
             position: fixed;
@@ -889,15 +900,32 @@
         <svg id="crosshair-svg" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
 
-    <!-- 顶部 HUD -->
+    <!-- 顶部 HUD (含挑战模式/自由模式切换卡片、一键极速重开) -->
     <div id="top-hud">
-        <div class="hud-card">
-            <div>倒计时: <span class="time-val" id="hud-time">49.0</span>s</div>
-            <div>得分: <span class="score-val" id="hud-score">0.0</span></div>
-            <div id="hud-hits-box">命中: <span class="hud-val" id="hud-hits">0</span></div>
-            <div id="hud-misses-box">脱靶: <span class="hud-val" id="hud-misses" style="color:#ef4444;">0</span></div>
-            <div><span id="lbl-acc">命中率</span>: <span class="hud-val" id="hud-acc">100%</span></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <!-- 模式切换卡片 -->
+            <div class="hud-card interactive-hud-card" id="btn-playmode-toggle" onclick="togglePlayMode()" title="点击切换：挑战模式(49s) / 自由模式(无尽)">
+                <span id="txt-playmode-badge" style="color:var(--primary);font-weight:900;display:flex;align-items:center;gap:4px;">
+                    <span>⏱️ 挑战模式</span>
+                </span>
+            </div>
+
+            <!-- 核心数据看板 -->
+            <div class="hud-card">
+                <div><span id="lbl-hud-time">倒计时</span>: <span class="time-val" id="hud-time">49.0</span>s</div>
+                <div>得分: <span class="score-val" id="hud-score">0.0</span></div>
+                <div id="hud-hits-box">命中: <span class="hud-val" id="hud-hits">0</span></div>
+                <div id="hud-misses-box">脱靶: <span class="hud-val" id="hud-misses" style="color:#ef4444;">0</span></div>
+                <div><span id="lbl-acc">命中率</span>: <span class="hud-val" id="hud-acc">100.0%</span></div>
+            </div>
+
+<!-- 点击这里只触发“改键”，绝对不会触发“重开” -->
+<div class="hud-card interactive-hud-card" id="btn-restart-hud" onclick="startRebind('restart')" title="点击直接更换重开按键">
+    <span class="dir-arrow-txt" style="color:var(--primary);font-size:0.82rem;">↺</span>
+    <span>按 <span id="txt-hud-restart-key" style="color:var(--primary);font-weight:900;">R</span> 键重开 (点击改键)</span>
+</div>
         </div>
+
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
             <div class="hud-card f11-card f11-highlight" id="f11-box" title="点击切换全屏">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
@@ -952,10 +980,13 @@
                         <button class="pill-btn key-bind-btn" id="kbind-backward" onclick="startRebind('backward')">后: S</button>
                         <button class="pill-btn key-bind-btn" id="kbind-left" onclick="startRebind('left')">左: A</button>
                     </div>
-                    <div class="preset-grid cols-3">
+                    <div class="preset-grid cols-3" style="margin-bottom:3px;">
                         <button class="pill-btn key-bind-btn" id="kbind-right" onclick="startRebind('right')">右: D</button>
                         <button class="pill-btn key-bind-btn" id="kbind-jump" onclick="startRebind('jump')">跳: 空格</button>
                         <button class="pill-btn key-bind-btn" id="kbind-crouch" onclick="startRebind('crouch')">蹲: Shift</button>
+                    </div>
+                    <div class="preset-grid cols-1">
+                        <button class="pill-btn key-bind-btn" id="kbind-restart" style="width:100%;font-weight:900;color:var(--primary);" onclick="startRebind('restart')">↺ 一键重开键: R</button>
                     </div>
                 </div>
 
@@ -990,7 +1021,14 @@
                 </div>
 
                 <div class="ctrl-row">
-                    <label title="自然过渡下潜感"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 12c3-6 9-6 12 0s6 6 6 0"/></svg>自然蹲感</label>
+                    <label title="阻尼动力过渡曲线">
+                        <svg class="icon-sm" viewBox="0 0 24 24">
+                            <path d="M3 5h4c2.5 0 4.5 14 8 14h6" stroke-width="2.2" stroke-linecap="round"/>
+                            <circle cx="5" cy="5" r="2.2" fill="currentColor" stroke="none"/>
+                            <circle cx="19" cy="19" r="2.2" fill="currentColor" stroke="none"/>
+                        </svg>
+                        <span>自然蹲感</span>
+                    </label>
                     <input type="range" id="inp-crouch-nature-r" min="0" max="100" step="1" value="15" oninput="setCrouchNature(parseFloat(this.value))" />
                     <span id="lbl-crouch-nature" style="font-size:0.62rem;font-weight:900;color:var(--primary);width:52px;text-align:center;">15%</span>
                 </div>
@@ -1015,11 +1053,15 @@
 
                 <div class="section-header" style="margin-top:4px;">
                     <span class="section-label" style="font-size:0.68rem;">
-                        <svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8m0 0V3m0 5h5m-5 4a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16m0 0v5m0-5h-5"/></svg>
+                        <svg class="icon-sm" viewBox="0 0 24 24">
+                            <path d="M4 16c2-8 10-10 16-4" stroke-width="2.2" stroke-linecap="round"/>
+                            <path d="M16 8l4 4-4 4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M3 20h18" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="2 3"/>
+                        </svg>
                         <span>空中变向模式</span>
                     </span>
                     <button class="pill-btn active toggle-switch-btn" id="btn-air-control" onclick="toggleAirControl()">
-                        <svg class="icon-sm" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></svg>
+                        <span class="dir-arrow-txt" style="font-size:0.8rem;margin-right:2px;">⚡</span>
                         <span>已开启</span>
                     </button>
                 </div>
@@ -1044,10 +1086,10 @@
         <div id="bottom-right-hud">
             <div class="rel-title" id="br-title">
                 <svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
-                <span>Sixshot 物理原理</span>
+                <span>物理手感与双锁安全</span>
             </div>
-            <div class="rel-formula" id="br-formula">• 面前 45° 绝对水平视平线正方形区域<br />• 始终恒定 6 靶，防堆叠粘连算法</div>
-            <div class="rel-desc" id="br-desc">• <strong>命中 +1 分</strong> ｜ <strong>空枪脱靶 -1 分</strong> ｜ 49秒限时。<br />• Raw Input 原生输入防抖机制。</div>
+            <div class="rel-formula" id="br-formula">• <strong>墙面大小</strong>与<strong>墙面远近</strong>均默认双重锁定<br />• 目标真实物理大小 100% 绝对保持恒定</div>
+            <div class="rel-desc" id="br-desc">• <strong>命中 +1 分</strong> ｜ <strong>脱靶 -1 分</strong> ｜ 支持 R 键极速不掉锁重开。<br />• 自由模式支持无尽长时训练。</div>
         </div>
     </div>
 
@@ -1069,7 +1111,7 @@
             <div class="result-grid">
                 <div class="res-box"><div class="res-label" id="res-lbl-1">有效命中</div><div class="res-val" id="res-val-1" style="color:#059669;">0</div></div>
                 <div class="res-box"><div class="res-label" id="res-lbl-2">空枪脱靶</div><div class="res-val" id="res-val-2" style="color:#ef4444;">0</div></div>
-                <div class="res-box"><div class="res-label" id="res-lbl-3">射击命中率</div><div class="res-val" id="res-val-3">100%</div></div>
+                <div class="res-box"><div class="res-label" id="res-lbl-3">射击命中率</div><div class="res-val" id="res-val-3">100.0%</div></div>
                 <div class="res-box"><div class="res-label" id="res-lbl-4">击杀速率</div><div class="res-val" id="res-val-4">0.0/s</div></div>
             </div>
             <div class="res-meta">
@@ -1106,7 +1148,7 @@
             <div class="panel-col-main">
                 <div class="mode-nav-tabs">
                     <button class="mode-nav-btn active" id="tab-mode-sixshot" onclick="switchTrainMode('sixshot')">
-                        <svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                        <svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="6" r="2"/></svg>
                         <span>Sixshot 定点</span>
                     </button>
                     <button class="mode-nav-btn" id="tab-mode-tracking" onclick="switchTrainMode('tracking')">
@@ -1140,7 +1182,7 @@
                         <button class="pill-btn" data-val="8.0" onclick="setViewHeight(8.0)">8.0 m</button>
                     </div>
                     <div class="ctrl-row">
-                        <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v20m-5-5 5 5 5-5"/></svg>微调高度</label>
+                        <label><span class="dir-arrow-txt" style="font-size:0.75rem;">↑↓</span>微调高度</label>
                         <input type="range" id="inp-view-height-r" min="0.1" max="10" step="0.02" value="1.625" oninput="setViewHeight(parseFloat(this.value))" />
                         <div class="stepper-box">
                             <button class="step-btn" onclick="stepValGlobal('inp-view-height', -0.05)">−</button>
@@ -1155,7 +1197,7 @@
                     <div class="section-card">
                         <div class="section-header">
                             <span class="section-label">
-                                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>
+                                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="4" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>
                                 <span>目标球径</span>
                             </span>
                             <span class="section-sub">125cm 自动 3 靶</span>
@@ -1191,11 +1233,11 @@
                                     <span>无规则乱飞</span>
                                 </button>
                                 <button class="pill-btn" id="btn-dyn-mode-horizontal" data-val="horizontal" onclick="setSixshotDynamicMode('horizontal')">
-                                    <svg class="icon-sm" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4M6 8l-4 4 4 4M2 12h20"/></svg>
+                                    <span class="dir-arrow-txt">← →</span>
                                     <span>纯粹左右</span>
                                 </button>
                                 <button class="pill-btn" id="btn-dyn-mode-vertical" data-val="vertical" onclick="setSixshotDynamicMode('vertical')">
-                                    <svg class="icon-sm" viewBox="0 0 24 24"><path d="m8 18 4 4 4-4M8 6l4-4 4 4M12 2v20"/></svg>
+                                    <span class="dir-arrow-txt">↑↓</span>
                                     <span>纯粹上下</span>
                                 </button>
                             </div>
@@ -1217,34 +1259,41 @@
                         </div>
                         <div class="note-tip" id="sixshot-dynamic-hint" style="display:none;margin-top:5px;"></div>
                     </div>
+
+                    <!-- 墙面的大小 (默认锁定) -->
                     <div class="section-card">
                         <div class="section-header">
                             <span class="section-label">
-                                <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9"/></svg>
-                                <span>生成区域角度</span>
+                                <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                                <span>墙面的大小</span>
                             </span>
-                            <span class="section-sub">水平正方视场</span>
+                            <button class="lock-btn" id="lock-sixshot-size" onclick="toggleSizeLock('sixshot')">
+                                <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span>已锁定</span>
+                            </button>
                         </div>
                         <div class="preset-grid cols-3" id="sixshot-angle-presets" style="margin-bottom:4px;">
-                            <button class="pill-btn active" data-val="45" onclick="syncSpawnAngle(45)">45°</button>
-                            <button class="pill-btn" data-val="67.5" onclick="syncSpawnAngle(67.5)">67.5°</button>
-                            <button class="pill-btn" data-val="90" onclick="syncSpawnAngle(90)">90°</button>
+                            <button class="pill-btn active" data-val="45" disabled onclick="syncSpawnAngle(45)">45° 紧凑</button>
+                            <button class="pill-btn" data-val="67.5" disabled onclick="syncSpawnAngle(67.5)">67.5° 标准</button>
+                            <button class="pill-btn" data-val="90" disabled onclick="syncSpawnAngle(90)">90° 宽广</button>
                         </div>
                         <div class="ctrl-row">
-                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M21 12H3m9-9v18"/></svg>角度范围</label>
-                            <input type="range" id="inp-spawn-angle-r" min="10" max="150" step="0.2" value="45" oninput="syncSpawnAngle(parseFloat(this.value))" />
+                            <label><span class="dir-arrow-txt" style="font-size:0.75rem;">←→</span>墙面范围</label>
+                            <input type="range" id="inp-spawn-angle-r" min="10" max="150" step="0.2" value="45" disabled oninput="syncSpawnAngle(parseFloat(this.value))" />
                             <div class="stepper-box">
-                                <button class="step-btn" onclick="stepValGlobal('inp-spawn-angle', -1)">−</button>
-                                <input type="number" class="num-input" id="inp-spawn-angle" value="45.00" step="0.5" min="10" max="150" />
-                                <button class="step-btn" onclick="stepValGlobal('inp-spawn-angle', 1)">+</button>
+                                <button class="step-btn" disabled onclick="stepValGlobal('inp-spawn-angle', -1)">−</button>
+                                <input type="number" class="num-input" id="inp-spawn-angle" value="45.00" step="0.5" min="10" max="150" disabled />
+                                <button class="step-btn" disabled onclick="stepValGlobal('inp-spawn-angle', 1)">+</button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 墙面的远近 (默认锁定) -->
                     <div class="section-card">
                         <div class="section-header">
                             <span class="section-label">
                                 <svg class="icon" viewBox="0 0 24 24"><path d="M2 12h20M7 7l5-5 5 5M7 17l5 5 5-5"/></svg>
-                                <span>生成深度</span>
+                                <span>墙面的远近</span>
                             </span>
                             <button class="lock-btn" id="lock-sixshot-depth" onclick="toggleDepthLock('sixshot')">
                                 <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -1252,7 +1301,7 @@
                             </button>
                         </div>
                         <div class="ctrl-row">
-                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>目标距离</label>
+                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>墙面距离</label>
                             <input type="range" id="inp-depth-sixshot-r" min="3" max="30" step="0.1" value="10.0" disabled oninput="setDepthSixshot(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-depth-sixshot', -0.5)">−</button>
@@ -1266,7 +1315,7 @@
                 <!-- Tracking 特有 -->
                 <div id="section-tracking-group" style="display:none;">
                     <div class="section-card">
-                        <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>目标球径</span></div>
+                        <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="4" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>目标球径</span></div>
                         <div class="preset-grid cols-4" id="tracking-size-presets">
                             <button class="pill-btn" data-val="15" onclick="syncTrackingTargetSize(15)">15 cm</button>
                             <button class="pill-btn active" data-val="25" onclick="syncTrackingTargetSize(25)">25 cm</button>
@@ -1301,39 +1350,81 @@
                         </div>
                         <div class="note-tip" id="tracking-speed-hint"></div>
                     </div>
+
+                    <!-- 墙面的大小（默认锁定） -->
                     <div class="section-card">
-                        <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9"/></svg>活动范围</span></div>
+                        <div class="section-header">
+                            <span class="section-label">
+                                <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+                                <span>墙面的大小 (活动跨度)</span>
+                            </span>
+                            <button class="lock-btn" id="lock-tracking-size" onclick="toggleSizeLock('tracking')">
+                                <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span>已锁定</span>
+                            </button>
+                        </div>
                         <div class="preset-grid cols-4" id="tracking-angle-presets" style="margin-bottom:4px;">
-                            <button class="pill-btn" data-val="45" onclick="setTrackingAngle(45)">45°</button>
-                            <button class="pill-btn" data-val="90" onclick="setTrackingAngle(90)">90°</button>
-                            <button class="pill-btn" data-val="180" onclick="setTrackingAngle(180)">180°</button>
-                            <button class="pill-btn active" data-val="360" onclick="setTrackingAngle(360)">360°</button>
+                            <button class="pill-btn" data-val="45" disabled onclick="setTrackingAngle(45)">45°</button>
+                            <button class="pill-btn" data-val="90" disabled onclick="setTrackingAngle(90)">90°</button>
+                            <button class="pill-btn" data-val="180" disabled onclick="setTrackingAngle(180)">180°</button>
+                            <button class="pill-btn active" data-val="360" disabled onclick="setTrackingAngle(360)">360°</button>
                         </div>
                         <div class="ctrl-row">
-                            <label><svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>角度范围</label>
-                            <input type="range" id="inp-track-angle-r" min="10" max="360" step="0.5" value="360" oninput="setTrackingAngle(parseFloat(this.value))" />
+                            <label><span class="dir-arrow-txt" style="font-size:0.75rem;">←→</span>横向跨度</label>
+                            <input type="range" id="inp-track-angle-r" min="10" max="360" step="0.5" value="360" disabled oninput="setTrackingAngle(parseFloat(this.value))" />
                             <div class="stepper-box">
-                                <button class="step-btn" onclick="stepValGlobal('inp-track-angle', -5)">−</button>
-                                <input type="number" class="num-input" id="inp-track-angle" value="360.00" step="1" min="10" max="360" />
-                                <button class="step-btn" onclick="stepValGlobal('inp-track-angle', 5)">+</button>
+                                <button class="step-btn" disabled onclick="stepValGlobal('inp-track-angle', -5)">−</button>
+                                <input type="number" class="num-input" id="inp-track-angle" value="360.00" step="1" min="10" max="360" disabled />
+                                <button class="step-btn" disabled onclick="stepValGlobal('inp-track-angle', 5)">+</button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- 墙面的远近（默认锁定） -->
                     <div class="section-card">
                         <div class="section-header">
-                            <span class="section-label"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12h20M7 7l5-5 5 5M7 17l5 5 5-5"/></svg>生成深度</span>
+                            <span class="section-label">
+                                <svg class="icon" viewBox="0 0 24 24"><path d="M2 12h20M7 7l5-5 5 5M7 17l5 5 5-5"/></svg>
+                                <span>墙面的远近</span>
+                            </span>
                             <button class="lock-btn" id="lock-tracking-depth" onclick="toggleDepthLock('tracking')">
                                 <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                 <span>已锁定</span>
                             </button>
                         </div>
                         <div class="ctrl-row">
-                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>基础深度</label>
+                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>墙面距离</label>
                             <input type="range" id="inp-depth-tracking-r" min="3" max="30" step="0.1" value="10.0" disabled oninput="setDepthTracking(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-depth-tracking', -0.5)">−</button>
                                 <input type="number" class="num-input" id="inp-depth-tracking" value="10.00" step="0.5" min="3" max="30" disabled />
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-depth-tracking', 0.5)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 墙面高度 -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">
+                                <span class="dir-arrow-txt" style="font-size:0.85rem;color:var(--primary);">↑↓</span>
+                                <span>墙面高度</span>
+                            </span>
+                            <span class="section-sub">直面/曲面/3D通用</span>
+                        </div>
+                        <div class="preset-grid cols-4" id="tracking-wallheight-presets" style="margin-bottom:4px;">
+                            <button class="pill-btn" data-val="3.0" onclick="setTrackingWallHeight(3.0)">3.0 m</button>
+                            <button class="pill-btn active" data-val="5.0" onclick="setTrackingWallHeight(5.0)">5.0 m</button>
+                            <button class="pill-btn" data-val="8.0" onclick="setTrackingWallHeight(8.0)">8.0 m</button>
+                            <button class="pill-btn" data-val="12.0" onclick="setTrackingWallHeight(12.0)">12.0 m</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label><span class="dir-arrow-txt" style="font-size:0.75rem;">↑↓</span>高度范围</label>
+                            <input type="range" id="inp-track-wallheight-r" min="1.0" max="25.0" step="0.1" value="5.0" oninput="setTrackingWallHeight(parseFloat(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-track-wallheight', -0.5)">−</button>
+                                <input type="number" class="num-input" id="inp-track-wallheight" value="5.00" step="0.5" min="1.0" max="30.0" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-track-wallheight', 0.5)">+</button>
                             </div>
                         </div>
                     </div>
@@ -1355,13 +1446,12 @@
                         </div>
                     </div>
 
-                    <!-- 动态目标尺寸配置容器 (含头部独立脱离锁定) -->
                     <div id="holding-dimension-container" class="section-card"></div>
 
                     <div class="section-card">
-                        <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18m6-18v18"/></svg>环境与运动 (超平滑)</span></div>
+                        <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18m6-18v18"/></svg>环境与运动</span></div>
                         <div class="ctrl-row">
-                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M4 6h16M4 18h16M9 6v12M15 6v12"/></svg>两墙缝宽</label>
+                            <label><span class="dir-arrow-txt" style="font-size:0.75rem;">←→</span>两墙缝宽</label>
                             <input type="range" id="inp-hold-gap-r" min="0.5" max="10.0" step="0.02" value="2.0" oninput="setHoldingGap(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-gap', -0.05)">−</button>
@@ -1370,7 +1460,7 @@
                             </div>
                         </div>
                         <div class="ctrl-row">
-                            <label><svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>掩体深度</label>
+                            <label><svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>掩体远近</label>
                             <input type="range" id="inp-hold-walldepth-r" min="3" max="30" step="0.05" value="15.0" oninput="setHoldingWallDepth(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-walldepth', -0.1)">−</button>
@@ -1379,7 +1469,7 @@
                             </div>
                         </div>
                         <div class="ctrl-row">
-                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="m19 12-7-7-7 7"/></svg>目标深度</label>
+                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="m19 12-7-7-7 7"/></svg>目标远近</label>
                             <input type="range" id="inp-hold-depth-r" min="3" max="35" step="0.05" value="15.5" oninput="setHoldingDepth(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-depth', -0.1)">−</button>
@@ -1423,18 +1513,18 @@
                             </div>
                         </div>
 
-                        <div class="section-header" style="margin-top:6px;margin-bottom:3px;"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4M6 8l-4 4 4 4M2 12h20"/></svg>出靶方位设定</span></div>
+                        <div class="section-header" style="margin-top:6px;margin-bottom:3px;"><span class="section-label"><span class="dir-arrow-txt">← →</span> 出靶方位设定</span></div>
                         <div class="preset-grid cols-3" id="holding-dir-presets">
                             <button class="pill-btn active" id="btn-hold-dir-random" data-val="random" onclick="setHoldingDirection('random')">
-                                <svg class="icon-sm" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4M6 8l-4 4 4 4M2 12h20"/></svg>
+                                <span class="dir-arrow-txt">← →</span>
                                 <span>双向随机</span>
                             </button>
                             <button class="pill-btn" id="btn-hold-dir-left" data-val="left" onclick="setHoldingDirection('left')">
-                                <svg class="icon-sm" viewBox="0 0 24 24"><path d="m13 17 5-5-5-5M6 17l5-5-5-5"/></svg>
+                                <span class="dir-arrow-txt">→</span>
                                 <span>从左向右</span>
                             </button>
                             <button class="pill-btn" id="btn-hold-dir-right" data-val="right" onclick="setHoldingDirection('right')">
-                                <svg class="icon-sm" viewBox="0 0 24 24"><path d="m11 17-5-5 5-5M18 17l-5-5 5-5"/></svg>
+                                <span class="dir-arrow-txt">←</span>
                                 <span>从右向左</span>
                             </button>
                         </div>
@@ -1442,11 +1532,14 @@
 
                     <div class="section-card">
                         <div class="section-header">
-                            <span class="section-label"><svg class="icon" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6M6 9l6 6 6-6"/></svg>高度与随机落差</span>
+                            <span class="section-label">
+                                <span class="dir-arrow-txt" style="font-size:0.85rem;color:var(--primary);">↑↓</span>
+                                <span>高度与随机落差</span>
+                            </span>
                             <span class="section-sub">附带灰色虚线轨道</span>
                         </div>
                         <div class="ctrl-row">
-                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg>基础上下</label>
+                            <label><span class="dir-arrow-txt" style="font-size:0.75rem;">↑↓</span>基础上下</label>
                             <input type="range" id="inp-hold-basey-r" min="-5.0" max="10.0" step="0.02" value="1.625" oninput="setHoldingBaseY(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-basey', -0.05)">−</button>
@@ -1466,7 +1559,6 @@
                     </div>
                 </div>
 
-                <!-- 1.5 秒安全等待冷却按钮 -->
                 <button class="btn-start" id="btn-lock" disabled onclick="startChallenge()">
                     <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     <span>▶ 开始挑战</span>
@@ -1489,7 +1581,7 @@
                             <span>无规则乱飞</span>
                         </button>
                         <button class="pill-btn" id="btn-track-strafe" data-val="strafe" onclick="setTrackingPattern('strafe')">
-                            <svg class="icon-sm" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4M6 8l-4 4 4 4M2 12h20"/></svg>
+                            <span class="dir-arrow-txt">← →</span>
                             <span>水平折返</span>
                         </button>
                     </div>
@@ -1503,7 +1595,7 @@
                     </div>
                 </div>
                 <div class="section-card">
-                    <div class="section-header"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><path d="m18 8 4 4-4 4M6 8l-4 4 4 4M2 12h20"/></svg>变向周期与到边折返</span></div>
+                    <div class="section-header"><span class="section-label"><span class="dir-arrow-txt">← →</span> 变向周期与到边折返</span></div>
                     <div class="section-sub" style="margin-bottom:4px;">0为到边折返/持续绕圈</div>
                     <div class="preset-grid cols-4" id="strafe-freq-presets" style="margin-bottom:6px;">
                         <button class="pill-btn" data-val="0,0" onclick="setStrafeRangePreset(0,0)">到边折返</button>
@@ -1555,7 +1647,6 @@
                     <div class="section-header"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>命中高亮颜色</span></div>
                     <div class="swatches-grid-9" id="swatches-highlight"></div>
                 </div>
-                <!-- 镜之边缘经典地面拉杆与柔和奶黄独立系统 -->
                 <div class="section-card" id="floor-color-picker">
                     <div class="section-header">
                         <span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M2 12h20M12 2v20"/></svg>地面底色</span>
@@ -1609,7 +1700,7 @@
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-gap',0.25)">+</button>
                 </div>
             </div>
-            <div class="section-header" style="margin-top:4px;"><span class="section-label">准星专属颜色 (100%全浏览器硬件级变色)</span></div>
+            <div class="section-header" style="margin-top:4px;"><span class="section-label">准星专属颜色</span></div>
             <div class="swatches-grid-9" id="swatches-crosshair"></div>
         </div>
 
@@ -1637,7 +1728,7 @@
         </div>
 
         <div class="section-card">
-            <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m12 8 4 4-4 4"/></svg>360° 旋转物理周长 (CM/360°)</span></div>
+            <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m12 8 4 4-4 4"/></svg>360° 物理周长 (CM/360°)</span></div>
             <div class="preset-grid cols-7" id="cm-preset-grid">
                 <button class="pill-btn cm-pill" data-val="25" onclick="setCmPreset(25)">25</button>
                 <button class="pill-btn cm-pill" data-val="35" onclick="setCmPreset(35)">35</button>
@@ -1679,12 +1770,9 @@
     </div>
 
     <!-- ============================================================
-         JavaScript 完整架构
+         JavaScript 核心架构
          ============================================================ -->
     <script>
-    // ============================================================
-    // 1. 全局配置与状态模型 (含假人记忆比例底数)
-    // ============================================================
     const COLOR_PALETTE = [
         { name: '赤红', hex: '#ef4444' },
         { name: '暖橙', hex: '#f97316' },
@@ -1699,6 +1787,8 @@
 
     const CFG = {
         mode: 'sixshot',
+        playMode: 'challenge', // 'challenge' (49s限时) | 'free' (无尽模式)
+        restartKey: 'KeyR',    // 一键重开按键
         dpi: 800,
         cmPer360: 55.0,
         fovHorizontal: 103,
@@ -1728,6 +1818,7 @@
             angleRange: 360.0,
             speedDegPerSec: 12.5,
             targetSizeCm: 25.0,
+            wallHeight: 5.0,
             strafeMinInterval: 0.8,
             strafeMaxInterval: 1.8
         },
@@ -1761,7 +1852,10 @@
                 headD: 1.0,
                 bodyW: 1.69,
                 bodyH: 6.79,
-                bodyD: 1.10
+                bodyD: 1.10,
+                neckGap: 0.275,
+                headOffX: 0,
+                headOffY: 0
             }
         },
         movement: {
@@ -1785,7 +1879,10 @@
     };
 
     const STATE = {
+        // 墙面大小与远近全部默认上锁
+        sizeLockSixshot: true,
         depthLockSixshot: true,
+        sizeLockTracking: true,
         depthLockTracking: true,
         game: 'idle',
         timeLeft: 49.0,
@@ -1800,23 +1897,21 @@
         pollCount: 0,
         pollLastCalc: performance.now(),
         peakPollRate: 0,
-        pollActiveSamples: 0,
         yaw: 0,
         pitch: 0,
-        isLocking: false,
         isDragging: false,
         offX: 0,
         offY: 0,
         tracking: {
-            x: 0, y: 0, z: -10, dist: 10.0,
-            yaw: 0, pitch: 0,
+            x: 0, y: 1.625, z: -10, dist: 10.0,
+            yaw: 0,
             vx: 0, vy: 0, vz: 0,
-            vYaw: 0, vPitch: 0, vDist: 0,
+            vYaw: 0, vDist: 0,
             changeDirTimer: 0
         },
         holding: {
             state: 'waiting',
-            x: 0, y: 0, z: -15.5,
+            x: 0, y: 1.625, z: -15.5,
             dir: 1, timer: 0
         }
     };
@@ -1830,9 +1925,10 @@
         keysPressed: {}
     };
 
-    const STORAGE_KEY = 'XDH_AIM_TRAINER_V9_PRO';
+    const STORAGE_KEY = 'XDH_AIM_TRAINER_V10_PRO';
     const ISO_INCH_TO_CM = 2.54;
     let btnCooldownTimer = null;
+    let lastQuickRestartTime = 0; // 防抖时间戳
 
     function getEl(id) { return document.getElementById(id); }
     function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -1842,13 +1938,22 @@
     function setVal(id, v) { const e = getEl(id); if (e) e.value = v; }
     function hFovToVfov(hFov, aspect) { return 2 * Math.atan(Math.tan((hFov * Math.PI / 180) / 2) / aspect) * 180 / Math.PI; }
 
-    function formatKeyCode(code) {
-        if (!code) return '--';
-        if (code.startsWith('Key')) return code.slice(3);
-        if (code.startsWith('Digit')) return code.slice(5);
-        const map = { 'Space': '空格', 'ShiftLeft': '左 Shift', 'ShiftRight': '右 Shift', 'ControlLeft': '左 Ctrl', 'ControlRight': '右 Ctrl', 'AltLeft': '左 Alt', 'AltRight': '右 Alt' };
-        return map[code] || code;
-    }
+function formatKeyCode(code) {
+    if (!code) return '--';
+    if (code.startsWith('Key')) return code.slice(3);
+    if (code.startsWith('Digit')) return code.slice(5);
+    const map = { 
+        'Space': '空格', 'ShiftLeft': '左 Shift', 'ShiftRight': '右 Shift', 
+        'ControlLeft': '左 Ctrl', 'ControlRight': '右 Ctrl', 'AltLeft': '左 Alt', 'AltRight': '右 Alt',
+        // === 新增：鼠标按键映射 ===
+        'Mouse0': '鼠标左键',
+        'Mouse1': '鼠标滚轮中键',
+        'Mouse2': '鼠标右键',
+        'Mouse3': '鼠标侧下键',
+        'Mouse4': '鼠标侧上键'
+    };
+    return map[code] || code;
+}
 
     function safeMergeConfig(target, source) {
         if (!source || typeof source !== 'object') return;
@@ -1864,9 +1969,7 @@
         }
     }
 
-    // ============================================================
-    // 2. 音效引擎 (Web Audio API)
-    // ============================================================
+    // 音效引擎
     let audioCtx = null;
     function getAudioContext() {
         if (!audioCtx) {
@@ -1931,9 +2034,7 @@
         osc.start(); osc.stop(ctx.currentTime + 0.05);
     }
 
-    // ============================================================
-    // 3. 准星硬件级双通道即时变色系统
-    // ============================================================
+    // 准星样式渲染
     function updateCrosshairStyle() {
         const svg = getEl('crosshair-svg');
         const container = getEl('crosshair-container');
@@ -2013,9 +2114,7 @@
         saveToLocalStorage();
     }
 
-    // ============================================================
-    // 4. Three.js 场景构建 (镜之边缘纯正高反差光影)
-    // ============================================================
+    // Three.js 场景系统
     let scene, camera, renderer, skyMesh, cloudGroup, floorMat, floor, gridHelper;
     let ambientLight, sunLight;
 
@@ -2106,7 +2205,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    // 镜之边缘网格自适应对比算法
     function updateFloorAndGrid(hexStr) {
         CFG.floorColor = hexStr;
         const col = new THREE.Color(hexStr);
@@ -2143,13 +2241,10 @@
         saveToLocalStorage();
     }
 
-    // ============================================================
-    // 5. 墙体、掩体与 3D 走廊虚线系统 (核心修复：视觉与物理绝对贴合)
-    // ============================================================
+    // 墙面与边界可视化系统
     const spawnWallGroup = new THREE.Group();
     const holdingRangeLines = new THREE.Group();
 
-    // 清空 Group 并释放几何体/材质，避免每次重建墙体时内存泄漏
     function clearGroup(group) {
         while (group.children.length) {
             const child = group.children[0];
@@ -2183,20 +2278,16 @@
             const pts = [new THREE.Vector3(-half, bottom, -D), new THREE.Vector3(half, bottom, -D), new THREE.Vector3(half, top, -D), new THREE.Vector3(-half, top, -D), new THREE.Vector3(-half, bottom, -D)];
             spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), edgeMat));
         } else if (CFG.mode === 'tracking') {
-            const D = CFG.depthTracking, space = CFG.tracking.space, isFly = CFG.tracking.pattern === 'fly';
+            const D = CFG.depthTracking, space = CFG.tracking.space;
             const spanRad = CFG.tracking.angleRange * Math.PI / 180, isFull = CFG.tracking.angleRange >= 359;
-            const maxPitch = 22.5 * Math.PI / 180;
+            const wallH = Math.max(1.0, CFG.tracking.wallHeight || 5.0);
+            const wallBottom = Math.max(0.05, cy - wallH / 2);
+            const wallTop = wallBottom + wallH;
+            const wallMidY = (wallBottom + wallTop) / 2;
 
             if (space === 'wall') {
-                // 【核心修复】：墙体顶点与物理折返上下沿绝对对齐，彻底消除上沿空气墙
                 const halfW = (D * spanRad) / 2;
-                const halfH = isFly ? (D * Math.tan(maxPitch)) : 0.35;
-                const wallBottom = Math.max(0.05, cy - halfH);
-                const wallTop = wallBottom + 2 * halfH;
-                const wallHeight = wallTop - wallBottom;
-                const wallMidY = (wallBottom + wallTop) / 2;
-
-                const mesh = new THREE.Mesh(new THREE.PlaneGeometry(halfW * 2, wallHeight), new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false }));
+                const mesh = new THREE.Mesh(new THREE.PlaneGeometry(halfW * 2, wallH), new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false }));
                 mesh.position.set(0, wallMidY, -D);
                 mesh.renderOrder = -1;
                 spawnWallGroup.add(mesh);
@@ -2211,34 +2302,55 @@
                 spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: wallHex, transparent: true, opacity: 0.95 })));
             } else if (space === 'curve') {
                 const startAng = isFull ? 0 : Math.PI - spanRad / 2, sweep = isFull ? Math.PI * 2 : spanRad;
-                const halfH = D * Math.tan(maxPitch), bottom = Math.max(0.05, cy - halfH), top = bottom + 2 * halfH, mid = (bottom + top) / 2, h = top - bottom;
-                const mesh = new THREE.Mesh(new THREE.CylinderGeometry(D, D, h, 64, 1, true, startAng, sweep), new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false }));
-                mesh.position.set(0, mid, 0);
+                const mesh = new THREE.Mesh(new THREE.CylinderGeometry(D, D, wallH, 64, 1, true, startAng, sweep), new THREE.MeshBasicMaterial({ color: wallHex, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false }));
+                mesh.position.set(0, wallMidY, 0);
                 mesh.renderOrder = -1;
                 spawnWallGroup.add(mesh);
-            } else if (space === 'free3d') {
-                const startAng = isFull ? 0 : Math.PI - spanRad / 2, sweep = isFull ? Math.PI * 2 : spanRad;
-                const lineMat = new THREE.LineDashedMaterial({ color: wallHex, dashSize: 0.5, gapSize: 0.3, transparent: true, opacity: 0.6 });
 
-                [D, D + 10].forEach(d => {
-                    const pts = [], segs = isFull ? 48 : 24;
+                const lineMat = new THREE.LineBasicMaterial({ color: wallHex, transparent: true, opacity: 0.95 });
+                [wallBottom, wallTop].forEach(yLvl => {
+                    const pts = [];
+                    const segs = isFull ? 64 : 32;
                     for (let i = 0; i <= segs; i++) {
                         const theta = startAng + (i / segs) * sweep;
-                        pts.push(new THREE.Vector3(d * Math.sin(theta), 0.05, d * Math.cos(theta)));
+                        pts.push(new THREE.Vector3(D * Math.sin(theta), yLvl, D * Math.cos(theta)));
                     }
-                    const ring = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat);
-                    ring.computeLineDistances();
-                    spawnWallGroup.add(ring);
+                    spawnWallGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat));
+                });
+            } else if (space === 'free3d') {
+                const startAng = isFull ? 0 : Math.PI - spanRad / 2, sweep = isFull ? Math.PI * 2 : spanRad;
+                const lineMat = new THREE.LineDashedMaterial({ color: wallHex, dashSize: 0.5, gapSize: 0.3, transparent: true, opacity: 0.75 });
+
+                [wallBottom, wallTop].forEach(yLvl => {
+                    [D, D + 10].forEach(d => {
+                        const pts = [], segs = isFull ? 48 : 24;
+                        for (let i = 0; i <= segs; i++) {
+                            const theta = startAng + (i / segs) * sweep;
+                            pts.push(new THREE.Vector3(d * Math.sin(theta), yLvl, d * Math.cos(theta)));
+                        }
+                        const ring = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat);
+                        ring.computeLineDistances();
+                        spawnWallGroup.add(ring);
+                    });
+
+                    if (!isFull) {
+                        const leftPts = [new THREE.Vector3(D * Math.sin(startAng), yLvl, D * Math.cos(startAng)), new THREE.Vector3((D + 10) * Math.sin(startAng), yLvl, (D + 10) * Math.cos(startAng))];
+                        const rightPts = [new THREE.Vector3(D * Math.sin(startAng + sweep), yLvl, D * Math.cos(startAng + sweep)), new THREE.Vector3((D + 10) * Math.sin(startAng + sweep), yLvl, (D + 10) * Math.cos(startAng + sweep))];
+                        const lineL = new THREE.Line(new THREE.BufferGeometry().setFromPoints(leftPts), lineMat);
+                        const lineR = new THREE.Line(new THREE.BufferGeometry().setFromPoints(rightPts), lineMat);
+                        lineL.computeLineDistances(); lineR.computeLineDistances();
+                        spawnWallGroup.add(lineL); spawnWallGroup.add(lineR);
+                    }
                 });
 
-                if (!isFull) {
-                    const leftPts = [new THREE.Vector3(D * Math.sin(startAng), 0.05, D * Math.cos(startAng)), new THREE.Vector3((D + 10) * Math.sin(startAng), 0.05, (D + 10) * Math.cos(startAng))];
-                    const rightPts = [new THREE.Vector3(D * Math.sin(startAng + sweep), 0.05, D * Math.cos(startAng + sweep)), new THREE.Vector3((D + 10) * Math.sin(startAng + sweep), 0.05, (D + 10) * Math.cos(startAng + sweep))];
-                    const lineL = new THREE.Line(new THREE.BufferGeometry().setFromPoints(leftPts), lineMat);
-                    const lineR = new THREE.Line(new THREE.BufferGeometry().setFromPoints(rightPts), lineMat);
-                    lineL.computeLineDistances(); lineR.computeLineDistances();
-                    spawnWallGroup.add(lineL); spawnWallGroup.add(lineR);
-                }
+                [startAng, isFull ? startAng + Math.PI : startAng + sweep].forEach(theta => {
+                    [D, D + 10].forEach(d => {
+                        const vPts = [new THREE.Vector3(d * Math.sin(theta), wallBottom, d * Math.cos(theta)), new THREE.Vector3(d * Math.sin(theta), wallTop, d * Math.cos(theta))];
+                        const vLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(vPts), lineMat);
+                        vLine.computeLineDistances();
+                        spawnWallGroup.add(vLine);
+                    });
+                });
             }
         } else if (CFG.mode === 'holding') {
             const wallDepth = CFG.holding.wallDepth || 15.0;
@@ -2275,9 +2387,7 @@
         }
     }
 
-    // ============================================================
-    // 6. 靶标模型构建与假人脱离交互
-    // ============================================================
+    // 靶标构建系统 (严苛保证目标物理尺寸 100% 恒定不变)
     const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
     const HEAD_GEO = new THREE.SphereGeometry(1, 32, 32);
     const BODY_GEO = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
@@ -2319,7 +2429,6 @@
             const r = (h.sizeCm / 100) / 2;
             holdingTarget.sphereMesh.scale.set(r, r, r);
         } else {
-            // 清空旧假人时只释放材质，几何体 HEAD_GEO/BODY_GEO 是共享的，不能释放
             while (holdingTarget.dummyGroup.children.length) {
                 const c = holdingTarget.dummyGroup.children[0];
                 if (c.material) {
@@ -2348,6 +2457,23 @@
             body.userData.part = 'body';
             holdingTarget.bodyMesh = body;
             holdingTarget.dummyGroup.add(body);
+        }
+
+        if (STATE.game !== 'playing' && STATE.game !== 'starting') {
+            previewHoldingDummyInCenter();
+        }
+    }
+
+    function previewHoldingDummyInCenter() {
+        if (CFG.mode !== 'holding') return;
+        const h = CFG.holding;
+        const targetDepth = Math.max((h.wallDepth || 15.0) + 0.1, h.depth || 15.5);
+        STATE.holding.x = 0;
+        STATE.holding.y = h.baseY;
+        STATE.holding.z = -targetDepth;
+        if (holdingTarget.rootGroup) {
+            holdingTarget.rootGroup.position.set(0, h.baseY, -targetDepth);
+            holdingTarget.rootGroup.visible = true;
         }
     }
 
@@ -2404,6 +2530,7 @@
 
     function getSixshotBounds() {
         const D = CFG.depthSixshot;
+        // 目标半径绝对固定：由 targetSizeCm 严苛决定，无论如何改变墙面大小与远近，球体尺寸绝对不变
         const r = CFG.targetSizeCm / 100 / 2;
         const halfAngle = (CFG.spawnAngleDeg / 2) * Math.PI / 180;
         const halfSize = D * Math.tan(halfAngle);
@@ -2436,6 +2563,10 @@
         t.mesh.visible = true;
         t.mesh.material = targetMat;
 
+        // 强校验：确保目标在任何时刻缩放均为绝对的物理米制半径
+        const r = CFG.targetSizeCm / 100 / 2;
+        t.mesh.scale.set(r, r, r);
+
         if (!keepDir) {
             const dMode = CFG.dynamic.mode || 'fly';
             if (dMode === 'horizontal') { t.dirX = Math.random() > 0.5 ? 1 : -1; t.dirY = 0; }
@@ -2460,7 +2591,9 @@
         const isFly = CFG.tracking.pattern === 'fly';
         const space = CFG.tracking.space;
         const spanRad = CFG.tracking.angleRange * Math.PI / 180;
-        const maxPitch = 22.5 * Math.PI / 180;
+        const wallH = Math.max(1.0, CFG.tracking.wallHeight || 5.0);
+        const wallBottom = Math.max(0.05, cy - wallH / 2);
+        const wallTop = wallBottom + wallH;
         const ts = STATE.tracking;
 
         if (isCenterTarget) {
@@ -2469,46 +2602,44 @@
             ts.z = -baseD;
             ts.dist = baseD;
             ts.yaw = 0;
-            ts.pitch = 0;
             ts.vx = linSpeed;
             ts.vy = isFly ? linSpeed * 0.5 : 0;
             ts.vYaw = speedRad;
-            ts.vPitch = isFly ? speedRad * 0.5 : 0;
             ts.vDist = (space === 'free3d') ? linSpeed * 0.5 : 0;
         } else {
+            const minY = wallBottom + r;
+            const maxY = wallTop - r;
+            ts.y = isFly ? rand(minY, maxY) : cy;
+
             if (space === 'wall') {
                 const halfW = Math.max(0.5, (baseD * spanRad) / 2 - r);
-                const halfH = isFly ? (baseD * Math.tan(maxPitch)) : 0.35;
-                const wallBottom = Math.max(0.05, cy - halfH);
-                const wallTop = wallBottom + 2 * halfH;
                 ts.x = rand(-halfW, halfW);
-                ts.y = isFly ? rand(wallBottom + r, wallTop - r) : cy;
                 ts.z = -baseD;
                 if (isFly) {
                     const ang = rand(0, Math.PI * 2);
-                    ts.vx = Math.cos(ang) * linSpeed; ts.vy = Math.sin(ang) * linSpeed;
+                    ts.vx = Math.cos(ang) * linSpeed;
+                    ts.vy = Math.sin(ang) * linSpeed;
                 } else {
-                    ts.vx = (rand(0, 1) > 0.5 ? 1 : -1) * linSpeed; ts.vy = 0;
+                    ts.vx = (rand(0, 1) > 0.5 ? 1 : -1) * linSpeed;
+                    ts.vy = 0;
                 }
             } else {
-                ts.dist = space === 'free3d' ? baseD + rand(0, 6) : baseD;
+                ts.dist = (space === 'free3d') ? baseD + rand(0, 6) : baseD;
                 ts.yaw = rand(-spanRad / 2, spanRad / 2);
-                ts.pitch = isFly ? rand(-maxPitch * 0.5, maxPitch * 0.5) : 0;
                 if (isFly) {
                     const ang = rand(0, Math.PI * 2);
                     ts.vYaw = Math.cos(ang) * speedRad;
-                    ts.vPitch = Math.sin(ang) * speedRad * 0.7;
+                    ts.vy = Math.sin(ang) * linSpeed;
                     ts.vDist = space === 'free3d' ? (rand(0, 1) > 0.5 ? 1 : -1) * linSpeed * 0.55 : 0;
                 } else {
                     ts.vYaw = (rand(0, 1) > 0.5 ? 1 : -1) * speedRad;
-                    ts.vPitch = 0;
+                    ts.vy = 0;
                     ts.vDist = space === 'free3d' ? (rand(0, 1) > 0.5 ? 1 : -1) * linSpeed * 0.5 : 0;
                 }
+                const d = (space === 'free3d') ? ts.dist : baseD;
                 const theta = Math.PI + ts.yaw;
-                ts.x = ts.dist * Math.sin(theta) * Math.cos(ts.pitch);
-                ts.y = Math.max(0.05 + r, cy + ts.dist * Math.sin(ts.pitch));
-                // 【核心修复】原代码此处使用了未定义变量 d，导致 curve/free3d 崩溃
-                ts.z = ts.dist * Math.cos(theta) * Math.cos(ts.pitch);
+                ts.x = d * Math.sin(theta);
+                ts.z = d * Math.cos(theta);
             }
         }
         ts.changeDirTimer = pickNextStrafeTimer();
@@ -2518,10 +2649,12 @@
             sixTargets[0].x = ts.x; sixTargets[0].y = ts.y; sixTargets[0].z = ts.z;
             sixTargets[0].mesh.visible = true;
             sixTargets[0].mesh.material = targetMat;
+            sixTargets[0].mesh.scale.set(r, r, r);
         }
     }
 
     function refreshAllPreviewTargets() {
+        // 目标物理大小绝对锁定：严格由厘米换算为米
         const r = (CFG.mode === 'sixshot' ? CFG.targetSizeCm : CFG.tracking.targetSizeCm) / 100 / 2;
         sixTargets.forEach(t => t.mesh.scale.set(r, r, r));
 
@@ -2542,7 +2675,7 @@
             respawnTrackingTarget(false);
         } else {
             buildHoldingTarget();
-            respawnHoldingTarget();
+            previewHoldingDummyInCenter();
         }
     }
 
@@ -2564,11 +2697,8 @@
         }
     }
 
-    // ============================================================
-    // 7. 物理主循环 (空中惯性制动 + 到边精准折返)
-    // ============================================================
+    // 物理循环与位移计算
     function updatePhysics(dt) {
-        // 云朵公转
         if (CFG.cloudsEnabled && cloudGroup) {
             cloudGroup.children.forEach(c => {
                 c.userData.angle += c.userData.speed * dt;
@@ -2577,7 +2707,6 @@
             });
         }
 
-        // 人物身法与移动 (严格落实空中变向关闭机制)
         if (CFG.movement.enabled) {
             const keys = CFG.movement.keys, isDown = code => !!MOVE_STATE.keysPressed[code];
             const crouching = isDown(keys.crouch);
@@ -2622,21 +2751,15 @@
             }
             const spd = CFG.movement.speed * (1 - MOVE_STATE.crouchCurrent) + CFG.movement.crouchSpeed * MOVE_STATE.crouchCurrent;
 
-            // 【核心修复】：空中变向彻底落实
-            if (MOVE_STATE.isGrounded) {
+            if (MOVE_STATE.isGrounded || CFG.movement.airControl) {
                 MOVE_STATE.vx = moveDirX * spd;
                 MOVE_STATE.vz = moveDirZ * spd;
             } else {
-                if (CFG.movement.airControl) {
-                    MOVE_STATE.vx = moveDirX * spd;
-                    MOVE_STATE.vz = moveDirZ * spd;
-                } else {
-                    if (moveDirX !== 0 || moveDirZ !== 0) {
-                        const dot = (moveDirX * MOVE_STATE.vx) + (moveDirZ * MOVE_STATE.vz);
-                        if (dot < -0.1) {
-                            MOVE_STATE.vx = 0;
-                            MOVE_STATE.vz = 0;
-                        }
+                if (moveDirX !== 0 || moveDirZ !== 0) {
+                    const dot = (moveDirX * MOVE_STATE.vx) + (moveDirZ * MOVE_STATE.vz);
+                    if (dot < -0.1) {
+                        MOVE_STATE.vx = 0;
+                        MOVE_STATE.vz = 0;
                     }
                 }
             }
@@ -2647,7 +2770,6 @@
         const eyeY = Math.max(0.05, CFG.viewHeight - MOVE_STATE.crouchCurrent * CFG.movement.crouchDepth + MOVE_STATE.jumpY);
         camera.position.set(MOVE_STATE.x, eyeY, MOVE_STATE.z);
 
-        // Sixshot 动态漂移碰撞反弹
         if (CFG.mode === 'sixshot') {
             const D = CFG.depthSixshot;
             const isM = CFG.dynamic.enabled && STATE.game !== 'finished';
@@ -2667,7 +2789,6 @@
                 else if (t.y > b.maxY) { t.y = b.maxY; t.dirY = -Math.abs(t.dirY); }
             }
 
-            // 球与球之间弹性碰撞反弹
             const vis = sixTargets.filter(t => t.mesh.visible);
             for (let i = 0; i < vis.length; i++) {
                 for (let j = i + 1; j < vis.length; j++) {
@@ -2700,7 +2821,6 @@
                 if (t.mesh.visible) t.mesh.position.set(t.x, t.y, t.z);
             }
         }
-        // Tracking 目标运动与精准到边折返 (彻底消灭上沿空气墙)
         else if (CFG.mode === 'tracking') {
             const ts = STATE.tracking;
             const space = CFG.tracking.space;
@@ -2711,18 +2831,15 @@
             const speedRad = CFG.tracking.speedDegPerSec * Math.PI / 180;
             const linSpeed = speedRad * baseD;
             const spanRad = CFG.tracking.angleRange * Math.PI / 180;
-            const maxPitch = 22.5 * Math.PI / 180;
+            const wallH = Math.max(1.0, CFG.tracking.wallHeight || 5.0);
+            const wallBottom = Math.max(0.05, cy - wallH / 2);
+            const wallTop = wallBottom + wallH;
+            const minY = wallBottom + r;
+            const maxY = wallTop - r;
 
             if (space === 'wall') {
                 const halfW = Math.max(0.5, (baseD * spanRad) / 2);
-                const halfH = isFly ? (baseD * Math.tan(maxPitch)) : 0.35;
-                const wallBottom = Math.max(0.05, cy - halfH);
-                const wallTop = wallBottom + 2 * halfH;
-
-                const minX = -halfW + r;
-                const maxX = halfW - r;
-                const minY = wallBottom + r;
-                const maxY = wallTop - r;
+                const minX = -halfW + r, maxX = halfW - r;
 
                 ts.x += ts.vx * dt;
                 ts.y += ts.vy * dt;
@@ -2747,16 +2864,20 @@
                 }
             } else {
                 ts.yaw += ts.vYaw * dt;
-                ts.pitch += ts.vPitch * dt;
-                const halfAngle = spanRad / 2;
+                if (isFly) ts.y += ts.vy * dt;
 
+                const halfAngle = spanRad / 2;
                 if (CFG.tracking.angleRange < 359) {
                     if (ts.yaw <= -halfAngle) { ts.yaw = -halfAngle; ts.vYaw = Math.abs(ts.vYaw); }
                     else if (ts.yaw >= halfAngle) { ts.yaw = halfAngle; ts.vYaw = -Math.abs(ts.vYaw); }
                 }
 
-                if (ts.pitch <= -maxPitch) { ts.pitch = -maxPitch; ts.vPitch = Math.abs(ts.vPitch); }
-                else if (ts.pitch >= maxPitch) { ts.pitch = maxPitch; ts.vPitch = -Math.abs(ts.vPitch); }
+                if (isFly) {
+                    if (ts.y <= minY) { ts.y = minY; ts.vy = Math.abs(ts.vy); }
+                    else if (ts.y >= maxY) { ts.y = maxY; ts.vy = -Math.abs(ts.vy); }
+                } else {
+                    ts.y = cy;
+                }
 
                 if (space === 'free3d') {
                     ts.dist += ts.vDist * dt;
@@ -2770,17 +2891,18 @@
                         ts.changeDirTimer = pickNextStrafeTimer();
                         if (isFly) {
                             const a = rand(0, Math.PI * 2);
-                            ts.vYaw = Math.cos(a) * speedRad; ts.vPitch = Math.sin(a) * speedRad * 0.7;
+                            ts.vYaw = Math.cos(a) * speedRad;
+                            ts.vy = Math.sin(a) * linSpeed;
                         } else {
-                            ts.vYaw = -ts.vYaw; ts.vPitch = 0;
+                            ts.vYaw = -ts.vYaw;
+                            ts.vy = 0;
                         }
                     }
                 }
-                const d = space === 'free3d' ? ts.dist : baseD;
+                const d = (space === 'free3d') ? ts.dist : baseD;
                 const theta = Math.PI + ts.yaw;
-                ts.x = d * Math.sin(theta) * Math.cos(ts.pitch);
-                ts.y = Math.max(0.05 + r, cy + d * Math.sin(ts.pitch));
-                ts.z = d * Math.cos(theta) * Math.cos(ts.pitch);
+                ts.x = d * Math.sin(theta);
+                ts.z = d * Math.cos(theta);
             }
 
             const t0 = sixTargets[0];
@@ -2805,7 +2927,6 @@
                 }
             }
         }
-        // Holding 掩体穿梭平移
         else if (CFG.mode === 'holding') {
             const sh = STATE.holding, h = CFG.holding;
             if (sh.state === 'waiting' && STATE.game === 'playing') {
@@ -2823,21 +2944,25 @@
             }
         }
 
-        // 倒计时
+        // 核心时间计算：挑战模式倒计时，自由模式正向无尽计时
         if (STATE.game === 'playing') {
-            STATE.timeLeft -= dt;
-            if (STATE.timeLeft <= 0) {
-                STATE.timeLeft = 0;
-                finishChallenge();
-                return;
+            if (CFG.playMode === 'challenge') {
+                STATE.timeLeft -= dt;
+                if (STATE.timeLeft <= 0) {
+                    STATE.timeLeft = 0;
+                    finishChallenge();
+                    return;
+                }
+                getEl('hud-time').innerText = STATE.timeLeft.toFixed(1);
+            } else {
+                // 自由模式：时间无限递增
+                STATE.timeLeft += dt;
+                getEl('hud-time').innerText = STATE.timeLeft.toFixed(1);
             }
-            getEl('hud-time').innerText = STATE.timeLeft.toFixed(1);
         }
     }
 
-    // ============================================================
-    // 8. 零 GC 内存保护与 1:1 瞄准精度输入
-    // ============================================================
+    // 瞄准与输入检测
     const raycaster = new THREE.Raycaster();
     const centerVec = new THREE.Vector2(0, 0);
     const _viewEuler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -2855,7 +2980,7 @@
             const wallObjects = [];
             spawnWallGroup.children.forEach(c => { if (c.isMesh && c.userData.isWall) wallObjects.push(c); });
             const targets = [];
-            if (holdingTarget.rootGroup.visible && STATE.holding.state === 'moving') {
+            if (holdingTarget.rootGroup.visible) {
                 if (CFG.holding.shape === 'sphere') targets.push(holdingTarget.sphereMesh);
                 else holdingTarget.dummyGroup.children.forEach(c => { if (c.isMesh) targets.push(c); });
             }
@@ -2922,13 +3047,44 @@
             STATE.yaw -= dx * radiansPerCount;
             STATE.pitch -= dy * radiansPerCount;
             STATE.pitch = clamp(STATE.pitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
-            STATE.yaw = STATE.yaw % (Math.PI * 2);
+
+            if (STATE.yaw > Math.PI) STATE.yaw -= Math.PI * 2;
+            else if (STATE.yaw < -Math.PI) STATE.yaw += Math.PI * 2;
 
             applyViewRotation();
         }
     }, { passive: true });
 
     window.addEventListener('mousedown', (e) => {
+
+    // === 新增：如果正在改键，按下任意鼠标按键就录入成功 ===
+    if (MOVE_STATE.rebindingAction) {
+        // 防止把“点击改键按钮”本身的这一次左键给录进去
+        if (performance.now() - (MOVE_STATE.rebindStartTime || 0) < 120) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        const mouseKey = `Mouse${e.button}`; // 0=左键, 1=中键, 2=右键, 3/4=侧键
+        if (MOVE_STATE.rebindingAction === 'restart') {
+            CFG.restartKey = mouseKey;
+        } else {
+            CFG.movement.keys[MOVE_STATE.rebindingAction] = mouseKey;
+        }
+        MOVE_STATE.rebindingAction = null;
+        refreshMovementKeyButtons();
+        saveToLocalStorage();
+        return;
+    }
+
+    // === 新增：如果在游戏中按下了设定的鼠标重开键，立刻重开 ===
+    if (`Mouse${e.button}` === CFG.restartKey) {
+        if (STATE.game === 'playing' || STATE.game === 'starting' || STATE.game === 'finished') {
+            e.preventDefault();
+            triggerQuickRestart();
+            return;
+        }
+    }
+
         if (document.pointerLockElement === document.body && e.button === 0) {
             if (STATE.game === 'armed') {
                 startCountdown();
@@ -2979,9 +3135,6 @@
         if (CFG.mode === 'tracking' && sixTargets[0]) sixTargets[0].mesh.material = targetMat;
     });
 
-    // ============================================================
-    // 9. 挑战生命周期 (1.5 秒冷却 + 第二次开始准星正中对齐)
-    // ============================================================
     const btnLock = getEl('btn-lock');
 
     function start1Point5SecondCooldown() {
@@ -2999,12 +3152,102 @@
                 clearInterval(btnCooldownTimer);
                 btnCooldownTimer = null;
                 btnLock.disabled = false;
-                btnLock.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span>▶ 开始挑战</span>`;
+                btnLock.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span>▶ 开始训练</span>`;
             } else {
                 btnLock.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>准备中 (${(remaining/10).toFixed(1)}s)...</span>`;
             }
         }, 100);
     }
+
+    // 自由模式 / 挑战模式切换
+    window.togglePlayMode = function() {
+        CFG.playMode = (CFG.playMode === 'challenge') ? 'free' : 'challenge';
+        syncPlayModeUI();
+        if (STATE.game === 'playing' || STATE.game === 'starting') {
+            triggerQuickRestart();
+        } else {
+            STATE.timeLeft = (CFG.playMode === 'challenge') ? 49.0 : 0.0;
+            getEl('hud-time').innerText = STATE.timeLeft.toFixed(1);
+        }
+        saveToLocalStorage();
+    };
+
+    function syncPlayModeUI() {
+        const isFree = CFG.playMode === 'free';
+        const badge = getEl('txt-playmode-badge');
+        const lblTime = getEl('lbl-hud-time');
+        if (badge) {
+            badge.innerHTML = isFree
+                ? '<span style="color:#16a34a;font-weight:900;">♾️ 自由模式</span>'
+                : '<span style="color:var(--primary);font-weight:900;">⏱️ 挑战模式</span>';
+        }
+        if (lblTime) {
+            lblTime.innerText = isFree ? '训练时长' : '倒计时';
+        }
+    }
+
+    // ============================================================
+    // 【核心创新】一键极速重开（绝不退出指针锁定，彻底杜绝浏览器丢锁BUG）
+    // ============================================================
+    window.triggerQuickRestart = function() {
+        const now = performance.now();
+        if (now - lastQuickRestartTime < 180) return; // 180ms防抖保护
+        lastQuickRestartTime = now;
+
+        if (STATE.startTimeoutId) {
+            clearTimeout(STATE.startTimeoutId);
+            STATE.startTimeoutId = null;
+        }
+
+        const isPointerLocked = (document.pointerLockElement === document.body);
+
+        // 重置局内数据
+        STATE.score = 0;
+        STATE.hits = 0;
+        STATE.misses = 0;
+        STATE.trackingFiringTime = 0;
+        STATE.trackingOnTargetTime = 0;
+        STATE.timeLeft = (CFG.playMode === 'challenge') ? 49.0 : 0.0;
+        STATE.isMouseDown = false;
+
+        // 重置身法
+        MOVE_STATE.x = 0;
+        MOVE_STATE.z = 0;
+        MOVE_STATE.vx = 0;
+        MOVE_STATE.vz = 0;
+        MOVE_STATE.jumpY = 0;
+        MOVE_STATE.jumpVelocity = 0;
+        MOVE_STATE.crouchCurrent = 0;
+        MOVE_STATE.isGrounded = true;
+
+        resetViewToCenter();
+
+        // 原地重新生成靶标
+        if (CFG.mode === 'tracking') {
+            respawnTrackingTarget(true);
+        } else if (CFG.mode === 'sixshot') {
+            for (let i = 0; i < STATE.targetCount && i < sixTargets.length; i++) {
+                respawnSixshotTarget(sixTargets[i], false);
+            }
+        } else {
+            buildHoldingTarget();
+            respawnHoldingTarget();
+        }
+
+        updateHUDStats();
+        getEl('result-modal').style.display = 'none';
+
+        if (isPointerLocked) {
+            // 绝密关键点：不退出 Pointer Lock！直接微秒级热重置！
+            STATE.game = 'playing';
+            getEl('progress-overlay').style.display = 'none';
+            setPanelsVisibility(false);
+            btnLock.innerText = '训练进行中...';
+            playBodyshotSound();
+        } else {
+            startChallenge();
+        }
+    };
 
     function updateHUDStats() {
         if (CFG.mode === 'sixshot' || CFG.mode === 'holding') {
@@ -3012,11 +3255,11 @@
             getEl('hud-hits').innerText = STATE.hits;
             getEl('hud-misses').innerText = STATE.misses;
             const total = STATE.hits + STATE.misses;
-            getEl('hud-acc').innerText = total > 0 ? `${((STATE.hits / total) * 100).toFixed(1)}%` : '100%';
+            getEl('hud-acc').innerText = total > 0 ? `${((STATE.hits / total) * 100).toFixed(1)}%` : '100.0%';
         } else {
             getEl('hud-score').innerText = STATE.score.toFixed(1);
-            const acc = STATE.trackingFiringTime > 0.05 ? ((STATE.trackingOnTargetTime / STATE.trackingFiringTime) * 100).toFixed(1) : '100%';
-            getEl('hud-acc').innerText = `${acc}%`;
+            const accVal = STATE.trackingFiringTime > 0.05 ? ((STATE.trackingOnTargetTime / STATE.trackingFiringTime) * 100) : 100.0;
+            getEl('hud-acc').innerText = `${accVal.toFixed(1)}%`;
         }
     }
 
@@ -3027,7 +3270,7 @@
         STATE.game = 'armed';
         STATE.score = 0; STATE.hits = 0; STATE.misses = 0;
         STATE.trackingFiringTime = 0; STATE.trackingOnTargetTime = 0;
-        STATE.timeLeft = 49.0;
+        STATE.timeLeft = (CFG.playMode === 'challenge') ? 49.0 : 0.0;
         updateHUDStats();
 
         setPanelsVisibility(false);
@@ -3069,11 +3312,11 @@
         bar.style.transition = 'width 0.135s linear';
         bar.style.width = '100%';
 
-        setTimeout(() => {
+        STATE.startTimeoutId = setTimeout(() => {
             getEl('progress-overlay').style.display = 'none';
             if (STATE.game === 'starting') {
                 STATE.game = 'playing';
-                btnLock.innerText = '挑战进行中...';
+                btnLock.innerText = '训练进行中...';
             }
         }, 145);
     }
@@ -3084,6 +3327,7 @@
         getEl('progress-overlay').style.display = 'none';
         getEl('result-modal').style.display = 'none';
         setPanelsVisibility(true);
+        if (CFG.mode === 'holding') previewHoldingDummyInCenter();
         start1Point5SecondCooldown();
     }
 
@@ -3120,9 +3364,10 @@
             getEl('res-lbl-2').innerText = '空枪脱靶';
             getEl('res-val-2').innerText = STATE.misses;
             getEl('res-lbl-3').innerText = '射击命中率';
-            getEl('res-val-3').innerText = total > 0 ? `${((STATE.hits / total) * 100).toFixed(1)}%` : '0%';
+            getEl('res-val-3').innerText = total > 0 ? `${((STATE.hits / total) * 100).toFixed(1)}%` : '0.0%';
             getEl('res-lbl-4').innerText = '击杀速率';
-            getEl('res-val-4').innerText = (STATE.hits / 49).toFixed(2) + '/s';
+            const duration = Math.max(1, (CFG.playMode === 'challenge' ? 49 : STATE.timeLeft));
+            getEl('res-val-4').innerText = (STATE.hits / duration).toFixed(2) + '/s';
         }
 
         getEl('res-meta-size').innerText = meta.size.toFixed(0);
@@ -3130,6 +3375,7 @@
         getEl('res-meta-fov').innerText = CFG.fovHorizontal.toFixed(0);
         getEl('result-modal').style.display = 'flex';
         setPanelsVisibility(true);
+        if (CFG.mode === 'holding') previewHoldingDummyInCenter();
         start1Point5SecondCooldown();
     }
 
@@ -3143,9 +3389,85 @@
         if (!locked && STATE.game !== 'idle' && STATE.game !== 'finished') resetToIdle();
     });
 
-    // ============================================================
-    // 10. UI 联动、变色与假人解剖级长宽高/脱离位移渲染
-    // ============================================================
+    // 墙面大小锁定控制器（默认上锁）
+    window.toggleSizeLock = function(mode) {
+        if (mode === 'sixshot') {
+            STATE.sizeLockSixshot = !STATE.sizeLockSixshot;
+            syncSizeLockUI('sixshot');
+        } else {
+            STATE.sizeLockTracking = !STATE.sizeLockTracking;
+            syncSizeLockUI('tracking');
+        }
+        saveToLocalStorage();
+    };
+
+    function syncSizeLockUI(mode) {
+        const isSixshot = mode === 'sixshot';
+        const locked = isSixshot ? STATE.sizeLockSixshot : STATE.sizeLockTracking;
+        const lockBtn = getEl(isSixshot ? 'lock-sixshot-size' : 'lock-tracking-size');
+        if (lockBtn) {
+            lockBtn.classList.toggle('unlocked', !locked);
+            lockBtn.innerHTML = locked
+                ? '<svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>已锁定</span>'
+                : '<svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg><span>已解锁</span>';
+        }
+
+        if (isSixshot) {
+            const r = getEl('inp-spawn-angle-r'), inp = getEl('inp-spawn-angle');
+            if (r) r.disabled = locked;
+            if (inp) inp.disabled = locked;
+            if (inp && inp.parentElement) {
+                inp.parentElement.querySelectorAll('.step-btn').forEach(btn => btn.disabled = locked);
+            }
+            document.querySelectorAll('#sixshot-angle-presets .pill-btn').forEach(b => b.disabled = locked);
+        } else {
+            const r = getEl('inp-track-angle-r'), inp = getEl('inp-track-angle');
+            if (r) r.disabled = locked;
+            if (inp) inp.disabled = locked;
+            if (inp && inp.parentElement) {
+                inp.parentElement.querySelectorAll('.step-btn').forEach(btn => btn.disabled = locked);
+            }
+            document.querySelectorAll('#tracking-angle-presets .pill-btn').forEach(b => b.disabled = locked);
+        }
+    }
+
+    // 墙面远近锁定控制器（默认上锁）
+    window.toggleDepthLock = function(mode) {
+        if (mode === 'sixshot') {
+            STATE.depthLockSixshot = !STATE.depthLockSixshot;
+            syncDepthLockUI('sixshot');
+        } else {
+            STATE.depthLockTracking = !STATE.depthLockTracking;
+            syncDepthLockUI('tracking');
+        }
+        saveToLocalStorage();
+    };
+
+    function syncDepthLockUI(mode) {
+        const locked = mode === 'sixshot' ? STATE.depthLockSixshot : STATE.depthLockTracking;
+        const lockId = mode === 'sixshot' ? 'lock-sixshot-depth' : 'lock-tracking-depth';
+        const lockBtn = getEl(lockId);
+        if (lockBtn) {
+            lockBtn.classList.toggle('unlocked', !locked);
+            lockBtn.innerHTML = locked
+                ? '<svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>已锁定</span>'
+                : '<svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg><span>已解锁</span>';
+        }
+        setDepthInputsEnabled(mode);
+    }
+
+    function setDepthInputsEnabled(mode) {
+        const locked = mode === 'sixshot' ? STATE.depthLockSixshot : STATE.depthLockTracking;
+        const prefix = mode === 'sixshot' ? 'inp-depth-sixshot' : 'inp-depth-tracking';
+        const input = getEl(prefix);
+        const rng = getEl(prefix + '-r');
+        if (input) input.disabled = locked;
+        if (rng) rng.disabled = locked;
+        if (input && input.parentElement) {
+            input.parentElement.querySelectorAll('.step-btn').forEach(btn => { btn.disabled = locked; });
+        }
+    }
+
     function syncAllButtonStates() {
         ['sixshot', 'tracking', 'holding'].forEach(m => {
             const b = getEl(`tab-mode-${m}`);
@@ -3177,6 +3499,9 @@
         });
         document.querySelectorAll('#tracking-angle-presets .pill-btn').forEach(b => {
             b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.tracking.angleRange) < 0.5);
+        });
+        document.querySelectorAll('#tracking-wallheight-presets .pill-btn').forEach(b => {
+            b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - (CFG.tracking.wallHeight || 5.0)) < 0.1);
         });
         document.querySelectorAll('#tracking-pattern-presets .pill-btn').forEach(b => {
             b.classList.toggle('active', b.dataset.val === CFG.tracking.pattern);
@@ -3228,6 +3553,11 @@
 
         const cloudBtn = getEl('btn-cloud-toggle');
         if (cloudBtn) cloudBtn.classList.toggle('active', CFG.cloudsEnabled);
+
+        syncSizeLockUI('sixshot');
+        syncSizeLockUI('tracking');
+        syncDepthLockUI('sixshot');
+        syncDepthLockUI('tracking');
     }
 
     function applyModeUI() {
@@ -3239,18 +3569,16 @@
 
         const tipMap = {
             sixshot: '设定：45° · 面前 45° 视平线区域 ｜ 0.135s 启动延迟 ｜ 恒定 6 靶',
-            tracking: '设定：360° · 持续锁敌跟枪模式 ｜ 连续按住开火计分',
-            holding: '设定：实体掩体墙 ｜ 头部白色高亮反馈 ｜ 爆头独立清脆音效'
+            tracking: '设定：360° · 持续锁敌跟枪模式 ｜ 连续按住开火计分 ｜ 物理折返',
+            holding: '设定：实体掩体墙 ｜ 头部白色高亮反馈 ｜ 爆头独立清脆音效 ｜ 调参居中观察'
         };
         getEl('note-tip-text').innerText = tipMap[m] || tipMap.sixshot;
     }
 
     function syncAllInputsFromConfig() {
-        // 视觉高度
         setValF('inp-view-height', CFG.viewHeight);
         const vhR = getEl('inp-view-height-r'); if (vhR) vhR.value = CFG.viewHeight;
 
-        // Sixshot
         setValF('inp-size', CFG.targetSizeCm);
         const szR = getEl('inp-size-r'); if (szR) szR.value = CFG.targetSizeCm;
         setValF('inp-speed', CFG.dynamic.speedDegPerSec);
@@ -3260,13 +3588,14 @@
         setValF('inp-depth-sixshot', CFG.depthSixshot);
         const d6R = getEl('inp-depth-sixshot-r'); if (d6R) d6R.value = CFG.depthSixshot;
 
-        // Tracking
         setValF('inp-track-size', CFG.tracking.targetSizeCm);
         const tsR = getEl('inp-track-size-r'); if (tsR) tsR.value = CFG.tracking.targetSizeCm;
         setValF('inp-track-speed', CFG.tracking.speedDegPerSec);
         const tspR = getEl('inp-track-speed-r'); if (tspR) tspR.value = CFG.tracking.speedDegPerSec;
         setValF('inp-track-angle', CFG.tracking.angleRange);
         const taR = getEl('inp-track-angle-r'); if (taR) taR.value = CFG.tracking.angleRange;
+        setValF('inp-track-wallheight', CFG.tracking.wallHeight || 5.0);
+        const twhR = getEl('inp-track-wallheight-r'); if (twhR) twhR.value = CFG.tracking.wallHeight || 5.0;
         setValF('inp-track-freq-min', CFG.tracking.strafeMinInterval);
         const fmR = getEl('inp-track-freq-min-r'); if (fmR) fmR.value = CFG.tracking.strafeMinInterval;
         setValF('inp-track-freq-max', CFG.tracking.strafeMaxInterval);
@@ -3274,7 +3603,6 @@
         setValF('inp-depth-tracking', CFG.depthTracking);
         const dtR = getEl('inp-depth-tracking-r'); if (dtR) dtR.value = CFG.depthTracking;
 
-        // Holding
         setValF('inp-hold-gap', CFG.holding.gapWidth);
         const hgR = getEl('inp-hold-gap-r'); if (hgR) hgR.value = CFG.holding.gapWidth;
         setValF('inp-hold-walldepth', CFG.holding.wallDepth);
@@ -3287,12 +3615,11 @@
         const himR = getEl('inp-hold-interval-min-r'); if (himR) himR.value = CFG.holding.intervalMin;
         setValF('inp-hold-interval-max', CFG.holding.intervalMax);
         const hixR = getEl('inp-hold-interval-max-r'); if (hixR) hixR.value = CFG.holding.intervalMax;
-        setValF('inp-hold-basey', CFG.holding.baseY);
+ setValF('inp-hold-basey', CFG.holding.baseY);
         const hbR = getEl('inp-hold-basey-r'); if (hbR) hbR.value = CFG.holding.baseY;
         setValF('inp-hold-range', CFG.holding.rangeY);
         const hrR = getEl('inp-hold-range-r'); if (hrR) hrR.value = CFG.holding.rangeY;
 
-        // 手感
         setValF('inp-cm', CFG.cmPer360);
         const cmR = getEl('inp-cm-r'); if (cmR) cmR.value = CFG.cmPer360;
         setVal('inp-dpi', CFG.dpi);
@@ -3300,7 +3627,6 @@
         setValF('inp-fov', CFG.fovHorizontal);
         const fovR = getEl('inp-fov-r'); if (fovR) fovR.value = CFG.fovHorizontal;
 
-        // 准星
         setValF('inp-cross-size', CFG.crosshair.size);
         const csR = getEl('inp-cross-size-r'); if (csR) csR.value = CFG.crosshair.size;
         setValF('inp-cross-thick', CFG.crosshair.thick);
@@ -3308,7 +3634,6 @@
         setValF('inp-cross-gap', CFG.crosshair.gap);
         const cgR = getEl('inp-cross-gap-r'); if (cgR) cgR.value = CFG.crosshair.gap;
 
-        // 移动
         setValF('inp-move-speed', CFG.movement.speed);
         const msR = getEl('inp-move-speed-r'); if (msR) msR.value = CFG.movement.speed;
         setValF('inp-crouch-speed', CFG.movement.crouchSpeed);
@@ -3328,33 +3653,10 @@
         if (themeBtn && themeBtn.querySelector('span')) {
             themeBtn.querySelector('span').innerText = CFG.theme === 'day' ? '日落暮色' : '天青日间';
         }
+        syncPlayModeUI();
     }
 
-    function setDepthInputsEnabled(mode) {
-        const locked = mode === 'sixshot' ? STATE.depthLockSixshot : STATE.depthLockTracking;
-        const prefix = mode === 'sixshot' ? 'inp-depth-sixshot' : 'inp-depth-tracking';
-        const input = getEl(prefix);
-        const rng = getEl(prefix + '-r');
-        if (input) input.disabled = locked;
-        if (rng) rng.disabled = locked;
-        if (input && input.parentElement) {
-            input.parentElement.querySelectorAll('.step-btn').forEach(btn => { btn.disabled = locked; });
-        }
-    }
-
-    function syncDepthLockUI(mode) {
-        const locked = mode === 'sixshot' ? STATE.depthLockSixshot : STATE.depthLockTracking;
-        const lockId = mode === 'sixshot' ? 'lock-sixshot-depth' : 'lock-tracking-depth';
-        const lockBtn = getEl(lockId);
-        if (lockBtn) {
-            lockBtn.classList.toggle('unlocked', !locked);
-            lockBtn.innerHTML = locked
-                ? '<svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>已锁定</span>'
-                : '<svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg><span>已解锁</span>';
-        }
-        setDepthInputsEnabled(mode);
-    }
-
+    // 假人尺寸与解剖比例渲染
     function renderHoldingDummyUI() {
         const h = CFG.holding, container = getEl('holding-dimension-container');
         if (!container) return;
@@ -3372,7 +3674,7 @@
         } else {
             container.innerHTML = `
                 <div class="ctrl-row">
-                    <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v20m-5-5 5 5 5-5"/></svg>等比总缩放</label>
+                    <label><span class="dir-arrow-txt" style="font-size:0.75rem;">↑↓</span>等比总缩放</label>
                     <input type="range" id="inp-h-s-r" min="5" max="150" step="0.05" value="${h.sizeCm || 23.0}" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-h-s', -0.5)">−</button>
@@ -3408,7 +3710,7 @@
                     <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">解锁后可调歪头偏头</span>
                 </div>
                 <div class="ctrl-row">
-                    <label>头部上下</label>
+                    <label><span class="dir-arrow-txt" style="font-size:0.75rem;">↑↓</span>头部上下</label>
                     <input type="range" id="inp-h-hy-r" min="-40" max="40" step="0.2" value="${h.headOffsetY}" ${h.headLocked ? 'disabled' : ''} oninput="updateHoldingDummy(parseFloat(this.value),'hy')" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-h-hy',-0.5)" ${h.headLocked ? 'disabled' : ''}>−</button>
@@ -3417,7 +3719,7 @@
                     </div>
                 </div>
                 <div class="ctrl-row">
-                    <label>头部左右</label>
+                    <label><span class="dir-arrow-txt" style="font-size:0.75rem;">←→</span>头部左右</label>
                     <input type="range" id="inp-h-hx-r" min="-40" max="40" step="0.2" value="${h.headOffsetX}" ${h.headLocked ? 'disabled' : ''} oninput="updateHoldingDummy(parseFloat(this.value),'hx')" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-h-hx',-0.5)" ${h.headLocked ? 'disabled' : ''}>−</button>
@@ -3445,6 +3747,8 @@
         if (prop === 'headLocked' && h.headLocked) {
             h.headOffsetX = 0;
             h.headOffsetY = 0;
+            h.baseRatio.headOffX = 0;
+            h.baseRatio.headOffY = 0;
         }
 
         renderHoldingDummyUI();
@@ -3474,6 +3778,19 @@
                 setValF('inp-h-bh', h.bodyHeightCm, 1);
                 setValF('inp-h-bd', h.bodyDepthCm, 1);
             }
+            h.neckGapCm = h.sizeCm * (h.baseRatio.neckGap || 0.275);
+
+            if (h.baseRatio.headOffX !== undefined) {
+                h.headOffsetX = h.sizeCm * h.baseRatio.headOffX;
+                setValF('inp-h-hx', h.headOffsetX, 1);
+                const rx = getEl('inp-h-hx-r'); if (rx) rx.value = h.headOffsetX;
+            }
+            if (h.baseRatio.headOffY !== undefined) {
+                h.headOffsetY = h.sizeCm * h.baseRatio.headOffY;
+                setValF('inp-h-hy', h.headOffsetY, 1);
+                const ry = getEl('inp-h-hy-r'); if (ry) ry.value = h.headOffsetY;
+            }
+
             setValF('inp-h-s', h.sizeCm, 1);
             const r = getEl('inp-h-s-r'); if (r) r.value = h.sizeCm;
         } else if (prop === 'hw') {
@@ -3497,9 +3814,11 @@
         } else if (prop === 'hy') {
             h.headOffsetY = clamp(val, -40, 40); setValF('inp-h-hy', h.headOffsetY, 1);
             const r = getEl('inp-h-hy-r'); if (r) r.value = h.headOffsetY;
+            h.baseRatio.headOffY = h.sizeCm > 0 ? h.headOffsetY / h.sizeCm : 0;
         } else if (prop === 'hx') {
             h.headOffsetX = clamp(val, -40, 40); setValF('inp-h-hx', h.headOffsetX, 1);
             const r = getEl('inp-h-hx-r'); if (r) r.value = h.headOffsetX;
+            h.baseRatio.headOffX = h.sizeCm > 0 ? h.headOffsetX / h.sizeCm : 0;
         }
 
         buildHoldingTarget();
@@ -3558,6 +3877,7 @@
         else if (id === 'inp-track-size') syncTrackingTargetSize(val);
         else if (id === 'inp-track-speed') setTrackingSpeed(val);
         else if (id === 'inp-track-angle') setTrackingAngle(val);
+        else if (id === 'inp-track-wallheight') setTrackingWallHeight(val);
         else if (id === 'inp-track-freq-min') setStrafeMin(val);
         else if (id === 'inp-track-freq-max') setStrafeMax(val);
         else if (id === 'inp-depth-tracking') setDepthTracking(val);
@@ -3603,9 +3923,6 @@
         }
     });
 
-    // ============================================================
-    // 11. 全局方法挂载 (确保所有行内 onclick/oninput 100% 可用)
-    // ============================================================
     window.switchTrainMode = function(mode) {
         CFG.mode = mode;
         applyModeUI();
@@ -3648,17 +3965,6 @@
         saveToLocalStorage();
     };
 
-    window.toggleDepthLock = function(mode) {
-        if (mode === 'sixshot') {
-            STATE.depthLockSixshot = !STATE.depthLockSixshot;
-            syncDepthLockUI('sixshot');
-        } else {
-            STATE.depthLockTracking = !STATE.depthLockTracking;
-            syncDepthLockUI('tracking');
-        }
-        saveToLocalStorage();
-    };
-
     window.setDepthSixshot = function(val) {
         CFG.depthSixshot = parseFloat(val);
         setValF('inp-depth-sixshot', CFG.depthSixshot);
@@ -3675,6 +3981,15 @@
 
     window.setTrackingSpace = function(s) {
         CFG.tracking.space = s;
+        syncAllButtonStates();
+        refreshAllPreviewTargets();
+        saveToLocalStorage();
+    };
+
+    window.setTrackingWallHeight = function(val) {
+        CFG.tracking.wallHeight = parseFloat(val);
+        setValF('inp-track-wallheight', CFG.tracking.wallHeight);
+        const rng = getEl('inp-track-wallheight-r'); if (rng) rng.value = CFG.tracking.wallHeight;
         syncAllButtonStates();
         refreshAllPreviewTargets();
         saveToLocalStorage();
@@ -3787,8 +4102,8 @@
         saveToLocalStorage();
     };
 
-    window.setHoldingBaseY = function(v) { CFG.holding.baseY = parseFloat(v); setValF('inp-hold-basey', v); updateSpawnWall(); saveToLocalStorage(); };
-    window.setHoldingRangeY = function(v) { CFG.holding.rangeY = parseFloat(v); setValF('inp-hold-range', v); updateSpawnWall(); saveToLocalStorage(); };
+    window.setHoldingBaseY = function(v) { CFG.holding.baseY = parseFloat(v); setValF('inp-hold-basey', v); updateSpawnWall(); previewHoldingDummyInCenter(); saveToLocalStorage(); };
+    window.setHoldingRangeY = function(v) { CFG.holding.rangeY = parseFloat(v); setValF('inp-hold-range', v); updateSpawnWall(); previewHoldingDummyInCenter(); saveToLocalStorage(); };
 
     window.toggleMovementEnabled = function() {
         CFG.movement.enabled = !CFG.movement.enabled;
@@ -3892,22 +4207,41 @@
         if (btn) btn.classList.remove('active');
     };
 
-    window.startRebind = function(action) {
-        MOVE_STATE.rebindingAction = action;
-        const btn = getEl(`kbind-${action}`);
-        if (btn) { btn.classList.add('listening'); btn.innerText = '按下按键...'; }
-    };
-
-    function refreshMovementKeyButtons() {
-        const labels = { forward: '前', backward: '后', left: '左', right: '右', jump: '跳', crouch: '蹲' };
-        Object.keys(labels).forEach(act => {
-            const b = getEl(`kbind-${act}`);
-            if (b) b.innerText = `${labels[act]}: ${formatKeyCode(CFG.movement.keys[act])}`;
-        });
+window.startRebind = function(action) {
+    MOVE_STATE.rebindingAction = action;
+    MOVE_STATE.rebindStartTime = performance.now(); // 记录开始时间，防左键误录
+    
+    // 如果改的是重开键，让左上角立刻显示等待输入的提示
+    if (action === 'restart') {
+        const hudKey = getEl('txt-hud-restart-key');
+        if (hudKey) hudKey.innerText = '请按新键...';
     }
+    
+    const btn = getEl(`kbind-${action}`);
+    if (btn) { btn.classList.add('listening'); btn.innerText = '按下按键...'; }
+};
+
+function refreshMovementKeyButtons() {
+    const labels = { forward: '前', backward: '后', left: '左', right: '右', jump: '跳', crouch: '蹲', restart: '一键重开键' };
+    Object.keys(labels).forEach(act => {
+        const b = getEl(`kbind-${act}`);
+        if (b) {
+            if(act === 'restart') {
+                b.innerText = `↺ ${labels[act]}: ${formatKeyCode(CFG.restartKey)}`;
+            } else {
+                b.innerText = `${labels[act]}: ${formatKeyCode(CFG.movement.keys[act])}`;
+            }
+        }
+    });
+
+    // === 新增：同步刷新左上角的重开按键文字 ===
+    const hudKey = getEl('txt-hud-restart-key');
+    if (hudKey) hudKey.innerText = formatKeyCode(CFG.restartKey);
+}
 
     window.resetMovementKeys = function() {
         CFG.movement.keys = { forward: 'KeyW', backward: 'KeyS', left: 'KeyA', right: 'KeyD', jump: 'Space', crouch: 'ShiftLeft' };
+        CFG.restartKey = 'KeyR';
         refreshMovementKeyButtons();
         saveToLocalStorage();
     };
@@ -3936,8 +4270,6 @@
                 initColorPickers();
                 applyModeUI();
                 syncAllInputsFromConfig();
-                syncDepthLockUI('sixshot');
-                syncDepthLockUI('tracking');
                 refreshMovementKeyButtons();
                 renderHoldingDummyUI();
                 setCrosshairType(CFG.crosshair.type);
@@ -3982,6 +4314,7 @@
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(CFG)); } catch (e) {}
     }
 
+    // 键盘监听（拦截一键重开按键）
     window.addEventListener('keydown', (e) => {
         if (MOVE_STATE.rebindingAction) {
             e.preventDefault(); e.stopPropagation();
@@ -3990,12 +4323,26 @@
                 refreshMovementKeyButtons();
                 return;
             }
-            CFG.movement.keys[MOVE_STATE.rebindingAction] = e.code;
+            if (MOVE_STATE.rebindingAction === 'restart') {
+                CFG.restartKey = e.code;
+            } else {
+                CFG.movement.keys[MOVE_STATE.rebindingAction] = e.code;
+            }
             MOVE_STATE.rebindingAction = null;
             refreshMovementKeyButtons();
             saveToLocalStorage();
             return;
         }
+
+        if (e.code === CFG.restartKey) {
+            if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                if (STATE.game === 'playing' || STATE.game === 'starting' || STATE.game === 'finished') {
+                    triggerQuickRestart();
+                }
+            }
+        }
+
         if (document.activeElement && document.activeElement.tagName !== 'INPUT') {
             MOVE_STATE.keysPressed[e.code] = true;
         }
@@ -4011,9 +4358,7 @@
         stepValGlobal(inp.id, e.deltaY < 0 ? step : -step);
     }, { passive: false });
 
-    // ============================================================
-    // 12. 渲染主循环与启动
-    // ============================================================
+    // 主渲染帧循环
     let lastFrameTime = performance.now();
     let fpsCount = 0, fpsTime = performance.now();
 
@@ -4059,8 +4404,6 @@
         renderHoldingDummyUI();
         applyModeUI();
         syncAllInputsFromConfig();
-        syncDepthLockUI('sixshot');
-        syncDepthLockUI('tracking');
         refreshMovementKeyButtons();
         resetViewToCenter();
         onResize();
