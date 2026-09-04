@@ -6,23 +6,51 @@
     <title>测量靶场 · (西岛海)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
+        /* ============================================================
+           1. 全局样式与科技拟态变量
+           ============================================================ */
+        :root {
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --primary-light: rgba(2, 132, 199, 0.08);
+            --border-glass: rgba(255, 255, 255, 0.85);
+            --bg-glass: rgba(255, 255, 255, 0.75);
+            --text-main: #0f172a;
+            --text-sub: #334155;
+            --text-muted: #64748b;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             user-select: none;
+            -webkit-user-select: none;
         }
         body {
             overflow: hidden;
             background-color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
             width: 100vw;
             height: 100vh;
         }
 
-        /* ===== 准星容器与通用样式 ===== */
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            background: #e2e8f0;
+        }
+        #canvas-container canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* 准星样式 */
         #crosshair-container {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -37,7 +65,6 @@
             transform: translate(-50%, -50%) scale(1.18);
         }
 
-        /* 原生经典测量准星样式 */
         .classic-crosshair-dot {
             width: 3px;
             height: 3px;
@@ -52,22 +79,16 @@
             background: inherit;
         }
         .classic-crosshair-dot::before {
-            top: -6px;
-            bottom: -6px;
-            left: 1px;
-            right: 1px;
+            top: -6px; bottom: -6px; left: 1px; right: 1px;
         }
         .classic-crosshair-dot::after {
-            left: -6px;
-            right: -6px;
-            top: 1px;
-            bottom: 1px;
+            left: -6px; right: -6px; top: 1px; bottom: 1px;
         }
         #crosshair-container.on-target .classic-crosshair-dot {
             box-shadow: 0 0 8px currentColor;
         }
 
-        /* ===== 顶部 HUD ===== */
+        /* 顶部 HUD */
         #top-hud {
             position: absolute;
             top: 16px;
@@ -78,40 +99,33 @@
             align-items: center;
             pointer-events: none;
             z-index: 5;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .hud-card {
-            background: rgba(255, 255, 255, 0.65);
+            background: var(--bg-glass);
             backdrop-filter: blur(28px) saturate(190%);
             padding: 7px 16px;
             border-radius: 8px;
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             font-weight: 700;
-            color: #334155;
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            color: var(--text-sub);
+            border: 1px solid var(--border-glass);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
-        .hud-val {
-            color: #0284c7;
-            font-weight: 900;
-        }
-        .fps-val {
-            color: #16a34a;
-            font-weight: 900;
-        }
-        .poll-val {
-            color: #7c3aed;
-            font-weight: 900;
-        }
+        .hud-val { color: var(--primary); font-weight: 900; }
+        .fps-val { color: #16a34a; font-weight: 900; }
+        .poll-val { color: #7c3aed; font-weight: 900; }
 
         .f11-card {
             padding: 7px 16px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 900;
             letter-spacing: 0.5px;
-            transition: all 0.5s;
+            transition: all 0.3s;
             cursor: pointer;
             pointer-events: auto;
         }
@@ -122,7 +136,7 @@
             box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
         }
 
-        /* ===== 左下角色板与作者卡片 ===== */
+        /* 左下角色板与作者卡片 */
         #left-bottom-group {
             position: absolute;
             bottom: 16px;
@@ -130,16 +144,15 @@
             z-index: 15;
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
             gap: 8px;
             transition: opacity 0.15s;
         }
         .palette-card {
-            background: rgba(255, 255, 255, 0.65);
+            background: var(--bg-glass);
             backdrop-filter: blur(24px) saturate(180%);
             padding: 7px 12px 8px 12px;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.85);
+            border: 1px solid var(--border-glass);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
             display: flex;
             flex-direction: column;
@@ -149,7 +162,6 @@
             font-size: 0.64rem;
             font-weight: 900;
             color: #334155;
-            letter-spacing: 0.3px;
             display: flex;
             align-items: center;
             gap: 4px;
@@ -165,30 +177,29 @@
         }
 
         #author-card {
-            background: rgba(255, 255, 255, 0.65);
+            background: var(--bg-glass);
             backdrop-filter: blur(24px) saturate(180%);
-            padding: 6px 14px 6px 6px;
+            padding: 5px 14px 5px 5px;
             border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.85);
+            border: 1px solid var(--border-glass);
             display: flex;
             align-items: center;
             gap: 10px;
             text-decoration: none;
             color: inherit;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-            transition: transform 0.15s, background 0.15s, border-color 0.15s;
+            transition: transform 0.15s, border-color 0.15s;
             cursor: pointer;
         }
         #author-card:hover {
             transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.88);
-            border-color: #0284c7;
+            border-color: var(--primary);
         }
         .author-avatar-badge {
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #0284c7, #0369a1);
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             font-weight: 900;
             font-size: 0.9rem;
@@ -197,22 +208,11 @@
             justify-content: center;
             box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
         }
-        .author-meta {
-            display: flex;
-            flex-direction: column;
-        }
-        .author-name {
-            font-size: 0.74rem;
-            font-weight: 900;
-            color: #0f172a;
-        }
-        .author-tag {
-            font-size: 0.58rem;
-            color: #64748b;
-            font-weight: bold;
-        }
+        .author-meta { display: flex; flex-direction: column; }
+        .author-name { font-size: 0.74rem; font-weight: 900; color: #0f172a; }
+        .author-tag { font-size: 0.58rem; color: #64748b; font-weight: bold; }
 
-        /* ===== 右下角原理与调试 HUD ===== */
+        /* 右下角原理与控制面板 */
         #bottom-right-hud {
             position: absolute;
             bottom: 16px;
@@ -220,12 +220,12 @@
             width: 360px;
             max-height: 86vh;
             overflow-y: auto;
-            background: rgba(255, 255, 255, 0.75);
+            background: var(--bg-glass);
             backdrop-filter: blur(28px) saturate(190%);
             padding: 12px 14px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            border-left: 4px solid #0284c7;
+            border: 1px solid var(--border-glass);
+            border-left: 4px solid var(--primary);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
             z-index: 22;
             transition: opacity 0.15s;
@@ -244,7 +244,7 @@
         .rel-title {
             font-size: 0.74rem;
             font-weight: 900;
-            color: #0284c7;
+            color: var(--primary);
             margin-bottom: 4px;
         }
         .rel-formula {
@@ -290,9 +290,8 @@
             transition: transform 0.25s, box-shadow 0.25s;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
         }
-        .debug-toggle input:checked+.slider { background: #0284c7; }
-        .debug-toggle input:checked+.slider+.knob { transform: translateX(18px); }
-        .debug-toggle input:checked+.slider { box-shadow: 0 0 6px rgba(2, 132, 199, 0.35); }
+        .debug-toggle input:checked + .slider { background: var(--primary); box-shadow: 0 0 6px rgba(2, 132, 199, 0.35); }
+        .debug-toggle input:checked + .slider + .knob { transform: translateX(18px); }
 
         .debug-label {
             font-size: 0.7rem;
@@ -308,59 +307,38 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             border: 1.5px solid #94a3b8;
             color: #94a3b8;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 900;
             cursor: help;
-            flex-shrink: 0;
             position: relative;
         }
-        .help-icon:hover {
-            border-color: #0284c7;
-            color: #0284c7;
-            background: rgba(2, 132, 199, 0.06);
-        }
+        .help-icon:hover { border-color: var(--primary); color: var(--primary); }
         .help-icon .tooltip-text {
             visibility: hidden;
             opacity: 0;
             width: 260px;
             background: #0f172a;
             color: #f1f5f9;
-            font-size: 0.7rem;
-            font-weight: 500;
-            text-align: left;
+            font-size: 0.68rem;
             border-radius: 8px;
-            padding: 10px 14px;
+            padding: 8px 12px;
             position: absolute;
             z-index: 100;
             bottom: 130%;
             left: 50%;
-            transform: translateX(-50%) translateY(6px);
-            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+            transform: translateX(-50%);
+            transition: opacity 0.2s ease;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
             line-height: 1.5;
             pointer-events: none;
             white-space: normal;
-            word-break: break-word;
         }
-        .help-icon .tooltip-text::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 8px solid transparent;
-            border-top-color: #0f172a;
-        }
-        .help-icon:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
+        .help-icon:hover .tooltip-text { visibility: visible; opacity: 1; }
 
         #debug-indicator {
             position: absolute;
@@ -380,37 +358,16 @@
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
             opacity: 0;
             transition: opacity 0.3s;
-            letter-spacing: 0.5px;
             white-space: nowrap;
         }
         #debug-indicator.active { opacity: 1; }
 
-        /* ===== 主控制面板（左 & 右） ===== */
-        #left-panel {
-            position: fixed;
-            left: 18px;
-            top: 56px;
-            width: 380px;
-            z-index: 20;
-            transition: opacity 0.15s;
-            max-height: 88vh;
-        }
-
-        #right-panel {
-            position: fixed;
-            right: 18px;
-            top: 56px;
-            width: 380px;
-            z-index: 19;
-            transition: opacity 0.15s;
-            max-height: 88vh;
-        }
-
+        /* 浮动面板通用样式 */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.65);
+            background: var(--bg-glass);
             backdrop-filter: blur(28px) saturate(190%);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-top: 3.5px solid #0284c7;
+            border: 1px solid var(--border-glass);
+            border-top: 3.5px solid var(--primary);
             border-radius: 10px;
             padding: 12px 14px;
             box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
@@ -419,9 +376,13 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            transition: opacity 0.15s;
         }
         .glass-panel::-webkit-scrollbar { width: 4px; }
         .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        #left-panel { position: fixed; left: 18px; top: 56px; width: 380px; z-index: 20; }
+        #right-panel { position: fixed; right: 18px; top: 56px; width: 380px; z-index: 19; }
 
         .panel-header {
             display: flex;
@@ -445,14 +406,10 @@
             display: inline-block;
             width: 6px;
             height: 12px;
-            background: #0284c7;
+            background: var(--primary);
             border-radius: 2px;
         }
-        .header-actions {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
+        .header-actions { display: flex; gap: 5px; align-items: center; }
         .header-btn {
             background: rgba(255, 255, 255, 0.8);
             border: 1px solid #cbd5e1;
@@ -464,16 +421,8 @@
             cursor: pointer;
             transition: 0.15s;
         }
-        .header-btn:hover {
-            background: #e0f2fe;
-            border-color: #0284c7;
-            color: #0284c7;
-        }
-        .header-btn.active {
-            background: #0284c7;
-            color: #ffffff;
-            border-color: #0284c7;
-        }
+        .header-btn:hover { background: #e0f2fe; border-color: var(--primary); color: var(--primary); }
+        .header-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
         .section-card {
             background: rgba(248, 250, 252, 0.65);
@@ -496,11 +445,7 @@
             gap: 4px;
         }
 
-        .preset-grid {
-            display: grid;
-            gap: 4px;
-            margin-bottom: 6px;
-        }
+        .preset-grid { display: grid; gap: 4px; margin-bottom: 6px; }
         .preset-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
         .preset-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
         .preset-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
@@ -520,17 +465,8 @@
             text-align: center;
             white-space: nowrap;
         }
-        .pill-btn:hover {
-            border-color: #0284c7;
-            color: #0284c7;
-            background: #f0f9ff;
-        }
-        .pill-btn.active {
-            background: #0284c7 !important;
-            color: #ffffff !important;
-            border-color: #0284c7 !important;
-            box-shadow: 0 1px 4px rgba(2, 132, 199, 0.2);
-        }
+        .pill-btn:hover { border-color: var(--primary); color: var(--primary); background: #f0f9ff; }
+        .pill-btn.active { background: var(--primary) !important; color: #fff !important; border-color: var(--primary) !important; }
 
         .btn-move-toggle {
             font-size: 0.66rem;
@@ -546,15 +482,24 @@
             align-items: center;
             gap: 4px;
         }
-        .btn-move-toggle:hover {
-            border-color: #0284c7;
-            color: #0284c7;
-        }
-        .btn-move-toggle.active-move {
-            background: #22c55e !important;
-            border-color: #16a34a !important;
-            color: #ffffff !important;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.35) !important;
+        .btn-move-toggle:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-move-toggle.active-move { background: #22c55e !important; border-color: #16a34a !important; color: #ffffff !important; }
+
+        .keycap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-bottom: 2px solid #94a3b8;
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 0.62rem;
+            font-weight: 900;
+            color: #0f172a;
+            font-family: inherit;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            margin: 0 2px;
         }
 
         .lock-btn {
@@ -571,7 +516,7 @@
             font-weight: 700;
             transition: 0.15s;
         }
-        .lock-btn:hover { border-color: #0284c7; color: #0284c7; }
+        .lock-btn:hover { border-color: var(--primary); color: var(--primary); }
         .lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
 
         .ctrl-row {
@@ -590,15 +535,10 @@
         }
         .ctrl-row input[type="range"] {
             flex: 1;
-            accent-color: #0284c7;
+            accent-color: var(--primary);
             cursor: pointer;
             height: 4px;
             min-width: 50px;
-        }
-        .ctrl-row input[type="range"]:disabled {
-            cursor: not-allowed !important;
-            opacity: 0.35 !important;
-            accent-color: #94a3b8 !important;
         }
 
         .stepper-box {
@@ -609,34 +549,21 @@
             overflow: hidden;
             background: #ffffff;
             flex-shrink: 0;
-            transition: background 0.15s, border-color 0.15s;
-        }
-        .stepper-box:has(:disabled) {
-            background: #f1f5f9 !important;
-            border-color: #e2e8f0 !important;
         }
         .step-btn {
             width: 19px;
             height: 22px;
             border: none;
             background: #f8fafc;
-            color: #0284c7;
+            color: var(--primary);
             font-size: 0.8rem;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.1s;
-            flex-shrink: 0;
         }
         .step-btn:hover { background: #e0f2fe; }
-        .step-btn:disabled {
-            opacity: 0.5 !important;
-            cursor: not-allowed !important;
-            background: #f1f5f9 !important;
-            color: #94a3b8 !important;
-        }
         .num-input {
             width: 54px;
             height: 22px;
@@ -647,68 +574,28 @@
             font-size: 0.72rem;
             font-weight: 800;
             text-align: center;
-            color: #0284c7;
+            color: var(--primary);
             outline: none;
             background: #ffffff;
-            transition: background 0.15s, color 0.15s;
-        }
-        .num-input:disabled {
-            color: #94a3b8 !important;
-            background: #f1f5f9 !important;
-            cursor: not-allowed !important;
         }
 
         .divider {
             height: 1px;
             background: rgba(226, 232, 240, 0.9);
             margin: 8px 0;
-            border-radius: 1px;
         }
 
         .move-subbox {
             background: rgba(2, 132, 199, 0.04);
-            border-left: 2.5px solid #0284c7;
+            border-left: 2.5px solid var(--primary);
             padding: 6px 8px;
             border-radius: 0 4px 4px 0;
             margin-top: 6px;
         }
-        .hint-speed-formula {
-            font-size: 0.58rem;
-            color: #0284c7;
-            margin-top: 4px;
-            font-weight: 600;
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        .swatches-grid-9 {
-            display: grid;
-            grid-template-columns: repeat(9, 1fr);
-            gap: 3px;
-            margin-top: 2px;
-        }
-        .round-swatch-btn {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border: 2px solid #cbd5e1;
-            cursor: pointer;
-            transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
-            flex-shrink: 0;
-        }
-        .round-swatch-btn:hover {
-            transform: scale(1.2);
-            border-color: #0284c7;
-        }
-        .round-swatch-btn.active {
-            border-color: #0284c7;
-            box-shadow: 0 0 0 2px #0284c7, 0 0 0 3px rgba(2, 132, 199, 0.2);
-            transform: scale(1.1);
-        }
 
         .btn-start {
             width: 100%;
-            background: linear-gradient(135deg, #0284c7, #0369a1);
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: #ffffff;
             border: none;
             border-radius: 6px;
@@ -719,19 +606,9 @@
             transition: all 0.2s ease;
             margin-top: 4px;
             box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
-            letter-spacing: 0.5px;
         }
-        .btn-start:hover {
-            background: linear-gradient(135deg, #0369a1, #075985);
-            box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
-        }
-        .btn-start:disabled,
-        .btn-start.disabled-cooldown {
-            background: #94a3b8 !important;
-            box-shadow: none !important;
-            cursor: not-allowed !important;
-            opacity: 0.75 !important;
-        }
+        .btn-start:hover { background: linear-gradient(135deg, var(--primary-hover), #075985); }
+        .btn-start:disabled { background: #94a3b8 !important; cursor: not-allowed !important; }
 
         .action-grid {
             display: grid;
@@ -748,16 +625,8 @@
             padding: 6px;
             border-radius: 4px;
             cursor: pointer;
-            transition: 0.15s;
         }
-        .btn-action:hover {
-            border-color: #0284c7;
-            color: #0284c7;
-            background: #f0f9ff;
-        }
-
-        .target-list-item { margin-bottom: 6px; }
-        .target-list-item:last-child { margin-bottom: 0; }
+        .btn-action:hover { border-color: var(--primary); color: var(--primary); background: #f0f9ff; }
 
         #debug-horizon-guide {
             position: absolute;
@@ -794,40 +663,72 @@
         .adv-badge {
             font-size: 0.55rem;
             background: #e0f2fe;
-            color: #0284c7;
+            color: var(--primary);
             padding: 1px 5px;
             border-radius: 3px;
             font-weight: 800;
         }
-        .size-lock-btn {
-            font-size: 0.6rem;
-            padding: 2px 7px;
-            border-radius: 4px;
-            border: 1px solid #cbd5e1;
-            background: rgba(255, 255, 255, 0.85);
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.15s;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-        .size-lock-btn:hover { border-color: #0284c7; color: #0284c7; }
-        .size-lock-btn.active-lock { background: #e2e8f0; color: #475569; border-color: #cbd5e1; }
-        .size-lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
 
-        /* 人偶尺寸 UI 样式 */
+        /* 准星 9 色色盘 + 拾色器 */
+        .swatches-grid-9 {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr) 22px;
+            gap: 3px;
+            align-items: center;
+        }
+        .round-swatch-btn {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.1s, box-shadow 0.1s;
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        .round-swatch-btn:hover {
+            transform: scale(1.18);
+            border-color: var(--primary);
+        }
+        .round-swatch-btn.active {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 2px #0284c7, 0 0 0 4px rgba(2, 132, 199, 0.25);
+            transform: scale(1.1);
+        }
+        .color-picker-input-wrap {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #cbd5e1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.15s;
+        }
+        .color-picker-input-wrap:hover { border-color: var(--primary); }
+        .color-picker-input-wrap input[type="color"] {
+            position: absolute;
+            left: -10px;
+            top: -10px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+            background: none;
+        }
+
+        /* 假人解剖尺寸卡片样式 */
         .dim-group {
             background: rgba(255, 255, 255, 0.6);
             border: 1px solid rgba(226, 232, 240, 0.9);
             border-radius: 6px;
             padding: 6px 8px;
             margin-top: 5px;
-            transition: all 0.2s ease;
         }
-        .dim-group.is-locked {
-            background: rgba(248, 250, 252, 0.45);
-            border-color: rgba(226, 232, 240, 0.6);
-        }
+        .dim-group.is-locked { background: rgba(248, 250, 252, 0.45); }
         .dim-group-header {
             display: flex;
             align-items: center;
@@ -842,17 +743,8 @@
             align-items: center;
             gap: 5px;
         }
-        .dim-indicator-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        .dim-card-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-        }
+        .dim-indicator-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .dim-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
         .dim-item {
             background: rgba(241, 245, 249, 0.65);
             border: 1px solid #e2e8f0;
@@ -862,18 +754,8 @@
             flex-direction: column;
             align-items: center;
             gap: 3px;
-            transition: all 0.15s ease;
         }
-        .dim-group.is-locked .dim-item {
-            background: rgba(241, 245, 249, 0.35);
-            border-color: #edf2f7;
-        }
-        .dim-item-title {
-            font-size: 0.58rem;
-            font-weight: 800;
-            color: #64748b;
-        }
-        .dim-group.is-locked .dim-item-title { color: #94a3b8; }
+        .dim-item-title { font-size: 0.58rem; font-weight: 800; color: #64748b; }
         .mini-stepper {
             width: 100%;
             height: 20px;
@@ -883,59 +765,26 @@
             border-radius: 3px;
             background: #ffffff;
             overflow: hidden;
-            transition: all 0.15s;
         }
-        .mini-stepper:has(:disabled) {
-            background: #f1f5f9 !important;
-            border-color: #e2e8f0 !important;
-        }
-        .mini-stepper .step-btn {
-            width: 15px;
-            height: 100%;
-            font-size: 0.68rem;
-            font-weight: bold;
-            background: #f8fafc;
-            border: none;
-            color: #0284c7;
+        .mini-stepper .step-btn { width: 15px; height: 100%; font-size: 0.68rem; padding: 0; }
+        .mini-stepper .num-input { width: 100%; height: 100%; font-size: 0.66rem; }
+        .size-lock-btn {
+            font-size: 0.6rem;
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+            background: rgba(255, 255, 255, 0.85);
+            color: #64748b;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            padding: 0;
+            font-weight: 700;
         }
-        .mini-stepper .step-btn:hover { background: #e0f2fe; }
-        .mini-stepper .step-btn:disabled {
-            background: #f8fafc !important;
-            color: #cbd5e1 !important;
-            cursor: not-allowed !important;
-            opacity: 0.6;
-        }
-        .mini-stepper .num-input {
-            width: 100%;
-            min-width: 0;
-            height: 100%;
-            border: none;
-            border-left: 1px solid #e2e8f0;
-            border-right: 1px solid #e2e8f0;
-            text-align: center;
-            font-size: 0.66rem;
-            font-weight: 800;
-            color: #0284c7;
-            background: #ffffff;
-            outline: none;
-            padding: 0;
-        }
-        .mini-stepper .num-input:disabled {
-            background: #f1f5f9 !important;
-            color: #94a3b8 !important;
-            cursor: not-allowed !important;
-        }
+        .size-lock-btn.active-lock { background: #e2e8f0; color: #475569; }
+        .size-lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
     </style>
 </head>
 <body>
 
-    <!-- 准星容器 (支持 SVG 及经典测量准星) -->
+    <!-- 准星容器 -->
     <div id="crosshair-container">
         <div id="crosshair-classic-inner" class="classic-crosshair-dot" style="background:#000000; color:#000000;"></div>
     </div>
@@ -943,25 +792,26 @@
     <div id="debug-horizon-guide"></div>
     <div id="debug-indicator">轴向已互换</div>
 
-    <!-- 顶部 HUD (加入高精硬件轮询率) -->
+    <!-- 顶部 HUD (加入纵向仰角与横向方位角) -->
     <div id="top-hud">
         <div class="hud-card">
             <div>DPI: <span class="hud-val" id="hud-dpi">800</span></div>
             <div>CM/360°: <span class="hud-val" id="hud-cm">50.00</span>cm</div>
             <div>FOV: <span class="hud-val" id="hud-fov">103</span>°</div>
-            <div>视角水平角: <span class="hud-val" id="hud-angle">0.000</span>°</div>
+            <div>水平方位角 (Yaw): <span class="hud-val" id="hud-angle">0.000</span>°</div>
+            <div>纵向俯仰角 (Pitch): <span class="hud-val" id="hud-pitch" style="color:#059669;">0.000</span>°</div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
             <div class="hud-card f11-card f11-highlight" id="f11-box">F11全屏</div>
             <div class="hud-card" style="gap:12px;">
-                <div title="高精硬件轮询率（平滑峰值捕获）">轮询率: <span class="poll-val" id="hud-poll">--</span> Hz</div>
+                <div title="高精硬件轮询率">轮询率: <span class="poll-val" id="hud-poll">--</span> Hz</div>
                 <div style="width:1.5px; height:14px; background:#cbd5e1; border-radius:1px;"></div>
                 <div>FPS: <span class="fps-val" id="hud-fps">--</span></div>
             </div>
         </div>
     </div>
 
-    <!-- 左下角组合：地面底色调色板 + 作者卡片 -->
+    <!-- 左下角色板与作者卡片 -->
     <div id="left-bottom-group">
         <div class="palette-card" id="floor-color-picker">
             <div class="palette-label" style="justify-content:space-between; align-items:center;">
@@ -986,6 +836,18 @@
         <div class="rel-title">物理精算映射原理 (底层互通)</div>
         <div class="rel-formula">360°总点数 N = (cm ÷ 2.54) × DPI<br />鼠标单点弧度 Δθ = 2π / N</div>
         <div class="rel-desc">• <strong>DPI</strong> 为采样率；<strong>CM/360°</strong> 为物理位移标定。<br />• 初始状态假人头部严格锁定视平线 1.625m，准星直指正中眉心。</div>
+
+        <!-- 纵向坐标开关 -->
+        <div class="debug-section" style="margin-top:6px; padding-top:6px;">
+            <span class="debug-label" style="color:var(--primary);">
+                <span>纵向坐标 (经线大圆与仰俯度数)</span>
+            </span>
+            <label class="debug-toggle" style="margin-left:auto;">
+                <input type="checkbox" id="toggle-meridian" checked />
+                <span class="slider"></span>
+                <span class="knob"></span>
+            </label>
+        </div>
 
         <div class="debug-section">
             <span class="debug-label">调试模式</span>
@@ -1015,10 +877,16 @@
             <div class="section-card">
                 <div class="adv-section-title">
                     <span>行走与机动系统</span>
-                    <button class="btn-move-toggle" id="btn-toggle-walk">行走: 关闭</button>
+                    <button class="btn-move-toggle" id="btn-toggle-walk">行走 [WASD]: 关闭</button>
                 </div>
-
                 <div id="walk-sub-controls" style="display:none; margin-top:4px;">
+                    <!-- 电竞键位提示指引 -->
+                    <div style="font-size:0.6rem; color:#334155; margin-bottom:6px; line-height:1.6; background:rgba(2,132,199,0.06); padding:6px 8px; border-radius:6px; border:1px solid #cbd5e1;">
+                        <div style="font-weight:900; color:var(--primary); margin-bottom:2px;">🎮 操作键位指南：</div>
+                        <div>• <strong>平地移动</strong>：<span class="keycap">W</span>前进 ｜ <span class="keycap">S</span>后退 ｜ <span class="keycap">A</span>向左 ｜ <span class="keycap">D</span>向右</div>
+                        <div>• <strong>飞行升降</strong>：<span class="keycap">空格 Space</span>上升 ｜ <span class="keycap">左 Shift</span>下降</div>
+                    </div>
+
                     <div class="ctrl-row">
                         <label>行走速度 (m/s)</label>
                         <input type="range" id="inp-walk-spd-r" min="1.0" max="25.0" step="0.2" value="7.5" />
@@ -1028,12 +896,10 @@
                             <button class="step-btn" onclick="stepValGlobal('inp-walk-spd', 0.5)">+</button>
                         </div>
                     </div>
-
                     <div class="ctrl-row" style="margin-top:4px;">
                         <label>垂直飞行权限</label>
-                        <button class="btn-move-toggle" id="btn-toggle-fly">可以飞: 关闭</button>
+                        <button class="btn-move-toggle" id="btn-toggle-fly">可以飞 [空格/Shift]: 关闭</button>
                     </div>
-
                     <div id="fly-sub-controls" style="display:none; margin-top:4px;">
                         <div class="ctrl-row">
                             <label>飞行升降速</label>
@@ -1045,12 +911,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div style="font-size:0.58rem; color:#64748b; margin-top:6px; line-height:1.5; background:rgba(2,132,199,0.05); padding:5px 6px; border-radius:4px;">
-                        • <strong>移动按键</strong>：前进 <code style="color:#0284c7;font-weight:bold;">W</code> ；后退 <code style="color:#0284c7;font-weight:bold;">S</code> ；向左 <code style="color:#0284c7;font-weight:bold;">A</code> ；向右 <code style="color:#0284c7;font-weight:bold;">D</code><br />
-                        • <strong>飞行升降</strong>：上升 <code style="color:#16a34a;font-weight:bold;">空格 (Space)</code> ；下降 <code style="color:#ef4444;font-weight:bold;">左侧 Shift (ShiftLeft)</code>
-                    </div>
-
                     <button class="btn-action" style="width:100%; margin-top:6px;" onclick="resetPlayerPosition()">重置回初始站位</button>
                 </div>
             </div>
@@ -1060,9 +920,7 @@
                     <span>镜之边缘风格箱子</span>
                     <span class="adv-badge" id="lbl-box-count">0 / 9 个</span>
                 </div>
-
                 <div id="boxes-container"></div>
-
                 <div class="action-grid" style="margin-top:6px;">
                     <button class="btn-action" onclick="addNewBox()">+ 添加箱子</button>
                     <button class="btn-action" onclick="removeLastBox()" style="color:#ef4444;">- 删除末尾箱子</button>
@@ -1071,6 +929,7 @@
         </div>
     </div>
 
+    <!-- WebGL 挂载容器 -->
     <div id="canvas-container"></div>
 
     <!-- 左侧主面板 -->
@@ -1085,9 +944,7 @@
         </div>
 
         <div class="section-card">
-            <div class="section-header">
-                <span class="section-label">目标形态切换</span>
-            </div>
+            <div class="section-header"><span class="section-label">目标形态切换</span></div>
             <div class="preset-grid cols-2">
                 <button class="pill-btn" id="btn-type-sphere" onclick="setTargetShape('sphere')">小球</button>
                 <button class="pill-btn active" id="btn-type-dummy" onclick="setTargetShape('dummy')">人偶</button>
@@ -1104,19 +961,15 @@
         <button class="btn-start" id="btn-lock">进入靶场 (锁定鼠标)</button>
     </div>
 
-    <!-- 右侧独立面板 (包含完整准星调优系统) -->
+    <!-- 右侧独立面板 (包含完整恢复的准星双通道调色系统) -->
     <div class="glass-panel" id="right-panel">
         <div class="panel-header">
             <span class="panel-title">设置与准星调优</span>
             <span style="font-size:0.6rem; color:#94a3b8;">滚轮微调</span>
         </div>
 
-        <!-- 物理外设 -->
         <div class="section-card">
-            <div class="section-header">
-                <span class="section-label">物理外设与灵敏度</span>
-            </div>
-
+            <div class="section-header"><span class="section-label">物理外设与灵敏度</span></div>
             <div class="preset-grid cols-8" id="dpi-presets">
                 <button class="pill-btn dpi-pill" data-val="200">200</button>
                 <button class="pill-btn dpi-pill" data-val="400">400</button>
@@ -1189,11 +1042,8 @@
             </div>
         </div>
 
-        <!-- 准星全面配置面板 -->
         <div class="section-card">
-            <div class="section-header">
-                <span class="section-label">准星形态与参数</span>
-            </div>
+            <div class="section-header"><span class="section-label">准星形态与参数</span></div>
             <div class="preset-grid cols-4" style="margin-bottom:6px;">
                 <button class="pill-btn active" id="btn-cross-classic" onclick="setCrosshairType('classic')">经典测量</button>
                 <button class="pill-btn" id="btn-cross-cross" onclick="setCrosshairType('cross')">十字准星</button>
@@ -1231,38 +1081,26 @@
                 </div>
             </div>
 
-            <div class="ctrl-row">
-                <label>准星不透明度</label>
-                <input type="range" id="inp-crosshair-opacity-r" min="0.1" max="1" step="0.05" value="1" />
-                <div class="stepper-box">
-                    <button class="step-btn" onclick="stepValGlobal('inp-crosshair-opacity', -0.05)">−</button>
-                    <input type="number" class="num-input" id="inp-crosshair-opacity" value="1.00" min="0.1" max="1" step="0.05" />
-                    <button class="step-btn" onclick="stepValGlobal('inp-crosshair-opacity', 0.05)">+</button>
-                </div>
-            </div>
-
             <div class="divider"></div>
 
-            <div class="section-header" style="margin-bottom:2px;">
-                <span class="section-label">准星调色与瞄准高亮</span>
-                <label style="margin-left:auto; display:flex; align-items:center; gap:3px; cursor:pointer; font-size:0.62rem; color:#0284c7; font-weight:bold;">
-                    <input type="checkbox" id="inp-custom-crosshair" /> 自定义颜色
-                </label>
+            <!-- 完整恢复：默认准星颜色与瞄准命中高亮颜色直接显性呈现 -->
+            <div class="section-header" style="margin-bottom:4px;">
+                <span class="section-label">默认静止准星颜色</span>
             </div>
+            <div class="swatches-grid-9" id="swatches-default" style="margin-bottom:8px;"></div>
 
-            <div id="crosshair-custom-box" class="move-subbox" style="display:none;">
-                <div style="font-size:0.62rem; font-weight:bold; color:#475569; margin-bottom:2px;">默认静止准星颜色:</div>
-                <div class="swatches-grid-9" id="swatches-default"></div>
-                <div style="font-size:0.62rem; font-weight:bold; color:#475569; margin-top:6px; margin-bottom:2px;">瞄准/命中目标高亮颜色:</div>
-                <div class="swatches-grid-9" id="swatches-target"></div>
+            <div class="section-header" style="margin-bottom:4px;">
+                <span class="section-label">瞄准/命中高亮颜色</span>
             </div>
+            <div class="swatches-grid-9" id="swatches-target"></div>
         </div>
     </div>
 
+    <!-- ============================================================
+         JavaScript 核心架构
+         ============================================================ -->
     <script>
-        // ============================================================
-        // 1. 配置与常量
-        // ============================================================
+        // 1. 全局配置与状态模型
         const ISO_INCH_TO_CM = 2.54;
         const LINEAR_MAX_HALF_DEG = 67.5;
         const CM_MAX = 1000000;
@@ -1292,16 +1130,15 @@
             cloudsEnabled: true,
             floorColor: '#f8fafc',
             targetShape: 'dummy',
-            crosshairOpacity: 1.0,
+            showMeridian: true,
             crosshair: {
-                type: 'classic', // 'classic' | 'cross' | 'dot' | 'circle_hollow'
+                type: 'classic',
                 size: 8,
                 thick: 2,
                 gap: 3,
                 outline: 1.2
             },
-            customCrosshair: {
-                enabled: false,
+            crosshairColor: {
                 defaultColor: '#000000',
                 targetColor: '#0284c7'
             },
@@ -1318,9 +1155,7 @@
             }
         };
 
-        // ============================================================
         // 2. 工具函数
-        // ============================================================
         function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
         function rand(min, max) { return min + Math.random() * (max - min); }
         function getEl(id) { return document.getElementById(id); }
@@ -1345,9 +1180,29 @@
             return ((-yaw * 180 / Math.PI) % 360 + 360) % 360;
         }
 
-        // ============================================================
-        // 3. 灵敏度与全局数值设置器
-        // ============================================================
+        function getPlayerCurrentPitchDeg() {
+            return (-pitch * 180 / Math.PI);
+        }
+
+        // 计算玩家眼睛指向指定目标的纵向仰俯角度 (Pitch)
+        function calculateTargetVerticalPitchDeg(t) {
+            const camX = config.advanced.playerPos.x;
+            const camY = config.viewHeight + config.advanced.playerPos.y;
+            const camZ = config.advanced.playerPos.z;
+
+            const tx = t.rootGroup.position.x;
+            const ty = t.rootGroup.position.y;
+            const tz = t.rootGroup.position.z;
+
+            const dx = tx - camX;
+            const dz = tz - camZ;
+            const dHoriz = Math.hypot(dx, dz);
+            const dy = ty - camY;
+
+            return Math.atan2(dy, Math.max(0.001, dHoriz)) * (180 / Math.PI);
+        }
+
+        // 3. 灵敏度与硬件映射
         let radiansPerCount = 0.0;
         let totalCounts360 = 0;
 
@@ -1355,9 +1210,7 @@
             totalCounts360 = (config.cmPer360 / ISO_INCH_TO_CM) * config.dpi;
             radiansPerCount = (Math.PI * 2) / Math.max(1, totalCounts360);
 
-            const elDpi = getEl('hud-dpi'),
-                elCm = getEl('hud-cm'),
-                elFov = getEl('hud-fov');
+            const elDpi = getEl('hud-dpi'), elCm = getEl('hud-cm'), elFov = getEl('hud-fov');
             if (elDpi) elDpi.innerText = config.dpi;
             if (elCm) elCm.innerText = config.cmPer360.toFixed(2);
             if (elFov) elFov.innerText = Math.round(config.fovHorizontal);
@@ -1409,16 +1262,6 @@
             updateScene();
         }
 
-        function setCrosshairOpacity(v) {
-            const val = clamp(parseFloat(v) || 1, 0.1, 1);
-            config.crosshairOpacity = val;
-            setNum('inp-crosshair-opacity', val, 2);
-            const r = getEl('inp-crosshair-opacity-r');
-            if (r) r.value = val;
-            const container = getEl('crosshair-container');
-            if (container) container.style.opacity = val;
-        }
-
         function syncFov(v) { setFov(v); }
 
         function setWalkSpeed(v) {
@@ -1437,17 +1280,11 @@
             if (r) r.value = val;
         }
 
-        // ============================================================
-        // 4. 准星核心渲染引擎 (融合经典与几何 SVG)
-        // ============================================================
+        // 4. 准星渲染引擎
         let lastTargetAimState = false;
 
         function getActiveCrosshairColor(onTarget) {
-            if (config.customCrosshair.enabled) {
-                return onTarget ? config.customCrosshair.targetColor : config.customCrosshair.defaultColor;
-            }
-            const isSunset = config.theme === 'sunset';
-            return onTarget ? (isSunset ? '#38bdf8' : '#0284c7') : (isSunset ? '#ffffff' : '#000000');
+            return onTarget ? config.crosshairColor.targetColor : config.crosshairColor.defaultColor;
         }
 
         function updateCrosshairStyle(onTarget = lastTargetAimState) {
@@ -1456,7 +1293,6 @@
             if (!container) return;
 
             container.classList.toggle('on-target', onTarget);
-            container.style.opacity = config.crosshairOpacity;
 
             const color = getActiveCrosshairColor(onTarget);
             const { type, size, thick, gap, outline } = config.crosshair;
@@ -1508,10 +1344,7 @@
             const lblSize = getEl('lbl-cross-size');
             if (lblSize) lblSize.innerText = type === 'cross' ? '臂长 (px)' : (type === 'classic' ? '点距比例' : '半径 (px)');
 
-            const sR = getEl('row-cross-size');
-            const tR = getEl('row-cross-thick');
-            const gR = getEl('row-cross-gap');
-
+            const sR = getEl('row-cross-size'), tR = getEl('row-cross-thick'), gR = getEl('row-cross-gap');
             if (type === 'classic') {
                 if (sR) sR.style.display = 'none';
                 if (tR) tR.style.display = 'none';
@@ -1521,7 +1354,6 @@
                 if (tR) tR.style.display = type === 'dot' ? 'none' : 'flex';
                 if (gR) gR.style.display = type === 'dot' ? 'none' : 'flex';
             }
-
             updateCrosshairStyle();
         }
 
@@ -1540,7 +1372,6 @@
             'inp-cm': setCm,
             'inp-fov': setFov,
             'inp-height': setHeight,
-            'inp-crosshair-opacity': setCrosshairOpacity,
             'inp-walk-spd': setWalkSpeed,
             'inp-fly-spd': setFlySpeed,
             'inp-cross-size': v => syncCrosshairProp('size', v),
@@ -1562,11 +1393,8 @@
             dispatchGlobalInput(id, clamp(current + delta, min, max));
         }
 
-        // ============================================================
-        // 5. 音频反馈
-        // ============================================================
+        // 5. 音频系统
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
         function playHitFeedback(part) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
@@ -1583,12 +1411,9 @@
             osc.stop(audioCtx.currentTime + 0.07);
         }
 
-        // ============================================================
-        // 6. 场景构建与视觉系统
-        // ============================================================
-        const container = getEl('canvas-container');
+        // 6. Three.js 场景构建
+        const canvasContainer = getEl('canvas-container');
         const scene = new THREE.Scene();
-
         const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.set(0, config.viewHeight, 0);
 
@@ -1597,7 +1422,7 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        container.appendChild(renderer.domElement);
+        canvasContainer.appendChild(renderer.domElement);
 
         function createSkyTexture(theme) {
             const c = document.createElement('canvas');
@@ -1636,12 +1461,8 @@
         for (let i = 0; i < 15; i++) {
             const angle = (i / 15) * Math.PI * 2 + rand(-0.2, 0.2);
             const dist = 75 + rand(0, 65);
-            const x = Math.sin(angle) * dist,
-                z = -Math.cos(angle) * dist,
-                y = 48 + rand(0, 20);
-            const w = 24 + rand(0, 20),
-                h = 2.5 + rand(0, 1.5),
-                d = 16 + rand(0, 18);
+            const x = Math.sin(angle) * dist, z = -Math.cos(angle) * dist, y = 48 + rand(0, 20);
+            const w = 24 + rand(0, 20), h = 2.5 + rand(0, 1.5), d = 16 + rand(0, 18);
             const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), cloudMat);
             mesh.position.set(x, y, z);
             mesh.userData = { angle, dist, speed: 0.0015 + rand(0, 0.002), altitude: y };
@@ -1710,55 +1531,34 @@
             if (rng && !isCreamy) rng.value = Math.round(((col.r + col.g + col.b) / 3) * 100);
         }
 
-        function setFloorColorPreset(hex) {
-            updateFloorAndGrid(hex);
-        }
-
+        function setFloorColorPreset(hex) { updateFloorAndGrid(hex); }
         function onFloorGraySlider(val) {
             const v = Math.round(clamp(parseFloat(val), 0, 100) * 2.55).toString(16).padStart(2, '0');
             updateFloorAndGrid(`#${v}${v}${v}`);
         }
 
         let horizonLine = null, thinLine = null;
-
         function updateHorizon(height) {
-            if (horizonLine) {
-                scene.remove(horizonLine);
-                horizonLine.geometry.dispose();
-                horizonLine.material.dispose();
-                horizonLine = null;
-            }
-            if (thinLine) {
-                scene.remove(thinLine);
-                thinLine.geometry.dispose();
-                thinLine.material.dispose();
-                thinLine = null;
-            }
-            const radius = 48;
-            const pts = [];
-            const segs = 72;
+            if (horizonLine) { scene.remove(horizonLine); horizonLine.geometry.dispose(); horizonLine.material.dispose(); }
+            if (thinLine) { scene.remove(thinLine); thinLine.geometry.dispose(); thinLine.material.dispose(); }
+
+            const radius = 48, pts = [], segs = 72;
             for (let i = 0; i <= segs; i++) {
                 const theta = (i / segs) * Math.PI * 2;
                 pts.push(new THREE.Vector3(radius * Math.cos(theta), height, radius * Math.sin(theta)));
             }
             const geo = new THREE.BufferGeometry().setFromPoints(pts);
-            const mat = new THREE.LineDashedMaterial({
-                color: 0xffffff,
-                dashSize: 0.45,
-                gapSize: 0.3,
-                transparent: true,
-                opacity: 0.5
-            });
+            const mat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 0.45, gapSize: 0.3, transparent: true, opacity: 0.5 });
             horizonLine = new THREE.Line(geo, mat);
             horizonLine.computeLineDistances();
             scene.add(horizonLine);
 
-            const thinMat = new THREE.LineBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.15 });
-            thinLine = new THREE.Line(geo.clone(), thinMat);
+            thinLine = new THREE.Line(geo.clone(), new THREE.LineBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.15 }));
             scene.add(thinLine);
         }
         updateHorizon(config.viewHeight);
 
+        // 地面 360° 罗盘角度标注
         const compassGroup = new THREE.Group();
         scene.add(compassGroup);
 
@@ -1780,20 +1580,15 @@
             ctx.textBaseline = 'middle';
             ctx.fillText(text, 256, 128);
             const tex = new THREE.CanvasTexture(c);
-            tex.minFilter = THREE.LinearFilter;
-            tex.magFilter = THREE.LinearFilter;
-            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-            const sp = new THREE.Sprite(mat);
+            const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
             sp.scale.set(isMain ? 4.8 : 3.8, isMain ? 2.4 : 1.9, 1);
             return sp;
         }
 
         for (let deg = 0; deg < 360; deg += 22.5) {
             const rad = (deg * Math.PI) / 180;
-            const x = 48 * Math.sin(rad),
-                z = -48 * Math.cos(rad);
-            const isCardinal = (deg % 90 === 0),
-                isSemi = (deg % 45 === 0);
+            const x = 48 * Math.sin(rad), z = -48 * Math.cos(rad);
+            const isCardinal = (deg % 90 === 0), isSemi = (deg % 45 === 0);
             const lm = new THREE.LineBasicMaterial({ color: isCardinal ? 0x0284c7 : (isSemi ? 0x64748b : 0x94a3b8) });
             const pts = [new THREE.Vector3(x, 0.01, z), new THREE.Vector3(x, isCardinal ? 5.5 : (isSemi ? 4.0 : 2.5), z)];
             compassGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lm));
@@ -1808,7 +1603,7 @@
         }
 
         // ============================================================
-        // 7. 目标模型构建
+        // 7. 目标模型、纵向经线与微型纵向仰俯度数气泡
         // ============================================================
         const SPHERE_GEO = new THREE.SphereGeometry(1, 48, 48);
         const HEAD_GEO = new THREE.SphereGeometry(1, 48, 48);
@@ -1821,6 +1616,99 @@
                 if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
                 else obj.material.dispose();
             }
+        }
+
+        function createTargetBadgeSprite(t) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 128;
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.minFilter = THREE.LinearFilter;
+            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+            const sprite = new THREE.Sprite(mat);
+            sprite.scale.set(1.4, 0.7, 1);
+            sprite.renderOrder = 99;
+            sprite.userData.canvas = canvas;
+            sprite.userData.ctx = canvas.getContext('2d');
+            sprite.userData.tex = tex;
+            return sprite;
+        }
+
+        function updateTargetBadgeCanvas(t) {
+            if (!t.badgeSprite) return;
+            const ctx = t.badgeSprite.userData.ctx;
+            ctx.clearRect(0, 0, 256, 128);
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+            ctx.beginPath();
+            ctx.roundRect(16, 12, 224, 78, 16);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(128 - 10, 90);
+            ctx.lineTo(128 + 10, 90);
+            ctx.lineTo(128, 106);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = t.color || '#0284c7';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            const pitchDeg = calculateTargetVerticalPitchDeg(t);
+            const pitchStr = `${pitchDeg >= 0 ? '+' : ''}${pitchDeg.toFixed(1)}°`;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${t.id} (纵): ${pitchStr}`, 128, 51);
+
+            t.badgeSprite.userData.tex.needsUpdate = true;
+        }
+
+        function createTargetMeridianLine(t) {
+            const segs = 96;
+            const pts = [];
+            for (let i = 0; i <= segs; i++) pts.push(new THREE.Vector3());
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const mat = new THREE.LineDashedMaterial({
+                color: new THREE.Color(t.color),
+                dashSize: 0.4,
+                gapSize: 0.25,
+                transparent: true,
+                opacity: 0.65
+            });
+            const line = new THREE.Line(geo, mat);
+            line.userData.ignoreRaycast = true;
+            scene.add(line);
+            return line;
+        }
+
+        function updateTargetMeridianGeometry(t) {
+            if (!t.meridianLine || !config.showMeridian) return;
+            const eyeY = config.viewHeight + config.advanced.playerPos.y;
+            const px = config.advanced.playerPos.x;
+            const pz = config.advanced.playerPos.z;
+            const tx = t.rootGroup.position.x;
+            const tz = t.rootGroup.position.z;
+            const dx = tx - px;
+            const dz = tz - pz;
+            const dist = Math.hypot(dx, dz) || t.distMeters || 10;
+            const angle = Math.atan2(dx, -dz);
+
+            const segs = 96;
+            const pts = [];
+            for (let i = 0; i <= segs; i++) {
+                const phi = (i / segs) * Math.PI * 2;
+                const rH = dist * Math.cos(phi);
+                const y = eyeY + dist * Math.sin(phi);
+                const x = px + rH * Math.sin(angle);
+                const z = pz - rH * Math.cos(angle);
+                pts.push(new THREE.Vector3(x, y, z));
+            }
+            t.meridianLine.geometry.setFromPoints(pts);
+            t.meridianLine.computeLineDistances();
         }
 
         function rebuildMannequinMesh(t) {
@@ -1868,14 +1756,8 @@
                 }
                 const dashGeo = new THREE.BufferGeometry().setFromPoints(dashPts);
                 const dashMat = new THREE.LineDashedMaterial({
-                    color: 0xffffff,
-                    dashSize: 0.025,
-                    gapSize: 0.018,
-                    linewidth: 2,
-                    transparent: true,
-                    opacity: 0.9,
-                    depthTest: false,
-                    depthWrite: false
+                    color: 0xffffff, dashSize: 0.025, gapSize: 0.018, linewidth: 2,
+                    transparent: true, opacity: 0.9, depthTest: false, depthWrite: false
                 });
                 const dashLine = new THREE.Line(dashGeo, dashMat);
                 dashLine.computeLineDistances();
@@ -1911,8 +1793,7 @@
 
             if (oldShape === 'dummy' && shape === 'sphere') {
                 config.targets.forEach(t => {
-                    const headHeight = 29.44 * (t.sizeCm / 23.0);
-                    t.sizeCm = headHeight;
+                    t.sizeCm = 29.44 * (t.sizeCm / 23.0);
                 });
             } else if (oldShape === 'sphere' && shape === 'dummy') {
                 config.targets.forEach(t => {
@@ -1933,9 +1814,7 @@
             rebuildTargetUI();
         }
 
-        // ============================================================
         // 8. 镜之边缘箱子
-        // ============================================================
         function updateBoxMesh(box) {
             const sx = Math.max(0.1, box.lenX);
             const sy = Math.max(0.1, box.heightY);
@@ -1962,11 +1841,7 @@
 
         function createMirrorEdgeBoxObject(boxData) {
             const group = new THREE.Group();
-            const mat = new THREE.MeshStandardMaterial({
-                color: new THREE.Color(boxData.color),
-                roughness: 0.28,
-                metalness: 0.1
-            });
+            const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(boxData.color), roughness: 0.28, metalness: 0.1 });
             const mesh = new THREE.Mesh(BOX_UNIT_GEO, mat);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
@@ -1974,8 +1849,7 @@
             mesh.userData.boxRef = boxData;
             group.add(mesh);
 
-            const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2, transparent: true, opacity: 0.85 });
-            const edgeLine = new THREE.LineSegments(BOX_UNIT_EDGES, edgeMat);
+            const edgeLine = new THREE.LineSegments(BOX_UNIT_EDGES, new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2, transparent: true, opacity: 0.85 }));
             edgeLine.userData.ignoreRaycast = true;
             group.add(edgeLine);
 
@@ -1983,31 +1857,17 @@
             boxData.group = group;
             boxData.mesh = mesh;
             boxData.edgeLine = edgeLine;
-
             updateBoxMesh(boxData);
         }
 
         function checkCollisionWithBoxes(tx, ty, tz, radius, halfHeight = 0) {
             for (const box of config.boxes) {
                 if (!box.group) continue;
-                const bx = box.group.position.x;
-                const by = box.group.position.y;
-                const bz = box.group.position.z;
-                const hx = box.lenX / 2;
-                const hy = box.heightY / 2;
-                const hz = box.widthZ / 2;
-
-                const bMinX = bx - hx, bMaxX = bx + hx;
-                const bMinY = by - hy, bMaxY = by + hy;
-                const bMinZ = bz - hz, bMaxZ = bz + hz;
-
-                const tMinX = tx - radius, tMaxX = tx + radius;
-                const tMinY = ty - halfHeight, tMaxY = ty + halfHeight;
-                const tMinZ = tz - radius, tMaxZ = tz + radius;
-
-                if (tMinX <= bMaxX && tMaxX >= bMinX &&
-                    tMinY <= bMaxY && tMaxY >= bMinY &&
-                    tMinZ <= bMaxZ && tMaxZ >= bMinZ) {
+                const bx = box.group.position.x, by = box.group.position.y, bz = box.group.position.z;
+                const hx = box.lenX / 2, hy = box.heightY / 2, hz = box.widthZ / 2;
+                if (tx - radius <= bx + hx && tx + radius >= bx - hx &&
+                    ty - halfHeight <= by + hy && ty + halfHeight >= by - hy &&
+                    tz - radius <= bz + hz && tz + radius >= bz - hz) {
                     return true;
                 }
             }
@@ -2028,15 +1888,27 @@
                 }
                 const anchor = t.anchorPos;
 
+                let headTopRelative = 0;
                 if (isSphere) {
                     const r = (t.sizeCm / 100) / 2;
                     t.sphereMesh.scale.set(r, r, r);
                     t.rootGroup.position.y = config.viewHeight + anchor.y + (t.yOffset || 0);
+                    headTopRelative = r;
                 } else {
                     const bodyH = t.bodyHeightCm / 100;
                     const neckGap = (t.neckGapCm || 6.325) / 100;
                     t.groundY = neckGap + bodyH + (t.yOffset || 0);
                     t.rootGroup.position.y = t.groundY + anchor.y;
+                    headTopRelative = (t.headHeightCm / 200) + (t.headOffsetY / 100);
+                }
+
+                if (t.badgeSprite) {
+                    t.badgeSprite.position.set(0, headTopRelative + 0.3, 0);
+                    t.badgeSprite.visible = config.showMeridian;
+                    updateTargetBadgeCanvas(t);
+                }
+                if (t.meridianLine) {
+                    t.meridianLine.visible = config.showMeridian;
                 }
 
                 if (!t.move.enabled) {
@@ -2051,23 +1923,18 @@
                         t.rootGroup.rotation.y = Math.atan2(dx, dz);
                     }
                 }
+                updateTargetMeridianGeometry(t);
             });
 
             config.boxes.forEach(b => updateBoxMesh(b));
 
-            camera.position.set(
-                config.advanced.playerPos.x,
-                config.viewHeight + config.advanced.playerPos.y,
-                config.advanced.playerPos.z
-            );
+            camera.position.set(config.advanced.playerPos.x, config.viewHeight + config.advanced.playerPos.y, config.advanced.playerPos.z);
             camera.fov = hFovToVfov(config.fovHorizontal, window.innerWidth / window.innerHeight);
             camera.updateProjectionMatrix();
             updateHorizon(config.viewHeight);
         }
 
-        // ============================================================
-        // 9. 输入、轮询率统计与视角移动
-        // ============================================================
+        // 9. 输入监听与仰角水平角解算
         let yaw = 0.0, pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
         let debugMode = false;
@@ -2092,19 +1959,23 @@
             });
         }
 
+        const meridianToggle = getEl('toggle-meridian');
+        if (meridianToggle) {
+            meridianToggle.addEventListener('change', function () {
+                config.showMeridian = this.checked;
+                config.targets.forEach(t => {
+                    if (t.meridianLine) t.meridianLine.visible = config.showMeridian;
+                    if (t.badgeSprite) t.badgeSprite.visible = config.showMeridian;
+                });
+            });
+        }
+
         const ALLOWED_KEYS = new Set(['KeyW', 'KeyS', 'KeyA', 'KeyD', 'Space', 'ShiftLeft']);
         const keysDown = new Set();
-        window.addEventListener('keydown', (e) => {
-            if (ALLOWED_KEYS.has(e.code)) keysDown.add(e.code);
-        });
-        window.addEventListener('keyup', (e) => {
-            if (ALLOWED_KEYS.has(e.code)) keysDown.delete(e.code);
-        });
+        window.addEventListener('keydown', (e) => { if (ALLOWED_KEYS.has(e.code)) keysDown.add(e.code); });
+        window.addEventListener('keyup', (e) => { if (ALLOWED_KEYS.has(e.code)) keysDown.delete(e.code); });
 
-        let pollCount = 0;
-        let pollLastCalc = performance.now();
-        let peakPollRate = 0;
-        let pollActiveSamples = 0;
+        let pollCount = 0, pollLastCalc = performance.now(), peakPollRate = 0, pollActiveSamples = 0;
 
         window.addEventListener('pointermove', (e) => {
             const events = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
@@ -2151,7 +2022,6 @@
                     });
                 }
             }
-
             for (const b of config.boxes) {
                 if (b.mesh && b.mesh.visible) activeRaycastObjects.push(b.mesh);
             }
@@ -2160,9 +2030,7 @@
             if (intersects.length > 0) {
                 updateCrosshairStyle(true);
                 const hitObject = intersects[0].object;
-                let hitTarget = null;
-                let hitPart = hitObject.userData.part || 'body';
-
+                let hitTarget = null, hitPart = hitObject.userData.part || 'body';
                 for (const t of config.targets) {
                     if (t.rootGroup === hitObject.parent || t.rootGroup === hitObject.parent?.parent) {
                         hitTarget = t;
@@ -2202,9 +2070,7 @@
             }
         });
 
-        // ============================================================
-        // 10. 目标 UI 构建与控制
-        // ============================================================
+        // 10. 目标 UI 构建与比例锁定
         const container1 = getEl('targets-container-1');
         const boxesContainer = getEl('boxes-container');
 
@@ -2246,7 +2112,7 @@
 
             config.targets.forEach((t, i) => {
                 const card = document.createElement('div');
-                card.className = 'section-card target-list-item';
+                card.className = 'section-card';
                 card.style.marginTop = '6px';
 
                 let dimensionControlsHTML = '';
@@ -2264,90 +2130,31 @@
                                 <button class="step-btn" id="btn-t${i}-s-plus">+</button>
                             </div>
                         </div>
-
-                        <!-- 头部尺寸卡片 -->
                         <div class="dim-group ${hLocked ? 'is-locked' : ''}" id="group-t${i}-head">
                             <div class="dim-group-header">
-                                <div class="dim-group-title">
-                                    <span class="dim-indicator-dot" style="background:${t.color};"></span>
-                                    <span>头部尺寸 (长×宽×高)</span>
-                                </div>
-                                <button class="size-lock-btn ${hLocked ? 'active-lock' : 'unlocked'}" id="btn-t${i}-hsize-lock">
-                                    ${hLocked ? '🔒 锁定比例' : '🔓 自由微调'}
-                                </button>
+                                <div class="dim-group-title"><span class="dim-indicator-dot" style="background:${t.color};"></span><span>头部尺寸 (长×宽×高)</span></div>
+                                <button class="size-lock-btn ${hLocked ? 'active-lock' : 'unlocked'}" id="btn-t${i}-hsize-lock">${hLocked ? '🔒 锁定比例' : '🔓 自由微调'}</button>
                             </div>
                             <div class="dim-card-grid">
-                                <div class="dim-item">
-                                    <span class="dim-item-title">宽 (X)</span>
-                                    <div class="mini-stepper">
-                                        <button class="step-btn" id="btn-t${i}-hw-minus" ${hLocked ? 'disabled' : ''}>−</button>
-                                        <input type="number" class="num-input" id="inp-t${i}-hw" value="${t.headWidthCm.toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} />
-                                        <button class="step-btn" id="btn-t${i}-hw-plus" ${hLocked ? 'disabled' : ''}>+</button>
-                                    </div>
-                                </div>
-                                <div class="dim-item">
-                                    <span class="dim-item-title">高 (Y)</span>
-                                    <div class="mini-stepper">
-                                        <button class="step-btn" id="btn-t${i}-hh-minus" ${hLocked ? 'disabled' : ''}>−</button>
-                                        <input type="number" class="num-input" id="inp-t${i}-hh" value="${t.headHeightCm.toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} />
-                                        <button class="step-btn" id="btn-t${i}-hh-plus" ${hLocked ? 'disabled' : ''}>+</button>
-                                    </div>
-                                </div>
-                                <div class="dim-item">
-                                    <span class="dim-item-title">深 (Z)</span>
-                                    <div class="mini-stepper">
-                                        <button class="step-btn" id="btn-t${i}-hd-minus" ${hLocked ? 'disabled' : ''}>−</button>
-                                        <input type="number" class="num-input" id="inp-t${i}-hd" value="${(t.headDepthCm !== undefined ? t.headDepthCm : t.headWidthCm).toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} />
-                                        <button class="step-btn" id="btn-t${i}-hd-plus" ${hLocked ? 'disabled' : ''}>+</button>
-                                    </div>
-                                </div>
+                                <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" id="btn-t${i}-hw-minus" ${hLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-t${i}-hw" value="${t.headWidthCm.toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-t${i}-hw-plus" ${hLocked ? 'disabled' : ''}>+</button></div></div>
+                                <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" id="btn-t${i}-hh-minus" ${hLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-t${i}-hh" value="${t.headHeightCm.toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-t${i}-hh-plus" ${hLocked ? 'disabled' : ''}>+</button></div></div>
+                                <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" id="btn-t${i}-hd-minus" ${hLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-t${i}-hd" value="${(t.headDepthCm !== undefined ? t.headDepthCm : t.headWidthCm).toFixed(1)}" step="0.5" ${hLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-t${i}-hd-plus" ${hLocked ? 'disabled' : ''}>+</button></div></div>
                             </div>
                         </div>
-
-                        <!-- 身体尺寸卡片 -->
                         <div class="dim-group ${bLocked ? 'is-locked' : ''}" id="group-t${i}-body">
                             <div class="dim-group-header">
-                                <div class="dim-group-title">
-                                    <span class="dim-indicator-dot" style="background:#64748b;"></span>
-                                    <span>身体尺寸 (长×宽×高)</span>
-                                </div>
-                                <button class="size-lock-btn ${bLocked ? 'active-lock' : 'unlocked'}" id="btn-t${i}-bsize-lock">
-                                    ${bLocked ? '🔒 锁定比例' : '🔓 自由微调'}
-                                </button>
+                                <div class="dim-group-title"><span class="dim-indicator-dot" style="background:#64748b;"></span><span>身体尺寸 (长×宽×高)</span></div>
+                                <button class="size-lock-btn ${bLocked ? 'active-lock' : 'unlocked'}" id="btn-t${i}-bsize-lock">${bLocked ? '🔒 锁定比例' : '🔓 自由微调'}</button>
                             </div>
                             <div class="dim-card-grid">
-                                <div class="dim-item">
-                                    <span class="dim-item-title">宽 (X)</span>
-                                    <div class="mini-stepper">
-                                        <button class="step-btn" id="btn-t${i}-bw-minus" ${bLocked ? 'disabled' : ''}>−</button>
-                                        <input type="number" class="num-input" id="inp-t${i}-bw" value="${t.bodyWidthCm.toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} />
-                                        <button class="step-btn" id="btn-t${i}-bw-plus" ${bLocked ? 'disabled' : ''}>+</button>
-                                    </div>
-                                </div>
-                                <div class="dim-item">
-                                    <span class="dim-item-title">高 (Y)</span>
-                                    <div class="mini-stepper">
-                                        <button class="step-btn" id="btn-t${i}-bh-minus" ${bLocked ? 'disabled' : ''}>−</button>
-                                        <input type="number" class="num-input" id="inp-t${i}-bh" value="${t.bodyHeightCm.toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} />
-                                        <button class="step-btn" id="btn-t${i}-bh-plus" ${bLocked ? 'disabled' : ''}>+</button>
-                                    </div>
-                                </div>
-                                <div class="dim-item">
-                                    <span class="dim-item-title">深 (Z)</span>
-                                    <div class="mini-stepper">
-                                        <button class="step-btn" id="btn-t${i}-bd-minus" ${bLocked ? 'disabled' : ''}>−</button>
-                                        <input type="number" class="num-input" id="inp-t${i}-bd" value="${(t.bodyDepthCm !== undefined ? t.bodyDepthCm : t.bodyWidthCm * (2.2/3.38)).toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} />
-                                        <button class="step-btn" id="btn-t${i}-bd-plus" ${bLocked ? 'disabled' : ''}>+</button>
-                                    </div>
-                                </div>
+                                <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" id="btn-t${i}-bw-minus" ${bLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-t${i}-bw" value="${t.bodyWidthCm.toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-t${i}-bw-plus" ${bLocked ? 'disabled' : ''}>+</button></div></div>
+                                <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" id="btn-t${i}-bh-minus" ${bLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-t${i}-bh" value="${t.bodyHeightCm.toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-t${i}-bh-plus" ${bLocked ? 'disabled' : ''}>+</button></div></div>
+                                <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" id="btn-t${i}-bd-minus" ${bLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-t${i}-bd" value="${(t.bodyDepthCm !== undefined ? t.bodyDepthCm : t.bodyWidthCm * (2.2/3.38)).toFixed(1)}" step="1" ${bLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-t${i}-bd-plus" ${bLocked ? 'disabled' : ''}>+</button></div></div>
                             </div>
                         </div>
-
                         <div class="ctrl-row" style="margin-top:6px;">
                             <label>头部位置锁定</label>
-                            <button class="lock-btn ${t.headLocked ? '' : 'unlocked'}" id="btn-t${i}-headlock">
-                                ${t.headLocked ? '🔒 已锁定' : '🔓 已解锁'}
-                            </button>
+                            <button class="lock-btn ${t.headLocked ? '' : 'unlocked'}" id="btn-t${i}-headlock">${t.headLocked ? '🔒 已锁定' : '🔓 已解锁'}</button>
                             <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">解锁可调头部偏移</span>
                         </div>
                         <div class="ctrl-row">
@@ -2390,9 +2197,7 @@
                             ${t.move.enabled ? '运动: 开启' : '运动: 关闭'}
                         </button>
                     </div>
-
                     ${dimensionControlsHTML}
-
                     <div class="ctrl-row" style="margin-top:6px;">
                         <label>前后距离 (m)</label>
                         <input type="range" id="inp-t${i}-z-r" min="1" max="50" step="0.5" value="${t.distMeters}" />
@@ -2431,7 +2236,7 @@
                             <button class="btn-move-toggle ${t.move.visualAngleLock ? 'active-move' : ''}" id="btn-t${i}-va-toggle">
                                 ${t.move.visualAngleLock ? '与弧形一致: 开' : '与弧形一致: 关'}
                             </button>
-                            <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">速度不变 · 上限 ±67.5°</span>
+                            <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">上限 ±67.5°</span>
                         </div>
                         <div class="ctrl-row">
                             <label style="color:${t.color};">• 摆动角跨 (°)</label>
@@ -2449,27 +2254,21 @@
                                 <button class="step-btn" id="btn-t${i}-spd-plus">+</button>
                             </div>
                         </div>
-                        <div class="hint-speed-formula" id="lbl-t${i}-hint"></div>
                     </div>
                 `;
 
                 container1.appendChild(card);
                 setupDynamicTargetBindings(t, i);
-                updateTargetSpeedHint(t, i);
             });
             updateScene();
         }
 
         function setupDynamicTargetBindings(t, i) {
             const isDummy = config.targetShape === 'dummy';
-
             const sR = getEl(`inp-t${i}-s-r`), sN = getEl(`inp-t${i}-s`);
+
             bindControl({
-                numEl: sN,
-                rangeEl: sR,
-                btnMinus: getEl(`btn-t${i}-s-minus`),
-                btnPlus: getEl(`btn-t${i}-s-plus`),
-                step: 0.5,
+                numEl: sN, rangeEl: sR, btnMinus: getEl(`btn-t${i}-s-minus`), btnPlus: getEl(`btn-t${i}-s-plus`), step: 0.5,
                 apply: (v) => {
                     const val = Math.max(1.0, parseFloat(v) || 23.0);
                     sR.value = val;
@@ -2477,25 +2276,37 @@
                     t.sizeCm = val;
 
                     if (isDummy) {
-                        const ratio = val / 23.0;
                         if (t.headSizeLocked) {
-                            t.headWidthCm = 23.0 * ratio;
-                            t.headHeightCm = 29.44 * ratio;
-                            t.headDepthCm = 23.0 * ratio;
+                            t.headWidthCm = t.sizeCm * (t.baseRatio.headW || 1.0);
+                            t.headHeightCm = t.sizeCm * (t.baseRatio.headH || 1.28);
+                            t.headDepthCm = t.sizeCm * (t.baseRatio.headD || 1.0);
                             const hw = getEl(`inp-t${i}-hw`), hh = getEl(`inp-t${i}-hh`), hd = getEl(`inp-t${i}-hd`);
                             if (hw) hw.value = t.headWidthCm.toFixed(1);
                             if (hh) hh.value = t.headHeightCm.toFixed(1);
                             if (hd) hd.value = t.headDepthCm.toFixed(1);
                         }
                         if (t.bodySizeLocked) {
-                            t.bodyWidthCm = 38.87 * ratio;
-                            t.bodyHeightCm = 156.17 * ratio;
-                            t.bodyDepthCm = 38.87 * ratio * (2.2 / 3.38);
-                            t.neckGapCm = 6.325 * ratio;
+                            t.bodyWidthCm = t.sizeCm * (t.baseRatio.bodyW || 1.69);
+                            t.bodyHeightCm = t.sizeCm * (t.baseRatio.bodyH || 6.79);
+                            t.bodyDepthCm = t.sizeCm * (t.baseRatio.bodyD || 1.10);
                             const bw = getEl(`inp-t${i}-bw`), bh = getEl(`inp-t${i}-bh`), bd = getEl(`inp-t${i}-bd`);
                             if (bw) bw.value = t.bodyWidthCm.toFixed(1);
                             if (bh) bh.value = t.bodyHeightCm.toFixed(1);
                             if (bd) bd.value = t.bodyDepthCm.toFixed(1);
+                        }
+                        t.neckGapCm = t.sizeCm * (t.baseRatio.neckGap || 0.275);
+
+                        if (t.baseRatio.headOffX !== undefined) {
+                            t.headOffsetX = t.sizeCm * t.baseRatio.headOffX;
+                            const hx = getEl(`inp-t${i}-hx`), hxR = getEl(`inp-t${i}-hx-r`);
+                            if (hx) hx.value = t.headOffsetX.toFixed(1);
+                            if (hxR) hxR.value = t.headOffsetX;
+                        }
+                        if (t.baseRatio.headOffY !== undefined) {
+                            t.headOffsetY = t.sizeCm * t.baseRatio.headOffY;
+                            const hy = getEl(`inp-t${i}-hy`), hyR = getEl(`inp-t${i}-hy-r`);
+                            if (hy) hy.value = t.headOffsetY.toFixed(1);
+                            if (hyR) hyR.value = t.headOffsetY;
                         }
                         rebuildMannequinMesh(t);
                     }
@@ -2505,9 +2316,6 @@
 
             if (isDummy) {
                 const hwN = getEl(`inp-t${i}-hw`), hhN = getEl(`inp-t${i}-hh`), hdN = getEl(`inp-t${i}-hd`);
-                const hwMinus = getEl(`btn-t${i}-hw-minus`), hwPlus = getEl(`btn-t${i}-hw-plus`);
-                const hhMinus = getEl(`btn-t${i}-hh-minus`), hhPlus = getEl(`btn-t${i}-hh-plus`);
-                const hdMinus = getEl(`btn-t${i}-hd-minus`), hdPlus = getEl(`btn-t${i}-hd-plus`);
                 const hLockBtn = getEl(`btn-t${i}-hsize-lock`);
                 const groupHead = getEl(`group-t${i}-head`);
 
@@ -2518,61 +2326,50 @@
                         hLockBtn.innerHTML = locked ? '🔒 锁定比例' : '🔓 自由微调';
                     }
                     if (groupHead) groupHead.classList.toggle('is-locked', locked);
-                    [hwN, hwMinus, hwPlus, hhN, hhMinus, hhPlus, hdN, hdMinus, hdPlus].forEach(el => {
-                        if (el) el.disabled = locked;
-                    });
+                    [hwN, getEl(`btn-t${i}-hw-minus`), getEl(`btn-t${i}-hw-plus`),
+                     hhN, getEl(`btn-t${i}-hh-minus`), getEl(`btn-t${i}-hh-plus`),
+                     hdN, getEl(`btn-t${i}-hd-minus`), getEl(`btn-t${i}-hd-plus`)].forEach(el => { if (el) el.disabled = locked; });
 
                     if (locked) {
-                        const ratio = t.sizeCm / 23.0;
-                        t.headWidthCm = 23.0 * ratio;
-                        t.headHeightCm = 29.44 * ratio;
-                        t.headDepthCm = 23.0 * ratio;
-                        if (hwN) hwN.value = t.headWidthCm.toFixed(1);
-                        if (hhN) hhN.value = t.headHeightCm.toFixed(1);
-                        if (hdN) hdN.value = t.headDepthCm.toFixed(1);
-                        rebuildMannequinMesh(t);
-                        updateScene();
+                        t.baseRatio.headW = t.headWidthCm / t.sizeCm;
+                        t.baseRatio.headH = t.headHeightCm / t.sizeCm;
+                        t.baseRatio.headD = t.headDepthCm / t.sizeCm;
                     }
                 };
                 if (hLockBtn) hLockBtn.addEventListener('click', () => setHeadSizeLock(!t.headSizeLocked));
 
                 bindControl({
-                    numEl: hwN, btnMinus: hwMinus, btnPlus: hwPlus, step: 0.5,
+                    numEl: hwN, btnMinus: getEl(`btn-t${i}-hw-minus`), btnPlus: getEl(`btn-t${i}-hw-plus`), step: 0.5,
                     apply: (v) => {
-                        const val = Math.max(0.5, parseFloat(v) || 23);
-                        hwN.value = val.toFixed(1);
-                        t.headWidthCm = val;
+                        t.headWidthCm = Math.max(0.5, parseFloat(v) || 23);
+                        hwN.value = t.headWidthCm.toFixed(1);
+                        if (t.headSizeLocked) t.baseRatio.headW = t.headWidthCm / t.sizeCm;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
-
                 bindControl({
-                    numEl: hhN, btnMinus: hhMinus, btnPlus: hhPlus, step: 0.5,
+                    numEl: hhN, btnMinus: getEl(`btn-t${i}-hh-minus`), btnPlus: getEl(`btn-t${i}-hh-plus`), step: 0.5,
                     apply: (v) => {
-                        const val = Math.max(0.5, parseFloat(v) || 29.44);
-                        hhN.value = val.toFixed(1);
-                        t.headHeightCm = val;
+                        t.headHeightCm = Math.max(0.5, parseFloat(v) || 29.44);
+                        hhN.value = t.headHeightCm.toFixed(1);
+                        if (t.headSizeLocked) t.baseRatio.headH = t.headHeightCm / t.sizeCm;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
-
                 bindControl({
-                    numEl: hdN, btnMinus: hdMinus, btnPlus: hdPlus, step: 0.5,
+                    numEl: hdN, btnMinus: getEl(`btn-t${i}-hd-minus`), btnPlus: getEl(`btn-t${i}-hd-plus`), step: 0.5,
                     apply: (v) => {
-                        const val = Math.max(0.5, parseFloat(v) || 23);
-                        hdN.value = val.toFixed(1);
-                        t.headDepthCm = val;
+                        t.headDepthCm = Math.max(0.5, parseFloat(v) || 23);
+                        hdN.value = t.headDepthCm.toFixed(1);
+                        if (t.headSizeLocked) t.baseRatio.headD = t.headDepthCm / t.sizeCm;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
 
                 const bwN = getEl(`inp-t${i}-bw`), bhN = getEl(`inp-t${i}-bh`), bdN = getEl(`inp-t${i}-bd`);
-                const bwMinus = getEl(`btn-t${i}-bw-minus`), bwPlus = getEl(`btn-t${i}-bw-plus`);
-                const bhMinus = getEl(`btn-t${i}-bh-minus`), bhPlus = getEl(`btn-t${i}-bh-plus`);
-                const bdMinus = getEl(`btn-t${i}-bd-minus`), bdPlus = getEl(`btn-t${i}-bd-plus`);
                 const bLockBtn = getEl(`btn-t${i}-bsize-lock`);
                 const groupBody = getEl(`group-t${i}-body`);
 
@@ -2583,53 +2380,44 @@
                         bLockBtn.innerHTML = locked ? '🔒 锁定比例' : '🔓 自由微调';
                     }
                     if (groupBody) groupBody.classList.toggle('is-locked', locked);
-                    [bwN, bwMinus, bwPlus, bhN, bhMinus, bhPlus, bdN, bdMinus, bdPlus].forEach(el => {
-                        if (el) el.disabled = locked;
-                    });
+                    [bwN, getEl(`btn-t${i}-bw-minus`), getEl(`btn-t${i}-bw-plus`),
+                     bhN, getEl(`btn-t${i}-bh-minus`), getEl(`btn-t${i}-bh-plus`),
+                     bdN, getEl(`btn-t${i}-bd-minus`), getEl(`btn-t${i}-bd-plus`)].forEach(el => { if (el) el.disabled = locked; });
 
                     if (locked) {
-                        const ratio = t.sizeCm / 23.0;
-                        t.bodyWidthCm = 38.87 * ratio;
-                        t.bodyHeightCm = 156.17 * ratio;
-                        t.bodyDepthCm = 38.87 * ratio * (2.2 / 3.38);
-                        t.neckGapCm = 6.325 * ratio;
-                        if (bwN) bwN.value = t.bodyWidthCm.toFixed(1);
-                        if (bhN) bhN.value = t.bodyHeightCm.toFixed(1);
-                        if (bdN) bdN.value = t.bodyDepthCm.toFixed(1);
-                        rebuildMannequinMesh(t);
-                        updateScene();
+                        t.baseRatio.bodyW = t.bodyWidthCm / t.sizeCm;
+                        t.baseRatio.bodyH = t.bodyHeightCm / t.sizeCm;
+                        t.baseRatio.bodyD = t.bodyDepthCm / t.sizeCm;
                     }
                 };
                 if (bLockBtn) bLockBtn.addEventListener('click', () => setBodySizeLock(!t.bodySizeLocked));
 
                 bindControl({
-                    numEl: bwN, btnMinus: bwMinus, btnPlus: bwPlus, step: 1.0,
+                    numEl: bwN, btnMinus: getEl(`btn-t${i}-bw-minus`), btnPlus: getEl(`btn-t${i}-bw-plus`), step: 1.0,
                     apply: (v) => {
-                        const val = Math.max(0.5, parseFloat(v) || 38.87);
-                        bwN.value = val.toFixed(1);
-                        t.bodyWidthCm = val;
+                        t.bodyWidthCm = Math.max(0.5, parseFloat(v) || 38.87);
+                        bwN.value = t.bodyWidthCm.toFixed(1);
+                        if (t.bodySizeLocked) t.baseRatio.bodyW = t.bodyWidthCm / t.sizeCm;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
-
                 bindControl({
-                    numEl: bhN, btnMinus: bhMinus, btnPlus: bhPlus, step: 1.0,
+                    numEl: bhN, btnMinus: getEl(`btn-t${i}-bh-minus`), btnPlus: getEl(`btn-t${i}-bh-plus`), step: 1.0,
                     apply: (v) => {
-                        const val = Math.max(0.5, parseFloat(v) || 156.17);
-                        bhN.value = val.toFixed(1);
-                        t.bodyHeightCm = val;
+                        t.bodyHeightCm = Math.max(0.5, parseFloat(v) || 156.17);
+                        bhN.value = t.bodyHeightCm.toFixed(1);
+                        if (t.bodySizeLocked) t.baseRatio.bodyH = t.bodyHeightCm / t.sizeCm;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
-
                 bindControl({
-                    numEl: bdN, btnMinus: bdMinus, btnPlus: bdPlus, step: 1.0,
+                    numEl: bdN, btnMinus: getEl(`btn-t${i}-bd-minus`), btnPlus: getEl(`btn-t${i}-bd-plus`), step: 1.0,
                     apply: (v) => {
-                        const val = Math.max(0.5, parseFloat(v) || 25.3);
-                        bdN.value = val.toFixed(1);
-                        t.bodyDepthCm = val;
+                        t.bodyDepthCm = Math.max(0.5, parseFloat(v) || 25.3);
+                        bdN.value = t.bodyDepthCm.toFixed(1);
+                        if (t.bodySizeLocked) t.baseRatio.bodyD = t.bodyDepthCm / t.sizeCm;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
@@ -2637,9 +2425,7 @@
 
                 const lockBtn = getEl(`btn-t${i}-headlock`);
                 const hyR = getEl(`inp-t${i}-hy-r`), hyN = getEl(`inp-t${i}-hy`);
-                const hyMinus = getEl(`btn-t${i}-hy-minus`), hyPlus = getEl(`btn-t${i}-hy-plus`);
                 const hxR = getEl(`inp-t${i}-hx-r`), hxN = getEl(`inp-t${i}-hx`);
-                const hxMinus = getEl(`btn-t${i}-hx-minus`), hxPlus = getEl(`btn-t${i}-hx-plus`);
 
                 const setHeadLock = (locked) => {
                     t.headLocked = locked;
@@ -2647,16 +2433,14 @@
                         lockBtn.innerHTML = locked ? '🔒 已锁定' : '🔓 已解锁';
                         lockBtn.classList.toggle('unlocked', !locked);
                     }
-                    [hyR, hyN, hyMinus, hyPlus, hxR, hxN, hxMinus, hxPlus].forEach(el => {
-                        if (el) el.disabled = locked;
-                    });
+                    [hyR, hyN, getEl(`btn-t${i}-hy-minus`), getEl(`btn-t${i}-hy-plus`),
+                     hxR, hxN, getEl(`btn-t${i}-hx-minus`), getEl(`btn-t${i}-hx-plus`)].forEach(el => { if (el) el.disabled = locked; });
+
                     if (locked && ((t.headOffsetX || 0) !== 0 || (t.headOffsetY || 0) !== 0)) {
-                        t.headOffsetX = 0;
-                        t.headOffsetY = 0;
-                        if (hyR) hyR.value = 0;
-                        if (hyN) hyN.value = '0.0';
-                        if (hxR) hxR.value = 0;
-                        if (hxN) hxN.value = '0.0';
+                        t.headOffsetX = 0; t.headOffsetY = 0;
+                        t.baseRatio.headOffX = 0; t.baseRatio.headOffY = 0;
+                        if (hyR) hyR.value = 0; if (hyN) hyN.value = '0.0';
+                        if (hxR) hxR.value = 0; if (hxN) hxN.value = '0.0';
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
@@ -2664,23 +2448,23 @@
                 if (lockBtn) lockBtn.addEventListener('click', () => setHeadLock(!t.headLocked));
 
                 bindControl({
-                    numEl: hyN, rangeEl: hyR, btnMinus: hyMinus, btnPlus: hyPlus, step: 0.5,
+                    numEl: hyN, rangeEl: hyR, btnMinus: getEl(`btn-t${i}-hy-minus`), btnPlus: getEl(`btn-t${i}-hy-plus`), step: 0.5,
                     apply: (v) => {
                         const val = clamp(parseFloat(v) || 0, -40, 40);
-                        hyR.value = val;
-                        hyN.value = val.toFixed(1);
+                        hyR.value = val; hyN.value = val.toFixed(1);
                         t.headOffsetY = val;
+                        t.baseRatio.headOffY = t.sizeCm > 0 ? t.headOffsetY / t.sizeCm : 0;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
                 });
                 bindControl({
-                    numEl: hxN, rangeEl: hxR, btnMinus: hxMinus, btnPlus: hxPlus, step: 0.5,
+                    numEl: hxN, rangeEl: hxR, btnMinus: getEl(`btn-t${i}-hx-minus`), btnPlus: getEl(`btn-t${i}-hx-plus`), step: 0.5,
                     apply: (v) => {
                         const val = clamp(parseFloat(v) || 0, -40, 40);
-                        hxR.value = val;
-                        hxN.value = val.toFixed(1);
+                        hxR.value = val; hxN.value = val.toFixed(1);
                         t.headOffsetX = val;
+                        t.baseRatio.headOffX = t.sizeCm > 0 ? t.headOffsetX / t.sizeCm : 0;
                         rebuildMannequinMesh(t);
                         updateScene();
                     }
@@ -2696,15 +2480,10 @@
                 numEl: zN, rangeEl: zR, btnMinus: getEl(`btn-t${i}-z-minus`), btnPlus: getEl(`btn-t${i}-z-plus`), step: 0.25,
                 apply: (v) => {
                     const val = Math.max(0.1, parseFloat(v) || 10);
-                    zR.value = val;
-                    zN.value = val.toFixed(2);
+                    zR.value = val; zN.value = val.toFixed(2);
                     t.distMeters = val;
-                    if (!t.move.enabled) {
-                        t.anchorPos = config.advanced.playerPos.clone();
-                        t.anchorYawDeg = getPlayerCurrentYawDeg();
-                    }
+                    if (!t.move.enabled) { t.anchorPos = config.advanced.playerPos.clone(); t.anchorYawDeg = getPlayerCurrentYawDeg(); }
                     updateScene();
-                    updateTargetSpeedHint(t, i);
                 }
             });
 
@@ -2713,13 +2492,9 @@
                 numEl: aN, rangeEl: aR, btnMinus: getEl(`btn-t${i}-a-minus`), btnPlus: getEl(`btn-t${i}-a-plus`), step: 0.25,
                 apply: (v) => {
                     const val = clamp(parseFloat(v) || 0, -180, 180);
-                    aR.value = val;
-                    aN.value = val.toFixed(2);
+                    aR.value = val; aN.value = val.toFixed(2);
                     t.centerDeg = val;
-                    if (!t.move.enabled) {
-                        t.anchorPos = config.advanced.playerPos.clone();
-                        t.anchorYawDeg = getPlayerCurrentYawDeg();
-                    }
+                    if (!t.move.enabled) { t.anchorPos = config.advanced.playerPos.clone(); t.anchorYawDeg = getPlayerCurrentYawDeg(); }
                     updateScene();
                 }
             });
@@ -2729,13 +2504,9 @@
                 numEl: yN, rangeEl: yR, btnMinus: getEl(`btn-t${i}-y-minus`), btnPlus: getEl(`btn-t${i}-y-plus`), step: 0.05,
                 apply: (v) => {
                     const val = parseFloat(v) || 0;
-                    yR.value = val;
-                    yN.value = val.toFixed(2);
+                    yR.value = val; yN.value = val.toFixed(2);
                     t.yOffset = val;
-                    if (!t.move.enabled) {
-                        t.anchorPos = config.advanced.playerPos.clone();
-                        t.anchorYawDeg = getPlayerCurrentYawDeg();
-                    }
+                    if (!t.move.enabled) { t.anchorPos = config.advanced.playerPos.clone(); t.anchorYawDeg = getPlayerCurrentYawDeg(); }
                     updateScene();
                 }
             });
@@ -2743,121 +2514,60 @@
             const btnMoveToggle = getEl(`btn-t${i}-move-toggle`);
             btnMoveToggle.addEventListener('click', () => {
                 t.move.enabled = !t.move.enabled;
-
                 if (t.move.enabled) {
-                    const targetX = t.rootGroup.position.x;
-                    const targetY = t.rootGroup.position.y;
-                    const targetZ = t.rootGroup.position.z;
-                    const px = config.advanced.playerPos.x;
-                    const pz = config.advanced.playerPos.z;
-                    let dx = targetX - px;
-                    let dz = targetZ - pz;
-                    let dist = Math.hypot(dx, dz);
+                    const tx = t.rootGroup.position.x, ty = t.rootGroup.position.y, tz = t.rootGroup.position.z;
+                    const px = config.advanced.playerPos.x, pz = config.advanced.playerPos.z;
+                    let dx = tx - px, dz = tz - pz, dist = Math.hypot(dx, dz);
                     if (dist < 0.001) {
                         dist = t.distMeters || 10;
                         const rad = ((t.anchorYawDeg || 0) * Math.PI) / 180;
-                        dx = dist * Math.sin(rad);
-                        dz = -dist * Math.cos(rad);
+                        dx = dist * Math.sin(rad); dz = -dist * Math.cos(rad);
                     }
                     const sightAngleRad = Math.atan2(dx, -dz);
-
                     t.motion = {
-                        centerX: targetX,
-                        centerY: targetY,
-                        centerZ: targetZ,
+                        centerX: tx, centerY: ty, centerZ: tz,
                         originPlayerPos: new THREE.Vector3(px, 0, pz),
-                        tangentX: Math.cos(sightAngleRad),
-                        tangentZ: Math.sin(sightAngleRad),
-                        baseRad: sightAngleRad,
-                        radius: dist,
-                        fixedRotationY: Math.atan2(-dx, -dz)
+                        tangentX: Math.cos(sightAngleRad), tangentZ: Math.sin(sightAngleRad),
+                        baseRad: sightAngleRad, radius: dist, fixedRotationY: Math.atan2(-dx, -dz)
                     };
-                    t.move.currentLinearOffset = 0;
-                    t.move.currentOffsetDeg = 0;
-                    t.move.dir = 1;
-
+                    t.move.currentLinearOffset = 0; t.move.currentOffsetDeg = 0; t.move.dir = 1;
                     if (config.targetShape === 'dummy' && t.dummyGroup.visible) {
                         t.rootGroup.rotation.y = t.motion.fixedRotationY;
                     }
                 }
-
                 btnMoveToggle.classList.toggle('active-move', t.move.enabled);
                 btnMoveToggle.innerHTML = t.move.enabled ? '运动: 开启' : '运动: 关闭';
                 getEl(`t${i}-move-box`).style.display = t.move.enabled ? 'block' : 'none';
             });
 
             const btnLinear = getEl(`btn-t${i}-m-linear`), btnOrbit = getEl(`btn-t${i}-m-orbit`);
-            const vaRow = getEl(`va-t${i}-row`);
-            const vaToggle = getEl(`btn-t${i}-va-toggle`);
-            const refreshVAVisibility = () => {
-                if (vaRow) vaRow.style.display = t.move.mode === 'linear' ? 'flex' : 'none';
-            };
+            const vaRow = getEl(`va-t${i}-row`), vaToggle = getEl(`btn-t${i}-va-toggle`);
             if (vaToggle) {
                 vaToggle.addEventListener('click', () => {
                     t.move.visualAngleLock = !t.move.visualAngleLock;
                     vaToggle.classList.toggle('active-move', t.move.visualAngleLock);
                     vaToggle.innerHTML = t.move.visualAngleLock ? '与弧形一致: 开' : '与弧形一致: 关';
-                    updateTargetSpeedHint(t, i);
                 });
             }
-
             btnLinear.addEventListener('click', () => {
                 t.move.mode = 'linear';
-                btnLinear.classList.add('active');
-                btnOrbit.classList.remove('active');
-                refreshVAVisibility();
-                updateTargetSpeedHint(t, i);
+                btnLinear.classList.add('active'); btnOrbit.classList.remove('active');
+                if (vaRow) vaRow.style.display = 'flex';
             });
             btnOrbit.addEventListener('click', () => {
                 t.move.mode = 'orbit';
-                btnOrbit.classList.add('active');
-                btnLinear.classList.remove('active');
-                refreshVAVisibility();
-                updateTargetSpeedHint(t, i);
+                btnOrbit.classList.add('active'); btnLinear.classList.remove('active');
+                if (vaRow) vaRow.style.display = 'none';
             });
 
-            const rN = getEl(`inp-t${i}-rng`);
             bindControl({
-                numEl: rN, btnMinus: getEl(`btn-t${i}-rng-minus`), btnPlus: getEl(`btn-t${i}-rng-plus`), step: 1.0,
-                apply: (v) => {
-                    const val = clamp(parseFloat(v) || 1.0, 0.1, 360);
-                    rN.value = val.toFixed(2);
-                    t.move.totalSpanDeg = val;
-                    updateTargetSpeedHint(t, i);
-                }
+                numEl: getEl(`inp-t${i}-rng`), btnMinus: getEl(`btn-t${i}-rng-minus`), btnPlus: getEl(`btn-t${i}-rng-plus`), step: 1.0,
+                apply: (v) => { t.move.totalSpanDeg = clamp(parseFloat(v) || 1.0, 0.1, 360); getEl(`inp-t${i}-rng`).value = t.move.totalSpanDeg.toFixed(2); }
             });
-
-            const spN = getEl(`inp-t${i}-spd`);
             bindControl({
-                numEl: spN, btnMinus: getEl(`btn-t${i}-spd-minus`), btnPlus: getEl(`btn-t${i}-spd-plus`), step: 1.0,
-                apply: (v) => {
-                    const val = clamp(parseFloat(v) || 1.0, 0.1, 360);
-                    spN.value = val.toFixed(2);
-                    t.move.speedDeg = val;
-                    updateTargetSpeedHint(t, i);
-                }
+                numEl: getEl(`inp-t${i}-spd`), btnMinus: getEl(`btn-t${i}-spd-minus`), btnPlus: getEl(`btn-t${i}-spd-plus`), step: 1.0,
+                apply: (v) => { t.move.speedDeg = clamp(parseFloat(v) || 1.0, 0.1, 360); getEl(`inp-t${i}-spd`).value = t.move.speedDeg.toFixed(2); }
             });
-        }
-
-        function updateTargetSpeedHint(t, i) {
-            const hint = getEl(`lbl-t${i}-hint`);
-            if (!hint) return;
-            const D = t.distMeters;
-            const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
-            const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
-            const linearSpan = D * totalSpanRad;
-
-            if (t.move.mode === 'linear' && t.move.visualAngleLock) {
-                const effHalf = Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG);
-                hint.innerHTML =
-                    `• 方位角范围与弧形一致：移动速度恒定 <strong>${linearSpeed.toFixed(2)} m/s</strong>，最远点方位角 ±${effHalf.toFixed(1)}°（直线上限 ±67.5°）`;
-            } else if (t.move.mode === 'linear') {
-                hint.innerHTML =
-                    `• 平面直线横移：当前 ${D.toFixed(1)}m 对应中心线速 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，行程 ≈ <strong>${linearSpan.toFixed(2)} m</strong>`;
-            } else {
-                hint.innerHTML =
-                    `• 弧形角度围绕：当前 ${D.toFixed(1)}m 对应圆周速度 ≈ <strong>${linearSpeed.toFixed(2)} m/s</strong>，弧线行程 ≈ <strong>${linearSpan.toFixed(2)} m</strong>`;
-            }
         }
 
         function addNewTarget() {
@@ -2872,16 +2582,12 @@
 
             const dummyGroup = new THREE.Group();
             rootGroup.add(dummyGroup);
-
-            rootGroup.position.set(0, 0, 0);
             scene.add(rootGroup);
 
-            let defaultDeg = 0;
-            if (i === 1) defaultDeg = 20;
-            else if (i > 1) defaultDeg = (i * 15) - 30;
+            let defaultDeg = (i === 1) ? 20 : ((i > 1) ? (i * 15) - 30 : 0);
 
             const newTarget = {
-                id,
+                id, color,
                 sizeCm: 23.0,
                 headWidthCm: 23.0,
                 headHeightCm: 29.44,
@@ -2897,7 +2603,6 @@
                 bodySizeLocked: true,
                 distMeters: 10,
                 centerDeg: defaultDeg,
-                color,
                 rootGroup,
                 sphereMesh,
                 dummyGroup,
@@ -2906,6 +2611,19 @@
                 anchorPos: config.advanced.playerPos.clone(),
                 anchorYawDeg: getPlayerCurrentYawDeg(),
                 motion: null,
+                badgeSprite: null,
+                meridianLine: null,
+                baseRatio: {
+                    headW: 1.0,
+                    headH: 1.28,
+                    headD: 1.0,
+                    bodyW: 1.69,
+                    bodyH: 6.79,
+                    bodyD: 1.10,
+                    neckGap: 0.275,
+                    headOffX: 0,
+                    headOffY: 0
+                },
                 move: {
                     enabled: false,
                     mode: 'linear',
@@ -2917,6 +2635,12 @@
                     currentLinearOffset: 0
                 }
             };
+
+            newTarget.badgeSprite = createTargetBadgeSprite(newTarget);
+            rootGroup.add(newTarget.badgeSprite);
+
+            newTarget.meridianLine = createTargetMeridianLine(newTarget);
+
             rebuildMannequinMesh(newTarget);
             config.targets.push(newTarget);
             rebuildTargetUI();
@@ -2925,6 +2649,11 @@
         function removeLastTarget() {
             if (config.targets.length <= 1) { alert("至少需保留一个目标用以练习！"); return; }
             const t = config.targets.pop();
+            if (t.meridianLine) {
+                scene.remove(t.meridianLine);
+                t.meridianLine.geometry.dispose();
+                t.meridianLine.material.dispose();
+            }
             t.rootGroup.traverse(child => {
                 disposeMaterialOnly(child);
                 if (child.geometry && child.geometry !== HEAD_GEO && child.geometry !== BODY_GEO && child.geometry !== SPHERE_GEO) {
@@ -2935,9 +2664,7 @@
             rebuildTargetUI();
         }
 
-        // ============================================================
-        // 11. 镜之边缘箱子 UI
-        // ============================================================
+        // 11. 镜之边缘箱子系统
         function rebuildBoxesUI() {
             boxesContainer.innerHTML = '';
             const lblCount = getEl('lbl-box-count');
@@ -2947,7 +2674,6 @@
                 const card = document.createElement('div');
                 card.className = 'section-card';
                 card.style.marginTop = '6px';
-
                 card.innerHTML = `
                     <div class="section-header">
                         <span class="section-label" style="color:${b.color};">箱子 ${b.id}</span>
@@ -2955,83 +2681,44 @@
                             ${b.sizeLocked ? '🔒 尺寸联动' : '🔓 自由长宽高'}
                         </button>
                     </div>
-
-                    <div style="font-size:0.6rem; font-weight:bold; color:#64748b; margin-bottom:2px;">跑酷涂装颜色:</div>
                     <div class="swatches-grid-9" id="box-${i}-swatches" style="margin-bottom:6px;"></div>
-
                     <div class="ctrl-row">
                         <label>等比大小 (m)</label>
                         <input type="range" id="inp-box-${i}-s-r" min="0.2" max="15.0" step="0.1" value="${b.uniformSize}" />
-                        <div class="stepper-box">
-                            <button class="step-btn" id="btn-box-${i}-s-m">−</button>
-                            <input type="number" class="num-input" id="inp-box-${i}-s" value="${b.uniformSize.toFixed(2)}" step="0.1" />
-                            <button class="step-btn" id="btn-box-${i}-s-p">+</button>
-                        </div>
+                        <div class="stepper-box"><button class="step-btn" id="btn-box-${i}-s-m">−</button><input type="number" class="num-input" id="inp-box-${i}-s" value="${b.uniformSize.toFixed(2)}" step="0.1" /><button class="step-btn" id="btn-box-${i}-s-p">+</button></div>
                     </div>
-
                     <div class="ctrl-row">
                         <label>长 X (m)</label>
                         <input type="range" id="inp-box-${i}-x-r" min="0.2" max="15.0" step="0.1" value="${b.lenX}" ${b.sizeLocked ? 'disabled' : ''} />
-                        <div class="stepper-box">
-                            <button class="step-btn" id="btn-box-${i}-x-m" ${b.sizeLocked ? 'disabled' : ''}>−</button>
-                            <input type="number" class="num-input" id="inp-box-${i}-x" value="${b.lenX.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} />
-                            <button class="step-btn" id="btn-box-${i}-x-p" ${b.sizeLocked ? 'disabled' : ''}>+</button>
-                        </div>
+                        <div class="stepper-box"><button class="step-btn" id="btn-box-${i}-x-m" ${b.sizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-box-${i}-x" value="${b.lenX.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-box-${i}-x-p" ${b.sizeLocked ? 'disabled' : ''}>+</button></div>
                     </div>
-
                     <div class="ctrl-row">
                         <label>宽 Z (m)</label>
                         <input type="range" id="inp-box-${i}-z-r" min="0.2" max="15.0" step="0.1" value="${b.widthZ}" ${b.sizeLocked ? 'disabled' : ''} />
-                        <div class="stepper-box">
-                            <button class="step-btn" id="btn-box-${i}-z-m" ${b.sizeLocked ? 'disabled' : ''}>−</button>
-                            <input type="number" class="num-input" id="inp-box-${i}-z" value="${b.widthZ.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} />
-                            <button class="step-btn" id="btn-box-${i}-z-p" ${b.sizeLocked ? 'disabled' : ''}>+</button>
-                        </div>
+                        <div class="stepper-box"><button class="step-btn" id="btn-box-${i}-z-m" ${b.sizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-box-${i}-z" value="${b.widthZ.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-box-${i}-z-p" ${b.sizeLocked ? 'disabled' : ''}>+</button></div>
                     </div>
-
                     <div class="ctrl-row">
                         <label>高 Y (m)</label>
                         <input type="range" id="inp-box-${i}-y-r" min="0.2" max="15.0" step="0.1" value="${b.heightY}" ${b.sizeLocked ? 'disabled' : ''} />
-                        <div class="stepper-box">
-                            <button class="step-btn" id="btn-box-${i}-y-m" ${b.sizeLocked ? 'disabled' : ''}>−</button>
-                            <input type="number" class="num-input" id="inp-box-${i}-y" value="${b.heightY.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} />
-                            <button class="step-btn" id="btn-box-${i}-y-p" ${b.sizeLocked ? 'disabled' : ''}>+</button>
-                        </div>
+                        <div class="stepper-box"><button class="step-btn" id="btn-box-${i}-y-m" ${b.sizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-box-${i}-y" value="${b.heightY.toFixed(2)}" step="0.1" ${b.sizeLocked ? 'disabled' : ''} /><button class="step-btn" id="btn-box-${i}-y-p" ${b.sizeLocked ? 'disabled' : ''}>+</button></div>
                     </div>
-
                     <div class="divider"></div>
-
                     <div class="ctrl-row">
                         <label>前后距离 (m)</label>
                         <input type="range" id="inp-box-${i}-dist-r" min="1" max="60" step="0.5" value="${b.distMeters}" />
-                        <div class="stepper-box">
-                            <button class="step-btn" id="btn-box-${i}-dist-m">−</button>
-                            <input type="number" class="num-input" id="inp-box-${i}-dist" value="${b.distMeters.toFixed(2)}" step="0.5" />
-                            <button class="step-btn" id="btn-box-${i}-dist-p">+</button>
-                        </div>
+                        <div class="stepper-box"><button class="step-btn" id="btn-box-${i}-dist-m">−</button><input type="number" class="num-input" id="inp-box-${i}-dist" value="${b.distMeters.toFixed(2)}" step="0.5" /><button class="step-btn" id="btn-box-${i}-dist-p">+</button></div>
                     </div>
-
                     <div class="ctrl-row">
                         <label>左右方位 (°)</label>
                         <input type="range" id="inp-box-${i}-deg-r" min="-180" max="180" step="0.5" value="${b.centerDeg}" />
-                        <div class="stepper-box">
-                            <button class="step-btn" id="btn-box-${i}-deg-m">−</button>
-                            <input type="number" class="num-input" id="inp-box-${i}-deg" value="${b.centerDeg.toFixed(2)}" step="0.5" />
-                            <button class="step-btn" id="btn-box-${i}-deg-p">+</button>
-                        </div>
+                        <div class="stepper-box"><button class="step-btn" id="btn-box-${i}-deg-m">−</button><input type="number" class="num-input" id="inp-box-${i}-deg" value="${b.centerDeg.toFixed(2)}" step="0.5" /><button class="step-btn" id="btn-box-${i}-deg-p">+</button></div>
                     </div>
-
                     <div class="ctrl-row">
                         <label>上下位移 (m)</label>
                         <input type="range" id="inp-box-${i}-yoff-r" min="-5" max="25" step="0.1" value="${b.yOffset}" />
-                        <div class="stepper-box">
-                            <button class="step-btn" id="btn-box-${i}-yoff-m">−</button>
-                            <input type="number" class="num-input" id="inp-box-${i}-yoff" value="${b.yOffset.toFixed(2)}" step="0.1" />
-                            <button class="step-btn" id="btn-box-${i}-yoff-p">+</button>
-                        </div>
+                        <div class="stepper-box"><button class="step-btn" id="btn-box-${i}-yoff-m">−</button><input type="number" class="num-input" id="inp-box-${i}-yoff" value="${b.yOffset.toFixed(2)}" step="0.1" /><button class="step-btn" id="btn-box-${i}-yoff-p">+</button></div>
                     </div>
                 `;
-
                 boxesContainer.appendChild(card);
                 setupBoxControls(b, i);
             });
@@ -3055,137 +2742,28 @@
             });
 
             const lockBtn = getEl(`btn-box-${i}-lock`);
-            const inpX = getEl(`inp-box-${i}-x`), inpXR = getEl(`inp-box-${i}-x-r`);
-            const inpZ = getEl(`inp-box-${i}-z`), inpZR = getEl(`inp-box-${i}-z-r`);
-            const inpY = getEl(`inp-box-${i}-y`), inpYR = getEl(`inp-box-${i}-y-r`);
-            const btnXm = getEl(`btn-box-${i}-x-m`), btnXp = getEl(`btn-box-${i}-x-p`);
-            const btnZm = getEl(`btn-box-${i}-z-m`), btnZp = getEl(`btn-box-${i}-z-p`);
-            const btnYm = getEl(`btn-box-${i}-y-m`), btnYp = getEl(`btn-box-${i}-y-p`);
-
             const setBoxLock = (locked) => {
                 b.sizeLocked = locked;
                 if (lockBtn) {
                     lockBtn.innerHTML = locked ? '🔒 尺寸联动' : '🔓 自由长宽高';
                     lockBtn.classList.toggle('unlocked', !locked);
                 }
-                [inpX, inpXR, inpZ, inpZR, inpY, inpYR, btnXm, btnXp, btnZm, btnZp, btnYm, btnYp].forEach(el => {
-                    if (el) el.disabled = locked;
-                });
+                [getEl(`inp-box-${i}-x`), getEl(`inp-box-${i}-x-r`), getEl(`inp-box-${i}-z`), getEl(`inp-box-${i}-z-r`),
+                 getEl(`inp-box-${i}-y`), getEl(`inp-box-${i}-y-r`)].forEach(el => { if (el) el.disabled = locked; });
                 if (locked) {
-                    b.lenX = b.uniformSize;
-                    b.widthZ = b.uniformSize;
-                    b.heightY = b.uniformSize;
-                    if (inpX) inpX.value = b.lenX.toFixed(2);
-                    if (inpXR) inpXR.value = b.lenX;
-                    if (inpZ) inpZ.value = b.widthZ.toFixed(2);
-                    if (inpZR) inpZR.value = b.widthZ;
-                    if (inpY) inpY.value = b.heightY.toFixed(2);
-                    if (inpYR) inpYR.value = b.heightY;
+                    b.lenX = b.uniformSize; b.widthZ = b.uniformSize; b.heightY = b.uniformSize;
                     updateBoxMesh(b);
                 }
             };
             if (lockBtn) lockBtn.onclick = () => setBoxLock(!b.sizeLocked);
 
-            const sR = getEl(`inp-box-${i}-s-r`), sN = getEl(`inp-box-${i}-s`);
-            bindControl({
-                numEl: sN, rangeEl: sR, btnMinus: getEl(`btn-box-${i}-s-m`), btnPlus: getEl(`btn-box-${i}-s-p`), step: 0.1,
-                apply: (v) => {
-                    const val = Math.max(0.1, parseFloat(v) || 1.0);
-                    sR.value = val;
-                    sN.value = val.toFixed(2);
-                    b.uniformSize = val;
-                    if (b.sizeLocked) {
-                        b.lenX = val;
-                        b.widthZ = val;
-                        b.heightY = val;
-                        if (inpX) inpX.value = val.toFixed(2);
-                        if (inpXR) inpXR.value = val;
-                        if (inpZ) inpZ.value = val.toFixed(2);
-                        if (inpZR) inpZR.value = val;
-                        if (inpY) inpY.value = val.toFixed(2);
-                        if (inpYR) inpYR.value = val;
-                    }
-                    b.anchorPos = config.advanced.playerPos.clone();
-                    b.anchorYawDeg = getPlayerCurrentYawDeg();
-                    updateBoxMesh(b);
-                }
-            });
-
-            bindControl({
-                numEl: inpX, rangeEl: inpXR, btnMinus: btnXm, btnPlus: btnXp, step: 0.1,
-                apply: (v) => {
-                    b.lenX = Math.max(0.1, parseFloat(v) || 1.0);
-                    inpX.value = b.lenX.toFixed(2);
-                    if (inpXR) inpXR.value = b.lenX;
-                    b.anchorPos = config.advanced.playerPos.clone();
-                    b.anchorYawDeg = getPlayerCurrentYawDeg();
-                    updateBoxMesh(b);
-                }
-            });
-
-            bindControl({
-                numEl: inpZ, rangeEl: inpZR, btnMinus: btnZm, btnPlus: btnZp, step: 0.1,
-                apply: (v) => {
-                    b.widthZ = Math.max(0.1, parseFloat(v) || 1.0);
-                    inpZ.value = b.widthZ.toFixed(2);
-                    if (inpZR) inpZR.value = b.widthZ;
-                    b.anchorPos = config.advanced.playerPos.clone();
-                    b.anchorYawDeg = getPlayerCurrentYawDeg();
-                    updateBoxMesh(b);
-                }
-            });
-
-            bindControl({
-                numEl: inpY, rangeEl: inpYR, btnMinus: btnYm, btnPlus: btnYp, step: 0.1,
-                apply: (v) => {
-                    b.heightY = Math.max(0.1, parseFloat(v) || 1.0);
-                    inpY.value = b.heightY.toFixed(2);
-                    if (inpYR) inpYR.value = b.heightY;
-                    b.anchorPos = config.advanced.playerPos.clone();
-                    b.anchorYawDeg = getPlayerCurrentYawDeg();
-                    updateBoxMesh(b);
-                }
-            });
-
-            const dR = getEl(`inp-box-${i}-dist-r`), dN = getEl(`inp-box-${i}-dist`);
-            bindControl({
-                numEl: dN, rangeEl: dR, btnMinus: getEl(`btn-box-${i}-dist-m`), btnPlus: getEl(`btn-box-${i}-dist-p`), step: 0.5,
-                apply: (v) => {
-                    b.distMeters = Math.max(0.2, parseFloat(v) || 5.0);
-                    dR.value = b.distMeters;
-                    dN.value = b.distMeters.toFixed(2);
-                    b.anchorPos = config.advanced.playerPos.clone();
-                    b.anchorYawDeg = getPlayerCurrentYawDeg();
-                    updateBoxMesh(b);
-                }
-            });
-
-            const degR = getEl(`inp-box-${i}-deg-r`), degN = getEl(`inp-box-${i}-deg`);
-            bindControl({
-                numEl: degN, rangeEl: degR, btnMinus: getEl(`btn-box-${i}-deg-m`), btnPlus: getEl(`btn-box-${i}-deg-p`), step: 0.5,
-                apply: (v) => {
-                    b.centerDeg = clamp(parseFloat(v) || 0, -180, 180);
-                    degR.value = b.centerDeg;
-                    degN.value = b.centerDeg.toFixed(2);
-                    b.anchorPos = config.advanced.playerPos.clone();
-                    b.anchorYawDeg = getPlayerCurrentYawDeg();
-                    updateBoxMesh(b);
-                }
-            });
-
-            const yoffR = getEl(`inp-box-${i}-yoff-r`), yoffN = getEl(`inp-box-${i}-yoff`);
-            bindControl({
-                numEl: yoffN, rangeEl: yoffR, btnMinus: getEl(`btn-box-${i}-yoff-m`), btnPlus: getEl(`btn-box-${i}-yoff-p`), step: 0.1,
-                apply: (v) => {
-                    b.yOffset = parseFloat(v) || 0;
-                    yoffR.value = b.yOffset;
-                    yoffN.value = b.yOffset.toFixed(2);
-                    b.anchorPos = config.advanced.playerPos.clone();
-                    b.anchorYawDeg = getPlayerCurrentYawDeg();
-                    updateBoxMesh(b);
-                }
-            });
-
+            bindControl({ numEl: getEl(`inp-box-${i}-s`), rangeEl: getEl(`inp-box-${i}-s-r`), btnMinus: getEl(`btn-box-${i}-s-m`), btnPlus: getEl(`btn-box-${i}-s-p`), step: 0.1, apply: (v) => { b.uniformSize = Math.max(0.1, parseFloat(v) || 1.0); if (b.sizeLocked) { b.lenX = b.uniformSize; b.widthZ = b.uniformSize; b.heightY = b.uniformSize; } updateBoxMesh(b); } });
+            bindControl({ numEl: getEl(`inp-box-${i}-x`), rangeEl: getEl(`inp-box-${i}-x-r`), btnMinus: getEl(`btn-box-${i}-x-m`), btnPlus: getEl(`btn-box-${i}-x-p`), step: 0.1, apply: (v) => { b.lenX = Math.max(0.1, parseFloat(v) || 1.0); updateBoxMesh(b); } });
+            bindControl({ numEl: getEl(`inp-box-${i}-z`), rangeEl: getEl(`inp-box-${i}-z-r`), btnMinus: getEl(`btn-box-${i}-z-m`), btnPlus: getEl(`btn-box-${i}-z-p`), step: 0.1, apply: (v) => { b.widthZ = Math.max(0.1, parseFloat(v) || 1.0); updateBoxMesh(b); } });
+            bindControl({ numEl: getEl(`inp-box-${i}-y`), rangeEl: getEl(`inp-box-${i}-y-r`), btnMinus: getEl(`btn-box-${i}-y-m`), btnPlus: getEl(`btn-box-${i}-y-p`), step: 0.1, apply: (v) => { b.heightY = Math.max(0.1, parseFloat(v) || 1.0); updateBoxMesh(b); } });
+            bindControl({ numEl: getEl(`inp-box-${i}-dist`), rangeEl: getEl(`inp-box-${i}-dist-r`), btnMinus: getEl(`btn-box-${i}-dist-m`), btnPlus: getEl(`btn-box-${i}-dist-p`), step: 0.5, apply: (v) => { b.distMeters = Math.max(0.2, parseFloat(v) || 5.0); updateBoxMesh(b); } });
+            bindControl({ numEl: getEl(`inp-box-${i}-deg`), rangeEl: getEl(`inp-box-${i}-deg-r`), btnMinus: getEl(`btn-box-${i}-deg-m`), btnPlus: getEl(`btn-box-${i}-deg-p`), step: 0.5, apply: (v) => { b.centerDeg = clamp(parseFloat(v) || 0, -180, 180); updateBoxMesh(b); } });
+            bindControl({ numEl: getEl(`inp-box-${i}-yoff`), rangeEl: getEl(`inp-box-${i}-yoff-r`), btnMinus: getEl(`btn-box-${i}-yoff-m`), btnPlus: getEl(`btn-box-${i}-yoff-p`), step: 0.1, apply: (v) => { b.yOffset = parseFloat(v) || 0; updateBoxMesh(b); } });
             setBoxLock(b.sizeLocked);
         }
 
@@ -3194,25 +2772,13 @@
             const i = config.boxes.length;
             const id = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
             const color = ME_BOX_PALETTE[i % ME_BOX_PALETTE.length].hex;
-
             const boxData = {
-                id,
-                color,
-                uniformSize: 2.0,
-                lenX: 2.0,
-                heightY: 2.0,
-                widthZ: 2.0,
-                sizeLocked: true,
-                distMeters: 8.0 + (i * 2.0),
+                id, color, uniformSize: 2.0, lenX: 2.0, heightY: 2.0, widthZ: 2.0,
+                sizeLocked: true, distMeters: 8.0 + (i * 2.0),
                 centerDeg: (i === 0 ? -25 : (i * 22) - 45),
-                yOffset: 0.0,
-                anchorPos: config.advanced.playerPos.clone(),
-                anchorYawDeg: getPlayerCurrentYawDeg(),
-                group: null,
-                mesh: null,
-                edgeLine: null
+                yOffset: 0.0, anchorPos: config.advanced.playerPos.clone(),
+                anchorYawDeg: getPlayerCurrentYawDeg(), group: null, mesh: null, edgeLine: null
             };
-
             createMirrorEdgeBoxObject(boxData);
             config.boxes.push(boxData);
             rebuildBoxesUI();
@@ -3234,33 +2800,15 @@
             updateScene();
         }
 
-        // ============================================================
-        // 12. 交互面板与全局事件绑定
-        // ============================================================
+        // 12. 面板交互与按键事件
         const leftPanel = getEl('left-panel');
         const rightPanel = getEl('right-panel');
-        const leftBottom = getEl('left-bottom-group');
         const handle = getEl('panel-handle');
         const dragBtn = getEl('btn-drag-toggle');
         const btnLock = getEl('btn-lock');
         const btnTheme = getEl('btn-theme-toggle');
 
-        let lockCooldownTimer = null;
         let isDragging = false, isStick = false, offX = 0, offY = 0;
-        let isLocking = false;
-
-        function triggerLockCooldown() {
-            if (lockCooldownTimer) clearTimeout(lockCooldownTimer);
-            btnLock.disabled = true;
-            btnLock.classList.add('disabled-cooldown');
-            btnLock.innerText = '进入靶场 (冷却中...)';
-            lockCooldownTimer = setTimeout(() => {
-                btnLock.disabled = false;
-                btnLock.classList.remove('disabled-cooldown');
-                btnLock.innerText = '进入靶场 (锁定鼠标)';
-                lockCooldownTimer = null;
-            }, 1000);
-        }
 
         function bindPanelAndLock() {
             handle.addEventListener('mousedown', (e) => {
@@ -3287,10 +2835,6 @@
             });
 
             btnLock.addEventListener('click', () => {
-                if (btnLock.disabled || isLocking || document.pointerLockElement === document.body) return;
-                isLocking = true;
-                setTimeout(() => { isLocking = false; }, 300);
-
                 try {
                     const promise = document.body.requestPointerLock({ unadjustedMovement: true });
                     if (promise && promise.catch) {
@@ -3305,32 +2849,16 @@
                 }
             });
 
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' || e.code === 'Escape') {
-                    if (isStick) {
-                        isStick = false;
-                        dragBtn.classList.remove('active');
-                        dragBtn.innerText = '移动窗口';
-                    }
-                }
-            }, true);
-
             document.addEventListener('pointerlockchange', () => {
                 const isLocked = (document.pointerLockElement === document.body);
                 leftPanel.style.opacity = isLocked ? '0' : '1';
                 leftPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
                 rightPanel.style.opacity = isLocked ? '0' : '1';
                 rightPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
-                if (leftBottom) {
-                    leftBottom.style.opacity = isLocked ? '0' : '1';
-                    leftBottom.style.pointerEvents = isLocked ? 'none' : 'auto';
-                }
-                const brHud = getEl('bottom-right-hud');
-                if (brHud) {
-                    brHud.style.opacity = isLocked ? '0' : '1';
-                    brHud.style.pointerEvents = isLocked ? 'none' : 'auto';
-                }
-                if (!isLocked) triggerLockCooldown();
+                getEl('left-bottom-group').style.opacity = isLocked ? '0' : '1';
+                getEl('left-bottom-group').style.pointerEvents = isLocked ? 'none' : 'auto';
+                getEl('bottom-right-hud').style.opacity = isLocked ? '0' : '1';
+                getEl('bottom-right-hud').style.pointerEvents = isLocked ? 'none' : 'auto';
             });
         }
 
@@ -3373,49 +2901,30 @@
                 config.advanced.enabled = advToggle.checked;
                 advContainer.style.display = advToggle.checked ? 'flex' : 'none';
             });
-
             btnToggleWalk.addEventListener('click', () => {
                 config.advanced.walkEnabled = !config.advanced.walkEnabled;
                 btnToggleWalk.classList.toggle('active-move', config.advanced.walkEnabled);
-                btnToggleWalk.innerText = config.advanced.walkEnabled ? '行走: 开启' : '行走: 关闭';
+                btnToggleWalk.innerText = config.advanced.walkEnabled ? '行走 [WASD]: 开启' : '行走 [WASD]: 关闭';
                 walkSub.style.display = config.advanced.walkEnabled ? 'block' : 'none';
             });
-
             btnToggleFly.addEventListener('click', () => {
                 config.advanced.flyEnabled = !config.advanced.flyEnabled;
                 btnToggleFly.classList.toggle('active-move', config.advanced.flyEnabled);
-                btnToggleFly.innerText = config.advanced.flyEnabled ? '可以飞: 开启' : '可以飞: 关闭';
+                btnToggleFly.innerText = config.advanced.flyEnabled ? '可以飞 [空格/Shift]: 开启' : '可以飞 [空格/Shift]: 关闭';
                 flySub.style.display = config.advanced.flyEnabled ? 'block' : 'none';
             });
-
             rebuildBoxesUI();
         }
-
-        const WHEEL_STEP = {
-            'inp-dpi': 50,
-            'inp-cm': 0.25,
-            'inp-fov': 1,
-            'inp-height': 0.025,
-            'inp-crosshair-opacity': 0.05,
-            'inp-walk-spd': 0.2,
-            'inp-fly-spd': 0.5,
-            'inp-cross-size': 0.5,
-            'inp-cross-thick': 0.5,
-            'inp-cross-gap': 0.25
-        };
 
         function bindGlobalInputs() {
             Object.keys(GLOBAL_NUM_HANDLERS).forEach(id => {
                 const inp = getEl(id);
                 if (!inp) return;
-                inp.addEventListener('change', () => {
-                    if (inp.disabled) return;
-                    dispatchGlobalInput(id, inp.value);
-                });
+                inp.addEventListener('change', () => { if (!inp.disabled) dispatchGlobalInput(id, inp.value); });
                 inp.addEventListener('wheel', (e) => {
                     e.preventDefault();
                     if (inp.disabled) return;
-                    const step = WHEEL_STEP[id] || parseFloat(inp.getAttribute('step')) || 1;
+                    const step = parseFloat(inp.getAttribute('step')) || 1;
                     dispatchGlobalInput(id, (parseFloat(inp.value) || 0) + (e.deltaY < 0 ? step : -step));
                 }, { passive: false });
             });
@@ -3424,58 +2933,60 @@
             getEl('inp-cm-r').addEventListener('input', e => setCm(sliderToCm(e.target.value)));
             getEl('inp-fov-r').addEventListener('input', e => setFov(e.target.value));
             getEl('inp-height-r').addEventListener('input', e => setHeight(e.target.value));
-            getEl('inp-crosshair-opacity-r').addEventListener('input', e => setCrosshairOpacity(e.target.value));
             getEl('inp-walk-spd-r').addEventListener('input', e => setWalkSpeed(e.target.value));
             getEl('inp-fly-spd-r').addEventListener('input', e => setFlySpeed(e.target.value));
 
-            document.querySelectorAll('.dpi-pill').forEach(b =>
-                b.addEventListener('click', () => setDpi(parseInt(b.dataset.val))));
-            document.querySelectorAll('.cm-pill').forEach(b =>
-                b.addEventListener('click', () => setCm(parseFloat(b.dataset.val))));
+            document.querySelectorAll('.dpi-pill').forEach(b => b.addEventListener('click', () => setDpi(parseInt(b.dataset.val))));
+            document.querySelectorAll('.cm-pill').forEach(b => b.addEventListener('click', () => setCm(parseFloat(b.dataset.val))));
+        }
+
+        // 准星双通道独立调色器恢复
+        function setupColorSwatchGrid(containerId, currentColor, onSelect) {
+            const c = getEl(containerId);
+            if (!c) return;
+            c.innerHTML = '';
+            COLOR_PRESETS_CROSSHAIR.forEach(item => {
+                const b = document.createElement('div');
+                b.className = 'round-swatch-btn' + (item.hex.toLowerCase() === currentColor.toLowerCase() ? ' active' : '');
+                b.style.background = item.hex;
+                b.dataset.hex = item.hex;
+                b.title = item.name;
+                b.onclick = () => {
+                    c.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
+                    b.classList.add('active');
+                    onSelect(item.hex);
+                };
+                c.appendChild(b);
+            });
+
+            const pickerWrap = document.createElement('div');
+            pickerWrap.className = 'color-picker-input-wrap';
+            pickerWrap.title = '全域自定义拾色器';
+            pickerWrap.innerHTML = `<input type="color" value="${currentColor}" />`;
+            pickerWrap.querySelector('input').oninput = (e) => {
+                c.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
+                onSelect(e.target.value);
+            };
+            c.appendChild(pickerWrap);
         }
 
         function initCrosshairColorSwatches() {
-            const defC = getEl('swatches-default'), tgtC = getEl('swatches-target');
-            COLOR_PRESETS_CROSSHAIR.forEach(c => {
-                const b1 = document.createElement('div');
-                b1.className = 'round-swatch-btn' + (c.hex === config.customCrosshair.defaultColor ? ' active' : '');
-                b1.style.background = c.hex;
-                b1.title = c.name;
-                b1.onclick = () => {
-                    config.customCrosshair.defaultColor = c.hex;
-                    defC.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
-                    b1.classList.add('active');
-                    updateCrosshairStyle();
-                };
-                defC.appendChild(b1);
-
-                const b2 = document.createElement('div');
-                b2.className = 'round-swatch-btn' + (c.hex === config.customCrosshair.targetColor ? ' active' : '');
-                b2.style.background = c.hex;
-                b2.title = c.name;
-                b2.onclick = () => {
-                    config.customCrosshair.targetColor = c.hex;
-                    tgtC.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
-                    b2.classList.add('active');
-                    updateCrosshairStyle();
-                };
-                tgtC.appendChild(b2);
+            setupColorSwatchGrid('swatches-default', config.crosshairColor.defaultColor, (hex) => {
+                config.crosshairColor.defaultColor = hex;
+                updateCrosshairStyle();
             });
-            getEl('inp-custom-crosshair').addEventListener('change', (e) => {
-                config.customCrosshair.enabled = e.target.checked;
-                getEl('crosshair-custom-box').style.display = config.customCrosshair.enabled ? 'block' : 'none';
+            setupColorSwatchGrid('swatches-target', config.crosshairColor.targetColor, (hex) => {
+                config.crosshairColor.targetColor = hex;
                 updateCrosshairStyle();
             });
         }
 
-        // ============================================================
-        // 13. 运动学与主渲染循环
-        // ============================================================
+        // 13. 动力学与渲染主循环
         let lastTime = performance.now(), lastFrame = performance.now(), frameCnt = 0;
         const hudFps = getEl('hud-fps');
         const hudAngle = getEl('hud-angle');
+        const hudPitch = getEl('hud-pitch');
         const hudPoll = getEl('hud-poll');
-        let lastRenderedAngle = -999;
 
         function updatePhysics(dt) {
             if (config.cloudsEnabled) {
@@ -3483,30 +2994,20 @@
                     c.userData.angle += c.userData.speed * dt;
                     c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
                     c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
-                    c.position.y = c.userData.altitude;
                 });
             }
 
             if (config.advanced.walkEnabled) {
-                const isForward = keysDown.has('KeyW');
-                const isBackward = keysDown.has('KeyS');
-                const isLeft = keysDown.has('KeyA');
-                const isRight = keysDown.has('KeyD');
-
                 let moveX = 0, moveZ = 0;
-                if (isForward) moveZ -= 1;
-                if (isBackward) moveZ += 1;
-                if (isLeft) moveX -= 1;
-                if (isRight) moveX += 1;
+                if (keysDown.has('KeyW')) moveZ -= 1;
+                if (keysDown.has('KeyS')) moveZ += 1;
+                if (keysDown.has('KeyA')) moveX -= 1;
+                if (keysDown.has('KeyD')) moveX += 1;
 
                 if (moveX !== 0 || moveZ !== 0) {
                     const len = Math.hypot(moveX, moveZ);
-                    const nx = moveX / len;
-                    const nz = moveZ / len;
-
-                    const sinY = Math.sin(yaw);
-                    const cosY = Math.cos(yaw);
-
+                    const nx = moveX / len, nz = moveZ / len;
+                    const sinY = Math.sin(yaw), cosY = Math.cos(yaw);
                     const worldX = (nx * cosY + nz * sinY) * config.advanced.walkSpeed * dt;
                     const worldZ = (-nx * sinY + nz * cosY) * config.advanced.walkSpeed * dt;
 
@@ -3515,31 +3016,16 @@
                     const py = config.viewHeight + config.advanced.playerPos.y;
 
                     if (!checkCollisionWithBoxes(nextPx, py - (config.viewHeight / 2), nextPz, 0.35, config.viewHeight / 2)) {
-                        config.advanced.playerPos.x = nextPx;
-                        config.advanced.playerPos.z = nextPz;
-                    } else {
-                        if (!checkCollisionWithBoxes(nextPx, py - (config.viewHeight / 2), config.advanced.playerPos.z, 0.35, config.viewHeight / 2)) {
-                            config.advanced.playerPos.x = nextPx;
-                        } else if (!checkCollisionWithBoxes(config.advanced.playerPos.x, py - (config.viewHeight / 2), nextPz, 0.35, config.viewHeight / 2)) {
-                            config.advanced.playerPos.z = nextPz;
-                        }
+                        config.advanced.playerPos.x = nextPx; config.advanced.playerPos.z = nextPz;
                     }
                 }
 
                 if (config.advanced.flyEnabled) {
-                    const isUp = keysDown.has('Space');
-                    const isDown = keysDown.has('ShiftLeft');
-
                     let moveY = 0;
-                    if (isUp) moveY += 1;
-                    if (isDown) moveY -= 1;
-
+                    if (keysDown.has('Space')) moveY += 1;
+                    if (keysDown.has('ShiftLeft')) moveY -= 1;
                     if (moveY !== 0) {
-                        const nextPy = config.advanced.playerPos.y + (moveY * config.advanced.flySpeed * dt);
-                        const totalY = config.viewHeight + nextPy;
-                        if (!checkCollisionWithBoxes(config.advanced.playerPos.x, totalY - (config.viewHeight / 2), config.advanced.playerPos.z, 0.35, config.viewHeight / 2)) {
-                            config.advanced.playerPos.y = nextPy;
-                        }
+                        config.advanced.playerPos.y += (moveY * config.advanced.flySpeed * dt);
                         if (config.advanced.playerPos.y + config.viewHeight < 0.1) {
                             config.advanced.playerPos.y = 0.1 - config.viewHeight;
                         }
@@ -3548,38 +3034,24 @@
                     config.advanced.playerPos.y = 0;
                 }
 
-                camera.position.set(
-                    config.advanced.playerPos.x,
-                    config.viewHeight + config.advanced.playerPos.y,
-                    config.advanced.playerPos.z
-                );
+                camera.position.set(config.advanced.playerPos.x, config.viewHeight + config.advanced.playerPos.y, config.advanced.playerPos.z);
                 if (horizonLine) horizonLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
                 if (thinLine) thinLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
             }
 
-            // 目标摆动与位移更新
+            // 目标摆动位移更新
             config.targets.forEach(t => {
                 if (!t.rootGroup.visible) return;
-
                 const isSphere = config.targetShape === 'sphere';
                 const radius = isSphere ? (t.sizeCm / 200) : (Math.max(t.bodyWidthCm, t.headWidthCm) / 200);
                 const halfHeight = isSphere ? radius : ((t.bodyHeightCm + t.headHeightCm) / 200);
 
                 if (t.move.enabled && t.motion) {
                     const D = t.motion.radius || t.distMeters;
-
                     if (t.move.mode === 'linear') {
                         const totalSpanRad = (t.move.totalSpanDeg * Math.PI) / 180;
-                        let linearHalfSpan;
-                        if (t.move.visualAngleLock) {
-                            const effHalfRad = Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG) * Math.PI / 180;
-                            const tanHalf = Math.tan(effHalfRad);
-                            linearHalfSpan = D * (isFinite(tanHalf) ? Math.abs(tanHalf) : 8);
-                        } else {
-                            linearHalfSpan = (D * totalSpanRad) / 2;
-                        }
+                        const linearHalfSpan = t.move.visualAngleLock ? D * Math.tan(Math.min(t.move.totalSpanDeg / 2, LINEAR_MAX_HALF_DEG) * Math.PI / 180) : (D * totalSpanRad) / 2;
                         const linearSpeed = D * (t.move.speedDeg * Math.PI / 180);
-
                         const nextLinearOffset = t.move.currentLinearOffset + t.move.dir * linearSpeed * dt;
 
                         const candX = t.motion.centerX + t.motion.tangentX * nextLinearOffset;
@@ -3590,21 +3062,13 @@
                             t.move.dir *= -1;
                         } else {
                             t.move.currentLinearOffset = nextLinearOffset;
-                            if (t.move.currentLinearOffset >= linearHalfSpan) {
-                                t.move.currentLinearOffset = linearHalfSpan;
-                                t.move.dir = -1;
-                            } else if (t.move.currentLinearOffset <= -linearHalfSpan) {
-                                t.move.currentLinearOffset = -linearHalfSpan;
-                                t.move.dir = 1;
-                            }
-                            t.rootGroup.position.x = candX;
-                            t.rootGroup.position.z = candZ;
-                            t.rootGroup.position.y = candY;
+                            if (t.move.currentLinearOffset >= linearHalfSpan) { t.move.currentLinearOffset = linearHalfSpan; t.move.dir = -1; }
+                            else if (t.move.currentLinearOffset <= -linearHalfSpan) { t.move.currentLinearOffset = -linearHalfSpan; t.move.dir = 1; }
+                            t.rootGroup.position.set(candX, candY, candZ);
                         }
                     } else {
                         const halfDeg = t.move.totalSpanDeg / 2;
                         const nextOffsetDeg = t.move.currentOffsetDeg + t.move.dir * t.move.speedDeg * dt;
-
                         const currentArcRad = t.motion.baseRad + (nextOffsetDeg * Math.PI / 180);
 
                         const candX = t.motion.originPlayerPos.x + D * Math.sin(currentArcRad);
@@ -3615,19 +3079,14 @@
                             t.move.dir *= -1;
                         } else {
                             t.move.currentOffsetDeg = nextOffsetDeg;
-                            if (t.move.currentOffsetDeg >= halfDeg) {
-                                t.move.currentOffsetDeg = halfDeg;
-                                t.move.dir = -1;
-                            } else if (t.move.currentOffsetDeg <= -halfDeg) {
-                                t.move.currentOffsetDeg = -halfDeg;
-                                t.move.dir = 1;
-                            }
-                            t.rootGroup.position.x = candX;
-                            t.rootGroup.position.z = candZ;
-                            t.rootGroup.position.y = candY;
+                            if (t.move.currentOffsetDeg >= halfDeg) { t.move.currentOffsetDeg = halfDeg; t.move.dir = -1; }
+                            else if (t.move.currentOffsetDeg <= -halfDeg) { t.move.currentOffsetDeg = -halfDeg; t.move.dir = 1; }
+                            t.rootGroup.position.set(candX, candY, candZ);
                         }
                     }
                 }
+                updateTargetMeridianGeometry(t);
+                updateTargetBadgeCanvas(t);
             });
         }
 
@@ -3637,11 +3096,10 @@
             lastFrame = now;
             updatePhysics(dt);
 
-            const currentDeg = getPlayerCurrentYawDeg();
-            if (Math.abs(currentDeg - lastRenderedAngle) > 0.001) {
-                lastRenderedAngle = currentDeg;
-                if (hudAngle) hudAngle.innerText = currentDeg.toFixed(3);
-            }
+            const currentYaw = getPlayerCurrentYawDeg();
+            const currentPitch = getPlayerCurrentPitchDeg();
+            if (hudAngle) hudAngle.innerText = currentYaw.toFixed(3);
+            if (hudPitch) hudPitch.innerText = (currentPitch >= 0 ? '+' : '') + currentPitch.toFixed(3);
 
             frameCnt++;
             if (now - lastTime >= 400) {
@@ -3650,7 +3108,6 @@
                 lastTime = now;
             }
 
-            // 轮询率捕获计算
             if (now - pollLastCalc >= 400) {
                 const elapsed = (now - pollLastCalc) / 1000;
                 const inst = Math.round(pollCount / elapsed);
@@ -3676,15 +3133,12 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // ============================================================
         // 14. 启动与初始化
-        // ============================================================
         function init() {
             setDpi(config.dpi);
             setCm(config.cmPer360);
             setFov(config.fovHorizontal);
             setHeight(config.viewHeight);
-            setCrosshairOpacity(config.crosshairOpacity || 1.0);
             updateSensitivity();
 
             initCrosshairColorSwatches();
