@@ -657,7 +657,6 @@
             color: #6d28d9;
         }
 
-        /* 修复 tooltip-container 撑满宽度，防止 grid 对齐塌陷 */
         .tooltip-container {
             position: relative;
             display: block;
@@ -704,13 +703,20 @@
         #track-sub-toggle {
             display: none;
         }
+        /* 隐藏步骤区域 */
+        #stepsNatural {
+            display: none;
+        }
+        .steps {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="card">
 
         <div class="header">
-            <span class="date">2026.9.2</span>
+            <span class="date">2026.9.4</span>
             <span>同身寸 · 收束法</span>
             <span class="badge" style="background:var(--blue-dark);">xlm</span>
             <a href="https://xidaohai.github.io/tsc.png" target="_blank" rel="noopener noreferrer" class="k-link">【说明】？</a>
@@ -870,7 +876,8 @@
                 </div>
             </div>
 
-            <div class="steps">
+            <!-- 步骤区域已隐藏，保留占位但不可见 -->
+            <div class="steps" style="display:none;">
                 <div class="title" id="stepsTitle">📝 计算推导流程</div>
                 <div id="stepsNatural"></div>
             </div>
@@ -904,10 +911,12 @@
             const x_safe = Math.max(0, x);
             const y_safe = Math.max(0.001, y);
             if (stdSubMode === 'simple') {
+                // 极简：保持原有 (e+√2)·x^(1/3)
                 const coeff = Math.E + Math.SQRT2;
                 return { result: coeff * Math.pow(x_safe, 1 / 3) };
             } else {
-                return { result: 1.08 * Math.pow(x_safe, 1 / 3) * Math.pow(y_safe, 0.25) };
+                // 完整：新公式 Output = 2.88 · x^0.333 · y^0.0625
+                return { result: 2.88 * Math.pow(x_safe, 0.333) * Math.pow(y_safe, 0.0625) };
             }
         }
 
@@ -1009,8 +1018,8 @@
                     footerDesc.innerHTML = `<strong>普通极简</strong>：(e + √2) · x<sup>1/3</sup>`;
                 } else {
                     exprElem.innerHTML =
-                        `<div class="math-row"><span>Output = 1.08 · x<sup>1/3</sup> · y<sup>0.25</sup></span></div>`;
-                    footerDesc.innerHTML = `<strong>普通完整</strong>：1.08 · x<sup>1/3</sup> · y<sup>0.25</sup>`;
+                        `<div class="math-row"><span>Output = 2.88 · x<sup>0.333</sup> · y<sup>0.0625</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>普通完整</strong>：2.88 · x<sup>0.333</sup> · y<sup>0.0625</sup>`;
                 }
             }
         }
@@ -1073,7 +1082,6 @@
             calculate();
         }
 
-        // 修复：用户在输入中时不强行覆写输入框字符串，允许键入负号 '-' 和小数点
         function onCorrectionInputLive() {
             const raw = document.getElementById('input-correct').value;
             if (raw === '-' || raw === '' || raw === '.') return;
@@ -1167,30 +1175,8 @@
             }
             updateDisplayValues(baseVals, factor, ratios);
 
-            // 步骤推导（已修复上标格式统一）
-            let stepsHtml = '';
-            if (currentMode === 'standard') {
-                const subName = stdSubMode === 'simple' ? '极简' : '完整';
-                let formulaStr = stdSubMode === 'simple' ?
-                    `(e + √2) · ${x}<sup>1/3</sup>` :
-                    `1.08 · ${x}<sup>1/3</sup> · ${y}<sup>0.25</sup>`;
-                stepsHtml = `
-                    <div class="step-stage cun" style="background:#0284c7;">普通 · ${subName}</div>
-                    <div class="step-line"><span class="step-num blue">1</span><span class="step-label">公式</span><span class="step-formula">${formulaStr}</span></div>
-                    <div class="step-line"><span class="step-num blue">2</span><span class="step-label">结果</span><span class="step-result blue">${stdResult.toFixed(2)} cm</span></div>
-                `;
-            } else {
-                const subName = trackSubMode === 'simple' ? '极简' : '完整';
-                const formula = trackSubMode === 'simple' ?
-                    `44 · ${x}<sup>0.125</sup> · ${z}<sup>−0.125</sup>` :
-                    `29.29 · ${x}<sup>0.125</sup> · ${y}<sup>0.0625</sup> · ${z}<sup>−0.125</sup>`;
-                stepsHtml = `
-                    <div class="step-stage cun track">跟枪 · ${subName}</div>
-                    <div class="step-line"><span class="step-num purple">1</span><span class="step-label">公式</span><span class="step-formula">${formula}</span></div>
-                    <div class="step-line"><span class="step-num purple">2</span><span class="step-label">结果</span><span class="step-result purple">${trackResult.toFixed(2)} cm</span></div>
-                `;
-            }
-            document.getElementById('stepsNatural').innerHTML = stepsHtml;
+            // 步骤推导已移除，留空
+            document.getElementById('stepsNatural').innerHTML = '';
 
             drawChart(x, y, z, t3_max, s_max, s_bal);
         }
@@ -1380,7 +1366,6 @@
                 ctx.fillText(`均衡 ${s_bal.toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
             }
 
-            // 绘制当前指示垂线并增加文本边界安全 Clamp
             const p_v = toPx(x_in, 0);
             ctx.strokeStyle = 'rgba(0,0,0,0.1)';
             ctx.setLineDash([2, 3]);
@@ -1423,7 +1408,6 @@
             calculate();
         }
 
-        // 仅保留 DOMContentLoaded，杜绝双重调用
         window.addEventListener('DOMContentLoaded', initAll);
         window.addEventListener('resize', calculate);
     </script>
