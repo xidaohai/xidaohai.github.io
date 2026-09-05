@@ -270,8 +270,8 @@
         </div>
 
         <div class="result-card">
-            <div class="result-label">实际物理转身距离</div>
-            <div class="result-value" id="realCm">30.425 cm/360°</div>
+            <div class="result-label">实际物理转身距离 (精算)</div>
+            <div class="result-value" id="realCm">30.4250 cm/360°</div>
         </div>
 
         <div class="formula-card">
@@ -310,7 +310,7 @@
         <div class="result-card purple">
             <div class="result-label">横纵距离比例</div>
             <div class="result-value" id="ratioResult">1 : 0.9024</div>
-            <div class="sub-desc" id="ratioDetail">纵轴约是横轴的 90.24%</div>
+            <div class="sub-desc" id="ratioDetail">纵轴约是横轴的 90.2367% (横:纵 = 1.1082 : 1)</div>
         </div>
 
         <div class="divider"></div>
@@ -353,7 +353,7 @@
         </div>
 
         <div class="footer">
-            <span style="color: var(--text-sub);">DPI 建议在鼠标驱动中四舍五入为最接近的挡位</span>
+            <span style="color: var(--text-sub);">保留 4 位小数精算</span>
         </div>
     </div>
 </div>
@@ -368,7 +368,7 @@
 
         if (actualDpi > 0 && inputDpi > 0 && targetCm > 0) {
             const realCm = targetCm * (inputDpi / actualDpi);
-            realCmEl.innerText = realCm.toFixed(3) + " cm/360°";
+            realCmEl.innerText = realCm.toFixed(4) + " cm/360°";
         } else {
             realCmEl.innerText = "-- cm/360°";
         }
@@ -395,8 +395,9 @@
 
         if (bx > 0 && by > 0) {
             const ratioXY = by / bx; // Y/X
+            const ratioYX = bx / by; // X/Y
             ratioResultEl.innerText = `1 : ${ratioXY.toFixed(4)}`;
-            ratioDetailEl.innerText = `纵轴约是横轴的 ${(ratioXY * 100).toFixed(2)}% (横:纵 = ${(bx / by).toFixed(4)} : 1)`;
+            ratioDetailEl.innerText = `纵轴约是横轴的 ${(ratioXY * 100).toFixed(4)}% (横:纵 = ${ratioYX.toFixed(4)} : 1)`;
 
             // 保持关联输入框同步更新
             if (document.activeElement === newYEl) calcFromNewY();
@@ -410,14 +411,14 @@
         }
     }
 
-    // --- CM 互算逻辑（正比关系：保持比例一致）---
+    // --- CM 互算逻辑（正比关系）---
     function calcFromNewX() {
         const bx = parseFloat(baseXEl.value);
         const by = parseFloat(baseYEl.value);
         const nx = parseFloat(newXEl.value);
 
         if (bx > 0 && by > 0 && nx > 0) {
-            newYEl.value = (nx * (by / bx)).toFixed(3);
+            newYEl.value = (nx * (by / bx)).toFixed(4);
         } else if (newXEl.value === '') {
             newYEl.value = '';
         }
@@ -429,13 +430,13 @@
         const ny = parseFloat(newYEl.value);
 
         if (bx > 0 && by > 0 && ny > 0) {
-            newXEl.value = (ny * (bx / by)).toFixed(3);
+            newXEl.value = (ny * (bx / by)).toFixed(4);
         } else if (newYEl.value === '') {
             newXEl.value = '';
         }
     }
 
-    // --- 驱动 DPI 互算逻辑（反比关系：CM 越短，DPI 应当越大）---
+    // --- 驱动 DPI 互算逻辑（反比关系）---
     function calcFromDpiX() {
         const bx = parseFloat(baseXEl.value);
         const by = parseFloat(baseYEl.value);
@@ -444,7 +445,7 @@
         if (bx > 0 && by > 0 && dx > 0) {
             // DPI_Y = DPI_X * (Base_X / Base_Y)
             const dy = dx * (bx / by);
-            dpiYEl.value = dy.toFixed(1);
+            dpiYEl.value = dy.toFixed(4);
         } else if (dpiXEl.value === '') {
             dpiYEl.value = '';
         }
@@ -458,7 +459,7 @@
         if (bx > 0 && by > 0 && dy > 0) {
             // DPI_X = DPI_Y * (Base_Y / Base_X)
             const dx = dy * (by / bx);
-            dpiXEl.value = dx.toFixed(1);
+            dpiXEl.value = dx.toFixed(4);
         } else if (dpiYEl.value === '') {
             dpiXEl.value = '';
         }
