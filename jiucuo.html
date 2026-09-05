@@ -12,10 +12,10 @@
             --text-sub: #8b949e;
             --border-color: #30363d;
             --accent-color: #58a6ff;
+            --purple-accent: #a371f7;
+            --green-accent: #3fb950;
             --input-bg: #0d1117;
             --formula-bg: #11161d;
-            --highlight-color: #2ea043;
-            --badge-bg: #1f2937;
         }
 
         body {
@@ -36,15 +36,15 @@
             display: flex;
             gap: 24px;
             width: 100%;
-            max-width: 900px;
+            max-width: 960px;
             align-items: stretch;
             justify-content: center;
         }
 
-        @media (max-width: 820px) {
+        @media (max-width: 860px) {
             .main-wrapper {
                 flex-direction: column;
-                max-width: 440px;
+                max-width: 480px;
             }
         }
 
@@ -52,7 +52,7 @@
             background-color: var(--card-bg);
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            padding: 26px;
+            padding: 24px;
             flex: 1;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             display: flex;
@@ -70,8 +70,26 @@
             padding-bottom: 12px;
         }
 
+        .section-title {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-title.purple {
+            color: var(--purple-accent);
+        }
+
+        .section-title.green {
+            color: var(--green-accent);
+        }
+
         .input-group {
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .input-row {
@@ -81,11 +99,12 @@
 
         .input-row .input-group {
             flex: 1;
+            margin-bottom: 12px;
         }
 
         label {
             display: block;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             margin-bottom: 6px;
             color: var(--text-sub);
             font-weight: 500;
@@ -93,7 +112,7 @@
 
         input {
             width: 100%;
-            padding: 10px 12px;
+            padding: 9px 12px;
             background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 6px;
@@ -111,25 +130,24 @@
 
         .divider {
             border-top: 1px dashed var(--border-color);
-            margin: 16px 0 18px 0;
+            margin: 14px 0 16px 0;
         }
 
         .result-card {
             margin-top: 10px;
-            padding: 14px 16px;
+            padding: 12px 14px;
             background-color: rgba(22, 27, 34, 0.5);
             border-radius: 8px;
             border: 1px solid var(--border-color);
             border-left: 4px solid var(--accent-color);
         }
 
-        .result-card.secondary {
-            border-left-color: #a371f7;
-            margin-top: 16px;
+        .result-card.purple {
+            border-left-color: var(--purple-accent);
         }
 
         .result-label {
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             color: var(--text-sub);
             margin-bottom: 4px;
             text-transform: uppercase;
@@ -137,22 +155,23 @@
         }
 
         .result-value {
-            font-size: 1.45rem;
+            font-size: 1.35rem;
             font-weight: 700;
             color: #ffffff;
             font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, monospace;
         }
 
         .sub-desc {
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             color: #8b949e;
             margin-top: 4px;
+            line-height: 1.4;
         }
 
         /* 公式卡片样式 */
         .formula-card {
-            margin-top: 18px;
-            padding: 12px;
+            margin-top: 14px;
+            padding: 10px 12px;
             background-color: var(--formula-bg);
             border: 1px dashed var(--border-color);
             border-radius: 8px;
@@ -160,15 +179,15 @@
         }
 
         .formula-title {
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             color: var(--text-sub);
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .formula-math {
-            font-size: 0.88rem;
+            font-size: 0.82rem;
             color: #f0f6fc;
             display: inline-flex;
             align-items: center;
@@ -205,13 +224,13 @@
         .tip-text {
             font-size: 0.75rem;
             color: var(--text-sub);
-            margin-top: 6px;
+            margin-bottom: 8px;
             line-height: 1.4;
         }
 
         .footer {
             margin-top: auto;
-            padding-top: 18px;
+            padding-top: 16px;
             text-align: right;
             font-size: 0.8rem;
         }
@@ -231,7 +250,7 @@
 <body>
 
 <div class="main-wrapper">
-    <!-- 左侧：DPI 纠正计算器 -->
+    <!-- 左侧：DPI 误差纠正计算器 -->
     <div class="container">
         <h2>DPI 误差纠正计算器</h2>
 
@@ -256,7 +275,7 @@
         </div>
 
         <div class="formula-card">
-            <div class="formula-title">计算公式 (Calculation Formula)</div>
+            <div class="formula-title">计算公式</div>
             <div class="formula-math">
                 <span class="text-target">实际灵敏度</span> = <span class="text-target">填错时灵敏度</span> × 
                 <div class="fraction">
@@ -271,57 +290,76 @@
         </div>
     </div>
 
-    <!-- 右侧：横竖轴比例换算器 -->
+    <!-- 右侧：XY 轴 CM 与 驱动 DPI 映射换算 -->
     <div class="container">
-        <h2>横纵轴 (X/Y) 比例换算器</h2>
+        <h2>横纵轴 (X/Y) 比例与驱动 DPI 换算</h2>
 
+        <!-- 基准 CM/360 输入 -->
+        <div class="section-title purple">1. 设定基准灵敏度 (目标 CM/360°)</div>
         <div class="input-row">
             <div class="input-group">
-                <label for="baseX">基准横轴 (X) cm/360°</label>
+                <label for="baseX">基准横轴 (X) cm</label>
                 <input type="number" step="any" id="baseX" value="78.15" placeholder="例如: 78.15">
             </div>
             <div class="input-group">
-                <label for="baseY">基准纵轴 (Y) cm/360°</label>
+                <label for="baseY">基准纵轴 (Y) cm</label>
                 <input type="number" step="any" id="baseY" value="70.52" placeholder="例如: 70.52">
             </div>
         </div>
 
-        <div class="result-card secondary">
-            <div class="result-label">横纵轴固定比例关系</div>
+        <div class="result-card purple">
+            <div class="result-label">横纵距离比例</div>
             <div class="result-value" id="ratioResult">1 : 0.9024</div>
             <div class="sub-desc" id="ratioDetail">纵轴约是横轴的 90.24%</div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="tip-text">任意输入新的目标横轴或纵轴，自动联动计算出另一轴：</div>
-
-        <div class="input-row" style="margin-top: 10px;">
+        <!-- 拓展一：换算新的 CM/360 -->
+        <div class="section-title">2. CM/360° 目标互算</div>
+        <div class="tip-text">在游戏支持独立XY灵敏度时，输入新的一轴自动计算另一轴：</div>
+        <div class="input-row">
             <div class="input-group">
-                <label for="newX">新横轴 (X) cm/360°</label>
+                <label for="newX">新横轴 (X) cm</label>
                 <input type="number" step="any" id="newX" placeholder="输入新X轴">
             </div>
             <div class="input-group">
-                <label for="newY">新纵轴 (Y) cm/360°</label>
+                <label for="newY">新纵轴 (Y) cm</label>
                 <input type="number" step="any" id="newY" placeholder="输入新Y轴">
             </div>
         </div>
 
+        <div class="divider"></div>
+
+        <!-- 拓展二：驱动独立 DPI 映射 -->
+        <div class="section-title green">3. 驱动独立 DPI 换算 (游戏不支持单独改Y轴)</div>
+        <div class="tip-text">距离越短对应需要的 DPI 越高（反比关系）。任意填入横/竖 DPI 自动互算：</div>
+        <div class="input-row">
+            <div class="input-group">
+                <label for="dpiX">鼠标横轴 (X) DPI</label>
+                <input type="number" step="any" id="dpiX" placeholder="例如: 1600">
+            </div>
+            <div class="input-group">
+                <label for="dpiY">鼠标纵轴 (Y) DPI</label>
+                <input type="number" step="any" id="dpiY" placeholder="自动计算">
+            </div>
+        </div>
+
         <div class="formula-card">
-            <div class="formula-title">比例公式</div>
+            <div class="formula-title">驱动 DPI 反比计算原理</div>
             <div class="formula-math">
-                <span style="color:#79c0ff;">新 Y</span> = 新 X × (<span class="denominator">基准 Y</span> / <span class="numerator">基准 X</span>)
+                <span style="color:#79c0ff;">DPI_Y</span> = DPI_X × (<span class="numerator">基准 X cm</span> / <span class="denominator">基准 Y cm</span>)
             </div>
         </div>
 
         <div class="footer">
-            <span style="color: var(--text-sub);">XY比例等比映射保持肌肉记忆</span>
+            <span style="color: var(--text-sub);">DPI 建议在鼠标驱动中四舍五入为最接近的挡位</span>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 模块 1：DPI 误差计算 ---
+    // ================= 模块 1：DPI 误差计算 =================
     function calculateDpi() {
         const actualDpi = parseFloat(document.getElementById('actualDpi').value);
         const inputDpi = parseFloat(document.getElementById('inputDpi').value);
@@ -340,11 +378,14 @@
     document.getElementById('inputDpi').addEventListener('input', calculateDpi);
     document.getElementById('targetCm').addEventListener('input', calculateDpi);
 
-    // --- 模块 2：XY 比例计算 ---
+    // ================= 模块 2：XY 比例 & 驱动 DPI =================
     const baseXEl = document.getElementById('baseX');
     const baseYEl = document.getElementById('baseY');
     const newXEl = document.getElementById('newX');
     const newYEl = document.getElementById('newY');
+    const dpiXEl = document.getElementById('dpiX');
+    const dpiYEl = document.getElementById('dpiY');
+
     const ratioResultEl = document.getElementById('ratioResult');
     const ratioDetailEl = document.getElementById('ratioDetail');
 
@@ -356,53 +397,84 @@
             const ratioXY = by / bx; // Y/X
             ratioResultEl.innerText = `1 : ${ratioXY.toFixed(4)}`;
             ratioDetailEl.innerText = `纵轴约是横轴的 ${(ratioXY * 100).toFixed(2)}% (横:纵 = ${(bx / by).toFixed(4)} : 1)`;
-            
-            // 如果用户已经填了新值，跟随更新
-            if (document.activeElement === newYEl) {
-                calcFromNewY();
-            } else {
-                calcFromNewX();
-            }
+
+            // 保持关联输入框同步更新
+            if (document.activeElement === newYEl) calcFromNewY();
+            else calcFromNewX();
+
+            if (document.activeElement === dpiYEl) calcFromDpiY();
+            else calcFromDpiX();
         } else {
             ratioResultEl.innerText = "-- : --";
             ratioDetailEl.innerText = "请输入有效的基准横纵轴数值";
         }
     }
 
-    // 从新 X 算新 Y
+    // --- CM 互算逻辑（正比关系：保持比例一致）---
     function calcFromNewX() {
         const bx = parseFloat(baseXEl.value);
         const by = parseFloat(baseYEl.value);
         const nx = parseFloat(newXEl.value);
 
         if (bx > 0 && by > 0 && nx > 0) {
-            const ny = nx * (by / bx);
-            newYEl.value = ny.toFixed(3);
+            newYEl.value = (nx * (by / bx)).toFixed(3);
         } else if (newXEl.value === '') {
             newYEl.value = '';
         }
     }
 
-    // 从新 Y 算新 X
     function calcFromNewY() {
         const bx = parseFloat(baseXEl.value);
         const by = parseFloat(baseYEl.value);
         const ny = parseFloat(newYEl.value);
 
         if (bx > 0 && by > 0 && ny > 0) {
-            const nx = ny * (bx / by);
-            newXEl.value = nx.toFixed(3);
+            newXEl.value = (ny * (bx / by)).toFixed(3);
         } else if (newYEl.value === '') {
             newXEl.value = '';
         }
     }
 
+    // --- 驱动 DPI 互算逻辑（反比关系：CM 越短，DPI 应当越大）---
+    function calcFromDpiX() {
+        const bx = parseFloat(baseXEl.value);
+        const by = parseFloat(baseYEl.value);
+        const dx = parseFloat(dpiXEl.value);
+
+        if (bx > 0 && by > 0 && dx > 0) {
+            // DPI_Y = DPI_X * (Base_X / Base_Y)
+            const dy = dx * (bx / by);
+            dpiYEl.value = dy.toFixed(1);
+        } else if (dpiXEl.value === '') {
+            dpiYEl.value = '';
+        }
+    }
+
+    function calcFromDpiY() {
+        const bx = parseFloat(baseXEl.value);
+        const by = parseFloat(baseYEl.value);
+        const dy = parseFloat(dpiYEl.value);
+
+        if (bx > 0 && by > 0 && dy > 0) {
+            // DPI_X = DPI_Y * (Base_Y / Base_X)
+            const dx = dy * (by / bx);
+            dpiXEl.value = dx.toFixed(1);
+        } else if (dpiYEl.value === '') {
+            dpiXEl.value = '';
+        }
+    }
+
+    // 事件监听
     baseXEl.addEventListener('input', updateRatio);
     baseYEl.addEventListener('input', updateRatio);
+
     newXEl.addEventListener('input', calcFromNewX);
     newYEl.addEventListener('input', calcFromNewY);
 
-    // 默认执行初始化
+    dpiXEl.addEventListener('input', calcFromDpiX);
+    dpiYEl.addEventListener('input', calcFromDpiY);
+
+    // 初始执行
     calculateDpi();
     updateRatio();
 </script>
