@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>同身寸 · 收束法 — XYZ 取值实操手册</title>
     <style>
         :root {
@@ -31,6 +31,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
             padding: 20px 10px;
             line-height: 1.5;
+            overflow-x: hidden;
         }
 
         .container {
@@ -64,8 +65,15 @@
             gap: 8px;
         }
 
-        h1 { font-size: 1.25rem; color: var(--blue-dark); display: flex; align-items: center; gap: 8px; }
-        .tag { font-size: 0.7rem; background: var(--blue-dark); color: #fff; padding: 2px 8px; border-radius: 4px; }
+        h1 { 
+            font-size: 1.25rem; 
+            color: var(--blue-dark); 
+            display: flex; 
+            align-items: center; 
+            flex-wrap: wrap;
+            gap: 8px; 
+        }
+        .tag { font-size: 0.7rem; background: var(--blue-dark); color: #fff; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
 
         .rule-bar {
             background: #fffbeb;
@@ -93,6 +101,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 4px;
         }
 
         .desc-list {
@@ -115,9 +125,6 @@
             border-radius: 8px;
             padding: 12px;
         }
-        @media (max-width: 740px) {
-            .grid-box { grid-template-columns: 1fr; }
-        }
 
         .ctrls {
             display: flex;
@@ -139,19 +146,41 @@
         input[type=range] {
             accent-color: var(--blue);
             cursor: pointer;
+            width: 100%;
         }
 
+        /* 手机端与PC保持100%几何比例的核心：严格等比缩放，绝不变形拉伸 */
         .canvas-wrap {
             background: #0f172a;
             border-radius: 6px;
-            height: 205px;
+            width: 100%;
+            aspect-ratio: 480 / 205;
+            height: auto;
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
+        /* 兼容老旧浏览器的等比内衬 */
+        @supports not (aspect-ratio: 480 / 205) {
+            .canvas-wrap {
+                height: 0;
+                padding-bottom: 42.71%;
+            }
+            .canvas-wrap canvas {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
+
         canvas {
             width: 100%;
             height: 100%;
             display: block;
+            object-fit: contain;
         }
 
         /* 还原第1版经典A4图文排版 */
@@ -161,9 +190,7 @@
             gap: 10px;
             margin-top: 10px;
         }
-        @media (max-width: 620px) {
-            .paper-demo-container { grid-template-columns: 1fr; }
-        }
+
         .paper-step {
             background: #fdfbf7;
             border: 1px solid var(--border);
@@ -195,7 +222,7 @@
         }
         .opt-btn {
             flex: 1;
-            padding: 5px 8px;
+            padding: 6px 8px;
             font-size: 0.75rem;
             border: 1px solid var(--border);
             border-radius: 4px;
@@ -204,6 +231,10 @@
             font-weight: bold;
             color: var(--text);
             transition: all 0.15s;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .opt-btn.active {
             background: var(--blue-dark);
@@ -223,6 +254,43 @@
             margin-top: 6px;
             padding-top: 10px;
             border-top: 1px dashed var(--border);
+        }
+
+        /* 移动端细致响应式优化 */
+        @media (max-width: 740px) {
+            .grid-box { 
+                grid-template-columns: 1fr; 
+                gap: 14px;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .paper-demo-container { 
+                grid-template-columns: 1fr; 
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px 6px;
+            }
+            .container {
+                padding: 16px 12px;
+                border-radius: 8px;
+            }
+            .card {
+                padding: 12px 10px;
+            }
+            .grid-box {
+                padding: 10px 8px;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            .opt-btn {
+                width: 100%;
+                padding: 8px;
+            }
         }
     </style>
 </head>
