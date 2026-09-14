@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>同身寸 · 收束法 — XYZ 取值实操手册</title>
+    <style>
+        :root {
+            --bg: #dfd7cb;
+            --paper: #d2c5b4;
+            --blue: #0284c7;
+            --blue-dark: #0369a1;
+            --purple: #7c3aed;
+            --purple-dark: #4338ca;
+            --gold: #b8860b;
+            --card: #ffffff;
+            --text: #1e293b;
+            --sub: #64748b;
+            --border: #d5cbbe;
+            --red: #ef4444;
+            --coffee: #854d0e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(var(--paper) 18%, transparent 19%);
+            background-size: 10px 10px;
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            padding: 20px 10px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            padding: 22px 18px;
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 5px;
+            background: var(--gold);
+            border-radius: 12px 0 0 12px;
+        }
+
+        header {
+            border-bottom: 1.5px dashed var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        h1 { font-size: 1.25rem; color: var(--blue-dark); display: flex; align-items: center; gap: 8px; }
+        .tag { font-size: 0.7rem; background: var(--blue-dark); color: #fff; padding: 2px 8px; border-radius: 4px; }
+
+        .rule-bar {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-left: 4px solid var(--gold);
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 0.83rem;
+            margin-bottom: 16px;
+        }
+        .rule-bar strong { color: #b45309; }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            background: #fff;
+        }
+
+        .card-title {
+            font-size: 1.02rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .desc-list {
+            font-size: 0.82rem;
+            color: #334155;
+            margin-bottom: 10px;
+        }
+        .desc-list li {
+            margin-left: 18px;
+            margin-bottom: 4px;
+        }
+
+        .grid-box {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 12px;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        @media (max-width: 740px) {
+            .grid-box { grid-template-columns: 1fr; }
+        }
+
+        .ctrls {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            font-size: 0.8rem;
+        }
+
+        .ctrl-row {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .ctrl-row label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+        input[type=range] {
+            accent-color: var(--blue);
+            cursor: pointer;
+        }
+
+        .canvas-wrap {
+            background: #0f172a;
+            border-radius: 6px;
+            height: 205px;
+            position: relative;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* 还原第1版经典A4图文排版 */
+        .paper-demo-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        @media (max-width: 620px) {
+            .paper-demo-container { grid-template-columns: 1fr; }
+        }
+        .paper-step {
+            background: #fdfbf7;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .paper-step .icon {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+
+        .badge-sub {
+            display: inline-block;
+            font-size: 0.72rem;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+        .badge-static { background: #e0f2fe; color: var(--blue-dark); }
+        .badge-short { background: #fef3c7; color: #b45309; }
+        .badge-long { background: #ede9fe; color: var(--purple-dark); }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+        .opt-btn {
+            flex: 1;
+            padding: 5px 8px;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--text);
+            transition: all 0.15s;
+        }
+        .opt-btn.active {
+            background: var(--blue-dark);
+            color: #fff;
+            border-color: var(--blue-dark);
+        }
+        .opt-btn.coffee.active {
+            background: var(--coffee);
+            color: #fff;
+            border-color: var(--coffee);
+        }
+
+        footer {
+            font-size: 0.75rem;
+            color: var(--sub);
+            text-align: center;
+            margin-top: 6px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>同身寸 · 表达法（收束法） 变量取值实操手册 <span class="tag">定手腕 · 划外沿</span></h1>
+    </header>
+
+    <!-- 姿势底线 -->
+    <div class="rule-bar">
+        <strong>⚠️⚠️⚠️ 唯一【手腕摆动】（姿势）：</strong>手腕与小臂前端<strong>死死按在鼠标垫上，务必不要动</strong>。
+        <br>仅靠手腕进行放松自然、最大幅度、无痛的左右摆动。
+    </div>
+
+    <!-- 变量 X -->
+    <div class="card">
+        <div class="card-title" style="color: #b45309;">
+            <span>变量 X：目标大小测量</span>
+            <span style="font-size:0.75rem; color:var(--sub); font-weight:normal;">(比例与尺寸仅供参考)</span>
+        </div>
+        <ul class="desc-list">
+            <li><strong>扫掠外边缘：</strong>手腕摆动，<strong>反复调节cm/360°灵敏度，准星恰好划过两个红色竖线（即目标外沿）的距离。</strong>测得的 cm/360° 即为 X。</li>
+            <li><strong>【取头部】必须用形状 1：</strong>头部是纵向椭圆，<strong>必须以其上下纵轴高度为直径画正圆</strong>，手腕满摆取正圆的最左至最右外沿。</li>
+            <li><strong>【取身体】则用形状 2：</strong>若目标大小选择身体，<strong>不必用形状 1 的画圆取法，直接取身体正常的左右自然宽度</strong>即可。</li>
+            <li><strong>严禁取极端像素点：</strong>极远处只有几个像素的目标极罕见，选它会导致 X 虚高、灵敏度极度迟钝。</li>
+        </ul>
+
+        <div class="grid-box">
+            <div class="ctrls">
+                <div class="ctrl-row">
+                    <label><span>部位模式切换</span></label>
+                    <div class="btn-group">
+                        <button class="opt-btn active" id="btn-part-head" onclick="setXPart('head')">① 头部 (形状1: 纵向画圆)</button>
+                        <button class="opt-btn" id="btn-part-body" onclick="setXPart('body')">② 身体 (形状2: 左右自然宽)</button>
+                    </div>
+                </div>
+
+                <div class="ctrl-row" style="margin-top:4px;">
+                    <label><span>交火距离<br>(仅是示意，大小不要参考此图)</span><span id="txt-x-dist" style="color:var(--blue);">远距 (推荐基准)</span></label>
+                    <input type="range" id="rng-x-dist" min="1" max="3" value="3" oninput="drawX()">
+                    <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--sub);">
+                        <span>近距</span><span>中距</span><span>远距 (推荐)</span>
+                    </div>
+                </div>
+
+                <div class="ctrl-row">
+                    <label><span>手腕满摆扫掠</span><span id="txt-x-swing">50%</span></label>
+                    <input type="range" id="rng-x-swing" min="0" max="100" value="50" oninput="drawX()">
+                </div>
+
+                <div style="font-size:0.72rem; color:#854d0e; background:#fefce8; padding:5px 8px; border-radius:4px; border:1px solid #fef08a;">
+                    <strong>说明提示：</strong><span id="txt-part-tip">头部取法：椭圆纵高外切正圆，手腕满摆恰好划过外沿。</span>
+                </div>
+            </div>
+            <div class="canvas-wrap">
+                <canvas id="cvsX" width="480" height="205"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 变量 Y -->
+    <div class="card">
+        <div class="card-title" style="color: var(--blue-dark);">
+            <span>变量 Y：常用甩枪 / 折返距离</span>
+            <span style="font-size:0.75rem; color:var(--sub); font-weight:normal;">(同 X 一样通过摆手测出)</span>
+        </div>
+
+        <ul class="desc-list">
+            <li><strong>测量方法完全同 X：</strong>手腕摆动，<strong>反复调节cm/360°灵敏度，直到这一摆恰好从准星原点划过选定的 Y 距离</strong>。测出的 cm/360° 即为 Y 值。</li>
+            <li><span class="badge-sub badge-static">目标静止时</span>准星直接甩到目标中心的距离。</li>
+            <li><span class="badge-sub badge-short">短 TTK (CS/瓦)</span>架点（或对枪时），敌人从掩体拉出，向外甩枪修正击杀的距离。</li>
+            <li><span class="badge-sub badge-long">长 TTK (Apex/OW)</span>跟枪中目标速度突变或身法折返，准星脱轨后<strong>折返甩回重新吸附</strong>的距离。</li>
+            <li><strong>四分法与两个咖啡三角：</strong>实战中有两个高频拉枪角（如近端与远端目标）。在两目标间进行<strong>四分法等分</strong>，可取的 Y 长度只有<strong>两个咖啡三角标点（二选一）</strong>：① <strong>靠近准星的点（1/4 处）</strong>：偏向近端高频小角度甩枪。 ② <strong>中点（2/4 处）</strong>：两端折中兼顾。
+            </li>
+        </ul>
+
+        <div class="grid-box">
+            <div class="ctrls">
+                <div class="ctrl-row">
+                    <label><span>咖啡三角选点 (二选一)</span></label>
+                    <div class="btn-group">
+                        <button class="opt-btn coffee active" id="btn-y-quarter" onclick="setYMode('quarter')">① 靠近准星点 (1/4 处)</button>
+                        <button class="opt-btn coffee" id="btn-y-mid" onclick="setYMode('mid')">② 中点 (2/4 处)</button>
+                    </div>
+                </div>
+                <div style="font-size:0.75rem; color:#475569; margin-top:4px;">
+                    当前选定策略：<strong id="txt-y-desc" style="color:var(--coffee);">偏向高频小角度 (1/4 处)</strong>
+                </div>
+                <div style="font-size:0.72rem; color:var(--sub);">
+                    图解：两球为实战目标，中段 4 等分；下方标出两个候选三角；绿色粗线为手腕一次满摆划过的 Y 位移。
+                </div>
+            </div>
+            <div class="canvas-wrap">
+                <canvas id="cvsY" width="480" height="205"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 变量 Z -->
+    <div class="card">
+        <div class="card-title" style="color: var(--purple);">
+            <span>变量 Z：目标常活动范围 (度数)</span>
+            <span style="font-size:0.75rem; color:var(--sub); font-weight:normal;">(长TTK跟枪专用)</span>
+        </div>
+        <ul class="desc-list">
+            <li><strong>扇面总视界：</strong>目标在你屏幕前横向左右移动折返时，整个轨迹构成的<strong>水平扇面总视角夹角</strong>。</li>
+            <li><strong>取值范围：</strong>中距离对枪通常在 <strong>45 度 ~ 70 度</strong>；近身缠斗/滑铲绕背最大可拉满至 <strong>120 度 ~ 180 度</strong>。</li>
+        </ul>
+
+        <div class="grid-box">
+            <div class="ctrls">
+                <div class="ctrl-row">
+                    <label><span>视角范围 Z</span><span id="txt-z-deg" style="color:var(--purple); font-weight:800;">90 度</span></label>
+                    <input type="range" id="rng-z-deg" min="30" max="180" step="5" value="90" oninput="drawZ()">
+                    <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--sub);">
+                        <span>30 度 (窄)</span><span>90 度 (半屏)</span><span>180 度 (平齐半圆)</span>
+                    </div>
+                </div>
+                <div style="font-size:0.75rem; color:var(--sub);">
+                    目标横向活动越宽（Z 越大），公式自动为你匹配更宽裕的追踪空间。
+                </div>
+            </div>
+            <div class="canvas-wrap">
+                <canvas id="cvsZ" width="480" height="205"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 经典 A4 纸取模法 (还原第1版好评) -->
+    <div class="card">
+        <div class="card-title" style="color: #0f766e;">
+            <span>📄 纸掐痕取模法 (1:1 实战对齐)</span>
+            <span style="font-size:0.75rem; color:var(--sub); font-weight:normal;">(物理级尺寸完美复刻)</span>
+        </div>
+        <p style="font-size:0.8rem; color:#475569; margin-bottom:6px;">
+            在不同游戏与网页测算器之间，用此法直接<strong>物理 1:1 复制目标大小</strong>：
+        </p>
+
+        <div class="paper-demo-container">
+            <div class="paper-step">
+                <div class="icon">🎮</div>
+                <strong style="font-size:0.88rem; color:var(--text);">步骤 1：游戏内截取</strong>
+                <p style="font-size:0.75rem; color:var(--sub); margin-top:4px;">
+                    在实战或靶场中找到X值目标大小或Y值长度，拿一张 A4 纸边缘贴在屏幕该目标侧面。
+                </p>
+            </div>
+
+            <div class="paper-step">
+                <div class="icon">🤏</div>
+                <strong style="font-size:0.88rem; color:var(--text);">步骤 2：手指掐印</strong>
+                <p style="font-size:0.75rem; color:var(--sub); margin-top:4px;">
+                    用指甲在纸边缘紧贴<strong>X或Y边缘</strong>处，用力掐出一道精准凹痕（正好截取了其长度）。
+                </p>
+            </div>
+
+            <div class="paper-step">
+                <div class="icon">🎯</div>
+                <strong style="font-size:0.88rem; color:var(--text);">步骤 3：对准网页小球</strong>
+                <p style="font-size:0.75rem; color:var(--sub); margin-top:4px;">
+                    把带凹印的纸贴在测算网页屏幕上，滑动靶球尺寸滑块，使其<strong>长度完全契合折痕</strong>。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        理论来源：西岛海
+    </footer>
+</div>
+
+<script>
+    // --- CANVAS X: 头部(形状1) VS 身体(形状2) ---
+    let currentXPart = 'head'; // 'head' or 'body'
+
+    function setXPart(part) {
+        currentXPart = part;
+        document.getElementById('btn-part-head').classList.toggle('active', part === 'head');
+        document.getElementById('btn-part-body').classList.toggle('active', part === 'body');
+        document.getElementById('txt-part-tip').textContent =
+            part === 'head'
+            ? "头部取法（形状1）：椭圆纵向高度外切正圆，手腕满摆恰好划过正圆两外沿。"
+            : "身体取法（形状2）：直接取身体正常左右自然宽度，不必纵向画圆！";
+        drawX();
+    }
+
+    function drawX() {
+        const dist = parseInt(document.getElementById('rng-x-dist').value);
+        const swing = parseInt(document.getElementById('rng-x-swing').value);
+        document.getElementById('txt-x-swing').textContent = swing + '%';
+        const txtDist = document.getElementById('txt-x-dist');
+
+        // 仅近/中/远三档，近距只微大一点，绝不再显巨大！
+        let ry = 18;
+        if (dist === 1) {
+            ry = 18; // 近距微大
+            txtDist.textContent = "近距";
+        } else if (dist === 2) {
+            ry = 10; // 中距
+            txtDist.textContent = "中距";
+        } else {
+            ry = 7; // 远距标准
+            txtDist.textContent = "远距 (推荐基准)";
+        }
+
+        const cvs = document.getElementById('cvsX');
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width, h = cvs.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const cx = w / 2;
+        const cy = h / 2 + 5;
+
+        if (currentXPart === 'head') {
+            // 【头部取法 - 目标形状 1】
+            const rx = ry * 0.72; // 纵向椭圆头
+            const circleR = ry;   // 以纵轴高度为直径画圆
+
+            // 1. 绘制椭圆头
+            ctx.fillStyle = '#ea580c';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 2. 纵向外切正圆 (蓝色虚线)
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            ctx.arc(cx, cy, circleR, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 3. 标出正圆外边缘红线
+            const leftEdge = cx - circleR;
+            const rightEdge = cx + circleR;
+
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(leftEdge, 20); ctx.lineTo(leftEdge, h - 25);
+            ctx.moveTo(rightEdge, 20); ctx.lineTo(rightEdge, h - 25);
+            ctx.stroke();
+
+            // 4. 满摆扫掠准星
+            const crossX = leftEdge + (swing / 100) * (circleR * 2);
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(crossX, cy - 12); ctx.lineTo(crossX, cy + 12);
+            ctx.moveTo(crossX - 12, cy); ctx.lineTo(crossX + 12, cy);
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = '11px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('目标形状1 (头部)：纵轴画圆取两边外沿', cx, h - 8);
+        } else {
+            // 【身体取法 - 目标形状 2】
+            const bodyW = ry * 1.8; // 身体自然宽度
+            const bodyH = ry * 2.8; // 身体高度
+
+            // 1. 绘制身体躯干轮廓
+            ctx.fillStyle = '#0369a1';
+            ctx.beginPath();
+            ctx.roundRect(cx - bodyW / 2, cy - bodyH / 2, bodyW, bodyH, 8);
+            ctx.fill();
+
+            // 2. 直接取身体正常左右自然宽度（红线）
+            const leftEdge = cx - bodyW / 2;
+            const rightEdge = cx + bodyW / 2;
+
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(leftEdge, 20); ctx.lineTo(leftEdge, h - 25);
+            ctx.moveTo(rightEdge, 20); ctx.lineTo(rightEdge, h - 25);
+            ctx.stroke();
+
+            // 3. 满摆扫掠准星
+            const crossX = leftEdge + (swing / 100) * bodyW;
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(crossX, cy - 12); ctx.lineTo(crossX, cy + 12);
+            ctx.moveTo(crossX - 12, cy); ctx.lineTo(crossX + 12, cy);
+            ctx.stroke();
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = '11px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('目标形状2 (身体)：直接取左右自然宽度（不必画圆）', cx, h - 8);
+        }
+    }
+
+    // --- CANVAS Y: 清晰无重叠四分法与两个咖啡三角 ---
+    let currentYChoice = 'quarter'; // 'quarter' (1/4) 或 'mid' (2/4)
+
+    function setYMode(mode) {
+        currentYChoice = mode;
+        document.getElementById('btn-y-quarter').classList.toggle('active', mode === 'quarter');
+        document.getElementById('btn-y-mid').classList.toggle('active', mode === 'mid');
+        document.getElementById('txt-y-desc').textContent =
+            mode === 'quarter' ? "偏向高频小角度 (1/4 处)" : "两头折中兼顾 (中点 2/4 处)";
+        drawY();
+    }
+
+    function drawY() {
+        const cvs = document.getElementById('cvsY');
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width, h = cvs.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const startX = 45;
+        const lineY = 85;
+
+        const t1X = startX + 115;
+        const t2X = startX + 315;
+        const gap = t2X - t1X;
+
+        // 1. 水平基准线
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(startX, lineY);
+        ctx.lineTo(w - 20, lineY);
+        ctx.stroke();
+
+        // 2. 原点十字准星
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(startX - 8, lineY); ctx.lineTo(startX + 8, lineY);
+        ctx.moveTo(startX, lineY - 8); ctx.lineTo(startX, lineY + 8);
+        ctx.stroke();
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = '10px "PingFang SC", "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('准星原点', startX, lineY - 14);
+
+        // 3. 目标 1 (近端)
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.arc(t1X, lineY, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#e0f2fe';
+        ctx.fillText('目标1', t1X, lineY - 16);
+
+        // 4. 目标 2 (远端)
+        ctx.fillStyle = '#ea580c';
+        ctx.beginPath();
+        ctx.arc(t2X, lineY, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffedd5';
+        ctx.fillText('目标2', t2X, lineY - 16);
+
+        // 5. 四分法小竖线
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 1;
+        for (let i = 1; i <= 3; i++) {
+            const tx = t1X + gap * (i / 4);
+            ctx.beginPath();
+            ctx.moveTo(tx, lineY - 5);
+            ctx.lineTo(tx, lineY + 5);
+            ctx.stroke();
+        }
+
+        // 6. 两个明确的咖啡三角
+        const tri1X = t1X + gap * 0.25; // 1/4 点
+        const tri2X = t1X + gap * 0.50; // 2/4 中点
+
+        function drawSingleTriangle(x, isSelected, title) {
+            ctx.fillStyle = isSelected ? '#facc15' : '#854d0e';
+            ctx.beginPath();
+            ctx.moveTo(x, lineY + 4);
+            ctx.lineTo(x - 5, lineY + 15);
+            ctx.lineTo(x + 5, lineY + 15);
+            ctx.closePath();
+            ctx.fill();
+
+            if (isSelected) {
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = isSelected ? '#facc15' : '#a16207';
+            ctx.font = isSelected ? 'bold 11px "PingFang SC", "Microsoft YaHei", sans-serif' : '10px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, x, lineY + 30);
+        }
+
+        drawSingleTriangle(tri1X, currentYChoice === 'quarter', '1/4 点 (近准星)');
+        drawSingleTriangle(tri2X, currentYChoice === 'mid', '中点 (2/4)');
+
+        // 7. 满摆位移绿线
+        const targetChosenX = currentYChoice === 'quarter' ? tri1X : tri2X;
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(startX, lineY);
+        ctx.lineTo(targetChosenX, lineY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#22c55e';
+        ctx.font = 'bold 11px "PingFang SC", "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`手腕满摆恰好划过选定 Y 位移`, (startX + targetChosenX) / 2, 35);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px "PingFang SC", "Microsoft YaHei", sans-serif';
+        ctx.fillText('两目标间四分法，仅在这两个咖啡三角中二选一', w / 2, h - 8);
+    }
+
+    // --- CANVAS Z: 视界扇面 (全中文无乱码) ---
+    function drawZ() {
+        const deg = parseInt(document.getElementById('rng-z-deg').value);
+        document.getElementById('txt-z-deg').textContent = deg + " 度";
+
+        const cvs = document.getElementById('cvsZ');
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width, h = cvs.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const ox = w / 2;
+        const oy = h - 22;
+        const radius = Math.min(w * 0.42, 140);
+        const rad = (deg * Math.PI) / 180;
+        const start = -Math.PI / 2 - rad / 2;
+        const end = -Math.PI / 2 + rad / 2;
+
+        ctx.fillStyle = 'rgba(124, 58, 237, 0.22)';
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.arc(ox, oy, radius, start, end);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.strokeStyle = '#8b5cf6';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(ox, oy, radius * 0.8, start, end);
+        ctx.stroke();
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(ox, oy, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = '12px "PingFang SC", "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        let desc = "视角范围 Z = " + deg + " 度";
+        if (deg === 180) desc += " (水平全开)";
+        ctx.fillText(desc, ox, 28);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        drawX();
+        drawY();
+        drawZ();
+    });
+</script>
+
+</body>
+</html>
