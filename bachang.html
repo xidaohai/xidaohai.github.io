@@ -115,10 +115,34 @@
             align-items: center;
             gap: 14px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            flex-wrap: wrap;
         }
         .hud-val { color: var(--primary); font-weight: 900; }
         .fps-val { color: #16a34a; font-weight: 900; }
         .poll-val { color: #7c3aed; font-weight: 900; }
+
+        .hud-action-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #cbd5e1;
+            font-size: 0.61rem;
+            font-weight: 800;
+            color: #334155;
+            padding: 1px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+        .hud-action-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #e0f2fe;
+        }
+        .hud-action-btn:active {
+            transform: scale(0.95);
+        }
 
         .f11-card {
             padding: 7px 16px;
@@ -233,6 +257,30 @@
         #bottom-right-hud::-webkit-scrollbar { width: 4px; }
         #bottom-right-hud::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
+        /* 紧贴右下角模块左侧的打点标定 HUD */
+        #marker-hud {
+            position: absolute;
+            bottom: 16px;
+            right: 384px;
+            width: 290px;
+            max-height: 86vh;
+            overflow-y: auto;
+            background: var(--bg-glass);
+            backdrop-filter: blur(28px) saturate(190%);
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-glass);
+            border-left: 4px solid #10b981;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+            z-index: 22;
+            transition: opacity 0.15s;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        #marker-hud::-webkit-scrollbar { width: 4px; }
+        #marker-hud::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
         .debug-section {
             display: flex;
             align-items: center;
@@ -292,6 +340,8 @@
         }
         .debug-toggle input:checked + .slider { background: var(--primary); box-shadow: 0 0 6px rgba(2, 132, 199, 0.35); }
         .debug-toggle input:checked + .slider + .knob { transform: translateX(18px); }
+
+        .toggle-green input:checked + .slider { background: #10b981 !important; box-shadow: 0 0 6px rgba(16, 185, 129, 0.35) !important; }
 
         .debug-label {
             font-size: 0.7rem;
@@ -792,14 +842,22 @@
     <div id="debug-horizon-guide"></div>
     <div id="debug-indicator">轴向已互换</div>
 
-    <!-- 顶部 HUD (加入纵向仰角与横向方位角) -->
+    <!-- 顶部 HUD (加入水平方位角与纵向俯仰角独立“选定为0°”与“重置”按钮) -->
     <div id="top-hud">
         <div class="hud-card">
             <div>DPI: <span class="hud-val" id="hud-dpi">800</span></div>
             <div>CM/360°: <span class="hud-val" id="hud-cm">50.00</span>cm</div>
             <div>FOV: <span class="hud-val" id="hud-fov">103</span>°</div>
-            <div>水平方位角 (Yaw): <span class="hud-val" id="hud-angle">0.000</span>°</div>
-            <div>纵向俯仰角 (Pitch): <span class="hud-val" id="hud-pitch" style="color:#059669;">0.000</span>°</div>
+            <div style="display:flex; align-items:center; gap:5px;">
+                <span>水平方位角 (Yaw): <span class="hud-val" id="hud-angle">0.000</span>°</span>
+                <button class="hud-action-btn" id="btn-zero-yaw" title="选定当前角度为水平0°">选定当前角度为0°</button>
+                <button class="hud-action-btn" id="btn-reset-yaw" title="恢复世界绝对0°">重置</button>
+            </div>
+            <div style="display:flex; align-items:center; gap:5px;">
+                <span>纵向俯仰角 (Pitch): <span class="hud-val" id="hud-pitch" style="color:#059669;">0.000</span>°</span>
+                <button class="hud-action-btn" id="btn-zero-pitch" title="选定当前角度为俯仰0°">选定当前角度为0°</button>
+                <button class="hud-action-btn" id="btn-reset-pitch" title="恢复世界绝对视平线0°">重置</button>
+            </div>
         </div>
         <div style="display:flex; gap:10px; align-items:center;">
             <div class="hud-card f11-card f11-highlight" id="f11-box">F11全屏</div>
@@ -829,6 +887,42 @@
             <div class="author-avatar-badge">海</div>
             <div class="author-meta"><span class="author-name">作者：西岛海</span><span class="author-tag">xlm</span></div>
         </a>
+    </div>
+
+    <!-- 紧贴右下角模块左侧的打点标定 HUD -->
+    <div id="marker-hud">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.75rem; font-weight:900; color:#0f172a; display:flex; align-items:center; gap:5px;">
+                <span style="display:inline-block; width:6px; height:12px; background:#10b981; border-radius:2px;"></span>
+                打点标定记录
+                
+            </span>
+            <label class="debug-toggle toggle-green" title="开启/关闭点击打点功能">
+                <input type="checkbox" id="toggle-click-marker" />
+                <span class="slider"></span>
+                <span class="knob"></span>
+            </label>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:3px 0; border-top:1px dashed rgba(203,213,225,0.8); border-bottom:1px dashed rgba(203,213,225,0.8);">
+            <span style="font-size:0.65rem; font-weight:800; color:#334155;">仅限命中目标时标点</span>
+            <label class="debug-toggle toggle-green" style="width:34px; height:18px;" title="开启后空枪不留标点，只有打中目标/箱子才留标点">
+                <input type="checkbox" id="toggle-hit-only-marker" />
+                <span class="slider"></span>
+                <span class="knob" style="width:14px; height:14px;"></span>
+            </label>
+        </div>
+
+        <div style="font-size:0.62rem; color:#64748b; line-height:1.4;">
+            开启后，在靶场内射击时自动留下空间打点标记，显示水平/俯仰角度（联动零点标定）。
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+            <span style="font-size:0.66rem; font-weight:800; color:#334155;">已标定坐标 (<span id="lbl-marker-count" style="color:#10b981;">0</span>)</span>
+            <button class="header-btn" id="btn-clear-markers" style="color:#ef4444; border-color:#fca5a5; font-size:0.62rem;">清空全部</button>
+        </div>
+        <div id="marker-list-container" style="display:flex; flex-direction:column; gap:4px; max-height:220px; overflow-y:auto;">
+            <div style="font-size:0.62rem; color:#94a3b8; text-align:center; padding:8px 0;">暂无打点记录 (退出锁定可操作)</div>
+        </div>
     </div>
 
     <!-- 右下角原理与调试 -->
@@ -961,7 +1055,7 @@
         <button class="btn-start" id="btn-lock">进入靶场 (锁定鼠标)</button>
     </div>
 
-    <!-- 右侧独立面板 (包含完整恢复的准星双通道调色系统) -->
+    <!-- 右侧独立面板 -->
     <div class="glass-panel" id="right-panel">
         <div class="panel-header">
             <span class="panel-title">设置与准星调优</span>
@@ -1083,7 +1177,6 @@
 
             <div class="divider"></div>
 
-            <!-- 完整恢复：默认准星颜色与瞄准命中高亮颜色直接显性呈现 -->
             <div class="section-header" style="margin-bottom:4px;">
                 <span class="section-label">默认静止准星颜色</span>
             </div>
@@ -1131,6 +1224,8 @@
             floorColor: '#f8fafc',
             targetShape: 'dummy',
             showMeridian: true,
+            clickMarkerEnabled: false,
+            clickMarkerHitOnly: false,
             crosshair: {
                 type: 'classic',
                 size: 8,
@@ -1154,6 +1249,10 @@
                 playerPos: new THREE.Vector3(0, 0, 0)
             }
         };
+
+        // 零点偏移参数 (与需求 2 对应)
+        let yawZeroOffsetDeg = 0.0;
+        let pitchZeroOffsetDeg = 0.0;
 
         // 2. 工具函数
         function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
@@ -1182,6 +1281,17 @@
 
         function getPlayerCurrentPitchDeg() {
             return (-pitch * 180 / Math.PI);
+        }
+
+        // 计算相对 0° 的水平与俯仰角
+        function getRelativeYawDeg(rawYaw = getPlayerCurrentYawDeg()) {
+            let diff = (rawYaw - yawZeroOffsetDeg) % 360;
+            if (diff < 0) diff += 360;
+            return diff;
+        }
+
+        function getRelativePitchDeg(rawPitch = getPlayerCurrentPitchDeg()) {
+            return rawPitch - pitchZeroOffsetDeg;
         }
 
         // 计算玩家眼睛指向指定目标的纵向仰俯角度 (Pitch)
@@ -1612,7 +1722,7 @@
         const BOX_UNIT_EDGES = new THREE.EdgesGeometry(BOX_UNIT_GEO);
 
         function disposeMaterialOnly(obj) {
-            if (obj.material) {
+            if (obj && obj.material) {
                 if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
                 else obj.material.dispose();
             }
@@ -1814,11 +1924,13 @@
             rebuildTargetUI();
         }
 
-        // 8. 镜之边缘箱子
+        // ============================================================
+        // 8. 镜之边缘箱子系统 (支持自由改动XYZ后保持比例缩放)
+        // ============================================================
         function updateBoxMesh(box) {
-            const sx = Math.max(0.1, box.lenX);
-            const sy = Math.max(0.1, box.heightY);
-            const sz = Math.max(0.1, box.widthZ);
+            const sx = Math.max(0.05, box.lenX);
+            const sy = Math.max(0.05, box.heightY);
+            const sz = Math.max(0.05, box.widthZ);
 
             box.mesh.scale.set(sx, sy, sz);
             box.edgeLine.scale.set(sx * 1.002, sy * 1.002, sz * 1.002);
@@ -1934,7 +2046,9 @@
             updateHorizon(config.viewHeight);
         }
 
+        // ============================================================
         // 9. 输入监听与仰角水平角解算
+        // ============================================================
         let yaw = 0.0, pitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
         let debugMode = false;
@@ -1969,6 +2083,29 @@
                 });
             });
         }
+
+        // 选定当前视角为0°与重置监听 (需求 2)
+        function setZeroYaw() {
+            yawZeroOffsetDeg = getPlayerCurrentYawDeg();
+            updateAllMarkerSprites();
+        }
+        function resetZeroYaw() {
+            yawZeroOffsetDeg = 0.0;
+            updateAllMarkerSprites();
+        }
+        function setZeroPitch() {
+            pitchZeroOffsetDeg = getPlayerCurrentPitchDeg();
+            updateAllMarkerSprites();
+        }
+        function resetZeroPitch() {
+            pitchZeroOffsetDeg = 0.0;
+            updateAllMarkerSprites();
+        }
+
+        getEl('btn-zero-yaw').addEventListener('click', setZeroYaw);
+        getEl('btn-reset-yaw').addEventListener('click', resetZeroYaw);
+        getEl('btn-zero-pitch').addEventListener('click', setZeroPitch);
+        getEl('btn-reset-pitch').addEventListener('click', resetZeroPitch);
 
         const ALLOWED_KEYS = new Set(['KeyW', 'KeyS', 'KeyA', 'KeyD', 'Space', 'ShiftLeft']);
         const keysDown = new Set();
@@ -2037,19 +2174,202 @@
                         break;
                     }
                 }
-                return { target: hitTarget, part: hitPart, object: hitObject };
+                return { target: hitTarget, part: hitPart, object: hitObject, intersect: intersects[0] };
             } else {
                 updateCrosshairStyle(false);
                 return null;
             }
         }
 
-        window.addEventListener('mousedown', (e) => {
+        // ============================================================
+        // 10. 坐标打点系统 (需求 3 与需求 2 联动)
+        // ============================================================
+        const clickMarkers = [];
+        let nextMarkerId = 1;
+        const markerGroup = new THREE.Group();
+        scene.add(markerGroup);
+
+const markerToggle = getEl('toggle-click-marker');
+        if (markerToggle) {
+            markerToggle.addEventListener('change', function () {
+                config.clickMarkerEnabled = this.checked;
+            });
+        }
+
+        // 👇 修复：补上“仅限命中时标点”开关的监听绑定
+        const hitOnlyToggle = getEl('toggle-hit-only-marker');
+        if (hitOnlyToggle) {
+            hitOnlyToggle.addEventListener('change', function () {
+                config.clickMarkerHitOnly = this.checked;
+            });
+        }
+
+        getEl('btn-clear-markers').addEventListener('click', clearAllMarkers);
+
+function createMarkerSprite(markerData) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.minFilter = THREE.LinearFilter;
+            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+            const sprite = new THREE.Sprite(mat);
+            // 缩小尺寸至精致小圆标，悬浮在打点光环正上方
+            sprite.scale.set(0.32, 0.32, 1);
+            sprite.renderOrder = 999;
+            markerData.spriteCanvas = canvas;
+            markerData.spriteCtx = ctx;
+            markerData.spriteTex = tex;
+            markerData.sprite = sprite;
+            updateMarkerSpriteCanvas(markerData);
+            return sprite;
+        }
+
+        function updateMarkerSpriteCanvas(m) {
+            const ctx = m.spriteCtx;
+            ctx.clearRect(0, 0, 128, 128);
+
+            // 绘制深色科技圆形徽标
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+            ctx.beginPath();
+            ctx.arc(64, 64, 52, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 绿色发光外边框
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 8;
+            ctx.stroke();
+
+            // 只显示标点编号（如 #1）
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 46px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`#${m.id}`, 64, 64);
+
+            m.spriteTex.needsUpdate = true;
+        }
+
+        function updateAllMarkerSprites() {
+            clickMarkers.forEach(m => updateMarkerSpriteCanvas(m));
+            renderMarkerListUI();
+        }
+
+        function addClickMarker(pos, dist, rawYaw, rawPitch) {
+            const mData = {
+                id: nextMarkerId++,
+                pos: pos.clone(),
+                dist: dist,
+                rawYaw: rawYaw,
+                rawPitch: rawPitch,
+                group: new THREE.Group()
+            };
+
+            // 3D 核心光斑
+            const dot = new THREE.Mesh(
+                new THREE.SphereGeometry(0.06, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0x10b981, depthTest: false })
+            );
+            dot.userData.ignoreRaycast = true;
+            mData.group.add(dot);
+
+            // 3D 外圈光环
+            const ring = new THREE.Mesh(
+                new THREE.RingGeometry(0.09, 0.13, 32),
+                new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, depthTest: false, transparent: true, opacity: 0.9 })
+            );
+            ring.userData.ignoreRaycast = true;
+            mData.group.add(ring);
+            mData.ring = ring;
+
+            // 3D 文字标签 Sprite
+            const sprite = createMarkerSprite(mData);
+            sprite.position.set(0, 0.32, 0);
+            mData.group.add(sprite);
+
+            mData.group.position.copy(pos);
+            markerGroup.add(mData.group);
+            clickMarkers.push(mData);
+
+            renderMarkerListUI();
+        }
+
+function deleteMarker(id) {
+            const idx = clickMarkers.findIndex(m => m.id === id);
+            if (idx !== -1) {
+                const m = clickMarkers[idx];
+                markerGroup.remove(m.group);
+                m.group.traverse(child => {
+                    disposeMaterialOnly(child);
+                    if (child.geometry) child.geometry.dispose();
+                });
+                if (m.spriteTex) m.spriteTex.dispose();
+                clickMarkers.splice(idx, 1);
+
+                // 👇 修复：如果列表中最后一个标点也被删除了，自动归位重置为 1
+                if (clickMarkers.length === 0) {
+                    nextMarkerId = 1;
+                }
+                renderMarkerListUI();
+            }
+        }
+
+        function clearAllMarkers() {
+            while (clickMarkers.length > 0) {
+                deleteMarker(clickMarkers[0].id);
+            }
+            // 👇 修复：点击“清空全部”后，强制将下一个标点重置为 #1
+            nextMarkerId = 1;
+            renderMarkerListUI();
+        }
+
+        function renderMarkerListUI() {
+            const container = getEl('marker-list-container');
+            const lblCount = getEl('lbl-marker-count');
+            if (lblCount) lblCount.innerText = clickMarkers.length;
+            if (!container) return;
+
+            if (clickMarkers.length === 0) {
+                container.innerHTML = '<div style="font-size:0.62rem; color:#94a3b8; text-align:center; padding:8px 0;">暂无打点记录 (退出锁定可操作)</div>';
+                return;
+            }
+
+            let html = '';
+            clickMarkers.forEach(m => {
+                const relYaw = getRelativeYawDeg(m.rawYaw);
+                const relPitch = getRelativePitchDeg(m.rawPitch);
+                const pitchSign = relPitch >= 0 ? '+' : '';
+                html += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.7); border:1px solid #e2e8f0; border-radius:5px; padding:4px 6px;">
+                        <div style="display:flex; flex-direction:column; gap:1px;">
+                            <span style="font-size:0.65rem; font-weight:900; color:#0f172a;">
+                                #${m.id} · <span style="color:#0284c7;">Y ${relYaw.toFixed(2)}°</span> · <span style="color:#059669;">P ${pitchSign}${relPitch.toFixed(2)}°</span>
+                            </span>
+                            <span style="font-size:0.56rem; color:#64748b;">测距: ${m.dist.toFixed(2)}m (基准0°差: Y-${yawZeroOffsetDeg.toFixed(1)}° P-${pitchZeroOffsetDeg.toFixed(1)}°)</span>
+                        </div>
+                        <button class="header-btn" onclick="deleteMarker(${m.id})" style="padding:2px 6px; font-size:0.65rem; color:#ef4444; border-color:#fca5a5;" title="删除此打点">✕</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+window.addEventListener('mousedown', (e) => {
             if (document.pointerLockElement === document.body && e.button === 0) {
                 const hitResult = checkAim();
+                let hitPos = null;
+                let hitDist = 20.0;
+                let isHit = false; // 👈 记录本次是否击中有效目标
+
                 if (hitResult) {
-                    const { target, part, object } = hitResult;
+                    isHit = true; // 击中了目标或箱子
+                    const { target, part, object, intersect } = hitResult;
                     playHitFeedback(part);
+                    if (intersect) {
+                        hitPos = intersect.point;
+                        hitDist = intersect.distance;
+                    }
                     if (part === 'head' && target) {
                         const headMesh = target.dummyGroup.children.find(c => c.userData.part === 'head' && c.isMesh);
                         if (headMesh) {
@@ -2067,10 +2387,38 @@
                         setTimeout(() => target.rootGroup.scale.setScalar(base), 70);
                     }
                 }
+
+                // 若开启了打点标定
+                if (config.clickMarkerEnabled) {
+                    // 👇 核心判定：如果开启了“仅限命中时标点”，但本次未击中任何目标，则直接退出，不生成标点
+                    if (config.clickMarkerHitOnly && !isHit) {
+                        return;
+                    }
+
+                    const currentYawRaw = getPlayerCurrentYawDeg();
+                    const currentPitchRaw = getPlayerCurrentPitchDeg();
+
+                    if (!hitPos) {
+                        raycaster.setFromCamera(centerVec, camera);
+                        const floorHits = raycaster.intersectObject(floor, false);
+                        if (floorHits.length > 0 && floorHits[0].distance < 120) {
+                            hitPos = floorHits[0].point;
+                            hitDist = floorHits[0].distance;
+                        } else {
+                            const dir = new THREE.Vector3();
+                            camera.getWorldDirection(dir);
+                            hitPos = camera.position.clone().add(dir.multiplyScalar(20.0));
+                            hitDist = 20.0;
+                        }
+                    }
+                    addClickMarker(hitPos, hitDist, currentYawRaw, currentPitchRaw);
+                }
             }
         });
 
-        // 10. 目标 UI 构建与比例锁定
+        // ============================================================
+        // 11. 目标与箱子 UI 构建
+        // ============================================================
         const container1 = getEl('targets-container-1');
         const boxesContainer = getEl('boxes-container');
 
@@ -2163,7 +2511,7 @@
                             <div class="stepper-box">
                                 <button class="step-btn" id="btn-t${i}-hy-minus" ${t.headLocked ? 'disabled' : ''}>−</button>
                                 <input type="number" class="num-input" id="inp-t${i}-hy" value="${(t.headOffsetY || 0).toFixed(1)}" step="0.5" min="-40" max="40" ${t.headLocked ? 'disabled' : ''} />
-                                <button class="step-btn" id="btn-t${i}-hy-plus" ${t.headLocked ? 'disabled' : ''}>+</button>
+                                <button class="step-btn" id="btn-t${i}-hy-plus">+</button>
                             </div>
                         </div>
                         <div class="ctrl-row">
@@ -2172,7 +2520,7 @@
                             <div class="stepper-box">
                                 <button class="step-btn" id="btn-t${i}-hx-minus" ${t.headLocked ? 'disabled' : ''}>−</button>
                                 <input type="number" class="num-input" id="inp-t${i}-hx" value="${(t.headOffsetX || 0).toFixed(1)}" step="0.5" min="-40" max="40" ${t.headLocked ? 'disabled' : ''} />
-                                <button class="step-btn" id="btn-t${i}-hx-plus" ${t.headLocked ? 'disabled' : ''}>+</button>
+                                <button class="step-btn" id="btn-t${i}-hx-plus">+</button>
                             </div>
                         </div>
                     `;
@@ -2664,7 +3012,7 @@
             rebuildTargetUI();
         }
 
-        // 11. 镜之边缘箱子系统
+        // 12. 镜之边缘箱子系统 (需求 1：改动 XYZ 后依然能等比缩放并保持修改状态)
         function rebuildBoxesUI() {
             boxesContainer.innerHTML = '';
             const lblCount = getEl('lbl-box-count');
@@ -2750,17 +3098,40 @@
                 }
                 [getEl(`inp-box-${i}-x`), getEl(`inp-box-${i}-x-r`), getEl(`inp-box-${i}-z`), getEl(`inp-box-${i}-z-r`),
                  getEl(`inp-box-${i}-y`), getEl(`inp-box-${i}-y-r`)].forEach(el => { if (el) el.disabled = locked; });
-                if (locked) {
-                    b.lenX = b.uniformSize; b.widthZ = b.uniformSize; b.heightY = b.uniformSize;
-                    updateBoxMesh(b);
-                }
+                // 重点修复：解锁改动后锁定，不再抹除已改动形态，保持当前 XYZ 比例
             };
             if (lockBtn) lockBtn.onclick = () => setBoxLock(!b.sizeLocked);
 
-            bindControl({ numEl: getEl(`inp-box-${i}-s`), rangeEl: getEl(`inp-box-${i}-s-r`), btnMinus: getEl(`btn-box-${i}-s-m`), btnPlus: getEl(`btn-box-${i}-s-p`), step: 0.1, apply: (v) => { b.uniformSize = Math.max(0.1, parseFloat(v) || 1.0); if (b.sizeLocked) { b.lenX = b.uniformSize; b.widthZ = b.uniformSize; b.heightY = b.uniformSize; } updateBoxMesh(b); } });
-            bindControl({ numEl: getEl(`inp-box-${i}-x`), rangeEl: getEl(`inp-box-${i}-x-r`), btnMinus: getEl(`btn-box-${i}-x-m`), btnPlus: getEl(`btn-box-${i}-x-p`), step: 0.1, apply: (v) => { b.lenX = Math.max(0.1, parseFloat(v) || 1.0); updateBoxMesh(b); } });
-            bindControl({ numEl: getEl(`inp-box-${i}-z`), rangeEl: getEl(`inp-box-${i}-z-r`), btnMinus: getEl(`btn-box-${i}-z-m`), btnPlus: getEl(`btn-box-${i}-z-p`), step: 0.1, apply: (v) => { b.widthZ = Math.max(0.1, parseFloat(v) || 1.0); updateBoxMesh(b); } });
-            bindControl({ numEl: getEl(`inp-box-${i}-y`), rangeEl: getEl(`inp-box-${i}-y-r`), btnMinus: getEl(`btn-box-${i}-y-m`), btnPlus: getEl(`btn-box-${i}-y-p`), step: 0.1, apply: (v) => { b.heightY = Math.max(0.1, parseFloat(v) || 1.0); updateBoxMesh(b); } });
+            // 等比大小调整：按比例整体缩放 X、Y、Z
+            bindControl({
+                numEl: getEl(`inp-box-${i}-s`), rangeEl: getEl(`inp-box-${i}-s-r`), btnMinus: getEl(`btn-box-${i}-s-m`), btnPlus: getEl(`btn-box-${i}-s-p`), step: 0.1,
+                apply: (v) => {
+                    const newS = Math.max(0.1, parseFloat(v) || 1.0);
+                    const oldS = Math.max(0.01, b.uniformSize || 1.0);
+                    const factor = newS / oldS;
+                    b.uniformSize = newS;
+                    getEl(`inp-box-${i}-s`).value = newS.toFixed(2);
+                    const sr = getEl(`inp-box-${i}-s-r`); if (sr) sr.value = newS;
+
+                    // 保持已改动的长宽高比例
+                    b.lenX = Math.max(0.05, b.lenX * factor);
+                    b.widthZ = Math.max(0.05, b.widthZ * factor);
+                    b.heightY = Math.max(0.05, b.heightY * factor);
+
+                    setNum(`inp-box-${i}-x`, b.lenX, 2);
+                    const rx = getEl(`inp-box-${i}-x-r`); if (rx) rx.value = b.lenX;
+                    setNum(`inp-box-${i}-z`, b.widthZ, 2);
+                    const rz = getEl(`inp-box-${i}-z-r`); if (rz) rz.value = b.widthZ;
+                    setNum(`inp-box-${i}-y`, b.heightY, 2);
+                    const ry = getEl(`inp-box-${i}-y-r`); if (ry) ry.value = b.heightY;
+
+                    updateBoxMesh(b);
+                }
+            });
+
+            bindControl({ numEl: getEl(`inp-box-${i}-x`), rangeEl: getEl(`inp-box-${i}-x-r`), btnMinus: getEl(`btn-box-${i}-x-m`), btnPlus: getEl(`btn-box-${i}-x-p`), step: 0.1, apply: (v) => { b.lenX = Math.max(0.05, parseFloat(v) || 1.0); updateBoxMesh(b); } });
+            bindControl({ numEl: getEl(`inp-box-${i}-z`), rangeEl: getEl(`inp-box-${i}-z-r`), btnMinus: getEl(`btn-box-${i}-z-m`), btnPlus: getEl(`btn-box-${i}-z-p`), step: 0.1, apply: (v) => { b.widthZ = Math.max(0.05, parseFloat(v) || 1.0); updateBoxMesh(b); } });
+            bindControl({ numEl: getEl(`inp-box-${i}-y`), rangeEl: getEl(`inp-box-${i}-y-r`), btnMinus: getEl(`btn-box-${i}-y-m`), btnPlus: getEl(`btn-box-${i}-y-p`), step: 0.1, apply: (v) => { b.heightY = Math.max(0.05, parseFloat(v) || 1.0); updateBoxMesh(b); } });
             bindControl({ numEl: getEl(`inp-box-${i}-dist`), rangeEl: getEl(`inp-box-${i}-dist-r`), btnMinus: getEl(`btn-box-${i}-dist-m`), btnPlus: getEl(`btn-box-${i}-dist-p`), step: 0.5, apply: (v) => { b.distMeters = Math.max(0.2, parseFloat(v) || 5.0); updateBoxMesh(b); } });
             bindControl({ numEl: getEl(`inp-box-${i}-deg`), rangeEl: getEl(`inp-box-${i}-deg-r`), btnMinus: getEl(`btn-box-${i}-deg-m`), btnPlus: getEl(`btn-box-${i}-deg-p`), step: 0.5, apply: (v) => { b.centerDeg = clamp(parseFloat(v) || 0, -180, 180); updateBoxMesh(b); } });
             bindControl({ numEl: getEl(`inp-box-${i}-yoff`), rangeEl: getEl(`inp-box-${i}-yoff-r`), btnMinus: getEl(`btn-box-${i}-yoff-m`), btnPlus: getEl(`btn-box-${i}-yoff-p`), step: 0.1, apply: (v) => { b.yOffset = parseFloat(v) || 0; updateBoxMesh(b); } });
@@ -2800,9 +3171,10 @@
             updateScene();
         }
 
-        // 12. 面板交互与按键事件
+        // 13. 面板交互与锁定事件
         const leftPanel = getEl('left-panel');
         const rightPanel = getEl('right-panel');
+        const markerHud = getEl('marker-hud');
         const handle = getEl('panel-handle');
         const dragBtn = getEl('btn-drag-toggle');
         const btnLock = getEl('btn-lock');
@@ -2859,6 +3231,10 @@
                 getEl('left-bottom-group').style.pointerEvents = isLocked ? 'none' : 'auto';
                 getEl('bottom-right-hud').style.opacity = isLocked ? '0' : '1';
                 getEl('bottom-right-hud').style.pointerEvents = isLocked ? 'none' : 'auto';
+                if (markerHud) {
+                    markerHud.style.opacity = isLocked ? '0' : '1';
+                    markerHud.style.pointerEvents = isLocked ? 'none' : 'auto';
+                }
             });
         }
 
@@ -2940,7 +3316,6 @@
             document.querySelectorAll('.cm-pill').forEach(b => b.addEventListener('click', () => setCm(parseFloat(b.dataset.val))));
         }
 
-        // 准星双通道独立调色器恢复
         function setupColorSwatchGrid(containerId, currentColor, onSelect) {
             const c = getEl(containerId);
             if (!c) return;
@@ -2981,7 +3356,7 @@
             });
         }
 
-        // 13. 动力学与渲染主循环
+        // 14. 动力学与渲染主循环
         let lastTime = performance.now(), lastFrame = performance.now(), frameCnt = 0;
         const hudFps = getEl('hud-fps');
         const hudAngle = getEl('hud-angle');
@@ -3088,6 +3463,11 @@
                 updateTargetMeridianGeometry(t);
                 updateTargetBadgeCanvas(t);
             });
+
+            // 保持打点光环正对相机
+            clickMarkers.forEach(m => {
+                if (m.ring) m.ring.quaternion.copy(camera.quaternion);
+            });
         }
 
         function animate(now) {
@@ -3096,10 +3476,13 @@
             lastFrame = now;
             updatePhysics(dt);
 
-            const currentYaw = getPlayerCurrentYawDeg();
-            const currentPitch = getPlayerCurrentPitchDeg();
-            if (hudAngle) hudAngle.innerText = currentYaw.toFixed(3);
-            if (hudPitch) hudPitch.innerText = (currentPitch >= 0 ? '+' : '') + currentPitch.toFixed(3);
+            const currentYawRaw = getPlayerCurrentYawDeg();
+            const currentPitchRaw = getPlayerCurrentPitchDeg();
+            const relYaw = getRelativeYawDeg(currentYawRaw);
+            const relPitch = getRelativePitchDeg(currentPitchRaw);
+
+            if (hudAngle) hudAngle.innerText = relYaw.toFixed(3);
+            if (hudPitch) hudPitch.innerText = (relPitch >= 0 ? '+' : '') + relPitch.toFixed(3);
 
             frameCnt++;
             if (now - lastTime >= 400) {
@@ -3133,7 +3516,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // 14. 启动与初始化
+        // 15. 启动与初始化
         function init() {
             setDpi(config.dpi);
             setCm(config.cmPer360);
