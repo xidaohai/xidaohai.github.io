@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>同身寸 · 收束法 - 西岛海</title>
+    <style>
+        :root {
+            --bg: #dfd7cb;
+            --paper: #d2c5b4;
+            --blue: #0284c7;
+            --blue-dark: #0369a1;
+            --purple: #6366f1;
+            --purple-dark: #4338ca;
+            --gold: #b8860b;
+            --card: #ffffff;
+            --card-sub: #fbf9f5;
+            --shadow: rgba(30, 20, 50, 0.08);
+            --anchor: #7c3aed;
+            --glow: rgba(99, 102, 241, 0.18);
+            --border: #e2d9cc;
+            --border-dark: #b8ab97;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            padding: 14px 8px;
+            background: var(--bg);
+            background-image: radial-gradient(var(--paper) 18%, transparent 19%), radial-gradient(var(--paper) 18%, transparent 19%);
+            background-size: 10px 10px;
+            color: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            width: 100%;
+            max-width: 920px;
+            background: var(--card);
+            border-radius: 12px;
+            padding: 18px 14px;
+            box-shadow: 0 8px 24px var(--shadow);
+            border: 1px solid var(--border-dark);
+            position: relative;
+        }
+        @media (min-width:600px) {
+            .card {
+                padding: 22px 18px;
+            }
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: var(--gold);
+            border-radius: 12px 0 0 12px;
+        }
+        .header {
+            font-size: 1.15rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--blue-dark);
+            flex-wrap: wrap;
+            border-bottom: 1.5px dashed var(--border);
+            padding-bottom: 10px;
+        }
+        .header .date {
+            font-size: 1rem;
+            opacity: 0.85;
+        }
+        .header .badge {
+            background: var(--purple-dark);
+            color: #fff;
+            font-size: 0.68rem;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        .k-link {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            background: var(--gold);
+            padding: 3px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-left: auto;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .k-link:hover {
+            background: #8b6914;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: stretch;
+        }
+
+        .input-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1.5px dashed var(--blue);
+            border-radius: 8px;
+            padding: 10px 12px;
+            height: 100%;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 3px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--blue-dark);
+        }
+        .input-group input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid rgba(2, 132, 199, 0.3);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--blue-dark);
+            padding: 5px 6px;
+            text-align: center;
+            outline: none;
+            font-family: "SF Mono", monospace;
+        }
+        .input-group input:focus {
+            border-color: var(--purple);
+            background: #fff;
+        }
+        .input-group input:disabled {
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: not-allowed;
+            border-color: #d1d5db;
+        }
+
+        .correction {
+            background: rgba(76, 29, 149, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .correction .title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--purple-dark);
+        }
+        .correction .sub {
+            font-size: 0.65rem;
+            color: #64748b;
+            margin-left: 4px;
+        }
+        .correction .row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .correction .row .step-btn {
+            width: 26px;
+            height: 26px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: #ffffff;
+            color: var(--purple-dark);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        .correction .row .step-btn:hover {
+            border-color: var(--purple);
+        }
+        .correction .row input {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--purple-dark);
+            padding: 3px 6px;
+            text-align: center;
+            outline: none;
+            font-family: "SF Mono", monospace;
+        }
+        .correction .slider {
+            width: 100%;
+            accent-color: var(--purple-dark);
+            cursor: pointer;
+            height: 4px;
+        }
+
+        .formula-card {
+            border: 1.5px solid var(--gold);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: rgba(184, 134, 11, 0.03);
+            transition: 0.25s;
+        }
+        .formula-card.track {
+            border-color: var(--purple);
+            background: rgba(76, 29, 149, 0.03);
+        }
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .f-title {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #78350f;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .math-hero {
+            background: #ffffff;
+            border: 1px solid #e2d9cc;
+            border-radius: 8px;
+            padding: 10px 8px;
+            margin: 8px 0 6px 0;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .math-row {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Cambria Math", "Latin Modern Math", serif;
+            font-size: 1.05rem;
+            color: #0f172a;
+            font-weight: bold;
+            flex-wrap: wrap;
+            gap: 4px;
+            row-gap: 8px;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 6px;
+            padding: 4px;
+        }
+        .toggle-btn {
+            border: none;
+            background: transparent;
+            padding: 8px 18px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #475569;
+            transition: 0.15s;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        .toggle-btn.active {
+            background: var(--gold);
+            color: #fff;
+        }
+        .toggle-btn.purple.active {
+            background: var(--purple-dark);
+            color: #fff;
+        }
+        .toggle-btn.track-sub.active {
+            background: #8b5cf6;
+            color: #fff;
+        }
+
+        .mode-badge {
+            font-size: 0.62rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            background: rgba(184, 134, 11, 0.15);
+            color: #78350f;
+        }
+        .mode-badge.track {
+            background: rgba(76, 29, 149, 0.15);
+            color: var(--purple);
+        }
+
+        .five-col {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-top: 6px;
+        }
+        @media(max-width:550px) {
+            .five-col {
+                gap: 2px;
+                font-size: 0.7rem;
+            }
+        }
+        .col-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px 2px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid transparent;
+            min-height: 44px;
+            justify-content: center;
+            transition: 0.15s;
+        }
+        .col-item .tag {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #78350f;
+        }
+        .col-item .val {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--gold);
+        }
+        .col-item .val.corrected {
+            color: var(--purple);
+        }
+        .col-item.clickable {
+            cursor: pointer;
+        }
+        .col-item.clickable:hover {
+            background: rgba(124, 58, 237, 0.08);
+        }
+        .col-item.anchor {
+            border-color: var(--anchor);
+            background: var(--glow);
+            box-shadow: 0 0 12px var(--glow);
+        }
+        .col-item .hint {
+            font-size: 0.5rem;
+            color: var(--anchor);
+            font-weight: 700;
+            opacity: 0;
+            transition: 0.2s;
+            margin-top: 1px;
+        }
+        .col-item.anchor .hint {
+            opacity: 1;
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+        .status .hl {
+            color: var(--purple);
+            font-weight: 700;
+        }
+
+        .chart-section {
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(120, 100, 70, 0.25);
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 14px;
+        }
+        .chart-header {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--blue-dark);
+            margin-bottom: 10px;
+        }
+        .interactive-chart-grid {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+        @media(max-width:750px) {
+            .interactive-chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .slider-control-card {
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(2, 132, 199, 0.2);
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .ctrl-row {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .ctrl-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.72rem;
+            font-weight: bold;
+            color: var(--blue-dark);
+        }
+        .ctrl-input-num {
+            width: 76px;
+            padding: 2px 4px;
+            font-size: 0.82rem;
+            font-weight: bold;
+            text-align: right;
+            border: 1px solid rgba(2, 132, 199, 0.3);
+            border-radius: 3px;
+            outline: none;
+            background: #fff;
+            color: var(--blue-dark);
+        }
+        .ctrl-range {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--blue);
+            margin-top: 2px;
+        }
+
+        .canvas-container {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 4px;
+            position: relative;
+            padding: 8px 6px;
+        }
+        canvas {
+            width: 100%;
+            height: 250px;
+            display: block;
+        }
+
+        .chart-legend-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-top: 10px;
+        }
+        @media(max-width:600px) {
+            .chart-legend-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        .legend-box {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 4px;
+            padding: 5px 8px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.65rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .legend-box.t3-max {
+            border-left: 3px solid #7c3aed;
+        }
+        .legend-box.s-max {
+            border-left: 3px solid #0284c7;
+        }
+        .legend-box.s-bal {
+            border-left: 3px dashed #38bdf8;
+        }
+        .legend-val {
+            font-size: 0.85rem;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .steps {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(180, 83, 9, 0.2);
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+        }
+        .steps .title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #78350f;
+            margin-bottom: 6px;
+        }
+
+        .step-stage {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin: 10px 0 4px 0;
+            display: inline-block;
+        }
+        .step-stage.cun {
+            background: var(--blue);
+        }
+        .step-stage.cun.track {
+            background: var(--purple);
+        }
+
+        .step-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 0;
+            color: #334155;
+            flex-wrap: wrap;
+            font-size: 0.78rem;
+        }
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gold);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: bold;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .step-num.purple {
+            background: var(--purple);
+        }
+        .step-num.blue {
+            background: var(--blue);
+        }
+        .step-label {
+            font-weight: 600;
+            color: #475569;
+        }
+        .step-formula {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.04);
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+        .step-result {
+            font-weight: bold;
+            color: var(--gold);
+        }
+        .step-result.purple {
+            color: var(--purple);
+        }
+        .step-result.blue {
+            color: var(--blue);
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            font-size: 0.82rem;
+            color: #475569;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(0, 0, 0, 0.08);
+        }
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .footer-left .desc {
+            font-size: 0.75rem;
+        }
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .footer-right .sig {
+            font-weight: bold;
+            color: var(--blue-dark);
+            font-size: 0.85rem;
+        }
+        .correction-badge {
+            background: var(--purple);
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+        .anchor-label {
+            font-size: 0.6rem;
+            color: var(--anchor);
+            font-weight: 700;
+            background: rgba(124, 58, 237, 0.12);
+            padding: 0 6px;
+            border-radius: 3px;
+            margin-left: 4px;
+        }
+        sup, sub {
+            font-size: 0.72em;
+        }
+        .ttk-tag {
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #e0e7ff;
+            color: #4338ca;
+            margin-left: 4px;
+        }
+        .ttk-tag.short {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .ttk-tag.long {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .tooltip-container {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .tooltip-container .tooltip-text {
+            visibility: hidden;
+            width: 240px;
+            background-color: #ffffff;
+            color: #1e293b;
+            text-align: left;
+            border-radius: 6px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            right: 0;
+            opacity: 0;
+            transition: opacity 0.25s;
+            font-weight: 400;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            pointer-events: none;
+        }
+        .tooltip-container .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            right: 20px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #ffffff transparent transparent transparent;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        #std-sub-toggle, #track-sub-toggle {
+            display: flex;
+        }
+        #track-sub-toggle {
+            display: none;
+        }
+        #stepsNatural {
+            display: none;
+        }
+        .steps {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+
+        <div class="header">
+            <span class="date">2026.9.17</span>
+            <span>同身寸 · 收束法</span>
+            <span class="badge" style="background:var(--blue-dark);">xlm</span>
+            <a href="https://xidaohai.github.io/tsc.png" target="_blank" rel="noopener noreferrer" class="k-link">【说明】？</a>
+        </div>
+
+        <div class="top-row">
+            <div class="input-panel">
+                <div class="input-group">
+                    <label for="input-x">x (目标大小测量):</label>
+                    <input type="number" id="input-x" value="2000" step="any" oninput="syncFromTop()">
+                </div>
+                <div class="input-group">
+                    <label for="input-y">y (常用拉枪距离):</label>
+                    <input type="number" id="input-y" value="700" step="any" oninput="syncFromTop()">
+                </div>
+                <div class="input-group">
+                    <label for="input-z">z (目标移动范围):</label>
+                    <input type="number" id="input-z" value="90" min="1" step="1" oninput="syncFromTop()">
+                </div>
+                <div class="input-group">
+                    <label for="input-tsc">大众同身寸（参考基准）</label>
+                    <div class="tooltip-container">
+                        <input type="number" id="input-tsc" value="2" step="0.01" disabled>
+                        <span class="tooltip-text">如何在不同年代确定所谓的最小单位1呢？就是拇指宽度分成一半且取大众均值。此实际长度为"1"。</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="correction">
+            <div><span class="title">✧ 个人修正系数</span><span class="sub">点击下方数值设锚点 · 步长 0.25%</span></div>
+            <div class="row">
+                <button type="button" class="step-btn" onclick="adjustCorrection(-0.25)">−</button>
+                <input type="number" id="input-correct" value="0.00" step="0.25" min="-10" max="10" oninput="onCorrectionInputLive()" onchange="onCorrectionChange()">
+                <span class="pct" style="color:var(--purple);font-weight:bold;font-size:0.8rem;">%</span>
+                <button type="button" class="step-btn" onclick="adjustCorrection(0.25)">+</button>
+            </div>
+            <input class="slider" id="correct-slider" type="range" min="-10" max="10" step="0.25" value="0" oninput="onSliderInput();">
+            <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:#94a3b8;padding:0 2px;">
+                <span>−10%</span>
+                <span id="correction-display" style="font-weight:bold;color:var(--purple);">0.00%</span>
+                <span>+10%</span>
+            </div>
+        </div>
+
+        <div class="formula-card" id="formulaCard">
+            <div class="card-top">
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <div class="f-title">
+                        <span id="fTitle">普通模式</span>
+                        <span class="mode-badge" id="modeBadge">普通模式</span>
+                        <span id="ttkTag" class="ttk-tag short">短TTK</span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
+                    <div class="toggle-group">
+                        <button type="button" class="toggle-btn active" id="btn-mode-std" onclick="setMode('standard')">普通</button>
+                        <button type="button" class="toggle-btn purple" id="btn-mode-t3d" onclick="setMode('tracking_3d')">跟枪</button>
+                    </div>
+                    <!-- 普通子切换 -->
+                    <div class="toggle-group" id="std-sub-toggle">
+                        <button type="button" class="toggle-btn" id="btn-std-simple" onclick="setStdSub('simple')">极简</button>
+                        <button type="button" class="toggle-btn active" id="btn-std-full" onclick="setStdSub('full')">完整</button>
+                    </div>
+                    <!-- 跟枪子切换 -->
+                    <div class="toggle-group" id="track-sub-toggle">
+                        <button type="button" class="toggle-btn track-sub active" id="btn-track-simple" onclick="setTrackSub('simple')">极简</button>
+                        <button type="button" class="toggle-btn track-sub" id="btn-track-full" onclick="setTrackSub('full')">完整</button>
+                    </div>
+                    <span style="font-size:0.65rem;font-weight:700;color:#64748b;background:#f1f5f9;padding:3px 8px;border-radius:4px;">cm</span>
+                </div>
+            </div>
+
+            <div class="math-hero" id="fExpr"></div>
+
+            <div class="five-col" id="baseRow">
+                <div class="col-item"><span class="tag">最小值</span><span class="val" id="base-half">--</span></div>
+                <div class="col-item"><span class="tag">偏快</span><span class="val" id="base-q1">--</span></div>
+                <div class="col-item"><span class="tag" style="font-weight:800;color:var(--purple);">均衡</span><span class="val" id="base-q2" style="color:var(--purple);">--</span></div>
+                <div class="col-item"><span class="tag">偏慢</span><span class="val" id="base-q3">--</span></div>
+                <div class="col-item"><span class="tag">最大值</span><span class="val" id="base-base">--</span></div>
+            </div>
+
+            <div style="margin-top:10px;border-top:1.5px dashed rgba(76,29,149,0.25);padding-top:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+                    <span style="font-weight:bold;color:var(--purple);font-size:0.85rem;">✧ 修正后 <span class="correction-badge" id="correction-badge">±0.00%</span></span>
+                    <span style="font-size:0.7rem;color:#94a3b8;">锚点: <span class="anchor-label" id="anchorName">均衡</span> <span style="margin-left:6px;font-size:0.6rem;color:#94a3b8;">点击数值切换</span></span>
+                </div>
+                <div class="five-col" id="correctedRow">
+                    <div class="col-item clickable" data-key="half" onclick="setAnchor('half')"><span class="tag">最小值</span><span class="val corrected" id="corr-half">--</span><span class="hint">⬆ 锚点</span></div>
+                    <div class="col-item clickable" data-key="q1" onclick="setAnchor('q1')"><span class="tag">偏快</span><span class="val corrected" id="corr-q1">--</span><span class="hint">⬆ 锚点</span></div>
+                    <div class="col-item clickable" data-key="q2" onclick="setAnchor('q2')"><span class="tag" style="font-weight:800;color:var(--anchor);">均衡</span><span class="val corrected" id="corr-q2" style="color:var(--anchor);">--</span><span class="hint">⬆ 锚点</span></div>
+                    <div class="col-item clickable" data-key="q3" onclick="setAnchor('q3')"><span class="tag">偏慢</span><span class="val corrected" id="corr-q3">--</span><span class="hint">⬆ 锚点</span></div>
+                    <div class="col-item clickable" data-key="base" onclick="setAnchor('base')"><span class="tag">最大值</span><span class="val corrected" id="corr-base">--</span><span class="hint">⬆ 锚点</span></div>
+                </div>
+                <div class="status">
+                    <span>修正系数 = <span class="hl" id="corrFactorDisplay">1.000</span></span>
+                    <span>锚点: <span class="hl" id="anchorDisplay">均衡</span></span>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <div class="chart-header">全景动态响应视界 (横轴: 目标X · 实时联动Y拉枪与Z视界)</div>
+
+                <div class="interactive-chart-grid">
+                    <div class="slider-control-card">
+                        <div class="ctrl-row">
+                            <div class="ctrl-head">
+                                <span>x (目标)</span>
+                                <input type="number" class="ctrl-input-num" id="side-input-x" value="2000" step="10" oninput="syncFromSide('x')">
+                            </div>
+                            <input type="range" class="ctrl-range" id="side-range-x" min="0" max="7000" step="10" value="2000" oninput="syncFromRange('x')">
+                        </div>
+
+                        <div class="ctrl-row">
+                            <div class="ctrl-head">
+                                <span>y (固定拉枪)</span>
+                                <input type="number" class="ctrl-input-num" id="side-input-y" value="700" step="10" oninput="syncFromSide('y')">
+                            </div>
+                            <input type="range" class="ctrl-range" id="side-range-y" min="0" max="2000" step="10" value="700" oninput="syncFromRange('y')">
+                        </div>
+
+                        <div class="ctrl-row">
+                            <div class="ctrl-head">
+                                <span>z (目标移动范围)</span>
+                                <input type="number" class="ctrl-input-num" id="side-input-z" value="90" min="1" step="1" oninput="syncFromSide('z')">
+                            </div>
+                            <input type="range" class="ctrl-range" id="side-range-z" min="1" max="1000" step="1" value="90" oninput="syncFromRange('z')">
+                        </div>
+
+                        <div class="ctrl-row" style="border-top:1px dashed rgba(0,0,0,0.06);padding-top:6px;">
+                            <div style="display:flex;justify-content:space-between;font-size:0.62rem;color:#64748b;">
+                                <span>当前模式: <strong id="mode-text-display" style="color:#0284c7;">普通模式</strong></span>
+                                <span>y/x: <strong id="ratio-display" style="color:var(--purple);">0.350</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="canvas-container">
+                        <canvas id="compCanvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-legend-grid">
+                    <div class="legend-box t3-max">
+                        <span style="color:#7c3aed; font-weight:bold;">[跟枪基准]</span>
+                        <span class="legend-val" id="lbl-t3-max" style="color:#7c3aed;">-- cm</span>
+                    </div>
+                    <div class="legend-box s-max">
+                        <span style="color:#0284c7; font-weight:bold;">[普通最大]</span>
+                        <span class="legend-val" id="lbl-s-max" style="color:#0284c7;">-- cm</span>
+                    </div>
+                    <div class="legend-box s-bal">
+                        <span style="color:#38bdf8; font-weight:bold;">[普通均衡]</span>
+                        <span class="legend-val" id="lbl-s-bal" style="color:#38bdf8;">-- cm</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 步骤区域保留占位但不可见 -->
+            <div class="steps" style="display:none;">
+                <div class="title" id="stepsTitle">📝 计算推导流程</div>
+                <div id="stepsNatural"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-left">
+                <div class="desc" id="footerDesc"><strong>新公式体系已生效</strong></div>
+            </div>
+            <div class="footer-right">
+                <span class="sig">作者：西岛海</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const PI = Math.PI;
+
+        let currentMode = 'standard';
+        let trackSubMode = 'simple';
+        let stdSubMode = 'full';
+        let currentAnchor = 'q2';
+
+        const RATIOS_STD = { half: 2 / 3, q1: 5 / 6, q2: 1, q3: 7 / 6, base: 4 / 3 };
+        const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
+        const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
+
+        // ---- 普通模式 ----
+        function calcStandard(x, y) {
+            const x_safe = Math.max(0, x);
+            const y_safe = Math.max(0.001, y);
+            if (stdSubMode === 'simple') {
+                const coeff = Math.E + Math.SQRT2;
+                return { result: coeff * Math.pow(x_safe, 1 / 3) };
+            } else {
+                return { result: 2.88 * Math.pow(x_safe, 0.333) * Math.pow(y_safe, 0.0625) };
+            }
+        }
+
+        // ---- 跟枪模式（已修改） ----
+        function calcTracking(x, y, z, sub) {
+            const x_safe = Math.max(0.001, x);
+            const y_safe = Math.max(0.001, y);
+            const z_safe = Math.max(0.1, z);
+            if (sub === 'simple') {
+                // 跟枪极简：Max = 15.55 · x^0.125 · z^0.125
+                return { result: 15.55 * Math.pow(x_safe, 0.125) * Math.pow(z_safe, 0.125) };
+            } else {
+                // 跟枪完整：Max = 10.50 · x^0.125 · y^0.0625 · z^0.125
+                return { result: 10.50 * Math.pow(x_safe, 0.125) * Math.pow(y_safe, 0.0625) * Math.pow(z_safe, 0.125) };
+            }
+        }
+
+        // ---- 切换模式 ----
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btn-mode-std').classList.toggle('active', mode === 'standard');
+            document.getElementById('btn-mode-t3d').classList.toggle('active', mode === 'tracking_3d');
+
+            const stdToggle = document.getElementById('std-sub-toggle');
+            const trackToggle = document.getElementById('track-sub-toggle');
+
+            if (mode === 'standard') {
+                stdToggle.style.display = 'flex';
+                trackToggle.style.display = 'none';
+                const badge = document.getElementById('modeBadge');
+                badge.textContent = '普通模式';
+                badge.className = 'mode-badge';
+                document.getElementById('fTitle').textContent = '普通模式';
+                document.getElementById('formulaCard').className = 'formula-card';
+                document.getElementById('mode-text-display').textContent = '普通模式';
+                document.getElementById('mode-text-display').style.color = '#0284c7';
+                document.getElementById('ttkTag').textContent = '短TTK';
+                document.getElementById('ttkTag').className = 'ttk-tag short';
+                document.getElementById('btn-std-simple').classList.toggle('active', stdSubMode === 'simple');
+                document.getElementById('btn-std-full').classList.toggle('active', stdSubMode === 'full');
+            } else {
+                stdToggle.style.display = 'none';
+                trackToggle.style.display = 'flex';
+                const badge = document.getElementById('modeBadge');
+                badge.textContent = '跟枪';
+                badge.className = 'mode-badge track';
+                document.getElementById('fTitle').textContent = '跟枪模式';
+                document.getElementById('formulaCard').className = 'formula-card track';
+                document.getElementById('mode-text-display').textContent = '跟枪';
+                document.getElementById('mode-text-display').style.color = 'var(--purple-dark)';
+                document.getElementById('ttkTag').textContent = '长TTK';
+                document.getElementById('ttkTag').className = 'ttk-tag long';
+                document.getElementById('btn-track-simple').classList.toggle('active', trackSubMode === 'simple');
+                document.getElementById('btn-track-full').classList.toggle('active', trackSubMode === 'full');
+            }
+
+            updateDisplays();
+            calculate();
+        }
+
+        // ---- 普通子模式切换 ----
+        function setStdSub(sub) {
+            stdSubMode = sub;
+            document.getElementById('btn-std-simple').classList.toggle('active', sub === 'simple');
+            document.getElementById('btn-std-full').classList.toggle('active', sub === 'full');
+            updateDisplays();
+            calculate();
+        }
+
+        // ---- 跟枪子模式切换 ----
+        function setTrackSub(sub) {
+            if (currentMode !== 'tracking_3d') {
+                setMode('tracking_3d');
+            }
+            trackSubMode = sub;
+            document.getElementById('btn-track-simple').classList.toggle('active', sub === 'simple');
+            document.getElementById('btn-track-full').classList.toggle('active', sub === 'full');
+            updateDisplays();
+            calculate();
+        }
+
+        // ---- 更新公式显示 ----
+        function updateDisplays() {
+            const exprElem = document.getElementById('fExpr');
+            const footerDesc = document.getElementById('footerDesc');
+
+            if (currentMode === 'tracking_3d') {
+                if (trackSubMode === 'simple') {
+                    exprElem.innerHTML =
+                        `<div class="math-row"><span>Max = 15.55 · x<sup>0.125</sup> · z<sup>0.125</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>跟枪极简</strong>：15.55 · x<sup>0.125</sup> · z<sup>0.125</sup>`;
+                } else {
+                    exprElem.innerHTML =
+                        `<div class="math-row"><span>Max = 10.50 · x<sup>0.125</sup> · y<sup>0.0625</sup> · z<sup>0.125</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>跟枪完整</strong>：10.50 · x<sup>0.125</sup> · y<sup>0.0625</sup> · z<sup>0.125</sup>`;
+                }
+            } else {
+                if (stdSubMode === 'simple') {
+                    exprElem.innerHTML =
+                        `<div class="math-row"><span>Output = (e + √2) · x<sup>1/3</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>普通极简</strong>：(e + √2) · x<sup>1/3</sup>`;
+                } else {
+                    exprElem.innerHTML =
+                        `<div class="math-row"><span>Output = 2.88 · x<sup>0.333</sup> · y<sup>0.0625</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>普通完整</strong>：2.88 · x<sup>0.333</sup> · y<sup>0.0625</sup>`;
+                }
+            }
+        }
+
+        // ---- 同步函数 ----
+        function syncFromTop() {
+            let x = parseFloat(document.getElementById('input-x').value) || 0;
+            let y = parseFloat(document.getElementById('input-y').value) || 0;
+            let z = parseFloat(document.getElementById('input-z').value) || 1;
+            x = Math.max(0, x);
+            y = Math.max(0, y);
+            z = Math.max(1, z);
+            document.getElementById('side-input-x').value = x;
+            document.getElementById('side-range-x').value = Math.min(x, 7000);
+            document.getElementById('side-input-y').value = y;
+            document.getElementById('side-range-y').value = Math.min(y, 2000);
+            document.getElementById('side-input-z').value = z;
+            document.getElementById('side-range-z').value = Math.min(z, 1000);
+            calculate();
+        }
+
+        function syncFromSide(type) {
+            if (type === 'x') {
+                let v = parseFloat(document.getElementById('side-input-x').value) || 0;
+                document.getElementById('input-x').value = Math.max(0, v);
+                document.getElementById('side-range-x').value = Math.min(v, 7000);
+            } else if (type === 'y') {
+                let v = parseFloat(document.getElementById('side-input-y').value) || 0;
+                document.getElementById('input-y').value = Math.max(0, v);
+                document.getElementById('side-range-y').value = Math.min(v, 2000);
+            } else if (type === 'z') {
+                let v = parseFloat(document.getElementById('side-input-z').value) || 1;
+                document.getElementById('input-z').value = Math.max(1, v);
+                document.getElementById('side-range-z').value = Math.min(v, 1000);
+            }
+            calculate();
+        }
+
+        function syncFromRange(type) {
+            if (type === 'x') {
+                const v = parseFloat(document.getElementById('side-range-x').value) || 0;
+                document.getElementById('input-x').value = v;
+                document.getElementById('side-input-x').value = v;
+            } else if (type === 'y') {
+                const v = parseFloat(document.getElementById('side-range-y').value) || 0;
+                document.getElementById('input-y').value = v;
+                document.getElementById('side-input-y').value = v;
+            } else if (type === 'z') {
+                const v = parseFloat(document.getElementById('side-range-z').value) || 1;
+                document.getElementById('input-z').value = v;
+                document.getElementById('side-input-z').value = v;
+            }
+            calculate();
+        }
+
+        function onSliderInput() {
+            const v = parseFloat(document.getElementById('correct-slider').value) || 0;
+            document.getElementById('input-correct').value = v.toFixed(2);
+            syncUI();
+            calculate();
+        }
+
+        function onCorrectionInputLive() {
+            const raw = document.getElementById('input-correct').value;
+            if (raw === '-' || raw === '' || raw === '.') return;
+            let v = parseFloat(raw);
+            if (isNaN(v)) return;
+            v = Math.max(-10, Math.min(10, v));
+            document.getElementById('correct-slider').value = v;
+            syncUI();
+            calculate();
+        }
+
+        function onCorrectionChange() {
+            let v = parseFloat(document.getElementById('input-correct').value) || 0;
+            v = Math.max(-10, Math.min(10, v));
+            v = Math.round(v / 0.25) * 0.25;
+            document.getElementById('input-correct').value = v.toFixed(2);
+            document.getElementById('correct-slider').value = v;
+            syncUI();
+            calculate();
+        }
+
+        function adjustCorrection(delta) {
+            const input = document.getElementById('input-correct');
+            let v = parseFloat(input.value) || 0;
+            v = Math.round((v + delta) / 0.25) * 0.25;
+            v = Math.max(-10, Math.min(10, v));
+            input.value = v.toFixed(2);
+            document.getElementById('correct-slider').value = v;
+            syncUI();
+            calculate();
+        }
+
+        function syncUI() {
+            const v = parseFloat(document.getElementById('input-correct').value) || 0;
+            const s = Math.round(v / 0.25) * 0.25;
+            const label = (s > 0 ? '+' : '') + s.toFixed(2) + '%';
+            document.getElementById('correction-display').textContent = label;
+            document.getElementById('correction-badge').textContent = label;
+            document.getElementById('corrFactorDisplay').textContent = (1 + s / 100).toFixed(3);
+        }
+
+        function setAnchor(key) {
+            currentAnchor = key;
+            document.querySelectorAll('#correctedRow .col-item').forEach(el => el.classList.toggle('anchor', el.dataset.key === key));
+            document.getElementById('anchorDisplay').textContent = KEY_NAMES[key];
+            document.getElementById('anchorName').textContent = KEY_NAMES[key];
+            calculate();
+        }
+
+        // ---- 主计算 ----
+        function calculate() {
+            const x = parseFloat(document.getElementById('input-x').value) || 0;
+            const y = parseFloat(document.getElementById('input-y').value) || 0;
+            const z = parseFloat(document.getElementById('input-z').value) || 1;
+            syncUI();
+
+            const ratio = x > 0 ? (y / x) : 0;
+            document.getElementById('ratio-display').textContent = ratio.toFixed(3);
+
+            let stdResult = 0, trackResult = 0;
+            if (currentMode === 'standard') {
+                stdResult = calcStandard(x, y).result;
+            } else {
+                trackResult = calcTracking(x, y, z, trackSubMode).result;
+            }
+
+            const corrPct = parseFloat(document.getElementById('input-correct').value) || 0;
+            const factor = 1 + corrPct / 100;
+
+            let t3_max = 0, s_max = 0, s_bal = 0;
+            if (currentMode === 'tracking_3d') {
+                t3_max = trackResult;
+                const stdBase = calcStandard(x, y).result;
+                s_max = stdBase * 4 / 3;
+                s_bal = stdBase;
+            } else {
+                s_bal = stdResult;
+                s_max = stdResult * 4 / 3;
+                t3_max = calcTracking(x, y, z, trackSubMode).result;
+            }
+
+            document.getElementById('lbl-t3-max').textContent = t3_max.toFixed(2) + ' cm';
+            document.getElementById('lbl-s-max').textContent = s_max.toFixed(2) + ' cm';
+            document.getElementById('lbl-s-bal').textContent = s_bal.toFixed(2) + ' cm';
+
+            let baseVal = currentMode === 'standard' ? stdResult : trackResult;
+            const ratios = currentMode === 'standard' ? RATIOS_STD : RATIOS_TRACK;
+            const baseVals = {};
+            for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
+                baseVals[key] = baseVal * ratios[key];
+            }
+            updateDisplayValues(baseVals, factor, ratios);
+
+            document.getElementById('stepsNatural').innerHTML = '';
+
+            drawChart(x, y, z, t3_max, s_max, s_bal);
+        }
+
+        function updateDisplayValues(baseVals, factor, ratios) {
+            document.getElementById('base-half').innerText = baseVals.half.toFixed(2);
+            document.getElementById('base-q1').innerText = baseVals.q1.toFixed(2);
+            document.getElementById('base-q2').innerText = baseVals.q2.toFixed(2);
+            document.getElementById('base-q3').innerText = baseVals.q3.toFixed(2);
+            document.getElementById('base-base').innerText = baseVals.base.toFixed(2);
+
+            const anchorBase = baseVals[currentAnchor];
+            const anchorRatio = ratios[currentAnchor];
+            const corrVals = {};
+            for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
+                corrVals[key] = anchorBase * factor * (ratios[key] / anchorRatio);
+            }
+            document.getElementById('corr-half').innerText = corrVals.half.toFixed(2);
+            document.getElementById('corr-q1').innerText = corrVals.q1.toFixed(2);
+            document.getElementById('corr-q2').innerText = corrVals.q2.toFixed(2);
+            document.getElementById('corr-q3').innerText = corrVals.q3.toFixed(2);
+            document.getElementById('corr-base').innerText = corrVals.base.toFixed(2);
+        }
+
+        // ---- 绘图 ----
+        function drawChart(x_in, y_in, z_in, t3_max, s_max, s_bal) {
+            const canvas = document.getElementById('compCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const w = rect.width;
+            const h = rect.height;
+            const pad = { top: 20, right: 20, bottom: 25, left: 35 };
+            ctx.clearRect(0, 0, w, h);
+
+            const maxX = 7000;
+            let maxY = Math.max(90, t3_max, s_max);
+            for (let x_plot = 0; x_plot <= maxX; x_plot += 100) {
+                const std = calcStandard(x_plot, y_in);
+                const stdMax = std.result * 4 / 3;
+                const trackSimple = calcTracking(x_plot, y_in, z_in, 'simple').result;
+                const trackFull = calcTracking(x_plot, y_in, z_in, 'full').result;
+                maxY = Math.max(maxY, stdMax, std.result, trackSimple, trackFull);
+            }
+            maxY = Math.max(90, maxY * 1.15);
+
+            function toPx(x, y) {
+                return {
+                    px: pad.left + (x / maxX) * (w - pad.left - pad.right),
+                    py: h - pad.bottom - (y / maxY) * (h - pad.top - pad.bottom)
+                };
+            }
+
+            ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+            ctx.lineWidth = 1;
+            for (let yVal = 20; yVal <= maxY; yVal += 20) {
+                const p = toPx(0, yVal);
+                ctx.beginPath();
+                ctx.moveTo(pad.left, p.py);
+                ctx.lineTo(w - pad.right, p.py);
+                ctx.stroke();
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '8px monospace';
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.round(yVal), pad.left - 3, p.py + 3);
+            }
+            for (let xVal = 1000; xVal <= maxX; xVal += 1000) {
+                const p = toPx(xVal, 0);
+                ctx.beginPath();
+                ctx.moveTo(p.px, pad.top);
+                ctx.lineTo(p.px, h - pad.bottom);
+                ctx.stroke();
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '8px monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText(xVal, p.px, h - pad.bottom + 12);
+            }
+
+            // 普通最大值 (实线)
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 1.8;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            let first = true;
+            for (let xp = 0; xp <= maxX; xp += 40) {
+                const r = calcStandard(xp, y_in);
+                const p = toPx(xp, r.result * 4 / 3);
+                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+            }
+            ctx.stroke();
+
+            // 普通均衡 (虚线)
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.4;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            first = true;
+            for (let xp = 0; xp <= maxX; xp += 40) {
+                const r = calcStandard(xp, y_in);
+                const p = toPx(xp, r.result);
+                if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+            }
+            ctx.stroke();
+
+            // 跟枪曲线
+            ctx.setLineDash([]);
+            if (currentMode === 'tracking_3d') {
+                ctx.strokeStyle = '#7c3aed';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                first = true;
+                for (let xp = 0; xp <= maxX; xp += 40) {
+                    const r = calcTracking(xp, y_in, z_in, trackSubMode);
+                    const p = toPx(xp, r.result);
+                    if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+                }
+                ctx.stroke();
+
+                ctx.strokeStyle = '#a78bfa';
+                ctx.lineWidth = 1.4;
+                ctx.setLineDash([4, 3]);
+                ctx.beginPath();
+                first = true;
+                for (let xp = 0; xp <= maxX; xp += 40) {
+                    const r = calcTracking(xp, y_in, z_in, trackSubMode);
+                    const p = toPx(xp, r.result * 0.75);
+                    if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else {
+                ctx.strokeStyle = '#a78bfa';
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash([4, 3]);
+                ctx.beginPath();
+                first = true;
+                for (let xp = 0; xp <= maxX; xp += 40) {
+                    const r = calcTracking(xp, y_in, z_in, trackSubMode);
+                    const p = toPx(xp, r.result);
+                    if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 绘制关键点与标签
+            if (currentMode === 'tracking_3d') {
+                const p_max = toPx(x_in, t3_max);
+                const p_bal = toPx(x_in, t3_max * 0.75);
+                ctx.fillStyle = '#7c3aed';
+                ctx.beginPath();
+                ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI);
+                ctx.fill();
+                ctx.fillStyle = '#a78bfa';
+                ctx.beginPath();
+                ctx.arc(p_bal.px, p_bal.py, 4, 0, 2 * PI);
+                ctx.fill();
+                ctx.fillStyle = '#7c3aed';
+                ctx.font = 'bold 8.5px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`跟枪 ${t3_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
+                ctx.fillStyle = '#a78bfa';
+                ctx.fillText(`均衡 ${(t3_max * 0.75).toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
+            } else {
+                const p_max = toPx(x_in, s_max);
+                const p_bal = toPx(x_in, s_bal);
+                ctx.fillStyle = '#0284c7';
+                ctx.beginPath();
+                ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI);
+                ctx.fill();
+                ctx.fillStyle = '#38bdf8';
+                ctx.beginPath();
+                ctx.arc(p_bal.px, p_bal.py, 4, 0, 2 * PI);
+                ctx.fill();
+                ctx.fillStyle = '#0284c7';
+                ctx.font = 'bold 8.5px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(`普通最大 ${s_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
+                ctx.fillStyle = '#38bdf8';
+                ctx.fillText(`均衡 ${s_bal.toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
+            }
+
+            const p_v = toPx(x_in, 0);
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.setLineDash([2, 3]);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(p_v.px, pad.top);
+            ctx.lineTo(p_v.px, h - pad.bottom);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#64748b';
+            ctx.font = '8px monospace';
+            const clampedTextX = Math.max(pad.left + 50, Math.min(w - pad.right - 50, p_v.px));
+            ctx.textAlign = 'center';
+            ctx.fillText(`X=${x_in} | y=${y_in} | z=${z_in}°`, clampedTextX, h - pad.bottom + 16);
+        }
+
+        // ---- 初始化 ----
+        function initAll() {
+            document.getElementById('input-tsc').value = '2';
+            stdSubMode = 'full';
+            document.getElementById('btn-std-full').classList.add('active');
+            document.getElementById('btn-std-simple').classList.remove('active');
+            trackSubMode = 'simple';
+            document.getElementById('btn-track-simple').classList.add('active');
+            document.getElementById('btn-track-full').classList.remove('active');
+
+            currentMode = 'standard';
+            document.getElementById('btn-mode-std').classList.add('active');
+            document.getElementById('btn-mode-t3d').classList.remove('active');
+            document.getElementById('std-sub-toggle').style.display = 'flex';
+            document.getElementById('track-sub-toggle').style.display = 'none';
+
+            const anchorEl = document.querySelector('#correctedRow .col-item[data-key="q2"]');
+            if (anchorEl) anchorEl.classList.add('anchor');
+            document.getElementById('anchorDisplay').textContent = '均衡';
+            document.getElementById('anchorName').textContent = '均衡';
+
+            updateDisplays();
+            syncFromTop();
+            calculate();
+        }
+
+        window.addEventListener('DOMContentLoaded', initAll);
+        window.addEventListener('resize', calculate);
+    </script>
+</body>
+</html>
