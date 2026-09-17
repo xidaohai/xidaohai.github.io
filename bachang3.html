@@ -468,6 +468,7 @@
         .section-sub { font-size: 0.6rem; color: var(--text-muted); font-weight: normal; }
 
         .preset-grid { display: grid; gap: 4px; margin-bottom: 5px; }
+        .preset-grid.cols-1 { grid-template-columns: repeat(1, 1fr); }
         .preset-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
         .preset-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
         .preset-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
@@ -919,11 +920,11 @@
                 <div><span id="lbl-acc">命中率</span>: <span class="hud-val" id="hud-acc">100.0%</span></div>
             </div>
 
-<!-- 点击这里只触发“改键”，绝对不会触发“重开” -->
-<div class="hud-card interactive-hud-card" id="btn-restart-hud" onclick="startRebind('restart')" title="点击直接更换重开按键">
-    <span class="dir-arrow-txt" style="color:var(--primary);font-size:0.82rem;">↺</span>
-    <span>按 <span id="txt-hud-restart-key" style="color:var(--primary);font-weight:900;">R</span> 键重开 (点击改键)</span>
-</div>
+            <!-- 点击这里触发改键 -->
+            <div class="hud-card interactive-hud-card" id="btn-restart-hud" onclick="startRebind('restart')" title="点击直接更换重开按键">
+                <span class="dir-arrow-txt" style="color:var(--primary);font-size:0.82rem;">↺</span>
+                <span>按 <span id="txt-hud-restart-key" style="color:var(--primary);font-weight:900;">R</span> 键重开 (点击改键)</span>
+            </div>
         </div>
 
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
@@ -952,11 +953,10 @@
 
     <!-- 右下角控制模块 -->
     <div id="bottom-right-container">
-        <!-- 角色移动身法模块 -->
+        <!-- 角色移动身法模块（纯净字样排版，彻底清除小图标） -->
         <div id="movement-panel" class="glass-panel" style="padding: 10px 14px; max-height:none; overflow:visible;">
             <div class="section-header" style="margin-bottom:0;">
                 <span class="section-label">
-                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><path d="M7 21l3-6 3 2 2 4M6 13l4-3 4 2 3-4"/></svg>
                     <span>角色移动与身法</span>
                 </span>
                 <button class="pill-btn toggle-switch-btn" id="btn-movement-toggle" onclick="toggleMovementEnabled()">
@@ -966,12 +966,8 @@
             <div id="movement-controls-box" style="display:none; flex-direction:column; gap:6px; margin-top:8px;">
                 <div style="background:rgba(255,255,255,0.75); padding:6px 8px; border-radius:6px; border:1px solid #cbd5e1;">
                     <div style="font-size:0.62rem; font-weight:800; color:#334155; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
-                        <span style="display:flex;align-items:center;gap:4px;">
-                            <svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h2m4 0h4M7 12h3m3 0h4M8 16h8"/></svg>
-                            <span>按键自定义 (点击改键)</span>
-                        </span>
+                        <span>按键自定义 (点击改键)</span>
                         <button class="header-btn" style="padding:1px 6px; font-size:0.58rem;" onclick="resetMovementKeys()">
-                            <svg class="icon-sm" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8m0 0V3m0 5h5"/></svg>
                             <span>默认</span>
                         </button>
                     </div>
@@ -990,8 +986,9 @@
                     </div>
                 </div>
 
+                <!-- 1. 地面移速（纯文本标签） -->
                 <div class="ctrl-row">
-                    <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>地面移速</label>
+                    <label>地面移速</label>
                     <input type="range" id="inp-move-speed-r" min="1.0" max="20.0" step="0.05" value="5.5" oninput="setMoveSpeed(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-move-speed', -0.1)">−</button>
@@ -1000,8 +997,9 @@
                     </div>
                 </div>
 
+                <!-- 2. 下蹲移速（纯文本标签） -->
                 <div class="ctrl-row">
-                    <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 4v16m-6-6l6 6 6-6"/></svg>下蹲移速</label>
+                    <label>下蹲移速</label>
                     <input type="range" id="inp-crouch-speed-r" min="0.5" max="15.0" step="0.05" value="2.25" oninput="setCrouchSpeed(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-crouch-speed', -0.05)">−</button>
@@ -1010,8 +1008,9 @@
                     </div>
                 </div>
 
+                <!-- 3. 下蹲深度（纯文本标签） -->
                 <div class="ctrl-row">
-                    <label><svg class="icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16"/></svg>下蹲深度</label>
+                    <label>下蹲深度</label>
                     <input type="range" id="inp-crouch-depth-r" min="0.1" max="1.5" step="0.02" value="0.5" oninput="setCrouchDepth(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-crouch-depth', -0.02)">−</button>
@@ -1020,23 +1019,18 @@
                     </div>
                 </div>
 
+                <!-- 4. 自然蹲感（纯文本标签） -->
                 <div class="ctrl-row">
-                    <label title="阻尼动力过渡曲线">
-                        <svg class="icon-sm" viewBox="0 0 24 24">
-                            <path d="M3 5h4c2.5 0 4.5 14 8 14h6" stroke-width="2.2" stroke-linecap="round"/>
-                            <circle cx="5" cy="5" r="2.2" fill="currentColor" stroke="none"/>
-                            <circle cx="19" cy="19" r="2.2" fill="currentColor" stroke="none"/>
-                        </svg>
-                        <span>自然蹲感</span>
-                    </label>
+                    <label title="阻尼动力过渡曲线">自然蹲感</label>
                     <input type="range" id="inp-crouch-nature-r" min="0" max="100" step="1" value="15" oninput="setCrouchNature(parseFloat(this.value))" />
                     <span id="lbl-crouch-nature" style="font-size:0.62rem;font-weight:900;color:var(--primary);width:52px;text-align:center;">15%</span>
                 </div>
 
                 <hr style="border:none;border-top:1px dashed #cbd5e1;margin:2px 0;">
 
+                <!-- 5. 跳跃高度（纯文本标签） -->
                 <div class="ctrl-row">
-                    <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 20V4m-6 6l6-6 6 6"/></svg>跳跃高度</label>
+                    <label>跳跃高度</label>
                     <input type="range" id="inp-jump-height-r" min="0.1" max="4.0" step="0.02" value="1.25" oninput="setJumpHeight(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-jump-height', -0.02)">−</button>
@@ -1045,19 +1039,16 @@
                     </div>
                 </div>
 
+                <!-- 6. 自然跳感（纯文本标签） -->
                 <div class="ctrl-row">
-                    <label title="重力方程拟合"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M4 18c4-12 12-12 16 0"/></svg>自然跳感</label>
+                    <label title="重力方程拟合">自然跳感</label>
                     <input type="range" id="inp-jump-nature-r" min="0" max="100" step="1" value="35" oninput="setJumpNature(parseFloat(this.value))" />
                     <span id="lbl-jump-nature" style="font-size:0.62rem;font-weight:900;color:var(--primary);width:52px;text-align:center;">35%</span>
                 </div>
 
+                <!-- 7. 空中变向模式（纯文本标签） -->
                 <div class="section-header" style="margin-top:4px;">
                     <span class="section-label" style="font-size:0.68rem;">
-                        <svg class="icon-sm" viewBox="0 0 24 24">
-                            <path d="M4 16c2-8 10-10 16-4" stroke-width="2.2" stroke-linecap="round"/>
-                            <path d="M16 8l4 4-4 4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3 20h18" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="2 3"/>
-                        </svg>
                         <span>空中变向模式</span>
                     </span>
                     <button class="pill-btn active toggle-switch-btn" id="btn-air-control" onclick="toggleAirControl()">
@@ -1162,7 +1153,7 @@
                 </div>
                 <div class="note-tip" id="note-tip">
                     <svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                    <span id="note-tip-text">设定：45° · 面前 45° 视平线区域 ｜ 0.135s 启动延迟 ｜ 恒定 6 靶</span>
+                    <span id="note-tip-text">设定：45° · 面前 45° 视平线区域 ｜ 0.135s 启动延迟 ｜ 自定靶标数量</span>
                 </div>
 
                 <!-- 视觉高度 -->
@@ -1192,7 +1183,7 @@
                     </div>
                 </div>
 
-                <!-- Sixshot 特有 -->
+                <!-- Sixshot 特有模块 -->
                 <div id="section-sixshot-group">
                     <div class="section-card">
                         <div class="section-header">
@@ -1200,7 +1191,7 @@
                                 <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="4" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>
                                 <span>目标球径</span>
                             </span>
-                            <span class="section-sub">125cm 自动 3 靶</span>
+                            <span class="section-sub">真实米制尺寸恒定</span>
                         </div>
                         <div class="preset-grid cols-4" id="sixshot-size-presets">
                             <button class="pill-btn active" data-val="15" onclick="syncTargetSize(15)">15 cm</button>
@@ -1218,6 +1209,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="section-card">
                         <div class="section-header">
                             <span class="section-label">
@@ -1310,9 +1302,40 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- 目标的数量 (位于墙面的远近下方) -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <circle cx="6.5" cy="7" r="2.5"/>
+                                    <circle cx="17.5" cy="7" r="2.5"/>
+                                    <circle cx="12" cy="16.5" r="2.5"/>
+                                </svg>
+                                <span>目标的数量</span>
+                            </span>
+                            <span class="section-sub">经典推荐 6 靶</span>
+                        </div>
+                        <div class="preset-grid cols-5" id="sixshot-count-presets" style="margin-bottom:4px;">
+                            <button class="pill-btn" data-val="1" onclick="setSixshotTargetCount(1)">1 靶</button>
+                            <button class="pill-btn" data-val="3" onclick="setSixshotTargetCount(3)">3 靶</button>
+                            <button class="pill-btn active" data-val="6" onclick="setSixshotTargetCount(6)">6 靶</button>
+                            <button class="pill-btn" data-val="8" onclick="setSixshotTargetCount(8)">8 靶</button>
+                            <button class="pill-btn" data-val="12" onclick="setSixshotTargetCount(12)">12 靶</button>
+                        </div>
+                        <div class="ctrl-row">
+                            <label><svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14"/></svg>微调数量</label>
+                            <input type="range" id="inp-target-count-r" min="1" max="24" step="1" value="6" oninput="setSixshotTargetCount(parseInt(this.value))" />
+                            <div class="stepper-box">
+                                <button class="step-btn" onclick="stepValGlobal('inp-target-count', -1)">−</button>
+                                <input type="number" class="num-input" id="inp-target-count" value="6" step="1" min="1" max="24" />
+                                <button class="step-btn" onclick="stepValGlobal('inp-target-count', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Tracking 特有 -->
+                <!-- Tracking 特有模块 -->
                 <div id="section-tracking-group" style="display:none;">
                     <div class="section-card">
                         <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="4" r="4"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>目标球径</span></div>
@@ -1430,7 +1453,7 @@
                     </div>
                 </div>
 
-                <!-- Holding 架枪练习特有 -->
+                <!-- Holding 架枪练习特有模块 -->
                 <div id="section-holding-group" style="display:none;">
                     <div class="section-card">
                         <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/></svg>目标形态切换</span></div>
@@ -1662,9 +1685,40 @@
         </div>
     </div>
 
-    <!-- 右侧面板：准星与手感调优 -->
+    <!-- 右侧面板：准星、音效与手感调优 -->
     <div id="right-panel" class="glass-panel">
-        <div class="panel-header"><span class="panel-title">准星与手感调优</span></div>
+<div class="panel-header">
+            <span class="panel-title">准星与手感调优</span>
+            <button class="header-btn" id="btn-toggle-right" onclick="toggleRightPanel()">收起</button>
+        </div>
+
+        <!-- 命中打击音效控制模块（支持3款音效自由切换、音量、试听） -->
+        <div class="section-card" id="section-sound-fx">
+            <div class="section-header">
+                <span class="section-label">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                    <span>命中打击音效</span>
+                </span>
+            </div>
+            <div class="preset-grid cols-3" id="hitsound-preset-grid" style="margin-bottom:5px;">
+                <button class="pill-btn active" data-val="crisp" onclick="setHitSoundPreset('crisp')">🔔 按键</button>
+                <button class="pill-btn" data-val="thud" onclick="setHitSoundPreset('thud')">❤️ 走心</button>
+                <button class="pill-btn" data-val="bubble" onclick="setHitSoundPreset('bubble')">🫧 台球</button>
+            </div>
+            <div class="ctrl-row">
+                <label>音效音量</label>
+                <input type="range" id="inp-sound-vol-r" min="0" max="100" step="1" value="75" oninput="setSoundVolume(parseFloat(this.value))" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('inp-sound-vol', -5)">−</button>
+                    <input type="number" class="num-input" id="inp-sound-vol" value="75" step="5" min="0" max="100" />
+                    <button class="step-btn" onclick="stepValGlobal('inp-sound-vol', 5)">+</button>
+                </div>
+            </div>
+            <div class="section-header" style="margin-top:4px;margin-bottom:1px;">
+                <span class="section-sub">脱靶空枪提示音</span>
+                <button class="pill-btn toggle-switch-btn active" id="btn-miss-sound-toggle" onclick="toggleMissSound()">已开启</button>
+            </div>
+        </div>
 
         <div class="section-card">
             <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>准星形态</span></div>
@@ -1785,10 +1839,26 @@
         { name: '深曜', hex: '#000000' }
     ];
 
+const HIT_SOUNDS_BASE64 = {
+    sound1: "data:audio/ogg;base64,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eQAAkFJKMcYYY0wppRhjjDGmlFKMMcaYU0opxhhjzDmnFGOMMeacY4wxxhhzzjHGGGOMOecYY4wxxpxzzjHGGGPOOecYY4wx55xzjDHGmAAAoAIHAIAAG0U2JxgJKjRkJQAQDgAAGMOUc85BKCWVCiHGIHRQSkqtVQgxBiGEUlJqLWrOOQghlJJSa9FzzkEIoZSUWouqhVBKKSWl1lp0LXRSSkmptRijlCKEkFJKrbUYnRMhhJJSai3G5pyMpaTUWowxNudkLCWl1mKMsTnnnGuttRZjrc0551xrKbYYa23OOad7bDHWWGtzzjmfW4utxloLADB5cACASrBxhpWks8LR4EJDVgIAuQEAjFKMMeacc84555xzzkmlGHPOOQghhBBCCCGUSjHmnHMQQgghhBBCKBlzzjkHIYQQQgghhFBK6ZxzEEIIIYQQQgihlNI55yCEEEIIIYQQQimlc85BCCGEEEIIIYRSSgghhBBCCCGEEEIIpZRSQgghhBBCCCGEEEoppYQQQgghhBBCCCGUUkoJIYQQQgghhBBCKKWUEkIIIYQQQgglhFBKKaWUEEIIoYQQQgihlFJKKSGEUkopIYQQQimllFJCKKGEEEIIIZRSSimllBJCKSGEEEIIpZRSSimllFJCCCGEEEoppZRSSimlhFBCCCGUUkoppZRSQiglhBJCKKWUUkoppYRQQgghhFBKKaWUUkoJIYQSQgihAACgAwcAgAAjKi3ETjOuPAJHFDJMQIWGrAQA0gIAAEOstdZaa6211lprDVLWWmuttdZaa621RilrrbXWWmuttdZaa6m11lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWksppZRSSimllFJKKaWUUkoppZRSSimllFJKKaWUUkoppZRSSimllFJKKaWUUkoppZRSSimllFJKKaWUUgHYBRsOgNETRhJSZxlWGnHjCRgikEJDVgIAaQEAgDGMMeYYdBBKSSmlCiHnIIROQiqtxRZjhJBzEEIoJaXWYosxeA5CCCGU0lJsMcZYPAchhBBSai3GGGMMsoVQSikptdZijLUW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",
+    sound2: "data:audio/ogg;base64,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Y3NOxlJSajHG5pxTrrUWY81JKaVcay3GWgsAQGhwAAA7sGF1hJOiscBCQ1YCAHkAAJBSSjHGGGNMKaUYY4wxppRSjDHGmFNKKcYYY8w5pxRjjDHmnGOMMcYYc84xxhhjjDnnGGOMMcacc84xxhhjzjnnGGOMMeecc4wxxpgAAKACBwCAABtFNicYCSo0ZCUAEA4AABjDlHPOQSgllQohxiB0UEpKrVUIMQYhhFJSai1qzjkIIZSSUmvRc85BCKGUlFqLqoVQSiklpdZadC10UkpJqbUYo5QihJBSSq21GJ0TIYSSUmotxuacjKWk1FqMMTbnZCwlpdZijLE555xrrbUWY63NOedcaym2GGttzjmne2wx1lhrc845n1uLrcZaCwAweXAAgEqwcYaVpLPC0eBCQ1YCALkBAIxSjDHmnHPOOeecc85JpRhzzjkIIYQQQgghlEox5pxzEEIIIYQQQigZc845ByGEEEIIIYRQSumccxBCCCGEEEIIoZTSOecghBBCCCGEEEIppXPOQQghhBBCCCGEUkoIIYQQQgghhBBCCKWUUkIIIYQQQgghhBBKKaWEEEIIIYQQQgghlFJKCSGEEEIIIYQQQiillBJCCCGEEEIIJYRQSimllBBCCKGEEEIIoZRSSikhhFJKKSGEEEIppZRSQiihhBBCCCGUUkoppZQSQikhhBBCCKWUUkoppZRSQgghhBBKKaWUUkoppYRQQgghlFJKKaWUUkIoJYQSQiillFJKKaWEUEIIIYRQSimllFJKCSGEEkIIoQAAoAMHAIAAIyotxE4zrjwCRxQyTECFhqwEANICAABDrLXWWmuttdZaaw1S1lprrbXWWmuttUYpa6211lprrbXWWmuptdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lpLKaWUUkoppZRSSimllFJKKaWUUkoppZRSSimllFJKKaWUUkoppZRSSimllFJKKaWUUkoppZRSSimllFIB2AUbDoDRE0YSUmcZVhpx4wkYIpBCQ1YCAGkBAIAxjDHmGHQQSkkppQoh5yCETkIqrcUWY4SQ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",
+    sound3: "data:audio/ogg;base64,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AABQ4AAAEGCDpsTiAIWGrAQAQgIAHIpiWZrmeZ4niqapmiRJ0zxPFEXRNE1TVUmSpnmeKIqiaZqmqrIsTfM8URRF01RVVYWmeZ4oiqJpqqrqwvM8TxRF0TRV1XXheZ4niqJomqrquhBFUTRN01RNVXVdIIqmaZqqqqquC0RPFE1TVV3XdYHniaJpqqqrui4QTdNUVVV1XVkGmKZpqqrryjJAVVXVdV1XlgGqqqqu67qyDFBV13VdWZZlAK7rurIsywIAAA4cAAACjKCTjCqLsNGECw9AoSErAoAoAADAGKYUU8owJiGkEBrGJIQUQiYlpdJSqiCkUlIpFYRUSiolo5RSailVEFIpqZQKQiollVIAANiBAwDYgYVQaMhKACAPAIAwRinGGHNOIqQUY845JxFSijHnnJNKMeacc85JKRlzzDnnpJTOOeecc1JK5pxzzjkppXPOOeeclFJK55xzTkopJYTOQSellNI555wTAABU4AAAEGCjyOYEI0GFhqwEAFIBAAyOY1ma5nmiaJqWJGma53meKJqmJkma5nmeJ4qqyfM8TxRF0TRVled5niiKommqKtcVRdM0TVVVXbIsiqZpmqrqujBN01RV13VdmKZpqqrrui5sW1VV1XVlGbatqqrqurIMXNd1ZdmWgSy7ruzasgAA8AQHAKACG1ZHOCkaCyw0ZCUAkAEAQBiDkEIIIWUQQgohhJRSCAkAABhwAAAIMKEMFBqyEgBIBQAAjLHWWmuttdZAZ6211lprrYDMWmuttdZaa6211lprrbXWUmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaa6211lprrbXWWmuttdZaay2llFJKKaWUUkoppZRSSimllFJKBQD6VTgA+D/YsDrCSdFYYKEhKwGAcAAAwBilGHMMQimlVAgx5px0VFqLsUKIMeckpNRabMVzzkEoIZXWYiyecw5CKSnFVmNRKYRSUkottliLSqGjklJKrdVYjDGppNZai63GYoxJKbTUWosxFiNsTam12GqrsRhjayottBhjjMUIX2RsLabaag3GCCNbLC3VWmswxhjdW4ultpqLMT742lIsMdZcAAB3gwMARIKNM6wknRWOBhcashIACAkAIBBSijHGGHPOOeekUow55pxzDkIIoVSKMcaccw5CCCGUjDHmnHMQQgghhFJKxpxz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"
+};
+
+// 预解码后的内存池（实现 0 微秒并发播放，不吞音）
+const AUDIO_BUFFERS = {
+    sound1: null,
+    sound2: null,
+    sound3: null
+};
+
     const CFG = {
         mode: 'sixshot',
         playMode: 'challenge', // 'challenge' (49s限时) | 'free' (无尽模式)
         restartKey: 'KeyR',    // 一键重开按键
+        hitSoundType: 'crisp', // 'crisp' (竞技清脆) | 'thud' (沉重钝击) | 'bubble' (空灵气泡)
+        soundVolume: 75,       // 音量 0~100
+        missSoundEnabled: true,// 脱靶提示音
         dpi: 800,
         cmPer360: 55.0,
         fovHorizontal: 103,
@@ -1802,6 +1872,7 @@
         depthSixshot: 10.0,
         depthTracking: 10.0,
         targetSizeCm: 15.0,
+        targetCount: 6,        // Sixshot 模式目标数量（自定化）
         spawnAngleDeg: 45,
         crosshair: {
             type: 'cross',
@@ -1879,7 +1950,6 @@
     };
 
     const STATE = {
-        // 墙面大小与远近全部默认上锁
         sizeLockSixshot: true,
         depthLockSixshot: true,
         sizeLockTracking: true,
@@ -1922,13 +1992,14 @@
         isGrounded: true,
         crouchCurrent: 0,
         rebindingAction: null,
+        rebindStartTime: 0,
         keysPressed: {}
     };
 
     const STORAGE_KEY = 'XDH_AIM_TRAINER_V10_PRO';
     const ISO_INCH_TO_CM = 2.54;
     let btnCooldownTimer = null;
-    let lastQuickRestartTime = 0; // 防抖时间戳
+    let lastQuickRestartTime = 0;
 
     function getEl(id) { return document.getElementById(id); }
     function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -1938,22 +2009,17 @@
     function setVal(id, v) { const e = getEl(id); if (e) e.value = v; }
     function hFovToVfov(hFov, aspect) { return 2 * Math.atan(Math.tan((hFov * Math.PI / 180) / 2) / aspect) * 180 / Math.PI; }
 
-function formatKeyCode(code) {
-    if (!code) return '--';
-    if (code.startsWith('Key')) return code.slice(3);
-    if (code.startsWith('Digit')) return code.slice(5);
-    const map = { 
-        'Space': '空格', 'ShiftLeft': '左 Shift', 'ShiftRight': '右 Shift', 
-        'ControlLeft': '左 Ctrl', 'ControlRight': '右 Ctrl', 'AltLeft': '左 Alt', 'AltRight': '右 Alt',
-        // === 新增：鼠标按键映射 ===
-        'Mouse0': '鼠标左键',
-        'Mouse1': '鼠标滚轮中键',
-        'Mouse2': '鼠标右键',
-        'Mouse3': '鼠标侧下键',
-        'Mouse4': '鼠标侧上键'
-    };
-    return map[code] || code;
-}
+    function formatKeyCode(code) {
+        if (!code) return '--';
+        if (code.startsWith('Key')) return code.slice(3);
+        if (code.startsWith('Digit')) return code.slice(5);
+        const map = { 
+            'Space': '空格', 'ShiftLeft': '左 Shift', 'ShiftRight': '右 Shift', 
+            'ControlLeft': '左 Ctrl', 'ControlRight': '右 Ctrl', 'AltLeft': '左 Alt', 'AltRight': '右 Alt',
+            'Mouse0': '鼠标左键', 'Mouse1': '鼠标滚轮中键', 'Mouse2': '鼠标右键', 'Mouse3': '鼠标侧下键', 'Mouse4': '鼠标侧上键'
+        };
+        return map[code] || code;
+    }
 
     function safeMergeConfig(target, source) {
         if (!source || typeof source !== 'object') return;
@@ -1969,7 +2035,9 @@ function formatKeyCode(code) {
         }
     }
 
-    // 音效引擎
+    // ============================================================
+    // 音效引擎系统（支持3款专业打击音效自选合成、试听、音量调节）
+    // ============================================================
     let audioCtx = null;
     function getAudioContext() {
         if (!audioCtx) {
@@ -1982,40 +2050,90 @@ function formatKeyCode(code) {
         return audioCtx;
     }
 
+    function getMasterGain(ctx, baseGain = 0.3) {
+        const gainNode = ctx.createGain();
+        const volScale = (CFG.soundVolume !== undefined ? CFG.soundVolume : 75) / 100;
+        gainNode.gain.setValueAtTime(baseGain * volScale, ctx.currentTime);
+        gainNode.connect(ctx.destination);
+        return gainNode;
+    }
+
+ // === 核心播放器：自动把你的 Base64 解码并以 0 延迟播放 ===
+    async function playCustomHitSound(key) {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        // 按钮名称映射：面板上的三个按钮分别对应你的 sound1、sound2、sound3
+        const keyMap = { 'crisp': 'sound1', 'thud': 'sound2', 'bubble': 'sound3' };
+        const actualKey = keyMap[key] || key;
+
+        // 如果这个音频还没泡开进内存，先解码并缓存
+        if (!AUDIO_BUFFERS[actualKey]) {
+            const base64Data = HIT_SOUNDS_BASE64[actualKey];
+            if (!base64Data) return;
+            try {
+                const res = await fetch(base64Data);
+                const arrayBuf = await res.arrayBuffer();
+                AUDIO_BUFFERS[actualKey] = await ctx.decodeAudioData(arrayBuf);
+            } catch (e) {
+                console.error("音频解码失败:", e);
+                return;
+            }
+        }
+
+        // 瞬间发声：高频连发绝对不吞音、不打断前一枪
+        const source = ctx.createBufferSource();
+        source.buffer = AUDIO_BUFFERS[actualKey];
+
+        // 自动连接面板上的“音效音量”滑块控制
+        const gainNode = getMasterGain(ctx, 1.0);
+        source.connect(gainNode);
+        source.start(0);
+    }
+
+    // === 命中目标时触发发声 ===
+    function playBodyshotSound() {
+        const currentSound = CFG.hitSoundType || 'sound1';
+        playCustomHitSound(currentSound);
+    }
+
+    // 爆头高阶音效
     function playHeadshotSound() {
         const ctx = getAudioContext(); if (!ctx) return;
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        const mainGain = getMasterGain(ctx, 0.38);
+        const osc = ctx.createOscillator();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(1400, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(2400, ctx.currentTime + 0.06);
-        gain.gain.setValueAtTime(0.35, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.08);
+        osc.frequency.setValueAtTime(1800, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(3200, ctx.currentTime + 0.055);
+
+        const env = ctx.createGain();
+        env.gain.setValueAtTime(1.0, ctx.currentTime);
+        env.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+
+        osc.connect(env);
+        env.connect(mainGain);
+
+        osc.start(); osc.stop(ctx.currentTime + 0.075);
     }
 
-    function playBodyshotSound() {
-        const ctx = getAudioContext(); if (!ctx) return;
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(550, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(950, ctx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.07);
-    }
-
+    // 脱靶空枪提示音
     function playMissSound() {
+        if (!CFG.missSoundEnabled) return;
         const ctx = getAudioContext(); if (!ctx) return;
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        const mainGain = getMasterGain(ctx, 0.2);
+        const osc = ctx.createOscillator();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(320, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.06);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.07);
+        osc.frequency.setValueAtTime(280, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.06);
+
+        const env = ctx.createGain();
+        env.gain.setValueAtTime(1.0, ctx.currentTime);
+        env.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+
+        osc.connect(env);
+        env.connect(mainGain);
+
+        osc.start(); osc.stop(ctx.currentTime + 0.065);
     }
 
     let lastTrackAudioTime = 0;
@@ -2024,15 +2142,52 @@ function formatKeyCode(code) {
         if (now - lastTrackAudioTime < 65) return;
         lastTrackAudioTime = now;
         const ctx = getAudioContext(); if (!ctx) return;
-        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        const mainGain = getMasterGain(ctx, 0.16);
+        const osc = ctx.createOscillator();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(880, ctx.currentTime);
         osc.frequency.setValueAtTime(1320, ctx.currentTime + 0.02);
-        gain.gain.setValueAtTime(0.12, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
-        osc.connect(gain); gain.connect(ctx.destination);
+
+        const env = ctx.createGain();
+        env.gain.setValueAtTime(1.0, ctx.currentTime);
+        env.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
+
+        osc.connect(env);
+        env.connect(mainGain);
+
         osc.start(); osc.stop(ctx.currentTime + 0.05);
     }
+
+    window.setHitSoundPreset = function(type) {
+        CFG.hitSoundType = type;
+        document.querySelectorAll('#hitsound-preset-grid .pill-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.val === type);
+        });
+        playBodyshotSound();
+        saveToLocalStorage();
+    };
+
+    window.setSoundVolume = function(val) {
+        CFG.soundVolume = clamp(parseFloat(val) || 0, 0, 100);
+        setVal('inp-sound-vol', CFG.soundVolume);
+        const r = getEl('inp-sound-vol-r'); if (r) r.value = CFG.soundVolume;
+        saveToLocalStorage();
+    };
+
+    window.toggleMissSound = function() {
+        CFG.missSoundEnabled = !CFG.missSoundEnabled;
+        const btn = getEl('btn-miss-sound-toggle');
+        if (btn) {
+            btn.classList.toggle('active', CFG.missSoundEnabled);
+            btn.innerText = CFG.missSoundEnabled ? '已开启' : '已关闭';
+        }
+        if (CFG.missSoundEnabled) playMissSound();
+        saveToLocalStorage();
+    };
+
+    window.testPlayCurrentSound = function() {
+        playBodyshotSound();
+    };
 
     // 准星样式渲染
     function updateCrosshairStyle() {
@@ -2387,7 +2542,7 @@ function formatKeyCode(code) {
         }
     }
 
-    // 靶标构建系统 (严苛保证目标物理尺寸 100% 恒定不变)
+    // 靶标构建系统 (预分配32个网格，支持任意 1~24 靶自由切换)
     const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
     const HEAD_GEO = new THREE.SphereGeometry(1, 32, 32);
     const BODY_GEO = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
@@ -2404,7 +2559,7 @@ function formatKeyCode(code) {
         scene.add(holdingTarget.rootGroup);
         holdingTarget.rootGroup.add(holdingTarget.dummyGroup);
 
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 32; i++) {
             const mesh = new THREE.Mesh(sphereGeo, targetMat);
             mesh.castShadow = true;
             mesh.visible = false;
@@ -2530,7 +2685,6 @@ function formatKeyCode(code) {
 
     function getSixshotBounds() {
         const D = CFG.depthSixshot;
-        // 目标半径绝对固定：由 targetSizeCm 严苛决定，无论如何改变墙面大小与远近，球体尺寸绝对不变
         const r = CFG.targetSizeCm / 100 / 2;
         const halfAngle = (CFG.spawnAngleDeg / 2) * Math.PI / 180;
         const halfSize = D * Math.tan(halfAngle);
@@ -2563,7 +2717,6 @@ function formatKeyCode(code) {
         t.mesh.visible = true;
         t.mesh.material = targetMat;
 
-        // 强校验：确保目标在任何时刻缩放均为绝对的物理米制半径
         const r = CFG.targetSizeCm / 100 / 2;
         t.mesh.scale.set(r, r, r);
 
@@ -2654,13 +2807,16 @@ function formatKeyCode(code) {
     }
 
     function refreshAllPreviewTargets() {
-        // 目标物理大小绝对锁定：严格由厘米换算为米
-        const r = (CFG.mode === 'sixshot' ? CFG.targetSizeCm : CFG.tracking.targetSizeCm) / 100 / 2;
+        const isS = CFG.mode === 'sixshot', isT = CFG.mode === 'tracking', isH = CFG.mode === 'holding';
+        const count = isS ? (CFG.targetCount || 6) : (isT ? 1 : 0);
+        STATE.targetCount = count;
+
+        const r = (isS ? CFG.targetSizeCm : CFG.tracking.targetSizeCm) / 100 / 2;
         sixTargets.forEach(t => t.mesh.scale.set(r, r, r));
 
-        const isS = CFG.mode === 'sixshot', isT = CFG.mode === 'tracking', isH = CFG.mode === 'holding';
-        const active = isS ? STATE.targetCount : (isT ? 1 : 0);
-        for (let i = 0; i < sixTargets.length; i++) sixTargets[i].mesh.visible = (i < active);
+        for (let i = 0; i < sixTargets.length; i++) {
+            sixTargets[i].mesh.visible = (i < count);
+        }
         if (holdingTarget.rootGroup) holdingTarget.rootGroup.visible = isH;
 
         updateSpawnWall();
@@ -2668,7 +2824,7 @@ function formatKeyCode(code) {
         syncAllButtonStates();
 
         if (isS) {
-            for (let i = 0; i < STATE.targetCount && i < sixTargets.length; i++) {
+            for (let i = 0; i < count && i < sixTargets.length; i++) {
                 respawnSixshotTarget(sixTargets[i], false);
             }
         } else if (isT) {
@@ -2944,7 +3100,6 @@ function formatKeyCode(code) {
             }
         }
 
-        // 核心时间计算：挑战模式倒计时，自由模式正向无尽计时
         if (STATE.game === 'playing') {
             if (CFG.playMode === 'challenge') {
                 STATE.timeLeft -= dt;
@@ -2955,7 +3110,6 @@ function formatKeyCode(code) {
                 }
                 getEl('hud-time').innerText = STATE.timeLeft.toFixed(1);
             } else {
-                // 自由模式：时间无限递增
                 STATE.timeLeft += dt;
                 getEl('hud-time').innerText = STATE.timeLeft.toFixed(1);
             }
@@ -3056,34 +3210,29 @@ function formatKeyCode(code) {
     }, { passive: true });
 
     window.addEventListener('mousedown', (e) => {
-
-    // === 新增：如果正在改键，按下任意鼠标按键就录入成功 ===
-    if (MOVE_STATE.rebindingAction) {
-        // 防止把“点击改键按钮”本身的这一次左键给录进去
-        if (performance.now() - (MOVE_STATE.rebindStartTime || 0) < 120) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        const mouseKey = `Mouse${e.button}`; // 0=左键, 1=中键, 2=右键, 3/4=侧键
-        if (MOVE_STATE.rebindingAction === 'restart') {
-            CFG.restartKey = mouseKey;
-        } else {
-            CFG.movement.keys[MOVE_STATE.rebindingAction] = mouseKey;
-        }
-        MOVE_STATE.rebindingAction = null;
-        refreshMovementKeyButtons();
-        saveToLocalStorage();
-        return;
-    }
-
-    // === 新增：如果在游戏中按下了设定的鼠标重开键，立刻重开 ===
-    if (`Mouse${e.button}` === CFG.restartKey) {
-        if (STATE.game === 'playing' || STATE.game === 'starting' || STATE.game === 'finished') {
+        if (MOVE_STATE.rebindingAction) {
+            if (performance.now() - (MOVE_STATE.rebindStartTime || 0) < 120) return;
             e.preventDefault();
-            triggerQuickRestart();
+            e.stopPropagation();
+            const mouseKey = `Mouse${e.button}`;
+            if (MOVE_STATE.rebindingAction === 'restart') {
+                CFG.restartKey = mouseKey;
+            } else {
+                CFG.movement.keys[MOVE_STATE.rebindingAction] = mouseKey;
+            }
+            MOVE_STATE.rebindingAction = null;
+            refreshMovementKeyButtons();
+            saveToLocalStorage();
             return;
         }
-    }
+
+        if (`Mouse${e.button}` === CFG.restartKey) {
+            if (STATE.game === 'playing' || STATE.game === 'starting' || STATE.game === 'finished') {
+                e.preventDefault();
+                triggerQuickRestart();
+                return;
+            }
+        }
 
         if (document.pointerLockElement === document.body && e.button === 0) {
             if (STATE.game === 'armed') {
@@ -3152,14 +3301,13 @@ function formatKeyCode(code) {
                 clearInterval(btnCooldownTimer);
                 btnCooldownTimer = null;
                 btnLock.disabled = false;
-                btnLock.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span>▶ 开始训练</span>`;
+                btnLock.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span>▶ 开始挑战</span>`;
             } else {
                 btnLock.innerHTML = `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>准备中 (${(remaining/10).toFixed(1)}s)...</span>`;
             }
         }, 100);
     }
 
-    // 自由模式 / 挑战模式切换
     window.togglePlayMode = function() {
         CFG.playMode = (CFG.playMode === 'challenge') ? 'free' : 'challenge';
         syncPlayModeUI();
@@ -3186,12 +3334,10 @@ function formatKeyCode(code) {
         }
     }
 
-    // ============================================================
-    // 【核心创新】一键极速重开（绝不退出指针锁定，彻底杜绝浏览器丢锁BUG）
-    // ============================================================
+    // 极速重开
     window.triggerQuickRestart = function() {
         const now = performance.now();
-        if (now - lastQuickRestartTime < 180) return; // 180ms防抖保护
+        if (now - lastQuickRestartTime < 180) return;
         lastQuickRestartTime = now;
 
         if (STATE.startTimeoutId) {
@@ -3201,7 +3347,6 @@ function formatKeyCode(code) {
 
         const isPointerLocked = (document.pointerLockElement === document.body);
 
-        // 重置局内数据
         STATE.score = 0;
         STATE.hits = 0;
         STATE.misses = 0;
@@ -3210,7 +3355,6 @@ function formatKeyCode(code) {
         STATE.timeLeft = (CFG.playMode === 'challenge') ? 49.0 : 0.0;
         STATE.isMouseDown = false;
 
-        // 重置身法
         MOVE_STATE.x = 0;
         MOVE_STATE.z = 0;
         MOVE_STATE.vx = 0;
@@ -3222,11 +3366,11 @@ function formatKeyCode(code) {
 
         resetViewToCenter();
 
-        // 原地重新生成靶标
         if (CFG.mode === 'tracking') {
             respawnTrackingTarget(true);
         } else if (CFG.mode === 'sixshot') {
-            for (let i = 0; i < STATE.targetCount && i < sixTargets.length; i++) {
+            const count = CFG.targetCount || 6;
+            for (let i = 0; i < count && i < sixTargets.length; i++) {
                 respawnSixshotTarget(sixTargets[i], false);
             }
         } else {
@@ -3238,7 +3382,6 @@ function formatKeyCode(code) {
         getEl('result-modal').style.display = 'none';
 
         if (isPointerLocked) {
-            // 绝密关键点：不退出 Pointer Lock！直接微秒级热重置！
             STATE.game = 'playing';
             getEl('progress-overlay').style.display = 'none';
             setPanelsVisibility(false);
@@ -3298,7 +3441,8 @@ function formatKeyCode(code) {
         if (CFG.mode === 'tracking') {
             respawnTrackingTarget(true);
         } else if (CFG.mode === 'sixshot') {
-            for (let i = 0; i < STATE.targetCount && i < sixTargets.length; i++) {
+            const count = CFG.targetCount || 6;
+            for (let i = 0; i < count && i < sixTargets.length; i++) {
                 respawnSixshotTarget(sixTargets[i], false);
             }
         } else {
@@ -3389,7 +3533,7 @@ function formatKeyCode(code) {
         if (!locked && STATE.game !== 'idle' && STATE.game !== 'finished') resetToIdle();
     });
 
-    // 墙面大小锁定控制器（默认上锁）
+    // 墙面大小锁定控制器
     window.toggleSizeLock = function(mode) {
         if (mode === 'sixshot') {
             STATE.sizeLockSixshot = !STATE.sizeLockSixshot;
@@ -3431,7 +3575,7 @@ function formatKeyCode(code) {
         }
     }
 
-    // 墙面远近锁定控制器（默认上锁）
+    // 墙面远近锁定控制器
     window.toggleDepthLock = function(mode) {
         if (mode === 'sixshot') {
             STATE.depthLockSixshot = !STATE.depthLockSixshot;
@@ -3490,6 +3634,19 @@ function formatKeyCode(code) {
         document.querySelectorAll('#sixshot-angle-presets .pill-btn').forEach(b => {
             b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.spawnAngleDeg) < 0.1);
         });
+        document.querySelectorAll('#sixshot-count-presets .pill-btn').forEach(b => {
+            b.classList.toggle('active', parseInt(b.dataset.val) === (CFG.targetCount || 6));
+        });
+
+        // 打击声音预设按钮激活
+        document.querySelectorAll('#hitsound-preset-grid .pill-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.val === (CFG.hitSoundType || 'crisp'));
+        });
+        const missBtn = getEl('btn-miss-sound-toggle');
+        if (missBtn) {
+            missBtn.classList.toggle('active', !!CFG.missSoundEnabled);
+            missBtn.innerText = CFG.missSoundEnabled ? '已开启' : '已关闭';
+        }
 
         document.querySelectorAll('#tracking-size-presets .pill-btn').forEach(b => {
             b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.tracking.targetSizeCm) < 0.1);
@@ -3568,7 +3725,7 @@ function formatKeyCode(code) {
         getEl('section-holding-group').style.display = m === 'holding' ? 'block' : 'none';
 
         const tipMap = {
-            sixshot: '设定：45° · 面前 45° 视平线区域 ｜ 0.135s 启动延迟 ｜ 恒定 6 靶',
+            sixshot: `设定：面前 ${CFG.spawnAngleDeg}° 视平线区域 ｜ 0.135s 启动延迟 ｜ 自定靶标数量`,
             tracking: '设定：360° · 持续锁敌跟枪模式 ｜ 连续按住开火计分 ｜ 物理折返',
             holding: '设定：实体掩体墙 ｜ 头部白色高亮反馈 ｜ 爆头独立清脆音效 ｜ 调参居中观察'
         };
@@ -3587,6 +3744,12 @@ function formatKeyCode(code) {
         const saR = getEl('inp-spawn-angle-r'); if (saR) saR.value = CFG.spawnAngleDeg;
         setValF('inp-depth-sixshot', CFG.depthSixshot);
         const d6R = getEl('inp-depth-sixshot-r'); if (d6R) d6R.value = CFG.depthSixshot;
+
+        setVal('inp-target-count', CFG.targetCount || 6);
+        const tcR = getEl('inp-target-count-r'); if (tcR) tcR.value = CFG.targetCount || 6;
+
+        setVal('inp-sound-vol', CFG.soundVolume !== undefined ? CFG.soundVolume : 75);
+        const svR = getEl('inp-sound-vol-r'); if (svR) svR.value = CFG.soundVolume !== undefined ? CFG.soundVolume : 75;
 
         setValF('inp-track-size', CFG.tracking.targetSizeCm);
         const tsR = getEl('inp-track-size-r'); if (tsR) tsR.value = CFG.tracking.targetSizeCm;
@@ -3615,7 +3778,7 @@ function formatKeyCode(code) {
         const himR = getEl('inp-hold-interval-min-r'); if (himR) himR.value = CFG.holding.intervalMin;
         setValF('inp-hold-interval-max', CFG.holding.intervalMax);
         const hixR = getEl('inp-hold-interval-max-r'); if (hixR) hixR.value = CFG.holding.intervalMax;
- setValF('inp-hold-basey', CFG.holding.baseY);
+        setValF('inp-hold-basey', CFG.holding.baseY);
         const hbR = getEl('inp-hold-basey-r'); if (hbR) hbR.value = CFG.holding.baseY;
         setValF('inp-hold-range', CFG.holding.rangeY);
         const hrR = getEl('inp-hold-range-r'); if (hrR) hrR.value = CFG.holding.rangeY;
@@ -3871,6 +4034,8 @@ function formatKeyCode(code) {
         if (id.startsWith('inp-cross-')) syncCrosshair(id.replace('inp-cross-', ''), val);
         else if (id === 'inp-view-height') setViewHeight(val);
         else if (id === 'inp-size') syncTargetSize(val);
+        else if (id === 'inp-target-count') setSixshotTargetCount(val);
+        else if (id === 'inp-sound-vol') setSoundVolume(val);
         else if (id === 'inp-speed') setSixshotSpeed(val);
         else if (id === 'inp-spawn-angle') syncSpawnAngle(val);
         else if (id === 'inp-depth-sixshot') setDepthSixshot(val);
@@ -3968,6 +4133,18 @@ function formatKeyCode(code) {
     window.setDepthSixshot = function(val) {
         CFG.depthSixshot = parseFloat(val);
         setValF('inp-depth-sixshot', CFG.depthSixshot);
+        refreshAllPreviewTargets();
+        saveToLocalStorage();
+    };
+
+    // Sixshot 目标数量配置控制器
+    window.setSixshotTargetCount = function(val) {
+        const count = clamp(parseInt(val) || 6, 1, 24);
+        CFG.targetCount = count;
+        STATE.targetCount = count;
+        setVal('inp-target-count', count);
+        const rng = getEl('inp-target-count-r'); if (rng) rng.value = count;
+        syncAllButtonStates();
         refreshAllPreviewTargets();
         saveToLocalStorage();
     };
@@ -4146,7 +4323,6 @@ function formatKeyCode(code) {
         CFG.targetSizeCm = parseFloat(v);
         setValF('inp-size', v);
         const r = getEl('inp-size-r'); if (r) r.value = v;
-        STATE.targetCount = (Math.abs(v - 125) < 0.1) ? 3 : 6;
         syncAllButtonStates();
         refreshAllPreviewTargets();
         saveToLocalStorage();
@@ -4207,37 +4383,35 @@ function formatKeyCode(code) {
         if (btn) btn.classList.remove('active');
     };
 
-window.startRebind = function(action) {
-    MOVE_STATE.rebindingAction = action;
-    MOVE_STATE.rebindStartTime = performance.now(); // 记录开始时间，防左键误录
-    
-    // 如果改的是重开键，让左上角立刻显示等待输入的提示
-    if (action === 'restart') {
-        const hudKey = getEl('txt-hud-restart-key');
-        if (hudKey) hudKey.innerText = '请按新键...';
-    }
-    
-    const btn = getEl(`kbind-${action}`);
-    if (btn) { btn.classList.add('listening'); btn.innerText = '按下按键...'; }
-};
-
-function refreshMovementKeyButtons() {
-    const labels = { forward: '前', backward: '后', left: '左', right: '右', jump: '跳', crouch: '蹲', restart: '一键重开键' };
-    Object.keys(labels).forEach(act => {
-        const b = getEl(`kbind-${act}`);
-        if (b) {
-            if(act === 'restart') {
-                b.innerText = `↺ ${labels[act]}: ${formatKeyCode(CFG.restartKey)}`;
-            } else {
-                b.innerText = `${labels[act]}: ${formatKeyCode(CFG.movement.keys[act])}`;
-            }
+    window.startRebind = function(action) {
+        MOVE_STATE.rebindingAction = action;
+        MOVE_STATE.rebindStartTime = performance.now();
+        
+        if (action === 'restart') {
+            const hudKey = getEl('txt-hud-restart-key');
+            if (hudKey) hudKey.innerText = '请按新键...';
         }
-    });
+        
+        const btn = getEl(`kbind-${action}`);
+        if (btn) { btn.classList.add('listening'); btn.innerText = '按下按键...'; }
+    };
 
-    // === 新增：同步刷新左上角的重开按键文字 ===
-    const hudKey = getEl('txt-hud-restart-key');
-    if (hudKey) hudKey.innerText = formatKeyCode(CFG.restartKey);
-}
+    function refreshMovementKeyButtons() {
+        const labels = { forward: '前', backward: '后', left: '左', right: '右', jump: '跳', crouch: '蹲', restart: '一键重开键' };
+        Object.keys(labels).forEach(act => {
+            const b = getEl(`kbind-${act}`);
+            if (b) {
+                if (act === 'restart') {
+                    b.innerText = `↺ ${labels[act]}: ${formatKeyCode(CFG.restartKey)}`;
+                } else {
+                    b.innerText = `${labels[act]}: ${formatKeyCode(CFG.movement.keys[act])}`;
+                }
+            }
+        });
+
+        const hudKey = getEl('txt-hud-restart-key');
+        if (hudKey) hudKey.innerText = formatKeyCode(CFG.restartKey);
+    }
 
     window.resetMovementKeys = function() {
         CFG.movement.keys = { forward: 'KeyW', backward: 'KeyS', left: 'KeyA', right: 'KeyD', jump: 'Space', crouch: 'ShiftLeft' };
@@ -4265,7 +4439,7 @@ function refreshMovementKeyButtons() {
         reader.onload = (event) => {
             try {
                 safeMergeConfig(CFG, JSON.parse(event.target.result));
-                STATE.targetCount = (Math.abs(CFG.targetSizeCm - 125) < 0.1) ? 3 : 6;
+                STATE.targetCount = CFG.targetCount || 6;
                 updateScene();
                 initColorPickers();
                 applyModeUI();
@@ -4314,7 +4488,7 @@ function refreshMovementKeyButtons() {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(CFG)); } catch (e) {}
     }
 
-    // 键盘监听（拦截一键重开按键）
+    // 键盘监听（按键绑定与重开拦截）
     window.addEventListener('keydown', (e) => {
         if (MOVE_STATE.rebindingAction) {
             e.preventDefault(); e.stopPropagation();
@@ -4394,7 +4568,7 @@ function refreshMovementKeyButtons() {
             console.warn('读取配置失败');
         }
 
-        STATE.targetCount = (Math.abs(CFG.targetSizeCm - 125) < 0.1) ? 3 : 6;
+        STATE.targetCount = CFG.targetCount || 6;
 
         initThreeScene();
         initTargets();
@@ -4444,6 +4618,24 @@ function refreshMovementKeyButtons() {
         lastFrameTime = performance.now();
         animate(performance.now());
     }
+
+// === 折叠/展开右侧手感调优面板 ===
+    window.toggleRightPanel = function() {
+        const panel = getEl('right-panel');
+        const btn = getEl('btn-toggle-right');
+        if (!panel || !btn) return;
+
+        // 切换折叠状态
+        const isCollapsed = panel.classList.toggle('panel-collapsed');
+        btn.innerText = isCollapsed ? '展开' : '收起';
+
+        // 隐藏/显示面板里除标题外的所有内容
+        Array.from(panel.children).forEach(child => {
+            if (!child.classList.contains('panel-header')) {
+                child.style.display = isCollapsed ? 'none' : '';
+            }
+        });
+    };
 
     document.addEventListener('DOMContentLoaded', init);
 </script>
