@@ -1874,13 +1874,13 @@ const AUDIO_BUFFERS = {
         targetSizeCm: 15.0,
         targetCount: 6,        // Sixshot 模式目标数量（自定化）
         spawnAngleDeg: 45,
-        crosshair: {
+            crosshair: {
             type: 'cross',
-            size: 8,
-            thick: 2,
-            gap: 3,
+            size: 11.75,
+            thick: 3.0,
+            gap: 1.5,
             outline: 1.2,
-            color: '#ef4444'
+            color: '#3b82f6'
         },
         dynamic: { enabled: false, speedDegPerSec: 12.5, mode: 'fly' },
         tracking: {
@@ -2189,14 +2189,15 @@ const AUDIO_BUFFERS = {
         playBodyshotSound();
     };
 
-    // 准星样式渲染
+// === 准星渲染（彻底兼容 HTML2EXE 打包，杜绝变黑和无法换色） ===
     function updateCrosshairStyle() {
         const svg = getEl('crosshair-svg');
         const container = getEl('crosshair-container');
         if (!svg || !container) return;
 
-        container.style.setProperty('--crosshair-color', CFG.crosshair.color);
-        container.style.color = CFG.crosshair.color;
+        // 获取真实的 16 进制颜色（例如 #ef4444），不再走可能失效的 CSS 变量
+        const realColor = CFG.crosshair.color || '#ef4444';
+        container.style.color = realColor;
 
         const { type, size, thick, gap, outline } = CFG.crosshair;
         const dim = Math.max(120, (size + gap + outline) * 4);
@@ -2216,15 +2217,16 @@ const AUDIO_BUFFERS = {
                 { x: half + gap, y: half - thick / 2, w: size, h: thick }
             ];
             rects.forEach(r => {
-                content += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="currentColor" stroke="#000000" stroke-width="${sw}" shape-rendering="crispEdges" />`;
+                // 直接写入 realColor，任何打包壳 100% 能识别
+                content += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${realColor}" stroke="#000000" stroke-width="${sw}" shape-rendering="crispEdges" />`;
             });
         } else if (type === 'dot') {
-            content = `<circle cx="${half}" cy="${half}" r="${Math.max(1, size)}" fill="currentColor" stroke="#000000" stroke-width="${sw}" />`;
+            content += `<circle cx="${half}" cy="${half}" r="${Math.max(1, size)}" fill="${realColor}" stroke="#000000" stroke-width="${sw}" />`;
         } else if (type === 'circle_hollow') {
             const inner = Math.max(1, gap);
             const outer = inner + thick;
             const mid = (inner + outer) / 2;
-            content = `<circle cx="${half}" cy="${half}" r="${mid}" fill="none" stroke="currentColor" stroke-width="${outer - inner}" />`;
+            content += `<circle cx="${half}" cy="${half}" r="${mid}" fill="none" stroke="${realColor}" stroke-width="${outer - inner}" />`;
             if (sw > 0) {
                 content += `<circle cx="${half}" cy="${half}" r="${outer}" fill="none" stroke="#000000" stroke-width="${sw}" />`;
                 content += `<circle cx="${half}" cy="${half}" r="${inner}" fill="none" stroke="#000000" stroke-width="${sw}" />`;
