@@ -946,6 +946,14 @@
         </div>
 
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+<div class="hud-card interactive-hud-card" onclick="toggleVSync()" title="点击切换：跟随屏幕刷新率 / 解除帧率锁定">
+    <span id="txt-vsync" style="color:var(--primary);font-weight:900;">帧率: 随屏同步</span>
+</div>
+            
+            <div class="hud-card interactive-hud-card" title="设置最大帧率 (0为跟随刷新率不限帧)">
+                <span style="font-size:0.7rem;font-weight:800;">最大FPS:</span>
+                <input type="number" id="inp-max-fps" class="num-input" style="width:42px;height:18px;border-radius:3px;font-size:0.75rem;" value="0" min="0" max="999" onchange="setMaxFps(this.value)" />
+            </div>
             <div class="hud-card f11-card f11-highlight" id="f11-box" title="点击切换全屏">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
                 <span>F11全屏</span>
@@ -1886,6 +1894,8 @@
     };
 
     const CFG = {
+        vsyncEnabled: true,
+        maxFps: 0,
         mode: 'sixshot',
         playMode: 'challenge',
         restartKey: 'KeyR',
@@ -2275,6 +2285,55 @@
     window.testPlayCurrentSound = function() {
         playBodyshotSound();
     };
+
+// ============================================================
+    // 随屏同步与极限锁帧系统
+    // ============================================================
+    let rafId = null;
+
+    // 无延迟消息通道：用来打破浏览器 setTimeout 强制的 4ms (250帧) 墙壁
+    const zeroDelayChannel = new MessageChannel();
+    zeroDelayChannel.port1.onmessage = () => {
+        animate(performance.now());
+    };
+
+    window.toggleVSync = function() {
+        CFG.vsyncEnabled = !CFG.vsyncEnabled;
+        applyVSyncAndFPS();
+        saveToLocalStorage();
+    };
+
+    window.setMaxFps = function(val) {
+        CFG.maxFps = parseInt(val) || 0;
+        applyVSyncAndFPS();
+        saveToLocalStorage();
+    };
+
+    function applyVSyncAndFPS() {
+        const isVSync = CFG.vsyncEnabled;
+        const maxFPS = CFG.maxFps || 0;
+        
+        const vsyncBtn = getEl('txt-vsync');
+        if (vsyncBtn) {
+            vsyncBtn.innerText = isVSync ? '帧率: 随屏同步' : '帧率: 已解锁';
+            vsyncBtn.style.color = isVSync ? 'var(--primary)' : '#ea580c';
+        }
+        const fpsInp = getEl('inp-max-fps');
+        if (fpsInp) fpsInp.value = maxFPS;
+
+        // 【防裂变安全机制】：这里不再重启循环。
+        // 引擎在下一帧会自动读取 CFG.maxFps 的新状态，避免幽灵循环叠加。
+    }
+
+    function scheduleFrame() {
+        if (CFG.vsyncEnabled) {
+            // 随屏同步：交由浏览器硬件调度
+            rafId = requestAnimationFrame(animate);
+        } else {
+            // 解除锁定：永远使用 MessageChannel 狂奔，具体限帧由 animate 内的门卫控制
+            zeroDelayChannel.port2.postMessage(null);
+        }
+    }
 
     // ============================================================
     // 准星样式渲染
@@ -4035,6 +4094,7 @@ function buildHoldingTarget() {
     }
 
     function syncAllInputsFromConfig() {
+        applyVSyncAndFPS();
         setValF('inp-view-height', CFG.viewHeight);
         const vhR = getEl('inp-view-height-r'); if (vhR) vhR.value = CFG.viewHeight;
 
@@ -4887,11 +4947,33 @@ function buildHoldingTarget() {
     let lastFrameTime = performance.now();
     let fpsCount = 0, fpsTime = performance.now();
 
-    function animate(now) {
-        requestAnimationFrame(animate);
-        const dt = clamp((now - lastFrameTime) / 1000, 0.0001, 0.05);
-        lastFrameTime = now;
+function animate(now) {
+        // 1. 第一时间马上安排下一次滴答，保证引擎永远不熄火
+        scheduleFrame();
+        
+        // 2. 严格的时间戳查岗（精准锁帧的核心）
+        const timeSinceLastFrame = now - lastFrameTime;
 
+        // 如果用户要求锁帧（关闭随屏同步，且设置了最大FPS）
+        if (!CFG.vsyncEnabled && CFG.maxFps > 0) {
+            const frameInterval = 1000 / CFG.maxFps;
+            
+            // 【时间门卫】：如果距离上一帧的时间还不够，直接拦截，不执行渲染，也不更新时间！
+            if (timeSinceLastFrame < frameInterval) {
+                return; 
+            }
+            
+            // 扣除掉微小误差，防止时间轴漂移导致偶尔掉帧卡顿
+            lastFrameTime = now - (timeSinceLastFrame % frameInterval);
+        } else {
+            // 不限帧 或 随屏同步 时，直接记录当下时间
+            lastFrameTime = now;
+        }
+
+        // 3. 计算物理时间增量 dt（防止切屏回来后目标瞬间飞走，最大限制为 0.05秒）
+        const dt = clamp(timeSinceLastFrame / 1000, 0.0001, 0.05);
+
+        // --- 以下是原有的物理更新和渲染逻辑 ---
         updatePhysics(dt);
 
         fpsCount++;
@@ -4967,7 +5049,7 @@ function buildHoldingTarget() {
         }, 3000);
 
         lastFrameTime = performance.now();
-        animate(performance.now());
+        scheduleFrame();
     }
 
     window.init = init;
