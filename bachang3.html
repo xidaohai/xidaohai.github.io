@@ -5431,11 +5431,12 @@ document.addEventListener('pointerlockerror', () => {
 
         dispatchGlobalValue(id, val);
     };
-    // 把内联 onclick / oninput 需要用到的函数挂到 window
-    window.toggleHoldingLock = toggleHoldingLock;
-    window.updateHoldingDummy = updateHoldingDummy;
-    window.setCrosshairType = setCrosshairType;
-    window.syncCrosshair = syncCrosshair;
+// 把内联 onclick / oninput 需要用到的函数挂到 window
+window.toggleHoldingLock = toggleHoldingLock;
+window.updateHoldingDummy = updateHoldingDummy;
+window.setCrosshairType = setCrosshairType;
+window.syncCrosshair = syncCrosshair;
+window.setCoastalWoodFloor = setCoastalWoodFloor;
 
     document.addEventListener('input', (e) => {
         const el = e.target;
