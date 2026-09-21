@@ -1110,9 +1110,49 @@
             }
             #bottom-center-projects { width: 90vw; overflow-x: auto; justify-content: flex-start; }
         }
+
+        /* 调试模式 */
+        #debug-indicator {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, calc(-50% - 60px));
+            pointer-events: none;
+            z-index: 60;
+            font-size: 0.86rem;
+            font-weight: 900;
+            color: #ef4444;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 6px 18px;
+            border-radius: 20px;
+            border: 1.5px solid rgba(239, 68, 68, 0.35);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+        #debug-indicator.active { opacity: 1; }
+
+        #debug-horizon-guide {
+            position: fixed;
+            top: 50%; left: 0; right: 0;
+            height: 1.5px;
+            background: rgba(239, 68, 68, 0.4);
+            pointer-events: none;
+            z-index: 55;
+            opacity: 0;
+            transition: opacity 0.4s;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.15);
+        }
+        #debug-horizon-guide.active { opacity: 1; }
     </style>
 </head>
 <body>
+
+    <!-- ★ 调试模式提示 -->
+    <div id="debug-indicator">轴向已互换 · 竖直移动鼠标 = 水平旋转</div>
+    <div id="debug-horizon-guide"></div>
 
     <!-- 准星容器 -->
     <div id="crosshair-container">
@@ -2046,6 +2086,21 @@
             <div class="swatches-grid-9" id="swatches-crosshair"></div>
         </div>
 
+        <!-- 调试测量模式 -->
+        <div class="section-card" id="section-debug-mode">
+            <div class="section-header">
+                <span class="section-label">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8m-4-4h8"/></svg>
+                    <span>调试测量模式</span>
+                </span>
+                <button class="pill-btn toggle-switch-btn" id="btn-debug-mode-toggle" onclick="toggleDebugMode()">已关闭</button>
+            </div>
+            <div style="font-size:0.62rem; color:#64748b; line-height:1.5;">
+                开启后：<strong style="color:#0284c7;">鼠标竖直移动</strong> → 映射为 <strong style="color:#0284c7;">水平旋转</strong>。
+                用尺子竖直移动鼠标 10cm，观察画面转过多少度，验证 DPI/CM360 换算是否准确。
+            </div>
+        </div>
+
         <div class="section-card">
             <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M7 12h10"/></svg>鼠标硬件 DPI</span></div>
             <div class="preset-grid cols-8" id="dpi-preset-grid">
@@ -2270,6 +2325,7 @@
         hitSoundType: 'crisp',
         soundVolume: 75,
         missSoundEnabled: true,
+        debugMode: false,   // ★ 调试测量模式
         dpi: 800,
         cmPer360: 55.0,
         cmPer360X: 55.0,
@@ -2370,7 +2426,7 @@
         _lastScoreStr: null,
         _lastAccStr: null,
         _lastAccUpdateTime: 0,
-        currentViewingBoard: 1,      // 排行榜弹窗中当前查看的榜位 (1-4)
+        currentViewingBoard: 1,
         lbPeriod: 'all',
         sizeLockSixshot: true,
         depthLockSixshot: true,
@@ -2396,12 +2452,24 @@
         isDragging: false,
         offX: 0,
         offY: 0,
+
+        // ★ 预测渲染专用（优化）
+        _yawVel: 0,
+        _pitchVel: 0,
+        _lastMoveTime: 0,
+        _lastManualRender: 0,
+
+        // ★ 帧节流专用（优化）
+        _collisionTick: 0,
+        _cloudTick: 0,
+        _trackTick: 0,
+
         tracking: {
             x: 0, y: 1.625, z: -10, dist: 10.0,
             yaw: 0,
             vx: 0, vy: 0, vz: 0,
             vYaw: 0, vDist: 0,
-            vTan: 0,                 // 切向速度 (m/s)
+            vTan: 0,
             changeDirTimer: 0
         },
         holding: {
@@ -2421,8 +2489,9 @@
         keysPressed: {}
     };
 
-    const STORAGE_KEY = 'XDH_AIM_TRAINER_V10_PRO';
-    const ISO_INCH_TO_CM = 2.54;
+const STORAGE_KEY = 'XDH_AIM_TRAINER_V10_PRO';
+const ISO_INCH_TO_CM = 2.54;
+const VIEW_PREDICT_MS = 0;   // ★ 预测渲染毫秒数
     let btnCooldownTimer = null;
     let lastQuickRestartTime = 0;
 
@@ -2464,17 +2533,17 @@
     // ============================================================
     // 音频引擎模块（支持预解码防掉帧、音量衰减与合成兜底）
     // ============================================================
-    let audioCtx = null;
-    function getAudioContext() {
-        if (!audioCtx) {
-            const AudioClass = window.AudioContext || window.webkitAudioContext;
-            if (AudioClass) audioCtx = new AudioClass();
-        }
-        if (audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume().catch(() => {});
-        }
-        return audioCtx;
+let audioCtx = null;
+function getAudioContext() {
+    if (!audioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) audioCtx = new AudioClass({ latencyHint: 'interactive' }); 
     }
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+    }
+    return audioCtx;
+}
 
     function getMasterGain(ctx, baseGain = 0.3) {
         const gainNode = ctx.createGain();
@@ -3073,6 +3142,27 @@
     const fpsChannel = new MessageChannel();
     fpsChannel.port1.onmessage = () => { animate(performance.now()); };
 
+    // ★ 调试模式切换
+    window.toggleDebugMode = function() {
+        CFG.debugMode = !CFG.debugMode;
+        const btn = getEl('btn-debug-mode-toggle');
+        if (btn) {
+            btn.classList.toggle('active', CFG.debugMode);
+            btn.innerText = CFG.debugMode ? '已开启' : '已关闭';
+        }
+        const indicator = getEl('debug-indicator');
+        const guide = getEl('debug-horizon-guide');
+        if (indicator) indicator.classList.toggle('active', CFG.debugMode);
+        if (guide) guide.classList.toggle('active', CFG.debugMode);
+
+        // 开启时把 pitch 归零，视角回到水平线
+        if (CFG.debugMode) {
+            STATE.pitch = 0;
+            applyViewRotation(0);
+        }
+        saveToLocalStorage();
+    };
+
     window.toggleVSync = function() {
         CFG.vsyncEnabled = !CFG.vsyncEnabled;
         applyVSyncAndFPS();
@@ -3353,12 +3443,19 @@
         camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.set(0, CFG.viewHeight, 0);
 
-        renderer = new THREE.WebGPURenderer({ antialias: true, powerPreference: "high-performance" });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const _canvas = document.createElement('canvas');
+    _canvas.setAttribute('desynchronized', 'true');
+    renderer = new THREE.WebGPURenderer({ 
+        canvas: _canvas,
+        antialias: true, 
+        powerPreference: "high-performance" 
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    
+        renderer.setPixelRatio(1);
         renderer.toneMapping = THREE.NoToneMapping;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.enabled = false;
         renderer.shadowMap.type = THREE.PCFShadowMap;
         renderer.setClearColor(0xf1f5f9, 1);
         canvasContainer.appendChild(renderer.domElement);
@@ -3368,7 +3465,7 @@
         updateBackendHUD(backendStatus);
 
         skyMesh = new THREE.Mesh(
-            new THREE.SphereGeometry(200, 32, 16),
+            new THREE.SphereGeometry(200, 16, 8),
             new THREE.MeshBasicMaterial({ map: createSkyTexture('day'), side: THREE.BackSide, depthWrite: false })
         );
         scene.add(skyMesh);
@@ -3659,8 +3756,8 @@
         }
     }
 
-    const sphereGeo = new THREE.SphereGeometry(1, 32, 32);
-    const HEAD_GEO = new THREE.SphereGeometry(1, 32, 32);
+const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
+const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
     const BODY_GEO = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
 
     let targetMat = new THREE.MeshStandardMaterial({ 
@@ -4213,13 +4310,23 @@
     // 物理运算与位移更新主循环 (Update Physics Loop)
     // ============================================================
     function updatePhysics(dt) {
-        if (CFG.cloudsEnabled && cloudGroup) {
-            cloudGroup.children.forEach(c => {
-                c.userData.angle += c.userData.speed * dt;
-                c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
-                c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
-            });
+        // ★ ：鼠标停止 30ms 后，速度归零，防止预测残留抖动
+        if (performance.now() - (STATE._lastMoveTime || 0) > 30) {
+            STATE._yawVel = 0;
+            STATE._pitchVel = 0;
         }
+    if (CFG.cloudsEnabled && cloudGroup) {
+    // ★ 每 3 帧更新一次（云移动速度极慢，肉眼无法分辨帧率差异）
+    STATE._cloudTick = (STATE._cloudTick || 0) + 1;
+    if (STATE._cloudTick % 5 === 0) {
+        const cloudDt = dt * 5;
+        cloudGroup.children.forEach(c => {
+            c.userData.angle += c.userData.speed * cloudDt;
+            c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
+            c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
+        });
+    }
+}
 
         // --- 身法位移 ---
         if (CFG.movement.enabled) {
@@ -4302,49 +4409,55 @@
                 else if (t.y > b.maxY) { t.y = b.maxY; t.dirY = -Math.abs(t.dirY); }
             }
 
-            const vis = sixTargets.filter(t => t.mesh.visible);
-            for (let i = 0; i < vis.length; i++) {
-                for (let j = i + 1; j < vis.length; j++) {
-                    const t1 = vis[i], t2 = vis[j];
-                    const dx = t2.x - t1.x, dy = t2.y - t1.y;
-                    const dist = Math.hypot(dx, dy);
-                    const minDist = b.r * 2.2;
-                    if (dist < minDist && dist > 0.0001) {
-                        const overlap = (minDist - dist) / 2;
-                        const nx = dx / dist, ny = dy / dist;
+            // ★ 碰撞检测隔帧执行（省 CPU），视觉位置每帧同步（画面丝滑）
+            STATE._collisionTick = (STATE._collisionTick || 0) + 1;
+            if (STATE._collisionTick % 2 === 0) {
+                const vis = sixTargets.filter(t => t.mesh.visible);
+                for (let i = 0; i < vis.length; i++) {
+                    for (let j = i + 1; j < vis.length; j++) {
+                        const t1 = vis[i], t2 = vis[j];
+                        const dx = t2.x - t1.x, dy = t2.y - t1.y;
+                        const dist = Math.hypot(dx, dy);
+                        const minDist = b.r * 2.2;
+                        if (dist < minDist && dist > 0.0001) {
+                            const overlap = (minDist - dist) / 2;
+                            const nx = dx / dist, ny = dy / dist;
 
-                        if (CFG.dynamic.mode === 'horizontal') {
-                            t1.x -= Math.sign(dx || 1) * overlap; t2.x += Math.sign(dx || 1) * overlap;
-                        } else if (CFG.dynamic.mode === 'vertical') {
-                            t1.y -= Math.sign(dy || 1) * overlap; t2.y += Math.sign(dy || 1) * overlap;
-                        } else {
-                            t1.x -= nx * overlap; t1.y -= ny * overlap;
-                            t2.x += nx * overlap; t2.y += ny * overlap;
-                        }
-
-                        if (curSpd > 0) {
                             if (CFG.dynamic.mode === 'horizontal') {
-                                t1.dirY = 0; t1.dirX = -t1.dirX;
-                                t2.dirY = 0; t2.dirX = -t2.dirX;
+                                t1.x -= Math.sign(dx || 1) * overlap; t2.x += Math.sign(dx || 1) * overlap;
                             } else if (CFG.dynamic.mode === 'vertical') {
-                                t1.dirX = 0; t1.dirY = -t1.dirY;
-                                t2.dirX = 0; t2.dirY = -t2.dirY;
+                                t1.y -= Math.sign(dy || 1) * overlap; t2.y += Math.sign(dy || 1) * overlap;
                             } else {
-                                const dvn = (t1.dirX * t1.speed - t2.dirX * t2.speed) * nx + (t1.dirY * t1.speed - t2.dirY * t2.speed) * ny;
-                                if (dvn < 0) {
-                                    t1.dirX -= dvn * nx / (t1.speed || 1); t1.dirY -= dvn * ny / (t1.speed || 1);
-                                    t2.dirX += dvn * nx / (t2.speed || 1); t2.dirY += dvn * ny / (t2.speed || 1);
-                                    const l1 = Math.hypot(t1.dirX, t1.dirY) || 1, l2 = Math.hypot(t2.dirX, t2.dirY) || 1;
-                                    t1.dirX /= l1; t1.dirY /= l1;
-                                    t2.dirX /= l2; t2.dirY /= l2;
+                                t1.x -= nx * overlap; t1.y -= ny * overlap;
+                                t2.x += nx * overlap; t2.y += ny * overlap;
+                            }
+
+                            if (curSpd > 0) {
+                                if (CFG.dynamic.mode === 'horizontal') {
+                                    t1.dirY = 0; t1.dirX = -t1.dirX;
+                                    t2.dirY = 0; t2.dirX = -t2.dirX;
+                                } else if (CFG.dynamic.mode === 'vertical') {
+                                    t1.dirX = 0; t1.dirY = -t1.dirY;
+                                    t2.dirX = 0; t2.dirY = -t2.dirY;
+                                } else {
+                                    const dvn = (t1.dirX * t1.speed - t2.dirX * t2.speed) * nx + (t1.dirY * t1.speed - t2.dirY * t2.speed) * ny;
+                                    if (dvn < 0) {
+                                        t1.dirX -= dvn * nx / (t1.speed || 1); t1.dirY -= dvn * ny / (t1.speed || 1);
+                                        t2.dirX += dvn * nx / (t2.speed || 1); t2.dirY += dvn * ny / (t2.speed || 1);
+                                        const l1 = Math.hypot(t1.dirX, t1.dirY) || 1, l2 = Math.hypot(t2.dirX, t2.dirY) || 1;
+                                        t1.dirX /= l1; t1.dirY /= l1;
+                                        t2.dirX /= l2; t2.dirY /= l2;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
+            }   // ← 碰撞计算 if 到此关闭
+
+            // ★ 视觉位置每帧同步，开启动态漂移时画面丝滑无卡顿
             for (const t of sixTargets) { if (t.mesh.visible) t.mesh.position.set(t.x, t.y, t.z); }
-        }
+        }   // ← Sixshot 分支 if 到此关闭
 
         // --- Tracking 跟枪逻辑 ---
         else if (CFG.mode === 'tracking') {
@@ -4535,41 +4648,55 @@
     // ============================================================
     // 零延迟瞄准与射线判定 (Raw Raycast)
     // ============================================================
-    const raycaster = new THREE.Raycaster();
-    const centerVec = new THREE.Vector2(0, 0);
-    const _viewEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+const raycaster = new THREE.Raycaster();
+const centerVec = new THREE.Vector2(0, 0);
+const _viewEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+const _raycastTargets = [];   // ★ 复用数组，避免每帧 new
 
-    function applyViewRotation() {
-        _viewEuler.set(STATE.pitch, STATE.yaw, 0);
-        camera.quaternion.setFromEuler(_viewEuler);
+// ★ 优化：支持传入"预测毫秒数"，将相机姿态沿角速度外推
+// 传 0（或不传）时是精确姿态，用于 raycast 和常规更新
+function applyViewRotation(predictMs = 0) {
+    let yaw = STATE.yaw;
+    let pitch = STATE.pitch;
+
+    if (predictMs > 0) {
+        yaw   += (STATE._yawVel   || 0) * predictMs / 1000;
+        pitch += (STATE._pitchVel || 0) * predictMs / 1000;
+        pitch = clamp(pitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
     }
 
-    function checkAim() {
-        if (document.pointerLockElement !== document.body) return null;
-        camera.updateMatrixWorld(true);
-        raycaster.setFromCamera(centerVec, camera);
+    _viewEuler.set(pitch, yaw, 0);
+    camera.quaternion.setFromEuler(_viewEuler);
+}
 
-        if (CFG.mode === 'holding') {
-            const wallObjects = [];
-            spawnWallGroup.children.forEach(c => { if (c.isMesh && c.userData.isWall) wallObjects.push(c); });
-            const targets = [];
-            if (holdingTarget.rootGroup.visible) {
-                if (CFG.holding.shape === 'sphere') targets.push(holdingTarget.sphereMesh);
-                else holdingTarget.dummyGroup.children.forEach(c => { if (c.isMesh) targets.push(c); });
-            }
-            const hits = raycaster.intersectObjects([...wallObjects, ...targets], false);
-            if (hits.length > 0) {
-                if (hits[0].object.userData.isWall) return { hit: false, isWall: true };
-                return { hit: true, object: hits[0].object, part: hits[0].object.userData.part || 'body' };
-            }
-            return null;
-        } else {
-            const objects = sixTargets.filter(t => t.mesh.visible).map(t => t.mesh);
-            const hits = raycaster.intersectObjects(objects, false);
-            if (hits.length > 0) return { hit: true, object: hits[0].object };
-            return null;
+function checkAim() {
+    if (document.pointerLockElement !== document.body) return null;
+    camera.updateMatrixWorld();
+    raycaster.setFromCamera(centerVec, camera);
+
+    _raycastTargets.length = 0;   // ★ 清空但保留容量
+
+    if (CFG.mode === 'holding') {
+        spawnWallGroup.children.forEach(c => { if (c.isMesh && c.userData.isWall) _raycastTargets.push(c); });
+        if (holdingTarget.rootGroup.visible) {
+            if (CFG.holding.shape === 'sphere') _raycastTargets.push(holdingTarget.sphereMesh);
+            else holdingTarget.dummyGroup.children.forEach(c => { if (c.isMesh) _raycastTargets.push(c); });
         }
+        const hits = raycaster.intersectObjects(_raycastTargets, false);
+        if (hits.length > 0) {
+            if (hits[0].object.userData.isWall) return { hit: false, isWall: true };
+            return { hit: true, object: hits[0].object, part: hits[0].object.userData.part || 'body' };
+        }
+        return null;
+    } else {
+        for (let i = 0; i < sixTargets.length; i++) {
+            if (sixTargets[i].mesh.visible) _raycastTargets.push(sixTargets[i].mesh);
+        }
+        const hits = raycaster.intersectObjects(_raycastTargets, false);
+        if (hits.length > 0) return { hit: true, object: hits[0].object };
+        return null;
     }
+}
 
     // ============================================================
     // 输入事件与系统控制管线
@@ -4588,13 +4715,35 @@
 
 function requestPointerLockCompat() {
     getAudioContext();
-    // 只尝试一次；失败交给 pointerlockerror 监听统一兜底
-    // 不要在 .catch 里重试 —— 那时已脱离用户手势上下文，必失败且产生 unhandled rejection
+
+    // 先尝试带未加速选项的锁定
     try {
         const p = document.body.requestPointerLock({ unadjustedMovement: true });
-        if (p && p.catch) p.catch(() => { /* 静默，交给 pointerlockerror */ });
+
+        // 情况 A：返回 Promise（Chrome/Edge 新 API）
+        if (p && typeof p.catch === 'function') {
+            p.catch(() => {
+                // unadjustedMovement 不被支持 → 立刻回退到普通锁定
+                try {
+                    const p2 = document.body.requestPointerLock();
+                    if (p2 && typeof p2.catch === 'function') {
+                        p2.catch(() => { /* 普通锁定也失败，交给 pointerlockerror 监听 */ });
+                    }
+                } catch (_) { /* 同步失败，同样交给 pointerlockerror */ }
+            });
+            return;
+        }
+
+        // 情况 B：返回 undefined（老式 API），锁定已直接生效，无需处理
+        return;
     } catch (e) {
-        try { document.body.requestPointerLock(); } catch (_) {}
+        // 情况 C：同步 throw（个别浏览器不支持带参数的调用）
+        try {
+            const p2 = document.body.requestPointerLock();
+            if (p2 && typeof p2.catch === 'function') {
+                p2.catch(() => { /* 交给 pointerlockerror */ });
+            }
+        } catch (_) { /* 交给 pointerlockerror */ }
     }
 }
 
@@ -4621,29 +4770,65 @@ function requestPointerLockCompat() {
         });
     }
 
-    // 采用 getCoalescedEvents() 获取原生态鼠标微包数据防漂移
-    window.addEventListener('pointermove', (e) => {
-        const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [e];
-        STATE.pollCount += events.length;
+// 采用 getCoalescedEvents() 获取原生态鼠标微包数据防漂移
+// 只挂载一个事件源
+const _supportsRawUpdate = ('onpointerrawupdate' in window);
 
-        if (document.pointerLockElement === document.body && STATE.game !== 'armed') {
-            let dx = 0, dy = 0;
-            for (let i = 0; i < events.length; i++) {
-                dx += (Number(events[i].movementX) || 0);
-                dy += (Number(events[i].movementY) || 0);
+function handlePointerMove(e) {
+    const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [e];
+
+    // 轮询率统计（现在只有一个事件源，直接累加即可）
+    STATE.pollCount += events.length;
+
+    if (document.pointerLockElement === document.body && STATE.game !== 'armed') {
+        let dx = 0, dy = 0;
+        for (let i = 0; i < events.length; i++) {
+            dx += (Number(events[i].movementX) || 0);
+            dy += (Number(events[i].movementY) || 0);
+        }
+
+        if (dx === 0 && dy === 0) return;
+        if (Math.abs(dx) > 2500 || Math.abs(dy) > 2500) return;
+
+        // ★ 计算角速度（弧度/秒）用于预测
+        const nowT = performance.now();
+        const moveDt = (nowT - (STATE._lastMoveTime || nowT)) / 1000;
+        if (moveDt > 0.0001 && moveDt < 0.1) {
+            if (CFG.debugMode) {
+                // 调试模式：竖直移动映射到水平旋转
+                STATE._yawVel   = (-dy * radiansPerCountY) / moveDt;
+                STATE._pitchVel = 0;
+            } else {
+                STATE._yawVel   = (-dx * radiansPerCountX) / moveDt;
+                STATE._pitchVel = (-dy * radiansPerCountY) / moveDt;
             }
-            if (Math.abs(dx) > 2500 || Math.abs(dy) > 2500) return;
+        }
+        STATE._lastMoveTime = nowT;
 
+        if (CFG.debugMode) {
+            // ★ 调试模式：鼠标 Y 驱动 yaw，pitch 锁死 0
+            STATE.yaw -= dy * radiansPerCountY;
+            STATE.pitch = 0;
+        } else {
             STATE.yaw -= dx * radiansPerCountX;
             STATE.pitch -= dy * radiansPerCountY;
             STATE.pitch = clamp(STATE.pitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
-
-            if (STATE.yaw > Math.PI) STATE.yaw -= Math.PI * 2;
-            else if (STATE.yaw < -Math.PI) STATE.yaw += Math.PI * 2;
-
-            applyViewRotation();
         }
-    }, { passive: true });
+
+        if (STATE.yaw > Math.PI) STATE.yaw -= Math.PI * 2;
+        else if (STATE.yaw < -Math.PI) STATE.yaw += Math.PI * 2;
+
+        applyViewRotation(0);   // 精确姿态，渲染时再加预测
+    }
+}
+
+// ★ 二选一挂载：Chrome/Edge 用 pointerrawupdate（低延迟原始数据），
+//   Firefox/Safari 等自动回退到 pointermove，保证旋转只执行一次。
+if (_supportsRawUpdate) {
+    window.addEventListener('pointerrawupdate', handlePointerMove, { passive: true });
+} else {
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+}
 
     window.addEventListener('mousedown', (e) => {
         if (MOVE_STATE.rebindingAction) {
@@ -5973,13 +6158,16 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
 
             const pollRate = Math.round((STATE.pollCount * 1000) / 500);
             if (pollRate > 100) STATE.peakPollRate = Math.max(STATE.peakPollRate, pollRate);
-            getEl('hud-poll').innerText = STATE.peakPollRate > 0 ? STATE.peakPollRate : '--';
+            getEl('hud-poll').innerText = pollRate > 50 ? pollRate : '--';
             STATE.pollCount = 0;
         }
 
-        // 3. 画面渲染
+        // 3. 画面渲染（★ 优化：用预测姿态渲染，渲染后恢复精确姿态）
         if (renderer && scene && camera) {
+            applyViewRotation(VIEW_PREDICT_MS);   // 预测姿态
             renderer.render(scene, camera);
+            applyViewRotation(0);                 // 精确姿态，确保 raycast 准确
+            STATE._lastManualRender = now;
         }
 
         // 4. 派发下一帧
@@ -6009,6 +6197,18 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
         applyModeUI();
         syncAllInputsFromConfig();
         refreshMovementKeyButtons();
+
+        // ★ 恢复调试模式开关状态
+        const dbgBtn = getEl('btn-debug-mode-toggle');
+        if (dbgBtn) {
+            dbgBtn.classList.toggle('active', CFG.debugMode);
+            dbgBtn.innerText = CFG.debugMode ? '已开启' : '已关闭';
+        }
+        const dbgInd = getEl('debug-indicator');
+        const dbgGuide = getEl('debug-horizon-guide');
+        if (dbgInd) dbgInd.classList.toggle('active', CFG.debugMode);
+        if (dbgGuide) dbgGuide.classList.toggle('active', CFG.debugMode);
+
         resetViewToCenter();
         onResize();
         start1Point5SecondCooldown();
