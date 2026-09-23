@@ -1525,7 +1525,7 @@
                         </div>
                     </div>
 
-                    <div class="section-card">
+<div class="section-card">
                         <div class="section-header">
                             <span class="section-label">
                                 <svg class="icon" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -1549,6 +1549,13 @@
                                 </button>
                             </div>
                         </div>
+                        <!-- ★ Sixshot 乱飞细分子选项 -->
+                        <div id="sixshot-fly-subtype-row" style="margin-bottom:5px;">
+                            <div class="preset-grid cols-2" id="sixshot-fly-subtypes">
+                                <button class="pill-btn active" id="btn-sixshot-fly-pure" onclick="setSixshotFlySubtype('pure')">🌀 纯粹乱飞 (无时无刻)</button>
+                                <button class="pill-btn" id="btn-sixshot-fly-bounce" onclick="setSixshotFlySubtype('bounce')">↔️ 折返乱飞 (直行折返)</button>
+                            </div>
+                        </div>
                         <div class="preset-grid cols-4" id="sixshot-speed-presets" style="margin-bottom:4px;">
                             <button class="pill-btn active" data-val="12.5" onclick="setSixshotSpeed(12.5)">12.5°/s</button>
                             <button class="pill-btn" data-val="25" onclick="setSixshotSpeed(25)">25°/s</button>
@@ -1565,6 +1572,34 @@
                             </div>
                         </div>
                         <div class="note-tip" id="sixshot-dynamic-hint" style="display:none;margin-top:5px;"></div>
+                        <!-- ★ Sixshot 专属变向周期面板 -->
+                        <div id="sixshot-interval-ui" style="margin-top:6px; display:none;">
+                            <div class="section-header" style="margin-bottom:3px;"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M18 8L22 12L18 16M6 8L2 12L6 16"/></svg>变向周期 (划弧时长)</span></div>
+                            <div class="preset-grid cols-4" id="sixshot-interval-presets" style="margin-bottom:6px;">
+                                <button class="pill-btn" data-val="0,0" onclick="setSixshotIntervalPreset(0,0)">极限碎闪</button>
+                                <button class="pill-btn" data-val="0.2,0.5" onclick="setSixshotIntervalPreset(0.2,0.5)">高频急转</button>
+                                <button class="pill-btn active" data-val="0.5,1.5" onclick="setSixshotIntervalPreset(0.5,1.5)">常规机动</button>
+                                <button class="pill-btn" data-val="1.5,2.5" onclick="setSixshotIntervalPreset(1.5,2.5)">大圆弧</button>
+                            </div>
+                            <div class="ctrl-row" style="margin-bottom:4px;">
+                                <label>最小周期</label>
+                                <input type="range" id="inp-sixshot-freq-min-r" min="0" max="5.0" step="0.05" value="0.5" oninput="setSixshotMinInterval(parseFloat(this.value))" />
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepValGlobal('inp-sixshot-freq-min', -0.05)">−</button>
+                                    <input type="number" class="num-input" id="inp-sixshot-freq-min" value="0.50" step="0.05" min="0" max="10" />
+                                    <button class="step-btn" onclick="stepValGlobal('inp-sixshot-freq-min', 0.05)">+</button>
+                                </div>
+                            </div>
+                            <div class="ctrl-row">
+                                <label>最大周期</label>
+                                <input type="range" id="inp-sixshot-freq-max-r" min="0" max="5.0" step="0.05" value="1.5" oninput="setSixshotMaxInterval(parseFloat(this.value))" />
+                                <div class="stepper-box">
+                                    <button class="step-btn" onclick="stepValGlobal('inp-sixshot-freq-max', -0.05)">−</button>
+                                    <input type="number" class="num-input" id="inp-sixshot-freq-max" value="1.50" step="0.05" min="0" max="10" />
+                                    <button class="step-btn" onclick="stepValGlobal('inp-sixshot-freq-max', 0.05)">+</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- 墙面的大小 -->
@@ -1960,7 +1995,7 @@
                         <span>跟枪动力学参数</span>
                     </span>
                 </div>
-                <div class="section-card">
+<div class="section-card">
                     <div class="section-header"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>运动轨迹</span></div>
                     <div class="preset-grid cols-2" id="tracking-pattern-presets">
                         <button class="pill-btn active" id="btn-track-fly" data-val="fly" onclick="setTrackingPattern('fly')">
@@ -1973,6 +2008,20 @@
                         </button>
                     </div>
                 </div>
+                    <!-- ★ Tracking 无规则乱飞细分子选项 -->
+                    <div id="tracking-fly-subtype-row" style="margin-top:4px;">
+                        <div class="preset-grid cols-2" id="tracking-fly-subtypes">
+                            <button class="pill-btn active" id="btn-track-fly-pure" onclick="setTrackingFlySubtype('pure')">🌀 纯粹乱飞 (无时无刻)</button>
+                            <button class="pill-btn" id="btn-track-fly-bounce" onclick="setTrackingFlySubtype('bounce')">↔️ 折返乱飞 (直行折返)</button>
+                        </div>
+                    </div>
+                    <!-- ★ Tracking 底层插值算法切换 -->
+                    <div id="tracking-steer-method-row" style="margin-top:4px; display:none;">
+                        <div class="preset-grid cols-2" id="tracking-steer-presets">
+                            <button class="pill-btn active" id="btn-track-steer-angle" onclick="setTrackingSteerMethod('angle')" title="圆周弧线转向：平滑圆弧，绝不卡壳">💫 弧线平滑 (Angle)</button>
+                            <button class="pill-btn" id="btn-track-steer-vector" onclick="setTrackingSteerMethod('vector')" title="向量折角：变向带急停制动感">⚡ 惯性折角 (Vector)</button>
+                        </div>
+                    </div>
                 <div class="section-card">
                     <div class="section-header"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>空间形态</span></div>
                     <div class="preset-grid cols-3" id="tracking-space-presets">
@@ -2388,11 +2437,12 @@
             outline: 1.2,
             color: '#0284c7'
         },
-        dynamic: { enabled: false, speedDegPerSec: 12.5, mode: 'fly' },
-            tracking: {
+dynamic: { enabled: false, speedDegPerSec: 12.5, mode: 'fly', flyType: 'pure', intervalMin: 0.5, intervalMax: 1.5 },
+        tracking: {
             shape: 'sphere',
-            autoFire: false,              // ★ 默认开启免按键自动开火
+            autoFire: false,
             pattern: 'fly',
+            flyType: 'pure',
             space: 'wall',
             angleRange: 360.0,
             speedDegPerSec: 12.5,
@@ -4242,14 +4292,13 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
         return { minX, maxX, minY, maxY, r: r };
     }
 
-    function respawnSixshotTarget(t, keepDir = false) {
+function respawnSixshotTarget(t, keepDir = false) {
         const b = getSixshotBounds();
         let fx = 0, fy = 0, valid = false, attempts = 0;
         let safeMargin = b.r * 3.2;
 
         while (!valid && attempts < 100) {
             attempts++;
-            // 防死锁机制：如果生成的靶标太多，墙面太小导致根本塞不下，逐渐放宽容差
             if (attempts > 50) safeMargin = b.r * 2.05;
 
             fx = rand(b.minX, b.maxX);
@@ -4275,16 +4324,21 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
             else { const ang = rand(0, Math.PI * 2); t.dirX = Math.cos(ang); t.dirY = Math.sin(ang); }
         }
         t.speed = CFG.dynamic.enabled ? (CFG.dynamic.speedDegPerSec * Math.PI / 180 * CFG.depthSixshot) : 0;
+        
+        // ★ R 键重开彻底清理中间态
+        t.ang = undefined;
+        t.targetAng = undefined;
+        t.mindTimer = 0;
     }
 
+    // ★ 周期为 0 时返回数学无穷大（永不到期）
     function pickNextStrafeTimer() {
         const mn = Math.min(CFG.tracking.strafeMinInterval, CFG.tracking.strafeMaxInterval);
         const mx = Math.max(CFG.tracking.strafeMinInterval, CFG.tracking.strafeMaxInterval);
-        if (mx <= 0.01) return 999999;
+        if (mx <= 0) return Infinity;
         return mn + Math.random() * (mx - mn);
     }
 
-// 采用 Archimedes 严密三维球面采样算法（含假人全身物理防穿框包围盒）
     function getTrackingTargetExtents() {
         const isDummy = (CFG.tracking.shape === 'dummy');
         if (isDummy) {
@@ -4298,8 +4352,8 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
 
             return {
                 top: Math.max(0.1, headTop),
-                bottom: neck + bh,          // 身体向下伸展的完整距离（约1.62m）
-                side: Math.max(bw / 2, headSide) // 肩膀和头部的最宽半边
+                bottom: neck + bh,
+                side: Math.max(bw / 2, headSide)
             };
         } else {
             const r = CFG.tracking.targetSizeCm / 100 / 2;
@@ -4320,7 +4374,6 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
         const wallTop = wallBottom + wallH;
         const ts = STATE.tracking;
 
-        // ★ 核心防穿透限位：假人最底端绝不穿出玻璃下沿，头顶绝不穿出玻璃上沿
         const minY = Math.max(0.05 + ext.bottom, wallBottom + ext.bottom);
         const maxY = Math.max(minY, wallTop - ext.top);
 
@@ -4400,9 +4453,16 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
                 ts.x = d * Math.sin(theta); ts.z = d * Math.cos(theta);
             }
         }
-        ts.changeDirTimer = pickNextStrafeTimer();
 
-// ★ 跟枪目标与 sixTargets 彻底解耦（出场即正对玩家）
+        // ★ 重开清空 Tracking 算法态
+        ts.changeDirTimer = pickNextStrafeTimer();
+        ts.mindTimer = 0;
+        ts.targetVx = undefined;
+        ts.targetVy = undefined;
+        ts.targetVz = undefined;
+        ts.ang = undefined;
+        ts.targetAng = undefined;
+
         if (trackingTarget.rootGroup) {
             trackingTarget.rootGroup.position.set(ts.x, ts.y, ts.z);
             const dx = camera.position.x - ts.x;
@@ -4517,7 +4577,7 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
     // ============================================================
     // 物理运算与位移更新主循环 (Update Physics Loop)
     // ============================================================
-    function updatePhysics(dt) {
+ function updatePhysics(dt) {
 
         if (CFG.cloudsEnabled && cloudGroup) {
             STATE._cloudTick = (STATE._cloudTick || 0) + 1;
@@ -4592,24 +4652,66 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
         const eyeY = Math.max(0.05, CFG.viewHeight - MOVE_STATE.crouchCurrent * CFG.movement.crouchDepth + MOVE_STATE.jumpY);
         camera.position.set(MOVE_STATE.x, eyeY, MOVE_STATE.z);
 
-        // --- Sixshot 动态逻辑 ---
+        // --- Sixshot 动态逻辑（恒定角速度 ω = π / T 模型）---
         if (CFG.mode === 'sixshot') {
             const D = CFG.depthSixshot;
             const isM = CFG.dynamic.enabled && STATE.game !== 'finished';
             const curSpd = isM ? (CFG.dynamic.speedDegPerSec * Math.PI / 180 * D) : 0;
             const b = getSixshotBounds();
+            const dMode = CFG.dynamic.mode || 'fly';
+            const flyType = CFG.dynamic.flyType || 'pure';
+
+            // ★ 改动 3：消除 0.02 下限
+            const minDyn = Math.max(0, CFG.dynamic.intervalMin !== undefined ? CFG.dynamic.intervalMin : 0.5);
+            const maxDyn = Math.max(minDyn, CFG.dynamic.intervalMax !== undefined ? CFG.dynamic.intervalMax : 1.5);
 
             for (const t of sixTargets) {
                 if (!t.mesh.visible) continue;
                 t.speed = curSpd;
+
                 if (curSpd > 0) {
+                    if (dMode === 'fly' && flyType === 'pure') {
+                        if (t.ang === undefined) t.ang = Math.atan2(t.dirY || 0, t.dirX || 1);
+                        if (t.targetAng === undefined) t.targetAng = t.ang;
+                        if (t.mindTimer === undefined) t.mindTimer = 0;
+                        if (t.mindDuration === undefined) t.mindDuration = 1.0;
+
+                        t.mindTimer -= dt;
+                        if (t.mindTimer <= 0) {
+                            t.mindDuration = minDyn + Math.random() * (maxDyn - minDyn);
+                            t.mindTimer = t.mindDuration;
+                            t.targetAng = Math.random() * Math.PI * 2;
+                        }
+
+                        // ★ 改动 6-A：使用球体半径 r 作为紧凑边界区
+                        const edgePad = b.r;
+                        if (t.x < b.minX + edgePad || t.x > b.maxX - edgePad || t.y < b.minY + edgePad || t.y > b.maxY - edgePad) {
+                            t.targetAng = Math.atan2((b.minY + b.maxY) / 2 - t.y, 0 - t.x);
+                        }
+
+                        // 恒定角速度：周期 T 内转过 π 弧度（无任何脏数字）
+                        const omega = t.mindDuration > 0 ? Math.PI / t.mindDuration : Infinity;
+                        const stepAng = omega * dt;
+
+                        let diff = t.targetAng - t.ang;
+                        while (diff > Math.PI) diff -= Math.PI * 2;
+                        while (diff < -Math.PI) diff += Math.PI * 2;
+
+                        if (Math.abs(diff) <= stepAng) t.ang = t.targetAng;
+                        else t.ang += Math.sign(diff) * stepAng;
+
+                        t.dirX = Math.cos(t.ang);
+                        t.dirY = Math.sin(t.ang);
+                    }
+
                     t.x += t.dirX * t.speed * dt;
                     t.y += t.dirY * t.speed * dt;
                 }
-                if (t.x < b.minX) { t.x = b.minX; t.dirX = Math.abs(t.dirX); }
-                else if (t.x > b.maxX) { t.x = b.maxX; t.dirX = -Math.abs(t.dirX); }
-                if (t.y < b.minY) { t.y = b.minY; t.dirY = Math.abs(t.dirY); }
-                else if (t.y > b.maxY) { t.y = b.maxY; t.dirY = -Math.abs(t.dirY); }
+
+                if (t.x < b.minX) { t.x = b.minX; t.dirX = Math.abs(t.dirX); t.ang = Math.atan2(t.dirY, t.dirX); }
+                else if (t.x > b.maxX) { t.x = b.maxX; t.dirX = -Math.abs(t.dirX); t.ang = Math.atan2(t.dirY, t.dirX); }
+                if (t.y < b.minY) { t.y = b.minY; t.dirY = Math.abs(t.dirY); t.ang = Math.atan2(t.dirY, t.dirX); }
+                else if (t.y > b.maxY) { t.y = b.maxY; t.dirY = -Math.abs(t.dirY); t.ang = Math.atan2(t.dirY, t.dirX); }
             }
 
             STATE._collisionTick = (STATE._collisionTick || 0) + 1;
@@ -4624,34 +4726,8 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
                         if (dist < minDist && dist > 0.0001) {
                             const overlap = (minDist - dist) / 2;
                             const nx = dx / dist, ny = dy / dist;
-
-                            if (CFG.dynamic.mode === 'horizontal') {
-                                t1.x -= Math.sign(dx || 1) * overlap; t2.x += Math.sign(dx || 1) * overlap;
-                            } else if (CFG.dynamic.mode === 'vertical') {
-                                t1.y -= Math.sign(dy || 1) * overlap; t2.y += Math.sign(dy || 1) * overlap;
-                            } else {
-                                t1.x -= nx * overlap; t1.y -= ny * overlap;
-                                t2.x += nx * overlap; t2.y += ny * overlap;
-                            }
-
-                            if (curSpd > 0) {
-                                if (CFG.dynamic.mode === 'horizontal') {
-                                    t1.dirY = 0; t1.dirX = -t1.dirX;
-                                    t2.dirY = 0; t2.dirX = -t2.dirX;
-                                } else if (CFG.dynamic.mode === 'vertical') {
-                                    t1.dirX = 0; t1.dirY = -t1.dirY;
-                                    t2.dirX = 0; t2.dirY = -t2.dirY;
-                                } else {
-                                    const dvn = (t1.dirX * t1.speed - t2.dirX * t2.speed) * nx + (t1.dirY * t1.speed - t2.dirY * t2.speed) * ny;
-                                    if (dvn < 0) {
-                                        t1.dirX -= dvn * nx / (t1.speed || 1); t1.dirY -= dvn * ny / (t1.speed || 1);
-                                        t2.dirX += dvn * nx / (t2.speed || 1); t2.dirY += dvn * ny / (t2.speed || 1);
-                                        const l1 = Math.hypot(t1.dirX, t1.dirY) || 1, l2 = Math.hypot(t2.dirX, t2.dirY) || 1;
-                                        t1.dirX /= l1; t1.dirY /= l1;
-                                        t2.dirX /= l2; t2.dirY /= l2;
-                                    }
-                                }
-                            }
+                            t1.x -= nx * overlap; t1.y -= ny * overlap;
+                            t2.x += nx * overlap; t2.y += ny * overlap;
                         }
                     }
                 }
@@ -4660,11 +4736,12 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
             for (const t of sixTargets) { if (t.mesh.visible) t.mesh.position.set(t.x, t.y, t.z); }
         }
 
-        // --- Tracking 跟枪逻辑（含假人边界严密防穿框） ---
+        // --- Tracking 跟枪逻辑（包含 1/2/3/6 彻底规整化）---
         else if (CFG.mode === 'tracking') {
             const ts = STATE.tracking;
             const space = CFG.tracking.space;
             const isFly = CFG.tracking.pattern === 'fly';
+            const flyType = CFG.tracking.flyType || 'pure';
             const baseD = CFG.depthTracking;
             const cy = CFG.viewHeight;
             const isDummy = (CFG.tracking.shape === 'dummy');
@@ -4676,43 +4753,132 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
             const wallBottom = Math.max(0.05, cy - wallH / 2);
             const wallTop = wallBottom + wallH;
 
-            // ★ 核心边界防穿透：假人身体最底端不穿出玻璃下沿，头顶不穿出玻璃上沿
             const minY = Math.max(0.05 + ext.bottom, wallBottom + ext.bottom);
             const maxY = Math.max(minY, wallTop - ext.top);
 
+            // ★ 改动 3：消除 minStrafe 的 0.02 下限
+            const rawMin = CFG.tracking.strafeMinInterval !== undefined ? CFG.tracking.strafeMinInterval : 0.8;
+            const rawMax = CFG.tracking.strafeMaxInterval !== undefined ? CFG.tracking.strafeMaxInterval : 1.8;
+            const minStrafe = Math.max(0, rawMin);
+            const maxStrafe = Math.max(minStrafe, rawMax);
+
+            if (ts.vTan === undefined || isNaN(ts.vTan)) ts.vTan = 0;
+            if (ts.vy === undefined || isNaN(ts.vy)) ts.vy = 0;
+            if (ts.vDist === undefined || isNaN(ts.vDist)) ts.vDist = 0;
+            if (ts.vx === undefined || isNaN(ts.vx)) ts.vx = 0;
+
             if (space === 'free3d') {
                 const range3D = Math.max(0.5, CFG.tracking.depthRange3D ?? 10.0);
-                
-                ts.vYaw = ts.vTan / Math.max(0.1, ts.dist);
+                const minD = baseD;
+                const maxD = baseD + range3D;
+
+                if (isFly && flyType === 'pure') {
+                    if (ts.targetVx === undefined) ts.targetVx = 0;
+                    if (ts.targetVy === undefined) ts.targetVy = 0;
+                    if (ts.targetVz === undefined) ts.targetVz = 0;
+                    if (ts.mindTimer === undefined) ts.mindTimer = 0;
+                    if (ts.mindDuration === undefined) ts.mindDuration = 1.0;
+
+                    ts.mindTimer -= dt;
+                    if (ts.mindTimer <= 0) {
+                        ts.mindDuration = minStrafe + Math.random() * (maxStrafe - minStrafe);
+                        ts.mindTimer = ts.mindDuration;
+
+                        // ★ 改动 1：修复球面均匀分布
+                        const cosPhi = rand(-1, 1);
+                        const sinPhi = Math.sqrt(1 - cosPhi * cosPhi);
+                        const theta = rand(0, Math.PI * 2);
+                        ts.targetVx = sinPhi * Math.cos(theta);
+                        ts.targetVy = cosPhi;
+                        ts.targetVz = sinPhi * Math.sin(theta);
+                    }
+
+                    // ★ 改动 2：修复 3D 边缘方向归一化
+                    const edgePad = ext.side;
+                    let isNearEdge = false;
+                    let tx = 0, ty = 0, tz = 0;
+                    if (ts.dist < minD + edgePad) { tz += 1; isNearEdge = true; }
+                    else if (ts.dist > maxD - edgePad) { tz -= 1; isNearEdge = true; }
+                    if (ts.y < minY + edgePad) { ty += 1; isNearEdge = true; }
+                    else if (ts.y > maxY - edgePad) { ty -= 1; isNearEdge = true; }
+
+                    const sideRad = ext.side / ts.dist;
+                    const halfAngle = Math.max(0, spanRad / 2 - sideRad);
+                    if (CFG.tracking.angleRange < 359) {
+                        if (ts.yaw < -halfAngle) { tx += 1; isNearEdge = true; }
+                        else if (ts.yaw > halfAngle) { tx -= 1; isNearEdge = true; }
+                    }
+
+                    if (isNearEdge) {
+                        const tlen = Math.hypot(tx, ty, tz);
+                        if (tlen > 0.0001) {
+                            ts.targetVx = tx / tlen;
+                            ts.targetVy = ty / tlen;
+                            ts.targetVz = tz / tlen;
+                        }
+                    }
+
+                    // ★ 改动 6-D：3D 球面恒定角速度旋转
+                    const omega = ts.mindDuration > 0 ? Math.PI / ts.mindDuration : Infinity;
+                    const stepAng = omega * dt;
+
+                    let curYaw = Math.atan2(ts.vDist, ts.vTan);
+                    let curPitch = Math.asin(clamp(ts.vy / (linSpeed || 1), -1, 1));
+                    const tgtYaw = Math.atan2(ts.targetVz, ts.targetVx);
+                    const tgtPitch = Math.asin(clamp(ts.targetVy, -1, 1));
+
+                    let dYaw = tgtYaw - curYaw;
+                    while (dYaw > Math.PI) dYaw -= Math.PI * 2;
+                    while (dYaw < -Math.PI) dYaw += Math.PI * 2;
+                    const dPitch = tgtPitch - curPitch;
+
+                    const totalArc = Math.hypot(dYaw * Math.cos((curPitch + tgtPitch) / 2), dPitch);
+
+                    if (totalArc <= stepAng) {
+                        curYaw = tgtYaw;
+                        curPitch = tgtPitch;
+                    } else {
+                        const k = stepAng / totalArc;
+                        curYaw += dYaw * k;
+                        curPitch += dPitch * k;
+                    }
+                    curPitch = clamp(curPitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
+
+                    const cosP = Math.cos(curPitch);
+                    ts.vTan = cosP * Math.cos(curYaw) * linSpeed;
+                    ts.vDist = cosP * Math.sin(curYaw) * linSpeed;
+                    ts.vy = Math.sin(curPitch) * linSpeed;
+                }
+
+                ts.vYaw = ts.vTan / ts.dist;
                 ts.yaw += ts.vYaw * dt;
                 ts.y += ts.vy * dt;
+                ts.dist += ts.vDist * dt;
+
                 if (ts.y <= minY) { ts.y = minY; ts.vy = Math.abs(ts.vy); }
                 else if (ts.y >= maxY) { ts.y = maxY; ts.vy = -Math.abs(ts.vy); }
-
-                ts.dist += ts.vDist * dt;
-                if (ts.dist <= baseD) { ts.dist = baseD; ts.vDist = Math.abs(ts.vDist); }
-                else if (ts.dist >= baseD + range3D) { ts.dist = baseD + range3D; ts.vDist = -Math.abs(ts.vDist); }
-
-                const sideRad = ext.side / Math.max(0.1, ts.dist);
-                const halfAngle = Math.max(0.05, spanRad / 2 - sideRad);
+                if (ts.dist <= minD) { ts.dist = minD; ts.vDist = Math.abs(ts.vDist); }
+                else if (ts.dist >= maxD) { ts.dist = maxD; ts.vDist = -Math.abs(ts.vDist); }
                 if (CFG.tracking.angleRange < 359) {
                     if (ts.yaw <= -halfAngle) { ts.yaw = -halfAngle; ts.vTan = Math.abs(ts.vTan); }
                     else if (ts.yaw >= halfAngle) { ts.yaw = halfAngle; ts.vTan = -Math.abs(ts.vTan); }
                 }
 
-                if (CFG.tracking.strafeMaxInterval > 0.01) {
-                    ts.changeDirTimer -= dt;
-                    if (ts.changeDirTimer <= 0) {
-                        ts.changeDirTimer = pickNextStrafeTimer();
-                        if (isFly) {
-                            const cosPhi = rand(-1, 1), sinPhi = Math.sqrt(1 - cosPhi * cosPhi);
-                            const theta = rand(0, Math.PI * 2);
-                            ts.vTan = sinPhi * Math.cos(theta) * linSpeed;
-                            ts.vy = cosPhi * linSpeed;
-                            ts.vDist = sinPhi * Math.sin(theta) * linSpeed;
-                        } else {
-                            ts.vTan = -ts.vTan;
-                            ts.vDist = -ts.vDist;
+if ((isFly && flyType === 'bounce') || !isFly) {
+    if (rawMax > 0) {
+                        ts.changeDirTimer -= dt;
+                        if (ts.changeDirTimer <= 0) {
+                            ts.changeDirTimer = minStrafe + Math.random() * (maxStrafe - minStrafe);
+                            if (isFly) {
+                                const cosPhi = rand(-1, 1), sinPhi = Math.sqrt(1 - cosPhi * cosPhi);
+                                const theta = rand(0, Math.PI * 2);
+                                ts.vTan = sinPhi * Math.cos(theta) * linSpeed;
+                                ts.vy = cosPhi * linSpeed;
+                                ts.vDist = sinPhi * Math.sin(theta) * linSpeed;
+                            } else {
+                                ts.vTan = -ts.vTan;
+                                ts.vDist = -ts.vDist;
+                            }
                         }
                     }
                 }
@@ -4722,81 +4888,153 @@ const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
                 ts.z = ts.dist * Math.cos(th);
             } 
             else if (space === 'curve') {
+                const sideRad = ext.side / Math.max(0.1, ts.dist || baseD);
+                const halfAngle = Math.max(0.05, spanRad / 2 - sideRad);
+
+                if (isFly && flyType === 'pure') {
+                    if (ts.ang === undefined) ts.ang = Math.atan2(ts.vy || 0, ts.vTan || 1);
+                    if (ts.targetAng === undefined) ts.targetAng = ts.ang;
+                    if (ts.mindTimer === undefined) ts.mindTimer = 0;
+                    if (ts.mindDuration === undefined) ts.mindDuration = 1.0;
+
+                    ts.mindTimer -= dt;
+                    if (ts.mindTimer <= 0) {
+                        ts.mindDuration = minStrafe + Math.random() * (maxStrafe - minStrafe);
+                        ts.mindTimer = ts.mindDuration;
+                        ts.targetAng = Math.random() * Math.PI * 2;
+                    }
+
+                    // ★ 改动 6-C：环形曲面恒定角速度
+                    const edgePad = ext.side;
+                    if (ts.y < minY + edgePad || ts.y > maxY - edgePad) {
+                        ts.targetAng = (ts.y < minY + edgePad) ? Math.PI / 2 : -Math.PI / 2;
+                    }
+                    if (CFG.tracking.angleRange < 359) {
+                        if (ts.yaw < -halfAngle) ts.targetAng = 0;
+                        else if (ts.yaw > halfAngle) ts.targetAng = Math.PI;
+                    }
+
+                    const omega = ts.mindDuration > 0 ? Math.PI / ts.mindDuration : Infinity;
+                    const stepAng = omega * dt;
+
+                    let diff = ts.targetAng - ts.ang;
+                    while (diff > Math.PI) diff -= Math.PI * 2;
+                    while (diff < -Math.PI) diff += Math.PI * 2;
+
+                    if (Math.abs(diff) <= stepAng) ts.ang = ts.targetAng;
+                    else ts.ang += Math.sign(diff) * stepAng;
+
+                    ts.vTan = Math.cos(ts.ang) * linSpeed;
+                    ts.vy = Math.sin(ts.ang) * linSpeed;
+                    ts.vYaw = ts.vTan / baseD;
+                }
+
                 ts.yaw += ts.vYaw * dt;
                 if (isFly) ts.y += ts.vy * dt;
 
-                const sideRad = ext.side / Math.max(0.1, ts.dist);
-                const halfAngle = Math.max(0.05, spanRad / 2 - sideRad);
+                if (ts.y <= minY) { ts.y = minY; ts.vy = Math.abs(ts.vy); }
+                else if (ts.y >= maxY) { ts.y = maxY; ts.vy = -Math.abs(ts.vy); }
                 if (CFG.tracking.angleRange < 359) {
-                    if (ts.yaw <= -halfAngle) { ts.yaw = -halfAngle; ts.vYaw = Math.abs(ts.vYaw); }
-                    else if (ts.yaw >= halfAngle) { ts.yaw = halfAngle; ts.vYaw = -Math.abs(ts.vYaw); }
-                }
-
-                if (isFly) {
-                    if (ts.y <= minY) { ts.y = minY; ts.vy = Math.abs(ts.vy); }
-                    else if (ts.y >= maxY) { ts.y = maxY; ts.vy = -Math.abs(ts.vy); }
+                    if (ts.yaw <= -halfAngle) { ts.yaw = -halfAngle; ts.vTan = Math.abs(ts.vTan); ts.vYaw = Math.abs(ts.vYaw); }
+                    else if (ts.yaw >= halfAngle) { ts.yaw = halfAngle; ts.vTan = -Math.abs(ts.vTan); ts.vYaw = -Math.abs(ts.vYaw); }
                 } else {
-                    ts.y = clamp(cy, minY, maxY);
+                    if (ts.yaw > Math.PI) ts.yaw -= Math.PI * 2;
+                    else if (ts.yaw < -Math.PI) ts.yaw += Math.PI * 2;
                 }
 
-                if (CFG.tracking.strafeMaxInterval > 0.01) {
-                    ts.changeDirTimer -= dt;
-                    if (ts.changeDirTimer <= 0) {
-                        ts.changeDirTimer = pickNextStrafeTimer();
-                        if (isFly) {
-                            const a = rand(0, Math.PI * 2);
-                            ts.vYaw = Math.cos(a) * speedRad;
-                            ts.vy = Math.sin(a) * linSpeed;
-                        } else {
-                            ts.vYaw = -ts.vYaw;
-                            ts.vy = 0;
+if ((isFly && flyType === 'bounce') || !isFly) {
+    if (rawMax > 0) {
+                        ts.changeDirTimer -= dt;
+                        if (ts.changeDirTimer <= 0) {
+                            ts.changeDirTimer = minStrafe + Math.random() * (maxStrafe - minStrafe);
+                            if (isFly) {
+                                const a = rand(0, Math.PI * 2);
+                                ts.vYaw = (Math.cos(a) * linSpeed) / baseD;
+                                ts.vy = Math.sin(a) * linSpeed;
+                            } else {
+                                ts.vYaw = -ts.vYaw;
+                                ts.vy = 0;
+                            }
                         }
                     }
                 }
+
                 const th = Math.PI + ts.yaw;
                 ts.x = baseD * Math.sin(th);
                 ts.z = baseD * Math.cos(th);
-            }
+            } 
             else {
-                // 直面墙面跟枪（包含假人肩宽防穿框）
+                // ★ 改动 6-B：直面墙恒定角速度
                 const halfW = Math.max(0.5, (baseD * spanRad) / 2);
                 const minX = -halfW + ext.side;
                 const maxX = halfW - ext.side;
 
+                if (isFly && flyType === 'pure') {
+                    if (ts.ang === undefined) ts.ang = Math.atan2(ts.vy || 0, ts.vx || 1);
+                    if (ts.targetAng === undefined) ts.targetAng = ts.ang;
+                    if (ts.mindTimer === undefined) ts.mindTimer = 0;
+                    if (ts.mindDuration === undefined) ts.mindDuration = 1.0;
+
+                    ts.mindTimer -= dt;
+                    if (ts.mindTimer <= 0) {
+                        ts.mindDuration = minStrafe + Math.random() * (maxStrafe - minStrafe);
+                        ts.mindTimer = ts.mindDuration;
+                        ts.targetAng = Math.random() * Math.PI * 2;
+                    }
+
+                    const edgePad = ext.side;
+                    if (ts.x < minX + edgePad || ts.x > maxX - edgePad || ts.y < minY + edgePad || ts.y > maxY - edgePad) {
+                        ts.targetAng = Math.atan2((minY + maxY) / 2 - ts.y, 0 - ts.x);
+                    }
+
+                    const omega = ts.mindDuration > 0 ? Math.PI / ts.mindDuration : Infinity;
+                    const stepAng = omega * dt;
+
+                    let diff = ts.targetAng - ts.ang;
+                    while (diff > Math.PI) diff -= Math.PI * 2;
+                    while (diff < -Math.PI) diff += Math.PI * 2;
+
+                    if (Math.abs(diff) <= stepAng) ts.ang = ts.targetAng;
+                    else ts.ang += Math.sign(diff) * stepAng;
+
+                    ts.vx = Math.cos(ts.ang) * linSpeed;
+                    ts.vy = Math.sin(ts.ang) * linSpeed;
+                }
+
                 ts.x += ts.vx * dt;
                 ts.y += ts.vy * dt;
+                ts.z = -baseD;
 
-                if (ts.x <= minX) { ts.x = minX; ts.vx = Math.abs(ts.vx); }
-                else if (ts.x >= maxX) { ts.x = maxX; ts.vx = -Math.abs(ts.vx); }
+                if (ts.x <= minX) { ts.x = minX; ts.vx = Math.abs(ts.vx); ts.ang = Math.atan2(ts.vy, ts.vx); }
+                else if (ts.x >= maxX) { ts.x = maxX; ts.vx = -Math.abs(ts.vx); ts.ang = Math.atan2(ts.vy, ts.vx); }
+                if (ts.y <= minY) { ts.y = minY; ts.vy = Math.abs(ts.vy); ts.ang = Math.atan2(ts.vy, ts.vx); }
+                else if (ts.y >= maxY) { ts.y = maxY; ts.vy = -Math.abs(ts.vy); ts.ang = Math.atan2(ts.vy, ts.vx); }
 
-                if (ts.y <= minY) { ts.y = minY; ts.vy = Math.abs(ts.vy); }
-                else if (ts.y >= maxY) { ts.y = maxY; ts.vy = -Math.abs(ts.vy); }
-
-                if (CFG.tracking.strafeMaxInterval > 0.01) {
-                    ts.changeDirTimer -= dt;
-                    if (ts.changeDirTimer <= 0) {
-                        ts.changeDirTimer = pickNextStrafeTimer();
-                        if (isFly) {
-                            const a = rand(0, Math.PI * 2);
-                            ts.vx = Math.cos(a) * linSpeed; ts.vy = Math.sin(a) * linSpeed;
-                        } else {
-                            ts.vx = -ts.vx; ts.vy = 0;
+if ((isFly && flyType === 'bounce') || !isFly) {
+    if (rawMax > 0) {
+                        ts.changeDirTimer -= dt;
+                        if (ts.changeDirTimer <= 0) {
+                            ts.changeDirTimer = minStrafe + Math.random() * (maxStrafe - minStrafe);
+                            if (isFly) {
+                                const a = rand(0, Math.PI * 2);
+                                ts.vx = Math.cos(a) * linSpeed; ts.vy = Math.sin(a) * linSpeed;
+                            } else {
+                                ts.vx = -ts.vx; ts.vy = 0;
+                            }
                         }
                     }
                 }
             }
 
-// 物理坐标与矩阵同步（飞奔中每一帧实时注视玩家）
             if (trackingTarget.rootGroup) {
                 trackingTarget.rootGroup.position.set(ts.x, ts.y, ts.z);
                 const dx = camera.position.x - ts.x;
                 const dz = camera.position.z - ts.z;
                 trackingTarget.rootGroup.rotation.y = Math.atan2(dx, dz);
+                trackingTarget.rootGroup.visible = (CFG.mode === 'tracking');
                 trackingTarget.rootGroup.updateMatrixWorld(true);
             }
 
-            // 开火与高亮判定
-            // 支持开关：如果开启了自动开火，无需按住左键；如果关闭，则必须按住左键
             const isTrackingFiring = CFG.tracking.autoFire || STATE.isMouseDown;
             if (STATE.game === 'playing' && isTrackingFiring) {
                 STATE.trackingFiringTime += dt;
@@ -5585,9 +5823,73 @@ function syncAllButtonStates() {
         document.querySelectorAll('#sixshot-size-presets .pill-btn').forEach(b => {
             b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.targetSizeCm) < 0.1);
         });
-        document.querySelectorAll('#sixshot-dyn-modes .pill-btn').forEach(b => {
+document.querySelectorAll('#sixshot-dyn-modes .pill-btn').forEach(b => {
             b.classList.toggle('active', b.dataset.val === (CFG.dynamic.mode || 'fly'));
         });
+
+        // Sixshot 细分子模式与周期面板显示联动
+        const sixFlyRow = getEl('sixshot-fly-subtype-row');
+        const sixIntUI = getEl('sixshot-interval-ui');
+        const isSixPure = CFG.dynamic.enabled && CFG.dynamic.mode === 'fly' && CFG.dynamic.flyType === 'pure';
+
+        if (sixFlyRow) {
+            sixFlyRow.style.display = (CFG.dynamic.mode === 'fly') ? 'block' : 'none';
+            const curSub = CFG.dynamic.flyType || 'pure';
+            const btnPure = getEl('btn-sixshot-fly-pure');
+            const btnBounce = getEl('btn-sixshot-fly-bounce');
+            if (btnPure) btnPure.classList.toggle('active', curSub === 'pure');
+            if (btnBounce) btnBounce.classList.toggle('active', curSub === 'bounce');
+        }
+
+        if (sixIntUI) {
+            sixIntUI.style.display = isSixPure ? 'block' : 'none';
+        }
+        document.querySelectorAll('#sixshot-interval-presets .pill-btn').forEach(b => {
+            const parts = b.dataset.val.split(',').map(Number);
+            b.classList.toggle('active', Math.abs(parts[0] - (CFG.dynamic.intervalMin !== undefined ? CFG.dynamic.intervalMin : 0.5)) < 0.05 && Math.abs(parts[1] - (CFG.dynamic.intervalMax !== undefined ? CFG.dynamic.intervalMax : 1.5)) < 0.05);
+        });
+
+        // Tracking 细分子模式显示与智能动态改名
+        const trackFlyRow = getEl('tracking-fly-subtype-row');
+        const isTrackPure = (CFG.tracking.pattern === 'fly') && (CFG.tracking.flyType === 'pure');
+
+        if (trackFlyRow) {
+            trackFlyRow.style.display = (CFG.tracking.pattern === 'fly') ? 'block' : 'none';
+            const curTrackSub = CFG.tracking.flyType || 'pure';
+            const btnTPure = getEl('btn-track-fly-pure');
+            const btnTBounce = getEl('btn-track-fly-bounce');
+            if (btnTPure) btnTPure.classList.toggle('active', curTrackSub === 'pure');
+            if (btnTBounce) btnTBounce.classList.toggle('active', curTrackSub === 'bounce');
+        }
+
+        // 智能动态改名
+        const strafeCard = getEl('strafe-freq-presets')?.closest('.section-card');
+        if (strafeCard) {
+            const titleSpan = strafeCard.querySelector('.section-label');
+            const subSpan = strafeCard.querySelector('.section-sub');
+            const pBtns = strafeCard.querySelectorAll('.preset-grid button');
+
+            if (isTrackPure) {
+                if (titleSpan) titleSpan.innerHTML = `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M18 8L22 12L18 16M6 8L2 12L6 16"/></svg><span>机动周期与变向频率</span>`;
+                if (subSpan) subSpan.innerText = '周期越短越神经碎闪，越长弧线越宽阔';
+                if (pBtns.length >= 4) {
+                    pBtns[0].innerText = '极限碎闪';
+                    pBtns[1].innerText = '高频急转';
+                    pBtns[2].innerText = '常规机动';
+                    pBtns[3].innerText = '大弧走位';
+                }
+            } else {
+                if (titleSpan) titleSpan.innerHTML = `<svg class="icon-sm" viewBox="0 0 24 24"><path d="M18 8L22 12L18 16M6 8L2 12L6 16"/></svg><span>变向周期与到边折返</span>`;
+                if (subSpan) subSpan.innerText = '0为到边折返/持续绕圈';
+                if (pBtns.length >= 4) {
+                    pBtns[0].innerText = '到边折返';
+                    pBtns[1].innerText = '高频AD';
+                    pBtns[2].innerText = '常规竞技';
+                    pBtns[3].innerText = '定长1.2s';
+                }
+            }
+        }
+
         document.querySelectorAll('#sixshot-speed-presets .pill-btn').forEach(b => {
             b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - CFG.dynamic.speedDegPerSec) < 0.1);
         });
@@ -5737,6 +6039,11 @@ function syncAllButtonStates() {
         setValF('inp-track-depth3d', CFG.tracking.depthRange3D ?? 10.0);
         const d3dR = getEl('inp-track-depth3d-r'); if (d3dR) d3dR.value = CFG.tracking.depthRange3D ?? 10.0;
 
+        setValF('inp-sixshot-freq-min', CFG.dynamic.intervalMin !== undefined ? CFG.dynamic.intervalMin : 0.5);
+        const sfmR = getEl('inp-sixshot-freq-min-r'); if (sfmR) sfmR.value = CFG.dynamic.intervalMin !== undefined ? CFG.dynamic.intervalMin : 0.5;
+        setValF('inp-sixshot-freq-max', CFG.dynamic.intervalMax !== undefined ? CFG.dynamic.intervalMax : 1.5);
+        const sfxR = getEl('inp-sixshot-freq-max-r'); if (sfxR) sfxR.value = CFG.dynamic.intervalMax !== undefined ? CFG.dynamic.intervalMax : 1.5;
+
         setValF('inp-track-freq-min', CFG.tracking.strafeMinInterval);
         const fmR = getEl('inp-track-freq-min-r'); if (fmR) fmR.value = CFG.tracking.strafeMinInterval;
         setValF('inp-track-freq-max', CFG.tracking.strafeMaxInterval);
@@ -5867,6 +6174,8 @@ function dispatchGlobalValue(id, val) {
         else if (id === 'inp-track-depth3d') window.setTrackingDepthRange3D(val);
         else if (id === 'inp-track-freq-min') window.setStrafeMin(val);
         else if (id === 'inp-track-freq-max') window.setStrafeMax(val);
+        else if (id === 'inp-sixshot-freq-min') window.setSixshotMinInterval(val);
+        else if (id === 'inp-sixshot-freq-max') window.setSixshotMaxInterval(val);
         else if (id === 'inp-depth-tracking') window.setDepthTracking(val);
         else if (id === 'inp-dpi') window.setDpiManual(val);
         else if (id === 'inp-fov') window.syncFov(val);
@@ -5937,14 +6246,74 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
         saveToLocalStorage();
     };
 
+    // ★ 改动 5-C：切换模式时清理残存角度态
     window.setSixshotDynamicMode = function(mode) {
         if (STATE.activeOfficialProject) return;
         CFG.dynamic.mode = mode;
+        sixTargets.forEach(t => { t.ang = undefined; t.targetAng = undefined; t.mindTimer = 0; });
         sixTargets.forEach(t => {
             if (mode === 'horizontal') { t.dirX = t.dirX >= 0 ? 1 : -1; t.dirY = 0; }
             else if (mode === 'vertical') { t.dirX = 0; t.dirY = t.dirY >= 0 ? 1 : -1; }
             else { const a = rand(0, Math.PI * 2); t.dirX = Math.cos(a); t.dirY = Math.sin(a); }
         });
+        syncAllButtonStates();
+        saveToLocalStorage();
+    };
+
+    // ★ 改动 5-A：清理 Sixshot 残存角度态
+    window.setSixshotFlySubtype = function(sub) {
+        if (STATE.activeOfficialProject) return;
+        CFG.dynamic.flyType = sub;
+        sixTargets.forEach(t => {
+            t.ang = undefined;
+            t.targetAng = undefined;
+            t.mindTimer = 0;
+        });
+        syncAllButtonStates();
+        saveToLocalStorage();
+    };
+
+    // ★ 改动 5-B：清理 Tracking 残存角度态
+    window.setTrackingFlySubtype = function(sub) {
+        if (STATE.activeOfficialProject) return;
+        CFG.tracking.flyType = sub;
+        const ts = STATE.tracking;
+        ts.mindTimer = 0;
+        ts.targetVx = undefined;
+        ts.targetVy = undefined;
+        ts.targetVz = undefined;
+        ts.ang = undefined;
+        ts.targetAng = undefined;
+        syncAllButtonStates();
+        saveToLocalStorage();
+    };
+
+    window.setSixshotIntervalPreset = function(mn, mx) {
+        if (STATE.activeOfficialProject) return;
+        CFG.dynamic.intervalMin = Math.min(mn, mx);
+        CFG.dynamic.intervalMax = Math.max(mn, mx);
+        setValF('inp-sixshot-freq-min', CFG.dynamic.intervalMin);
+        setValF('inp-sixshot-freq-max', CFG.dynamic.intervalMax);
+        const r1 = getEl('inp-sixshot-freq-min-r'); if (r1) r1.value = CFG.dynamic.intervalMin;
+        const r2 = getEl('inp-sixshot-freq-max-r'); if (r2) r2.value = CFG.dynamic.intervalMax;
+        syncAllButtonStates();
+        saveToLocalStorage();
+    };
+
+    window.setSixshotMinInterval = function(v) {
+        if (STATE.activeOfficialProject) return;
+        CFG.dynamic.intervalMin = Math.min(parseFloat(v), CFG.dynamic.intervalMax);
+        setValF('inp-sixshot-freq-min', CFG.dynamic.intervalMin);
+        const r = getEl('inp-sixshot-freq-min-r'); if (r) r.value = CFG.dynamic.intervalMin;
+        syncAllButtonStates();
+        saveToLocalStorage();
+    };
+
+    window.setSixshotMaxInterval = function(v) {
+        if (STATE.activeOfficialProject) return;
+        CFG.dynamic.intervalMax = Math.max(parseFloat(v), CFG.dynamic.intervalMin);
+        setValF('inp-sixshot-freq-max', CFG.dynamic.intervalMax);
+        const r = getEl('inp-sixshot-freq-max-r'); if (r) r.value = CFG.dynamic.intervalMax;
         syncAllButtonStates();
         saveToLocalStorage();
     };
