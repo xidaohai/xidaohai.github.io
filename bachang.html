@@ -1391,26 +1391,50 @@
         }
 
         // 4. 准星渲染引擎
-        let lastTargetAimState = false;
+let lastTargetAimState = false;
+// ★ 缓存上一次的准星状态与参数，避免重复重建 DOM
+let _lastCrosshairState = null;
+let _lastCrosshairType = null;
+let _lastCrosshairColor = null;
+let _lastCrosshairSize = null;
+let _lastCrosshairThick = null;
+let _lastCrosshairGap = null;
 
         function getActiveCrosshairColor(onTarget) {
             return onTarget ? config.crosshairColor.targetColor : config.crosshairColor.defaultColor;
         }
 
-        function updateCrosshairStyle(onTarget = lastTargetAimState) {
-            lastTargetAimState = onTarget;
-            const container = getEl('crosshair-container');
-            if (!container) return;
+function updateCrosshairStyle(onTarget = lastTargetAimState) {
+    const container = getEl('crosshair-container');
+    if (!container) return;
 
-            container.classList.toggle('on-target', onTarget);
+    const color = getActiveCrosshairColor(onTarget);
+    const { type, size, thick, gap, outline } = config.crosshair;
 
-            const color = getActiveCrosshairColor(onTarget);
-            const { type, size, thick, gap, outline } = config.crosshair;
+    // ★ 缓存命中：状态、类型、颜色都没变，直接返回
+    if (_lastCrosshairState === onTarget &&
+        _lastCrosshairType === type &&
+        _lastCrosshairColor === color &&
+        _lastCrosshairSize === size &&
+        _lastCrosshairThick === thick &&
+        _lastCrosshairGap === gap) {
+        return;
+    }
 
-            if (type === 'classic') {
-                container.innerHTML = `<div class="classic-crosshair-dot" style="background:${color}; color:${color};"></div>`;
-                return;
-            }
+    _lastCrosshairState = onTarget;
+    _lastCrosshairType = type;
+    _lastCrosshairColor = color;
+    _lastCrosshairSize = size;
+    _lastCrosshairThick = thick;
+    _lastCrosshairGap = gap;
+    lastTargetAimState = onTarget;
+
+    container.classList.toggle('on-target', onTarget);
+
+    if (type === 'classic') {
+        container.innerHTML = `<div class="classic-crosshair-dot" style="background:${color}; color:${color};"></div>`;
+        return;
+    }
 
             const dim = Math.max(120, (size + gap + outline) * 4);
             const half = dim / 2;
@@ -1744,38 +1768,47 @@
             return sprite;
         }
 
-        function updateTargetBadgeCanvas(t) {
-            if (!t.badgeSprite) return;
-            const ctx = t.badgeSprite.userData.ctx;
-            ctx.clearRect(0, 0, 256, 128);
+function updateTargetBadgeCanvas(t) {
+    if (!t.badgeSprite) return;
 
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
-            ctx.beginPath();
-            ctx.roundRect(16, 12, 224, 78, 16);
-            ctx.fill();
+    const pitchDeg = calculateTargetVerticalPitchDeg(t);
 
-            ctx.beginPath();
-            ctx.moveTo(128 - 10, 90);
-            ctx.lineTo(128 + 10, 90);
-            ctx.lineTo(128, 106);
-            ctx.closePath();
-            ctx.fill();
+    // ★ 角度变化小于 0.1° 则跳过重绘（人类视觉察觉不到差异）
+    if (t._lastBadgePitch !== undefined && Math.abs(pitchDeg - t._lastBadgePitch) < 0.1) {
+        return;
+    }
+    t._lastBadgePitch = pitchDeg;
 
-            ctx.strokeStyle = t.color || '#0284c7';
-            ctx.lineWidth = 4;
-            ctx.stroke();
+    const ctx = t.badgeSprite.userData.ctx;
+    ctx.clearRect(0, 0, 256, 128);
 
-            const pitchDeg = calculateTargetVerticalPitchDeg(t);
-            const pitchStr = `${pitchDeg >= 0 ? '+' : ''}${pitchDeg.toFixed(1)}°`;
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+    ctx.beginPath();
+    ctx.roundRect(16, 12, 224, 78, 16);
+    ctx.fill();
 
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(`${t.id} (纵): ${pitchStr}`, 128, 51);
+    ctx.beginPath();
+    ctx.moveTo(128 - 10, 90);
+    ctx.lineTo(128 + 10, 90);
+    ctx.lineTo(128, 106);
+    ctx.closePath();
+    ctx.fill();
 
-            t.badgeSprite.userData.tex.needsUpdate = true;
-        }
+    ctx.strokeStyle = t.color || '#0284c7';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // ★ 这里只声明一次 pitchStr
+    const pitchStr = `${pitchDeg >= 0 ? '+' : ''}${pitchDeg.toFixed(1)}°`;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`${t.id} (纵): ${pitchStr}`, 128, 51);
+
+    t.badgeSprite.userData.tex.needsUpdate = true;
+}
 
         function createTargetMeridianLine(t) {
             const segs = 96;
@@ -1795,13 +1828,22 @@
             return line;
         }
 
-        function updateTargetMeridianGeometry(t) {
-            if (!t.meridianLine || !config.showMeridian) return;
-            const eyeY = config.viewHeight + config.advanced.playerPos.y;
-            const px = config.advanced.playerPos.x;
-            const pz = config.advanced.playerPos.z;
-            const tx = t.rootGroup.position.x;
-            const tz = t.rootGroup.position.z;
+function updateTargetMeridianGeometry(t) {
+    if (!t.meridianLine || !config.showMeridian) return;
+
+    const eyeY = config.viewHeight + config.advanced.playerPos.y;
+    const px = config.advanced.playerPos.x;
+    const pz = config.advanced.playerPos.z;
+    const tx = t.rootGroup.position.x;
+    const tz = t.rootGroup.position.z;
+
+    // ★ 位置快照对比：任一位置量变化才重建
+    if (!t._lastMeridian) t._lastMeridian = { px: NaN, pz: NaN, eyeY: NaN, tx: NaN, tz: NaN };
+    const m = t._lastMeridian;
+    if (m.px === px && m.pz === pz && m.eyeY === eyeY && m.tx === tx && m.tz === tz) {
+        return;  // 位置未变，跳过几何重建
+    }
+    m.px = px; m.pz = pz; m.eyeY = eyeY; m.tx = tx; m.tz = tz;
             const dx = tx - px;
             const dz = tz - pz;
             const dist = Math.hypot(dx, dz) || t.distMeters || 10;
@@ -2114,30 +2156,38 @@
 
         let pollCount = 0, pollLastCalc = performance.now(), peakPollRate = 0, pollActiveSamples = 0;
 
-        window.addEventListener('pointermove', (e) => {
-            const events = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
-            pollCount += events.length;
+// ★ 优先使用 pointerrawupdate（Chrome/Edge 低延迟），否则回退 pointermove
+const _supportsRawUpdate = ('onpointerrawupdate' in window);
 
-            if (document.pointerLockElement !== document.body) return;
-            let dx = 0, dy = 0;
-            for (const ev of events) {
-                dx += ev.movementX || 0;
-                dy += ev.movementY || 0;
-            }
-            if (Math.abs(dx) > 2500 || Math.abs(dy) > 2500) return;
+function _handlePointerMove(e) {
+    const events = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
+    pollCount += events.length;
 
-            if (debugMode) {
-                yaw -= dy * radiansPerCount;
-                pitch = 0;
-            } else {
-                yaw -= dx * radiansPerCount;
-                pitch -= dy * radiansPerCount;
-                pitch = clamp(pitch, -Math.PI / 2 + 0.001, Math.PI / 2 - 0.001);
-            }
-            yaw = yaw % (Math.PI * 2);
-            cameraEuler.set(pitch, yaw, 0);
-            camera.quaternion.setFromEuler(cameraEuler);
-        }, { passive: true });
+    if (document.pointerLockElement !== document.body) return;
+    let dx = 0, dy = 0;
+    for (const ev of events) {
+        dx += ev.movementX || 0;
+        dy += ev.movementY || 0;
+    }
+    if (Math.abs(dx) > 2500 || Math.abs(dy) > 2500) return;
+
+    if (debugMode) {
+        yaw -= dy * radiansPerCount;
+        pitch = 0;
+    } else {
+        yaw -= dx * radiansPerCount;
+        pitch -= dy * radiansPerCount;
+        pitch = clamp(pitch, -Math.PI / 2 + 0.001, Math.PI / 2 - 0.001);
+    }
+    yaw = yaw % (Math.PI * 2);
+    // ★ 不再在此处更新 cameraEuler / camera.quaternion，挪到 animate 里
+}
+
+if (_supportsRawUpdate) {
+    window.addEventListener('pointerrawupdate', _handlePointerMove, { passive: true });
+} else {
+    window.addEventListener('pointermove', _handlePointerMove, { passive: true });
+}
 
         const raycaster = new THREE.Raycaster();
         const centerVec = new THREE.Vector2(0, 0);
@@ -3470,19 +3520,32 @@ window.addEventListener('mousedown', (e) => {
             });
         }
 
-        function animate(now) {
-            requestAnimationFrame(animate);
-            const dt = Math.min((now - lastFrame) / 1000, 0.1);
-            lastFrame = now;
-            updatePhysics(dt);
+function animate(now) {
+    requestAnimationFrame(animate);
+    const dt = Math.min((now - lastFrame) / 1000, 0.1);
+    lastFrame = now;
+    updatePhysics(dt);
 
             const currentYawRaw = getPlayerCurrentYawDeg();
             const currentPitchRaw = getPlayerCurrentPitchDeg();
             const relYaw = getRelativeYawDeg(currentYawRaw);
             const relPitch = getRelativePitchDeg(currentPitchRaw);
 
-            if (hudAngle) hudAngle.innerText = relYaw.toFixed(3);
-            if (hudPitch) hudPitch.innerText = (relPitch >= 0 ? '+' : '') + relPitch.toFixed(3);
+    // ★ 值变化才写 DOM，静止时 0 次写入
+    if (hudAngle) {
+        const s = relYaw.toFixed(3);
+        if (hudAngle._lastVal !== s) {
+            hudAngle.innerText = s;
+            hudAngle._lastVal = s;
+        }
+    }
+    if (hudPitch) {
+        const s = (relPitch >= 0 ? '+' : '') + relPitch.toFixed(3);
+        if (hudPitch._lastVal !== s) {
+            hudPitch.innerText = s;
+            hudPitch._lastVal = s;
+        }
+    }
 
             frameCnt++;
             if (now - lastTime >= 400) {
@@ -3505,9 +3568,13 @@ window.addEventListener('mousedown', (e) => {
                 pollLastCalc = now;
             }
 
-            checkAim();
-            renderer.render(scene, camera);
-        }
+    // ★ 渲染前统一应用最新视角（一帧只算一次三角函数）
+    cameraEuler.set(pitch, yaw, 0);
+    camera.quaternion.setFromEuler(cameraEuler);
+
+    checkAim();
+    renderer.render(scene, camera);
+}
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
