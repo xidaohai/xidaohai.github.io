@@ -1159,7 +1159,7 @@
         <svg id="crosshair-svg" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
 
-    <!-- 顶部 HUD 看板 -->
+<!-- 顶部 HUD 看板 -->
     <div id="top-hud">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <!-- 模式切换卡片 -->
@@ -1189,6 +1189,11 @@
             <div class="hud-card interactive-hud-card" onclick="toggleVSync()" title="点击切换：跟随屏幕刷新率 / 解除帧率锁定">
                 <span id="txt-vsync" style="color:var(--primary);font-weight:900;">帧率: 随屏同步</span>
             </div>
+
+            <!-- ★ 右上角抗锯齿 MSAA 开关按钮 -->
+            <div class="hud-card interactive-hud-card" onclick="toggleAntialias()" title="点击切换抗锯齿：关闭(极致低延迟) / 开启4x MSAA(边缘平滑)">
+                <span id="txt-antialias" style="color:var(--primary);font-weight:900;">MSAA: 关闭(极速)</span>
+            </div>
             
             <div class="hud-card interactive-hud-card" title="设置最大帧率 (0为跟随刷新率不限帧)">
                 <span style="font-size:0.7rem;font-weight:800;">最大FPS:</span>
@@ -1206,7 +1211,7 @@
                 <div>FPS: <span class="fps-val" id="hud-fps">--</span></div>
             </div>
         </div>
-    </div>
+    </div> <!-- ★★★ 这里补全了缺失的闭合标签！ ★★★ -->
 
     <!-- 左下角作者卡片 -->
     <div id="left-bottom-group">
@@ -1643,9 +1648,25 @@
                     </div>
                 </div>
 
-                <!-- Tracking 特有模块 -->
+<!-- Tracking 特有模块 -->
                 <div id="section-tracking-group" style="display:none;">
+                    <!-- 目标形态切换 -->
                     <div class="section-card">
+                        <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2"/></svg>目标形态切换</span></div>
+                        <div class="preset-grid cols-2" id="tracking-shape-presets">
+                            <button class="pill-btn active" id="btn-track-type-sphere" data-val="sphere" onclick="setTrackingShape('sphere')">
+                                <svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+                                <span>标准小球</span>
+                            </button>
+                            <button class="pill-btn" id="btn-track-type-dummy" data-val="dummy" onclick="setTrackingShape('dummy')">
+                                <svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></svg>
+                                <span>人偶假人</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tracking 尺寸容器：小球/假人参数自动切换 -->
+                    <div id="tracking-dimension-container" class="section-card">
                         <div class="section-header">
                             <span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>目标球径</span>
                         </div>
@@ -1665,6 +1686,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="section-card">
                         <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>运动速度</span></div>
                         <div class="preset-grid cols-3" id="tracking-speed-presets" style="margin-bottom:4px;">
@@ -1682,6 +1704,21 @@
                             </div>
                         </div>
                         <div class="note-tip" id="tracking-speed-hint"></div>
+
+                        <!-- ★ 跟枪开火触发模式开关 -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <span class="section-label">
+                                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                                <span>开火触发模式</span>
+                            </span>
+                            <button class="pill-btn toggle-switch-btn active" id="btn-autofire-toggle" onclick="toggleTrackingAutoFire()">
+                                <span id="txt-autofire">自动开火: 开启</span>
+                            </button>
+                        </div>
+                        <div class="section-sub" style="margin-top:2px;">开启后 即会自动始终按住开火键（放松食指紧绷）</div>
+                    </div>
+
                     </div>
 
                     <!-- 墙面的大小 -->
@@ -1758,7 +1795,6 @@
                                 <button class="step-btn" onclick="stepValGlobal('inp-track-wallheight', 0.5)">+</button>
                             </div>
                         </div>
-                        <!-- 原生声明：3D自由深度游走跨度 -->
                         <div class="ctrl-row" id="row-track-depth3d" style="display:none;margin-top:4px;">
                             <label title="仅在3D自由深度模式下生效">3D游走跨度</label>
                             <input type="range" id="inp-track-depth3d-r" min="0" max="40" step="0.5" value="10.0" oninput="setTrackingDepthRange3D(parseFloat(this.value))" />
@@ -2325,7 +2361,7 @@
         hitSoundType: 'crisp',
         soundVolume: 75,
         missSoundEnabled: true,
-        debugMode: false,   // ★ 调试测量模式
+        debugMode: false,   // 调试测量模式
         dpi: 800,
         cmPer360: 55.0,
         cmPer360X: 55.0,
@@ -2353,14 +2389,16 @@
             color: '#0284c7'
         },
         dynamic: { enabled: false, speedDegPerSec: 12.5, mode: 'fly' },
-        tracking: {
+            tracking: {
+            shape: 'sphere',
+            autoFire: false,              // ★ 默认开启免按键自动开火
             pattern: 'fly',
             space: 'wall',
             angleRange: 360.0,
             speedDegPerSec: 12.5,
             targetSizeCm: 25.0,
             wallHeight: 5.0,
-            depthRange3D: 10.0,          // 3D 自由深度下纵深跨度
+            depthRange3D: 10.0,
             strafeMinInterval: 0.8,
             strafeMaxInterval: 1.8
         },
@@ -2375,7 +2413,7 @@
             spawnDirection: 'random',
             baseY: 1.625,
             rangeY: 1.0,
-            rangeZ: 0.0,                 // 架枪每次出靶前后深度随机差
+            rangeZ: 0.0,
             sizeCm: 23.0,
             headWidthCm: 23.0,
             headHeightCm: 29.44,
@@ -2453,16 +2491,9 @@
         offX: 0,
         offY: 0,
 
-        // ★ 预测渲染专用（优化）
-        _yawVel: 0,
-        _pitchVel: 0,
-        _lastMoveTime: 0,
-        _lastManualRender: 0,
-
-        // ★ 帧节流专用（优化）
+        // 帧节流专用
         _collisionTick: 0,
         _cloudTick: 0,
-        _trackTick: 0,
 
         tracking: {
             x: 0, y: 1.625, z: -10, dist: 10.0,
@@ -2489,11 +2520,14 @@
         keysPressed: {}
     };
 
-const STORAGE_KEY = 'XDH_AIM_TRAINER_V10_PRO';
-const ISO_INCH_TO_CM = 2.54;
-const VIEW_PREDICT_MS = 0;   // ★ 预测渲染毫秒数
+    const STORAGE_KEY = 'XDH_AIM_TRAINER_V10_PRO';
+    const ISO_INCH_TO_CM = 2.54;
     let btnCooldownTimer = null;
     let lastQuickRestartTime = 0;
+    // ★ 暴露核心对象给外部补丁脚本（图表模块等）使用
+window.CFG = CFG;
+window.STATE = STATE;
+window.MOVE_STATE = MOVE_STATE;
 
     // 工具辅助函数
     function getEl(id) { return document.getElementById(id); }
@@ -3163,11 +3197,31 @@ function getAudioContext() {
         saveToLocalStorage();
     };
 
-    window.toggleVSync = function() {
+window.toggleVSync = function() {
         CFG.vsyncEnabled = !CFG.vsyncEnabled;
         applyVSyncAndFPS();
         saveToLocalStorage();
     };
+
+    // ★ 新增：切换抗锯齿（切换配置并极速重载 WebGPU 显卡管线）
+    window.toggleAntialias = function() {
+        CFG.antialias = !CFG.antialias;
+        saveToLocalStorage();
+        location.reload();
+    };
+
+    function syncAntialiasHUD() {
+        const txt = getEl('txt-antialias');
+        if (txt) {
+            if (CFG.antialias) {
+                txt.innerText = 'MSAA: 开启(平滑)';
+                txt.style.color = '#16a34a';
+            } else {
+                txt.innerText = 'MSAA: 关闭(极速)';
+                txt.style.color = 'var(--primary)';
+            }
+        }
+    }
 
     window.setMaxFps = function(val) {
         CFG.maxFps = parseInt(val) || 0;
@@ -3186,6 +3240,7 @@ function getAudioContext() {
         }
         const fpsInp = getEl('inp-max-fps');
         if (fpsInp) fpsInp.value = maxFPS;
+        syncAntialiasHUD();
     }
 
     function scheduleFrame() {
@@ -3443,20 +3498,19 @@ function getAudioContext() {
         camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.set(0, CFG.viewHeight, 0);
 
-    const _canvas = document.createElement('canvas');
-    _canvas.setAttribute('desynchronized', 'true');
-    renderer = new THREE.WebGPURenderer({ 
-        canvas: _canvas,
-        antialias: true, 
-        powerPreference: "high-performance" 
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    
+        const _canvas = document.createElement('canvas');
+        _canvas.setAttribute('desynchronized', 'true');
+        renderer = new THREE.WebGPURenderer({ 
+            canvas: _canvas,
+            antialias: Boolean(CFG.antialias), // ★ 读取用户抗锯齿开关
+            powerPreference: "high-performance" 
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        
         renderer.setPixelRatio(1);
         renderer.toneMapping = THREE.NoToneMapping;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.shadowMap.enabled = false;
-        renderer.shadowMap.type = THREE.PCFShadowMap;
         renderer.setClearColor(0xf1f5f9, 1);
         canvasContainer.appendChild(renderer.domElement);
 
@@ -3757,7 +3811,7 @@ function getAudioContext() {
     }
 
 const sphereGeo = new THREE.SphereGeometry(1, 16, 16);
-const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
+    const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
     const BODY_GEO = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
 
     let targetMat = new THREE.MeshStandardMaterial({ 
@@ -3774,17 +3828,23 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
     });
 
     const sixTargets = [];
+    // 假人与模型组：架枪专属
     const holdingTarget = { rootGroup: new THREE.Group(), dummyGroup: new THREE.Group(), sphereMesh: null, headMesh: null, bodyMesh: null };
+    // ★ 移植：Tracking 跟枪专属（支持小球与假人动态双模）
+    const trackingTarget = { rootGroup: new THREE.Group(), dummyGroup: new THREE.Group(), sphereMesh: null, headMesh: null, bodyMesh: null };
 
     function initTargets() {
         scene.add(spawnWallGroup);
         scene.add(holdingRangeLines);
+        
         scene.add(holdingTarget.rootGroup);
         holdingTarget.rootGroup.add(holdingTarget.dummyGroup);
 
+        scene.add(trackingTarget.rootGroup);
+        trackingTarget.rootGroup.add(trackingTarget.dummyGroup);
+
         for (let i = 0; i < 32; i++) {
             const mesh = new THREE.Mesh(sphereGeo, targetMat);
-            mesh.castShadow = true;
             mesh.visible = false;
             mesh.renderOrder = 10;
             scene.add(mesh);
@@ -3792,11 +3852,41 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
         }
     }
 
+    // 构建通用假人装配逻辑
+    function constructDummyMesh(targetObj) {
+        while (targetObj.dummyGroup.children.length) {
+            const c = targetObj.dummyGroup.children[0];
+            if (c.material) {
+                if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
+                else c.material.dispose();
+            }
+            targetObj.dummyGroup.remove(c);
+        }
+        const h = CFG.holding;
+        const hrx = (h.headWidthCm || 23.0) / 200, hry = (h.headHeightCm || 29.44) / 200, hrz = (h.headDepthCm || 23.0) / 200;
+        const bw = (h.bodyWidthCm || 38.87) / 100, bh = (h.bodyHeightCm || 156.17) / 100, bd = (h.bodyDepthCm || 25.30) / 100;
+        const neck = (h.neckGapCm || 6.325) / 100;
+        const offX = (h.headOffsetX || 0) / 100, offY = (h.headOffsetY || 0) / 100;
+
+        const head = new THREE.Mesh(HEAD_GEO, targetMat.clone());
+        head.scale.set(hrx, hry, hrz);
+        head.position.set(offX, offY, 0);
+        head.userData.part = 'head';
+        targetObj.headMesh = head;
+        targetObj.dummyGroup.add(head);
+
+        const body = new THREE.Mesh(BODY_GEO, new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 }));
+        body.scale.set(bw, bh, bd);
+        body.position.set(0, -(neck + bh / 2), 0);
+        body.userData.part = 'body';
+        targetObj.bodyMesh = body;
+        targetObj.dummyGroup.add(body);
+    }
+
     function buildHoldingTarget() {
         const h = CFG.holding;
         if (!holdingTarget.sphereMesh) {
             holdingTarget.sphereMesh = new THREE.Mesh(sphereGeo, targetMat);
-            holdingTarget.sphereMesh.castShadow = true;
             holdingTarget.sphereMesh.userData.part = 'body';
             holdingTarget.rootGroup.add(holdingTarget.sphereMesh);
         }
@@ -3807,34 +3897,7 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
             const r = (h.sizeCm / 100) / 2;
             holdingTarget.sphereMesh.scale.set(r, r, r);
         } else {
-            while (holdingTarget.dummyGroup.children.length) {
-                const c = holdingTarget.dummyGroup.children[0];
-                if (c.material) {
-                    if (Array.isArray(c.material)) c.material.forEach(m => m.dispose());
-                    else c.material.dispose();
-                }
-                holdingTarget.dummyGroup.remove(c);
-            }
-            const hrx = (h.headWidthCm || 23.0) / 200, hry = (h.headHeightCm || 29.44) / 200, hrz = (h.headDepthCm || 23.0) / 200;
-            const bw = (h.bodyWidthCm || 38.87) / 100, bh = (h.bodyHeightCm || 156.17) / 100, bd = (h.bodyDepthCm || 25.30) / 100;
-            const neck = (h.neckGapCm || 6.325) / 100;
-            const offX = (h.headOffsetX || 0) / 100, offY = (h.headOffsetY || 0) / 100;
-
-            const head = new THREE.Mesh(HEAD_GEO, targetMat.clone());
-            head.scale.set(hrx, hry, hrz);
-            head.position.set(offX, offY, 0);
-            head.castShadow = true;
-            head.userData.part = 'head';
-            holdingTarget.headMesh = head;
-            holdingTarget.dummyGroup.add(head);
-
-            const body = new THREE.Mesh(BODY_GEO, new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 }));
-            body.scale.set(bw, bh, bd);
-            body.position.set(0, -(neck + bh / 2), 0);
-            body.castShadow = true;
-            body.userData.part = 'body';
-            holdingTarget.bodyMesh = body;
-            holdingTarget.dummyGroup.add(body);
+            constructDummyMesh(holdingTarget);
         }
 
         if (STATE.game !== 'playing' && STATE.game !== 'starting') {
@@ -3842,9 +3905,95 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
         }
     }
 
+    // ★ Tracking 目标模型构建
+    function buildTrackingTarget() {
+        const shape = CFG.tracking.shape || 'sphere';
+        if (!trackingTarget.sphereMesh) {
+            trackingTarget.sphereMesh = new THREE.Mesh(sphereGeo, targetMat);
+            trackingTarget.sphereMesh.userData.part = 'body';
+            trackingTarget.rootGroup.add(trackingTarget.sphereMesh);
+        }
+        trackingTarget.sphereMesh.visible = (shape === 'sphere');
+        trackingTarget.dummyGroup.visible = (shape === 'dummy');
+
+        if (shape === 'sphere') {
+            const r = (CFG.tracking.targetSizeCm / 100) / 2;
+            trackingTarget.sphereMesh.scale.set(r, r, r);
+        } else {
+            constructDummyMesh(trackingTarget);
+        }
+    }
+
     // ============================================================
     // 假人尺寸与解剖比例渲染 UI
     // ============================================================
+
+    // 假人身体材质单例（避免高频 new 材质引起卡顿）
+    const dummyBodyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
+
+    // 通用假人 HTML 生成器（prefix: 'inp-h-' 用于架枪, 'inp-th-' 用于跟枪，彻底防止 ID 冲突）
+    function generateDummyHTML(prefix) {
+        const h = CFG.holding;
+        return `
+            <div class="ctrl-row">
+                <label>等比总缩放</label>
+                <input type="range" id="${prefix}s-r" min="5" max="150" step="0.05" value="${h.sizeCm || 23.0}" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('${prefix}s', -0.5)">−</button>
+                    <input type="number" class="num-input" id="${prefix}s" value="${(h.sizeCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
+                    <button class="step-btn" onclick="stepValGlobal('${prefix}s', 0.5)">+</button>
+                </div>
+            </div>
+            <div class="dim-group ${h.headSizeLocked ? 'is-locked' : ''}">
+                <div class="dim-group-header">
+                    <div class="dim-group-title"><span>头部尺寸 (长×宽×高)</span></div>
+                    <button class="size-lock-btn ${h.headSizeLocked ? 'active-lock' : 'unlocked'}" onclick="toggleHoldingLock('headSizeLocked')">${h.headSizeLocked ? '🔒 锁定比例' : '🔓 自由微调'}</button>
+                </div>
+                <div class="dim-card-grid">
+                    <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hw',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}hw" value="${(h.headWidthCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hw')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hw',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hh',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}hh" value="${(h.headHeightCm || 29.44).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hh')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hh',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hd',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}hd" value="${(h.headDepthCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hd')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hd',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
+                </div>
+            </div>
+            <div class="dim-group ${h.bodySizeLocked ? 'is-locked' : ''}">
+                <div class="dim-group-header">
+                    <div class="dim-group-title"><span>身体尺寸 (长×宽×高)</span></div>
+                    <button class="size-lock-btn ${h.bodySizeLocked ? 'active-lock' : 'unlocked'}" onclick="toggleHoldingLock('bodySizeLocked')">${h.bodySizeLocked ? '🔒 锁定比例' : '🔓 自由微调'}</button>
+                </div>
+                <div class="dim-card-grid">
+                    <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bw',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}bw" value="${(h.bodyWidthCm || 38.87).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bw')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bw',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bh',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}bh" value="${(h.bodyHeightCm || 156.17).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bh')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bh',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bd',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}bd" value="${(h.bodyDepthCm || 25.30).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bd')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bd',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
+                </div>
+            </div>
+            <!-- ★ 补全项：头部歪头、上下偏移与居中锁定 -->
+            <div class="ctrl-row" style="margin-top:6px;">
+                <label>头部位置</label>
+                <button class="lock-btn ${h.headLocked ? '' : 'unlocked'}" onclick="toggleHoldingLock('headLocked')">${h.headLocked ? '🔒 居中锁定' : '🔓 脱离调位'}</button>
+                <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">解锁后可调歪头偏头</span>
+            </div>
+            <div class="ctrl-row">
+                <label>头部上下</label>
+                <input type="range" id="${prefix}hy-r" min="-40" max="40" step="0.2" value="${h.headOffsetY}" ${h.headLocked ? 'disabled' : ''} oninput="updateHoldingDummy(parseFloat(this.value),'hy')" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('${prefix}hy',-0.5)" ${h.headLocked ? 'disabled' : ''}>−</button>
+                    <input type="number" class="num-input" id="${prefix}hy" value="${(h.headOffsetY || 0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hy')" ${h.headLocked ? 'disabled' : ''} />
+                    <button class="step-btn" onclick="stepValGlobal('${prefix}hy',0.5)" ${h.headLocked ? 'disabled' : ''}>+</button>
+                </div>
+            </div>
+            <div class="ctrl-row">
+                <label>头部左右</label>
+                <input type="range" id="${prefix}hx-r" min="-40" max="40" step="0.2" value="${h.headOffsetX}" ${h.headLocked ? 'disabled' : ''} oninput="updateHoldingDummy(parseFloat(this.value),'hx')" />
+                <div class="stepper-box">
+                    <button class="step-btn" onclick="stepValGlobal('${prefix}hx',-0.5)" ${h.headLocked ? 'disabled' : ''}>−</button>
+                    <input type="number" class="num-input" id="${prefix}hx" value="${(h.headOffsetX || 0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hx')" ${h.headLocked ? 'disabled' : ''} />
+                    <button class="step-btn" onclick="stepValGlobal('${prefix}hx',0.5)" ${h.headLocked ? 'disabled' : ''}>+</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // 渲染架枪模式假人面板
     function renderHoldingDummyUI() {
         const h = CFG.holding, container = getEl('holding-dimension-container');
         if (!container) return;
@@ -3860,69 +4009,42 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                     </div>
                 </div>`;
         } else {
-            container.innerHTML = `
-                <div class="ctrl-row">
-                    <label>等比总缩放</label>
-                    <input type="range" id="inp-h-s-r" min="5" max="150" step="0.05" value="${h.sizeCm || 23.0}" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-h-s', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-h-s" value="${(h.sizeCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
-                        <button class="step-btn" onclick="stepValGlobal('inp-h-s', 0.5)">+</button>
-                    </div>
-                </div>
-                <div class="dim-group ${h.headSizeLocked ? 'is-locked' : ''}">
-                    <div class="dim-group-header">
-                        <div class="dim-group-title"><span>头部尺寸 (长×宽×高)</span></div>
-                        <button class="size-lock-btn ${h.headSizeLocked ? 'active-lock' : 'unlocked'}" onclick="toggleHoldingLock('headSizeLocked')">${h.headSizeLocked ? '🔒 锁定比例' : '🔓 自由微调'}</button>
-                    </div>
-                    <div class="dim-card-grid">
-                        <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('inp-h-hw',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-h-hw" value="${(h.headWidthCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hw')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('inp-h-hw',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
-                        <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('inp-h-hh',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-h-hh" value="${(h.headHeightCm || 29.44).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hh')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('inp-h-hh',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
-                        <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('inp-h-hd',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-h-hd" value="${(h.headDepthCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hd')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('inp-h-hd',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
-                    </div>
-                </div>
-                <div class="dim-group ${h.bodySizeLocked ? 'is-locked' : ''}">
-                    <div class="dim-group-header">
-                        <div class="dim-group-title"><span>身体尺寸 (长×宽×高)</span></div>
-                        <button class="size-lock-btn ${h.bodySizeLocked ? 'active-lock' : 'unlocked'}" onclick="toggleHoldingLock('bodySizeLocked')">${h.bodySizeLocked ? '🔒 锁定比例' : '🔓 自由微调'}</button>
-                    </div>
-                    <div class="dim-card-grid">
-                        <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('inp-h-bw',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-h-bw" value="${(h.bodyWidthCm || 38.87).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bw')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('inp-h-bw',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
-                        <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('inp-h-bh',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-h-bh" value="${(h.bodyHeightCm || 156.17).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bh')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('inp-h-bh',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
-                        <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('inp-h-bd',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="inp-h-bd" value="${(h.bodyDepthCm || 25.30).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bd')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('inp-h-bd',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
-                    </div>
-                </div>
-                <div class="ctrl-row" style="margin-top:6px;">
-                    <label>头部位置</label>
-                    <button class="lock-btn ${h.headLocked ? '' : 'unlocked'}" onclick="toggleHoldingLock('headLocked')">${h.headLocked ? '🔒 居中锁定' : '🔓 脱离调位'}</button>
-                    <span style="font-size:0.55rem;color:#94a3b8;margin-left:auto;">解锁后可调歪头偏头</span>
-                </div>
-                <div class="ctrl-row">
-                    <label>头部上下</label>
-                    <input type="range" id="inp-h-hy-r" min="-40" max="40" step="0.2" value="${h.headOffsetY}" ${h.headLocked ? 'disabled' : ''} oninput="updateHoldingDummy(parseFloat(this.value),'hy')" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-h-hy',-0.5)" ${h.headLocked ? 'disabled' : ''}>−</button>
-                        <input type="number" class="num-input" id="inp-h-hy" value="${(h.headOffsetY || 0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hy')" ${h.headLocked ? 'disabled' : ''} />
-                        <button class="step-btn" onclick="stepValGlobal('inp-h-hy',0.5)" ${h.headLocked ? 'disabled' : ''}>+</button>
-                    </div>
-                </div>
-                <div class="ctrl-row">
-                    <label>头部左右</label>
-                    <input type="range" id="inp-h-hx-r" min="-40" max="40" step="0.2" value="${h.headOffsetX}" ${h.headLocked ? 'disabled' : ''} oninput="updateHoldingDummy(parseFloat(this.value),'hx')" />
-                    <div class="stepper-box">
-                        <button class="step-btn" onclick="stepValGlobal('inp-h-hx',-0.5)" ${h.headLocked ? 'disabled' : ''}>−</button>
-                        <input type="number" class="num-input" id="inp-h-hx" value="${(h.headOffsetX || 0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hx')" ${h.headLocked ? 'disabled' : ''} />
-                        <button class="step-btn" onclick="stepValGlobal('inp-h-hx',0.5)" ${h.headLocked ? 'disabled' : ''}>+</button>
-                    </div>
-                </div>`;
-        }
-        if (STATE.activeOfficialProject) {
-            container.querySelectorAll('input, button').forEach(el => {
-                el.disabled = true;
-            });
+            container.innerHTML = generateDummyHTML('inp-h-');
         }
     }
 
+    // 渲染跟枪模式假人面板
+    function renderTrackingDummyUI() {
+        const isDummy = (CFG.tracking.shape === 'dummy');
+        const container = getEl('tracking-dimension-container');
+        if (!container) return;
+
+        if (!isDummy) {
+            container.innerHTML = `
+                <div class="section-header">
+                    <span class="section-label"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3v3m0 12v3M3 12h3m12 0h3"/></svg>目标球径</span>
+                </div>
+                <div class="preset-grid cols-4" id="tracking-size-presets">
+                    <button class="pill-btn" data-val="15" onclick="syncTrackingTargetSize(15)">15 cm</button>
+                    <button class="pill-btn active" data-val="25" onclick="syncTrackingTargetSize(25)">25 cm</button>
+                    <button class="pill-btn" data-val="35" onclick="syncTrackingTargetSize(35)">35 cm</button>
+                    <button class="pill-btn" data-val="125" onclick="syncTrackingTargetSize(125)">125 cm</button>
+                </div>
+                <div class="ctrl-row">
+                    <label>微调大小</label>
+                    <input type="range" id="inp-track-size-r" min="1" max="500" step="0.1" value="${CFG.tracking.targetSizeCm}" oninput="syncTrackingTargetSize(parseFloat(this.value))" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepValGlobal('inp-track-size', -0.5)">−</button>
+                        <input type="number" class="num-input" id="inp-track-size" value="${CFG.tracking.targetSizeCm.toFixed(2)}" step="0.5" min="1" max="500" />
+                        <button class="step-btn" onclick="stepValGlobal('inp-track-size', 0.5)">+</button>
+                    </div>
+                </div>`;
+        } else {
+            container.innerHTML = generateDummyHTML('inp-th-');
+        }
+    }
+
+    // ★ 无论在架枪还是跟枪面板点击锁定/解锁，两边面板同步刷新，绝不卡死
     function toggleHoldingLock(prop) {
         const h = CFG.holding;
         h[prop] = !h[prop];
@@ -3945,10 +4067,13 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
         }
 
         renderHoldingDummyUI();
+        renderTrackingDummyUI();
         buildHoldingTarget();
+        buildTrackingTarget();
         saveToLocalStorage();
     }
 
+    // ★ 假人参数变更同步更新两套模型和所有界面输入框
     function updateHoldingDummy(val, prop) {
         const h = CFG.holding;
         if (isNaN(val)) return;
@@ -3959,62 +4084,68 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                 h.headWidthCm = h.sizeCm * (h.baseRatio.headW || 1.0);
                 h.headHeightCm = h.sizeCm * (h.baseRatio.headH || 1.28);
                 h.headDepthCm = h.sizeCm * (h.baseRatio.headD || 1.0);
-                setValF('inp-h-hw', h.headWidthCm, 1);
-                setValF('inp-h-hh', h.headHeightCm, 1);
-                setValF('inp-h-hd', h.headDepthCm, 1);
+                setValF('inp-h-hw', h.headWidthCm, 1); setValF('inp-th-hw', h.headWidthCm, 1);
+                setValF('inp-h-hh', h.headHeightCm, 1); setValF('inp-th-hh', h.headHeightCm, 1);
+                setValF('inp-h-hd', h.headDepthCm, 1); setValF('inp-th-hd', h.headDepthCm, 1);
             }
             if (h.bodySizeLocked) {
                 h.bodyWidthCm = h.sizeCm * (h.baseRatio.bodyW || 1.69);
                 h.bodyHeightCm = h.sizeCm * (h.baseRatio.bodyH || 6.79);
                 h.bodyDepthCm = h.sizeCm * (h.baseRatio.bodyD || 1.10);
-                setValF('inp-h-bw', h.bodyWidthCm, 1);
-                setValF('inp-h-bh', h.bodyHeightCm, 1);
-                setValF('inp-h-bd', h.bodyDepthCm, 1);
+                setValF('inp-h-bw', h.bodyWidthCm, 1); setValF('inp-th-bw', h.bodyWidthCm, 1);
+                setValF('inp-h-bh', h.bodyHeightCm, 1); setValF('inp-th-bh', h.bodyHeightCm, 1);
+                setValF('inp-h-bd', h.bodyDepthCm, 1); setValF('inp-th-bd', h.bodyDepthCm, 1);
             }
             h.neckGapCm = h.sizeCm * (h.baseRatio.neckGap || 0.275);
 
             if (h.baseRatio.headOffX !== undefined) {
                 h.headOffsetX = h.sizeCm * h.baseRatio.headOffX;
-                setValF('inp-h-hx', h.headOffsetX, 1);
-                const rx = getEl('inp-h-hx-r'); if (rx) rx.value = h.headOffsetX;
+                setValF('inp-h-hx', h.headOffsetX, 1); setValF('inp-th-hx', h.headOffsetX, 1);
+                const rx = getEl('inp-h-hx-r'), rtx = getEl('inp-th-hx-r');
+                if (rx) rx.value = h.headOffsetX; if (rtx) rtx.value = h.headOffsetX;
             }
             if (h.baseRatio.headOffY !== undefined) {
                 h.headOffsetY = h.sizeCm * h.baseRatio.headOffY;
-                setValF('inp-h-hy', h.headOffsetY, 1);
-                const ry = getEl('inp-h-hy-r'); if (ry) ry.value = h.headOffsetY;
+                setValF('inp-h-hy', h.headOffsetY, 1); setValF('inp-th-hy', h.headOffsetY, 1);
+                const ry = getEl('inp-h-hy-r'), rty = getEl('inp-th-hy-r');
+                if (ry) ry.value = h.headOffsetY; if (rty) rty.value = h.headOffsetY;
             }
 
-            setValF('inp-h-s', h.sizeCm, 1);
-            const r = getEl('inp-h-s-r'); if (r) r.value = h.sizeCm;
+            setValF('inp-h-s', h.sizeCm, 1); setValF('inp-th-s', h.sizeCm, 1);
+            const r = getEl('inp-h-s-r'), tr = getEl('inp-th-s-r');
+            if (r) r.value = h.sizeCm; if (tr) tr.value = h.sizeCm;
         } else if (prop === 'hw') {
-            h.headWidthCm = Math.max(0.5, val); setValF('inp-h-hw', val, 1);
+            h.headWidthCm = Math.max(0.5, val); setValF('inp-h-hw', val, 1); setValF('inp-th-hw', val, 1);
             if (h.headSizeLocked) h.baseRatio.headW = h.headWidthCm / h.sizeCm;
         } else if (prop === 'hh') {
-            h.headHeightCm = Math.max(0.5, val); setValF('inp-h-hh', val, 1);
+            h.headHeightCm = Math.max(0.5, val); setValF('inp-h-hh', val, 1); setValF('inp-th-hh', val, 1);
             if (h.headSizeLocked) h.baseRatio.headH = h.headHeightCm / h.sizeCm;
         } else if (prop === 'hd') {
-            h.headDepthCm = Math.max(0.5, val); setValF('inp-h-hd', val, 1);
+            h.headDepthCm = Math.max(0.5, val); setValF('inp-h-hd', val, 1); setValF('inp-th-hd', val, 1);
             if (h.headSizeLocked) h.baseRatio.headD = h.headDepthCm / h.sizeCm;
         } else if (prop === 'bw') {
-            h.bodyWidthCm = Math.max(0.5, val); setValF('inp-h-bw', val, 1);
+            h.bodyWidthCm = Math.max(0.5, val); setValF('inp-h-bw', val, 1); setValF('inp-th-bw', val, 1);
             if (h.bodySizeLocked) h.baseRatio.bodyW = h.bodyWidthCm / h.sizeCm;
         } else if (prop === 'bh') {
-            h.bodyHeightCm = Math.max(0.5, val); setValF('inp-h-bh', val, 1);
+            h.bodyHeightCm = Math.max(0.5, val); setValF('inp-h-bh', val, 1); setValF('inp-th-bh', val, 1);
             if (h.bodySizeLocked) h.baseRatio.bodyH = h.bodyHeightCm / h.sizeCm;
         } else if (prop === 'bd') {
-            h.bodyDepthCm = Math.max(0.5, val); setValF('inp-h-bd', val, 1);
+            h.bodyDepthCm = Math.max(0.5, val); setValF('inp-h-bd', val, 1); setValF('inp-th-bd', val, 1);
             if (h.bodySizeLocked) h.baseRatio.bodyD = h.bodyDepthCm / h.sizeCm;
         } else if (prop === 'hy') {
-            h.headOffsetY = clamp(val, -40, 40); setValF('inp-h-hy', h.headOffsetY, 1);
-            const r = getEl('inp-h-hy-r'); if (r) r.value = h.headOffsetY;
+            h.headOffsetY = clamp(val, -40, 40); setValF('inp-h-hy', h.headOffsetY, 1); setValF('inp-th-hy', h.headOffsetY, 1);
+            const r = getEl('inp-h-hy-r'), tr = getEl('inp-th-hy-r');
+            if (r) r.value = h.headOffsetY; if (tr) tr.value = h.headOffsetY;
             h.baseRatio.headOffY = h.sizeCm > 0 ? h.headOffsetY / h.sizeCm : 0;
         } else if (prop === 'hx') {
-            h.headOffsetX = clamp(val, -40, 40); setValF('inp-h-hx', h.headOffsetX, 1);
-            const r = getEl('inp-h-hx-r'); if (r) r.value = h.headOffsetX;
+            h.headOffsetX = clamp(val, -40, 40); setValF('inp-h-hx', h.headOffsetX, 1); setValF('inp-th-hx', h.headOffsetX, 1);
+            const r = getEl('inp-h-hx-r'), tr = getEl('inp-th-hx-r');
+            if (r) r.value = h.headOffsetX; if (tr) tr.value = h.headOffsetX;
             h.baseRatio.headOffX = h.sizeCm > 0 ? h.headOffsetX / h.sizeCm : 0;
         }
 
         buildHoldingTarget();
+        buildTrackingTarget();
         saveToLocalStorage();
     }
 
@@ -4030,6 +4161,7 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
             holdingTarget.rootGroup.visible = true;
         }
     }
+
 
     // ============================================================
     // 物理数学判定与无重叠目标生成算法
@@ -4152,10 +4284,32 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
         return mn + Math.random() * (mx - mn);
     }
 
-    // 采用 Archimedes 严密三维球面采样算法，无极点偏置
+// 采用 Archimedes 严密三维球面采样算法（含假人全身物理防穿框包围盒）
+    function getTrackingTargetExtents() {
+        const isDummy = (CFG.tracking.shape === 'dummy');
+        if (isDummy) {
+            const h = CFG.holding;
+            const headTop = ((h.headOffsetY || 0) / 100) + ((h.headHeightCm || 29.44) / 200);
+            const neck = (h.neckGapCm || 6.325) / 100;
+            const bh = (h.bodyHeightCm || 156.17) / 100;
+            const bw = (h.bodyWidthCm || 38.87) / 100;
+            const hrx = (h.headWidthCm || 23.0) / 200;
+            const headSide = Math.abs((h.headOffsetX || 0) / 100) + hrx;
+
+            return {
+                top: Math.max(0.1, headTop),
+                bottom: neck + bh,          // 身体向下伸展的完整距离（约1.62m）
+                side: Math.max(bw / 2, headSide) // 肩膀和头部的最宽半边
+            };
+        } else {
+            const r = CFG.tracking.targetSizeCm / 100 / 2;
+            return { top: r, bottom: r, side: r };
+        }
+    }
+
     function respawnTrackingTarget(isCenterTarget = false) {
         const baseD = CFG.depthTracking, cy = CFG.viewHeight;
-        const r = CFG.tracking.targetSizeCm / 100 / 2;
+        const ext = getTrackingTargetExtents();
         const speedRad = CFG.tracking.speedDegPerSec * Math.PI / 180;
         const linSpeed = speedRad * baseD;
         const isFly = CFG.tracking.pattern === 'fly';
@@ -4166,23 +4320,23 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
         const wallTop = wallBottom + wallH;
         const ts = STATE.tracking;
 
+        // ★ 核心防穿透限位：假人最底端绝不穿出玻璃下沿，头顶绝不穿出玻璃上沿
+        const minY = Math.max(0.05 + ext.bottom, wallBottom + ext.bottom);
+        const maxY = Math.max(minY, wallTop - ext.top);
+
         if (isCenterTarget) {
-            ts.x = 0; ts.y = cy; ts.z = -baseD; ts.dist = baseD; ts.yaw = 0;
+            ts.x = 0; 
+            ts.y = clamp(cy, minY, maxY); 
+            ts.z = -baseD; ts.dist = baseD; ts.yaw = 0;
             const a = rand(0, Math.PI * 2);
 
             if (space === 'wall') {
-                if (isFly) {
-                    ts.vx = Math.cos(a) * linSpeed; ts.vy = Math.sin(a) * linSpeed;
-                } else {
-                    ts.vx = (rand(0, 1) > 0.5 ? 1 : -1) * linSpeed; ts.vy = 0;
-                }
+                ts.vx = (isFly ? Math.cos(a) : (rand(0, 1) > 0.5 ? 1 : -1)) * linSpeed;
+                ts.vy = isFly ? Math.sin(a) * linSpeed : 0;
                 ts.vYaw = 0; ts.vDist = 0;
             } else if (space === 'curve') {
-                if (isFly) {
-                    ts.vYaw = Math.cos(a) * speedRad; ts.vy = Math.sin(a) * linSpeed;
-                } else {
-                    ts.vYaw = (rand(0, 1) > 0.5 ? 1 : -1) * speedRad; ts.vy = 0;
-                }
+                ts.vYaw = (isFly ? Math.cos(a) : (rand(0, 1) > 0.5 ? 1 : -1)) * speedRad;
+                ts.vy = isFly ? Math.sin(a) * linSpeed : 0;
                 ts.vx = 0; ts.vDist = 0;
             } else {
                 if (isFly) {
@@ -4191,7 +4345,6 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                     ts.vy = cosPhi * linSpeed;
                     ts.vDist = sinPhi * Math.sin(a) * linSpeed;
                 } else {
-                    // ★ 圆周分配，保证 2D 平面合速度 = linSpeed
                     const theta = rand(0, Math.PI * 2);
                     ts.vTan  = Math.cos(theta) * linSpeed;
                     ts.vy    = 0;
@@ -4200,12 +4353,14 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                 ts.vx = 0; ts.vYaw = 0;
             }
         } else {
-            const minY = wallBottom + r, maxY = wallTop - r;
-            ts.y = isFly ? rand(minY, maxY) : cy;
+            ts.y = isFly ? rand(minY, maxY) : clamp(cy, minY, maxY);
 
             if (space === 'wall') {
-                const halfW = Math.max(0.5, (baseD * spanRad) / 2 - r);
-                ts.x = rand(-halfW, halfW); ts.z = -baseD;
+                const halfW = Math.max(0.5, (baseD * spanRad) / 2);
+                const minX = -halfW + ext.side;
+                const maxX = halfW - ext.side;
+                ts.x = minX < maxX ? rand(minX, maxX) : 0;
+                ts.z = -baseD;
                 if (isFly) {
                     const ang = rand(0, Math.PI * 2);
                     ts.vx = Math.cos(ang) * linSpeed; ts.vy = Math.sin(ang) * linSpeed;
@@ -4215,7 +4370,11 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
             } else {
                 const range3D = CFG.tracking.depthRange3D ?? 10.0;
                 ts.dist = (space === 'free3d') ? baseD + rand(0, range3D) : baseD;
-                ts.yaw = rand(-spanRad / 2, spanRad / 2);
+
+                const sideRad = ext.side / Math.max(0.1, ts.dist);
+                const halfAngle = Math.max(0.05, spanRad / 2 - sideRad);
+                ts.yaw = rand(-halfAngle, halfAngle);
+
                 if (isFly) {
                     const ang = rand(0, Math.PI * 2);
                     if (space === 'free3d') {
@@ -4228,10 +4387,9 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                     }
                 } else {
                     if (space === 'free3d') {
-                        // ★ 圆周分配，保证 2D 平面合速度 = linSpeed
                         const theta = rand(0, Math.PI * 2);
-                        ts.vTan  = Math.cos(theta) * linSpeed;
-                        ts.vy    = 0;
+                        ts.vTan = Math.cos(theta) * linSpeed;
+                        ts.vy   = 0;
                         ts.vDist = Math.sin(theta) * linSpeed;
                     } else {
                         ts.vYaw = (rand(0, 1) > 0.5 ? 1 : -1) * speedRad; ts.vy = 0; ts.vDist = 0;
@@ -4244,27 +4402,32 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
         }
         ts.changeDirTimer = pickNextStrafeTimer();
 
-        if (sixTargets[0]) {
-            sixTargets[0].mesh.position.set(ts.x, ts.y, ts.z);
-            sixTargets[0].x = ts.x; sixTargets[0].y = ts.y; sixTargets[0].z = ts.z;
-            sixTargets[0].mesh.visible = true;
-            sixTargets[0].mesh.material = targetMat;
-            sixTargets[0].mesh.scale.set(r, r, r);
+// ★ 跟枪目标与 sixTargets 彻底解耦（出场即正对玩家）
+        if (trackingTarget.rootGroup) {
+            trackingTarget.rootGroup.position.set(ts.x, ts.y, ts.z);
+            const dx = camera.position.x - ts.x;
+            const dz = camera.position.z - ts.z;
+            trackingTarget.rootGroup.rotation.y = Math.atan2(dx, dz);
+            trackingTarget.rootGroup.visible = (CFG.mode === 'tracking');
+            trackingTarget.rootGroup.updateMatrixWorld(true);
         }
     }
 
+    // ★ 唯一的 refreshAllPreviewTargets
     function refreshAllPreviewTargets() {
         const isS = CFG.mode === 'sixshot', isT = CFG.mode === 'tracking', isH = CFG.mode === 'holding';
-        const count = isS ? (CFG.targetCount || 6) : (isT ? 1 : 0);
+        const count = isS ? (CFG.targetCount || 6) : 0;
         STATE.targetCount = count;
 
-        const r = (isS ? CFG.targetSizeCm : CFG.tracking.targetSizeCm) / 100 / 2;
+        const r = CFG.targetSizeCm / 100 / 2;
         sixTargets.forEach(t => t.mesh.scale.set(r, r, r));
 
         for (let i = 0; i < sixTargets.length; i++) {
             sixTargets[i].mesh.visible = (i < count);
         }
+        
         if (holdingTarget.rootGroup) holdingTarget.rootGroup.visible = isH;
+        if (trackingTarget.rootGroup) trackingTarget.rootGroup.visible = isT;
 
         updateSpawnWall();
         updateSpeedHints();
@@ -4275,11 +4438,56 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                 respawnSixshotTarget(sixTargets[i], false);
             }
         } else if (isT) {
+            buildTrackingTarget();
             respawnTrackingTarget(false);
         } else {
             buildHoldingTarget();
             previewHoldingDummyInCenter();
         }
+
+        if (typeof syncTrackingShapeUI === 'function') syncTrackingShapeUI();
+    }
+
+// ★ 切换跟枪模式的自动开火开关
+    window.toggleTrackingAutoFire = function() {
+        if (STATE.activeOfficialProject) return;
+        CFG.tracking.autoFire = !CFG.tracking.autoFire;
+        syncAllButtonStates();
+        saveToLocalStorage();
+    };
+
+    // ★ 跟枪模式形态切换函数
+    window.setTrackingShape = function(s) {
+        if (STATE.activeOfficialProject) return;
+        CFG.tracking.shape = s;
+        renderTrackingDummyUI();
+        buildTrackingTarget();
+        syncAllButtonStates();
+        refreshAllPreviewTargets();
+        saveToLocalStorage();
+    };
+
+    // ★ 跟枪模式专属形态按钮状态同步
+    function syncTrackingShapeUI() {
+        document.querySelectorAll('#tracking-shape-presets .pill-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.val === (CFG.tracking.shape || 'sphere'));
+        });
+    }
+
+    // 修复结算面板元信息显示
+    function currentModeMeta() {
+        if (CFG.mode === 'sixshot') return { size: CFG.targetSizeCm, depth: CFG.depthSixshot };
+        if (CFG.mode === 'tracking') {
+            const isDummy = (CFG.tracking.shape === 'dummy');
+            return {
+                size: isDummy ? (CFG.holding.headWidthCm || 23.0) : CFG.tracking.targetSizeCm,
+                depth: CFG.depthTracking
+            };
+        }
+        return {
+            size: CFG.holding.shape === 'sphere' ? CFG.holding.sizeCm : CFG.holding.headWidthCm,
+            depth: Math.max(CFG.holding.wallDepth + 0.1, CFG.holding.depth)
+        };
     }
 
     function updateSpeedHints() {
@@ -4310,23 +4518,18 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
     // 物理运算与位移更新主循环 (Update Physics Loop)
     // ============================================================
     function updatePhysics(dt) {
-        // ★ ：鼠标停止 30ms 后，速度归零，防止预测残留抖动
-        if (performance.now() - (STATE._lastMoveTime || 0) > 30) {
-            STATE._yawVel = 0;
-            STATE._pitchVel = 0;
+
+        if (CFG.cloudsEnabled && cloudGroup) {
+            STATE._cloudTick = (STATE._cloudTick || 0) + 1;
+            if (STATE._cloudTick % 5 === 0) {
+                const cloudDt = dt * 5;
+                cloudGroup.children.forEach(c => {
+                    c.userData.angle += c.userData.speed * cloudDt;
+                    c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
+                    c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
+                });
+            }
         }
-    if (CFG.cloudsEnabled && cloudGroup) {
-    // ★ 每 3 帧更新一次（云移动速度极慢，肉眼无法分辨帧率差异）
-    STATE._cloudTick = (STATE._cloudTick || 0) + 1;
-    if (STATE._cloudTick % 5 === 0) {
-        const cloudDt = dt * 5;
-        cloudGroup.children.forEach(c => {
-            c.userData.angle += c.userData.speed * cloudDt;
-            c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
-            c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
-        });
-    }
-}
 
         // --- 身法位移 ---
         if (CFG.movement.enabled) {
@@ -4409,7 +4612,6 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                 else if (t.y > b.maxY) { t.y = b.maxY; t.dirY = -Math.abs(t.dirY); }
             }
 
-            // ★ 碰撞检测隔帧执行（省 CPU），视觉位置每帧同步（画面丝滑）
             STATE._collisionTick = (STATE._collisionTick || 0) + 1;
             if (STATE._collisionTick % 2 === 0) {
                 const vis = sixTargets.filter(t => t.mesh.visible);
@@ -4453,28 +4655,30 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                         }
                     }
                 }
-            }   // ← 碰撞计算 if 到此关闭
+            }
 
-            // ★ 视觉位置每帧同步，开启动态漂移时画面丝滑无卡顿
             for (const t of sixTargets) { if (t.mesh.visible) t.mesh.position.set(t.x, t.y, t.z); }
-        }   // ← Sixshot 分支 if 到此关闭
+        }
 
-        // --- Tracking 跟枪逻辑 ---
+        // --- Tracking 跟枪逻辑（含假人边界严密防穿框） ---
         else if (CFG.mode === 'tracking') {
             const ts = STATE.tracking;
             const space = CFG.tracking.space;
             const isFly = CFG.tracking.pattern === 'fly';
             const baseD = CFG.depthTracking;
             const cy = CFG.viewHeight;
-            const r = CFG.tracking.targetSizeCm / 100 / 2;
+            const isDummy = (CFG.tracking.shape === 'dummy');
+            const ext = getTrackingTargetExtents();
             const speedRad = CFG.tracking.speedDegPerSec * Math.PI / 180;
             const linSpeed = speedRad * baseD;
             const spanRad = CFG.tracking.angleRange * Math.PI / 180;
             const wallH = Math.max(1.0, CFG.tracking.wallHeight || 5.0);
             const wallBottom = Math.max(0.05, cy - wallH / 2);
             const wallTop = wallBottom + wallH;
-            const minY = wallBottom + r;
-            const maxY = wallTop - r;
+
+            // ★ 核心边界防穿透：假人身体最底端不穿出玻璃下沿，头顶不穿出玻璃上沿
+            const minY = Math.max(0.05 + ext.bottom, wallBottom + ext.bottom);
+            const maxY = Math.max(minY, wallTop - ext.top);
 
             if (space === 'free3d') {
                 const range3D = Math.max(0.5, CFG.tracking.depthRange3D ?? 10.0);
@@ -4489,8 +4693,9 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                 if (ts.dist <= baseD) { ts.dist = baseD; ts.vDist = Math.abs(ts.vDist); }
                 else if (ts.dist >= baseD + range3D) { ts.dist = baseD + range3D; ts.vDist = -Math.abs(ts.vDist); }
 
+                const sideRad = ext.side / Math.max(0.1, ts.dist);
+                const halfAngle = Math.max(0.05, spanRad / 2 - sideRad);
                 if (CFG.tracking.angleRange < 359) {
-                    const halfAngle = spanRad / 2;
                     if (ts.yaw <= -halfAngle) { ts.yaw = -halfAngle; ts.vTan = Math.abs(ts.vTan); }
                     else if (ts.yaw >= halfAngle) { ts.yaw = halfAngle; ts.vTan = -Math.abs(ts.vTan); }
                 }
@@ -4507,7 +4712,7 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                             ts.vDist = sinPhi * Math.sin(theta) * linSpeed;
                         } else {
                             ts.vTan = -ts.vTan;
-                            ts.vDist = -ts.vDist; // 严密的 3D Strafe 径向反转
+                            ts.vDist = -ts.vDist;
                         }
                     }
                 }
@@ -4520,7 +4725,8 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                 ts.yaw += ts.vYaw * dt;
                 if (isFly) ts.y += ts.vy * dt;
 
-                const halfAngle = spanRad / 2;
+                const sideRad = ext.side / Math.max(0.1, ts.dist);
+                const halfAngle = Math.max(0.05, spanRad / 2 - sideRad);
                 if (CFG.tracking.angleRange < 359) {
                     if (ts.yaw <= -halfAngle) { ts.yaw = -halfAngle; ts.vYaw = Math.abs(ts.vYaw); }
                     else if (ts.yaw >= halfAngle) { ts.yaw = halfAngle; ts.vYaw = -Math.abs(ts.vYaw); }
@@ -4530,7 +4736,7 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                     if (ts.y <= minY) { ts.y = minY; ts.vy = Math.abs(ts.vy); }
                     else if (ts.y >= maxY) { ts.y = maxY; ts.vy = -Math.abs(ts.vy); }
                 } else {
-                    ts.y = cy;
+                    ts.y = clamp(cy, minY, maxY);
                 }
 
                 if (CFG.tracking.strafeMaxInterval > 0.01) {
@@ -4552,9 +4758,10 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                 ts.z = baseD * Math.cos(th);
             }
             else {
-                // Wall 面跟枪
+                // 直面墙面跟枪（包含假人肩宽防穿框）
                 const halfW = Math.max(0.5, (baseD * spanRad) / 2);
-                const minX = -halfW + r, maxX = halfW - r;
+                const minX = -halfW + ext.side;
+                const maxX = halfW - ext.side;
 
                 ts.x += ts.vx * dt;
                 ts.y += ts.vy * dt;
@@ -4579,25 +4786,52 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
                 }
             }
 
-            const t0 = sixTargets[0];
-            if (t0) {
-                t0.mesh.position.set(ts.x, ts.y, ts.z);
-                t0.x = ts.x; t0.y = ts.y; t0.z = ts.z;
+// 物理坐标与矩阵同步（飞奔中每一帧实时注视玩家）
+            if (trackingTarget.rootGroup) {
+                trackingTarget.rootGroup.position.set(ts.x, ts.y, ts.z);
+                const dx = camera.position.x - ts.x;
+                const dz = camera.position.z - ts.z;
+                trackingTarget.rootGroup.rotation.y = Math.atan2(dx, dz);
+                trackingTarget.rootGroup.updateMatrixWorld(true);
+            }
 
-                if (STATE.game === 'playing' && STATE.isMouseDown) {
-                    STATE.trackingFiringTime += dt;
-                    const res = checkAim();
-                    if (res && res.hit && res.object === t0.mesh) {
-                        STATE.trackingOnTargetTime += dt;
-                        STATE.score += dt;
-                        t0.mesh.material = highlightMat;
-                        playTrackingTickSound();
+            // 开火与高亮判定
+            // 支持开关：如果开启了自动开火，无需按住左键；如果关闭，则必须按住左键
+            const isTrackingFiring = CFG.tracking.autoFire || STATE.isMouseDown;
+            if (STATE.game === 'playing' && isTrackingFiring) {
+                STATE.trackingFiringTime += dt;
+                const res = checkAim();
+                if (res && res.hit) {
+                    STATE.trackingOnTargetTime += dt;
+                    STATE.score += dt;
+
+                    if (isDummy) {
+                        if (res.part === 'head') {
+                            if (trackingTarget.headMesh) trackingTarget.headMesh.material = highlightMat;
+                            if (trackingTarget.bodyMesh) trackingTarget.bodyMesh.material = dummyBodyMat;
+                        } else {
+                            if (trackingTarget.bodyMesh) trackingTarget.bodyMesh.material = highlightMat;
+                            if (trackingTarget.headMesh) trackingTarget.headMesh.material = targetMat;
+                        }
                     } else {
-                        t0.mesh.material = targetMat;
+                        if (trackingTarget.sphereMesh) trackingTarget.sphereMesh.material = highlightMat;
                     }
-                    updateHUDStats();
+                    playTrackingTickSound();
                 } else {
-                    t0.mesh.material = targetMat;
+                    if (isDummy) {
+                        if (trackingTarget.headMesh) trackingTarget.headMesh.material = targetMat;
+                        if (trackingTarget.bodyMesh) trackingTarget.bodyMesh.material = dummyBodyMat;
+                    } else {
+                        if (trackingTarget.sphereMesh) trackingTarget.sphereMesh.material = targetMat;
+                    }
+                }
+                updateHUDStats();
+            } else {
+                if (isDummy) {
+                    if (trackingTarget.headMesh) trackingTarget.headMesh.material = targetMat;
+                    if (trackingTarget.bodyMesh) trackingTarget.bodyMesh.material = dummyBodyMat;
+                } else {
+                    if (trackingTarget.sphereMesh) trackingTarget.sphereMesh.material = targetMat;
                 }
             }
         }
@@ -4646,57 +4880,122 @@ const HEAD_GEO = new THREE.SphereGeometry(1, 16, 16);
     }
 
     // ============================================================
-    // 零延迟瞄准与射线判定 (Raw Raycast)
+    // 零开销中心射线与高精几何数学相交判定 (Pure Math Intersection)
     // ============================================================
-const raycaster = new THREE.Raycaster();
-const centerVec = new THREE.Vector2(0, 0);
-const _viewEuler = new THREE.Euler(0, 0, 0, 'YXZ');
-const _raycastTargets = [];   // ★ 复用数组，避免每帧 new
+    const raycaster = new THREE.Raycaster();
+    const _viewEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+    const _rayOrigin = new THREE.Vector3();
+    const _rayDir = new THREE.Vector3();
+    const _raycastTargets = [];
 
-// ★ 优化：支持传入"预测毫秒数"，将相机姿态沿角速度外推
-// 传 0（或不传）时是精确姿态，用于 raycast 和常规更新
-function applyViewRotation(predictMs = 0) {
-    let yaw = STATE.yaw;
-    let pitch = STATE.pitch;
-
-    if (predictMs > 0) {
-        yaw   += (STATE._yawVel   || 0) * predictMs / 1000;
-        pitch += (STATE._pitchVel || 0) * predictMs / 1000;
-        pitch = clamp(pitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
+    // ★ 相机姿态只在渲染前或显式要求时执行
+    function applyViewRotation() {
+        _viewEuler.set(STATE.pitch, STATE.yaw, 0);
+        camera.quaternion.setFromEuler(_viewEuler);
     }
 
-    _viewEuler.set(pitch, yaw, 0);
-    camera.quaternion.setFromEuler(_viewEuler);
-}
+    // ★ 优化 ②：直接用角向量解析屏幕中央射线的方向，零矩阵相乘开销
+    function getCenterAimRay(outOrigin, outDir) {
+        outOrigin.copy(camera.position);
+        const cosP = Math.cos(STATE.pitch);
+        outDir.set(
+            -Math.sin(STATE.yaw) * cosP,
+            Math.sin(STATE.pitch),
+            -Math.cos(STATE.yaw) * cosP
+        );
+    }
 
-function checkAim() {
-    if (document.pointerLockElement !== document.body) return null;
-    camera.updateMatrixWorld();
-    raycaster.setFromCamera(centerVec, camera);
+    // ★ 优化 ④：纯数学“射线 vs 球体”求交，无视 Mesh，0.001ms 极速解析
+    function raySphereIntersect(ox, oy, oz, dx, dy, dz, cx, cy, cz, radius) {
+        const vx = cx - ox;
+        const vy = cy - oy;
+        const vz = cz - oz;
+        const t = vx * dx + vy * dy + vz * dz;
+        if (t <= 0) return -1; // 在视线背后
+        const px = ox + dx * t;
+        const py = oy + dy * t;
+        const pz = oz + dz * t;
+        const distSq = (cx - px) * (cx - px) + (cy - py) * (cy - py) + (cz - pz) * (cz - pz);
+        if (distSq <= radius * radius) {
+            return t; // 命中深度
+        }
+        return -1;
+    }
 
-    _raycastTargets.length = 0;   // ★ 清空但保留容量
+    function checkAim() {
+        if (document.pointerLockElement !== document.body) return null;
+        getCenterAimRay(_rayOrigin, _rayDir);
 
-    if (CFG.mode === 'holding') {
-        spawnWallGroup.children.forEach(c => { if (c.isMesh && c.userData.isWall) _raycastTargets.push(c); });
-        if (holdingTarget.rootGroup.visible) {
-            if (CFG.holding.shape === 'sphere') _raycastTargets.push(holdingTarget.sphereMesh);
-            else holdingTarget.dummyGroup.children.forEach(c => { if (c.isMesh) _raycastTargets.push(c); });
+        // 1. Sixshot 模式：全量走纯数学解算
+        if (CFG.mode === 'sixshot') {
+            const r = (CFG.targetSizeCm / 100) / 2;
+            let closestT = Infinity;
+            let hitTarget = null;
+            for (let i = 0; i < sixTargets.length; i++) {
+                const tObj = sixTargets[i];
+                if (!tObj.mesh.visible) continue;
+                const dist = raySphereIntersect(
+                    _rayOrigin.x, _rayOrigin.y, _rayOrigin.z,
+                    _rayDir.x, _rayDir.y, _rayDir.z,
+                    tObj.x, tObj.y, tObj.z,
+                    r
+                );
+                if (dist > 0 && dist < closestT) {
+                    closestT = dist;
+                    hitTarget = tObj;
+                }
+            }
+            if (hitTarget) return { hit: true, object: hitTarget.mesh };
+            return null;
         }
-        const hits = raycaster.intersectObjects(_raycastTargets, false);
-        if (hits.length > 0) {
-            if (hits[0].object.userData.isWall) return { hit: false, isWall: true };
-            return { hit: true, object: hits[0].object, part: hits[0].object.userData.part || 'body' };
+
+        // 2. Tracking 模式：小球数学算，假人轻量 Raycast
+        if (CFG.mode === 'tracking') {
+            if ((CFG.tracking.shape || 'sphere') === 'sphere') {
+                const r = (CFG.tracking.targetSizeCm / 100) / 2;
+                const dist = raySphereIntersect(
+                    _rayOrigin.x, _rayOrigin.y, _rayOrigin.z,
+                    _rayDir.x, _rayDir.y, _rayDir.z,
+                    STATE.tracking.x, STATE.tracking.y, STATE.tracking.z,
+                    r
+                );
+                if (dist > 0) return { hit: true, object: trackingTarget.sphereMesh };
+                return null;
+            } else {
+                // Tracking 假人
+                raycaster.ray.origin.copy(_rayOrigin);
+                raycaster.ray.direction.copy(_rayDir);
+                _raycastTargets.length = 0;
+                trackingTarget.dummyGroup.children.forEach(c => { if (c.isMesh) _raycastTargets.push(c); });
+                const hits = raycaster.intersectObjects(_raycastTargets, false);
+                if (hits.length > 0) {
+                    return { hit: true, object: hits[0].object, part: hits[0].object.userData.part || 'body' };
+                }
+                return null;
+            }
         }
-        return null;
-    } else {
-        for (let i = 0; i < sixTargets.length; i++) {
-            if (sixTargets[i].mesh.visible) _raycastTargets.push(sixTargets[i].mesh);
+
+        // 3. Holding 模式：直接设置中心 ray，不再做 setFromCamera
+        if (CFG.mode === 'holding') {
+            raycaster.ray.origin.copy(_rayOrigin);
+            raycaster.ray.direction.copy(_rayDir);
+            _raycastTargets.length = 0;
+
+            spawnWallGroup.children.forEach(c => { if (c.isMesh && c.userData.isWall) _raycastTargets.push(c); });
+            if (holdingTarget.rootGroup.visible) {
+                if (CFG.holding.shape === 'sphere') _raycastTargets.push(holdingTarget.sphereMesh);
+                else holdingTarget.dummyGroup.children.forEach(c => { if (c.isMesh) _raycastTargets.push(c); });
+            }
+            const hits = raycaster.intersectObjects(_raycastTargets, false);
+            if (hits.length > 0) {
+                if (hits[0].object.userData.isWall) return { hit: false, isWall: true };
+                return { hit: true, object: hits[0].object, part: hits[0].object.userData.part || 'body' };
+            }
+            return null;
         }
-        const hits = raycaster.intersectObjects(_raycastTargets, false);
-        if (hits.length > 0) return { hit: true, object: hits[0].object };
+
         return null;
     }
-}
 
     // ============================================================
     // 输入事件与系统控制管线
@@ -4774,53 +5073,34 @@ function requestPointerLockCompat() {
 // 只挂载一个事件源
 const _supportsRawUpdate = ('onpointerrawupdate' in window);
 
-function handlePointerMove(e) {
-    const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [e];
+// ★ 极简高频鼠标处理。只算角度，绝不在此碰 Camera
+    function handlePointerMove(e) {
+        const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [e];
+        STATE.pollCount += events.length;
 
-    // 轮询率统计（现在只有一个事件源，直接累加即可）
-    STATE.pollCount += events.length;
-
-    if (document.pointerLockElement === document.body && STATE.game !== 'armed') {
-        let dx = 0, dy = 0;
-        for (let i = 0; i < events.length; i++) {
-            dx += (Number(events[i].movementX) || 0);
-            dy += (Number(events[i].movementY) || 0);
-        }
-
-        if (dx === 0 && dy === 0) return;
-        if (Math.abs(dx) > 2500 || Math.abs(dy) > 2500) return;
-
-        // ★ 计算角速度（弧度/秒）用于预测
-        const nowT = performance.now();
-        const moveDt = (nowT - (STATE._lastMoveTime || nowT)) / 1000;
-        if (moveDt > 0.0001 && moveDt < 0.1) {
-            if (CFG.debugMode) {
-                // 调试模式：竖直移动映射到水平旋转
-                STATE._yawVel   = (-dy * radiansPerCountY) / moveDt;
-                STATE._pitchVel = 0;
-            } else {
-                STATE._yawVel   = (-dx * radiansPerCountX) / moveDt;
-                STATE._pitchVel = (-dy * radiansPerCountY) / moveDt;
+        if (document.pointerLockElement === document.body && STATE.game !== 'armed') {
+            let dx = 0, dy = 0;
+            for (let i = 0; i < events.length; i++) {
+                dx += (Number(events[i].movementX) || 0);
+                dy += (Number(events[i].movementY) || 0);
             }
+
+            if (dx === 0 && dy === 0) return;
+            if (Math.abs(dx) > 2500 || Math.abs(dy) > 2500) return;
+
+            if (CFG.debugMode) {
+                STATE.yaw -= dy * radiansPerCountY;
+                STATE.pitch = 0;
+            } else {
+                STATE.yaw -= dx * radiansPerCountX;
+                STATE.pitch -= dy * radiansPerCountY;
+                STATE.pitch = clamp(STATE.pitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
+            }
+
+            if (STATE.yaw > Math.PI) STATE.yaw -= Math.PI * 2;
+            else if (STATE.yaw < -Math.PI) STATE.yaw += Math.PI * 2;
         }
-        STATE._lastMoveTime = nowT;
-
-        if (CFG.debugMode) {
-            // ★ 调试模式：鼠标 Y 驱动 yaw，pitch 锁死 0
-            STATE.yaw -= dy * radiansPerCountY;
-            STATE.pitch = 0;
-        } else {
-            STATE.yaw -= dx * radiansPerCountX;
-            STATE.pitch -= dy * radiansPerCountY;
-            STATE.pitch = clamp(STATE.pitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
-        }
-
-        if (STATE.yaw > Math.PI) STATE.yaw -= Math.PI * 2;
-        else if (STATE.yaw < -Math.PI) STATE.yaw += Math.PI * 2;
-
-        applyViewRotation(0);   // 精确姿态，渲染时再加预测
     }
-}
 
 // ★ 二选一挂载：Chrome/Edge 用 pointerrawupdate（低延迟原始数据），
 //   Firefox/Safari 等自动回退到 pointermove，保证旋转只执行一次。
@@ -4904,6 +5184,13 @@ if (`Mouse${e.button}` === CFG.restartKey) {
             }
         }
     });
+
+    // ★ 鼠标按键松开监听
+        window.addEventListener('mouseup', (e) => {
+            if (e.button === 0) {
+                STATE.isMouseDown = false;
+            }
+        });
 
         // ★ 切标签页/最小化时，强制释放鼠标状态，避免卡住
         window.addEventListener('blur', () => {
@@ -5126,15 +5413,6 @@ if (`Mouse${e.button}` === CFG.restartKey) {
         start1Point5SecondCooldown();
     }
 
-    function currentModeMeta() {
-        if (CFG.mode === 'sixshot') return { size: CFG.targetSizeCm, depth: CFG.depthSixshot };
-        if (CFG.mode === 'tracking') return { size: CFG.tracking.targetSizeCm, depth: CFG.depthTracking };
-        return {
-            size: CFG.holding.shape === 'sphere' ? CFG.holding.sizeCm : CFG.holding.headWidthCm,
-            depth: Math.max(CFG.holding.wallDepth + 0.1, CFG.holding.depth)
-        };
-    }
-
     function finishChallenge() {
         STATE.game = 'finished';
         document.exitPointerLock();
@@ -5294,7 +5572,7 @@ document.addEventListener('pointerlockerror', () => {
         }
     }
 
-    function syncAllButtonStates() {
+function syncAllButtonStates() {
         ['sixshot', 'tracking', 'holding'].forEach(m => {
             const b = getEl(`tab-mode-${m}`);
             if (b) b.classList.toggle('active', CFG.mode === m);
@@ -5399,6 +5677,15 @@ document.addEventListener('pointerlockerror', () => {
         syncSizeLockUI('tracking');
         syncDepthLockUI('sixshot');
         syncDepthLockUI('tracking');
+
+        // ★ 同步跟枪模式假人/小球按钮高亮
+        if (typeof syncTrackingShapeUI === 'function') syncTrackingShapeUI();
+
+        // 同步自动开火按钮外观
+        const autoFireBtn = getEl('btn-autofire-toggle');
+        const autoFireTxt = getEl('txt-autofire');
+        if (autoFireBtn) autoFireBtn.classList.toggle('active', !!CFG.tracking.autoFire);
+        if (autoFireTxt) autoFireTxt.innerText = CFG.tracking.autoFire ? '自动开火: 开启' : '自动开火: 关闭';
     }
 
     function applyModeUI() {
@@ -5564,7 +5851,7 @@ document.addEventListener('pointerlockerror', () => {
         });
     }
 
-    function dispatchGlobalValue(id, val) {
+function dispatchGlobalValue(id, val) {
         if (id.startsWith('inp-cross-')) syncCrosshair(id.replace('inp-cross-', ''), val);
         else if (id === 'inp-view-height') window.setViewHeight(val);
         else if (id === 'inp-size') window.syncTargetSize(val);
@@ -5598,7 +5885,9 @@ document.addEventListener('pointerlockerror', () => {
         else if (id === 'inp-crouch-nature') window.setCrouchNature(val);
         else if (id === 'inp-jump-height') window.setJumpHeight(val);
         else if (id === 'inp-jump-nature') window.setJumpNature(val);
+        // 支持架枪假人 (inp-h-) 与 跟枪假人 (inp-th-)，双向互通绝不冲突
         else if (id.startsWith('inp-h-')) updateHoldingDummy(val, id.replace('inp-h-', ''));
+        else if (id.startsWith('inp-th-')) updateHoldingDummy(val, id.replace('inp-th-', ''));
         else if (id === 'inp-cm-x') window.setCmX(val);
         else if (id === 'inp-cm-y') window.setCmY(val);
     }
@@ -5616,6 +5905,7 @@ document.addEventListener('pointerlockerror', () => {
 
         dispatchGlobalValue(id, val);
     };
+
 // 把内联 onclick / oninput 需要用到的函数挂到 window
 window.toggleHoldingLock = toggleHoldingLock;
 window.updateHoldingDummy = updateHoldingDummy;
@@ -6126,12 +6416,10 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
     let lastFrameTime = performance.now();
     let fpsCount = 0, fpsTime = performance.now();
 
-    function animate(now) {
+function animate(now) {
         const timeSinceLastFrame = now - lastFrameTime;
 
-        // 精确节流：VSync 模式不节流，解锁模式按 maxFps 或兜底 720 节流
         if (!CFG.vsyncEnabled) {
-            // ★ 关键兜底：maxFps = 0 时自动限制为 720，防止无限制暴走
             const effectiveMax = CFG.maxFps > 0 ? CFG.maxFps : 720;
             const frameInterval = 1000 / effectiveMax;
             if (timeSinceLastFrame < frameInterval - 0.1) {
@@ -6143,7 +6431,6 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
             lastFrameTime = now;
         }
 
-        // 限制最大 dt 防止切屏回来后小球瞬移或穿模
         const dt = clamp(timeSinceLastFrame / 1000, 0.0001, 0.05);
 
         // 1. 物理状态更新
@@ -6162,12 +6449,10 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
             STATE.pollCount = 0;
         }
 
-        // 3. 画面渲染（★ 优化：用预测姿态渲染，渲染后恢复精确姿态）
+        // 3. 画面渲染（在 render 这一刻准时应用最新视角，手感最平滑且无撕裂）
         if (renderer && scene && camera) {
-            applyViewRotation(VIEW_PREDICT_MS);   // 预测姿态
+            applyViewRotation();
             renderer.render(scene, camera);
-            applyViewRotation(0);                 // 精确姿态，确保 raycast 准确
-            STATE._lastManualRender = now;
         }
 
         // 4. 派发下一帧
@@ -6194,11 +6479,16 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
         updateScene();
         setCrosshairType(CFG.crosshair.type);
         renderHoldingDummyUI();
+        
+        // ★ 初始化渲染跟枪假人界面与模型
+        if (typeof renderTrackingDummyUI === 'function') renderTrackingDummyUI();
+        if (typeof buildTrackingTarget === 'function') buildTrackingTarget();
+
         applyModeUI();
         syncAllInputsFromConfig();
         refreshMovementKeyButtons();
 
-        // ★ 恢复调试模式开关状态
+        // 恢复调试模式开关状态
         const dbgBtn = getEl('btn-debug-mode-toggle');
         if (dbgBtn) {
             dbgBtn.classList.toggle('active', CFG.debugMode);
@@ -6246,6 +6536,9 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
             if (f11) f11.classList.remove('f11-highlight');
         }, 3000);
 
+        // ★ 刷新右上角抗锯齿按钮文字显示
+        if (typeof syncAntialiasHUD === 'function') syncAntialiasHUD();
+
         lastFrameTime = performance.now();
         scheduleFrame();
     }
@@ -6270,6 +6563,656 @@ window.setCoastalWoodFloor = setCoastalWoodFloor;
     } else {
         init(); // 网页已就绪，直接执行启动
     }
+
     </script>
 </body>
+
+
+<!-- ============================================================
+     预测得分 & 准确率 分析图表
+     ============================================================ -->
+<style>
+    /* 1. 图表卡片容器与排版 (纯净纯黑科技风) */
+    #chart-patch-container {
+        margin-top: 12px;
+        margin-bottom: 18px; /* 与下方按钮保持留白 */
+        background: #14121d;
+        border: 1px solid #282436;
+        border-radius: 10px;
+        padding: 10px 14px 10px;
+        text-align: left;
+        box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.5);
+        display: none;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+    }
+    #chart-patch-container:hover {
+        border-color: #3b354f;
+    }
+    
+    /* 顶部仅保留右上角放大提示 */
+    .chart-tabs-header {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+    .chart-size-hint {
+        font-size: 0.62rem;
+        color: #71717a;
+        font-weight: 800;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: all 0.15s;
+    }
+    #chart-patch-container:hover .chart-size-hint {
+        color: #e0f2fe;
+        border-color: #38bdf8;
+    }
+
+    /* 默认精致大图表尺寸 (230px) */
+    #perfCanvas {
+        display: block;
+        width: 100%;
+        height: 230px;
+        transition: height 0.25s ease;
+    }
+
+    /* 点击放大后的超宽巨幕模式 (340px) */
+    #chart-patch-container.is-expanded #perfCanvas {
+        height: 340px;
+    }
+
+    /* 底部药丸 */
+    .chart-legend-row {
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+        cursor: default;
+    }
+    .chart-pills-wrap {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .legend-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.68rem;
+        font-weight: 900;
+        padding: 3px 12px;
+        border-radius: 4px;
+        user-select: none;
+    }
+    .legend-pill.active-acc {
+        border: 1px solid #38bdf8;
+        background: rgba(56, 189, 248, 0.12);
+        color: #ffffff;
+    }
+    .legend-pill.active-spm {
+        border: 1px solid #f59e0b;
+        background: rgba(245, 158, 11, 0.12);
+        color: #ffffff;
+    }
+    .legend-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+</style>
+
+<script>
+(function() {
+    const PATCH_KEY = 'XDH_PERF_CHART_STRICT_RECORD';
+    let recordEnabled = localStorage.getItem(PATCH_KEY) !== 'false';
+
+    // 预分配定长 TypedArray (支持长达 20 分钟自由模式打靶，零运行时 GC 掉帧)
+    const MAX_POINTS = 2400;
+    const timeData = new Float32Array(MAX_POINTS);
+    const spmData = new Float32Array(MAX_POINTS);
+    const accData = new Float32Array(MAX_POINTS);
+    let sampleCount = 0;
+    let sampleTimer = null;
+    let isTrackingMode = false;
+    let isChartExpanded = false;
+    let sessionStarted = false;
+    
+    // 防抖与动画过渡锁
+    let _drawDebounceTimer = null;
+    let _isZoomTransitioning = false;
+
+    // 解析当前生效的重开键
+    function getActualRestartKey() {
+        if (window.CFG && window.CFG.restartKey) return window.CFG.restartKey;
+        try {
+            const raw = localStorage.getItem('XDH_AIM_TRAINER_V10_PRO');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed.restartKey) return parsed.restartKey;
+            }
+        } catch(e) {}
+        return 'KeyR';
+    }
+
+    // 严密判断是否真正处于打靶射击中
+    function isGameActivelyPlaying() {
+        if (window.STATE) {
+            return window.STATE.game === 'playing';
+        }
+        const isLocked = (document.pointerLockElement === document.body);
+        const overlay = document.getElementById('progress-overlay');
+        const modal = document.getElementById('result-modal');
+        const overlayHidden = !overlay || overlay.style.display === 'none' || overlay.style.display === '';
+        const modalHidden = !modal || modal.style.display === 'none' || modal.style.display === '';
+        return isLocked && overlayHidden && modalHidden;
+    }
+
+    // ============================================================
+    // 1. 注入控制开关到【地面底色】下方
+    // ============================================================
+    function injectSettingSwitch() {
+        const floorPicker = document.getElementById('floor-color-picker');
+        if (!floorPicker || document.getElementById('section-perf-switch-card')) return;
+
+        const switchCard = document.createElement('div');
+        switchCard.className = 'section-card';
+        switchCard.id = 'section-perf-switch-card';
+        switchCard.style.marginTop = '6px';
+        switchCard.innerHTML = `
+            <div class="section-header" style="margin-bottom:2px;">
+                <span class="section-label">
+                    <svg class="icon-sm" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span>战绩性能曲线</span>
+                </span>
+                <button class="pill-btn toggle-switch-btn ${recordEnabled ? 'active' : ''}" id="btn-chart-toggle-sidebar" onclick="window.toggleChartStrictRecord()">
+                    <span id="txt-chart-record-btn">${recordEnabled ? '已开启' : '已关闭'}</span>
+                </button>
+            </div>
+            <div class="section-sub" style="line-height:1.4;">关闭后后台采样彻底休眠，零计算开销以保极速手感</div>
+        `;
+        floorPicker.parentNode.insertBefore(switchCard, floorPicker.nextSibling);
+    }
+
+    // 开关切换 (结算弹窗内切换实时联动刷新)
+    window.toggleChartStrictRecord = function() {
+        recordEnabled = !recordEnabled;
+        localStorage.setItem(PATCH_KEY, recordEnabled ? 'true' : 'false');
+
+        const btn = document.getElementById('btn-chart-toggle-sidebar');
+        const txt = document.getElementById('txt-chart-record-btn');
+        if (btn) btn.classList.toggle('active', recordEnabled);
+        if (txt) txt.innerText = recordEnabled ? '已开启' : '已关闭';
+
+        const container = document.getElementById('chart-patch-container');
+        const resModal = document.getElementById('result-modal');
+        const isModalShowing = resModal && resModal.style.display === 'flex';
+
+        if (!recordEnabled) {
+            stopRecording();
+            if (container) container.style.display = 'none';
+        } else {
+            if (isGameActivelyPlaying()) {
+                startRecordingSession();
+            } else if (isModalShowing && sampleCount >= 2) {
+                if (container) container.style.display = 'block';
+                scheduleDraw(0);
+            }
+        }
+    };
+
+    // ============================================================
+    // 2. 注入图表卡片到结算弹窗
+    // ============================================================
+    function injectChartToModal() {
+        const resultCard = document.querySelector('.result-card');
+        if (!resultCard) return;
+
+        let chartBox = document.getElementById('chart-patch-container');
+        if (!chartBox) {
+            resultCard.style.maxWidth = '520px';
+
+            chartBox = document.createElement('div');
+            chartBox.id = 'chart-patch-container';
+            chartBox.innerHTML = `
+                <div class="chart-tabs-header">
+                    <div class="chart-size-hint" id="chart-size-hint">🔍 点击放大</div>
+                </div>
+                <canvas id="perfCanvas" width="480" height="230"></canvas>
+                <div class="chart-legend-row" id="chart-legend-wrap">
+                    <div class="chart-pills-wrap">
+                        <span class="legend-pill active-acc"><span class="legend-dot" style="background:#38bdf8;"></span>Accuracy</span>
+                        <span class="legend-pill active-spm"><span class="legend-dot" style="background:#f59e0b;"></span><span id="lbl-perf-orange-legend">预测得分</span></span>
+                    </div>
+                </div>
+            `;
+
+            chartBox.onclick = toggleChartZoom;
+            const actionsRow = resultCard.querySelector('.result-actions-row');
+            if (actionsRow) {
+                resultCard.insertBefore(chartBox, actionsRow);
+            } else {
+                resultCard.appendChild(chartBox);
+            }
+        }
+    }
+
+    // 缩放切换
+    function toggleChartZoom(e) {
+        if (e && e.target && e.target.closest('#chart-legend-wrap')) return;
+
+        const container = document.getElementById('chart-patch-container');
+        const resultCard = document.querySelector('.result-card');
+        const hint = document.getElementById('chart-size-hint');
+        if (!container || !resultCard) return;
+
+        isChartExpanded = !isChartExpanded;
+        container.classList.toggle('is-expanded', isChartExpanded);
+
+        if (isChartExpanded) {
+            resultCard.style.maxWidth = '760px';
+            if (hint) hint.innerText = '🔍 点击还原';
+        } else {
+            resultCard.style.maxWidth = '520px';
+            if (hint) hint.innerText = '🔍 点击放大';
+        }
+
+        _isZoomTransitioning = true;
+        scheduleDraw(260);
+        setTimeout(() => {
+            _isZoomTransitioning = false;
+        }, 270);
+    }
+
+    // ============================================================
+    // 3. 超低开销采样核心 (★ 全模式防锯齿·底池保护算法)
+    // ============================================================
+    function takeSnapshot(force = false) {
+        if (!recordEnabled || sampleCount >= MAX_POINTS) return;
+        if (!force && !isGameActivelyPlaying()) return;
+
+        // ★ 核心时间对齐：直接读取游戏主时钟 (避免时钟漂移与等待锯齿)
+        let elapsedSec = 0;
+        let isChallengeMode = true;
+
+        if (window.STATE && window.CFG) {
+            isChallengeMode = (window.CFG.playMode === 'challenge');
+            elapsedSec = isChallengeMode ? Math.max(0, 49.0 - window.STATE.timeLeft) : window.STATE.timeLeft;
+        } else {
+            const timeEl = document.getElementById('hud-time');
+            const playBadge = document.getElementById('txt-playmode-badge');
+            isChallengeMode = playBadge ? !playBadge.textContent.includes('自由模式') : true;
+            const tVal = timeEl ? parseFloat(timeEl.textContent) || 0 : 49;
+            elapsedSec = isChallengeMode ? Math.max(0, 49.0 - tVal) : tVal;
+        }
+
+        if (sampleCount > 0 && (elapsedSec - timeData[sampleCount - 1] < 0.08) && !force) return;
+
+        let currentScore = 0;
+        let currentAcc = 100.0;
+
+        if (window.STATE && window.CFG) {
+            const S = window.STATE;
+            const C = window.CFG;
+            isTrackingMode = (C.mode === 'tracking');
+            currentScore = S.score || 0;
+
+            if (isTrackingMode) {
+                currentAcc = S.trackingFiringTime > 0.05 ? ((S.trackingOnTargetTime / S.trackingFiringTime) * 100) : 100.0;
+            } else {
+                const total = S.hits + S.misses;
+                currentAcc = total > 0 ? ((S.hits / total) * 100) : 100.0;
+            }
+        } else {
+            const scoreEl = document.getElementById('hud-score');
+            const hitsEl = document.getElementById('hud-hits');
+            const missesEl = document.getElementById('hud-misses');
+            const trackTab = document.getElementById('tab-mode-tracking');
+
+            isTrackingMode = trackTab ? trackTab.classList.contains('active') : false;
+
+            if (isTrackingMode) {
+                currentScore = scoreEl ? parseFloat(scoreEl.textContent) || 0 : 0;
+                const accEl = document.getElementById('hud-acc');
+                currentAcc = accEl ? parseFloat(accEl.textContent) || 100.0 : 100.0;
+            } else {
+                const h = hitsEl ? parseInt(hitsEl.textContent) || 0 : 0;
+                const m = missesEl ? parseInt(missesEl.textContent) || 0 : 0;
+                currentScore = Math.max(0, h - m);
+                const total = h + m;
+                currentAcc = total > 0 ? (h / total) * 100.0 : 100.0; // 原生数学计算，绝不误判为0
+            }
+        }
+
+        let calculatedValue = 0;
+        if (isChallengeMode) {
+            if (elapsedSec < 1.0) {
+                calculatedValue = currentScore;
+            } else {
+                // ★★★ 核心保底算法：预测得分绝对不低于当前已得分，彻底消灭架枪模式等待出靶时的锯齿下坠！ ★★★
+                const validTime = Math.max(elapsedSec, 3.0);
+                const paceValue = (currentScore / validTime) * 49.0;
+                calculatedValue = Math.max(currentScore, paceValue);
+            }
+        } else {
+            calculatedValue = currentScore;
+        }
+
+        timeData[sampleCount] = elapsedSec;
+        spmData[sampleCount] = calculatedValue;
+        accData[sampleCount] = currentAcc;
+        sampleCount++;
+    }
+
+    // 终点绝对精准对齐
+    function writeFinalSettlementFrame() {
+        if (sampleCount === 0) return;
+
+        let finalScore = 0;
+        let finalAcc = 100.0;
+        let isChallengeMode = true;
+
+        if (window.STATE && window.CFG) {
+            const S = window.STATE;
+            const C = window.CFG;
+            isTrackingMode = (C.mode === 'tracking');
+            isChallengeMode = (C.playMode === 'challenge');
+            finalScore = isTrackingMode ? parseFloat(S.score.toFixed(1)) : Math.round(S.score);
+            if (isTrackingMode) {
+                finalAcc = S.trackingFiringTime > 0.05 ? ((S.trackingOnTargetTime / S.trackingFiringTime) * 100) : 100.0;
+            } else {
+                const total = S.hits + S.misses;
+                finalAcc = total > 0 ? ((S.hits / total) * 100) : 100.0;
+            }
+        } else {
+            const resScoreEl = document.getElementById('res-score');
+            const hudScoreEl = document.getElementById('hud-score');
+            const resAccEl = document.getElementById('res-val-3');
+            const hudAccEl = document.getElementById('hud-acc');
+            const trackTab = document.getElementById('tab-mode-tracking');
+            const playBadge = document.getElementById('txt-playmode-badge');
+
+            isTrackingMode = trackTab ? trackTab.classList.contains('active') : false;
+            isChallengeMode = playBadge ? !playBadge.textContent.includes('自由模式') : true;
+
+            finalScore = resScoreEl && resScoreEl.textContent ? parseFloat(resScoreEl.textContent) : (hudScoreEl ? parseFloat(hudScoreEl.textContent) || 0 : 0);
+            finalAcc = resAccEl && resAccEl.textContent ? parseFloat(resAccEl.textContent) : (hudAccEl ? parseFloat(hudAccEl.textContent) || 100.0 : 100.0);
+        }
+
+        const finalTime = isChallengeMode ? 49.0 : timeData[sampleCount - 1];
+
+        const lastIdx = sampleCount - 1;
+        const targetIdx = (sampleCount > 0 && Math.abs(timeData[lastIdx] - finalTime) < 1.0) ? lastIdx : sampleCount;
+
+        timeData[targetIdx] = finalTime;
+        spmData[targetIdx] = finalScore;
+        accData[targetIdx] = finalAcc;
+
+        if (targetIdx === sampleCount && sampleCount < MAX_POINTS) {
+            sampleCount++;
+        }
+    }
+
+    function startRecordingSession() {
+        if (!recordEnabled) return;
+        sampleCount = 0;
+        sessionStarted = true;
+
+        isChartExpanded = false;
+        const c = document.getElementById('chart-patch-container');
+        if (c) c.classList.remove('is-expanded');
+        const card = document.querySelector('.result-card');
+        if (card) card.style.maxWidth = '520px';
+        const hint = document.getElementById('chart-size-hint');
+        if (hint) hint.innerText = '🔍 点击放大';
+
+        if (sampleTimer) clearInterval(sampleTimer);
+        sampleTimer = setInterval(() => takeSnapshot(false), 500);
+    }
+
+    function stopRecording() {
+        if (sampleTimer) {
+            clearInterval(sampleTimer);
+            sampleTimer = null;
+        }
+        if (recordEnabled && sessionStarted) {
+            sessionStarted = false;
+            writeFinalSettlementFrame();
+        }
+    }
+
+    // ============================================================
+    // 4. 防抖重绘调度器
+    // ============================================================
+    function scheduleDraw(delay = 0) {
+        if (_drawDebounceTimer) clearTimeout(_drawDebounceTimer);
+        const finalDelay = _isZoomTransitioning ? Math.max(delay, 260) : delay;
+        
+        _drawDebounceTimer = setTimeout(() => {
+            _drawDebounceTimer = null;
+            drawPerformanceChart();
+        }, finalDelay);
+    }
+
+    // ============================================================
+    // 5. Canvas 绘制引擎 (整十/整百规整刻度 + 完美自适应平滑)
+    // ============================================================
+    function calculateNiceStep(raw) {
+        const mag = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 0.1))));
+        const n = raw / mag;
+        if (n <= 1) return mag;
+        if (n <= 2) return 2 * mag;
+        if (n <= 5) return 5 * mag;
+        return 10 * mag;
+    }
+
+    function drawPerformanceChart() {
+        injectChartToModal();
+        const container = document.getElementById('chart-patch-container');
+        if (!container) return;
+
+        if (!recordEnabled || sampleCount < 2) {
+            container.style.display = 'none';
+            return;
+        }
+        container.style.display = 'block';
+
+        writeFinalSettlementFrame();
+
+        const legendLabel = document.getElementById('lbl-perf-orange-legend');
+        if (legendLabel) {
+            legendLabel.textContent = isTrackingMode ? '命中时间' : '预测得分';
+        }
+
+        const canvas = document.getElementById('perfCanvas');
+        if (!canvas) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        
+        const cssW = rect.width > 0 ? rect.width : 480;
+        const cssH = rect.height > 0 ? rect.height : (isChartExpanded ? 340 : 230);
+
+        canvas.width = cssW * dpr;
+        canvas.height = cssH * dpr;
+
+        const ctx = canvas.getContext('2d');
+        ctx.resetTransform();
+        ctx.scale(dpr, dpr);
+
+        const W = cssW;
+        const H = cssH;
+
+        // 1. 规整刻度计算 (自动适配 0~50 命中时间 或 0~100+ 定点得分)
+        let peakVal = 5;
+        for (let i = 0; i < sampleCount; i++) {
+            if (spmData[i] > peakVal) peakVal = spmData[i];
+        }
+
+        const stepVal = calculateNiceStep((peakVal * 1.15) / 10);
+        const maxVal = stepVal * 10;
+
+        const padLeft = maxVal >= 1000 ? 46 : 38;
+        const padRight = 36;
+        const padTop = 14;
+        const padBottom = 22;
+        const plotW = Math.max(10, W - padLeft - padRight);
+        const plotH = Math.max(10, H - padTop - padBottom);
+
+        ctx.fillStyle = '#14121d';
+        ctx.fillRect(0, 0, W, H);
+
+        // 2. 绘制 10 段整洁水平网格
+        const ySteps = 10;
+        ctx.font = '700 9.5px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+        for (let i = 0; i <= ySteps; i++) {
+            const y = padTop + (plotH / ySteps) * (ySteps - i);
+
+            ctx.beginPath();
+            ctx.strokeStyle = (i === 0) ? '#38324a' : 'rgba(56, 50, 74, 0.45)';
+            ctx.lineWidth = 1;
+            ctx.moveTo(padLeft, y);
+            ctx.lineTo(padLeft + plotW, y);
+            ctx.stroke();
+
+            // 左 Y 轴：规整得分 / 命中时间刻度
+            const curVal = stepVal * i;
+            ctx.fillStyle = '#f59e0b';
+            ctx.textAlign = 'right';
+            ctx.fillText(Number(curVal.toFixed(1)).toLocaleString(), padLeft - 6, y + 3.5);
+
+            // 右 Y 轴：规整百分比 (0%, 10%, 20%... 100%)
+            const accVal = 10 * i;
+            ctx.fillStyle = '#71717a';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${accVal}%`, padLeft + plotW + 6, y + 3.5);
+        }
+
+        // 3. X 轴整十秒对齐
+        const recordedEnd = timeData[sampleCount - 1] || 10.0;
+        let timeStep = 10;
+        if (recordedEnd <= 20) timeStep = 5;
+        else if (recordedEnd > 90) timeStep = 30;
+
+        const totalDuration = Math.max(timeStep * 3, Math.ceil(recordedEnd / timeStep) * timeStep);
+        const xDivisions = Math.round(totalDuration / timeStep);
+
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#71717a';
+
+        for (let i = 0; i <= xDivisions; i++) {
+            const t = timeStep * i;
+            const x = padLeft + (t / totalDuration) * plotW;
+            const m = Math.floor(t / 60);
+            const s = Math.floor(t % 60);
+            ctx.fillText(`${m}:${s.toString().padStart(2, '0')}`, x, H - 5);
+        }
+
+        const getX = (t) => padLeft + (Math.min(t, totalDuration) / totalDuration) * plotW;
+        const getY_Score = (v) => padTop + plotH - (Math.min(v, maxVal) / maxVal) * plotH;
+        const getY_Acc = (v) => padTop + plotH - (Math.min(v, 100) / 100) * plotH;
+
+        // 4. 样条曲线平滑渲染
+        function drawSpline(dataArr, getYFunc, strokeColor, lineWidth) {
+            if (sampleCount < 2) return;
+            ctx.save();
+            ctx.beginPath();
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            ctx.moveTo(getX(timeData[0]), getYFunc(dataArr[0]));
+            for (let i = 1; i < sampleCount - 1; i++) {
+                const xCurr = getX(timeData[i]);
+                const yCurr = getYFunc(dataArr[i]);
+                const xNext = getX(timeData[i + 1]);
+                const yNext = getYFunc(dataArr[i + 1]);
+                const xc = (xCurr + xNext) / 2;
+                const yc = (yCurr + yNext) / 2;
+                ctx.quadraticCurveTo(xCurr, yCurr, xc, yc);
+            }
+            const lastIdx = sampleCount - 1;
+            ctx.lineTo(getX(timeData[lastIdx]), getYFunc(dataArr[lastIdx]));
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 准确率 (亮天蓝) -> 终点严格收敛到结算面板
+        drawSpline(accData, getY_Acc, '#38bdf8', 2.2);
+
+        // 命中时间 / 预测得分 (暖金橙) -> 绝不下坠，平稳收敛到最终总分
+        drawSpline(spmData, getY_Score, '#f59e0b', 2.6);
+    }
+
+    // ============================================================
+    // 6. 生命周期管理
+    // ============================================================
+    function initLifecycle() {
+        injectSettingSwitch();
+        injectChartToModal();
+
+        // 准星锁定状态监听
+        document.addEventListener('pointerlockchange', () => {
+            if (!recordEnabled) return;
+            const isLocked = (document.pointerLockElement === document.body);
+            if (isLocked) {
+                startRecordingSession();
+            } else {
+                stopRecording();
+                scheduleDraw(60);
+            }
+        });
+
+        // 键盘重开键监听 (Capture 阶段拦截)
+        window.addEventListener('keydown', (e) => {
+            if (!recordEnabled || e.defaultPrevented) return;
+            if (document.querySelector('.key-bind-btn.listening')) return;
+            if (document.pointerLockElement !== document.body) return;
+
+            const targetKey = getActualRestartKey();
+            if (e.code === targetKey || e.key === targetKey) {
+                startRecordingSession();
+            }
+        }, true);
+
+        // 鼠标重开键监听
+        window.addEventListener('mousedown', (e) => {
+            if (!recordEnabled || e.defaultPrevented) return;
+            if (document.querySelector('.key-bind-btn.listening')) return;
+            if (document.pointerLockElement !== document.body) return;
+
+            const targetKey = getActualRestartKey();
+            if (`Mouse${e.button}` === targetKey) {
+                startRecordingSession();
+            }
+        }, true);
+
+        // 结算弹窗监听
+        const resModal = document.getElementById('result-modal');
+        if (resModal) {
+            const modalObserver = new MutationObserver(() => {
+                if (resModal.style.display === 'flex' && recordEnabled) {
+                    stopRecording();
+                    injectChartToModal();
+                    scheduleDraw(60);
+                }
+            });
+            modalObserver.observe(resModal, { attributes: true, attributeFilter: ['style'] });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLifecycle);
+    } else {
+        initLifecycle();
+    }
+})();
+</script>
+
 </html>
