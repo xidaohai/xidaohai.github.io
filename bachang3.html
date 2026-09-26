@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>练习靶场 · (西岛海) · Tracking优化版</title>
+    <title>XD靶场 · (西岛海)</title>
     
     <!-- 1. importmap 必须排在首位 -->
     <script type="importmap">
@@ -2560,6 +2560,10 @@
                     <div class="section-header"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>目标颜色</span></div>
                     <div class="swatches-grid-9" id="swatches-ball"></div>
                 </div>
+                <div class="section-card" id="dummy-body-color-picker">
+                    <div class="section-header"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><path d="M6 21v-2a6 6 0 0 1 12 0v2"/></svg>假人身体颜色</span></div>
+                    <div class="swatches-grid-9" id="swatches-dummy-body"></div>
+                </div>
                 <div class="section-card" id="highlight-color-picker">
                     <div class="section-header"><span class="section-label"><svg class="icon-sm" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>命中高亮颜色</span></div>
                     <div class="swatches-grid-9" id="swatches-highlight"></div>
@@ -2947,6 +2951,7 @@
         floorColor: '#eedfcb',
         floorMode: 'coastalWood',
         ballColor: '#ea580c',
+        dummyBodyColor: '#334155',
         highlightColor: '#22c55e',
         viewHeight: 1.625,
         depthSixshot: 10.0,
@@ -4811,7 +4816,7 @@ function clearGroup(group) {
         saveToLocalStorage();
     };
 
-    const dummyBodyMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.65 });
+    const dummyBodyMat = new THREE.MeshStandardMaterial({ color: hexToThree(CFG.dummyBodyColor || '#334155'), roughness: 0.65 });
 
     function constructDummyMesh(targetObj) {
         while (targetObj.dummyGroup.children.length) {
@@ -6662,6 +6667,7 @@ function clearGroup(group) {
             } else {
                 raycaster.ray.origin.copy(_rayOrigin);
                 raycaster.ray.direction.copy(_rayDir);
+                _raycastHits.length = 0;
                 raycaster.intersectObject(trackingTarget.dummyGroup, true, _raycastHits);
                 if (_raycastHits.length > 0) {
                     return { hit: true, object: _raycastHits[0].object, part: _raycastHits[0].object.userData.part || 'body' };
@@ -6674,6 +6680,7 @@ function clearGroup(group) {
             raycaster.ray.origin.copy(_rayOrigin);
             raycaster.ray.direction.copy(_rayDir);
             _raycastTargets.length = 0;
+            _raycastHits.length = 0;
 
             const walls = spawnWallGroup.children;
             for (let i = 0; i < walls.length; i++) {
@@ -7772,7 +7779,7 @@ function finishChallenge() {
             '变向周期', '左右变向周期', '前后变向周期', '环绕换向周期',
             '环境与运动', '出生位置随机化', '命中打击音效',
             '调试测量模式', '战绩性能曲线', '天空云朵', '背景墙颜色', '目标颜色',
-            '命中高亮颜色', '地面底色', '球体精度'
+            '命中高亮颜色', '地面底色', '球体精度', '假人身体颜色'
         ]);
         const openByDefault = new Set(['视觉高度', '目标尺寸', '动态漂移', '目标形态', '运动速度']);
 
@@ -7992,6 +7999,11 @@ function finishChallenge() {
             CFG.ballColor = hex;
             targetMatStandard.color.set(hex);
             targetMatLambert.color.set(hex);
+            saveToLocalStorage();
+        });
+        setupGrid('swatches-dummy-body', CFG.dummyBodyColor || '#334155', (hex) => {
+            CFG.dummyBodyColor = hex;
+            dummyBodyMat.color.set(hex);
             saveToLocalStorage();
         });
         setupGrid('swatches-highlight', CFG.highlightColor, (hex) => {
