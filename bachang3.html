@@ -1075,7 +1075,7 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.8);
-            transition: max-width 0.25s ease, box-shadow 0.25s ease;
+            transition: box-shadow 0.25s ease;
         }
         .score-large { font-size: 3.2rem; font-weight: 900; color: var(--primary); line-height: 1; margin-bottom: 10px; }
         .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
@@ -1281,6 +1281,44 @@
         #chart-patch-container:hover .chart-size-hint { color: #e0f2fe; border-color: #38bdf8; }
         #perfCanvas { display: block; width: 100%; height: 230px; transition: height 0.25s ease; }
         #chart-patch-container.is-expanded #perfCanvas { height: 340px; }
+        .result-summary-row { display:grid; grid-template-columns:92px minmax(0,1fr); gap:12px; align-items:stretch; margin-top:12px; margin-bottom:12px; }
+        .result-summary-row .result-grid { margin-bottom:0; align-self:stretch; grid-template-columns:1fr; gap:6px; }
+        .result-summary-row .res-box { min-height:0; padding:7px 8px; display:flex; flex-direction:column; justify-content:center; }
+        .result-analysis-grid { display:block; margin-top:0; margin-bottom:18px; }
+        .result-analysis-panel { min-width:0; }
+        #chart-patch-container { margin-top:0; margin-bottom:0; height:auto; }
+        #aim-heatmap-panel { background:linear-gradient(180deg,#171522 0%,#111019 100%); border:1px solid #302a3f; border-radius:12px; padding:10px 12px 11px; text-align:left; box-shadow:inset 0 1px 0 rgba(255,255,255,.035),inset 0 2px 12px rgba(0,0,0,.45); display:none; min-width:0; transition:border-color .18s ease, box-shadow .18s ease; }
+        #aim-heatmap-panel.is-expanded { padding:12px 14px 14px; border-color:#4b445f; box-shadow:inset 0 1px 0 rgba(255,255,255,.04),inset 0 2px 14px rgba(0,0,0,.5),0 8px 22px rgba(0,0,0,.10); }
+        .heatmap-header { display:flex; align-items:center; justify-content:space-between; gap:9px; margin-bottom:7px; }
+        .heatmap-title-wrap { display:flex; align-items:baseline; gap:7px; min-width:0; }
+        .heatmap-title { font-size:.74rem; font-weight:900; color:#f4f4f5; letter-spacing:.2px; }
+        .heatmap-subtitle { font-size:.58rem; color:#71717a; font-weight:700; white-space:nowrap; }
+        .heatmap-header-actions { display:flex; gap:6px; align-items:center; flex-shrink:0; }
+        .heatmap-mode-toggle { display:flex; gap:4px; flex-shrink:0; }
+        .heatmap-mode-btn { min-width:78px; min-height:34px; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.07); color:#c4c4cc; border-radius:8px; padding:7px 14px; font-size:.72rem; font-weight:900; cursor:pointer; transition:all .12s ease; box-shadow:inset 0 1px 0 rgba(255,255,255,.045); }
+        .heatmap-mode-btn:hover { border-color:#38bdf8; color:#e0f2fe; background:rgba(56,189,248,.10); }
+        .heatmap-mode-btn.active { background:linear-gradient(180deg,rgba(56,189,248,.30),rgba(56,189,248,.17)); border-color:#38bdf8; color:#ffffff; box-shadow:0 0 0 1px rgba(56,189,248,.13),0 3px 10px rgba(56,189,248,.10),inset 0 1px 0 rgba(255,255,255,.06); }
+        .heatmap-expand-btn { min-width:60px; border:1px solid rgba(255,255,255,.13); background:rgba(255,255,255,.055); color:#d4d4d8; border-radius:7px; padding:6px 10px; font-size:.62rem; font-weight:900; cursor:pointer; transition:all .12s ease; }
+        .heatmap-expand-btn:hover { border-color:#a78bfa; color:#f5f3ff; background:rgba(167,139,250,.12); }
+        #aimHeatmapCanvas { display:block; width:min(100%,360px); height:auto; aspect-ratio:1/1; min-height:0; max-height:360px; margin:0 auto; background:#0c0b12; border-radius:8px; }
+        #aim-heatmap-panel.is-expanded #aimHeatmapCanvas { width:min(100%,560px); max-height:560px; }
+        .heatmap-legend { display:flex; align-items:center; gap:7px; margin-top:8px; }
+        .heatmap-gradient { flex:1; height:8px; border-radius:999px; background:linear-gradient(90deg,#22c55e 0%,#eab308 50%,#ef4444 100%); box-shadow:0 0 0 1px rgba(255,255,255,.04); }
+        .heatmap-legend-label { font-size:.55rem; color:#85858e; font-weight:800; white-space:nowrap; }
+        .heatmap-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:8px; }
+        .heatmap-stat { padding:5px 6px; border:1px solid rgba(255,255,255,.07); background:rgba(255,255,255,.035); border-radius:6px; }
+        .heatmap-stat-label { display:block; color:#71717a; font-size:.51rem; font-weight:800; margin-bottom:2px; }
+        .heatmap-stat-value { display:block; color:#e4e4e7; font-size:.68rem; font-weight:900; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .heatmap-download-row { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+        .heatmap-download-btn { flex:1 1 0; min-width:0; min-height:30px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.055); color:#d4d4d8; border-radius:7px; padding:6px 8px; font-size:.59rem; font-weight:900; cursor:pointer; transition:all .12s ease; white-space:nowrap; }
+        .heatmap-download-btn:hover { border-color:#38bdf8; color:#f8fafc; background:rgba(56,189,248,.10); }
+        .heatmap-download-btn.primary { border-color:rgba(56,189,248,.24); background:rgba(56,189,248,.08); }
+        .chart-download-row { display:flex; justify-content:flex-end; margin-top:7px; }
+        .chart-download-btn { min-height:30px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.045); color:#c4c4cc; border-radius:7px; padding:6px 12px; font-size:.59rem; font-weight:900; cursor:pointer; transition:all .12s ease; }
+        .chart-download-btn:hover { border-color:#f59e0b; color:#fff7ed; background:rgba(245,158,11,.10); }
+        .heatmap-note { margin-top:6px; color:#71717a; font-size:.51rem; font-weight:700; line-height:1.35; }
+        .heatmap-note.is-trend { color:#f59e0b; }
+        .result-card.has-chart { max-width:980px; }
         .chart-legend-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; cursor: default; }
         .chart-range-hint { font-size: 0.58rem; color: #71717a; font-weight: 700; }
         .chart-pills-wrap { display: flex; gap: 8px; align-items: center; }
@@ -1310,6 +1348,7 @@
             #right-panel, #bottom-right-container { width: 300px; }
         }
         @media (max-width: 900px) {
+            .result-summary-row { grid-template-columns:1fr; }
             #draggable-panel .panel-body { flex-direction: column; }
             .panel-col-tracking-behavior, .panel-col-palette, .panel-col-main {
                 width: 100%; border-left: none; padding-left: 0;
@@ -1641,11 +1680,40 @@
             <div style="font-size:1.2rem;font-weight:900;color:#0f172a;" id="res-title">🎯 挑战结算报告</div>
             <div style="font-size:0.7rem;color:#64748b;margin:2px 0 8px;" id="res-subtitle">49秒限时训练已完成</div>
             <div class="score-large" id="res-score">0</div>
-            <div class="result-grid">
-                <div class="res-box"><div class="res-label" id="res-lbl-1">有效命中</div><div class="res-val" id="res-val-1" style="color:#059669;">0</div></div>
-                <div class="res-box"><div class="res-label" id="res-lbl-2">空枪脱靶</div><div class="res-val" id="res-val-2" style="color:#ef4444;">0</div></div>
-                <div class="res-box"><div class="res-label" id="res-lbl-3">射击命中率</div><div class="res-val" id="res-val-3">100.0%</div></div>
-                <div class="res-box"><div class="res-label" id="res-lbl-4">击杀速率</div><div class="res-val" id="res-val-4">0.0/s</div></div>
+            <div class="result-summary-row">
+                <div class="result-grid">
+                    <div class="res-box"><div class="res-label" id="res-lbl-1">有效命中</div><div class="res-val" id="res-val-1" style="color:#059669;">0</div></div>
+                    <div class="res-box"><div class="res-label" id="res-lbl-2">空枪脱靶</div><div class="res-val" id="res-val-2" style="color:#ef4444;">0</div></div>
+                    <div class="res-box"><div class="res-label" id="res-lbl-3">射击命中率</div><div class="res-val" id="res-val-3">100.0%</div></div>
+                    <div class="res-box"><div class="res-label" id="res-lbl-4">击杀速率</div><div class="res-val" id="res-val-4">0.0/s</div></div>
+                </div>
+                <div id="aim-heatmap-panel" class="result-analysis-panel">
+                    <div class="heatmap-header">
+                        <div class="heatmap-title-wrap">
+                            <span class="heatmap-title" id="heatmap-title">瞄准落点热图</span>
+                            <span class="heatmap-subtitle">目标中心 = 0，边缘 = 1R</span>
+                        </div>
+                        <div class="heatmap-header-actions">
+                            <div class="heatmap-mode-toggle" role="group" aria-label="热图显示模式">
+                                <button type="button" class="heatmap-mode-btn" data-heatmap-mode="discrete" onclick="setHeatmapDisplayMode('discrete')">离散</button>
+                                <button type="button" class="heatmap-mode-btn active" data-heatmap-mode="trend" onclick="setHeatmapDisplayMode('trend')">连贯</button>
+                            </div>
+                            <button type="button" class="heatmap-expand-btn" id="heatmap-expand-btn" onclick="toggleHeatmapZoom(event)">展开</button>
+                        </div>
+                    </div>
+                    <canvas id="aimHeatmapCanvas" width="360" height="360"></canvas>
+                    <div class="heatmap-legend"><span class="heatmap-legend-label">少</span><div class="heatmap-gradient"></div><span class="heatmap-legend-label">多</span></div>
+                    <div class="heatmap-stats">
+                        <div class="heatmap-stat"><span class="heatmap-stat-label">命中</span><span class="heatmap-stat-value" id="heatmap-stat-total">0</span></div>
+                        <div class="heatmap-stat"><span class="heatmap-stat-label">平均偏差</span><span class="heatmap-stat-value" id="heatmap-stat-error">0.00R</span></div>
+                        <div class="heatmap-stat"><span class="heatmap-stat-label">脱靶</span><span class="heatmap-stat-value" id="heatmap-stat-misses">0</span></div>
+                    </div>
+                    <div class="heatmap-download-row">
+                        <button type="button" class="heatmap-download-btn" onclick="downloadHeatmapImage('discrete')">保存离散图 PNG</button>
+                        <button type="button" class="heatmap-download-btn primary" onclick="downloadHeatmapImage('trend')">保存连贯图 PNG</button>
+                    </div>
+                    <div class="heatmap-note" id="heatmap-note">连贯模式：按真实落点的局部密集程度形成连续密度场；白色方块是每一枪的真实记录。</div>
+                </div>
             </div>
             <div class="res-meta">
                 <span>目标尺寸: <span id="res-meta-size">15</span>cm</span>
@@ -1653,22 +1721,27 @@
                 <span>FOV: <span id="res-meta-fov">103</span>°</span>
             </div>
 
-            <!-- 图表容器 -->
-            <div id="chart-patch-container">
-                <div class="chart-tabs-header">
-                    <div class="chart-title-wrap">
-                        <span class="chart-title">战绩性能曲线</span>
-                        <span class="chart-subtitle">随时间记录训练表现</span>
+            <!-- 结算分析：性能曲线单独占整行 -->
+            <div id="result-analysis-grid" class="result-analysis-grid">
+                <div id="chart-patch-container" class="result-analysis-panel">
+                    <div class="chart-tabs-header">
+                        <div class="chart-title-wrap">
+                            <span class="chart-title">战绩性能曲线</span>
+                            <span class="chart-subtitle">随时间记录训练表现</span>
+                        </div>
+                        <div class="chart-size-hint" id="chart-size-hint">放大</div>
                     </div>
-                    <div class="chart-size-hint" id="chart-size-hint">放大</div>
-                </div>
-                <canvas id="perfCanvas" width="480" height="230"></canvas>
-                <div class="chart-legend-row" id="chart-legend-wrap">
-                    <div class="chart-pills-wrap">
-                        <span class="legend-pill active-acc"><span class="legend-dot" style="background:#38bdf8;"></span>命中率</span>
-                        <span class="legend-pill active-spm"><span class="legend-dot" style="background:#f59e0b;"></span><span id="lbl-perf-orange-legend">预测得分</span></span>
+                    <canvas id="perfCanvas" width="480" height="230"></canvas>
+                    <div class="chart-legend-row" id="chart-legend-wrap">
+                        <div class="chart-pills-wrap">
+                            <span class="legend-pill active-acc"><span class="legend-dot" style="background:#38bdf8;"></span>命中率</span>
+                            <span class="legend-pill active-spm"><span class="legend-dot" style="background:#f59e0b;"></span><span id="lbl-perf-orange-legend">预测得分</span></span>
+                        </div>
+                        <span class="chart-range-hint" id="chart-range-hint">0:00 → 0:00</span>
                     </div>
-                    <span class="chart-range-hint" id="chart-range-hint">0:00 → 0:00</span>
+                    <div class="chart-download-row">
+                        <button type="button" class="chart-download-btn" onclick="downloadPerformanceChart()">保存高清曲线 PNG</button>
+                    </div>
                 </div>
             </div>
 
@@ -2621,13 +2694,13 @@
                     <div class="section-header" style="margin-bottom:2px;">
                         <span class="section-label">
                             <svg class="icon-sm" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                            <span>战绩性能曲线</span>
+                            <span>战绩性能曲线 + 落点图</span>
                         </span>
                         <button class="pill-btn toggle-switch-btn active" id="btn-chart-toggle-sidebar" onclick="toggleChartStrictRecord()">
                             <span id="txt-chart-record-btn">已开启</span>
                         </button>
                     </div>
-                    <div class="section-sub" style="line-height:1.4;">关闭后后台采样彻底休眠，零计算开销以保极速手感</div>
+                    <div class="section-sub" style="line-height:1.4;">关闭后性能曲线与落点记录一起休眠，训练中零绘图开销</div>
                 </div>
             </div>
         </div>
@@ -5608,15 +5681,6 @@ function clearGroup(group) {
         return center + clamp(shortestAngle(center, dirAlpha), -angularLimit, angularLimit);
     }
 
-    // 纯乱飞/OU 的软方向偏置：dθ/dt = k(θ* - θ)。
-    function applyDirectionalDrift(angle, biasRaw, tau, dt) {
-        const { strength, center } = getDirectionBiasState(biasRaw);
-        if (strength <= 0) return angle;
-        const k = strength / Math.max(tau, MOTION_CONST.EPS_TIME);
-        const alpha = Math.min(1, k * dt);
-        return wrapAngle(angle + shortestAngle(angle, center) * alpha);
-    }
-
     // 真 3D 方向用单位向量保存，避免独立 alpha/beta 漂移造成极点问题。
     function ensureUnitDirection3D(ts) {
         const lenSq = ts.dirX * ts.dirX + ts.dirY * ts.dirY + ts.dirZ * ts.dirZ;
@@ -6085,7 +6149,6 @@ function clearGroup(group) {
             const ts = STATE.tracking;
             const space = CFG.tracking.space;
             const isFly = CFG.tracking.pattern === 'fly';
-            const isStrafe = CFG.tracking.pattern === 'strafe';
             const isContinuous = (CFG.tracking.algo === 'ou');
             const baseD = CFG.depthTracking;
             const isDummy = (CFG.tracking.shape === 'dummy');
@@ -6632,12 +6695,19 @@ function clearGroup(group) {
     }
 
     function raySphereIntersect(ox, oy, oz, dx, dy, dz, cx, cy, cz, radius) {
+        // 精确求射线与球体的前表面交点。命中判定与原逻辑一致，
+        // 但返回的 t 不再是“射线到球心的最近点”，而是真实球面交点。
         const vx = cx - ox, vy = cy - oy, vz = cz - oz;
-        const t = vx * dx + vy * dy + vz * dz;
-        if (t <= 0) return -1;
-        const px = ox + dx * t, py = oy + dy * t, pz = oz + dz * t;
-        const distSq = (cx - px) * (cx - px) + (cy - py) * (cy - py) + (cz - pz) * (cz - pz);
-        return distSq <= radius * radius ? t : -1;
+        const tca = vx * dx + vy * dy + vz * dz;
+        if (tca <= 0) return -1;
+        const d2 = vx * vx + vy * vy + vz * vz - tca * tca;
+        const r2 = radius * radius;
+        if (d2 > r2) return -1;
+        const thc = Math.sqrt(Math.max(0, r2 - d2));
+        const tNear = tca - thc;
+        if (tNear > 1e-6) return tNear;
+        const tFar = tca + thc;
+        return tFar > 1e-6 ? tFar : -1;
     }
 
     function checkAim() {
@@ -6656,14 +6726,14 @@ function clearGroup(group) {
                     hitTarget = tObj;
                 }
             }
-            return hitTarget ? { hit: true, object: hitTarget.mesh } : null;
+            return hitTarget ? { hit: true, object: hitTarget.mesh, distance: closestT } : null;
         }
 
         if (CFG.mode === 'tracking') {
             if ((CFG.tracking.shape || 'sphere') === 'sphere') {
                 const r = (CFG.tracking.targetSizeCm / 100) / 2;
                 const dist = raySphereIntersect(_rayOrigin.x, _rayOrigin.y, _rayOrigin.z, _rayDir.x, _rayDir.y, _rayDir.z, STATE.tracking.x, STATE.tracking.y, STATE.tracking.z, r);
-                return dist > 0 ? { hit: true, object: trackingTarget.sphereMesh } : null;
+                return dist > 0 ? { hit: true, object: trackingTarget.sphereMesh, distance: dist } : null;
             } else {
                 raycaster.ray.origin.copy(_rayOrigin);
                 raycaster.ray.direction.copy(_rayDir);
@@ -6846,9 +6916,11 @@ function clearGroup(group) {
                         STATE.hits++; STATE.score += 1;
                         playBodyshotSound();
                         const tObj = res.object && res.object.userData ? res.object.userData.targetRef : null;
+                        recordAimImpact(true, tObj, res.distance);
                         if (tObj) respawnSixshotTarget(tObj);
                     } else {
                         STATE.misses++; STATE.score = Math.max(0, STATE.score - 1);
+                        recordAimImpact(false, null);
                         playMissSound();
                     }
                     updateHUDStats();
@@ -6856,6 +6928,7 @@ function clearGroup(group) {
                     const res = checkAim();
                     if (res && res.hit && STATE.holding.state === 'moving') {
                         STATE.hits++; STATE.score += 1;
+                        recordAimImpact(true, null, CFG.holding.shape === 'sphere' ? (res.distance || -1) : -1);
                         if (CFG.holding.shape === 'sphere') {
                             playBodyshotSound();
                         } else {
@@ -6867,6 +6940,7 @@ function clearGroup(group) {
                         holdingTarget.rootGroup.visible = false;
                     } else {
                         STATE.misses++; STATE.score = Math.max(0, STATE.score - 1);
+                        recordAimImpact(false, null);
                         playMissSound();
                     }
                     updateHUDStats();
@@ -7163,13 +7237,23 @@ function finishChallenge() {
             }
         }
 
+        // 先锁定最终曲线采样，再一次性确定结算卡尺寸；这样首帧不会先以 520px 绘图、随后再跳宽。
+        stopRecording();
+        const card = document.querySelector('.result-card');
+        const chartReady = recordEnabled && sampleCount >= 2;
+        if (card) {
+            card.classList.toggle('has-chart', chartReady);
+            card.style.maxWidth = chartReady ? '980px' : '520px';
+        }
         getEl('result-modal').style.display = 'flex';
         setPanelsVisibility(true);
         if (CFG.mode === 'holding') previewHoldingDummyInCenter();
         start1Point5SecondCooldown();
 
-        stopRecording();
-        scheduleDrawChart(30);
+        if (chartReady) {
+            scheduleDrawChart(30);
+            setTimeout(() => drawAimHeatmap(), 40);
+        }
     }
 
     window.restartChallenge = function() {
@@ -9499,6 +9583,87 @@ window.addEventListener('keydown', (e) => {
     const accData = new Float32Array(MAX_CHART_POINTS);
     const CHART_SAMPLE_INTERVAL = 0.5;
     const CHART_MIN_DURATION = 0.5;
+
+    const MAX_HEATMAP_POINTS = 12000;
+    const heatXData = new Float32Array(MAX_HEATMAP_POINTS);
+    const heatYData = new Float32Array(MAX_HEATMAP_POINTS);
+    const HEATMAP_DISPLAY_RADIUS = 2.35;
+    // 热图数据场的固定坐标域：展开/还原只能改变可视窗口，不能改变落点分桶。
+    // 之前错误地用 displayRange 参与分桶，导致 2.35R 与 2.85R 下同一批数据落入不同网格，热点位置因此发生变化。
+    const HEATMAP_CALC_RADIUS = 2.85;
+    let heatmapCount = 0;
+    let heatmapHitCount = 0;
+    let heatmapMissCount = 0;
+    let heatmapSumError = 0;
+    let heatmapDisplayMode = 'trend';
+    let isHeatmapExpanded = false;
+    let heatmapFieldCache = null;
+
+    const _heatRight = new THREE.Vector3();
+    const _heatUp = new THREE.Vector3();
+    const _heatCenter = new THREE.Vector3();
+    const _heatProjected = new THREE.Vector3();
+    const _heatOffset = new THREE.Vector3();
+    const _heatBest = {x:0,y:0,radial:Infinity,radius:0};
+
+    function isHeatmapModeSupported() {
+        return CFG.mode === 'sixshot' || (CFG.mode === 'holding' && CFG.holding.shape === 'sphere');
+    }
+
+    function resetHeatmapRecording() {
+        heatmapCount = 0; heatmapHitCount = 0; heatmapMissCount = 0; heatmapSumError = 0;
+        heatmapFieldCache = null;
+    }
+
+    function getTargetAimOffset(cx, cy, cz, radius, out = _heatBest, hitT = -1) {
+        if (!(radius > 1e-6)) return null;
+        getCenterAimRay(_rayOrigin, _rayDir);
+        const vx = cx - _rayOrigin.x, vy = cy - _rayOrigin.y, vz = cz - _rayOrigin.z;
+        // 脱靶：使用射线对目标中心的最近点，作为目标平面上的有符号偏移。
+        // 命中：hitT 来自精确的射线-球面前表面交点。
+        // 最终 X/Y 以相机 Right/Up 基向量投影并除以目标半径，得到真实相对位置。
+        let t = hitT;
+        if (!(t > 1e-6)) t = vx * _rayDir.x + vy * _rayDir.y + vz * _rayDir.z;
+        if (!(t > 1e-6)) return null;
+        _heatProjected.set(_rayOrigin.x + _rayDir.x*t, _rayOrigin.y + _rayDir.y*t, _rayOrigin.z + _rayDir.z*t);
+        _heatCenter.set(cx,cy,cz); _heatOffset.subVectors(_heatProjected,_heatCenter);
+        const sy=Math.sin(STATE.yaw), cyaw=Math.cos(STATE.yaw), sp=Math.sin(STATE.pitch), cp=Math.cos(STATE.pitch);
+        _heatRight.set(cyaw,0,-sy); _heatUp.set(sy*sp,cp,cyaw*sp);
+        // Right / Up 是同一相机正交基；applyFovToCamera() 用横向 FOV + aspect 推导纵向 FOV，
+        // 因而屏幕像素尺度 fx 与 fy 相等。相同的 15px 屏幕偏移不会因为上下/左右而产生额外倍率。
+        const x=_heatOffset.dot(_heatRight)/radius, y=_heatOffset.dot(_heatUp)/radius;
+        out.x=x; out.y=y; out.radial=Math.hypot(x,y); out.radius=radius;
+        return out;
+    }
+
+    function findNearestSixshotTargetToAim() {
+        let bestTarget=null, bestRadial=Infinity;
+        const radius=(CFG.targetSizeCm/100)/2;
+        for (let i=0;i<sixTargets.length;i++) {
+            const t=sixTargets[i]; if (!t.mesh.visible) continue;
+            const off=getTargetAimOffset(t.x,t.y,t.z,radius,_heatBest);
+            if (off && off.radial<bestRadial) { bestRadial=off.radial; bestTarget=t; }
+        }
+        return bestTarget ? {target:bestTarget,radial:bestRadial} : null;
+    }
+
+    function recordAimImpact(hit, targetObj=null, hitT=-1) {
+        if (!recordEnabled || !sessionStarted || !isHeatmapModeSupported() || heatmapCount>=MAX_HEATMAP_POINTS) return;
+        if (CFG.mode==='holding' && STATE.holding.state!=='moving') return;
+        const radius=CFG.mode==='sixshot' ? (CFG.targetSizeCm/100)/2 : (CFG.holding.sizeCm/100)/2;
+        let ref=targetObj;
+        if (CFG.mode==='sixshot' && !ref) ref=findNearestSixshotTargetToAim()?.target || null;
+        if (!ref && CFG.mode==='sixshot') return;
+        const cx=CFG.mode==='sixshot'?ref.x:STATE.holding.x;
+        const cy=CFG.mode==='sixshot'?ref.y:STATE.holding.y;
+        const cz=CFG.mode==='sixshot'?ref.z:STATE.holding.z;
+        const off=getTargetAimOffset(cx,cy,cz,radius,_heatBest, hitT);
+        if (!off) return;
+        heatXData[heatmapCount]=off.x; heatYData[heatmapCount]=off.y; heatmapCount++;
+        if(hit) heatmapHitCount++; else { heatmapMissCount++; }
+        heatmapSumError+=off.radial;
+    }
+
     let sampleCount = 0;
     let sampleTimer = null;
     let isChartExpanded = false;
@@ -9513,7 +9678,9 @@ window.addEventListener('keydown', (e) => {
     }
 
     window.toggleChartStrictRecord = function() {
-        recordEnabled = !recordEnabled;
+        const enableNext = !recordEnabled;
+        if (!enableNext) stopRecording();
+        recordEnabled = enableNext;
         localStorage.setItem(CHART_STORAGE_KEY, recordEnabled ? 'true' : 'false');
 
         const btn = getEl('btn-chart-toggle-sidebar');
@@ -9528,12 +9695,16 @@ window.addEventListener('keydown', (e) => {
         if (!recordEnabled) {
             stopRecording();
             if (container) container.style.display = 'none';
+            drawAimHeatmap();
         } else {
             if (isGameActivelyPlaying()) {
                 startRecordingSession();
             } else if (isModalShowing && sampleCount >= 2) {
                 if (container) container.style.display = 'block';
+                const card = document.querySelector('.result-card');
+                if (card && !isChartExpanded) { card.classList.add('has-chart'); card.style.maxWidth = '980px'; }
                 scheduleDrawChart(0);
+                drawAimHeatmap();
             }
         }
     };
@@ -9550,10 +9721,10 @@ window.addEventListener('keydown', (e) => {
         container.classList.toggle('is-expanded', isChartExpanded);
 
         if (isChartExpanded) {
-            resultCard.style.maxWidth = '760px';
+            resultCard.style.maxWidth = '1180px';
             if (hint) hint.innerText = '还原';
         } else {
-            resultCard.style.maxWidth = '520px';
+            resultCard.style.maxWidth = '980px';
             if (hint) hint.innerText = '放大';
         }
 
@@ -9660,17 +9831,28 @@ window.addEventListener('keydown', (e) => {
         }
 
         sampleCount = 0;
+        resetHeatmapRecording();
+        setHeatmapDisplayMode('trend');
         sessionStarted = true;
         nextSampleElapsed = 0;
         sessionFinalElapsed = 0;
 
         isChartExpanded = false;
+        isHeatmapExpanded = false;
+        const heatPanelReset = getEl('aim-heatmap-panel');
+        const heatExpandBtnReset = getEl('heatmap-expand-btn');
+        if (heatPanelReset) heatPanelReset.classList.remove('is-expanded');
+        if (heatExpandBtnReset) heatExpandBtnReset.textContent = '展开';
         const c = getEl('chart-patch-container');
         if (c) c.classList.remove('is-expanded');
-        const card = document.querySelector('.result-card');
-        if (card) card.style.maxWidth = '520px';
+        const resultCard = document.querySelector('.result-card');
+        if (resultCard) { resultCard.classList.remove('has-chart'); resultCard.style.maxWidth = '520px'; }
         const hint = getEl('chart-size-hint');
         if (hint) hint.innerText = '放大';
+        const analysisGrid = getEl('result-analysis-grid');
+        if (analysisGrid) analysisGrid.classList.remove('no-heatmap');
+        const heatPanel = getEl('aim-heatmap-panel');
+        if (heatPanel) heatPanel.style.display = 'none';
 
         // 采样器只负责唤醒检查；实际时间永远来自训练时间轴，因此不会因 setTimeout 漂移而累计误差。
         const sampleLoop = () => {
@@ -9700,6 +9882,320 @@ window.addEventListener('keydown', (e) => {
         writeFinalSettlementFrame();
     }
 
+    window.setHeatmapDisplayMode = function(mode) {
+        heatmapDisplayMode = mode === 'trend' ? 'trend' : 'discrete';
+        document.querySelectorAll('[data-heatmap-mode]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.heatmapMode === heatmapDisplayMode);
+        });
+        const note = getEl('heatmap-note');
+        if (note) {
+            if (heatmapDisplayMode === 'trend') {
+                note.classList.add('is-trend');
+                note.textContent = '连贯模式：按真实落点的局部密集程度形成连续密度场；白色方块是每一枪的真实记录。展开/还原只改变可视范围。';
+            } else {
+                note.classList.remove('is-trend');
+                note.textContent = '离散模式：每一枪独立显示为白色方块，不连接相邻点、不使用热力颜色；R = 当前目标参考半径。';
+            }
+        }
+        drawAimHeatmap();
+    };
+
+    window.toggleHeatmapZoom = function(e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        const panel = getEl('aim-heatmap-panel');
+        const btn = getEl('heatmap-expand-btn');
+        const card = document.querySelector('.result-card');
+        if (!panel) return;
+        isHeatmapExpanded = !isHeatmapExpanded;
+        panel.classList.toggle('is-expanded', isHeatmapExpanded);
+        if (btn) btn.textContent = isHeatmapExpanded ? '还原' : '展开';
+        if (card) {
+            if (isHeatmapExpanded || isChartExpanded) {
+                card.classList.add('has-chart');
+                card.style.maxWidth = '1180px';
+            } else {
+                card.classList.add('has-chart');
+                card.style.maxWidth = '980px';
+            }
+        }
+        // 关键：这里只改变 Canvas 的可视尺寸/窗口，数据场不重新采样。
+        requestAnimationFrame(() => drawAimHeatmap());
+    };
+
+    // ============================================================
+    // 落点热图：原始落点数据是唯一真值，显示层不得改变坐标。
+    // 连贯模式使用固定世界坐标的高斯密度场；普通/展开只改变可视窗口。
+    // 离散模式只显示每一枪的白色方块，不使用热力颜色。
+    // ============================================================
+    const HEAT_FIELD_N = 512;
+    const HEAT_FIELD_SIGMA = 10.5; // 约 0.117R 的世界尺度，接近第一版的连贯范围
+    const HEAT_FIELD_SUPPORT = 32; // 约 3*sigma，足够截断高斯尾部
+
+    function buildHeatmapFieldCache() {
+        if (heatmapFieldCache || heatmapCount <= 0) return heatmapFieldCache;
+        const N = HEAT_FIELD_N;
+        const size = N * N;
+        const base = new Float32Array(size);
+        const tmp = new Float32Array(size);
+        const density = new Float32Array(size);
+
+        // 双线性投点，保留真实浮点落点的位置，不先四舍五入到单格。
+        for (let i = 0; i < heatmapCount; i++) {
+            const px = heatXData[i];
+            const py = heatYData[i];
+            if (Math.abs(px) > HEATMAP_CALC_RADIUS || Math.abs(py) > HEATMAP_CALC_RADIUS) continue;
+            const gx = ((px / HEATMAP_CALC_RADIUS) * .5 + .5) * (N - 1);
+            // Canvas 数据行号向下为正，而 heatYData 的 +Y 定义为屏幕向上；这里必须只翻转一次。
+            // 白色真实落点绘制使用 sy = cy - py，因此热力场也必须采用同样的 Y 方向。
+            const gy = ((-py / HEATMAP_CALC_RADIUS) * .5 + .5) * (N - 1);
+            const x0 = Math.floor(gx), y0 = Math.floor(gy);
+            const fx = gx - x0, fy = gy - y0;
+            for (let oy = 0; oy <= 1; oy++) {
+                const y = y0 + oy;
+                if (y < 0 || y >= N) continue;
+                const wy = oy ? fy : (1 - fy);
+                for (let ox = 0; ox <= 1; ox++) {
+                    const x = x0 + ox;
+                    if (x < 0 || x >= N) continue;
+                    const wx = ox ? fx : (1 - fx);
+                    base[y * N + x] += wx * wy;
+                }
+            }
+        }
+
+        // 一维可分离高斯核：比逐点 2D kernel 精确、稳定，同时能保持较宽的第一版式样。
+        const sigma = HEAT_FIELD_SIGMA;
+        const support = HEAT_FIELD_SUPPORT;
+        const kernel = new Float32Array(support * 2 + 1);
+        let ksum = 0;
+        for (let k = -support; k <= support; k++) {
+            const w = Math.exp(-(k * k) / (2 * sigma * sigma));
+            kernel[k + support] = w;
+            ksum += w;
+        }
+        for (let i = 0; i < kernel.length; i++) kernel[i] /= ksum;
+
+        // horizontal
+        for (let y = 0; y < N; y++) {
+            const row = y * N;
+            for (let x = 0; x < N; x++) {
+                let sum = 0;
+                for (let k = -support; k <= support; k++) {
+                    const xx = x + k;
+                    if (xx < 0 || xx >= N) continue;
+                    sum += base[row + xx] * kernel[k + support];
+                }
+                tmp[row + x] = sum;
+            }
+        }
+        // vertical
+        for (let y = 0; y < N; y++) {
+            for (let x = 0; x < N; x++) {
+                let sum = 0;
+                for (let k = -support; k <= support; k++) {
+                    const yy = y + k;
+                    if (yy < 0 || yy >= N) continue;
+                    sum += tmp[yy * N + x] * kernel[k + support];
+                }
+                density[y * N + x] = sum;
+            }
+        }
+
+        // 保留第一版“更柔和的连贯感”，但只做轻微平滑，不把热区抹成大片雾。
+        for (let pass = 0; pass < 2; pass++) {
+            const src = pass === 0 ? density : tmp;
+            const dst = pass === 0 ? tmp : density;
+            for (let y = 0; y < N; y++) {
+                for (let x = 0; x < N; x++) {
+                    let sum = 0, count = 0;
+                    for (let oy = -1; oy <= 1; oy++) {
+                        const yy = y + oy;
+                        if (yy < 0 || yy >= N) continue;
+                        for (let ox = -1; ox <= 1; ox++) {
+                            const xx = x + ox;
+                            if (xx < 0 || xx >= N) continue;
+                            sum += src[yy * N + xx];
+                            count++;
+                        }
+                    }
+                    dst[y * N + x] = sum / count;
+                }
+            }
+        }
+
+        let max = 0;
+        for (let i = 0; i < density.length; i++) if (density[i] > max) max = density[i];
+        heatmapFieldCache = { N, density, max };
+        return heatmapFieldCache;
+    }
+
+    function heatHueFromDensity(v) {
+        // v 已经做了轻微幂变换，使绿色、黄色、红色都能有可见面积。
+        if (v < .34) {
+            const p = v / .34;
+            return 120 - 60 * p; // 绿 -> 黄
+        }
+        if (v < .72) {
+            const p = (v - .34) / .38;
+            return 60 - 40 * p; // 黄 -> 橙
+        }
+        const p = (v - .72) / .28;
+        return 20 * (1 - p); // 橙 -> 红
+    }
+
+    function renderHeatmapImage(mode, targetCanvas, W, H, options = {}) {
+        const ctx = targetCanvas.getContext('2d');
+        const scale = Math.max(1, Number(options.scale) || 1);
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#0c0b12';
+        ctx.fillRect(0, 0, W, H);
+
+        const isExport = !!options.isExport;
+        const expanded = options.expanded !== undefined ? !!options.expanded : isHeatmapExpanded;
+        const cx = W * .5, cy = H * .5;
+        const side = Math.min(W, H);
+        const displayRange = expanded ? HEATMAP_CALC_RADIUS : HEATMAP_DISPLAY_RADIUS;
+        const displayR = side * (expanded ? .43 : .39);
+        const targetR = displayR / displayRange;
+
+        if (mode === 'trend') {
+            const field = buildHeatmapFieldCache();
+            if (field && field.max > 1e-9) {
+                const N = field.N;
+                const density = field.density;
+                const image = document.createElement('canvas');
+                image.width = N; image.height = N;
+                const ictx = image.getContext('2d');
+                const pixels = ictx.createImageData(N, N);
+                const data = pixels.data;
+                const threshold = field.max * .006;
+                for (let i = 0; i < density.length; i++) {
+                    const value = density[i];
+                    const off = i * 4;
+                    if (value <= threshold) {
+                        data[off] = 12; data[off + 1] = 11; data[off + 2] = 18; data[off + 3] = 0;
+                        continue;
+                    }
+                    const raw = clamp(value / field.max, 0, 1);
+                    // 开方拉开中高密度层级，让黄色和红色拥有可见面积，而不是每个绿斑只留下一个黄色针尖。
+                    const v = Math.pow(raw, .52);
+                    const hue = heatHueFromDensity(v);
+                    const rgb = heatColorRgbFromHue(hue);
+                    const alpha = Math.min(.94, .06 + .88 * Math.pow(v, .62));
+                    data[off] = rgb[0]; data[off + 1] = rgb[1]; data[off + 2] = rgb[2]; data[off + 3] = Math.round(alpha * 255);
+                }
+                ictx.putImageData(pixels, 0, 0);
+
+                // 数据场始终覆盖 [-HEATMAP_CALC_RADIUS, +HEATMAP_CALC_RADIUS]。
+                // 普通视野仅裁剪中央部分；展开视野显示全部。由此切换尺寸不会改变热点位置。
+                const cropRatio = displayRange / HEATMAP_CALC_RADIUS;
+                const srcSize = N * cropRatio;
+                const srcX = (N - srcSize) * .5;
+                const srcY = (N - srcSize) * .5;
+                ctx.save();
+                ctx.imageSmoothingEnabled = true;
+                ctx.drawImage(image, srcX, srcY, srcSize, srcSize, (W - side) * .5, (H - side) * .5, side, side);
+                ctx.restore();
+            }
+        }
+
+        // 两种模式都保留真实落点；离散模式没有彩色层，只显示白色方块。
+        const pointSize = isExport ? Math.max(6, side / 230) : Math.max(2.4, side / 150);
+        ctx.fillStyle = 'rgba(255,255,255,.62)';
+        for (let i = 0; i < heatmapCount; i++) {
+            const px = heatXData[i], py = heatYData[i];
+            if (Math.abs(px) > displayRange || Math.abs(py) > displayRange) continue;
+            const sx = cx + (px / displayRange) * (side * .5);
+            const sy = cy - (py / displayRange) * (side * .5);
+            const half = pointSize * .5;
+            ctx.fillRect(Math.round(sx - half), Math.round(sy - half), Math.ceil(pointSize), Math.ceil(pointSize));
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, targetR, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,255,255,.92)';
+        ctx.lineWidth = isExport ? 3 : 1.5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy, Math.max(isExport ? 7 : 3, targetR * .035), 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,.82)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,.20)';
+        ctx.lineWidth = isExport ? 2 : 1;
+        ctx.moveTo(cx - targetR * 1.18, cy);
+        ctx.lineTo(cx + targetR * 1.18, cy);
+        ctx.moveTo(cx, cy - targetR * 1.18);
+        ctx.lineTo(cx, cy + targetR * 1.18);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function heatColorRgbFromHue(h) {
+        const hue = ((h % 360) + 360) % 360;
+        const c = 1, x = 1 - Math.abs((hue / 60) % 2 - 1);
+        let r = 0, g = 0, b = 0;
+        if (hue < 60) { r = c; g = x; }
+        else if (hue < 120) { r = x; g = c; }
+        else { g = c; }
+        // 保持适中的亮度与饱和度，避免绿色过亮、黄色发白。
+        const scale = .90, m = .05;
+        return [Math.round((r * scale + m) * 255), Math.round((g * scale + m) * 255), Math.round((b * scale + m) * 255)];
+    }
+
+    window.downloadHeatmapImage = function(mode) {
+        if (!recordEnabled || !isHeatmapModeSupported() || heatmapCount <= 0) return;
+        const canvas = document.createElement('canvas');
+        const size = 1800;
+        canvas.width = size; canvas.height = size;
+        renderHeatmapImage(mode === 'trend' ? 'trend' : 'discrete', canvas, size, size, { expanded: true, isExport: true });
+        canvas.toBlob((blob) => {
+            if (!blob) return;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = mode === 'trend' ? '瞄准落点_连贯热图_高清.png' : '瞄准落点_离散落点_高清.png';
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }, 'image/png');
+    };
+
+    function drawAimHeatmap() {
+        const panel = getEl('aim-heatmap-panel'), canvas = getEl('aimHeatmapCanvas');
+        if (!panel || !canvas) return;
+        const show = recordEnabled && isHeatmapModeSupported() && heatmapCount > 0;
+        if (!show) { panel.style.display = 'none'; return; }
+        panel.style.display = 'block';
+
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        const rect = canvas.getBoundingClientRect();
+        const W = rect.width > 0 ? rect.width : 360;
+        const H = rect.height > 0 ? rect.height : 360;
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        renderHeatmapImage(heatmapDisplayMode === 'trend' ? 'trend' : 'discrete', canvas, W, H, { expanded: isHeatmapExpanded, isExport: false, scale: dpr });
+
+        const t = getEl('heatmap-stat-total'), e = getEl('heatmap-stat-error'), m = getEl('heatmap-stat-misses');
+        if (t) t.textContent = heatmapHitCount.toLocaleString();
+        if (e) e.textContent = `${(heatmapSumError / Math.max(1, heatmapCount)).toFixed(2)}R`;
+        if (m) m.textContent = heatmapMissCount.toLocaleString();
+    }
+
+    window.downloadPerformanceChart = function() {
+        const canvas = getEl('perfCanvas');
+        if (!canvas || !recordEnabled || sampleCount < 2) return;
+        // 直接保存当前 Canvas 的真实像素，而不是截图 UI，保留 DPR 对应的清晰度。
+        canvas.toBlob((blob) => {
+            if (!blob) return;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = '战绩性能曲线_高清.png';
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        }, 'image/png');
+    };
+
     function scheduleDrawChart(delay = 0) {
         if (_drawDebounceTimer) clearTimeout(_drawDebounceTimer);
         const finalDelay = _isZoomTransitioning ? Math.max(delay, 260) : delay;
@@ -9727,6 +10223,12 @@ window.addEventListener('keydown', (e) => {
             return;
         }
         container.style.display = 'block';
+        drawAimHeatmap();
+        const resultCard = document.querySelector('.result-card');
+        if (resultCard && !isChartExpanded) {
+            resultCard.classList.add('has-chart');
+            resultCard.style.maxWidth = '980px';
+        }
 
         const isTrackingMode = (CFG.mode === 'tracking');
         const legendLabel = getEl('lbl-perf-orange-legend');
