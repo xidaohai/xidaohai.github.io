@@ -65,6 +65,21 @@
             transform: translate(-50%, -50%) scale(1.18);
         }
 
+        /* 锁定瞄准时取消准星动画过渡，避免命中反馈人为滞后 80~100ms */
+        body.aim-locked #crosshair-container,
+        body.aim-locked .classic-crosshair-dot {
+            transition: none !important;
+        }
+
+        /* 锁定时不绘制设置面板，避免 backdrop-filter 持续参与合成 */
+        body.aim-locked #left-panel,
+        body.aim-locked #right-panel,
+        body.aim-locked #left-bottom-group,
+        body.aim-locked #bottom-right-hud,
+        body.aim-locked #marker-hud {
+            visibility: hidden;
+        }
+
         .classic-crosshair-dot {
             width: 3px;
             height: 3px;
@@ -830,6 +845,53 @@
         }
         .size-lock-btn.active-lock { background: #e2e8f0; color: #475569; }
         .size-lock-btn.unlocked { background: #fffbeb; border-color: #f59e0b; color: #d97706; }
+
+/* ============ 开场遮罩与进度条 ============ */
+#progress-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+.progress-hint {
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px 24px;
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+#progress-bar-container {
+    width: 280px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 2px;
+    overflow: hidden;
+}
+#progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--primary);
+    border-radius: 2px;
+}
+/* 按钮武装态（点击「进入靶场」后变橙） */
+.btn-start.armed {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35) !important;
+}
+
     </style>
 </head>
 <body>
@@ -1025,6 +1087,16 @@
 
     <!-- WebGL 挂载容器 -->
     <div id="canvas-container"></div>
+
+    <!-- 开场遮罩 -->
+<div id="progress-overlay">
+    <div class="progress-hint" id="progress-hint">
+        <span>点击左键锁定并开始</span>
+    </div>
+    <div id="progress-bar-container" style="display:none;">
+        <div id="progress-bar"></div>
+    </div>
+</div>
 
     <!-- 左侧主面板 -->
     <div class="glass-panel" id="left-panel">
@@ -1551,11 +1623,14 @@ function updateCrosshairStyle(onTarget = lastTargetAimState) {
         const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000);
         camera.position.set(0, config.viewHeight, 0);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", desynchronized: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // 静态靶场无需每帧重建阴影贴图；目标移动/场景参数变化时再主动刷新。
+        renderer.shadowMap.autoUpdate = false;
+        renderer.shadowMap.needsUpdate = true;
         canvasContainer.appendChild(renderer.domElement);
 
         function createSkyTexture(theme) {
@@ -1812,9 +1887,10 @@ function updateTargetBadgeCanvas(t) {
 
         function createTargetMeridianLine(t) {
             const segs = 96;
-            const pts = [];
-            for (let i = 0; i <= segs; i++) pts.push(new THREE.Vector3());
-            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const count = segs + 1;
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(count * 3), 3));
+            geo.setAttribute('lineDistance', new THREE.BufferAttribute(new Float32Array(count), 1));
             const mat = new THREE.LineDashedMaterial({
                 color: new THREE.Color(t.color),
                 dashSize: 0.4,
@@ -1824,6 +1900,7 @@ function updateTargetBadgeCanvas(t) {
             });
             const line = new THREE.Line(geo, mat);
             line.userData.ignoreRaycast = true;
+            line.userData.segments = segs;
             scene.add(line);
             return line;
         }
@@ -1837,31 +1914,40 @@ function updateTargetMeridianGeometry(t) {
     const tx = t.rootGroup.position.x;
     const tz = t.rootGroup.position.z;
 
-    // ★ 位置快照对比：任一位置量变化才重建
+    // 位置快照对比：任一位置量变化才更新几何。
     if (!t._lastMeridian) t._lastMeridian = { px: NaN, pz: NaN, eyeY: NaN, tx: NaN, tz: NaN };
     const m = t._lastMeridian;
     if (m.px === px && m.pz === pz && m.eyeY === eyeY && m.tx === tx && m.tz === tz) {
-        return;  // 位置未变，跳过几何重建
+        return false;
     }
     m.px = px; m.pz = pz; m.eyeY = eyeY; m.tx = tx; m.tz = tz;
-            const dx = tx - px;
-            const dz = tz - pz;
-            const dist = Math.hypot(dx, dz) || t.distMeters || 10;
-            const angle = Math.atan2(dx, -dz);
 
-            const segs = 96;
-            const pts = [];
-            for (let i = 0; i <= segs; i++) {
-                const phi = (i / segs) * Math.PI * 2;
-                const rH = dist * Math.cos(phi);
-                const y = eyeY + dist * Math.sin(phi);
-                const x = px + rH * Math.sin(angle);
-                const z = pz - rH * Math.cos(angle);
-                pts.push(new THREE.Vector3(x, y, z));
-            }
-            t.meridianLine.geometry.setFromPoints(pts);
-            t.meridianLine.computeLineDistances();
-        }
+    const dx = tx - px;
+    const dz = tz - pz;
+    const dist = Math.hypot(dx, dz) || t.distMeters || 10;
+    const angle = Math.atan2(dx, -dz);
+    const segs = t.meridianLine.userData.segments || 96;
+    const posAttr = t.meridianLine.geometry.getAttribute('position');
+    const distAttr = t.meridianLine.geometry.getAttribute('lineDistance');
+    const invSegs = 1 / segs;
+    let lineDistance = 0;
+    let prevX = 0, prevY = 0, prevZ = 0;
+
+    for (let i = 0; i <= segs; i++) {
+        const phi = (i * invSegs) * Math.PI * 2;
+        const rH = dist * Math.cos(phi);
+        const y = eyeY + dist * Math.sin(phi);
+        const x = px + rH * Math.sin(angle);
+        const z = pz - rH * Math.cos(angle);
+        posAttr.setXYZ(i, x, y, z);
+        if (i > 0) lineDistance += Math.hypot(x - prevX, y - prevY, z - prevZ);
+        distAttr.setX(i, lineDistance);
+        prevX = x; prevY = y; prevZ = z;
+    }
+    posAttr.needsUpdate = true;
+    distAttr.needsUpdate = true;
+    return true;
+}
 
         function rebuildMannequinMesh(t) {
             while (t.dummyGroup.children.length) {
@@ -2086,12 +2172,16 @@ function updateTargetMeridianGeometry(t) {
             camera.fov = hFovToVfov(config.fovHorizontal, window.innerWidth / window.innerHeight);
             camera.updateProjectionMatrix();
             updateHorizon(config.viewHeight);
+            raycastListDirty = true;
+            aimStateDirty = true;
+            renderer.shadowMap.needsUpdate = true;
         }
 
         // ============================================================
         // 9. 输入监听与仰角水平角解算
         // ============================================================
         let yaw = 0.0, pitch = 0.0;
+let aimStateDirty = true;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
         let debugMode = false;
 
@@ -2180,7 +2270,8 @@ function _handlePointerMove(e) {
         pitch = clamp(pitch, -Math.PI / 2 + 0.001, Math.PI / 2 - 0.001);
     }
     yaw = yaw % (Math.PI * 2);
-    // ★ 不再在此处更新 cameraEuler / camera.quaternion，挪到 animate 里
+    aimStateDirty = true;
+    // ★ 不再在此处更新 cameraEuler / camera.quaternion，统一在渲染前应用最新视角
 }
 
 if (_supportsRawUpdate) {
@@ -2192,27 +2283,32 @@ if (_supportsRawUpdate) {
         const raycaster = new THREE.Raycaster();
         const centerVec = new THREE.Vector2(0, 0);
         const activeRaycastObjects = [];
+        let raycastListDirty = true;
 
-        function checkAim() {
-            raycaster.setFromCamera(centerVec, camera);
+        function rebuildRaycastList() {
             activeRaycastObjects.length = 0;
             const isSphere = (config.targetShape === 'sphere');
-
             for (const t of config.targets) {
                 if (isSphere) {
                     if (t.sphereMesh.visible) activeRaycastObjects.push(t.sphereMesh);
                 } else if (t.dummyGroup.visible) {
-                    t.dummyGroup.children.forEach(child => {
+                    for (const child of t.dummyGroup.children) {
                         if (child.isMesh && child.userData.part && !child.userData.ignoreRaycast) {
                             activeRaycastObjects.push(child);
                         }
-                    });
+                    }
                 }
             }
             for (const b of config.boxes) {
                 if (b.mesh && b.mesh.visible) activeRaycastObjects.push(b.mesh);
             }
+            raycastListDirty = false;
+        }
 
+        function checkAim(force = true) {
+            if (!force && !aimStateDirty && !raycastListDirty) return lastTargetAimState;
+            if (raycastListDirty) rebuildRaycastList();
+            raycaster.setFromCamera(centerVec, camera);
             const intersects = raycaster.intersectObjects(activeRaycastObjects, false);
             if (intersects.length > 0) {
                 updateCrosshairStyle(true);
@@ -2224,9 +2320,11 @@ if (_supportsRawUpdate) {
                         break;
                     }
                 }
+                aimStateDirty = false;
                 return { target: hitTarget, part: hitPart, object: hitObject, intersect: intersects[0] };
             } else {
                 updateCrosshairStyle(false);
+                aimStateDirty = false;
                 return null;
             }
         }
@@ -2302,7 +2400,7 @@ function createMarkerSprite(markerData) {
         }
 
         function updateAllMarkerSprites() {
-            clickMarkers.forEach(m => updateMarkerSpriteCanvas(m));
+            // 标点 Sprite 只绘制编号，与零点偏移无关；零点变化只需更新列表文字。
             renderMarkerListUI();
         }
 
@@ -2406,7 +2504,17 @@ function deleteMarker(id) {
         }
 
 window.addEventListener('mousedown', (e) => {
-            if (document.pointerLockElement === document.body && e.button === 0) {
+    if (document.pointerLockElement === document.body && e.button === 0) {
+        // ★ 武装阶段：这一下左键 = 真正开始，不做射击判定
+        if (isArmed) {
+            triggerRealStart();
+            return;
+        }
+
+        // 鼠标事件可能早于下一帧 rAF 到达；点击判定前强制让相机追上最新 yaw/pitch。
+        cameraEuler.set(pitch, yaw, 0);
+                camera.quaternion.setFromEuler(cameraEuler);
+                camera.updateMatrixWorld(true);
                 const hitResult = checkAim();
                 let hitPos = null;
                 let hitDist = 20.0;
@@ -2434,7 +2542,11 @@ window.addEventListener('mousedown', (e) => {
                     } else if (target) {
                         const base = target.rootGroup.scale.x;
                         target.rootGroup.scale.setScalar(base * 1.18);
-                        setTimeout(() => target.rootGroup.scale.setScalar(base), 70);
+                        setTimeout(() => {
+                            target.rootGroup.scale.setScalar(base);
+                            renderer.shadowMap.needsUpdate = true;
+                        }, 70);
+                        renderer.shadowMap.needsUpdate = true;
                     }
                 }
 
@@ -3041,6 +3153,9 @@ window.addEventListener('mousedown', (e) => {
 
             rebuildMannequinMesh(newTarget);
             config.targets.push(newTarget);
+            raycastListDirty = true;
+            aimStateDirty = true;
+            renderer.shadowMap.needsUpdate = true;
             rebuildTargetUI();
         }
 
@@ -3059,6 +3174,9 @@ window.addEventListener('mousedown', (e) => {
                 }
             });
             scene.remove(t.rootGroup);
+            raycastListDirty = true;
+            aimStateDirty = true;
+            renderer.shadowMap.needsUpdate = true;
             rebuildTargetUI();
         }
 
@@ -3202,6 +3320,9 @@ window.addEventListener('mousedown', (e) => {
             };
             createMirrorEdgeBoxObject(boxData);
             config.boxes.push(boxData);
+            raycastListDirty = true;
+            aimStateDirty = true;
+            renderer.shadowMap.needsUpdate = true;
             rebuildBoxesUI();
         }
 
@@ -3213,6 +3334,9 @@ window.addEventListener('mousedown', (e) => {
                 disposeMaterialOnly(b.mesh);
                 disposeMaterialOnly(b.edgeLine);
             }
+            raycastListDirty = true;
+            aimStateDirty = true;
+            renderer.shadowMap.needsUpdate = true;
             rebuildBoxesUI();
         }
 
@@ -3228,6 +3352,90 @@ window.addEventListener('mousedown', (e) => {
         const handle = getEl('panel-handle');
         const dragBtn = getEl('btn-drag-toggle');
         const btnLock = getEl('btn-lock');
+        // ===== 开场流程状态 =====
+let isArmed = false;
+let btnCooldownTimer = null;
+
+// 1.5 秒冷却（按钮灰色倒计时）
+function startButtonCooldown() {
+    if (!btnLock) return;
+    btnLock.disabled = true;
+    btnLock.classList.remove('armed');
+    if (btnCooldownTimer) clearInterval(btnCooldownTimer);
+
+    let remaining = 15;
+    btnLock.innerText = `准备中 (${(remaining / 10).toFixed(1)}s)...`;
+
+    btnCooldownTimer = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+            clearInterval(btnCooldownTimer);
+            btnCooldownTimer = null;
+            btnLock.disabled = false;
+            btnLock.innerText = '进入靶场 (锁定鼠标)';
+        } else {
+            btnLock.innerText = `准备中 (${(remaining / 10).toFixed(1)}s)...`;
+        }
+    }, 100);
+}
+
+// 武装阶段：显示遮罩 + 请求指针锁定（此时还没真正开始）
+function startArmedPhase() {
+    isArmed = true;
+    const overlay = getEl('progress-overlay');
+    const hint = getEl('progress-hint');
+    const barWrap = getEl('progress-bar-container');
+    const bar = getEl('progress-bar');
+
+    if (overlay) overlay.style.display = 'flex';
+    if (hint) hint.style.display = 'flex';
+    if (barWrap) barWrap.style.display = 'none';
+    if (bar) bar.style.width = '0%';
+
+    btnLock.innerText = '点击左键开始...';
+    btnLock.classList.add('armed');
+    btnLock.disabled = true;
+
+    try {
+        const p = document.body.requestPointerLock({ unadjustedMovement: true });
+        if (p && p.catch) {
+            p.catch(() => {
+                if (document.pointerLockElement !== document.body) {
+                    try { document.body.requestPointerLock(); } catch (_) {}
+                }
+            });
+        }
+    } catch (_) {
+        try { document.body.requestPointerLock(); } catch (_) {}
+    }
+}
+
+// 真正开始：进度条 135ms 后隐藏遮罩
+function triggerRealStart() {
+    isArmed = false;
+    const hint = getEl('progress-hint');
+    const barWrap = getEl('progress-bar-container');
+    const bar = getEl('progress-bar');
+
+    if (hint) hint.style.display = 'none';
+    if (barWrap) barWrap.style.display = 'block';
+
+    if (bar) {
+        bar.style.transition = 'none';
+        bar.style.width = '0%';
+        void bar.offsetHeight;
+        bar.style.transition = 'width 0.135s linear';
+        bar.style.width = '100%';
+    }
+
+    setTimeout(() => {
+        const overlay = getEl('progress-overlay');
+        if (overlay) overlay.style.display = 'none';
+        btnLock.classList.remove('armed');
+        btnLock.disabled = false;
+        btnLock.innerText = '进入靶场 (锁定鼠标)';
+    }, 135);
+}
         const btnTheme = getEl('btn-theme-toggle');
 
         let isDragging = false, isStick = false, offX = 0, offY = 0;
@@ -3256,36 +3464,41 @@ window.addEventListener('mousedown', (e) => {
                 dragBtn.innerText = isStick ? '放置' : '移动窗口';
             });
 
-            btnLock.addEventListener('click', () => {
-                try {
-                    const promise = document.body.requestPointerLock({ unadjustedMovement: true });
-                    if (promise && promise.catch) {
-                        promise.catch(() => {
-                            if (document.pointerLockElement !== document.body) {
-                                try { document.body.requestPointerLock(); } catch (_) {}
-                            }
-                        });
-                    }
-                } catch (_) {
-                    try { document.body.requestPointerLock(); } catch (e) {}
-                }
-            });
+btnLock.addEventListener('click', () => {
+    if (btnLock.disabled) return;
+    startArmedPhase();
+});
 
-            document.addEventListener('pointerlockchange', () => {
-                const isLocked = (document.pointerLockElement === document.body);
-                leftPanel.style.opacity = isLocked ? '0' : '1';
-                leftPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
-                rightPanel.style.opacity = isLocked ? '0' : '1';
-                rightPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
-                getEl('left-bottom-group').style.opacity = isLocked ? '0' : '1';
-                getEl('left-bottom-group').style.pointerEvents = isLocked ? 'none' : 'auto';
-                getEl('bottom-right-hud').style.opacity = isLocked ? '0' : '1';
-                getEl('bottom-right-hud').style.pointerEvents = isLocked ? 'none' : 'auto';
-                if (markerHud) {
-                    markerHud.style.opacity = isLocked ? '0' : '1';
-                    markerHud.style.pointerEvents = isLocked ? 'none' : 'auto';
-                }
-            });
+document.addEventListener('pointerlockchange', () => {
+    const isLocked = (document.pointerLockElement === document.body);
+
+    document.body.classList.toggle('aim-locked', isLocked);
+    leftPanel.style.opacity = isLocked ? '0' : '1';
+    leftPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
+    rightPanel.style.opacity = isLocked ? '0' : '1';
+    rightPanel.style.pointerEvents = isLocked ? 'none' : 'auto';
+    getEl('left-bottom-group').style.opacity = isLocked ? '0' : '1';
+    getEl('left-bottom-group').style.pointerEvents = isLocked ? 'none' : 'auto';
+    getEl('bottom-right-hud').style.opacity = isLocked ? '0' : '1';
+    getEl('bottom-right-hud').style.pointerEvents = isLocked ? 'none' : 'auto';
+    if (markerHud) {
+        markerHud.style.opacity = isLocked ? '0' : '1';
+        markerHud.style.pointerEvents = isLocked ? 'none' : 'auto';
+    }
+
+    // ★ 只要退出锁定（无论是武装阶段被打断，还是训练中按 Esc），就进入冷却
+    if (!isLocked) {
+        // 回滚武装阶段的遮罩 UI
+        if (isArmed) {
+            isArmed = false;
+            const overlay = getEl('progress-overlay');
+            if (overlay) overlay.style.display = 'none';
+        }
+        btnLock.classList.remove('armed');
+        btnLock.innerText = '进入靶场 (锁定鼠标)';
+        startButtonCooldown();   // ← 触发 1.5s 冷却
+    }
+});
         }
 
         function initThemeAndF11() {
@@ -3414,6 +3627,9 @@ window.addEventListener('mousedown', (e) => {
         const hudPoll = getEl('hud-poll');
 
         function updatePhysics(dt) {
+            let playerMoved = false;
+            let shadowCastersMoved = false;
+
             if (config.cloudsEnabled) {
                 cloudGroup.children.forEach(c => {
                     c.userData.angle += c.userData.speed * dt;
@@ -3442,6 +3658,8 @@ window.addEventListener('mousedown', (e) => {
 
                     if (!checkCollisionWithBoxes(nextPx, py - (config.viewHeight / 2), nextPz, 0.35, config.viewHeight / 2)) {
                         config.advanced.playerPos.x = nextPx; config.advanced.playerPos.z = nextPz;
+                        playerMoved = true;
+                    aimStateDirty = true;
                     }
                 }
 
@@ -3450,18 +3668,23 @@ window.addEventListener('mousedown', (e) => {
                     if (keysDown.has('Space')) moveY += 1;
                     if (keysDown.has('ShiftLeft')) moveY -= 1;
                     if (moveY !== 0) {
+                        const prevPlayerY = config.advanced.playerPos.y;
                         config.advanced.playerPos.y += (moveY * config.advanced.flySpeed * dt);
                         if (config.advanced.playerPos.y + config.viewHeight < 0.1) {
                             config.advanced.playerPos.y = 0.1 - config.viewHeight;
                         }
+                        playerMoved = playerMoved || (config.advanced.playerPos.y !== prevPlayerY);
+                        if (config.advanced.playerPos.y !== prevPlayerY) aimStateDirty = true;
                     }
                 } else {
                     config.advanced.playerPos.y = 0;
                 }
 
-                camera.position.set(config.advanced.playerPos.x, config.viewHeight + config.advanced.playerPos.y, config.advanced.playerPos.z);
-                if (horizonLine) horizonLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
-                if (thinLine) thinLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
+                if (playerMoved) {
+                    camera.position.set(config.advanced.playerPos.x, config.viewHeight + config.advanced.playerPos.y, config.advanced.playerPos.z);
+                    if (horizonLine) horizonLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
+                    if (thinLine) thinLine.position.set(config.advanced.playerPos.x, 0, config.advanced.playerPos.z);
+                }
             }
 
             // 目标摆动位移更新
@@ -3471,6 +3694,7 @@ window.addEventListener('mousedown', (e) => {
                 const radius = isSphere ? (t.sizeCm / 200) : (Math.max(t.bodyWidthCm, t.headWidthCm) / 200);
                 const halfHeight = isSphere ? radius : ((t.bodyHeightCm + t.headHeightCm) / 200);
 
+                let targetMoved = false;
                 if (t.move.enabled && t.motion) {
                     const D = t.motion.radius || t.distMeters;
                     if (t.move.mode === 'linear') {
@@ -3490,6 +3714,9 @@ window.addEventListener('mousedown', (e) => {
                             if (t.move.currentLinearOffset >= linearHalfSpan) { t.move.currentLinearOffset = linearHalfSpan; t.move.dir = -1; }
                             else if (t.move.currentLinearOffset <= -linearHalfSpan) { t.move.currentLinearOffset = -linearHalfSpan; t.move.dir = 1; }
                             t.rootGroup.position.set(candX, candY, candZ);
+                            targetMoved = true;
+                            aimStateDirty = true;
+                            shadowCastersMoved = true;
                         }
                     } else {
                         const halfDeg = t.move.totalSpanDeg / 2;
@@ -3507,17 +3734,24 @@ window.addEventListener('mousedown', (e) => {
                             if (t.move.currentOffsetDeg >= halfDeg) { t.move.currentOffsetDeg = halfDeg; t.move.dir = -1; }
                             else if (t.move.currentOffsetDeg <= -halfDeg) { t.move.currentOffsetDeg = -halfDeg; t.move.dir = 1; }
                             t.rootGroup.position.set(candX, candY, candZ);
+                            targetMoved = true;
+                            aimStateDirty = true;
+                            shadowCastersMoved = true;
                         }
                     }
                 }
-                updateTargetMeridianGeometry(t);
-                updateTargetBadgeCanvas(t);
+                if (targetMoved || playerMoved) {
+                    updateTargetMeridianGeometry(t);
+                    updateTargetBadgeCanvas(t);
+                }
             });
 
             // 保持打点光环正对相机
             clickMarkers.forEach(m => {
                 if (m.ring) m.ring.quaternion.copy(camera.quaternion);
             });
+
+            if (shadowCastersMoved) renderer.shadowMap.needsUpdate = true;
         }
 
 function animate(now) {
@@ -3535,21 +3769,21 @@ function animate(now) {
     if (hudAngle) {
         const s = relYaw.toFixed(3);
         if (hudAngle._lastVal !== s) {
-            hudAngle.innerText = s;
+            hudAngle.textContent = s;
             hudAngle._lastVal = s;
         }
     }
     if (hudPitch) {
         const s = (relPitch >= 0 ? '+' : '') + relPitch.toFixed(3);
         if (hudPitch._lastVal !== s) {
-            hudPitch.innerText = s;
+            hudPitch.textContent = s;
             hudPitch._lastVal = s;
         }
     }
 
             frameCnt++;
             if (now - lastTime >= 400) {
-                if (hudFps) hudFps.innerText = Math.round((frameCnt * 1000) / (now - lastTime));
+                if (hudFps) hudFps.textContent = Math.round((frameCnt * 1000) / (now - lastTime));
                 frameCnt = 0;
                 lastTime = now;
             }
@@ -3559,10 +3793,10 @@ function animate(now) {
                 const inst = Math.round(pollCount / elapsed);
                 if (inst > 120) {
                     peakPollRate = Math.max(peakPollRate, inst);
-                    if (hudPoll) hudPoll.innerText = peakPollRate;
+                    if (hudPoll) hudPoll.textContent = peakPollRate;
                     pollActiveSamples++;
                 } else if (pollActiveSamples === 0) {
-                    if (hudPoll) hudPoll.innerText = '--';
+                    if (hudPoll) hudPoll.textContent = '--';
                 }
                 pollCount = 0;
                 pollLastCalc = now;
@@ -3572,7 +3806,11 @@ function animate(now) {
     cameraEuler.set(pitch, yaw, 0);
     camera.quaternion.setFromEuler(cameraEuler);
 
-    checkAim();
+    if (document.pointerLockElement === document.body) {
+        checkAim(false);
+    } else if (lastTargetAimState) {
+        updateCrosshairStyle(false);
+    }
     renderer.render(scene, camera);
 }
 
@@ -3606,6 +3844,10 @@ function animate(now) {
             addNewTarget();
             setTargetShape('dummy');
             updateScene();
+
+    // ★ 首屏就启动冷却
+    startButtonCooldown();
+
             animate(performance.now());
 
             setTimeout(() => {
