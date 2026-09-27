@@ -1,4 +1,4 @@
-<!DOCTYPEhtml>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
@@ -359,7 +359,7 @@
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid #cbd5e1;
             color: var(--text-sub);
-            font-size: 0.68rem;
+            font-size: 0.72rem;
             font-weight: 800;
             padding: 6px 0;
             border-radius: 4px;
@@ -1390,7 +1390,117 @@
             box-shadow: 0 0 8px rgba(239, 68, 68, 0.15);
         }
         #debug-horizon-guide.active { opacity: 1; }
-        /* ── 前后方向偏好：竖直拉杆（rotate 方案，所有浏览器兼容） ── */
+        /* ── 方向偏好：横向左—左中—中—右中—右，五个位置均可磁吸 ── */
+        .direction-bias-control {
+            display: block;
+            padding: 8px 2px 2px;
+        }
+        .direction-bias-labels {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            align-items: center;
+            color: #64748b;
+            font-size: 0.72rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 0 1px 4px;
+        }
+        .direction-bias-labels span { text-align: center; white-space: nowrap; }
+        .direction-bias-labels span:first-child { text-align: left; }
+        .direction-bias-labels span:last-child { text-align: right; }
+        .direction-bias-labels span:nth-child(3) { color: #0284c7; }
+        .direction-bias-slider-wrap {
+            position: relative;
+            width: 100%;
+            min-width: 0;
+            height: 30px;
+            display: flex;
+            align-items: center;
+        }
+        .direction-bias-ticks {
+            position: absolute;
+            left: 7px;
+            right: 7px;
+            top: 50%;
+            height: 0;
+            transform: translateY(-50%);
+            pointer-events: none;
+            z-index: 3;
+        }
+        .direction-bias-ticks span {
+            position: absolute;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            transform: translate(-50%, -50%);
+            border: 1px solid #ffffff;
+            border-radius: 50%;
+            background: #94a3b8;
+            box-shadow: 0 0 0 1px rgba(100,116,139,.26), 0 0 5px rgba(100,116,139,.16);
+        }
+        .direction-bias-ticks span:nth-child(1) { left: 0%; }
+        .direction-bias-ticks span:nth-child(2) { left: 25%; }
+        .direction-bias-ticks span:nth-child(3) {
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            background: #0284c7;
+            box-shadow: 0 0 0 1px rgba(2,132,199,.30), 0 0 0 4px rgba(2,132,199,.10);
+        }
+        .direction-bias-ticks span:nth-child(4) { left: 75%; }
+        .direction-bias-ticks span:nth-child(5) { left: 100%; }
+        .direction-bias-slider-wrap input[type=range] {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            margin: 0;
+        }
+        .direction-bias-constraint-key {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 7px;
+            min-width: 84px;
+            align-self: stretch;
+            border-left: 1px solid rgba(148,163,184,.22);
+            padding: 2px 4px 2px 10px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            line-height: 1.15;
+            color: #94a3b8;
+            box-sizing: border-box;
+        }
+        .direction-bias-constraint-key span {
+            white-space: nowrap;
+            opacity: .38;
+            writing-mode: horizontal-tb;
+            transform: none;
+        }
+        .direction-bias-constraint-key span.active {
+            color: #0284c7;
+            opacity: 1;
+        }
+        #dir-bias-viz-wrap {
+            display:flex;
+            justify-content:center;
+            align-items:stretch;
+            margin-top:10px;
+            gap:10px;
+        }
+        #dir-bias-viz-wrap > div:first-child {
+            flex: 0 1 auto;
+            min-width: 0;
+        }
+        #dir-bias-viz-label {
+            max-width: 196px;
+            font-size: 0.68rem !important;
+            line-height: 1.3;
+            overflow: visible;
+            white-space: normal;
+            word-break: keep-all;
+        }
+
         .bias-vertical-row {
             display: flex;
             align-items: center;
@@ -1949,14 +2059,14 @@
                         </div>
                         <div id="sixshot-fly-algo-row" style="margin-bottom:5px;">
                             <div class="preset-grid cols-2" id="sixshot-algos">
-                                <button class="pill-btn active" id="btn-sixshot-seg" onclick="setFlyAlgo('segmented')"><span>📐 角度·分段算法</span></button>
-                                <button class="pill-btn" id="btn-sixshot-ou" onclick="setFlyAlgo('ou')"><span>💫 角度·OU算法</span></button>
+                                <button class="pill-btn active" id="btn-sixshot-seg" onclick="setFlyAlgo('segmented')"><span>📐 角度·拟真</span></button>
+                                <button class="pill-btn" id="btn-sixshot-ou" onclick="setFlyAlgo('ou')"><span>💫 角度·随机</span></button>
                             </div>
                         </div>
                         <div id="sixshot-speed-algo-row" style="margin-bottom:5px; display:none;">
                             <div class="preset-grid cols-2" id="sixshot-speed-algos">
-                                <button class="pill-btn active" id="btn-sixshot-spd-seg" onclick="setSpeedAlgo('dynamic','segmented')">📐 速度·分段算法</button>
-                                <button class="pill-btn" id="btn-sixshot-spd-ou" onclick="setSpeedAlgo('dynamic','ou')">💫 速度·OU算法</button>
+                                <button class="pill-btn active" id="btn-sixshot-spd-seg" onclick="setSpeedAlgo('dynamic','segmented')">📐 速度·拟真</button>
+                                <button class="pill-btn" id="btn-sixshot-spd-ou" onclick="setSpeedAlgo('dynamic','ou')">💫 速度·随机</button>
                             </div>
                         </div>
                         <div id="sixshot-speed-amp-row" class="speed-amp-control" style="margin-bottom:5px; display:none;">
@@ -2425,21 +2535,21 @@
                     <div class="motion-preset-copy">
                         <span class="motion-preset-kicker">运动基准</span>
                         <span class="motion-preset-title">经典</span>
-                        <span class="motion-preset-desc">恒定速度 · 平滑方向变化</span>
+                        <span class="motion-preset-desc">恒定速度 · 惯性式平滑转向</span>
                     </div>
                     <button class="motion-preset-btn" id="btn-tracking-classic" onclick="applyMotionPreset('tracking','classic')">使用</button>
                 </div>
                 <div id="tracking-fly-algo-row" style="margin-top:4px; margin-bottom: 4px;">
                     <div class="preset-grid cols-2" id="tracking-algos">
-                        <button class="pill-btn active" id="btn-tracking-seg" onclick="setTrackingAlgo('segmented')"><span>📐 角度·分段算法</span></button>
-                        <button class="pill-btn" id="btn-tracking-ou" onclick="setTrackingAlgo('ou')"><span>💫 角度·OU算法</span></button>
+                        <button class="pill-btn active" id="btn-tracking-seg" onclick="setTrackingAlgo('segmented')"><span>📐 角度·拟真</span></button>
+                        <button class="pill-btn" id="btn-tracking-ou" onclick="setTrackingAlgo('ou')"><span>💫 角度·随机</span></button>
                     </div>
                 </div>
 
                 <div id="tracking-speed-algo-row" style="margin-top:4px; margin-bottom:4px; display:none;">
                     <div class="preset-grid cols-2" id="tracking-speed-algos">
-                        <button class="pill-btn active" id="btn-tracking-spd-seg" onclick="setSpeedAlgo('tracking','segmented')">📐 速度·分段算法</button>
-                        <button class="pill-btn" id="btn-tracking-spd-ou" onclick="setSpeedAlgo('tracking','ou')">💫 速度·OU算法</button>
+                        <button class="pill-btn active" id="btn-tracking-spd-seg" onclick="setSpeedAlgo('tracking','segmented')">📐 速度·拟真</button>
+                        <button class="pill-btn" id="btn-tracking-spd-ou" onclick="setSpeedAlgo('tracking','ou')">💫 速度·随机</button>
                     </div>
                 </div>
                 <div id="tracking-speed-amp-row" class="speed-amp-control" style="margin-bottom:4px; display:none;">
@@ -2458,23 +2568,38 @@
                             <svg class="icon-sm" viewBox="0 0 24 24"><path d="M18 8L22 12L18 16M6 8L2 12L6 16"/></svg>
                             <span>方向偏好</span>
                         </span>
-                        <span id="txt-direction-bias" style="font-size:0.75rem; font-weight:900; color:var(--primary);">各半</span>
+                        <span id="txt-direction-bias" style="font-size:0.75rem; font-weight:900; color:var(--primary);">中</span>
                     </div>
-                    <div class="ctrl-row">
-                        <label style="width: 68px;">←左 右→</label>
-                        <input type="range" id="inp-track-dirbias-r" min="0" max="100" step="1" value="50" oninput="setTrackingDirectionBias(parseFloat(this.value))" />
-                        <div class="stepper-box">
-                            <button class="step-btn" onclick="stepValGlobal('inp-track-dirbias', -5)">−</button>
-                            <input type="number" class="num-input" id="inp-track-dirbias" value="50" step="5" min="0" max="100" />
-                            <button class="step-btn" onclick="stepValGlobal('inp-track-dirbias', 5)">+</button>
+                    <div class="direction-bias-control">
+                        <div class="direction-bias-labels" aria-hidden="true">
+                            <span>左</span>
+                            <span>左中</span>
+                            <span>中</span>
+                            <span>右中</span>
+                            <span>右</span>
+                        </div>
+                        <div class="direction-bias-slider-wrap">
+                            <div class="direction-bias-ticks" aria-hidden="true">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                            <input type="range" id="inp-track-dirbias-r" min="0" max="100" step="1" value="50"
+                                   aria-label="方向偏好：左、左中、中、右中、右" oninput="setTrackingDirectionBias(this.value)" />
+                        </div>
+                        <!-- 内部仍保留 0–100 的数值存储，避免破坏现有配置/本地存储兼容性；界面不显示数字。 -->
+                        <input type="hidden" id="inp-track-dirbias" value="50" />
+                    </div>
+                    <div id="dir-bias-viz-wrap">
+                        <div style="display:flex; flex-direction:column; align-items:center; min-width:0;">
+                            <canvas id="dir-bias-viz" style="display:block;"></canvas>
+                            <div id="dir-bias-viz-label" style="margin-top:6px;"></div>
+                        </div>
+                        <div id="dir-bias-constraint-key" class="direction-bias-constraint-key" aria-label="方向限制类型">
+                            <span data-constraint-type="hard">硬性限制</span>
+                            <span data-constraint-type="soft">软性限制</span>
                         </div>
                     </div>
-                    <div id="dir-bias-viz-wrap" style="display:flex; justify-content:center; align-items:center; margin-top:8px; flex-direction:column;">
-                        <canvas id="dir-bias-viz" style="display:block;"></canvas>
-                        <div id="dir-bias-viz-label" style="margin-top:4px; font-size:0.6rem; font-weight:800; color:#0284c7; text-align:center; letter-spacing:0.2px;"></div>
-                    </div>
-                    <div class="section-sub" style="margin-top: 3px; line-height: 1.35; color:#64748b;">
-                        • <strong>0</strong>: 纯左绕 ｜ <strong>50</strong>: 左右各半 ｜ <strong>100</strong>: 纯右绕
+                    <div class="section-sub" style="margin-top: 5px; line-height: 1.4; color:#64748b; font-size:0.68rem;">
+                        • <strong>左</strong>：偏向左侧 ｜ <strong>中</strong>：左右均匀 ｜ <strong>右</strong>：偏向右侧
                     </div>
                 </div>
 
@@ -2492,7 +2617,7 @@
                     <div class="preset-grid cols-4" id="strafe-freq-presets" style="margin-bottom:6px;">
                         <button class="pill-btn" data-val="0,0" onclick="setStrafeRangePreset(0,0)">到边折返</button>
                         <button class="pill-btn" data-val="0.2,0.5" onclick="setStrafeRangePreset(0.2,0.5)">高频AD</button>
-                        <button class="pill-btn active" data-val="0.8,1.8" onclick="setStrafeRangePreset(0.8,1.8)">常规竞技</button>
+                        <button class="pill-btn active" data-val="0.8,1.8" onclick="setStrafeRangePreset(0.8,1.8)">拟真常规</button>
                         <button class="pill-btn" data-val="1.2,1.2" onclick="setStrafeRangePreset(1.2,1.2)">定长1.2s</button>
                     </div>
                     <div class="ctrl-row" style="margin-bottom:4px;">
@@ -5518,6 +5643,16 @@ function clearGroup(group) {
         EPS_TIME: 1e-6,
         EPS_SEGMENT: 1e-3,
         EPS_DISTANCE: 1e-6,
+        EPS_ANGLE: 1e-6,
+        EPS_SQUARED_DISTANCE: 1e-8,
+        EPS_SAMPLE_TIME: 1e-9,
+        EPS_HEATMAP_VALUE: 1e-9,
+        LOOK_PITCH_EPS: 1e-4,
+
+        // 物理主循环的时间保护与固定子步长。
+        PHYSICS_ACCUM_EPS: 1e-4,
+        PHYSICS_MAX_SUBSTEP: 1 / 60,
+        PHYSICS_MAX_FRAME_DT: 0.10,
 
         // 用户换向周期的稳定下限；UI 的 (0,0) 专门表示碎闪。
         MIN_USER_PERIOD: 1 / 25,
@@ -5525,7 +5660,7 @@ function clearGroup(group) {
         JITTER_PERIOD_MIN: 1 / 16,
         JITTER_PERIOD_MAX: 1 / 8,
 
-        // 单次方向转折设计上限：90°。
+        // 基础角度转折尺度：90°；拟真算法作为单段转折上限，随机算法作为扩散强度基准。
         MAX_TURN_RAD: Math.PI / 2,
 
         // Wall 最大水平展开：150°。保留角度别名供旧逻辑使用。
@@ -5535,7 +5670,6 @@ function clearGroup(group) {
         // 六边形/椭圆边界的软引导区。
         SOFT_ZONE_START: 0.75,
         SOFT_ZONE_WIDTH: 0.25,
-        MIN_DIRECTION_RESPONSE_TAU: 0.1,
 
         // 目标中心距 = 半径 × 此比例。
         TARGET_SEPARATION_RADII: 2.2,
@@ -5554,16 +5688,47 @@ function clearGroup(group) {
         // 参考轴切换阈值：避免方向接近世界 Y 轴时切向基退化。
         REFERENCE_AXIS_ALIGNMENT_LIMIT: 0.95,
         BIAS_DISPLAY_DEADBAND: 0.05,
+        DIRECTION_BIAS_CENTER_SNAP: 0.04, // 滑条接近中点时自动磁吸到“中”
+        DIRECTION_BIAS_QUARTER_SNAP: 0.04, // 左中/右中的四分点也提供磁吸
 
         INV_SQRT2: 1 / Math.sqrt(2),
     });
 
-    // 兼容旧变量名；新代码使用 MOTION_CONST。
-    const FLY_CONST = MOTION_CONST;
-
-    function smoothStep01(s) {
+    // 拟真算法的时间剖面：五次 minimum-jerk（最小冲击）轨迹。
+    // 约束：q(0)=0、q(1)=1，且起止时刻的一阶、二阶导数都为 0。
+    // 因此位置/角度在分段连接处没有瞬时速度或瞬时加速度跳变，
+    // 比三次 smooth-step 更接近“有惯性、有限驱动能力”的真实运动。
+    // 随机算法不使用这个时间剖面；它负责连续随机扩散。
+    function minimumJerkStep01(s) {
         const t = clamp(s, 0, 1);
-        return t * t * (3 - 2 * t);
+        const t2 = t * t;
+        const t3 = t2 * t;
+        return t3 * (t * (t * 6 - 15) + 10);
+    }
+
+    // 拟真动作的统一“段”管理：
+    //   1) 换段时一次性确定动作持续时间；
+    //   2) 段内只推进时间，不重新抽样；
+    //   3) 状态通过 minimum-jerk 曲线连续地从起点过渡到终点。
+    // 角度拟真与速度拟真共享同一时间结构；随机性只发生在动作规划时。
+    function beginPlannedSegment(state, minDuration, maxDuration) {
+        state.segDuration = rand(minDuration, maxDuration);
+        state.segElapsed = 0;
+    }
+
+    function stepPlannedSegment(state, dt) {
+        state.segElapsed += dt;
+        const progress = clamp(
+            state.segElapsed / Math.max(MOTION_CONST.EPS_SEGMENT, state.segDuration),
+            0,
+            1
+        );
+        return minimumJerkStep01(progress);
+    }
+
+    // 拟真动作规划使用对称采样，不在运行阶段持续注入随机噪声。
+    function sampleSymmetricAmount(maxAbs) {
+        return (Math.random() * 2 - 1) * maxAbs;
     }
 
     function wrapAngle(angle) {
@@ -5594,6 +5759,46 @@ function clearGroup(group) {
         ts.dirBeta = Math.asin(clamp(ts.dirY, -1, 1));
     }
 
+    // 将 3D 方向向量写回唯一真源，并同步角度视图。
+    function setTrackingDirectionFromVector(ts, x, y, z) {
+        const length = Math.hypot(x, y, z);
+        if (!Number.isFinite(length) || length <= MOTION_CONST.EPS_DISTANCE) return false;
+
+        const invLength = 1 / length;
+        ts.dirX = x * invLength;
+        ts.dirY = y * invLength;
+        ts.dirZ = z * invLength;
+        ts.dirAlpha = Math.atan2(ts.dirZ, ts.dirX);
+        ts.dirBeta = Math.asin(clamp(ts.dirY, -1, 1));
+        return true;
+    }
+
+    // 对单位方向做标准镜面反射：d' = d - 2(d·n)n。
+    // n 为边界法向；反射结果继续写入方向真源，而不是派生速度。
+    function reflectTrackingDirection(ts, nx, ny, nz) {
+        const normalLength = Math.hypot(nx, ny, nz);
+        if (!Number.isFinite(normalLength) || normalLength <= MOTION_CONST.EPS_DISTANCE) return false;
+
+        const invNormalLength = 1 / normalLength;
+        nx *= invNormalLength;
+        ny *= invNormalLength;
+        nz *= invNormalLength;
+
+        const normalComponent = ts.dirX * nx + ts.dirY * ny + ts.dirZ * nz;
+        return setTrackingDirectionFromVector(
+            ts,
+            ts.dirX - 2 * normalComponent * nx,
+            ts.dirY - 2 * normalComponent * ny,
+            ts.dirZ - 2 * normalComponent * nz
+        );
+    }
+
+    function updateTrackingVelocity(ts, speed) {
+        ts.vx = ts.dirX * speed;
+        ts.vy = ts.dirY * speed;
+        ts.vz = ts.dirZ * speed;
+    }
+
     function getFree3DHorizontalYaw(x, z) {
         return Math.atan2(x, -z);
     }
@@ -5605,7 +5810,7 @@ function clearGroup(group) {
 
     function constrainFree3DHorizontalSector(ts, minD, maxD) {
         const halfSpan = getFree3DHorizontalHalfSpan();
-        if (halfSpan >= Math.PI - 1e-6) return false;
+        if (halfSpan >= Math.PI - MOTION_CONST.EPS_ANGLE) return false;
 
         const curR = Math.hypot(ts.x, ts.z);
         if (curR <= MOTION_CONST.EPS_DISTANCE) return false;
@@ -5623,23 +5828,15 @@ function clearGroup(group) {
         ts.x = radius * radialX;
         ts.z = radius * radialZ;
 
-        // 只反射越过扇区边界的水平切向分量，保留径向/竖直分量，保持总线速度连续。
-        const vx = Number.isFinite(ts.vx) ? ts.vx : ts.dirX;
-        const vy = Number.isFinite(ts.vy) ? ts.vy : ts.dirY;
-        const vz = Number.isFinite(ts.vz) ? ts.vz : ts.dirZ;
-        const outward = vx * tangentX + vz * tangentZ;
-        if (outward * Math.sign(yaw) > 0) {
-            ts.vx = vx - 2 * outward * tangentX;
-            ts.vz = vz - 2 * outward * tangentZ;
-            ts.vy = vy;
-            const speed = Math.hypot(ts.vx, ts.vy, ts.vz);
-            if (speed > MOTION_CONST.EPS_DISTANCE) {
-                setTrackingDirectionFromAngles(ts, Math.atan2(ts.vz, ts.vx), Math.asin(clamp(ts.vy / speed, -1, 1)));
-            }
-        } else {
-            syncTrackingDirectionAngles(ts);
-        }
-        return true;
+        const sideSign = Math.sign(yaw);
+        const boundaryNormalX = sideSign * tangentX;
+        const boundaryNormalZ = sideSign * tangentZ;
+        const movingOutward = ts.dirX * boundaryNormalX + ts.dirZ * boundaryNormalZ;
+
+        // 扇区边界也是镜面边界：只反射水平切向的边界法向分量。
+        return movingOutward > 0
+            ? reflectTrackingDirection(ts, boundaryNormalX, 0, boundaryNormalZ)
+            : false;
     }
 
     function getTrackingSpeedConfig() {
@@ -5666,14 +5863,80 @@ function clearGroup(group) {
         return Math.random() < getDirectionBiasProbability(biasRaw) ? 1 : -1;
     }
 
+    // 拟真飞行的目标方向采样：directionBias 直接决定
+    // “下一段动作目标落在首选半平面”的概率。
+    // bias=1 → 目标始终在右半平面；bias=0 → 始终在左半平面；
+    // bias=0.5 → 整圆均匀。
+    function sampleBiasedDirectionTarget(biasRaw) {
+        const p = getDirectionBiasProbability(biasRaw);
+        // alpha=0 为向右，alpha=π 为向左；因此 bias 本身就是“向右”的概率。
+        const chosenCenter = Math.random() < p ? 0 : Math.PI;
+        return wrapAngle(
+            chosenCenter + sampleSymmetricAmount(MOTION_CONST.MAX_TURN_RAD)
+        );
+    }
+
+    // 拟真动作仍受最大转向能力限制：目标可以很远，但单个动作段最多转 MAX_TURN_RAD。
+    // 这样既保留 directionBias 的概率语义，又不会因为偏好切换产生瞬时角度跳变。
+    function clampAngleMoveTarget(startAngle, targetAngle, maxTurn = MOTION_CONST.MAX_TURN_RAD) {
+        const delta = clamp(shortestAngle(startAngle, targetAngle), -maxTurn, maxTurn);
+        return wrapAngle(startAngle + delta);
+    }
+
     function getDirectionBiasState(biasRaw) {
-        const strength = Math.abs(2 * biasRaw - 1);
+        const bias = getDirectionBiasProbability(biasRaw);
+        const strength = Math.abs(2 * bias - 1);
         return {
             strength,
-            center: biasRaw >= 0.5 ? 0 : Math.PI,
-            // 仅用于“折返乱飞”的有界方向模型。
+            center: bias >= 0.5 ? 0 : Math.PI,
+            // 仅在“折返乱飞”中使用；OU 只读取 center / strength。
             angularLimit: Math.PI - strength * (Math.PI / 2)
         };
+    }
+
+    // 统一角度扩散参数：所有角度 OU 共用同一套时间尺度与扩散强度。
+    function getAngularOURates(tau) {
+        const safeTau = Math.max(tau, MOTION_CONST.EPS_TIME);
+        return {
+            meanReversionRate: 1 / safeTau,
+            diffusionRate: MOTION_CONST.MAX_TURN_RAD / Math.sqrt(safeTau)
+        };
+    }
+
+    // 统一角度 OU 核心：漂移 + Brownian 扩散。几何空间只负责提供目标角度。
+    // Angular OU 只承担“连续随机扩散”。
+    // strength=0 时，漂移项消失，退化为 Brownian-like 角度扩散；
+    // strength>0 时，向 targetAngle 做均值回复。
+    // 拟真算法不会调用这里，因此两种算法的职责不会混在一起。
+    function evolveAngularOU(angle, targetAngle, strength, tau, dt) {
+        // 统一的角度 OU 离散步：
+        //   angle_next = angle + 漂移 + Brownian 扩散
+        // 漂移由“当前角度 → 目标角度”的最短有符号角决定，
+        // 因此跨越 -π / +π 时仍会沿最短路径回复。
+        const { meanReversionRate, diffusionRate } = getAngularOURates(tau);
+        const drift = strength * meanReversionRate * shortestAngle(angle, targetAngle) * dt;
+        const noise = diffusionRate * Math.sqrt(Math.max(0, dt)) * normalRand();
+        return wrapAngle(angle + drift + noise);
+    }
+
+    // 二维方向的标准镜面反射。
+    // n 是边界法向，d 是入射方向；反射只改变法向分量，切向分量保持不变。
+    // 公式：d' = d - 2(d·n)n。
+    function reflectPlanarAngle(angle, nx, ny) {
+        const normalLength = Math.hypot(nx, ny);
+        if (!Number.isFinite(normalLength) || normalLength <= MOTION_CONST.EPS_DISTANCE) {
+            return angle;
+        }
+
+        nx /= normalLength;
+        ny /= normalLength;
+
+        const dx = Math.cos(angle);
+        const dy = Math.sin(angle);
+        const normalComponent = dx * nx + dy * ny;
+        const reflectedX = dx - 2 * normalComponent * nx;
+        const reflectedY = dy - 2 * normalComponent * ny;
+        return Math.atan2(reflectedY, reflectedX);
     }
 
     function limitDirectionByBias(dirAlpha, biasRaw) {
@@ -5704,7 +5967,8 @@ function clearGroup(group) {
 
         let dx = ts.dirX, dy = ts.dirY, dz = ts.dirZ;
         const { strength, center } = getDirectionBiasState(biasRaw);
-        const k = strength / Math.max(tau, MOTION_CONST.EPS_TIME);
+        const { meanReversionRate, diffusionRate } = getAngularOURates(tau);
+        const k = strength * meanReversionRate;
 
         let refX = 0, refY = 1, refZ = 0;
         if (Math.abs(dy) > MOTION_CONST.REFERENCE_AXIS_ALIGNMENT_LIMIT) {
@@ -5731,7 +5995,7 @@ function clearGroup(group) {
         const sy = -prefDot * dy;
         const sz = pz - prefDot * dz;
 
-        const sigmaRate = MOTION_CONST.MAX_TURN_RAD / Math.sqrt(Math.max(tau, MOTION_CONST.EPS_TIME));
+        const sigmaRate = diffusionRate;
         // 两个正交高斯通道各承担 1/√2，使总切向 RMS 保持为 sigmaRate。
         const noiseScale = sigmaRate * Math.sqrt(Math.max(0, dt)) * MOTION_CONST.INV_SQRT2;
         const n1 = normalRand(), n2 = normalRand();
@@ -5763,7 +6027,11 @@ function clearGroup(group) {
     }
 
     // ============================================================
-    // 速度演化引擎（分段 / OU / 恒定=幅度0）
+    // 速度演化引擎
+    //   拟真：低频动作规划；每段只决定一次目标速度，段内按
+    //        minimum-jerk 曲线连续加减速。随机性只发生在换段时。
+    //   随机：连续随机过程；每个时间步都可能受到新的随机扰动。
+    //   amp=0：拟真速度退化为恒速；随机算法退化为无随机项的均值回复。
     // ============================================================
     function evolveSpeedSegmented(state, V_base, tau, ampPct, dt) {
         if (state.V === undefined || isNaN(state.V)) {
@@ -5779,17 +6047,21 @@ function clearGroup(group) {
         }
         state.V_timer -= dt;
         const s = clamp(1 - state.V_timer / tau, 0, 1);
-        state.V = state.V_start + (state.V_target - state.V_start) * smoothStep01(s);
+        state.V = state.V_start + (state.V_target - state.V_start) * minimumJerkStep01(s);
         return state.V;
     }
 
     function evolveSpeedOU(state, V_base, tau, ampPct, dt) {
+        // 速度 OU 使用精确离散转移：
+        //   V_next = μ + (V - μ)e^(-dt/τ) + σ_eq√(1-e^(-2dt/τ))ξ
+        // 因而 τ 决定回复时间尺度，ampPct 决定平稳随机波动的相对幅度。
         if (state.V === undefined || isNaN(state.V)) state.V = V_base;
         const amp = ampPct / 100;
-        const decay = Math.exp(-dt / Math.max(tau, 1e-4));
+        const decay = Math.exp(-dt / Math.max(tau, MOTION_CONST.EPS_TIME));
         const sigmaEquil = V_base * amp;
         const noise = sigmaEquil * Math.sqrt(Math.max(0, 1 - decay * decay)) * normalRand();
         state.V = V_base + (state.V - V_base) * decay + noise;
+        // 速度是标量，物理上不允许出现负值；负值截到 0 不参与方向反射。
         if (state.V < 0) state.V = 0;
         return state.V;
     }
@@ -6019,8 +6291,8 @@ function clearGroup(group) {
             const rawMin = CFG.dynamic.intervalMin !== undefined ? CFG.dynamic.intervalMin : 0.5;
             const rawMax = CFG.dynamic.intervalMax !== undefined ? CFG.dynamic.intervalMax : 1.5;
             const isJitter = (rawMin === MOTION_CONST.JITTER_SENTINEL && rawMax === MOTION_CONST.JITTER_SENTINEL);
-            const minDyn = isJitter ? FLY_CONST.JITTER_PERIOD_MIN : Math.max(FLY_CONST.MIN_USER_PERIOD, rawMin);
-            const maxDyn = isJitter ? FLY_CONST.JITTER_PERIOD_MAX : Math.max(minDyn, rawMax);
+            const minDyn = isJitter ? MOTION_CONST.JITTER_PERIOD_MIN : Math.max(MOTION_CONST.MIN_USER_PERIOD, rawMin);
+            const maxDyn = isJitter ? MOTION_CONST.JITTER_PERIOD_MAX : Math.max(minDyn, rawMax);
 
             const Rx = Math.max(MOTION_CONST.MIN_RADIUS, (b.maxX - b.minX) * 0.5);
             const Ry = Math.max(MOTION_CONST.MIN_RADIUS, (b.maxY - b.minY) * 0.5);
@@ -6050,49 +6322,47 @@ function clearGroup(group) {
 
                     // 1) 速度演化（幅度 0 等价恒定）
                     const V_now = evolveSpeed(t, curSpd, tauSpd, spdAlgo, ampSeg, ampOU, dt);
-                    t.speed = V_now;
-
                     // 2) 角度演化
                     if (dMode === 'fly' && flyType === 'pure') {
-                        if (t.ang === undefined || isNaN(t.ang)) t.ang = Math.atan2(t.dirY || 0, t.dirX || 1);
+                        if (t.ang === undefined || isNaN(t.ang)) t.ang = Math.atan2(
+                            Number.isFinite(t.dirY) ? t.dirY : 0,
+                            Number.isFinite(t.dirX) ? t.dirX : 1
+                        );
 
                         if ((CFG.dynamic.algo || 'segmented') === 'ou') {
-                            const sigmaAng = FLY_CONST.MAX_TURN_RAD / Math.sqrt(Math.max(tauSpd, 1e-4));
-                            t.ang += sigmaAng * normalRand() * Math.sqrt(dt);
-
+                            // Sixshot 与 Tracking 共用同一个 Angular OU 核心。
+                            // 几何层只负责回答：当前是否进入软边界区，以及“向内”目标角是多少。
                             const ux = (t.x - Xc) / Rx, uy = (t.y - Yc) / Ry;
                             const rho = Math.hypot(ux, uy);
-                            if (rho > FLY_CONST.SOFT_ZONE_START) {
+                            let targetAngle = t.ang;
+                            let strength = 0;
+                            if (rho > MOTION_CONST.SOFT_ZONE_START) {
                                 const w = Math.min(1, (rho - MOTION_CONST.SOFT_ZONE_START) / MOTION_CONST.SOFT_ZONE_WIDTH);
-                                const sf = w * w * (3 - 2 * w);
-                                const inwardAng = Math.atan2(-uy, -ux);
-                                let diff = inwardAng - t.ang;
-                                while (diff > Math.PI) diff -= Math.PI * 2;
-                                while (diff < -Math.PI) diff += Math.PI * 2;
-                                t.ang += diff * sf * Math.min(1.0, dt / Math.max(tauSpd, MOTION_CONST.MIN_DIRECTION_RESPONSE_TAU));
+                                strength = w * w * (3 - 2 * w);
+                                targetAngle = Math.atan2(-uy, -ux);
                             }
+                            t.ang = evolveAngularOU(t.ang, targetAngle, strength, tauSpd, dt);
                         } else {
+                            // 拟真：每段只在开始时规划一次目标方向，段内按
+                            // minimum-jerk 时间剖面连续转向。
                             if (!t.segDuration || t.segElapsed === undefined || t.segElapsed >= t.segDuration) {
-                                t.segDuration = minDyn + Math.random() * (maxDyn - minDyn);
-                                t.segElapsed = 0;
+                                beginPlannedSegment(t, minDyn, maxDyn);
                                 t.segStartAng = t.ang;
-                                let chosenDelta = (Math.random() - 0.5) * 2 * FLY_CONST.MAX_TURN_RAD;
+
+                                // 拟真：换段时一次规划目标方向。靠近边界时，目标逐渐偏向区域内部。
+                                let chosenDelta = sampleSymmetricAmount(MOTION_CONST.MAX_TURN_RAD);
                                 const ux = (t.x - Xc) / Rx, uy = (t.y - Yc) / Ry;
                                 const rho = Math.hypot(ux, uy);
-                                if (rho > FLY_CONST.SOFT_ZONE_START) {
+                                if (rho > MOTION_CONST.SOFT_ZONE_START) {
                                     const w = Math.min(1, (rho - MOTION_CONST.SOFT_ZONE_START) / MOTION_CONST.SOFT_ZONE_WIDTH);
                                     const sf = w * w * (3 - 2 * w);
                                     const inwardAng = Math.atan2(-uy, -ux);
-                                    let diff = inwardAng - t.segStartAng;
-                                    while (diff > Math.PI) diff -= Math.PI * 2;
-                                    while (diff < -Math.PI) diff += Math.PI * 2;
+                                    const diff = shortestAngle(t.segStartAng, inwardAng);
                                     chosenDelta = chosenDelta * (1 - sf) + diff * sf;
                                 }
-                                t.segDeltaAng = clamp(chosenDelta, -FLY_CONST.MAX_TURN_RAD, FLY_CONST.MAX_TURN_RAD);
+                                t.segDeltaAng = clamp(chosenDelta, -MOTION_CONST.MAX_TURN_RAD, MOTION_CONST.MAX_TURN_RAD);
                             }
-                            t.segElapsed += dt;
-                            const s = clamp(t.segElapsed / Math.max(MOTION_CONST.EPS_SEGMENT, t.segDuration), 0, 1);
-                            t.ang = t.segStartAng + (t.segDeltaAng || 0) * (s * s * (3 - 2 * s));
+                            t.ang = t.segStartAng + t.segDeltaAng * stepPlannedSegment(t, dt);
                         }
 
                         t.dirX = Math.cos(t.ang);
@@ -6103,12 +6373,37 @@ function clearGroup(group) {
                     t.x += t.dirX * V_now * dt;
                     t.y += t.dirY * V_now * dt;
 
-                    // 弹跳模式边界翻转
-                    if (!(dMode === 'fly' && flyType === 'pure')) {
-                        if (t.x < b.minX) { t.x = b.minX; t.dirX = Math.abs(t.dirX); }
-                        else if (t.x > b.maxX) { t.x = b.maxX; t.dirX = -Math.abs(t.dirX); }
-                        if (t.y < b.minY) { t.y = b.minY; t.dirY = Math.abs(t.dirY); }
-                        else if (t.y > b.maxY) { t.y = b.maxY; t.dirY = -Math.abs(t.dirY); }
+                    // 4) Sixshot 活动区域采用封闭边界。
+                    //    无论是纯乱飞还是折返乱飞，只要撞到边界就做镜面反射。
+                    //    反射后立即同步 ang / dirX / dirY，避免下一帧的角度算法把反射结果覆盖。
+                    let bounced = false;
+                    if (t.x < b.minX) {
+                        t.x = b.minX;
+                        t.ang = reflectPlanarAngle(t.ang, 1, 0);
+                        bounced = true;
+                    } else if (t.x > b.maxX) {
+                        t.x = b.maxX;
+                        t.ang = reflectPlanarAngle(t.ang, 1, 0);
+                        bounced = true;
+                    }
+
+                    if (t.y < b.minY) {
+                        t.y = b.minY;
+                        t.ang = reflectPlanarAngle(t.ang, 0, 1);
+                        bounced = true;
+                    } else if (t.y > b.maxY) {
+                        t.y = b.maxY;
+                        t.ang = reflectPlanarAngle(t.ang, 0, 1);
+                        bounced = true;
+                    }
+
+                    if (bounced) {
+                        t.dirX = Math.cos(t.ang);
+                        t.dirY = Math.sin(t.ang);
+                        // 拟真算法的当前目标方向属于“撞墙前”这一段；
+                        // 撞墙后重新开始一段，保证反射方向成为下一段的真实起点。
+                        t.segDuration = undefined;
+                        t.segElapsed = undefined;
                     }
                 }
             }
@@ -6124,7 +6419,7 @@ function clearGroup(group) {
                         if (!t2.mesh.visible) continue;
                         const dx = t2.x - t1.x, dy = t2.y - t1.y;
                         const d2 = dx * dx + dy * dy;
-                        if (d2 < minD2 && d2 > 1e-8) {
+                        if (d2 < minD2 && d2 > MOTION_CONST.EPS_SQUARED_DISTANCE) {
                             const dist = Math.sqrt(d2);
                             const push = (minDist - dist) * 0.5 * Math.min(1, dt * MOTION_CONST.SEPARATION_CORRECTION_RATE);
                             const nx = dx / dist, ny = dy / dist;
@@ -6149,14 +6444,15 @@ function clearGroup(group) {
             const ts = STATE.tracking;
             const space = CFG.tracking.space;
             const isFly = CFG.tracking.pattern === 'fly';
+            const flyType = CFG.tracking.flyType || 'pure';
             const isContinuous = (CFG.tracking.algo === 'ou');
             const baseD = CFG.depthTracking;
             const isDummy = (CFG.tracking.shape === 'dummy');
             const ext = getTrackingTargetExtents();
 
             const linSpeedBase = (CFG.tracking.speedDegPerSec * MOTION_CONST.DEG_TO_RAD) * baseD;
-            const trkTauSpd = ((Math.max(FLY_CONST.MIN_USER_PERIOD, CFG.tracking.strafeMinInterval ?? 0.8))
-                             + (Math.max(FLY_CONST.MIN_USER_PERIOD, CFG.tracking.strafeMaxInterval ?? 1.8))) * 0.5;
+            const trkTauSpd = ((Math.max(MOTION_CONST.MIN_USER_PERIOD, CFG.tracking.strafeMinInterval ?? 0.8))
+                             + (Math.max(MOTION_CONST.MIN_USER_PERIOD, CFG.tracking.strafeMaxInterval ?? 1.8))) * 0.5;
             // fly 与 strafe 各自独立的速度演化配置：
             //   fly    → speedAlgo / speedAmpSegmented / speedAmpOU
             //   strafe → strafeSpeedAlgo / strafeSpeedAmpSegmented / strafeSpeedAmpOU
@@ -6173,8 +6469,8 @@ function clearGroup(group) {
             const rawMin = CFG.tracking.strafeMinInterval ?? 0.8;
             const rawMax = CFG.tracking.strafeMaxInterval ?? 1.8;
             const isJitter = (rawMin === MOTION_CONST.JITTER_SENTINEL && rawMax === MOTION_CONST.JITTER_SENTINEL);
-            const minStrafe = isJitter ? FLY_CONST.JITTER_PERIOD_MIN : Math.max(FLY_CONST.MIN_USER_PERIOD, rawMin);
-            const maxStrafe = isJitter ? FLY_CONST.JITTER_PERIOD_MAX : Math.max(minStrafe, rawMax);
+            const minStrafe = isJitter ? MOTION_CONST.JITTER_PERIOD_MIN : Math.max(MOTION_CONST.MIN_USER_PERIOD, rawMin);
+            const maxStrafe = isJitter ? MOTION_CONST.JITTER_PERIOD_MAX : Math.max(minStrafe, rawMax);
             const tau = (minStrafe + maxStrafe) * 0.5;
 
             if (isNaN(ts.x) || isNaN(ts.y) || isNaN(ts.z)) respawnTrackingTarget(false);
@@ -6264,7 +6560,7 @@ function clearGroup(group) {
                         else if (bg.r > rMax) { bg.r = rMax; bg.vRadial = -Math.abs(bg.vRadial); }
                         const halfSpan = getFree3DHorizontalHalfSpan();
                         bg.phi += (bg.vTangent / Math.max(MOTION_CONST.MIN_RADIUS, bg.r)) * dt;
-                        if (halfSpan < Math.PI - 1e-6) {
+                        if (halfSpan < Math.PI - MOTION_CONST.EPS_ANGLE) {
                             if (bg.phi < -halfSpan) { bg.phi = -halfSpan; bg.vTangent = Math.abs(bg.vTangent); }
                             else if (bg.phi > halfSpan) { bg.phi = halfSpan; bg.vTangent = -Math.abs(bg.vTangent); }
                         } else {
@@ -6312,8 +6608,6 @@ function clearGroup(group) {
     }
     // 开火判定统一由本分支末尾的通用逻辑处理，此处不得重复，否则得分/命中时间会翻倍
 } else if (isFly) {
-                const flyType = CFG.tracking.flyType || 'pure';
-
                 if (flyType === 'bounce') {
                     if (rawMax > 0) {
                         if (ts.changeDirTimer <= 0 || ts.changeDirTimer === undefined || isNaN(ts.changeDirTimer)) {
@@ -6331,41 +6625,39 @@ function clearGroup(group) {
                         // 真 3D：单位球面的切平面各向同性 OU。
                         evolveFree3DDirectionOU(ts, biasRaw, tau, dt);
                     } else {
-                        // Wall / Curve：只有一个角度自由度，因此使用一维 OU。
+                        // Wall / Curve：只有一个角度自由度，与 Sixshot 共用统一角度 OU 核心。
                         const { strength, center } = getDirectionBiasState(biasRaw);
-                        const k = strength / Math.max(tau, MOTION_CONST.EPS_TIME);
-                        const sigmaRate = MOTION_CONST.MAX_TURN_RAD / Math.sqrt(Math.max(tau, MOTION_CONST.EPS_TIME));
-                        const drift = k * shortestAngle(ts.dirAlpha, center) * dt;
-                        const noise = sigmaRate * normalRand() * Math.sqrt(Math.max(0, dt));
-                        ts.dirAlpha = wrapAngle(ts.dirAlpha + drift + noise);
+                        ts.dirAlpha = evolveAngularOU(ts.dirAlpha, center, strength, tau, dt);
                     }
                 } else {
                     if (!ts.segDuration || ts.segElapsed === undefined || ts.segElapsed >= ts.segDuration) {
-                        ts.segDuration = minStrafe + Math.random() * (maxStrafe - minStrafe);
-                        ts.segElapsed = 0;
+                        beginPlannedSegment(ts, minStrafe, maxStrafe);
                         ts.segStartAlpha = Number.isFinite(ts.dirAlpha) ? ts.dirAlpha : 0;
                         ts.segStartBeta = Number.isFinite(ts.dirBeta) ? ts.dirBeta : 0;
 
-                        // 分段算法：每一段先确定一个有偏好的终止方向，再用 smoothStep 连续插值。
-                        // 因此“角度·分段”不会再叠加逐帧 OU/漂移，算法语义保持纯粹且可复现。
-                        const rawTargetAlpha = ts.segStartAlpha +
-                            (Math.random() < 0.5 ? -1 : 1) * Math.random() * FLY_CONST.MAX_TURN_RAD;
-                        const targetAlpha = limitDirectionByBias(rawTargetAlpha, biasRaw);
-                        ts.segTargetAlpha = targetAlpha;
+                        // 拟真：换段时一次规划下一步方向；段内轨迹完全由 minimum-jerk 决定。
+                        // directionBias 在这里不再只是“把随机目标裁进一个角度区间”，
+                        // 而是直接决定下一段目标落在首选半平面还是反向半平面的概率。
+                        // 随后再施加最大转向能力，确保运动仍然连续、可实现。
+                        const sampledTargetAlpha = sampleBiasedDirectionTarget(biasRaw);
+                        const targetAlpha = clampAngleMoveTarget(
+                            ts.segStartAlpha,
+                            sampledTargetAlpha,
+                            MOTION_CONST.MAX_TURN_RAD
+                        );
                         ts.segDeltaAlpha = shortestAngle(ts.segStartAlpha, targetAlpha);
 
                         const targetBeta = (space === 'free3d')
-                            ? clamp(ts.segStartBeta +
-                                (Math.random() < 0.5 ? -1 : 1) * Math.random() * FLY_CONST.MAX_TURN_RAD,
-                                -Math.PI / 2, Math.PI / 2)
+                            ? clamp(
+                                ts.segStartBeta + sampleSymmetricAmount(MOTION_CONST.MAX_TURN_RAD),
+                                -Math.PI / 2,
+                                Math.PI / 2
+                            )
                             : 0;
-                        ts.segTargetBeta = targetBeta;
                         ts.segDeltaBeta = targetBeta - ts.segStartBeta;
                     }
 
-                    ts.segElapsed += dt;
-                    const s = Math.min(1, ts.segElapsed / Math.max(MOTION_CONST.EPS_SEGMENT, ts.segDuration));
-                    const progress = smoothStep01(s);
+                    const progress = stepPlannedSegment(ts, dt);
                     ts.dirAlpha = wrapAngle(ts.segStartAlpha + ts.segDeltaAlpha * progress);
                     ts.dirBeta = ts.segStartBeta + ts.segDeltaBeta * progress;
                     if (space === 'free3d') {
@@ -6486,7 +6778,7 @@ function clearGroup(group) {
                     // 角速度 = 切向线速度 / 当前半径 → 圆心角匀速推进
                     const omega = (orbitSign * V_tangent) / curR;
                     const halfSpan = getFree3DHorizontalHalfSpan();
-                    if (halfSpan >= Math.PI - 1e-6) {
+                    if (halfSpan >= Math.PI - MOTION_CONST.EPS_ANGLE) {
                         ts.yaw = (ts.yaw ?? 0) + omega * dt;
                         if (ts.yaw >  Math.PI) ts.yaw -= Math.PI * 2;
                         else if (ts.yaw < -Math.PI) ts.yaw += Math.PI * 2;
@@ -6503,7 +6795,7 @@ function clearGroup(group) {
                     //   速度恒定 = V_radial（归一化后的 linSpeed 分量）
                     //   周期只决定"多久换一次方向"，不改变速度
                     //   撞墙时：方向指回内 → 重置周期（若清 0 会被下一帧反向，永久卡死）
-                    const rMin = Math.max(FLY_CONST.MIN_USER_PERIOD, CFG.tracking.radialStrafeMin ?? 0.8);
+                    const rMin = Math.max(MOTION_CONST.MIN_USER_PERIOD, CFG.tracking.radialStrafeMin ?? 0.8);
                     const rMax = Math.max(rMin, CFG.tracking.radialStrafeMax ?? 1.8);
                     const sampleRadialPeriod = () => rMin + Math.random() * (rMax - rMin);
 
@@ -6533,46 +6825,58 @@ function clearGroup(group) {
                     ts.z = -ts.dist * Math.cos(ts.yaw);
                     ts.y = clamp(ts.y, minY, maxY);
                 } else {
+                    // 3D 自由飞行：dirX / dirY / dirZ 是唯一方向真源。
+                    // vx / vy / vz 只由“方向 × 当前线速度”派生，不参与状态决策。
                     ensureUnitDirection3D(ts);
-                    ts.vx = ts.dirX * linSpeed;
-                    ts.vy = ts.dirY * linSpeed;
-                    ts.vz = ts.dirZ * linSpeed;
+                    updateTrackingVelocity(ts, linSpeed);
 
                     ts.x += ts.vx * dt;
                     ts.y += ts.vy * dt;
                     ts.z += ts.vz * dt;
 
-                    // 水平活动范围是相对正前方的真实扇区，不只是初始生成范围。
-                    constrainFree3DHorizontalSector(ts, minD, maxD);
+                    // 水平活动范围是相对正前方的真实扇区。若越过扇区边界，
+                    // 先把位置投回边界，再把方向按边界法向做镜面反射。
+                    bounced = constrainFree3DHorizontalSector(ts, minD, maxD);
 
                     const curR = Math.hypot(ts.x, ts.z);
-                    if (curR > 1e-6) {
-                        const hx = ts.x / curR, hz = ts.z / curR;
-                        const vRad = ts.vx * hx + ts.vz * hz;
-                        if (curR < minD && vRad < 0) {
-                            ts.vx -= 2 * vRad * hx; ts.vz -= 2 * vRad * hz;
-                            const sc = minD / curR; ts.x *= sc; ts.z *= sc; bounced = true;
-                        } else if (curR > maxD && vRad > 0) {
-                            ts.vx -= 2 * vRad * hx; ts.vz -= 2 * vRad * hz;
-                            const sc = maxD / curR; ts.x *= sc; ts.z *= sc; bounced = true;
-                        }
-                    }
-                    if (ts.y < minY && ts.vy < 0) { ts.y = minY; ts.vy = Math.abs(ts.vy); bounced = true; }
-                    else if (ts.y > maxY && ts.vy > 0) { ts.y = maxY; ts.vy = -Math.abs(ts.vy); bounced = true; }
+                    if (curR > MOTION_CONST.EPS_DISTANCE) {
+                        const hx = ts.x / curR;
+                        const hz = ts.z / curR;
+                        const radialVelocity = ts.dirX * hx + ts.dirZ * hz;
 
-                    if (bounced) {
-                        if (linSpeed > MOTION_CONST.EPS_DISTANCE) {
-                            syncTrackingDirectionAngles(ts);
-                        } else {
-                            ts.dirAlpha = Math.atan2(ts.vz, ts.vx);
-                            ts.dirBeta = 0;
-                        }
-                        ts.segDuration = undefined;
-                        if (isFly && (CFG.tracking.flyType === 'bounce')) {
-                            const limitedAlpha = limitDirectionByBias(ts.dirAlpha, biasRaw);
-                            setTrackingDirectionFromAngles(ts, limitedAlpha, ts.dirBeta);
+                        if (curR < minD && radialVelocity < 0) {
+                            ts.x = minD * hx;
+                            ts.z = minD * hz;
+                            bounced = reflectTrackingDirection(ts, hx, 0, hz) || bounced;
+                        } else if (curR > maxD && radialVelocity > 0) {
+                            ts.x = maxD * hx;
+                            ts.z = maxD * hz;
+                            bounced = reflectTrackingDirection(ts, hx, 0, hz) || bounced;
                         }
                     }
+
+                    if (ts.y < minY && ts.dirY < 0) {
+                        ts.y = minY;
+                        bounced = reflectTrackingDirection(ts, 0, 1, 0) || bounced;
+                    } else if (ts.y > maxY && ts.dirY > 0) {
+                        ts.y = maxY;
+                        bounced = reflectTrackingDirection(ts, 0, 1, 0) || bounced;
+                    }
+
+                    // 折返乱飞的 directionBias 是硬角度支持范围。
+                    // Free3D 发生空间边界镜面反射后，反射方向可能越过偏好范围，
+                    // 因此这里统一重新限幅，保证与 Wall / Curve 的语义一致。
+                    if (isFly && flyType === 'bounce') {
+                        syncTrackingDirectionAngles(ts);
+                        const limitedAlpha = limitDirectionByBias(ts.dirAlpha, biasRaw);
+                        if (Math.abs(shortestAngle(ts.dirAlpha, limitedAlpha)) > MOTION_CONST.EPS_ANGLE) {
+                            setTrackingDirectionFromAngles(ts, limitedAlpha, ts.dirBeta);
+                            bounced = true;
+                        }
+                    }
+
+                    if (bounced) ts.segDuration = undefined;
+                    updateTrackingVelocity(ts, linSpeed);
                     ts.dist = Math.hypot(ts.x, ts.z);
                 }
             }
@@ -6705,9 +7009,9 @@ function clearGroup(group) {
         if (d2 > r2) return -1;
         const thc = Math.sqrt(Math.max(0, r2 - d2));
         const tNear = tca - thc;
-        if (tNear > 1e-6) return tNear;
+        if (tNear > MOTION_CONST.EPS_DISTANCE) return tNear;
         const tFar = tca + thc;
-        return tFar > 1e-6 ? tFar : -1;
+        return tFar > MOTION_CONST.EPS_DISTANCE ? tFar : -1;
     }
 
     function checkAim() {
@@ -6863,7 +7167,7 @@ function clearGroup(group) {
         } else {
             STATE.yaw -= dx * radiansPerCountX;
             STATE.pitch -= dy * radiansPerCountY;
-            STATE.pitch = clamp(STATE.pitch, -Math.PI / 2 + 0.0001, Math.PI / 2 - 0.0001);
+            STATE.pitch = clamp(STATE.pitch, -Math.PI / 2 + MOTION_CONST.LOOK_PITCH_EPS, Math.PI / 2 - MOTION_CONST.LOOK_PITCH_EPS);
         }
 
         if (STATE.yaw > Math.PI) STATE.yaw -= Math.PI * 2;
@@ -7596,7 +7900,7 @@ function finishChallenge() {
                 if (pBtns.length >= 4) {
                     pBtns[0].innerText = '到边折返';
                     pBtns[1].innerText = '高频AD';
-                    pBtns[2].innerText = '常规竞技';
+                    pBtns[2].innerText = '拟真常规';
                     pBtns[3].innerText = '定长1.2s';
                 }
             }
@@ -7708,6 +8012,9 @@ function finishChallenge() {
         const autoFireTxt = getEl('txt-autofire');
         if (autoFireBtn) autoFireBtn.classList.toggle('active', !!CFG.tracking.autoFire);
         if (autoFireTxt) autoFireTxt.innerText = CFG.tracking.autoFire ? '自动开火: 开启' : '自动开火: 关闭';
+
+        // 所有运动行的显隐已经完成后，再统一判断高级面板是否为空。
+        syncAdvancedPanelVisibility();
     }
 
     // ============================================================
@@ -7773,6 +8080,17 @@ function finishChallenge() {
         const firstRow = rows[0];
         parent.insertBefore(panel, firstRow);
         rows.forEach(row => panel.appendChild(row));
+    }
+
+    // 高级面板只负责收纳“当前确实存在的高级参数”。
+    // 某些运动形态（例如抛物线弹跳）没有这些参数时，整块面板自动隐藏，
+    // 避免出现一个只有“高级运动参数”标题、里面却完全空白的折叠框。
+    function syncAdvancedPanelVisibility() {
+        document.querySelectorAll('#draggable-panel .ui-advanced-panel').forEach(panel => {
+            const rows = Array.from(panel.children).slice(1);
+            const hasVisibleRows = rows.some(row => row.style.display !== 'none');
+            panel.style.display = hasVisibleRows ? '' : 'none';
+        });
     }
 
     function organizePalette() {
@@ -7862,7 +8180,7 @@ function finishChallenge() {
             '目标数量', '目标距离', '运动空间',
             '变向周期', '左右变向周期', '前后变向周期', '环绕换向周期',
             '环境与运动', '出生位置随机化', '命中打击音效',
-            '调试测量模式', '战绩性能曲线', '天空云朵', '背景墙颜色', '目标颜色',
+            '调试测量模式', '战绩性能曲线', '背景墙颜色', '目标颜色',
             '命中高亮颜色', '地面底色', '球体精度', '假人身体颜色'
         ]);
         const openByDefault = new Set(['视觉高度', '目标尺寸', '动态漂移', '目标形态', '运动速度']);
@@ -8231,7 +8549,6 @@ function finishChallenge() {
             t.ang = undefined; 
             t.segDuration = undefined; t.segElapsed = undefined;
             t.segStartAng = undefined; t.segDeltaAng = undefined;
-            t.vx = undefined; t.vy = undefined; t.tauTimer = 0; 
             if (mode === 'horizontal') { t.dirX = t.dirX >= 0 ? 1 : -1; t.dirY = 0; }
             else if (mode === 'vertical') { t.dirX = 0; t.dirY = t.dirY >= 0 ? 1 : -1; }
             else { const a = rand(0, Math.PI * 2); t.dirX = Math.cos(a); t.dirY = Math.sin(a); }
@@ -8247,7 +8564,6 @@ function finishChallenge() {
             t.ang = undefined;
             t.segDuration = undefined; t.segElapsed = undefined;
             t.segStartAng = undefined; t.segDeltaAng = undefined;
-            t.vx = undefined; t.vy = undefined; t.tauTimer = 0;
         });
         syncAllButtonStates();
         saveToLocalStorage();
@@ -8333,37 +8649,48 @@ function finishChallenge() {
     };
 
     window.setTrackingDirectionBias = function(val) {
-        const v = clamp(parseFloat(val) || 50, 0, 100);
-        CFG.tracking.directionBias = v / 100;
+        const parsed = parseFloat(val);
+        let v = clamp(Number.isFinite(parsed) ? parsed : 50, 0, 100);
+
+        // 五档磁吸：左 / 左中 / 中 / 右中 / 右。
+        // 内部仍保持连续 0–1；只有靠近语义刻度时才吸附，便于精细调节。
+        const snapPointsPct = [0, 25, 50, 75, 100];
+        const snapDistancesPct = [
+            MOTION_CONST.DIRECTION_BIAS_QUARTER_SNAP * 100,
+            MOTION_CONST.DIRECTION_BIAS_QUARTER_SNAP * 100,
+            MOTION_CONST.DIRECTION_BIAS_CENTER_SNAP * 100,
+            MOTION_CONST.DIRECTION_BIAS_QUARTER_SNAP * 100,
+            MOTION_CONST.DIRECTION_BIAS_QUARTER_SNAP * 100
+        ];
+        for (let i = 0; i < snapPointsPct.length; i++) {
+            if (Math.abs(v - snapPointsPct[i]) <= snapDistancesPct[i]) {
+                v = snapPointsPct[i];
+                break;
+            }
+        }
+        const centerPct = 50;
+
+        const normalized = v / 100;
+        CFG.tracking.directionBias = normalized;
 
         setVal('inp-track-dirbias', Math.round(v));
-        const r = getEl('inp-track-dirbias-r'); if (r) r.value = Math.round(v);
+        const r = getEl('inp-track-dirbias-r');
+        if (r) r.value = Math.round(v);
 
         const txt = getEl('txt-direction-bias');
         if (txt) {
-            const pat = CFG.tracking.pattern;
-            // 概率语义：strafe（水平折返）· bungee（抛物线弹跳）
-            //   —— 伯努利采样，directionBias 就是"朝某一边的概率"
-            // 角度语义：fly（无规则乱飞）
-            //   —— 折返乱飞用 limitDirectionByBias 限制角度支持范围；纯乱飞用软趋向。
-            const deadbandPct = MOTION_CONST.BIAS_DISPLAY_DEADBAND * 100;
-            if (pat === 'strafe' || pat === 'bungee') {
-                if (v < 50 - deadbandPct) txt.innerText = `偏左 · ${(100 - v).toFixed(0)}% / ${v.toFixed(0)}%`;
-                else if (v > 50 + deadbandPct) txt.innerText = `偏右 · ${(100 - v).toFixed(0)}% / ${v.toFixed(0)}%`;
-                else txt.innerText = `各半 · 50% / 50%`;
-            } else if ((CFG.tracking.flyType || 'pure') === 'bounce') {
-                const strength = Math.abs(2 * (v / 100) - 1);
-                const limitDeg = (180 - strength * 90).toFixed(1);
-                if (v < 50 - deadbandPct) txt.innerText = `偏左 · 半宽 ±${limitDeg}°`;
-                else if (v > 50 + deadbandPct) txt.innerText = `偏右 · 半宽 ±${limitDeg}°`;
-                else txt.innerText = `各向均匀 · 整圆`;
-            } else {
-                const strength = Math.abs(2 * (v / 100) - 1);
-                if (strength <= MOTION_CONST.BIAS_DISPLAY_DEADBAND) txt.innerText = '各向均匀 · 无方向回复';
-                else txt.innerText = `${v >= 50 ? '偏右' : '偏左'} · 趋向强度 ${(strength * 100).toFixed(0)}%`;
-            }
+            if (v === 0) txt.innerText = '左';
+            else if (v === 25) txt.innerText = '左中';
+            else if (v === centerPct) txt.innerText = '中';
+            else if (v === 75) txt.innerText = '右中';
+            else if (v === 100) txt.innerText = '右';
+            else if (v < centerPct) txt.innerText = '偏左';
+            else txt.innerText = '偏右';
         }
+
         saveToLocalStorage();
+        // 训练中默认不持续重绘方向图；用户调整滑块时只刷新一次，保证 UI 与当前偏好立即同步。
+        scheduleBiasViz();
     };
 
     window.setSixshotIntervalPreset = function(mn, mx) {
@@ -8539,7 +8866,8 @@ function finishChallenge() {
     };
 
         window.setRadialBias = function(val) {
-        const v = clamp(parseFloat(val) || 50, 0, 100);
+        const parsed = parseFloat(val);
+        const v = clamp(Number.isFinite(parsed) ? parsed : 50, 0, 100);
         CFG.tracking.radialBias = v / 100;
 
         setVal('inp-radial-bias', Math.round(v));
@@ -9540,10 +9868,13 @@ window.addEventListener('keydown', (e) => {
         lastFrameTime = now;
 
         // 限制长时间阻塞后的追赶步数，避免一次恢复帧产生过大的 CPU 峰值。
-        const realDt = Math.min(Math.max(timeSinceLastFrame / 1000, 0.0001), 0.10);
-        const MAX_SUBSTEP = 0.01667;
+        const realDt = Math.min(
+            Math.max(timeSinceLastFrame / 1000, MOTION_CONST.PHYSICS_ACCUM_EPS),
+            MOTION_CONST.PHYSICS_MAX_FRAME_DT
+        );
+        const MAX_SUBSTEP = MOTION_CONST.PHYSICS_MAX_SUBSTEP;
         let accumulator = realDt;
-        while (accumulator > 0.0001) {
+        while (accumulator > MOTION_CONST.PHYSICS_ACCUM_EPS) {
             const step = Math.min(accumulator, MAX_SUBSTEP);
             updatePhysics(step);
             accumulator -= step;
@@ -9616,15 +9947,15 @@ window.addEventListener('keydown', (e) => {
     }
 
     function getTargetAimOffset(cx, cy, cz, radius, out = _heatBest, hitT = -1) {
-        if (!(radius > 1e-6)) return null;
+        if (!(radius > MOTION_CONST.EPS_DISTANCE)) return null;
         getCenterAimRay(_rayOrigin, _rayDir);
         const vx = cx - _rayOrigin.x, vy = cy - _rayOrigin.y, vz = cz - _rayOrigin.z;
         // 脱靶：使用射线对目标中心的最近点，作为目标平面上的有符号偏移。
         // 命中：hitT 来自精确的射线-球面前表面交点。
         // 最终 X/Y 以相机 Right/Up 基向量投影并除以目标半径，得到真实相对位置。
         let t = hitT;
-        if (!(t > 1e-6)) t = vx * _rayDir.x + vy * _rayDir.y + vz * _rayDir.z;
-        if (!(t > 1e-6)) return null;
+        if (!(t > MOTION_CONST.EPS_DISTANCE)) t = vx * _rayDir.x + vy * _rayDir.y + vz * _rayDir.z;
+        if (!(t > MOTION_CONST.EPS_DISTANCE)) return null;
         _heatProjected.set(_rayOrigin.x + _rayDir.x*t, _rayOrigin.y + _rayDir.y*t, _rayOrigin.z + _rayDir.z*t);
         _heatCenter.set(cx,cy,cz); _heatOffset.subVectors(_heatProjected,_heatCenter);
         const sy=Math.sin(STATE.yaw), cyaw=Math.cos(STATE.yaw), sp=Math.sin(STATE.pitch), cp=Math.cos(STATE.pitch);
@@ -9746,7 +10077,7 @@ window.addEventListener('keydown', (e) => {
         if (!force && !isGameActivelyPlaying()) return;
 
         const elapsedSec = getSessionElapsed();
-        if (!force && elapsedSec + 1e-9 < nextSampleElapsed) return;
+        if (!force && elapsedSec + MOTION_CONST.EPS_SAMPLE_TIME < nextSampleElapsed) return;
 
         const isTrackingMode = (CFG.mode === 'tracking');
         const currentScore = STATE.score || 0;
@@ -10061,7 +10392,7 @@ window.addEventListener('keydown', (e) => {
 
         if (mode === 'trend') {
             const field = buildHeatmapFieldCache();
-            if (field && field.max > 1e-9) {
+            if (field && field.max > MOTION_CONST.EPS_HEATMAP_VALUE) {
                 const N = field.N;
                 const density = field.density;
                 const image = document.createElement('canvas');
@@ -10357,14 +10688,15 @@ window.addEventListener('keydown', (e) => {
     // ============================================================
     // 方向偏好实时可视化 (0% 训练期开销)
     // ============================================================
-    const BIAS_CANVAS_SIZE = 160;
-    const BIAS_R = 64;
+    const BIAS_CANVAS_SIZE = 192;
+    const BIAS_R = 70;
     let biasCanvas = null, biasCtx = null;
 
     function getBiasRaw() {
         const el = getEl('inp-track-dirbias');
-        const v = el ? (parseFloat(el.value) || 50) : 50;
-        return clamp(v / 100, 0, 1);
+        if (!el) return 0.5;
+        const parsed = parseFloat(el.value);
+        return clamp(Number.isFinite(parsed) ? parsed / 100 : 0.5, 0, 1);
     }
 
     function getRealTargetAlpha() {
@@ -10406,6 +10738,7 @@ window.addEventListener('keydown', (e) => {
 
         const isFly = (cfg.pattern === 'fly');
         const isBungeeViz = (cfg.pattern === 'bungee');
+        const isBungee3D = isBungeeViz && cfg.space === 'free3d';
 
         // ── 地平论盘子（水平圆盘俯视投影）──
         //
@@ -10424,14 +10757,14 @@ window.addEventListener('keydown', (e) => {
             y: cy + r * Math.sin(-theta) * PLATE_COS
         });
         // 统一的方向定位器：bungee 用盘子投影，其它模式用正圆投影
-        const screenDir = isBungeeViz
+        const screenDir = isBungee3D
             ? plate
             : (theta, r) => toBiasScreen(theta, cx, cy, r);
 
         biasCtx.clearRect(0, 0, BIAS_CANVAS_SIZE, BIAS_CANVAS_SIZE);
 
-        // 参考外沿：bungee 不画正圆（避免破坏透视感），由盘子自身盘沿承担
-        if (!isBungeeViz) {
+        // 参考外沿：3D bungee 用椭圆盘面，其它模式用正圆方向图。
+        if (!isBungee3D) {
             biasCtx.beginPath();
             biasCtx.arc(cx, cy, BIAS_R, 0, Math.PI * 2);
             biasCtx.strokeStyle = '#cbd5e1';
@@ -10440,100 +10773,202 @@ window.addEventListener('keydown', (e) => {
         }
 
         if (isFly) {
-            // 纯乱飞：directionBias 是“软趋向”，不是硬边界。
-            // 这里恢复 Pac-Man 式扇形图：
-            //   · 蓝色主体 = 偏好方向的软扇区（仅用于观察，不参与物理裁剪）
-            //   · 红色射线 = 当前真实运动方向
-            //   · 50% 时扇区退化为整圆，表示没有水平偏好
-            const strength = Math.abs(2 * biasRaw - 1);
-            const center = biasRaw >= 0.5 ? 0 : Math.PI;
-            const preferredHalfAngle = Math.PI - strength * (Math.PI / 2);
+            const bodyR = BIAS_R - 8;
+            const isOU = cfg.algo === 'ou';
+            const isBounceFly = cfg.flyType === 'bounce';
 
-            // Pac-Man 主体：保留“偏好扇区”，扇口朝向偏好相反侧。
-            // 它只是可视化，因此不会把真实随机方向硬裁掉。
-            const bodyR = BIAS_R - 1;
-            const a1 = -(center + preferredHalfAngle);
-            const a2 = -(center - preferredHalfAngle);
-            biasCtx.beginPath();
-            biasCtx.moveTo(cx, cy);
-            biasCtx.arc(cx, cy, bodyR, a1, a2, false);
-            biasCtx.closePath();
-            biasCtx.fillStyle = `rgba(2, 132, 199, ${0.10 + 0.16 * strength})`;
-            biasCtx.fill();
-            biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.35 + 0.35 * strength})`;
-            biasCtx.lineWidth = 1.5;
-            biasCtx.stroke();
+            // 折返乱飞的方向偏好是硬性角度限制，因此始终使用 Pac-Man 扇区。
+            // 纯粹乱飞只有 OU 使用 Pac-Man：它表示软性趋向而非硬边界；
+            // 纯粹乱飞·拟真仍使用左右概率节点。
+            if (isBounceFly || isOU) {
+                // 折返乱飞：directionBias 决定硬性允许角度；
+                // 随机 OU：directionBias 决定均值回复方向与强度。
+                // 两者都使用 Pac-Man 扇区，但语义由右侧提示区分。
+                const strength = Math.abs(2 * biasRaw - 1);
+                const center = biasRaw >= 0.5 ? 0 : Math.PI;
+                const preferred = toBiasScreen(center, cx, cy, bodyR);
 
-            // 偏好轴：告诉使用者“趋向哪里”，而不把它误认为硬限制。
-            const preferred = toBiasScreen(center, cx, cy, bodyR);
-            biasCtx.beginPath();
-            biasCtx.moveTo(cx, cy);
-            biasCtx.lineTo(preferred.x, preferred.y);
-            biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.30 + 0.40 * strength})`;
-            biasCtx.lineWidth = 2.5;
-            biasCtx.lineCap = 'round';
-            biasCtx.stroke();
-        } else if (isBungeeViz) {
-            // 弹跳模式：地平论盘子
-            //   盘面 4 个方向球：前/后沿椭圆长轴（远端/近端），左/右沿短轴
-            //   前后概率由 radialBias 决定（伯努利），左右固定 50/50
-            //   方向名"前/后"并入百分比标签，避免与轴文字重叠
-            //   所有像素量（半径 / 偏移 / 线宽）纯为绘制，不参与任何物理计算
-
-            const plateR = BIAS_R + 4;
-            const plateH = 3;
-
-            // 盘子下表面
-            biasCtx.beginPath();
-            biasCtx.ellipse(cx, cy + plateH, plateR, plateR * PLATE_COS, 0, 0, Math.PI * 2);
-            biasCtx.fillStyle = 'rgba(2, 132, 199, 0.14)';
-            biasCtx.fill();
-            biasCtx.strokeStyle = 'rgba(2, 132, 199, 0.40)';
-            biasCtx.lineWidth = 1;
-            biasCtx.stroke();
-
-            // 盘子上表面
-            biasCtx.beginPath();
-            biasCtx.ellipse(cx, cy, plateR, plateR * PLATE_COS, 0, 0, Math.PI * 2);
-            biasCtx.fillStyle = 'rgba(2, 132, 199, 0.06)';
-            biasCtx.fill();
-            biasCtx.strokeStyle = 'rgba(2, 132, 199, 0.60)';
-            biasCtx.lineWidth = 1.5;
-            biasCtx.stroke();
-
-            const bias = clamp(cfg.radialBias ?? 0.5, 0, 1);
-            const pFwd = bias, pBack = 1 - bias;
-            const R_ball = plateR - 20;
-            const pUp = plate( Math.PI / 2, R_ball);
-            const pDn = plate(-Math.PI / 2, R_ball);
-            const pRt = plate( 0,           R_ball);
-            const pLf = plate( Math.PI,     R_ball);
-
-            const drawBall = (p, alpha) => {
+                // 淡色回复扇区：越偏离 50%，首选方向越集中。
+                const halfAngle = Math.PI * (1 - 0.5 * strength);
+                const a1 = -(center + halfAngle);
+                const a2 = -(center - halfAngle);
                 biasCtx.beginPath();
-                biasCtx.arc(p.x, p.y, 7, 0, Math.PI * 2);
-                biasCtx.fillStyle = `rgba(2, 132, 199, ${0.10 + 0.65 * alpha})`;
+                biasCtx.moveTo(cx, cy);
+                biasCtx.arc(cx, cy, bodyR, a1, a2, false);
+                biasCtx.closePath();
+                biasCtx.fillStyle = `rgba(2, 132, 199, ${0.06 + 0.14 * strength})`;
                 biasCtx.fill();
-                biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.3 + 0.6 * alpha})`;
+                biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.22 + 0.38 * strength})`;
                 biasCtx.lineWidth = 1.5;
                 biasCtx.stroke();
-            };
-            const drawPct = (p, text, dy) => {
-                biasCtx.font = '700 9px -apple-system, "PingFang SC", sans-serif';
+
+                // 蓝色方向轴：bounce 表示硬限制的首选方向，OU 表示均值回复方向。
+                // 箭头长度固定；只有 OU 使用线条透明度/粗细表达回复强度。
+                biasCtx.beginPath();
+                biasCtx.moveTo(cx, cy);
+                biasCtx.lineTo(preferred.x, preferred.y);
+                biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.28 + 0.62 * strength})`;
+                biasCtx.lineWidth = 2 + 2 * strength;
+                biasCtx.lineCap = 'round';
+                biasCtx.stroke();
+
+                biasCtx.font = '800 12px -apple-system, "PingFang SC", sans-serif';
                 biasCtx.fillStyle = '#0284c7';
                 biasCtx.textAlign = 'center';
                 biasCtx.textBaseline = 'middle';
-                biasCtx.fillText(text, p.x, p.y + dy);
-            };
+                if (strength <= MOTION_CONST.BIAS_DISPLAY_DEADBAND) {
+                    biasCtx.fillText(isBounceFly ? '各向均匀 · 整圆' : '左右均匀', cx, cy + 22);
+                } else {
+                    const labelPos = toBiasScreen(center, cx, cy, Math.min(42, bodyR - 18));
+                    if (isBounceFly) {
+                        const halfAngleDeg = (halfAngle * 180 / Math.PI).toFixed(0);
+                        biasCtx.fillText(`偏${center === 0 ? '右' : '左'} · 硬限 ±${halfAngleDeg}°`, labelPos.x, labelPos.y - 12);
+                    } else {
+                        const pct = (strength * 100).toFixed(0);
+                        biasCtx.fillText(`偏${center === 0 ? '右' : '左'} · 回复 ${pct}%`, labelPos.x, labelPos.y - 12);
+                    }
+                }
+            } else {
+                // 拟真算法：directionBias 是“下一段目标进入哪一侧”的概率。
+                // 用左右两个独立节点表达概率，比大面积半圆填充更直接：
+                //   右节点 = 下一段目标落在右半平面的概率
+                //   左节点 = 下一段目标落在左半平面的概率
+                const pRight = biasRaw;
+                const pLeft = 1 - biasRaw;
+                const nodeR = 8;
+                const pR = toBiasScreen(0, cx, cy, bodyR);
+                const pL = toBiasScreen(Math.PI, cx, cy, bodyR);
 
-            // 前后球：方向名并入百分比，贴在球外侧（前球上、后球下）
-            drawBall(pUp, pFwd);   drawPct(pUp, `前 ${(pFwd  * 100).toFixed(0)}%`, -16);
-            drawBall(pDn, pBack);  drawPct(pDn, `后 ${(pBack * 100).toFixed(0)}%`, +17);
-            // 左右球：由 directionBias 控制，与 UI 方向偏好滑块同步
+                // 水平轴只保留一条，避免四向辅助线把概率图切得太碎。
+                biasCtx.setLineDash([3, 3]);
+                biasCtx.strokeStyle = 'rgba(148, 163, 184, 0.36)';
+                biasCtx.lineWidth = 1;
+                biasCtx.beginPath();
+                biasCtx.moveTo(cx - bodyR, cy);
+                biasCtx.lineTo(cx + bodyR, cy);
+                biasCtx.stroke();
+                biasCtx.setLineDash([]);
+
+                const drawProbabilityNode = (p, probability) => {
+                    biasCtx.beginPath();
+                    biasCtx.arc(p.x, p.y, nodeR, 0, Math.PI * 2);
+                    biasCtx.fillStyle = `rgba(2, 132, 199, ${0.08 + 0.72 * probability})`;
+                    biasCtx.fill();
+                    biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.28 + 0.65 * probability})`;
+                    biasCtx.lineWidth = 1.5;
+                    biasCtx.stroke();
+                };
+
+                drawProbabilityNode(pR, pRight);
+                drawProbabilityNode(pL, pLeft);
+
+                biasCtx.font = '800 12px -apple-system, "PingFang SC", sans-serif';
+                biasCtx.fillStyle = '#0284c7';
+                biasCtx.textAlign = 'center';
+                biasCtx.textBaseline = 'middle';
+                biasCtx.fillText(`右 ${Math.round(pRight * 100)}%`, pR.x, pR.y - 17);
+                biasCtx.fillText(`左 ${Math.round(pLeft * 100)}%`, pL.x, pL.y - 17);
+
+                // 中心小标记说明：红色方向是“现在”，蓝色节点是“下一段规划”。
+                biasCtx.beginPath();
+                biasCtx.arc(cx, cy, 3.5, 0, Math.PI * 2);
+                biasCtx.fillStyle = '#0284c7';
+                biasCtx.fill();
+            }
+        } else if (isBungeeViz) {
+            const bias = clamp(cfg.radialBias ?? 0.5, 0, 1);
             const dBias = clamp(cfg.directionBias ?? 0.5, 0, 1);
-            const pRightT = dBias, pLeftT = 1 - dBias;
-            drawBall(pRt, pRightT); drawPct(pRt, `右 ${(pRightT * 100).toFixed(0)}%`, -14);
-            drawBall(pLf, pLeftT);  drawPct(pLf, `左 ${(pLeftT * 100).toFixed(0)}%`, -14);
+
+            if (isBungee3D) {
+                // 3D 弹跳：水平漂移同时具有两个独立自由度。
+                //   前/后 ← radialBias
+                //   左/右 ← directionBias
+                // 盘面俯视投影只表达水平漂移；竖直跳跃不在此图中显示。
+                const plateR = BIAS_R + 4;
+                const plateH = 3;
+
+                biasCtx.beginPath();
+                biasCtx.ellipse(cx, cy + plateH, plateR, plateR * PLATE_COS, 0, 0, Math.PI * 2);
+                biasCtx.fillStyle = 'rgba(2, 132, 199, 0.14)';
+                biasCtx.fill();
+                biasCtx.strokeStyle = 'rgba(2, 132, 199, 0.40)';
+                biasCtx.lineWidth = 1;
+                biasCtx.stroke();
+
+                biasCtx.beginPath();
+                biasCtx.ellipse(cx, cy, plateR, plateR * PLATE_COS, 0, 0, Math.PI * 2);
+                biasCtx.fillStyle = 'rgba(2, 132, 199, 0.06)';
+                biasCtx.fill();
+                biasCtx.strokeStyle = 'rgba(2, 132, 199, 0.60)';
+                biasCtx.lineWidth = 1.5;
+                biasCtx.stroke();
+
+                const pFwd = bias, pBack = 1 - bias;
+                const R_ball = plateR - 20;
+                const pUp = plate(Math.PI / 2, R_ball);
+                const pDn = plate(-Math.PI / 2, R_ball);
+                const pRt = plate(0, R_ball);
+                const pLf = plate(Math.PI, R_ball);
+
+                const drawBall = (p, alpha) => {
+                    biasCtx.beginPath();
+                    biasCtx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+                    biasCtx.fillStyle = `rgba(2, 132, 199, ${0.10 + 0.65 * alpha})`;
+                    biasCtx.fill();
+                    biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.3 + 0.6 * alpha})`;
+                    biasCtx.lineWidth = 1.5;
+                    biasCtx.stroke();
+                };
+                const drawPct = (p, text, dy) => {
+                    biasCtx.font = '800 12px -apple-system, "PingFang SC", sans-serif';
+                    biasCtx.fillStyle = '#0284c7';
+                    biasCtx.textAlign = 'center';
+                    biasCtx.textBaseline = 'middle';
+                    biasCtx.fillText(text, p.x, p.y + dy);
+                };
+
+                drawBall(pUp, pFwd);   drawPct(pUp, `前 ${Math.round(pFwd * 100)}%`, -16);
+                drawBall(pDn, pBack);  drawPct(pDn, `后 ${Math.round(pBack * 100)}%`, +17);
+                drawBall(pRt, dBias);  drawPct(pRt, `右 ${Math.round(dBias * 100)}%`, -14);
+                drawBall(pLf, 1 - dBias); drawPct(pLf, `左 ${Math.round((1 - dBias) * 100)}%`, -14);
+            } else {
+                // Wall / Curve 弹跳：没有径向前后漂移，radialBias 在此空间不生效。
+                // 因此图表只显示真正参与运动的左右偏好。
+                const bodyR = BIAS_R - 8;
+                const pRight = dBias;
+                const pLeft = 1 - dBias;
+                const pR = toBiasScreen(0, cx, cy, bodyR);
+                const pL = toBiasScreen(Math.PI, cx, cy, bodyR);
+
+                const drawProbabilityNode = (p, probability) => {
+                    biasCtx.beginPath();
+                    biasCtx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+                    biasCtx.fillStyle = `rgba(2, 132, 199, ${0.08 + 0.72 * probability})`;
+                    biasCtx.fill();
+                    biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.28 + 0.65 * probability})`;
+                    biasCtx.lineWidth = 1.5;
+                    biasCtx.stroke();
+                };
+
+                biasCtx.setLineDash([3, 3]);
+                biasCtx.strokeStyle = 'rgba(148, 163, 184, 0.36)';
+                biasCtx.lineWidth = 1;
+                biasCtx.beginPath();
+                biasCtx.moveTo(cx - bodyR, cy);
+                biasCtx.lineTo(cx + bodyR, cy);
+                biasCtx.stroke();
+                biasCtx.setLineDash([]);
+
+                drawProbabilityNode(pR, pRight);
+                drawProbabilityNode(pL, pLeft);
+
+                biasCtx.font = '800 12px -apple-system, "PingFang SC", sans-serif';
+                biasCtx.fillStyle = '#0284c7';
+                biasCtx.textAlign = 'center';
+                biasCtx.textBaseline = 'middle';
+                biasCtx.fillText(`右 ${Math.round(pRight * 100)}%`, pR.x, pR.y - 17);
+                biasCtx.fillText(`左 ${Math.round(pLeft * 100)}%`, pL.x, pL.y - 17);
+            }
         } else {
             const pRight = biasRaw, pLeft = 1 - biasRaw;
             const pR = toBiasScreen(0, cx, cy, BIAS_R);
@@ -10552,7 +10987,7 @@ window.addEventListener('keydown', (e) => {
             biasCtx.strokeStyle = `rgba(2, 132, 199, ${0.3 + 0.6 * pLeft})`;
             biasCtx.lineWidth = 1.5;
             biasCtx.stroke();
-            biasCtx.font = '700 9px -apple-system, "PingFang SC", sans-serif';
+            biasCtx.font = '800 12px -apple-system, "PingFang SC", sans-serif';
             biasCtx.fillStyle = '#0284c7';
             biasCtx.textAlign = 'center';
             biasCtx.textBaseline = 'middle';
@@ -10561,11 +10996,15 @@ window.addEventListener('keydown', (e) => {
         }
 
         // 辐射虚线：四个方向都画（勾勒盘面十字）
-        const axesAll = [
-            { a: 0 }, { a: Math.PI / 2 }, { a: Math.PI }, { a: -Math.PI / 2 },
-        ];
-        // 轴文字标签：bungee 下"前/后"已并入百分比标签，此处不再重复
-        const axesLabels = isBungeeViz ? [
+        const isHorizontalOnly = (!isFly && !isBungee3D);
+        const axesAll = isHorizontalOnly
+            ? [{ a: 0 }, { a: Math.PI }]
+            : [{ a: 0 }, { a: Math.PI / 2 }, { a: Math.PI }, { a: -Math.PI / 2 }];
+        // 二维弹跳 / 水平折返只有左右自由度；3D 弹跳与 fly 才显示四向水平轴。
+        const axesLabels = isHorizontalOnly ? [
+            { a: 0, label: '右' },
+            { a: Math.PI, label: '左' },
+        ] : isBungeeViz ? [
             { a: 0, label: '右' },
             { a: Math.PI, label: '左' },
         ] : [
@@ -10583,19 +11022,20 @@ window.addEventListener('keydown', (e) => {
             biasCtx.stroke();
         });
         biasCtx.setLineDash([]);
-        biasCtx.font = '600 10px -apple-system, "PingFang SC", sans-serif';
+        biasCtx.font = '800 12px -apple-system, "PingFang SC", sans-serif';
         biasCtx.fillStyle = '#94a3b8';
         biasCtx.textAlign = 'center';
         biasCtx.textBaseline = 'middle';
         axesLabels.forEach(({ a, label }) => {
-            const p = screenDir(a, BIAS_R + 10);
+            const p = screenDir(a, BIAS_R + 5);
             biasCtx.fillText(label, p.x, p.y);
         });
 
         let pp = null;
         if (isFly) {
-            // 只有 fly 模式才画红色方向箭头（strafe / bungee 下方向不是连续的）
-            pp = toBiasScreen(dirAlpha, cx, cy, BIAS_R);
+            // 只有 fly 模式才画红色方向箭头（strafe / bungee 下方向不是连续的）。
+            // 箭头故意收在内圈，避免覆盖外围的方向文字与概率标签。
+            pp = toBiasScreen(dirAlpha, cx, cy, BIAS_R - 14);
             biasCtx.beginPath();
             biasCtx.moveTo(cx, cy);
             biasCtx.lineTo(pp.x, pp.y);
@@ -10620,7 +11060,7 @@ window.addEventListener('keydown', (e) => {
         }
 
         if (isFly && cfg.flyType === 'bounce') {
-            const arrowLen = 10, rad = -dirAlpha;
+            const arrowLen = 8, rad = -dirAlpha;
             const ax = pp.x + Math.cos(rad) * arrowLen;
             const ay = pp.y + Math.sin(rad) * arrowLen;
             biasCtx.beginPath();
@@ -10636,15 +11076,33 @@ window.addEventListener('keydown', (e) => {
         if (label) {
             let modeStr;
             if (isFly) {
-                const algoStr = (cfg.algo === 'ou') ? '连续自然' : '分段预测';
                 const ftStr = (cfg.flyType === 'bounce') ? '折返乱飞' : '纯粹乱飞';
-                modeStr = `无规则乱飞 · ${ftStr} · ${algoStr}`;
+                if (cfg.algo === 'ou') {
+                    modeStr = `无规则乱飞 · ${ftStr} · 随机：方向回复强度`;
+                } else {
+                    modeStr = `无规则乱飞 · ${ftStr} · 拟真：下一段目标概率`;
+                }
             } else if (isBungeeViz) {
-                modeStr = '抛物线弹跳 · 触底伯努利 前后/左右 独立偏好';
+                modeStr = isBungee3D
+                    ? '抛物线弹跳 · 触底伯努利 · 前后/左右独立偏好'
+                    : '抛物线弹跳 · 触底伯努利 · 左右偏好';
             } else {
                 modeStr = '水平折返 · 定时伯努利左右偏好';
             }
             label.textContent = modeStr;
+        }
+
+        // 右侧竖向提示：只针对 fly 有意义。
+        //   bounce = 偏好对应实际角度支持范围，属于硬性限制；
+        //   pure   = 偏好只是 OU/拟真规划的趋势，不是空间围墙，属于软性限制。
+        const constraintKey = getEl('dir-bias-constraint-key');
+        if (constraintKey) {
+            const hard = constraintKey.querySelector('[data-constraint-type="hard"]');
+            const soft = constraintKey.querySelector('[data-constraint-type="soft"]');
+            const isHard = isFly && cfg.flyType === 'bounce';
+            if (hard) hard.classList.toggle('active', isHard);
+            if (soft) soft.classList.toggle('active', isFly && !isHard);
+            constraintKey.style.display = isFly ? 'flex' : 'none';
         }
     }
 
