@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Raw Mouse Counts Tracker (8K Certified)</title>
+<title>Raw Mouse Counts Tracker</title>
 <style>
   :root{
     --bg:#0b0d10; --panel:#12161b; --panel2:#171c22; --line:#2a313a;
@@ -118,7 +118,7 @@
 <aside id="side">
   <h1>Raw Mouse Counts Tracker</h1>
   <div class="subtitle">
-    已启用 <b>pointerrawupdate</b> + <b>Coalesced Events</b> 无损解包，原生支持 <b>8000Hz</b> 高回报率。
+    优先使用 <b>pointerrawupdate</b> + <b>Coalesced Events</b> 获取高频增量；发现浏览器子事件与父事件不一致时自动回退，避免 counts 漏计。
   </div>
 
   <div class="row">
@@ -204,7 +204,7 @@
 
   <div id="overlay">
     <div id="overlayCard">
-      <h2>Raw Counts Tracker (8K Ready)</h2>
+      <h2>Raw Counts Tracker</h2>
       <p>未捕获时为<b>平移查看模式</b>：可直接按住左键拖动画布，滚轮以光标为中心缩放。</p>
       <div style="margin-top:14px">
         <button class="primary" id="overlayStartBtn" style="height:38px;padding:0 20px;font-size:14px">进入原始捕获</button>
@@ -223,7 +223,7 @@
   const ctx = canvas.getContext("2d");
   const groupsEl = $("groups");
 
-  const STORAGE_KEY = "rawMouseCountsTracker.v5";
+  const STORAGE_KEY = "rawMouseCountsTracker.v6";
 
   let groups = [];
   let activeId = null;
@@ -245,18 +245,17 @@
   let dragStartViewX = 0, dragStartViewY = 0;
   let hoverWorldPos = null;
 
-  let lastPeriodicSave = 0;
-
   // --- 高精度 8000Hz 测频引擎 ---
   let currentPollingHz = 0;
   let peakPollingHz = 0;
   let recentTimestamps = [];
   let hzDecayTimer = null;
+  let periodicSaveTimer = null;
+  let periodicSavePending = false;
 
-  function registerHzSample(count = 1) {
-    const now = performance.now();
+  function registerHzSample(count = 1, timestamp = performance.now()) {
     for (let i = 0; i < count; i++) {
-      recentTimestamps.push(now);
+      recentTimestamps.push(timestamp);
     }
   }
 
@@ -278,6 +277,36 @@
     }
     $("liveHz").textContent = `${currentPollingHz.toLocaleString()} Hz`;
     $("peakHz").textContent = `${peakPollingHz.toLocaleString()} Hz`;
+  }
+
+  // 周期性持久化：保留文件 1 的数据安全能力，但不在每个 8K 输入事件里
+  // 直接执行同步 localStorage 写入。优先利用浏览器空闲时间完成一次全量快照。
+  function requestPeriodicSave() {
+    if (!recording || periodicSavePending) return;
+    periodicSavePending = true;
+
+    const commit = () => {
+      periodicSavePending = false;
+      if (!recording) return;
+      save();
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(commit, { timeout: 500 });
+    } else {
+      setTimeout(commit, 0);
+    }
+  }
+
+  function startPeriodicSave() {
+    clearInterval(periodicSaveTimer);
+    periodicSaveTimer = setInterval(requestPeriodicSave, 2000);
+  }
+
+  function stopPeriodicSave() {
+    clearInterval(periodicSaveTimer);
+    periodicSaveTimer = null;
+    periodicSavePending = false;
   }
 
   function uid() {
@@ -306,7 +335,8 @@
 
   function load() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY) || 
+      const raw = localStorage.getItem(STORAGE_KEY) ||
+                  localStorage.getItem("rawMouseCountsTracker.v5") ||
                   localStorage.getItem("rawMouseCountsTracker.v4");
       if (raw) groups = JSON.parse(raw);
     } catch (_) { groups = []; }
@@ -421,10 +451,10 @@
     const g = activeGroup();
     if (!g) return;
     const p = g.points[g.points.length - 1];
-    $("liveX").textContent = Math.round(p[0]);
-    $("liveY").textContent = Math.round(p[1]);
+    $("liveX").textContent = formatCount(p[0]);
+    $("liveY").textContent = formatCount(p[1]);
     $("eventCount").textContent = g.events.toLocaleString();
-    $("pathLen").textContent = Math.round(g.distance).toLocaleString();
+    $("pathLen").textContent = formatCount(g.distance);
   }
 
   function boundsOfVisible() {
@@ -710,6 +740,8 @@
     const g = activeGroup();
     const p = g?.points?.[g.points.length - 1] || [0,0];
 
+    // 实时统计面板跟随渲染帧更新；采集热路径不直接触碰 DOM。
+    updateLive();
     updateHzCalculation();
 
     let hudText =
@@ -721,7 +753,7 @@
       `SAMPLES: ${(g?.events ?? 0).toLocaleString()} (真实节点)\n` +
       `SCALE: ${Number(scale.toFixed(3))} px/count\n` +
       `MODE: ${displayMode === "follow" ? "FOLLOW" : "FIXED"}\n` +
-      `SOURCE: ${_supportsRawUpdate ? "pointerrawupdate (8K Ready)" : "pointermove (fallback)"}`;
+      `SOURCE: ${_supportsRawUpdate ? "pointerrawupdate + coalesced" : "pointermove fallback"}`;
 
     if (hoverWorldPos && !recording) {
       hudText += `\n\n[ HOVER ]\nX: ${formatCount(hoverWorldPos[0])}\nY: ${formatCount(hoverWorldPos[1])}`;
@@ -863,12 +895,12 @@
     recording = true;
     recentTimestamps = [];
     currentPollingHz = 0;
-    lastPeriodicSave = performance.now();
 
     clearInterval(hzDecayTimer);
     hzDecayTimer = setInterval(() => {
       if (recording) scheduleDraw();
     }, 100);
+    startPeriodicSave();
 
     $("overlay").style.display = "none";
     canvas.style.cursor = "none";
@@ -926,47 +958,109 @@
   const _supportsRawUpdate = ('onpointerrawupdate' in window);
   const _captureEventName = _supportsRawUpdate ? 'pointerrawupdate' : 'pointermove';
 
+  // 读取一次 pointerrawupdate / pointermove 中真正可用的增量。
+  // 关键点：如果浏览器暴露了 coalesced events，则只有在这些子事件
+  // 的 movementX/Y 之和与父事件一致时才逐点解包；否则回退到父事件。
+  // 这样可以避免浏览器实现差异造成“漏计 / 重计” counts。
+  function getCaptureSamples(e) {
+    const parentDx = Number.isFinite(Number(e.movementX)) ? Number(e.movementX) : 0;
+    const parentDy = Number.isFinite(Number(e.movementY)) ? Number(e.movementY) : 0;
+    const parentDelta = (parentDx !== 0 || parentDy !== 0) ? [[parentDx, parentDy]] : [];
+
+    if (typeof e.getCoalescedEvents !== "function") {
+      return { deltas: parentDelta, hzEvents: parentDelta.length ? [e] : [] };
+    }
+
+    let coalesced = [];
+    try {
+      coalesced = e.getCoalescedEvents() || [];
+    } catch (_) {
+      coalesced = [];
+    }
+
+    if (!coalesced.length) {
+      return { deltas: parentDelta, hzEvents: parentDelta.length ? [e] : [] };
+    }
+
+    const deltas = [];
+    let sumX = 0;
+    let sumY = 0;
+    let valid = 0;
+
+    for (const ev of coalesced) {
+      const dx = Number(ev.movementX);
+      const dy = Number(ev.movementY);
+      if (!Number.isFinite(dx) || !Number.isFinite(dy)) continue;
+      sumX += dx;
+      sumY += dy;
+      valid++;
+      if (dx !== 0 || dy !== 0) deltas.push([dx, dy]);
+    }
+
+    // 正常实现应满足：父事件 movement ≈ 所有 coalesced movement 之和。
+    // 允许极小浮点误差；较大不一致时，以父事件作为总量的可信来源。
+    const tolX = 1e-7 * Math.max(1, Math.abs(parentDx), Math.abs(sumX));
+    const tolY = 1e-7 * Math.max(1, Math.abs(parentDy), Math.abs(sumY));
+    const consistent = valid > 0 &&
+      Math.abs(sumX - parentDx) <= tolX &&
+      Math.abs(sumY - parentDy) <= tolY;
+
+    if (consistent && deltas.length) {
+      return { deltas, hzEvents: coalesced };
+    }
+
+    // 浏览器异常时优先保证 counts 总量正确；代价是无法恢复该批次的
+    // 中间折角，只能以父事件的总位移作为一个节点。
+    if (parentDelta.length) {
+      return { deltas: parentDelta, hzEvents: [e], fallback: true };
+    }
+
+    return { deltas, hzEvents: coalesced };
+  }
+
+  function normalizeEventTime(ts) {
+    const t = Number(ts);
+    if (!Number.isFinite(t)) return performance.now();
+    const now = performance.now();
+    // 老实现可能给 epoch 毫秒；现代实现通常与 performance.now() 同源。
+    if (Math.abs(t - now) < 1e7) return t;
+    const origin = Number(performance.timeOrigin);
+    return Number.isFinite(origin) ? t - origin : t - (Date.now() - now);
+  }
+
   function _handleCaptureEvent(e) {
     if (!recording || document.pointerLockElement !== canvas) return;
 
-    let evs = [e];
-    if (typeof e.getCoalescedEvents === "function") {
-      const coalesced = e.getCoalescedEvents();
-      if (coalesced && coalesced.length > 0) {
-        evs = coalesced;
-      }
-    }
+    const capture = getCaptureSamples(e);
+    if (!capture.deltas.length) return;
 
     let moved = false;
-    let validSampleCount = 0;
-
-    for (let i = 0; i < evs.length; i++) {
-      const ev = evs[i];
-      const dx = Number(ev.movementX) || 0;
-      const dy = Number(ev.movementY) || 0;
+    for (const [dx, dy] of capture.deltas) {
       if (dx === 0 && dy === 0) continue;
-
       addMove(dx, dy);
       moved = true;
-      validSampleCount++;
     }
 
     if (!moved) return;
 
-    registerHzSample(validSampleCount);
-    updateLive();
+    // 测频使用实际事件时间戳，而不是把一个 coalesced 批次的所有 samples
+    // 都压在同一个 performance.now() 上。
+    for (const ev of capture.hzEvents) {
+      const dx = Number(ev.movementX);
+      const dy = Number(ev.movementY);
+      if (Number.isFinite(dx) && Number.isFinite(dy) && (dx !== 0 || dy !== 0)) {
+        registerHzSample(1, normalizeEventTime(ev.timeStamp));
+      }
+    }
 
+    // 不再在每个 8K 输入事件上直接修改 DOM。
+    // UI 与 Canvas 统一在 requestAnimationFrame 中刷新，避免高回报率下
+    // 主线程被状态栏更新拖慢，从而反过来影响原始输入事件的处理。
     if (displayMode === "follow") {
       const g = activeGroup();
       const p = g.points[g.points.length - 1];
       viewX = p[0];
       viewY = p[1];
-    }
-
-    const now = performance.now();
-    if (now - lastPeriodicSave >= 2000) {
-      save();
-      lastPeriodicSave = now;
     }
 
     scheduleDraw();
@@ -1013,8 +1107,9 @@
       canvas.style.cursor = "grab";
       currentPollingHz = 0;
       clearInterval(hzDecayTimer);
+      stopPeriodicSave();
       setStatus("已退出捕获，直接拖动画布可平移查看");
-      save(); 
+      save();
       renderGroups(); 
       scheduleDraw();
     } else {
@@ -1035,7 +1130,10 @@
   $("start").onclick = enterPointerLock;
   $("overlayStartBtn").onclick = enterPointerLock;
 
-  window.addEventListener("beforeunload", save);
+  window.addEventListener("beforeunload", () => {
+    stopPeriodicSave();
+    save();
+  });
 
   $("newGroup").onclick = () => {
     exitPointerLock();
@@ -1110,7 +1208,7 @@
   $("exportBtn").onclick = () => {
     const payload = {
       app: "Raw Mouse Counts Tracker",
-      version: 8,
+      version: 9,
       exportedAt: new Date().toISOString(),
       groups
     };
