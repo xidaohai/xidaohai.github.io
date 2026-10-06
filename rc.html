@@ -19,7 +19,7 @@
   h1{font-size:18px;margin:0}
   .subtitle{font-size:12px;color:var(--muted);line-height:1.45}
   .row{display:flex;gap:8px;align-items:center}
-  button,input{
+  button,input,select{
     font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);
     border-radius:7px;height:34px;transition:0.15s;
   }
@@ -29,6 +29,7 @@
     display:inline-flex;align-items:center;justify-content:center;
   }
   button:hover{border-color:#46515e;background:#1c2229}
+  button:disabled{cursor:not-allowed}
   button.primary{background:#1b3b69;border-color:#315f99;color:#fff}
   button.active{background:#274b78;border-color:#528ad8;color:#fff}
   button.danger{border-color:#6f3333;color:#ffb3b3}
@@ -120,6 +121,69 @@
   .stat b{display:block;font:13px ui-monospace,SFMono-Regular,Consolas,monospace}
   .stat span{color:var(--muted);font-size:10px}
 
+  /* 缩放率小锁头 */
+  #scaleLock{
+    width:34px;height:34px;flex:0 0 auto;
+    font-size:14px;padding:0;line-height:1;
+  }
+
+  /* 缩放倍率预设卡片 */
+  .zoom-presets-card{
+    border:1px solid var(--line);border-radius:8px;padding:9px 10px;
+    background:#0d1116;
+  }
+  .zoom-presets-head{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    margin-bottom:7px;
+  }
+  .zoom-presets-head .label{font-size:11px;color:var(--muted)}
+  .zoom-presets-list{
+    display:flex;flex-wrap:wrap;gap:5px;
+    margin-bottom:7px;
+  }
+  .zoom-presets-empty{
+    font-size:10px;color:#6b7683;padding:3px 0;
+  }
+  .zoom-preset-btn{
+    height:24px;padding:0 9px;font-size:11px;border-radius:5px;
+    background:#161b21;border:1px solid var(--line);
+    font-family: ui-monospace,SFMono-Regular,Consolas,monospace;
+    color:#cfd8e3;
+  }
+  .zoom-preset-btn:hover{
+    border-color:#528ad8;color:#cfe0ff;background:#1a2230;
+  }
+
+  /* 左下角：按键清除轨迹 */
+  .clear-key-card{
+    border:1px solid var(--line);border-radius:8px;padding:9px 10px;
+    background:#0d1116;
+  }
+  .clear-key-head{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    margin-bottom:7px;
+  }
+  .clear-key-head .label{font-size:11px;color:var(--muted)}
+  .clear-key-head .hint{
+    font-size:10px;color:#6ea8fe;
+    background:rgba(110,168,254,.10);
+    border:1px solid rgba(110,168,254,.30);
+    padding:1px 6px;border-radius:5px;
+  }
+  .clear-key-head .hint.off{
+    color:#8f9aa7;background:transparent;border-color:transparent;padding:0;
+  }
+  #clearKeySelect{
+    width:100%;height:30px;padding:0 8px;
+    background:var(--panel2);color:var(--text);
+    border:1px solid var(--line);border-radius:6px;
+    font:inherit;font-size:12px;cursor:pointer;
+  }
+  #clearKeySelect:hover{border-color:#46515e}
+  .clear-key-note{
+    font-size:10px;color:#6b7683;line-height:1.4;margin-top:6px;
+  }
+
   /* 右下角作者栏 */
   #authorBadge {
     position: absolute; right: 14px; bottom: 12px;
@@ -184,13 +248,6 @@
         鼠标硬件真实上报数据包的位置。轨迹发生<b>物理折角</b>的真实节点。
       </div>
     </div>
-    <div class="item">
-      <span class="symbol"><div style="width:2px;height:12px;background:var(--accent);transform:rotate(25deg)"></div></span>
-      <div>
-        <b style="color:#d0d7de">分割线 (Ticks)</b><br>
-        沿轨迹<b>等弧长距离</b>切分的标尺刻度，默认关闭。
-      </div>
-    </div>
   </div>
 
   <div class="statsGrid">
@@ -204,7 +261,10 @@
 
   <div class="row">
     <label class="small">当前缩放</label>
-    <input type="number" id="scale" min="0.01" max="50" step="0.05" value="1">
+    <input type="number" id="scale" min="0.01" max="50" step="0.00001" value="1">
+    <button id="scaleLock" class="iconbtn" title="锁定缩放率（点击解锁）">🔒</button>
+  </div>
+  <div class="row">
     <button id="fit" style="flex:1">适配全图</button>
     <button id="centerOrigin" style="flex:1">原点 (0,0)</button>
   </div>
@@ -218,6 +278,35 @@
     <button id="importBtn" style="flex:1">导入 JSON</button>
     <input id="importFile" type="file" accept=".json,application/json" hidden>
   </div>
+
+  <!-- 缩放倍率预设 -->
+  <div class="zoom-presets-card">
+    <div class="zoom-presets-head">
+      <span class="label">缩放倍率预设（左键切换 / 右键删除）</span>
+    </div>
+    <div id="zoomPresetsList" class="zoom-presets-list"></div>
+    <div class="row">
+      <input type="number" id="zoomPresetInput" min="0.01" max="50" step="0.00001" placeholder="如 0.5 / 1 / 2" style="flex:1;text-align:left;padding:0 10px">
+      <button id="addZoomPreset" class="primary" style="flex:0 0 auto;padding:0 12px">添加</button>
+    </div>
+  </div>
+
+  <!-- 按键清除当前轨迹 -->
+  <div class="clear-key-card">
+    <div class="clear-key-head">
+      <span class="label">按键清除轨迹（捕获中 / ESC 后均可用）</span>
+      <span id="clearKeyHint" class="hint off">关闭</span>
+    </div>
+    <select id="clearKeySelect" aria-label="选择清除轨迹的鼠标按键">
+      <option value="-1">关闭</option>
+      <option value="0">鼠标左键</option>
+      <option value="2">鼠标右键</option>
+      <option value="1">鼠标中键</option>
+      <option value="3">侧键 · 后退</option>
+      <option value="4">侧键 · 前进</option>
+    </select>
+    <div class="clear-key-note">非捕获状态下，左键/右键需<b>点击而不拖动</b>才清除（拖动仍平移画布）。</div>
+  </div>
 </aside>
 
 <main id="main">
@@ -225,7 +314,7 @@
   <div id="hud"></div>
   <div id="topbar">
     <button id="toggleNodes" class="primary" title="显示鼠标每次上报数据的真实物理位置（圆点）">采样点</button>
-    <button id="toggleTicks" title="显示沿轨迹线等距离切分的标尺刻度（短竖线）">分割线</button>
+    <button id="toggleLines" title="隐藏轨迹连线，仅保留采样点">去掉线</button>
     <button id="toggleGrid" class="primary">网格</button>
     <button id="toggleAxes" class="primary">坐标轴</button>
     <div class="sep"></div>
@@ -259,6 +348,9 @@
   const groupsEl = $("groups");
 
   const STORAGE_KEY = "rawMouseCountsTracker.v6";
+  const CLEAR_KEY_STORAGE = "rawMouseCountsTracker.clearKey";
+  const SCALE_LOCK_STORAGE = "rawMouseCountsTracker.scaleLock";
+  const SCALE_PRESETS_STORAGE = "rawMouseCountsTracker.scalePresets";
 
   let groups = [];
   let activeId = null;
@@ -267,8 +359,19 @@
 
   let showGrid = true;
   let showAxes = true;
-  let showTicks = false; 
-  let showNodes = true; 
+  let showLines = true;   // 轨迹连线（“去掉线”按钮控制）
+  let showNodes = true;   // 采样点
+
+  // 按键清除轨迹：-1 = 关闭
+  let clearKeyCode = -1;
+  // 非捕获状态下，左键/右键的“点击候选”——用于区分点击与拖拽
+  let clearClickCandidate = null;
+
+  // 缩放率锁定：默认锁定，强制使用当前 scale
+  let scaleLocked = true;
+
+  // 缩放倍率预设（用户可添加）
+  let scalePresets = [];
 
   let scale = 1;
   let viewX = 0, viewY = 0;
@@ -491,6 +594,18 @@
     scheduleDraw();
   }
 
+  // 只清除轨迹本身（不清空峰值 Hz 统计），用于按键清除功能
+  function clearCurrentTrace() {
+    const g = activeGroup();
+    if (!g) return;
+    g.points = [[0,0]];
+    g.events = 0;
+    g.distance = 0;
+    updateLive();
+    save();
+    scheduleDraw();
+  }
+
   function setDisplayMode(mode) {
     displayMode = mode === "follow" ? "follow" : "fixed";
     $("modeFollow").classList.toggle("primary", displayMode === "follow");
@@ -567,7 +682,8 @@
     viewX = (b.minX + b.maxX) / 2;
     viewY = (b.minY + b.maxY) / 2;
     setDisplayMode("fixed");
-    $("scale").value = Number(scale.toFixed(3));
+    $("scale").value = Number(scale.toFixed(5));
+    syncScaleLockUI();
     scheduleDraw();
   }
 
@@ -600,21 +716,6 @@
       state.w / 2 + (x - state.viewX) * state.scale,
       state.h / 2 + (y - state.viewY) * state.scale
     ];
-  }
-
-  function getTickStep(s) {
-    const minPx = 12;
-    const rawCount = minPx / Math.max(s, 0.0001);
-    if (rawCount <= 1) return 1;
-    if (rawCount <= 2) return 2;
-    if (rawCount <= 5) return 5;
-    if (rawCount <= 10) return 10;
-    if (rawCount <= 20) return 20;
-    if (rawCount <= 50) return 50;
-    const pow = Math.pow(10, Math.floor(Math.log10(rawCount)));
-    const n = rawCount / pow;
-    const mult = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
-    return mult * pow;
   }
 
   function chooseGridStep(s) {
@@ -712,15 +813,17 @@
     ctx.lineCap = "butt";
     ctx.lineJoin = "bevel"; 
 
-    // 1. 主轨迹绘制
-    ctx.beginPath();
-    const p0 = worldToScreenState(pts[0][0], pts[0][1], state);
-    ctx.moveTo(p0[0], p0[1]);
-    for (let i = 1; i < pts.length; i++) {
-      const p = worldToScreenState(pts[i][0], pts[i][1], state);
-      ctx.lineTo(p[0], p[1]);
+    // 1. 主轨迹绘制（“去掉线”关闭后只保留采样点）
+    if (showLines) {
+      ctx.beginPath();
+      const p0 = worldToScreenState(pts[0][0], pts[0][1], state);
+      ctx.moveTo(p0[0], p0[1]);
+      for (let i = 1; i < pts.length; i++) {
+        const p = worldToScreenState(pts[i][0], pts[i][1], state);
+        ctx.lineTo(p[0], p[1]);
+      }
+      ctx.stroke();
     }
-    ctx.stroke();
 
     // 2. 真实采样节点（导出时设定为 1 物理像素点，放大后颗粒分明无粘连）
     if (showNodes) {
@@ -740,65 +843,27 @@
       }
     }
 
-    // 3. 分割线标尺
-    if (showTicks) {
-      const tickStep = getTickStep(scl);
-      const tickLen = selected ? 3.5 : 2.5;
+    // 3. 当前末端光标准星（去线模式下不绘制，保证“只剩下点”）
+    if (showLines) {
+      const last = pts[pts.length - 1];
+      const lp = worldToScreenState(last[0], last[1], state);
+
       ctx.strokeStyle = g.color;
+      ctx.fillStyle = g.color;
+      ctx.globalAlpha = selected ? 1 : 0.7;
       ctx.lineWidth = linePixelWidth;
-      ctx.globalAlpha = selected ? 0.9 : 0.5;
+
+      const r = isExport ? (3.5 / dpr) : 4;
       ctx.beginPath();
+      ctx.arc(lp[0], lp[1], r, 0, Math.PI * 2);
+      ctx.stroke();
 
-      let currentAcc = 0; 
-      let tickIndex = 1;
-      let targetDist = tickIndex * tickStep;
-
-      for (let i = 1; i < pts.length; i++) {
-        const a = pts[i - 1], b = pts[i];
-        const dx = b[0] - a[0];
-        const dy = b[1] - a[1];
-        const segLen = Math.hypot(dx, dy);
-        if (segLen <= 1e-9) continue;
-
-        const nx = -dy / segLen; 
-        const ny = dx / segLen;
-
-        while (targetDist <= currentAcc + segLen) {
-          const t = (targetDist - currentAcc) / segLen;
-          const wx = a[0] + dx * t;
-          const wy = a[1] + dy * t;
-          const sc = worldToScreenState(wx, wy, state);
-
-          ctx.moveTo(sc[0] - nx * tickLen, sc[1] - ny * tickLen);
-          ctx.lineTo(sc[0] + nx * tickLen, sc[1] + ny * tickLen);
-
-          tickIndex++;
-          targetDist = tickIndex * tickStep;
-        }
-        currentAcc += segLen;
-      }
+      const crossR = isExport ? (6 / dpr) : 7;
+      ctx.beginPath();
+      ctx.moveTo(lp[0] - crossR, lp[1]); ctx.lineTo(lp[0] + crossR, lp[1]);
+      ctx.moveTo(lp[0], lp[1] - crossR); ctx.lineTo(lp[0], lp[1] + crossR);
       ctx.stroke();
     }
-
-    // 4. 当前末端光标准星
-    const last = pts[pts.length - 1];
-    const lp = worldToScreenState(last[0], last[1], state);
-
-    ctx.strokeStyle = g.color;
-    ctx.fillStyle = g.color;
-    ctx.globalAlpha = selected ? 1 : 0.7;
-    ctx.lineWidth = linePixelWidth;
-
-    const r = isExport ? (3.5 / dpr) : 4;
-    ctx.beginPath();
-    ctx.arc(lp[0], lp[1], r, 0, Math.PI * 2);
-    ctx.stroke();
-
-    const crossR = isExport ? (6 / dpr) : 7;
-    ctx.beginPath();
-    ctx.moveTo(lp[0] - crossR, lp[1]); ctx.lineTo(lp[0] + crossR, lp[1]);
-    ctx.moveTo(lp[0], lp[1] - crossR); ctx.lineTo(lp[0], lp[1] + crossR);
-    ctx.stroke();
 
     ctx.restore();
   }
@@ -836,7 +901,7 @@
       `TRACK X: ${formatCount(p[0])} counts\n` +
       `TRACK Y: ${formatCount(p[1])} counts\n` +
       `SAMPLES: ${(g?.events ?? 0).toLocaleString()} (非零轨迹节点)\n` +
-      `SCALE: ${Number(scale.toFixed(3))} px/count\n` +
+      `SCALE: ${Number(scale.toFixed(5))} px/count${scaleLocked ? " 🔒" : ""}\n` +
       `MODE: ${displayMode === "follow" ? "FOLLOW" : "FIXED"}\n` +
       `SOURCE: ${_supportsRawUpdate ? "pointerrawupdate + coalesced" : "pointermove fallback"}`;
 
@@ -1169,15 +1234,32 @@
 
   window.addEventListener(_captureEventName, _handleCaptureEvent, { passive: true });
 
-  window.addEventListener("mouseup", () => {
+  window.addEventListener("mouseup", (e) => {
     if (isDragging) {
       isDragging = false;
       canvas.style.cursor = "grab";
+    }
+
+    // 非捕获状态下，左键/右键点击（未拖动）触发清除
+    if (clearClickCandidate && e.button === clearClickCandidate.button) {
+      const dx = e.clientX - clearClickCandidate.x;
+      const dy = e.clientY - clearClickCandidate.y;
+      if (Math.hypot(dx, dy) < 5) {
+        const g = activeGroup();
+        if (g) {
+          clearCurrentTrace();
+          setStatus(`已清除“${g.name}”轨迹（${buttonName(clearKeyCode)}）`);
+        }
+      }
+      clearClickCandidate = null;
     }
   });
 
   canvas.addEventListener("wheel", e => {
     e.preventDefault();
+    // 缩放率已锁定：滚轮不改变缩放
+    if (scaleLocked) return;
+
     const factor = e.deltaY < 0 ? 1.15 : 0.87;
     const newScale = Math.max(0.01, Math.min(50, scale * factor));
     if (newScale === scale) return;
@@ -1196,7 +1278,8 @@
       viewY = wy - (my - canvas.clientHeight / 2) / scale;
     }
 
-    $("scale").value = Number(scale.toFixed(3));
+    $("scale").value = Number(scale.toFixed(5));
+    syncScaleLockUI();
     scheduleDraw();
   }, { passive: false });
 
@@ -1265,11 +1348,182 @@
   $("modeFixed").onclick = () => setDisplayMode("fixed");
   $("modeFollow").onclick = () => setDisplayMode("follow");
 
-  $("fit").onclick = fitView;
+  // ---------- 缩放：锁定 + 倍率预设 ----------
+
+  function clampScale(v) {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return null;
+    return Math.max(0.01, Math.min(50, n));
+  }
+
+  function applyScale(newScale) {
+    const v = clampScale(newScale);
+    if (v === null) return;
+    scale = v;
+    $("scale").value = Number(scale.toFixed(5));
+    syncScaleLockUI();
+    scheduleDraw();
+  }
+
+  function formatPreset(v) {
+    const n = Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : String(Number(v.toFixed(5)));
+    return n + "×";
+  }
+
+  function renderZoomPresets() {
+    const list = $("zoomPresetsList");
+    if (!list) return;
+    list.innerHTML = "";
+    if (!scalePresets.length) {
+      const empty = document.createElement("div");
+      empty.className = "zoom-presets-empty";
+      empty.textContent = "暂无预设，输入倍率后点添加";
+      list.appendChild(empty);
+      return;
+    }
+    scalePresets.forEach((val, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "zoom-preset-btn";
+      btn.textContent = formatPreset(val);
+      btn.title = `左键切换到 ${formatPreset(val)}，右键删除`;
+      btn.onclick = () => {
+        applyScale(val);
+        setStatus(`缩放已切换到 ${formatPreset(val)}${scaleLocked ? "（锁头锁定中，已同步锁定值）" : ""}`);
+      };
+      btn.oncontextmenu = (e) => {
+        e.preventDefault();
+        if (!confirm(`删除预设 ${formatPreset(val)}？`)) return;
+        scalePresets.splice(i, 1);
+        saveScalePresets();
+        renderZoomPresets();
+        setStatus(`已删除预设 ${formatPreset(val)}`);
+      };
+      list.appendChild(btn);
+    });
+  }
+
+  function dedupeSortPresets(arr) {
+    const uniq = [];
+    for (const v of arr) {
+      if (!uniq.some(x => Math.abs(x - v) < 1e-9)) uniq.push(v);
+    }
+    return uniq.sort((a, b) => a - b);
+  }
+
+  function loadScalePresets() {
+    try {
+      const raw = localStorage.getItem(SCALE_PRESETS_STORAGE);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          scalePresets = dedupeSortPresets(
+            arr.map(v => clampScale(v)).filter(v => v !== null)
+          );
+        }
+      }
+    } catch (_) { scalePresets = []; }
+    renderZoomPresets();
+  }
+
+  function saveScalePresets() {
+    try {
+      localStorage.setItem(SCALE_PRESETS_STORAGE, JSON.stringify(scalePresets));
+    } catch (_) {}
+  }
+
+  $("addZoomPreset").onclick = () => {
+    const input = $("zoomPresetInput");
+    const v = clampScale(input.value);
+    if (v === null) {
+      setStatus("请输入有效的缩放倍率（0.01 ~ 50）", true);
+      return;
+    }
+    if (scalePresets.some(x => Math.abs(x - v) < 1e-9)) {
+      setStatus(`${formatPreset(v)} 已在预设中`, true);
+      return;
+    }
+    scalePresets.push(v);
+    scalePresets = dedupeSortPresets(scalePresets);
+    saveScalePresets();
+    renderZoomPresets();
+    input.value = "";
+    setStatus(`已添加预设 ${formatPreset(v)}`);
+  };
+
+  $("zoomPresetInput")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      $("addZoomPreset").click();
+    }
+  });
+
+  function syncScaleLockUI() {
+    const btn = $("scaleLock");
+    if (btn) {
+      btn.textContent = scaleLocked ? "🔒" : "🔓";
+      btn.title = scaleLocked
+        ? `缩放率已锁定为 ${Number(scale.toFixed(5))}，点击解锁`
+        : "缩放率未锁定，点击锁定";
+      btn.classList.toggle("active", scaleLocked);
+    }
+    const fit = $("fit");
+    const rz = $("resetZoom");
+    if (fit) {
+      fit.disabled = scaleLocked;
+      fit.style.opacity = scaleLocked ? "0.4" : "";
+      fit.title = scaleLocked ? "缩放率已锁定，先解锁小锁头" : "自动缩放到适配全图";
+    }
+    if (rz) {
+      rz.disabled = scaleLocked;
+      rz.style.opacity = scaleLocked ? "0.4" : "";
+      rz.title = scaleLocked ? "缩放率已锁定，先解锁小锁头" : "重置为 1:1";
+    }
+  }
+
+  function loadScaleLockSetting() {
+    try {
+      const v = localStorage.getItem(SCALE_LOCK_STORAGE);
+      scaleLocked = v === null ? true : v === "1";
+    } catch (_) {
+      scaleLocked = true;
+    }
+    syncScaleLockUI();
+  }
+
+  function saveScaleLockSetting() {
+    try {
+      localStorage.setItem(SCALE_LOCK_STORAGE, scaleLocked ? "1" : "0");
+    } catch (_) {}
+  }
+
+  $("scaleLock").onclick = () => {
+    scaleLocked = !scaleLocked;
+    saveScaleLockSetting();
+    syncScaleLockUI();
+    if (scaleLocked) {
+      setStatus(`缩放率已锁定为 ${Number(scale.toFixed(5))}`);
+    } else {
+      setStatus("缩放率已解锁，滚轮与适配按钮恢复生效");
+    }
+  };
+
+  $("fit").onclick = () => {
+    if (scaleLocked) {
+      setStatus("缩放率已锁定，请先点击小锁头解锁", true);
+      return;
+    }
+    fitView();
+  };
+
   $("centerOrigin").onclick = () => { viewX = 0; viewY = 0; scheduleDraw(); };
+
   $("scale").onchange = () => {
-    scale = Math.max(0.01, Math.min(50, Number($("scale").value) || 1));
+    // 手动输入始终允许，输入的就是“当前应强制使用的缩放率”
+    const v = clampScale($("scale").value);
+    scale = v === null ? 1 : v;
     $("scale").value = String(scale);
+    syncScaleLockUI();
     scheduleDraw();
   };
 
@@ -1287,9 +1541,9 @@
     $("toggleNodes").classList.toggle("primary", showNodes);
     scheduleDraw();
   };
-  $("toggleTicks").onclick = () => {
-    showTicks = !showTicks;
-    $("toggleTicks").classList.toggle("primary", showTicks);
+  $("toggleLines").onclick = () => {
+    showLines = !showLines;
+    $("toggleLines").classList.toggle("active", !showLines);
     scheduleDraw();
   };
   $("toggleGrid").onclick = () => {
@@ -1303,14 +1557,170 @@
     scheduleDraw();
   };
 
-  $("resetZoom").onclick = () => { scale = 1; $("scale").value = "1"; scheduleDraw(); };
+  $("resetZoom").onclick = () => {
+    if (scaleLocked) {
+      setStatus("缩放率已锁定，请先点击小锁头解锁", true);
+      return;
+    }
+    scale = 1;
+    $("scale").value = "1";
+    scheduleDraw();
+  };
+
   $("downloadPng").onclick = () => downloadHighResPng();
+
+  // ---------- 按键清除轨迹（捕获中 + ESC 后均可用） ----------
+  function buttonName(code) {
+    switch (Number(code)) {
+      case 0: return "鼠标左键";
+      case 1: return "鼠标中键";
+      case 2: return "鼠标右键";
+      case 3: return "侧键 · 后退";
+      case 4: return "侧键 · 前进";
+      default: return "关闭";
+    }
+  }
+
+  function syncClearKeyHint() {
+    const hint = $("clearKeyHint");
+    if (!hint) return;
+    if (clearKeyCode >= 0) {
+      hint.textContent = buttonName(clearKeyCode);
+      hint.classList.remove("off");
+    } else {
+      hint.textContent = "关闭";
+      hint.classList.add("off");
+    }
+  }
+
+  function loadClearKeySetting() {
+    try {
+      const v = localStorage.getItem(CLEAR_KEY_STORAGE);
+      clearKeyCode = v === null ? -1 : Number(v);
+      if (!Number.isInteger(clearKeyCode)) clearKeyCode = -1;
+    } catch (_) {
+      clearKeyCode = -1;
+    }
+    const sel = $("clearKeySelect");
+    if (sel) sel.value = String(clearKeyCode);
+    syncClearKeyHint();
+  }
+
+  function saveClearKeySetting() {
+    try {
+      localStorage.setItem(CLEAR_KEY_STORAGE, String(clearKeyCode));
+    } catch (_) {}
+  }
+
+  const clearKeySelect = $("clearKeySelect");
+  if (clearKeySelect) {
+    clearKeySelect.onchange = () => {
+      const v = Number(clearKeySelect.value);
+      clearKeyCode = Number.isInteger(v) ? v : -1;
+      saveClearKeySetting();
+      syncClearKeyHint();
+      if (clearKeyCode >= 0) {
+        setStatus(`已启用：按【${buttonName(clearKeyCode)}】清除当前轨迹（捕获中 / ESC 后均可用）`);
+      } else {
+        setStatus("已关闭按键清除轨迹");
+      }
+    };
+  }
+
+  // mousedown 处理（捕获阶段）
+  window.addEventListener("mousedown", (e) => {
+    if (clearKeyCode < 0) return;
+    if (e.button !== clearKeyCode) return;
+
+    if (recording) {
+      // 捕获中：立即清除
+      const g = activeGroup();
+      if (!g) return;
+      clearCurrentTrace();
+      setStatus(`已清除“${g.name}”轨迹（${buttonName(clearKeyCode)}）`);
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    // 非捕获状态：只作用于画布（不干扰侧栏 / 顶栏按钮）
+    if (e.target !== canvas) return;
+
+    if (clearKeyCode === 0 || clearKeyCode === 2) {
+      // 左键 / 右键：记录起点，交给 mouseup 判断“点击 vs 拖拽”
+      clearClickCandidate = { x: e.clientX, y: e.clientY, button: e.button };
+      // 不阻止默认：让画布拖拽/右键菜单逻辑照常运行
+    } else {
+      // 中键 / 侧键：直接清除
+      const g = activeGroup();
+      if (!g) return;
+      clearCurrentTrace();
+      setStatus(`已清除“${g.name}”轨迹（${buttonName(clearKeyCode)}）`);
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true); // 捕获阶段
+
+  // 非捕获状态下，侧键（后退/前进）命中画布时阻止浏览器导航
+  window.addEventListener("auxclick", (e) => {
+    if (clearKeyCode < 0) return;
+    if (e.button !== clearKeyCode) return;
+    if (e.target !== canvas) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  // ---------- 导入 / 导出 ----------
+
+  function collectSettings() {
+    return {
+      scaleLocked: !!scaleLocked,
+      scalePresets: scalePresets.slice(),
+      clearKeyCode: clearKeyCode
+    };
+  }
+
+  function applySettings(settings) {
+    if (!settings || typeof settings !== "object") return [];
+    const applied = [];
+
+    if (typeof settings.scaleLocked === "boolean") {
+      scaleLocked = settings.scaleLocked;
+      saveScaleLockSetting();
+      syncScaleLockUI();
+      applied.push(scaleLocked ? "锁定缩放率" : "解锁缩放率");
+    }
+
+    if (Array.isArray(settings.scalePresets)) {
+      const arr = settings.scalePresets
+        .map(v => clampScale(v))
+        .filter(v => v !== null);
+      scalePresets = dedupeSortPresets(arr);
+      saveScalePresets();
+      renderZoomPresets();
+      applied.push(`${scalePresets.length} 个缩放预设`);
+    }
+
+    if (Number.isInteger(settings.clearKeyCode)) {
+      let code = settings.clearKeyCode;
+      if (code < -1 || code > 4) code = -1;
+      clearKeyCode = code;
+      saveClearKeySetting();
+      syncClearKeyHint();
+      const sel = $("clearKeySelect");
+      if (sel) sel.value = String(clearKeyCode);
+      applied.push("清除按键");
+    }
+
+    return applied;
+  }
 
   $("exportBtn").onclick = () => {
     const payload = {
       app: "Raw Mouse Counts Tracker",
-      version: 10,
+      version: 12,
       exportedAt: new Date().toISOString(),
+      settings: collectSettings(),
       groups
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -1328,6 +1738,13 @@
       const data = JSON.parse(await f.text());
       const incoming = Array.isArray(data) ? data : data.groups;
       if (!Array.isArray(incoming)) throw new Error("JSON 格式无效");
+
+      // 应用设置（缩放锁定 / 缩放预设 / 清除按键）
+      const appliedSettings =
+        (data && !Array.isArray(data) && data.settings)
+          ? applySettings(data.settings)
+          : [];
+
       const clean = incoming.map((g, i) => {
         const rawPoints = Array.isArray(g.points) ? g.points : [];
         const points = rawPoints
@@ -1349,7 +1766,12 @@
       groups.push(...clean);
       activeId = clean[clean.length - 1].id;
       save(); renderGroups(); syncColorPalette(); updateLive(); scheduleDraw();
-      setStatus(`已成功导入 ${clean.length} 个轨迹组`);
+
+      let msg = `已成功导入 ${clean.length} 个轨迹组`;
+      if (appliedSettings.length) {
+        msg += `，并应用：${appliedSettings.join("、")}`;
+      }
+      setStatus(msg);
     } catch (e) {
       setStatus("导入失败：" + e.message, true);
     } finally {
@@ -1359,12 +1781,16 @@
 
   window.addEventListener("resize", resize);
 
+  loadClearKeySetting();
+  loadScaleLockSetting();
+  loadScalePresets();
   load();
   resize();
   updateLive();
   renderGroups();
   renderColorPalette();
   setDisplayMode("fixed");
+  syncScaleLockUI();
   scheduleDraw();
 })();
 </script>
