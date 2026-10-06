@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Raw Mouse Counts Tracker (8K Certified)</title>
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#12161b; --panel2:#171c22; --line:#2a313a;
+    --text:#e8edf3; --muted:#8f9aa7; --accent:#6ea8fe; --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+  body{display:flex;overflow:hidden}
+  #side{
+    width:330px;min-width:330px;background:var(--panel);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;padding:16px;gap:12px;z-index:10;
+  }
+  h1{font-size:18px;margin:0}
+  .subtitle{font-size:12px;color:var(--muted);line-height:1.45}
+  .row{display:flex;gap:8px;align-items:center}
+  button,input{
+    font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);
+    border-radius:7px;height:34px;transition:0.15s;
+  }
+  button{
+    padding:0 8px;cursor:pointer;font-size:12px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
+  button:hover{border-color:#46515e;background:#1c2229}
+  button.primary{background:#1b3b69;border-color:#315f99;color:#fff}
+  button.active{background:#274b78;border-color:#528ad8;color:#fff}
+  button.danger{border-color:#6f3333;color:#ffb3b3}
+  input[type=text]{width:100%;padding:0 10px}
+  input[type=number]{width:80px;padding:0 6px;text-align:center}
+  label.small{font-size:12px;color:var(--muted);white-space:nowrap}
+  .status{
+    border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;line-height:1.5;
+    background:#0e1217
+  }
+  .status strong{color:#fff}
+  
+  .legend-card {
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px;
+    background: #0d1116; font-size: 11px; line-height: 1.5; color: #a9b5c2;
+  }
+  .legend-card .item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .legend-card .item:last-child { margin-bottom: 0; }
+  .legend-card .symbol { 
+    display: inline-flex; align-items: center; justify-content: center; 
+    width: 16px; height: 16px; flex-shrink: 0;
+  }
+
+  #groups{overflow:auto;min-height:0;flex:1;border-top:1px solid var(--line);padding-top:8px}
+  .group{
+    display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:center;
+    padding:8px;border-radius:7px;margin-bottom:5px;background:transparent;cursor:pointer;
+  }
+  .group.active{background:#1b222a}
+  .swatch{width:10px;height:10px;border-radius:50%;justify-self:center}
+  .gname{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gmeta{font-size:10px;color:var(--muted)}
+  .group-actions{display:flex;gap:4px}
+  .iconbtn{width:28px;padding:0;height:28px;font-size:12px;line-height:1}
+  #main{position:relative;flex:1;min-width:0;user-select:none}
+  #canvas{display:block;width:100%;height:100%;background:#080a0d;cursor:grab}
+  #hud{
+    position:absolute;left:14px;top:12px;padding:10px 12px;background:rgba(8,10,13,.86);
+    border:1px solid var(--line);border-radius:8px;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;
+    pointer-events:none;white-space:pre;z-index:5;backdrop-filter:blur(4px);
+  }
+  #overlay{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;z-index:4;
+  }
+  #overlayCard{
+    max-width:460px;padding:20px 24px;text-align:center;background:rgba(13,17,22,.94);
+    border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.35);
+    pointer-events:auto;
+  }
+  #overlayCard h2{margin:0 0 8px;font-size:18px}
+  #overlayCard p{margin:6px 0;color:var(--muted);font-size:13px;line-height:1.55}
+  #overlayCard .hint{margin-top:12px;color:#c8d2dd}
+  #topbar{
+    position:absolute;right:12px;top:12px;display:flex;gap:7px;align-items:center;
+    padding:7px;background:rgba(8,10,13,.86);border:1px solid var(--line);border-radius:8px;
+    z-index:5;backdrop-filter:blur(4px);
+  }
+  #topbar button{height:30px;padding:0 10px}
+  .sep{height:22px;width:1px;background:var(--line)}
+  .statsGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .stat{padding:8px;background:#0d1116;border:1px solid #202730;border-radius:7px}
+  .stat b{display:block;font:13px ui-monospace,SFMono-Regular,Consolas,monospace}
+  .stat span{color:var(--muted);font-size:10px}
+
+  /* 右下角作者栏 */
+  #authorBadge {
+    position: absolute; right: 14px; bottom: 12px;
+    padding: 4px 8px; border-radius: 6px;
+    font-size: 11px; color: var(--muted);
+    background: rgba(8, 10, 13, 0.72);
+    border: 1px solid var(--line);
+    text-decoration: none;
+    transition: 0.15s;
+    z-index: 5;
+    backdrop-filter: blur(4px);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  #authorBadge:hover {
+    color: var(--text);
+    border-color: #46515e;
+    background: rgba(18, 22, 27, 0.95);
+  }
+</style>
+</head>
+<body>
+<aside id="side">
+  <h1>Raw Mouse Counts Tracker</h1>
+  <div class="subtitle">
+    已启用 <b>pointerrawupdate</b> + <b>Coalesced Events</b> 无损解包，原生支持 <b>8000Hz</b> 高回报率。
+  </div>
+
+  <div class="row">
+    <button class="primary" id="newGroup" style="flex:1">新建组</button>
+    <button id="rename" style="flex:1">重命名</button>
+    <button class="danger" id="deleteGroup" style="flex:1">删除组</button>
+  </div>
+
+  <div class="row" id="captureButtons">
+    <button id="start" class="primary" style="flex:1">进入原始捕获</button>
+  </div>
+
+  <div>
+    <label class="small">显示模式</label>
+    <div class="row" style="margin-top:4px">
+      <button id="modeFixed" class="primary" style="flex:1" title="固定屏幕（视口静止，光标在屏幕移动）">固定屏幕</button>
+      <button id="modeFollow" style="flex:1" title="屏幕跟随（轨迹头部始终居中）">屏幕跟随</button>
+    </div>
+  </div>
+
+  <div class="status" id="status">状态：<strong>未捕获（小手平移中）</strong></div>
+
+  <div class="legend-card">
+    <div class="item">
+      <span class="symbol"><div style="width:6px;height:6px;background:var(--accent);border-radius:50%"></div></span>
+      <div>
+        <b style="color:#d0d7de">采样点 (Nodes)</b><br>
+        鼠标硬件真实上报数据包的位置。轨迹发生<b>物理折角</b>的真实节点。
+      </div>
+    </div>
+    <div class="item">
+      <span class="symbol"><div style="width:2px;height:12px;background:var(--accent);transform:rotate(25deg)"></div></span>
+      <div>
+        <b style="color:#d0d7de">分割线 (Ticks)</b><br>
+        沿轨迹<b>等弧长距离</b>切分的标尺刻度，默认关闭。
+      </div>
+    </div>
+  </div>
+
+  <div class="statsGrid">
+    <div class="stat"><b id="liveHz">0 Hz</b><span>当前回报率 (实时)</span></div>
+    <div class="stat"><b id="peakHz">0 Hz</b><span>峰值回报率 (Peak)</span></div>
+    <div class="stat"><b id="liveX">0</b><span>累计 ΔX</span></div>
+    <div class="stat"><b id="liveY">0</b><span>累计 ΔY</span></div>
+    <div class="stat"><b id="eventCount">0</b><span>真实采样点</span></div>
+    <div class="stat"><b id="pathLen">0</b><span>弧长 counts</span></div>
+  </div>
+
+  <div class="row">
+    <label class="small">当前缩放</label>
+    <input type="number" id="scale" min="0.01" max="50" step="0.05" value="1">
+    <button id="fit" style="flex:1">适配全图</button>
+    <button id="centerOrigin" style="flex:1">原点 (0,0)</button>
+  </div>
+
+  <div id="groups"></div>
+
+  <div class="row">
+    <button id="showAll" style="flex:1">全显</button>
+    <button id="hideAll" style="flex:1">全隐</button>
+    <button id="exportBtn" style="flex:1">导出 JSON</button>
+    <button id="importBtn" style="flex:1">导入 JSON</button>
+    <input id="importFile" type="file" accept=".json,application/json" hidden>
+  </div>
+</aside>
+
+<main id="main">
+  <canvas id="canvas"></canvas>
+  <div id="hud"></div>
+  <div id="topbar">
+    <button id="toggleNodes" class="primary" title="显示鼠标每次上报数据的真实物理位置（圆点）">采样点</button>
+    <button id="toggleTicks" title="显示沿轨迹线等距离切分的标尺刻度（短竖线）">分割线</button>
+    <button id="toggleGrid" class="primary">网格</button>
+    <button id="toggleAxes" class="primary">坐标轴</button>
+    <div class="sep"></div>
+    <button id="resetZoom">1:1</button>
+    <button id="downloadPng" class="primary" title="按当前视图无损导出发丝级 4× 高清 PNG 图片">下载高清</button>
+  </div>
+
+  <a id="authorBadge" href="https://space.bilibili.com/1534330" target="_blank" rel="noopener noreferrer" title="访问作者 Bilibili 主页">
+    bilibili @1534330
+  </a>
+
+  <div id="overlay">
+    <div id="overlayCard">
+      <h2>Raw Counts Tracker (8K Ready)</h2>
+      <p>未捕获时为<b>平移查看模式</b>：可直接按住左键拖动画布，滚轮以光标为中心缩放。</p>
+      <div style="margin-top:14px">
+        <button class="primary" id="overlayStartBtn" style="height:38px;padding:0 20px;font-size:14px">进入原始捕获</button>
+      </div>
+      <p class="hint">捕获中按 ESC 退出，自动切回小手平移浏览</p>
+    </div>
+  </div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const canvas = $("canvas");
+  const ctx = canvas.getContext("2d");
+  const groupsEl = $("groups");
+
+  const STORAGE_KEY = "rawMouseCountsTracker.v5";
+
+  let groups = [];
+  let activeId = null;
+  let recording = false;
+  let lockMode = "none";
+
+  let showGrid = true;
+  let showAxes = true;
+  let showTicks = false; 
+  let showNodes = true; 
+
+  let scale = 1;
+  let viewX = 0, viewY = 0;
+  let displayMode = "fixed"; 
+  let renderDpr = 1;
+
+  let isDragging = false;
+  let dragStartX = 0, dragStartY = 0;
+  let dragStartViewX = 0, dragStartViewY = 0;
+  let hoverWorldPos = null;
+
+  let lastPeriodicSave = 0;
+
+  // --- 高精度 8000Hz 测频引擎 ---
+  let currentPollingHz = 0;
+  let peakPollingHz = 0;
+  let recentTimestamps = [];
+  let hzDecayTimer = null;
+
+  function registerHzSample(count = 1) {
+    const now = performance.now();
+    for (let i = 0; i < count; i++) {
+      recentTimestamps.push(now);
+    }
+  }
+
+  function updateHzCalculation() {
+    const now = performance.now();
+    while (recentTimestamps.length && (now - recentTimestamps[0] > 200)) {
+      recentTimestamps.shift();
+    }
+    if (recentTimestamps.length > 2) {
+      const duration = (now - recentTimestamps[0]) / 1000;
+      if (duration > 0.02) {
+        currentPollingHz = Math.round(recentTimestamps.length / duration);
+        if (currentPollingHz > peakPollingHz) {
+          peakPollingHz = currentPollingHz;
+        }
+      }
+    } else {
+      currentPollingHz = 0;
+    }
+    $("liveHz").textContent = `${currentPollingHz.toLocaleString()} Hz`;
+    $("peakHz").textContent = `${peakPollingHz.toLocaleString()} Hz`;
+  }
+
+  function uid() {
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+  }
+
+  function colorFor(i) {
+    const hue = (i * 137.508) % 360;
+    return `hsl(${hue.toFixed(1)} 78% 62%)`;
+  }
+
+  function computeDistance(points) {
+    let d = 0;
+    for (let i = 1; i < points.length; i++) {
+      d += Math.hypot(points[i][0] - points[i-1][0], points[i][1] - points[i-1][1]);
+    }
+    return d;
+  }
+
+  function nextGroupName() {
+    const used = new Set(groups.map(g => g.name));
+    let n = groups.length + 1;
+    while (used.has(`组 ${n}`)) n++;
+    return `组 ${n}`;
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY) || 
+                  localStorage.getItem("rawMouseCountsTracker.v4");
+      if (raw) groups = JSON.parse(raw);
+    } catch (_) { groups = []; }
+
+    if (!Array.isArray(groups)) groups = [];
+
+    groups.forEach((g, i) => {
+      if (!g.color) g.color = colorFor(i);
+      if (!Array.isArray(g.points) || g.points.length === 0) g.points = [[0,0]];
+      if (typeof g.visible !== "boolean") g.visible = true;
+      if (!Number.isFinite(g.distance) || g.distance <= 0) {
+        g.distance = computeDistance(g.points);
+      }
+      if (!Number.isFinite(g.events)) g.events = Math.max(0, g.points.length - 1);
+    });
+
+    if (!groups.length) createGroup(false);
+    else activeId = groups[groups.length - 1].id;
+    save();
+    renderGroups();
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(groups));
+    } catch (e) {
+      setStatus("本地保存失败：数据量过大，请及时导出 JSON", true);
+    }
+  }
+
+  function activeGroup() {
+    return groups.find(g => g.id === activeId) || null;
+  }
+
+  function createGroup(autoName = true) {
+    const g = {
+      id: uid(),
+      name: autoName ? nextGroupName() : "组 1",
+      createdAt: new Date().toISOString(),
+      color: colorFor(groups.length),
+      visible: true,
+      points: [[0,0]],
+      events: 0,
+      distance: 0
+    };
+    groups.push(g);
+    activeId = g.id;
+    recording = false;
+    currentPollingHz = 0;
+    peakPollingHz = 0;
+    updateLive();
+    renderGroups();
+    save();
+    scheduleDraw();
+  }
+
+  function resetCurrent() {
+    const g = activeGroup();
+    if (!g) return;
+    g.points = [[0,0]];
+    g.events = 0;
+    g.distance = 0;
+    currentPollingHz = 0;
+    peakPollingHz = 0;
+    updateLive();
+    save();
+    scheduleDraw();
+  }
+
+  function setDisplayMode(mode) {
+    displayMode = mode === "follow" ? "follow" : "fixed";
+    $("modeFollow").classList.toggle("primary", displayMode === "follow");
+    $("modeFixed").classList.toggle("primary", displayMode === "fixed");
+
+    if (displayMode === "fixed") {
+      setStatus(recording ? `${lockModeLabel()} · 固定屏幕` : "固定屏幕模式（小手平移中）");
+    } else {
+      const g = activeGroup();
+      if (g && g.points.length) {
+        const p = g.points[g.points.length - 1];
+        viewX = p[0];
+        viewY = p[1];
+      }
+      setStatus(recording ? `${lockModeLabel()} · 鼠标居中` : "屏幕跟随模式（小手平移中）");
+    }
+    scheduleDraw();
+  }
+
+  function lockModeLabel() {
+    if (lockMode === "raw") return "Raw 原始捕获中";
+    if (lockMode === "unknown") return "Pointer Lock 捕获中 (未验证原始)";
+    if (lockMode === "normal") return "普通捕获中 (含系统加速)";
+    return "捕获中";
+  }
+
+  function addMove(dx, dy) {
+    const g = activeGroup();
+    if (!g) return;
+    const p = g.points[g.points.length - 1];
+    const nx = p[0] + dx;
+    const ny = p[1] + dy;
+    g.points.push([nx, ny]);
+    g.events++;
+    g.distance += Math.hypot(dx, dy);
+  }
+
+  function setStatus(text, error = false) {
+    $("status").innerHTML = `状态：<strong style="color:${error ? "#ff9b9b" : "inherit"}">${text}</strong>`;
+  }
+
+  function updateLive() {
+    const g = activeGroup();
+    if (!g) return;
+    const p = g.points[g.points.length - 1];
+    $("liveX").textContent = Math.round(p[0]);
+    $("liveY").textContent = Math.round(p[1]);
+    $("eventCount").textContent = g.events.toLocaleString();
+    $("pathLen").textContent = Math.round(g.distance).toLocaleString();
+  }
+
+  function boundsOfVisible() {
+    const gs = groups.filter(g => g.visible && g.points.length);
+    if (!gs.length) return {minX:-10,maxX:10,minY:-10,maxY:10};
+    let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    for (const g of gs) for (const p of g.points) {
+      minX = Math.min(minX,p[0]); maxX=Math.max(maxX,p[0]);
+      minY = Math.min(minY,p[1]); maxY=Math.max(maxY,p[1]);
+    }
+    if (!Number.isFinite(minX)) return {minX:-10,maxX:10,minY:-10,maxY:10};
+    return {minX,maxX,minY,maxY};
+  }
+
+  function fitView() {
+    const b = boundsOfVisible();
+    const w = Math.max(10, b.maxX - b.minX);
+    const h = Math.max(10, b.maxY - b.minY);
+    const margin = 60;
+    scale = Math.min(
+      Math.max((canvas.clientWidth - margin*2) / w, 0.01),
+      Math.max((canvas.clientHeight - margin*2) / h, 0.01),
+      50
+    );
+    viewX = (b.minX + b.maxX) / 2;
+    viewY = (b.minY + b.maxY) / 2;
+    setDisplayMode("fixed");
+    $("scale").value = Number(scale.toFixed(3));
+    scheduleDraw();
+  }
+
+  function centerOnActive() {
+    const g = activeGroup();
+    if (!g || !g.points.length) return;
+    const p = g.points[g.points.length - 1];
+    viewX = p[0]; viewY = p[1];
+    scheduleDraw();
+  }
+
+  function resize() {
+    const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+    renderDpr = dpr;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    scheduleDraw();
+  }
+
+  function screenToWorld(sx, sy) {
+    return [
+      viewX + (sx - canvas.clientWidth / 2) / scale,
+      viewY + (sy - canvas.clientHeight / 2) / scale
+    ];
+  }
+
+  function worldToScreenState(x, y, state) {
+    return [
+      state.w / 2 + (x - state.viewX) * state.scale,
+      state.h / 2 + (y - state.viewY) * state.scale
+    ];
+  }
+
+  function getTickStep(s) {
+    const minPx = 12;
+    const rawCount = minPx / Math.max(s, 0.0001);
+    if (rawCount <= 1) return 1;
+    if (rawCount <= 2) return 2;
+    if (rawCount <= 5) return 5;
+    if (rawCount <= 10) return 10;
+    if (rawCount <= 20) return 20;
+    if (rawCount <= 50) return 50;
+    const pow = Math.pow(10, Math.floor(Math.log10(rawCount)));
+    const n = rawCount / pow;
+    const mult = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+    return mult * pow;
+  }
+
+  function chooseGridStep(s) {
+    const targetPx = 60;
+    const raw = targetPx / Math.max(s, 0.0001);
+    const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+    const n = raw / pow;
+    const mult = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+    return mult * pow;
+  }
+
+  function snapPixelCenter(v, dpr) {
+    return (Math.floor(v * dpr) + 0.5) / dpr;
+  }
+
+  function drawGridState(state) {
+    if (!showGrid) return;
+    const {ctx, w, h, dpr, scale:scl, viewX:vx, viewY:vy} = state;
+    const base = chooseGridStep(scl);
+    const left = vx - w / (2 * scl), right = vx + w / (2 * scl);
+    const top = vy - h / (2 * scl), bottom = vy + h / (2 * scl);
+
+    ctx.save();
+    ctx.lineWidth = 1 / dpr;
+    ctx.strokeStyle = "rgba(145,160,176,0.12)";
+    ctx.beginPath();
+
+    const kLeftX = Math.ceil(left / base);
+    const kRightX = Math.floor(right / base);
+    for (let k = kLeftX; k <= kRightX; k++) {
+      const sx = snapPixelCenter(worldToScreenState(k * base, 0, state)[0], dpr);
+      ctx.moveTo(sx, 0); ctx.lineTo(sx, h);
+    }
+
+    const kTopY = Math.ceil(top / base);
+    const kBottomY = Math.floor(bottom / base);
+    for (let k = kTopY; k <= kBottomY; k++) {
+      const sy = snapPixelCenter(worldToScreenState(0, k * base, state)[1], dpr);
+      ctx.moveTo(0, sy); ctx.lineTo(w, sy);
+    }
+    ctx.stroke();
+
+    const major = base * 5;
+    ctx.strokeStyle = "rgba(145,160,176,0.22)";
+    ctx.beginPath();
+    
+    const mLeftX = Math.ceil(left / major);
+    const mRightX = Math.floor(right / major);
+    for (let k = mLeftX; k <= mRightX; k++) {
+      const sx = snapPixelCenter(worldToScreenState(k * major, 0, state)[0], dpr);
+      ctx.moveTo(sx, 0); ctx.lineTo(sx, h);
+    }
+
+    const mTopY = Math.ceil(top / major);
+    const mBottomY = Math.floor(bottom / major);
+    for (let k = mTopY; k <= mBottomY; k++) {
+      const sy = snapPixelCenter(worldToScreenState(0, k * major, state)[1], dpr);
+      ctx.moveTo(0, sy); ctx.lineTo(w, sy);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawAxesState(state) {
+    if (!showAxes) return;
+    const {ctx, w, h, dpr} = state;
+    const o = worldToScreenState(0, 0, state);
+
+    ctx.save();
+    // 修正：严格 1 个物理像素对齐
+    ctx.lineWidth = 1 / dpr;
+    ctx.strokeStyle = "rgba(220,230,240,0.45)";
+    ctx.beginPath();
+    const oy = snapPixelCenter(o[1], dpr);
+    const ox = snapPixelCenter(o[0], dpr);
+    ctx.moveTo(0, oy); ctx.lineTo(w, oy);
+    ctx.moveTo(ox, 0); ctx.lineTo(ox, h);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawGroupState(g, selected, state, isExport = false) {
+    if (!g.visible || g.points.length < 2) return;
+
+    const {ctx, dpr, scale:scl, w, h} = state;
+    const pts = g.points;
+
+    ctx.save();
+
+    // 恒定占用 1 个物理像素
+    const linePixelWidth = 1 / dpr;
+    ctx.strokeStyle = g.color;
+    ctx.globalAlpha = selected ? 0.95 : 0.55;
+    ctx.lineWidth = linePixelWidth;
+    ctx.lineCap = "butt";
+    ctx.lineJoin = "bevel"; 
+
+    // 1. 主轨迹绘制
+    ctx.beginPath();
+    const p0 = worldToScreenState(pts[0][0], pts[0][1], state);
+    ctx.moveTo(p0[0], p0[1]);
+    for (let i = 1; i < pts.length; i++) {
+      const p = worldToScreenState(pts[i][0], pts[i][1], state);
+      ctx.lineTo(p[0], p[1]);
+    }
+    ctx.stroke();
+
+    // 2. 真实采样节点（导出时设定为 1 物理像素点，放大后颗粒分明无粘连）
+    if (showNodes) {
+      ctx.fillStyle = g.color;
+      ctx.globalAlpha = selected ? 0.95 : 0.5;
+      const nodeRadius = isExport ? (1.0 / dpr) : Math.max(1.2, 1.8 / dpr);
+
+      if (scl > 0.08 || isExport) {
+        ctx.beginPath();
+        for (let i = 0; i < pts.length; i++) {
+          const sc = worldToScreenState(pts[i][0], pts[i][1], state);
+          if (!isExport && (sc[0] < -10 || sc[0] > w + 10 || sc[1] < -10 || sc[1] > h + 10)) continue;
+          ctx.moveTo(sc[0] + nodeRadius, sc[1]);
+          ctx.arc(sc[0], sc[1], nodeRadius, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    }
+
+    // 3. 分割线标尺
+    if (showTicks) {
+      const tickStep = getTickStep(scl);
+      const tickLen = selected ? 3.5 : 2.5;
+      ctx.strokeStyle = g.color;
+      ctx.lineWidth = linePixelWidth;
+      ctx.globalAlpha = selected ? 0.9 : 0.5;
+      ctx.beginPath();
+
+      let currentAcc = 0; 
+      let tickIndex = 1;
+      let targetDist = tickIndex * tickStep;
+
+      for (let i = 1; i < pts.length; i++) {
+        const a = pts[i - 1], b = pts[i];
+        const dx = b[0] - a[0];
+        const dy = b[1] - a[1];
+        const segLen = Math.hypot(dx, dy);
+        if (segLen <= 1e-9) continue;
+
+        const nx = -dy / segLen; 
+        const ny = dx / segLen;
+
+        while (targetDist <= currentAcc + segLen) {
+          const t = (targetDist - currentAcc) / segLen;
+          const wx = a[0] + dx * t;
+          const wy = a[1] + dy * t;
+          const sc = worldToScreenState(wx, wy, state);
+
+          ctx.moveTo(sc[0] - nx * tickLen, sc[1] - ny * tickLen);
+          ctx.lineTo(sc[0] + nx * tickLen, sc[1] + ny * tickLen);
+
+          tickIndex++;
+          targetDist = tickIndex * tickStep;
+        }
+        currentAcc += segLen;
+      }
+      ctx.stroke();
+    }
+
+    // 4. 当前末端光标准星
+    const last = pts[pts.length - 1];
+    const lp = worldToScreenState(last[0], last[1], state);
+
+    ctx.strokeStyle = g.color;
+    ctx.fillStyle = g.color;
+    ctx.globalAlpha = selected ? 1 : 0.7;
+    ctx.lineWidth = linePixelWidth;
+
+    const r = isExport ? (3.5 / dpr) : 4;
+    ctx.beginPath();
+    ctx.arc(lp[0], lp[1], r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    const crossR = isExport ? (6 / dpr) : 7;
+    ctx.beginPath();
+    ctx.moveTo(lp[0] - crossR, lp[1]); ctx.lineTo(lp[0] + crossR, lp[1]);
+    ctx.moveTo(lp[0], lp[1] - crossR); ctx.lineTo(lp[0], lp[1] + crossR);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function renderScene(targetCtx, cssW, cssH, dpr, sceneScale, sceneViewX, sceneViewY, isExport = false) {
+    const state = {
+      ctx: targetCtx, w: cssW, h: cssH, dpr, scale: sceneScale, viewX: sceneViewX, viewY: sceneViewY
+    };
+    targetCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    targetCtx.fillStyle = "#080a0d";
+    targetCtx.fillRect(0, 0, cssW, cssH);
+
+    drawGridState(state);
+    drawAxesState(state);
+    for (const g of groups) {
+      drawGroupState(g, g.id === activeId, state, isExport);
+    }
+  }
+
+  function draw() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    renderScene(ctx, w, h, renderDpr, scale, viewX, viewY, false);
+
+    const g = activeGroup();
+    const p = g?.points?.[g.points.length - 1] || [0,0];
+
+    updateHzCalculation();
+
+    let hudText =
+      `STATUS: ${recording ? "🎯 CAPTURING (8K 捕获中)" : "🖐️ PAN & INSPECT (平移查看中)"}\n` +
+      `POLLING: ${currentPollingHz.toLocaleString()} Hz (Peak: ${peakPollingHz.toLocaleString()} Hz)\n` +
+      `ACTIVE: ${g?.name ?? "-"}\n` +
+      `TRACK X: ${formatCount(p[0])} counts\n` +
+      `TRACK Y: ${formatCount(p[1])} counts\n` +
+      `SAMPLES: ${(g?.events ?? 0).toLocaleString()} (真实节点)\n` +
+      `SCALE: ${Number(scale.toFixed(3))} px/count\n` +
+      `MODE: ${displayMode === "follow" ? "FOLLOW" : "FIXED"}\n` +
+      `SOURCE: ${_supportsRawUpdate ? "pointerrawupdate (8K Ready)" : "pointermove (fallback)"}`;
+
+    if (hoverWorldPos && !recording) {
+      hudText += `\n\n[ HOVER ]\nX: ${formatCount(hoverWorldPos[0])}\nY: ${formatCount(hoverWorldPos[1])}`;
+    }
+
+    $("hud").textContent = hudText;
+  }
+
+  function formatCount(v) {
+    return Number.isFinite(v)
+      ? (Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2))
+      : "0";
+  }
+
+  async function downloadHighResPng() {
+    const cssW = Math.max(1, Math.floor(canvas.clientWidth));
+    const cssH = Math.max(1, Math.floor(canvas.clientHeight));
+
+    const exportDpr = 4;
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = Math.max(1, Math.round(cssW * exportDpr));
+    exportCanvas.height = Math.max(1, Math.round(cssH * exportDpr));
+    const exportCtx = exportCanvas.getContext("2d");
+
+    // 触发超高清发丝级光栅化
+    renderScene(exportCtx, cssW, cssH, exportDpr, scale, viewX, viewY, true);
+
+    const blob = await new Promise(resolve => exportCanvas.toBlob(resolve, "image/png"));
+    if (!blob) {
+      setStatus("高清 PNG 导出失败", true);
+      return;
+    }
+
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    a.href = URL.createObjectURL(blob);
+    a.download = `mouse-counts-${stamp}-4x.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+
+    setStatus(`已导出 4× 发丝级超清图（${exportCanvas.width}×${exportCanvas.height}）`);
+  }
+
+  let rafPending = false;
+  function scheduleDraw() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      draw();
+    });
+  }
+
+  function renderGroups() {
+    groupsEl.innerHTML = "";
+    groups.forEach((g, index) => {
+      const wrap = document.createElement("div");
+      wrap.className = "group" + (g.id === activeId ? " active" : "");
+
+      const sw = document.createElement("div");
+      sw.className = "swatch"; sw.style.background = g.color;
+
+      const info = document.createElement("div");
+      info.style.minWidth = "0";
+      const name = document.createElement("div"); name.className = "gname"; name.textContent = g.name;
+      const meta = document.createElement("div"); meta.className = "gmeta";
+      meta.textContent = `${g.points.length-1} 点 · ${Math.round(g.distance).toLocaleString()} counts`;
+      info.append(name, meta);
+
+      const actions = document.createElement("div"); actions.className = "group-actions";
+      const vis = document.createElement("button"); vis.className = "iconbtn"; vis.title = "显示/隐藏";
+      vis.textContent = g.visible ? "●" : "○";
+      vis.onclick = (e) => {
+        e.stopPropagation(); g.visible = !g.visible; save(); renderGroups(); scheduleDraw();
+      };
+
+      const del = document.createElement("button"); del.className = "iconbtn"; del.title = "删除";
+      del.textContent = "×";
+      del.onclick = (e) => {
+        e.stopPropagation();
+        if (groups.length <= 1) { resetCurrent(); return; }
+        if (!confirm(`确定删除“${g.name}”吗？`)) return;
+        groups = groups.filter(x => x.id !== g.id);
+        if (activeId === g.id) activeId = groups[Math.max(0, index - 1)].id;
+        save(); renderGroups(); updateLive(); scheduleDraw();
+      };
+
+      actions.append(vis, del);
+      wrap.append(sw, info, actions);
+
+      wrap.onclick = () => {
+        activeId = g.id;
+        updateLive(); renderGroups(); centerOnActive(); scheduleDraw();
+      };
+      groupsEl.appendChild(wrap);
+    });
+  }
+
+  function requestLock(el, unadjusted) {
+    let ret;
+    try {
+      ret = unadjusted
+        ? el.requestPointerLock({ unadjustedMovement: true })
+        : el.requestPointerLock();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    if (ret && typeof ret.then === "function") {
+      return ret.then(() => (unadjusted ? "raw" : "normal"));
+    }
+    return Promise.resolve("unknown");
+  }
+
+  async function enterPointerLock() {
+    const g = activeGroup();
+    if (!g) { createGroup(true); return; }
+
+    if (!canvas.requestPointerLock) {
+      setStatus("此浏览器不支持 Pointer Lock API", true);
+      return;
+    }
+
+    let mode = "unknown";
+    try {
+      mode = await requestLock(canvas, true);
+    } catch (e1) {
+      try {
+        await requestLock(canvas, false);
+        mode = "normal";
+      } catch (e2) {
+        setStatus("锁定失败：" + (e2?.message || e2?.name || "未知错误"), true);
+        return;
+      }
+    }
+
+    lockMode = mode;
+    recording = true;
+    recentTimestamps = [];
+    currentPollingHz = 0;
+    lastPeriodicSave = performance.now();
+
+    clearInterval(hzDecayTimer);
+    hzDecayTimer = setInterval(() => {
+      if (recording) scheduleDraw();
+    }, 100);
+
+    $("overlay").style.display = "none";
+    canvas.style.cursor = "none";
+    setStatus(`${lockModeLabel()} · ${displayMode === "follow" ? "鼠标居中" : "固定屏幕"}`);
+    renderGroups();
+    scheduleDraw();
+  }
+
+  function exitPointerLock() {
+    try { document.exitPointerLock?.(); } catch(_) {}
+  }
+
+  canvas.addEventListener("contextmenu", e => e.preventDefault());
+
+  canvas.addEventListener("mousedown", e => {
+    if (recording) return;
+    if (e.button === 0 || e.button === 2) {
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragStartViewX = viewX;
+      dragStartViewY = viewY;
+      canvas.style.cursor = "grabbing";
+    }
+  });
+
+  window.addEventListener("mousemove", e => {
+    if (isDragging) {
+      const dx = (e.clientX - dragStartX) / scale;
+      const dy = (e.clientY - dragStartY) / scale;
+      viewX = dragStartViewX - dx;
+      viewY = dragStartViewY - dy;
+      if (displayMode === "follow") setDisplayMode("fixed");
+      scheduleDraw();
+      return;
+    }
+
+    if (!recording) {
+      const rect = canvas.getBoundingClientRect();
+      if (e.clientX >= rect.left && e.clientX <= rect.right &&
+          e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        hoverWorldPos = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+        scheduleDraw();
+      }
+    }
+  });
+
+  canvas.addEventListener("mouseleave", () => {
+    if (!recording) {
+      hoverWorldPos = null;
+      scheduleDraw();
+    }
+  });
+
+  const _supportsRawUpdate = ('onpointerrawupdate' in window);
+  const _captureEventName = _supportsRawUpdate ? 'pointerrawupdate' : 'pointermove';
+
+  function _handleCaptureEvent(e) {
+    if (!recording || document.pointerLockElement !== canvas) return;
+
+    let evs = [e];
+    if (typeof e.getCoalescedEvents === "function") {
+      const coalesced = e.getCoalescedEvents();
+      if (coalesced && coalesced.length > 0) {
+        evs = coalesced;
+      }
+    }
+
+    let moved = false;
+    let validSampleCount = 0;
+
+    for (let i = 0; i < evs.length; i++) {
+      const ev = evs[i];
+      const dx = Number(ev.movementX) || 0;
+      const dy = Number(ev.movementY) || 0;
+      if (dx === 0 && dy === 0) continue;
+
+      addMove(dx, dy);
+      moved = true;
+      validSampleCount++;
+    }
+
+    if (!moved) return;
+
+    registerHzSample(validSampleCount);
+    updateLive();
+
+    if (displayMode === "follow") {
+      const g = activeGroup();
+      const p = g.points[g.points.length - 1];
+      viewX = p[0];
+      viewY = p[1];
+    }
+
+    const now = performance.now();
+    if (now - lastPeriodicSave >= 2000) {
+      save();
+      lastPeriodicSave = now;
+    }
+
+    scheduleDraw();
+  }
+
+  window.addEventListener(_captureEventName, _handleCaptureEvent, { passive: true });
+
+  window.addEventListener("mouseup", () => {
+    if (isDragging) {
+      isDragging = false;
+      canvas.style.cursor = "grab";
+    }
+  });
+
+  canvas.addEventListener("wheel", e => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.15 : 0.87;
+    const newScale = Math.max(0.01, Math.min(50, scale * factor));
+    if (newScale === scale) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const wx = viewX + (mx - canvas.clientWidth / 2) / scale;
+    const wy = viewY + (my - canvas.clientHeight / 2) / scale;
+
+    scale = newScale;
+
+    if (displayMode === "fixed" || !recording) {
+      viewX = wx - (mx - canvas.clientWidth / 2) / scale;
+      viewY = wy - (my - canvas.clientHeight / 2) / scale;
+    }
+
+    $("scale").value = Number(scale.toFixed(3));
+    scheduleDraw();
+  }, { passive: false });
+
+  document.addEventListener("pointerlockchange", () => {
+    const locked = document.pointerLockElement === canvas;
+    recording = locked;
+    if (!locked) {
+      lockMode = "none";
+      canvas.style.cursor = "grab";
+      currentPollingHz = 0;
+      clearInterval(hzDecayTimer);
+      setStatus("已退出捕获，直接拖动画布可平移查看");
+      save(); 
+      renderGroups(); 
+      scheduleDraw();
+    } else {
+      $("overlay").style.display = "none";
+      setStatus(`${lockModeLabel()} · ${displayMode === "follow" ? "鼠标居中" : "固定屏幕"}`);
+      scheduleDraw();
+    }
+  });
+
+  document.addEventListener("pointerlockerror", () => {
+    recording = false;
+    lockMode = "none";
+    canvas.style.cursor = "grab";
+    clearInterval(hzDecayTimer);
+    setStatus("锁定请求被拦截，请点击“进入原始捕获”重试", true);
+  });
+
+  $("start").onclick = enterPointerLock;
+  $("overlayStartBtn").onclick = enterPointerLock;
+
+  window.addEventListener("beforeunload", save);
+
+  $("newGroup").onclick = () => {
+    exitPointerLock();
+    const current = activeGroup();
+    if (current && current.points.length === 1 && groups.length > 1) return;
+    createGroup(true);
+    viewX = 0; viewY = 0; scale = 1;
+    $("scale").value = "1";
+    setDisplayMode("fixed");
+    setStatus("已创建新组，点击开始进行采集");
+  };
+
+  $("rename").onclick = () => {
+    const g = activeGroup(); if (!g) return;
+    const name = prompt("组名称：", g.name);
+    if (name && name.trim()) { g.name = name.trim(); save(); renderGroups(); scheduleDraw(); }
+  };
+
+  $("deleteGroup").onclick = () => {
+    const g = activeGroup(); if (!g) return;
+    if (groups.length === 1) { resetCurrent(); return; }
+    if (!confirm(`确定删除“${g.name}”吗？`)) return;
+    groups = groups.filter(x => x.id !== g.id);
+    activeId = groups[groups.length - 1].id;
+    save(); renderGroups(); updateLive(); centerOnActive(); scheduleDraw();
+  };
+
+  $("modeFixed").onclick = () => setDisplayMode("fixed");
+  $("modeFollow").onclick = () => setDisplayMode("follow");
+
+  $("fit").onclick = fitView;
+  $("centerOrigin").onclick = () => { viewX = 0; viewY = 0; scheduleDraw(); };
+  $("scale").onchange = () => {
+    scale = Math.max(0.01, Math.min(50, Number($("scale").value) || 1));
+    $("scale").value = String(scale);
+    scheduleDraw();
+  };
+
+  $("showAll").onclick = () => {
+    groups.forEach(g => g.visible = true); save(); renderGroups(); scheduleDraw();
+  };
+  $("hideAll").onclick = () => {
+    groups.forEach(g => g.visible = false);
+    const g = activeGroup(); if (g) g.visible = true;
+    save(); renderGroups(); scheduleDraw();
+  };
+
+  $("toggleNodes").onclick = () => {
+    showNodes = !showNodes;
+    $("toggleNodes").classList.toggle("primary", showNodes);
+    scheduleDraw();
+  };
+  $("toggleTicks").onclick = () => {
+    showTicks = !showTicks;
+    $("toggleTicks").classList.toggle("primary", showTicks);
+    scheduleDraw();
+  };
+  $("toggleGrid").onclick = () => {
+    showGrid = !showGrid;
+    $("toggleGrid").classList.toggle("primary", showGrid);
+    scheduleDraw();
+  };
+  $("toggleAxes").onclick = () => {
+    showAxes = !showAxes;
+    $("toggleAxes").classList.toggle("primary", showAxes);
+    scheduleDraw();
+  };
+
+  $("resetZoom").onclick = () => { scale = 1; $("scale").value = "1"; scheduleDraw(); };
+  $("downloadPng").onclick = () => downloadHighResPng();
+
+  $("exportBtn").onclick = () => {
+    const payload = {
+      app: "Raw Mouse Counts Tracker",
+      version: 8,
+      exportedAt: new Date().toISOString(),
+      groups
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `mouse-counts-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  $("importBtn").onclick = () => $("importFile").click();
+  $("importFile").onchange = async () => {
+    const f = $("importFile").files?.[0]; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      const incoming = Array.isArray(data) ? data : data.groups;
+      if (!Array.isArray(incoming)) throw new Error("JSON 格式无效");
+      const clean = incoming.map((g, i) => {
+        const rawPoints = Array.isArray(g.points) ? g.points : [];
+        const points = rawPoints
+          .map(p => Array.isArray(p) ? [Number(p[0]), Number(p[1])] : null)
+          .filter(p => p && Number.isFinite(p[0]) && Number.isFinite(p[1]));
+        if (!points.length) points.push([0, 0]);
+
+        return {
+          id: uid(),
+          name: String(g.name || `导入组 ${i+1}`),
+          createdAt: g.createdAt || new Date().toISOString(),
+          color: g.color || colorFor(groups.length + i),
+          visible: g.visible !== false,
+          points,
+          events: Math.max(0, points.length - 1),
+          distance: computeDistance(points)
+        };
+      });
+      groups.push(...clean);
+      activeId = clean[clean.length - 1].id;
+      save(); renderGroups(); updateLive(); scheduleDraw();
+      setStatus(`已成功导入 ${clean.length} 个轨迹组`);
+    } catch (e) {
+      setStatus("导入失败：" + e.message, true);
+    } finally {
+      $("importFile").value = "";
+    }
+  };
+
+  window.addEventListener("resize", resize);
+
+  load();
+  resize();
+  updateLive();
+  renderGroups();
+  setDisplayMode("fixed");
+  scheduleDraw();
+})();
+</script>
+</body>
+</html>
