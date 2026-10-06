@@ -63,6 +63,32 @@
   .gmeta{font-size:10px;color:var(--muted)}
   .group-actions{display:flex;gap:4px}
   .iconbtn{width:28px;padding:0;height:28px;font-size:12px;line-height:1}
+
+  .color-picker-card{
+    border:1px solid var(--line);border-radius:8px;padding:9px 10px;
+    background:#0d1116;
+  }
+  .color-picker-head{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    margin-bottom:7px;
+  }
+  .color-picker-head .label{font-size:11px;color:var(--muted)}
+  .color-picker-head .value{
+    width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.45);
+    flex:0 0 auto;
+  }
+  .color-palette{
+    display:flex;gap:6px;align-items:center;width:100%;
+  }
+  .color-swatch-btn{
+    position:relative;flex:1;min-width:0;height:24px;padding:0;border-radius:6px;
+    border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);
+  }
+  .color-swatch-btn::after{
+    content:"";position:absolute;inset:4px;border:2px solid transparent;border-radius:4px;
+  }
+  .color-swatch-btn.selected::after{border-color:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+  .color-swatch-btn:hover{transform:translateY(-1px)}
   #main{position:relative;flex:1;min-width:0;user-select:none}
   #canvas{display:block;width:100%;height:100%;background:#080a0d;cursor:grab}
   #hud{
@@ -118,13 +144,22 @@
 <aside id="side">
   <h1>Raw Mouse Counts Tracker</h1>
   <div class="subtitle">
-    优先使用 <b>pointerrawupdate</b> + <b>Coalesced Events</b> 获取高频增量；发现浏览器子事件与父事件不一致时自动回退，避免 counts 漏计。
+    优先使用 <b>pointerrawupdate</b> + <b>Coalesced Events</b> 获取高频增量；发现无法可靠读取子事件时才回退到父事件。
+    <br>轨迹用于<b>参考分析</b>；浏览器事件链路不等同于 USB/原生硬件测试，不应作为专业级轮询、时序或噪声计量依据。
   </div>
 
   <div class="row">
     <button class="primary" id="newGroup" style="flex:1">新建组</button>
     <button id="rename" style="flex:1">重命名</button>
     <button class="danger" id="deleteGroup" style="flex:1">删除组</button>
+  </div>
+
+  <div class="color-picker-card">
+    <div class="color-picker-head">
+      <span class="label">组颜色 · 横向七彩色盘（点击切换当前组）</span>
+      <span id="activeColorPreview" class="value"></span>
+    </div>
+    <div id="colorPalette" class="color-palette" aria-label="组颜色选择"></div>
   </div>
 
   <div class="row" id="captureButtons">
@@ -159,11 +194,11 @@
   </div>
 
   <div class="statsGrid">
-    <div class="stat"><b id="liveHz">0 Hz</b><span>当前回报率 (实时)</span></div>
-    <div class="stat"><b id="peakHz">0 Hz</b><span>峰值回报率 (Peak)</span></div>
+    <div class="stat"><b id="liveHz">0 Hz</b><span>当前事件频率 (实时)</span></div>
+    <div class="stat"><b id="peakHz">0 Hz</b><span>峰值事件频率 (Peak)</span></div>
     <div class="stat"><b id="liveX">0</b><span>累计 ΔX</span></div>
     <div class="stat"><b id="liveY">0</b><span>累计 ΔY</span></div>
-    <div class="stat"><b id="eventCount">0</b><span>真实采样点</span></div>
+    <div class="stat"><b id="eventCount">0</b><span>轨迹节点（非零）</span></div>
     <div class="stat"><b id="pathLen">0</b><span>弧长 counts</span></div>
   </div>
 
@@ -261,13 +296,16 @@
 
   function updateHzCalculation() {
     const now = performance.now();
-    while (recentTimestamps.length && (now - recentTimestamps[0] > 200)) {
+    while (recentTimestamps.length && (now - recentTimestamps[0] > 250)) {
       recentTimestamps.shift();
     }
-    if (recentTimestamps.length > 2) {
-      const duration = (now - recentTimestamps[0]) / 1000;
-      if (duration > 0.02) {
-        currentPollingHz = Math.round(recentTimestamps.length / duration);
+
+    if (recentTimestamps.length >= 3) {
+      const first = recentTimestamps[0];
+      const last = recentTimestamps[recentTimestamps.length - 1];
+      const duration = (last - first) / 1000;
+      if (duration > 0) {
+        currentPollingHz = Math.round((recentTimestamps.length - 1) / duration);
         if (currentPollingHz > peakPollingHz) {
           peakPollingHz = currentPollingHz;
         }
@@ -275,6 +313,7 @@
     } else {
       currentPollingHz = 0;
     }
+
     $("liveHz").textContent = `${currentPollingHz.toLocaleString()} Hz`;
     $("peakHz").textContent = `${peakPollingHz.toLocaleString()} Hz`;
   }
@@ -313,9 +352,54 @@
     return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
   }
 
+  const PALETTE_COLORS = [
+    "#ff5f6d", // 红
+    "#ff9f43", // 橙
+    "#ffd166", // 黄
+    "#4cd97b", // 绿
+    "#35c9ff", // 青
+    "#6ea8fe", // 蓝
+    "#a78bfa"  // 紫
+  ];
+
   function colorFor(i) {
-    const hue = (i * 137.508) % 360;
-    return `hsl(${hue.toFixed(1)} 78% 62%)`;
+    return PALETTE_COLORS[((i % PALETTE_COLORS.length) + PALETTE_COLORS.length) % PALETTE_COLORS.length];
+  }
+
+  function renderColorPalette() {
+    const palette = $("colorPalette");
+    if (!palette) return;
+    palette.innerHTML = "";
+    PALETTE_COLORS.forEach((color, i) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "color-swatch-btn";
+      btn.style.background = color;
+      btn.dataset.color = color;
+      btn.title = ["红", "橙", "黄", "绿", "青", "蓝", "紫"][i];
+      btn.setAttribute("aria-label", `选择${btn.title}色`);
+      btn.onclick = () => {
+        const g = activeGroup();
+        if (!g) return;
+        g.color = color;
+        syncColorPalette();
+        save();
+        renderGroups();
+        scheduleDraw();
+      };
+      palette.appendChild(btn);
+    });
+    syncColorPalette();
+  }
+
+  function syncColorPalette() {
+    const g = activeGroup();
+    const buttons = $("colorPalette")?.querySelectorAll(".color-swatch-btn");
+    if (buttons) {
+      buttons.forEach(btn => btn.classList.toggle("selected", !!g && btn.dataset.color === g.color));
+    }
+    const preview = $("activeColorPreview");
+    if (preview) preview.style.background = g?.color || "#6ea8fe";
   }
 
   function computeDistance(points) {
@@ -389,6 +473,7 @@
     peakPollingHz = 0;
     updateLive();
     renderGroups();
+    syncColorPalette();
     save();
     scheduleDraw();
   }
@@ -750,7 +835,7 @@
       `ACTIVE: ${g?.name ?? "-"}\n` +
       `TRACK X: ${formatCount(p[0])} counts\n` +
       `TRACK Y: ${formatCount(p[1])} counts\n` +
-      `SAMPLES: ${(g?.events ?? 0).toLocaleString()} (真实节点)\n` +
+      `SAMPLES: ${(g?.events ?? 0).toLocaleString()} (非零轨迹节点)\n` +
       `SCALE: ${Number(scale.toFixed(3))} px/count\n` +
       `MODE: ${displayMode === "follow" ? "FOLLOW" : "FIXED"}\n` +
       `SOURCE: ${_supportsRawUpdate ? "pointerrawupdate + coalesced" : "pointermove fallback"}`;
@@ -848,7 +933,7 @@
 
       wrap.onclick = () => {
         activeId = g.id;
-        updateLive(); renderGroups(); centerOnActive(); scheduleDraw();
+        updateLive(); renderGroups(); syncColorPalette(); centerOnActive(); scheduleDraw();
       };
       groupsEl.appendChild(wrap);
     });
@@ -881,14 +966,14 @@
     let mode = "unknown";
     try {
       mode = await requestLock(canvas, true);
-    } catch (e1) {
-      try {
-        await requestLock(canvas, false);
-        mode = "normal";
-      } catch (e2) {
-        setStatus("锁定失败：" + (e2?.message || e2?.name || "未知错误"), true);
-        return;
-      }
+    } catch (e) {
+      // 本工具的目标是原始 counts。若无法启用 unadjustedMovement，
+      // 宁可拒绝采集，也不悄悄退回带系统加速的普通 Pointer Lock。
+      setStatus(
+        "无法启用原始鼠标输入：" + (e?.message || e?.name || "浏览器不支持 unadjustedMovement；未开始采集"),
+        true
+      );
+      return;
     }
 
     lockMode = mode;
@@ -965,10 +1050,11 @@
   function getCaptureSamples(e) {
     const parentDx = Number.isFinite(Number(e.movementX)) ? Number(e.movementX) : 0;
     const parentDy = Number.isFinite(Number(e.movementY)) ? Number(e.movementY) : 0;
-    const parentDelta = (parentDx !== 0 || parentDy !== 0) ? [[parentDx, parentDy]] : [];
+    const parentHasMove = parentDx !== 0 || parentDy !== 0;
+    const parentDelta = parentHasMove ? [[parentDx, parentDy]] : [];
 
     if (typeof e.getCoalescedEvents !== "function") {
-      return { deltas: parentDelta, hzEvents: parentDelta.length ? [e] : [] };
+      return { deltas: parentDelta, hzEvents: [e] };
     }
 
     let coalesced = [];
@@ -979,43 +1065,58 @@
     }
 
     if (!coalesced.length) {
-      return { deltas: parentDelta, hzEvents: parentDelta.length ? [e] : [] };
+      return { deltas: parentDelta, hzEvents: [e] };
     }
 
     const deltas = [];
-    let sumX = 0;
-    let sumY = 0;
-    let valid = 0;
+    const hzEvents = [];
+    let invalidMovement = false;
 
     for (const ev of coalesced) {
       const dx = Number(ev.movementX);
       const dy = Number(ev.movementY);
-      if (!Number.isFinite(dx) || !Number.isFinite(dy)) continue;
-      sumX += dx;
-      sumY += dy;
-      valid++;
-      if (dx !== 0 || dy !== 0) deltas.push([dx, dy]);
+
+      // 时间频率统计：零位移事件也属于事件，不应因为 dx/dy 为 0 被完全忽略。
+      hzEvents.push(ev);
+
+      if (!Number.isFinite(dx) || !Number.isFinite(dy)) {
+        invalidMovement = true;
+        continue;
+      }
+
+      if (dx !== 0 || dy !== 0) {
+        deltas.push([dx, dy]);
+      }
     }
 
-    // 正常实现应满足：父事件 movement ≈ 所有 coalesced movement 之和。
-    // 允许极小浮点误差；较大不一致时，以父事件作为总量的可信来源。
-    const tolX = 1e-7 * Math.max(1, Math.abs(parentDx), Math.abs(sumX));
-    const tolY = 1e-7 * Math.max(1, Math.abs(parentDy), Math.abs(sumY));
-    const consistent = valid > 0 &&
-      Math.abs(sumX - parentDx) <= tolX &&
-      Math.abs(sumY - parentDy) <= tolY;
+    /*
+      重要修正：
+      不再把“coalesced movementX/Y 之和”强行与父事件 movementX/Y 比较。
 
-    if (consistent && deltas.length) {
-      return { deltas, hzEvents: coalesced };
+      Pointer Events 规定父事件是 coalesced events 的聚合表示，并允许父事件
+      存在额外处理；规范也明确建议开发者处理“父事件”或“全部 coalesced events”
+      二选一，而不是混用两者。因此，对于轨迹几何，优先完整使用 coalesced 流。
+
+      只有在子事件 movement 字段本身不可用时，才回退到父事件，以保证总 counts
+      不至于因为浏览器实现异常而丢失。
+    */
+    if (!invalidMovement && deltas.length) {
+      return { deltas, hzEvents };
     }
 
-    // 浏览器异常时优先保证 counts 总量正确；代价是无法恢复该批次的
-    // 中间折角，只能以父事件的总位移作为一个节点。
-    if (parentDelta.length) {
+    if (!invalidMovement && !deltas.length) {
+      // 子事件全部为零；若父事件有非零总位移，用父事件保住 counts。
+      return parentHasMove
+        ? { deltas: parentDelta, hzEvents: [e], fallback: true }
+        : { deltas: [], hzEvents };
+    }
+
+    if (parentHasMove) {
       return { deltas: parentDelta, hzEvents: [e], fallback: true };
     }
 
-    return { deltas, hzEvents: coalesced };
+    // 父事件也没有可用的非零位移时，不凭空制造数据。
+    return { deltas, hzEvents, fallback: invalidMovement };
   }
 
   function normalizeEventTime(ts) {
@@ -1158,7 +1259,7 @@
     if (!confirm(`确定删除“${g.name}”吗？`)) return;
     groups = groups.filter(x => x.id !== g.id);
     activeId = groups[groups.length - 1].id;
-    save(); renderGroups(); updateLive(); centerOnActive(); scheduleDraw();
+    save(); renderGroups(); syncColorPalette(); updateLive(); centerOnActive(); scheduleDraw();
   };
 
   $("modeFixed").onclick = () => setDisplayMode("fixed");
@@ -1208,7 +1309,7 @@
   $("exportBtn").onclick = () => {
     const payload = {
       app: "Raw Mouse Counts Tracker",
-      version: 9,
+      version: 10,
       exportedAt: new Date().toISOString(),
       groups
     };
@@ -1247,7 +1348,7 @@
       });
       groups.push(...clean);
       activeId = clean[clean.length - 1].id;
-      save(); renderGroups(); updateLive(); scheduleDraw();
+      save(); renderGroups(); syncColorPalette(); updateLive(); scheduleDraw();
       setStatus(`已成功导入 ${clean.length} 个轨迹组`);
     } catch (e) {
       setStatus("导入失败：" + e.message, true);
@@ -1262,6 +1363,7 @@
   resize();
   updateLive();
   renderGroups();
+  renderColorPalette();
   setDisplayMode("fixed");
   scheduleDraw();
 })();
