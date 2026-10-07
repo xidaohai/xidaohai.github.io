@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>任脉 CV22→CV1 针刺深度与解剖安全数据表｜复核修订版</title>
+<style>
+  :root{
+    --ink:#17212b;
+    --muted:#5b6773;
+    --line:#cfd6dd;
+    --soft:#f4f6f8;
+    --accent:#243b53;
+    --warn:#fff4d6;
+    --danger:#fde9e7;
+    --good:#eaf5ec;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    color:var(--ink);
+    font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;
+    background:#eef1f4;
+    line-height:1.55;
+  }
+  .page{
+    max-width:1500px;
+    margin:24px auto;
+    background:#fff;
+    padding:28px 30px 40px;
+    box-shadow:0 3px 18px rgba(0,0,0,.08);
+  }
+  h1{font-size:25px;margin:0 0 6px}
+  h2{font-size:18px;margin:28px 0 10px;border-left:4px solid var(--accent);padding-left:9px}
+  p{margin:8px 0}
+  .subtitle{color:var(--muted);font-size:13px}
+  .callout{
+    background:var(--warn);
+    border:1px solid #e8d69c;
+    padding:12px 14px;
+    border-radius:7px;
+    margin:14px 0;
+    font-size:13px;
+  }
+  .note{
+    background:var(--soft);
+    border:1px solid var(--line);
+    padding:12px 14px;
+    border-radius:7px;
+    font-size:13px;
+  }
+  .metrics{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+    margin:15px 0 8px;
+  }
+  .metric{
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:11px 12px;
+    background:#fff;
+  }
+  .metric b{display:block;font-size:18px}
+  .metric span{font-size:12px;color:var(--muted)}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+    font-size:12px;
+  }
+  th,td{
+    border:1px solid var(--line);
+    padding:7px 7px;
+    vertical-align:top;
+    overflow-wrap:anywhere;
+  }
+  th{
+    background:#eef2f5;
+    text-align:left;
+    font-weight:700;
+  }
+  tr:nth-child(even) td{background:#fbfcfd}
+  .center{text-align:center}
+  .nowrap{white-space:nowrap}
+  .tag{
+    display:inline-block;
+    padding:2px 6px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    margin-right:4px;
+  }
+  .A{background:var(--good);border:1px solid #b8d9bd}
+  .B{background:#eef4ff;border:1px solid #bdd0f1}
+  .C{background:#f7f1ff;border:1px solid #d8c7f0}
+  .D{background:#f1f1f1;border:1px solid #d1d1d1}
+  .warnrow td{background:#fffaf0!important}
+  .dangerrow td{background:#fff5f4!important}
+  .source a{color:#135fa5;text-decoration:none}
+  .source a:hover{text-decoration:underline}
+  .small{font-size:11px;color:var(--muted)}
+  .formula{
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+    background:#f7f8fa;
+    border:1px solid var(--line);
+    padding:1px 4px;
+    border-radius:4px;
+  }
+  .legend td:first-child{width:70px;text-align:center}
+  .footer{
+    margin-top:25px;
+    padding-top:12px;
+    border-top:1px solid var(--line);
+    color:var(--muted);
+    font-size:11px;
+  }
+  .btnbar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px}
+  button{
+    border:1px solid #9aa6b2;background:#fff;padding:7px 12px;border-radius:6px;cursor:pointer;
+  }
+  button:hover{background:#f5f7f9}
+  @media print{
+    @page{size:A4 landscape;margin:10mm}
+    body{background:#fff}
+    .page{margin:0;max-width:none;box-shadow:none;padding:0}
+    .btnbar{display:none}
+    h1{font-size:19px}
+    h2{font-size:14px;margin-top:15px}
+    table{font-size:9.2px}
+    th,td{padding:4px}
+    .metrics{grid-template-columns:repeat(4,1fr)}
+    a{color:inherit;text-decoration:none}
+    thead{display:table-header-group}
+    tr,td,th{break-inside:avoid}
+    .pagebreak{break-before:page}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="btnbar">
+    <button onclick="window.print()">打印 / 另存为 PDF</button>
+    <button onclick="document.body.classList.toggle('compact')">切换视图</button>
+  </div>
+
+  <h1>任脉 CV22（天突）→ CV1（会阴）</h1>
+  <div class="subtitle">人体针刺深度与解剖安全数据汇总｜研究数据优先｜打印版｜资料核验日期：2026-10-07；复核修订版</div>
+
+  <div class="callout">
+    <b>重要定义：</b>本表不是“自行进针操作指南”，也不是给某一个人的安全深度处方。
+    “危险深度 / 可允许深度 / 研究建议深度”在不同论文中的定义并不统一；不同人、体型、体位、进针角度、测量工具和靶结构均可造成明显差异。
+    尤其是腹部与颈胸部，不能把表中某个平均值理解成绝对安全阈值。
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><b>24</b><span>任脉穴位：CV22 → CV1</span></div>
+    <div class="metric"><b>47项研究</b><span>2013年深度系统综述纳入</span></div>
+    <div class="metric"><b>83名成人</b><span>CV12活体超声研究</span></div>
+    <div class="metric"><b>319名儿童</b><span>CV22等胸部穴位CT研究</span></div>
+  </div>
+
+  <h2>一、先看懂“70%”是什么意思</h2>
+  <div class="note">
+    部分针刺解剖研究把“安全深度”设置为测得危险深度的 70%。
+    例如危险深度为 <span class="formula">20 mm</span>，则对应的70%参考值为
+    <span class="formula">14 mm</span>。这只是把均值/个体值整体乘以0.70，并不会消除原有的个体离散。
+    2013年系统综述明确指出：70%、75%、80%等比例并没有统一的国际标准，很多研究是基于临床经验选择比例；因此本表把“70%值”单独列出，不把它写成绝对安全线。
+  </div>
+
+  <h2>二、CV22 → CV1 数据表</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:55px">穴位</th>
+        <th style="width:74px">名称</th>
+        <th style="width:125px">区域 / 主要风险结构</th>
+        <th style="width:170px">测量指标（最重要）</th>
+        <th style="width:205px">定量结果</th>
+        <th style="width:145px">样本 / 方法</th>
+        <th style="width:240px">如何解释</th>
+        <th style="width:72px">证据级别</th>
+        <th style="width:230px">来源</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr class="warnrow">
+        <td class="center"><b>CV22</b></td><td>天突</td>
+        <td>胸骨上窝；气管；更深部邻近胸膜顶/纵隔结构</td>
+        <td>儿童CT：皮肤→气管；成人旧CT系列亦有胸部安全深度资料，但本版不采用未能直接核验原始数值的二手数字</td>
+        <td>
+          <b>儿童，n=319：</b><br>
+          男：<b>22.39 ± 7.04 mm</b><br>
+          女：<b>22.82 ± 7.20 mm</b><br>
+          年龄分组：4–6岁 <b>19.32 ± 4.84</b>；7–9岁 <b>21.28 ± 7.47</b>；10–12岁 <b>25.53 ± 8.80</b>；13–15岁 <b>24.04 ± 6.67</b>；16–18岁 <b>23.80 ± 7.16 mm</b>
+        </td>
+        <td>319名4–18岁儿童；CT；28个胸部穴位。CV22的安全深度定义为皮肤→气管。</td>
+        <td>这是本表中样本量最大的任脉直接深度研究之一。结果显示年龄、体重/BMI与深度存在明显分层差异。<b>不能把儿童数据直接套用于成人。</b></td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/25945112/">PubMed</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4592721/">PMC全文</a><br><a href="https://onlinelibrary.wiley.com/doi/10.1155/2015/126028">Wiley期刊</a></td>
+      </tr><tr>
+        <td class="center"><b>CV23</b></td><td>廉泉</td>
+        <td>舌骨下方；颏舌骨肌、颏舌肌、二腹肌；舌下腺/血管风险</td>
+        <td>活体超声：皮肤→颏舌骨肌；同时观察软组织结构</td>
+        <td>
+          总体：<b>1.59 ± 0.49 cm</b>（15.9 ± 4.9 mm）<br>
+          男：<b>1.43 ± 0.52 cm</b>；女：<b>1.75 ± 0.42 cm</b>；<b>p=0.03</b><br>
+          总体IQR：<b>1.2–2.0 cm</b>（中位数1.65 cm）
+        </td>
+        <td>30名20–30岁成人（15男/15女）；超声；来自Standard Ultrasound Image of Acupoint数据库。</td>
+        <td>近期同行评议活体超声研究。除深度外，还直接看到颏舌骨肌、颏舌肌、二腹肌以及血管；作者特别提醒斜刺时要考虑舌下腺损伤。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://www.integrmed.org/journal/view.php?doi=10.56986%2Fpim.2023.02.007">期刊原文</a><br><a href="https://doi.org/10.56986/pim.2023.02.007">DOI</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV21</b></td><td>璇玑</td>
+        <td>胸骨柄区；胸膜风险</td>
+        <td>成人胸部CT存在历史安全深度数据；本版核心表不采用未经原始论文逐项核验的具体毫米值</td>
+        <td>—<br><span class="small">旧版曾使用二手转述数字；本次复核撤下，避免把“Mean ± 95% CI（建议值）”误写成SD或危险深度。</span></td>
+        <td>120名成人胸部CT研究被2013年系统综述收录。</td>
+        <td>证据可确认体型会影响胸部穴位深度，但在当前可直接核验范围内，不应把二手转述数字冒充同一测量定义下的危险深度。</td>
+        <td><span class="tag B">B</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/1338010/">PubMed：Sheu & Lin, 1992</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC系统综述</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV20</b></td><td>华盖</td>
+        <td>胸骨区；胸膜/纵隔风险</td>
+        <td>成人胸部CT存在历史安全深度数据；本版核心表不采用未经原始论文逐项核验的具体毫米值</td>
+        <td>—<br><span class="small">旧版曾使用二手转述数字；本次复核撤下，避免把“Mean ± 95% CI（建议值）”误写成SD或危险深度。</span></td>
+        <td>120名成人胸部CT研究被2013年系统综述收录。</td>
+        <td>证据可确认体型会影响胸部穴位深度，但在当前可直接核验范围内，不应把二手转述数字冒充同一测量定义下的危险深度。</td>
+        <td><span class="tag B">B</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/1338010/">PubMed：Sheu & Lin, 1992</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC系统综述</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV19</b></td><td>紫宫</td>
+        <td>胸骨区；胸膜/纵隔风险</td>
+        <td>成人胸部CT存在历史安全深度数据；本版核心表不采用未经原始论文逐项核验的具体毫米值</td>
+        <td>—<br><span class="small">旧版曾使用二手转述数字；本次复核撤下，避免把“Mean ± 95% CI（建议值）”误写成SD或危险深度。</span></td>
+        <td>120名成人胸部CT研究被2013年系统综述收录。</td>
+        <td>证据可确认体型会影响胸部穴位深度，但在当前可直接核验范围内，不应把二手转述数字冒充同一测量定义下的危险深度。</td>
+        <td><span class="tag B">B</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/1338010/">PubMed：Sheu & Lin, 1992</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC系统综述</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV18</b></td><td>玉堂</td>
+        <td>胸骨区；胸膜/纵隔风险</td>
+        <td>成人胸部CT存在历史安全深度数据；本版核心表不采用未经原始论文逐项核验的具体毫米值</td>
+        <td>—<br><span class="small">旧版曾使用二手转述数字；本次复核撤下，避免把“Mean ± 95% CI（建议值）”误写成SD或危险深度。</span></td>
+        <td>120名成人胸部CT研究被2013年系统综述收录。</td>
+        <td>证据可确认体型会影响胸部穴位深度，但在当前可直接核验范围内，不应把二手转述数字冒充同一测量定义下的危险深度。</td>
+        <td><span class="tag B">B</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/1338010/">PubMed：Sheu & Lin, 1992</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC系统综述</a></td>
+      </tr>
+
+      <tr class="dangerrow">
+        <td class="center"><b>CV17</b></td><td>膻中</td>
+        <td>胸骨；先天性胸骨孔；胸腔/心包风险</td>
+        <td>①皮肤→胸骨后面；②胸骨厚度；③先天性胸骨孔发生率</td>
+        <td>
+          J-STAGE研究：<br>
+          皮肤→胸骨后面：<b>18.8 ± 5.0 mm</b>，范围 <b>11–31 mm</b>（31名）<br>
+          胸骨厚度：<b>11.5 ± 2.0 mm</b>，范围 <b>9–15 mm</b>（21具尸体）<br>
+          先天性胸骨孔：<b>1/51具尸体</b>
+        </td>
+        <td>日本针灸学会期刊；51具尸体、21具尸体、31名活体。</td>
+        <td>这里的风险重点不是“平均深度”，而是少数人存在胸骨孔，针尖可绕开胸骨直接进入胸腔/心包方向；属于解剖变异问题。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source">
+          <a href="https://www.jstage.jst.go.jp/article/jjsam1981/50/1/50_1_103/_article">J-STAGE原文：Maeoka & Kitamura, 2000</a><br>
+          <a href="https://pubmed.ncbi.nlm.nih.gov/1338010/">成人CT胸部数据：PubMed</a>
+        </td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV16</b></td><td>中庭</td>
+        <td>胸骨剑突附近；胸膜/纵隔风险</td>
+        <td>成人胸部CT存在历史安全深度数据；本版核心表不采用未经原始论文逐项核验的具体毫米值</td>
+        <td>—<br><span class="small">旧版曾使用二手转述数字；本次复核撤下，避免把“Mean ± 95% CI（建议值）”误写成SD或危险深度。</span></td>
+        <td>120名成人胸部CT研究被2013年系统综述收录。</td>
+        <td>证据可确认体型会影响胸部穴位深度，但在当前可直接核验范围内，不应把二手转述数字冒充同一测量定义下的危险深度。</td>
+        <td><span class="tag B">B</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/1338010/">PubMed：Sheu & Lin, 1992</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC系统综述</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV15</b></td><td>鸠尾</td>
+        <td>剑突下；腹腔深部结构</td>
+        <td>MRI下不同进针角度的研究“安全深度”</td>
+        <td>
+          研究所列不同方向/角度的安全深度范围：<b>16.99–53.47 mm</b><br>
+          垂直方向：<b>16.99 ± 2.86 mm</b>
+        </td>
+        <td>20名健康成人（10男/10女）；MRI。</td>
+        <td><b>方向是关键变量。</b>同一穴位不能脱离进针角度讨论一个固定毫米数。2013系统综述把CV15列为角度导致深度差异明显的例子。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/22741258/">PubMed：Cheng & Dong, 2012</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC系统综述</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV14</b></td><td>巨阙</td>
+        <td>上腹；腹腔脏器</td>
+        <td>MRI研究存在；主要报告性别/体型等因素</td>
+        <td><b>本版不填未经直接核验的毫米数。</b><br>已核验：10男+10女，MRI研究；报告未见性别、身高、体重、BMI、body-cun与安全深度的显著相关。</td>
+        <td>10名男性+10名女性；MRI（研究被2013系统综述收录）。</td>
+        <td>原始量化数据未在当前可核验公开页面完整呈现，因此不“猜数”。</td>
+        <td><span class="tag B">B</span></td>
+        <td class="source"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC系统综述（Yu 2010；参考文献可追溯）</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV13</b></td><td>上脘</td>
+        <td>上腹；腹膜、肝/胰/胃等随个体而异</td>
+        <td>成人MRI：皮肤→壁腹膜；另有尸体解剖研究涉及肝脏/胃或横结肠</td>
+        <td>
+          <b>MRI活体，n=20：</b><br>
+          总体：<b>17.6 ± 7.1 mm</b><br>
+          男：<b>14.2 ± 4.0 mm</b>；女：<b>21.0 ± 8.1 mm</b><br><br>
+          同一区域另有尸体研究，但定义为“皮肤→器官深点”，不能和MRI的皮肤→腹膜直接混合。
+        </td>
+        <td>20名22–28岁成人；MRI；2013系统综述收录。</td>
+        <td>这是活体数据，但样本仅20人。它适合说明离散与活体差异，不适合作为所有人的统一阈值。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://www.e-sciencecentral.org/articles/SC000046906">ScienceCentral：原始研究表与参考文献可追溯</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC系统综述</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV12</b></td><td>中脘</td>
+        <td>上腹；腹膜、胃、横结肠；部分人肝脏可位于深方</td>
+        <td>两套关键数据：①活体超声皮肤→脏层腹膜；②尸体超声皮肤→腹膜危险深度</td>
+        <td>
+          <b>活体超声，n=83：</b><br>
+          ANIR：<b>25.3 ± 10.2 mm</b>；超声图像中<b>62.7%</b>受试者可见肝脏。<br><br>
+          <b>尸体超声，n=20：</b><br>
+          危险深度：<b>11.0 ± 5.4 mm</b>，范围 <b>3.5–23.8 mm</b><br>
+          论文汇总的70%参考值：<b>7.7 ± 3.8 mm</b>
+        </td>
+        <td>活体：85人招募、83例有效超声；平均20.3±2.5岁。<br>尸体：20具，51–96岁。</td>
+        <td><b>优先数据。</b>活体与尸体数字相差很大，正好说明“固定毫米数”不能替代个体解剖判断。原研究明确建议考虑人体测量因素并根据个体器官位置评估风险。</td>
+        <td><span class="tag A">A</span><span class="tag B">B</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/36141319/">PubMed：Chu et al., 2022</a><br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498562/">PMC全文</a><br><a href="https://www.e-sciencecentral.org/articles/SC000046906">ScienceCentral：尸体研究汇总</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV11</b></td><td>建里</td>
+        <td>上腹；腹腔</td>
+        <td>已核验主要综述未提供可直接引用的统一成人毫米分布</td>
+        <td>—</td>
+        <td>缺少当前可核验的成人大样本毫米级数据。</td>
+        <td>不填猜测值。可作为“数据空白”记录。</td>
+        <td><span class="tag D">D</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/23935678/">PubMed：2013系统综述</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV10</b></td><td>下脘</td>
+        <td>上腹；腹腔</td>
+        <td>有儿童CT研究覆盖CV9–CV14，但本版不把儿童数据冒充成人数据</td>
+        <td>—</td>
+        <td>2008：219名7–15岁儿童，CT；研究显示深度随年龄、体重、腰围显著变化。</td>
+        <td>成年人没有在当前核验范围内得到足够稳健的统一毫米分布，因此不填成人固定值。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/19028333/">PubMed：Chen et al., 2008</a><br><a href="https://www.sciencedirect.com/science/article/abs/pii/S0965229908000642">ScienceDirect原文摘要</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV9</b></td><td>水分</td>
+        <td>脐上；腹腔</td>
+        <td>儿童CT研究覆盖，但缺少可直接用于成人的统一量化数据</td>
+        <td>—</td>
+        <td>2008：219名7–15岁儿童，CT。</td>
+        <td>保留“数据空白”，避免把儿童统计值硬套成人。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/19028333/">PubMed：Chen et al., 2008</a></td>
+      </tr>
+
+      <tr class="dangerrow">
+        <td class="center"><b>CV8</b></td><td>神阙</td>
+        <td>脐部；腹腔</td>
+        <td>特殊穴位；传统文献与临床安全规范通常不按普通“深度”逻辑处理</td>
+        <td>—</td>
+        <td>本版不将“禁针/慎用”转换成毫米数。</td>
+        <td>不能通过一个平均毫米数概括安全性；本表不提供操作深度。</td>
+        <td><span class="tag C">C</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/23935678/">PubMed：深度定义综述</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV7</b></td><td>阴交</td>
+        <td>脐下；腹腔</td>
+        <td>有儿童CT研究覆盖CV2–CV7；成人统一毫米数据不足</td>
+        <td>—</td>
+        <td>2008：219名7–15岁儿童，CT。</td>
+        <td>研究证明年龄、体重、腰围会显著影响深度；因此不应采用一个固定成人值。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/19028333/">PubMed：Chen et al., 2008</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV6</b></td><td>气海</td>
+        <td>下腹；腹膜 / 腹腔</td>
+        <td>尸体超声：皮肤→腹膜；危险深度与研究报告的70%参考值</td>
+        <td>
+          危险深度：<b>12.8 ± 6.7 mm</b><br>
+          范围：<b>3.0–27.4 mm</b><br>
+          70%参考：<b>9.0 ± 4.7 mm</b>
+        </td>
+        <td>20具成人尸体（15男/5女，51–96岁）；超声。</td>
+        <td><b>样本较小。</b>但“均值+SD+范围+70%参考”完整，非常适合观察离散。不能把其直接当作活体个人安全线。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/32551810/">PubMed：Shen et al., 2021</a><br><a href="https://www.e-sciencecentral.org/articles/SC000046906">ScienceCentral数据表</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV5</b></td><td>石门</td>
+        <td>下腹；腹膜 / 盆腔结构</td>
+        <td>当前可核验主要文献未形成稳健的成人统一毫米分布</td>
+        <td>—</td>
+        <td>缺少可直接引用的成人大样本定量边界。</td>
+        <td>不以传统“几寸”反推危险深度。</td>
+        <td><span class="tag D">D</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/23935678/">PubMed：2013系统综述</a></td>
+      </tr>
+
+      <tr class="dangerrow">
+        <td class="center"><b>CV4</b></td><td>关元</td>
+        <td>下腹；腹膜 / 腹腔；膀胱位置还会受充盈状态等因素影响</td>
+        <td>尸体超声：皮肤→腹膜；危险深度与研究报告的70%参考值</td>
+        <td>
+          危险深度：<b>13.1 ± 7.0 mm</b><br>
+          范围：<b>3.4–28.2 mm</b><br>
+          70%参考：<b>9.2 ± 5.2 mm</b>
+        </td>
+        <td>20具成人尸体（15男/5女，51–96岁）；超声。</td>
+        <td><b>这是本表的核心离散数据。</b>最浅个体只有3.4 mm，说明均值13.1 mm掩盖了很大的个体差异。70%是研究中的保守参考，不是绝对安全边界。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/32551810/">PubMed：Shen et al., 2021</a><br><a href="https://www.e-sciencecentral.org/articles/SC000046906">ScienceCentral数据表</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV3</b></td><td>中极</td>
+        <td>耻骨上区；膀胱 / 盆腔结构</td>
+        <td>儿童CT覆盖CV2–CV7；成人存在影像/临床研究，但当前未得到可用于普通成人统一毫米阈值的充分数据</td>
+        <td>—</td>
+        <td>2008：219名7–15岁儿童，CT；另有较新的CV3临床影像研究。</td>
+        <td>膀胱充盈、盆腔器官位置是重要个体因素；本版不把研究方案深度写成通用成人安全值。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/19028333/">PubMed：Chen et al., 2008</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV2</b></td><td>曲骨</td>
+        <td>耻骨联合上方；耻骨、膀胱 / 盆腔</td>
+        <td>儿童CT覆盖CV2；成人统一毫米分布不足</td>
+        <td>—</td>
+        <td>2008：219名7–15岁儿童，CT。</td>
+        <td>不把儿童数据转换成成人“安全毫米数”。</td>
+        <td><span class="tag A">A</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/19028333/">PubMed：Chen et al., 2008</a></td>
+      </tr>
+
+      <tr>
+        <td class="center"><b>CV1</b></td><td>会阴</td>
+        <td>会阴；会阴肌群、阴部神经及血管等</td>
+        <td>当前核验到的资料以解剖关系和定位为主，缺少可泛化的大样本“皮肤→危险结构”毫米统计</td>
+        <td>—</td>
+        <td>未发现足够强的统一成人量化数据库。</td>
+        <td>不建议用传统寸数自行反推出危险边界。</td>
+        <td><span class="tag D">D</span></td>
+        <td class="source"><a href="https://pubmed.ncbi.nlm.nih.gov/23935678/">PubMed：2013系统综述</a></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <h2>三、重点核验后的“高可信数据集”</h2>
+<table>
+<thead><tr><th style="width:135px">数据集</th><th style="width:110px">样本</th><th>核心数字</th><th style="width:400px">为什么值得优先参考</th><th style="width:220px">原始来源</th></tr></thead>
+<tbody>
+<tr><td><b>CV22 天突</b></td><td>319名儿童</td><td><b>22.39±7.04 mm（男）</b>；<b>22.82±7.20 mm（女）</b>。CV22定义为皮肤→气管。</td><td>任脉直接深度研究中样本量较大；有年龄、体重/BMI分层；原始研究全文可核验。</td><td><a href="https://pubmed.ncbi.nlm.nih.gov/25945112/">PubMed</a>｜<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4592721/">PMC</a></td></tr>
+<tr><td><b>CV12 中脘</b></td><td>83名成人</td><td><b>25.3±10.2 mm</b>（活体超声ANIR）；62.7%图像可见肝脏。</td><td>活体、现代超声、直接测量皮肤→脏层腹膜；作者明确强调个体差异并建议考虑人体测量与器官位置。</td><td><a href="https://pubmed.ncbi.nlm.nih.gov/36141319/">PubMed</a>｜<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498562/">PMC</a></td></tr>
+<tr><td><b>ST25 天枢（腹部对照）</b></td><td>90名成人</td><td><b>32.1±8.7 mm</b>；<b>13.1–56.3 mm</b>；皮肤→壁腹膜。</td><td>虽非任脉，但在同一腹部区域；成人CT原始研究，样本大于CV4/CV6尸体研究，可作为腹壁个体离散的外部参照。</td><td><a href="https://kiss.kstudy.com/Detail/Ar?key=3353761">KCI期刊页面</a>｜<a href="https://doi.org/10.13045/acupunct.2015039">DOI</a></td></tr>
+<tr><td><b>CV23 廉泉</b></td><td>30名成人</td><td><b>15.9±4.9 mm</b>至颏舌骨肌；IQR <b>12–20 mm</b>。</td><td>近期同行评议活体超声；同时记录颏舌骨肌、颏舌肌、二腹肌、血管等，不只是单一“深度数字”。</td><td><a href="https://www.integrmed.org/journal/view.php?doi=10.56986/pim.2023.02.007">期刊原文</a>｜<a href="https://doi.org/10.56986/pim.2023.02.007">DOI</a></td></tr>
+<tr><td><b>CV4 / CV6</b></td><td>20具成人尸体</td><td>CV4：<b>13.1±7.0 mm</b>，3.4–28.2 mm；CV6：<b>12.8±6.7 mm</b>，3.0–27.4 mm。</td><td>样本不大，但均值、SD、范围和研究报告的70%参考值齐全，非常适合观察“离散”。同时必须记住尸体与活体存在系统差异。</td><td><a href="https://pubmed.ncbi.nlm.nih.gov/32551810/">PubMed</a>｜<a href="https://www.e-sciencecentral.org/articles/SC000046906">数据汇总表</a></td></tr>
+</tbody></table>
+<div class="note"><b>核验原则：</b>“A”表示同行评议的原始人体研究且数字可从原文/权威索引核对，并不表示样本一定足够大。20–30人的研究仍有明显统计不确定性。ST25仅作为腹部邻近穴位的外部参照，不作为任脉数据。</div>
+
+<h2>四、为什么同一个穴位会出现差一倍甚至更多的“深度”</h2>
+  <table>
+    <thead><tr><th style="width:170px">因素</th><th>影响方式</th><th style="width:330px">本版最典型例子</th></tr></thead>
+    <tbody>
+      <tr><td><b>样本类型</b></td><td>活体、尸体、儿童、成人的组织厚度和器官位置不同。</td><td>CV12：83名成人活体超声 25.3±10.2 mm；20具尸体超声危险深度 11.0±5.4 mm。</td></tr>
+      <tr><td><b>危险结构定义</b></td><td>皮肤→腹膜、皮肤→脏器最深点、皮肤→胸膜、皮肤→气管，不是同一个指标。</td><td>CV22儿童研究采用皮肤→气管；胸部成人CT系列按皮肤→胸膜定义安全深度。</td></tr>
+      <tr><td><b>进针角度</b></td><td>斜刺使针尖沿组织前进的有效路径改变，数值不能简单与直刺比较。</td><td>CV15同一研究中，不同角度的参考深度从16.99 mm到53.47 mm。</td></tr>
+      <tr><td><b>体型 / BMI / 腰围</b></td><td>软组织厚度和器官相对位置可随体型发生改变。</td><td>胸部CT与儿童腹部CT均显示体型差异；CV12活体研究也把BMI和腹围作为预测变量。</td></tr>
+      <tr><td><b>“70%规则”</b></td><td>只是在测得危险深度上乘一个保守系数；不会消除个体离散。</td><td>CV4：研究表直接报告危险深度 <b>13.1±7.0 mm</b>、70%参考值 <b>9.2±5.2 mm</b>。<b>本表不自行把SD机械乘0.70</b>，避免把研究者报告值与数学推算混淆。</td></tr>
+    </tbody>
+  </table>
+
+  <h2>五、证据等级</h2>
+  <table class="legend">
+    <tbody>
+      <tr><td><span class="tag A">A</span></td><td><b>优先证据：</b>同行评议原始人体研究，且数字可通过 PubMed、PMC、J-STAGE 或原始期刊页面核验；不等同于“大样本或高等级临床试验”。</td></tr>
+      <tr><td><span class="tag B">B</span></td><td><b>可靠二手量化证据：</b>同行评议系统综述/研究综述清楚列出原始研究、样本与数值；原始论文目前不便从公开入口完整核验，故不抬高到A。</td></tr>
+      <tr><td><span class="tag C">C</span></td><td><b>标准/解剖级资料：</b>可用于定位或说明风险性质，但本版没有将其转换成毫米安全值。</td></tr>
+      <tr><td><span class="tag D">D</span></td><td><b>数据不足：</b>在本次核验的核心数据库/综述中没有得到足够稳健的成人毫米分布，因此明确留空，而不是填经验猜测。</td></tr>
+    </tbody>
+  </table>
+
+  <h2>六、核心参考文献（建议保存）</h2>
+  <ol class="small">
+    <li><b>Lin JG, Chou PC, Chu HY. 2013.</b> An Exploration of the Needling Depth in Acupuncture: The Safe Needling Depth and the Needling Depth of Clinical Efficacy. Evidence-Based Complementary and Alternative Medicine. DOI: 10.1155/2013/740508. <a href="https://pubmed.ncbi.nlm.nih.gov/23935678/">PubMed</a>｜<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3722841/">PMC全文</a></li>
+    <li><b>Chou PC, Chu HY, Lin JG. 2011.</b> Safe Needling Depth of Acupuncture Points. Journal of Alternative and Complementary Medicine. 17(3):199–206. DOI: 10.1089/acm.2010.0192. <a href="https://pubmed.ncbi.nlm.nih.gov/21417806/">PubMed</a></li>
+    <li><b>Sheu CY, Lin JG. 1992.</b> Detection of the safety depth on human chest by computer tomographic scanning. Zhonghua Yi Xue Za Zhi (Taipei). 50(5):388–399. PMID 1338010. <a href="https://pubmed.ncbi.nlm.nih.gov/1338010/">PubMed</a></li>
+    <li><b>Ma et al. 2015.</b> The Depths from Skin to the Major Organs at Chest Acupoints of Pediatric Patients. Evidence-Based Complementary and Alternative Medicine. DOI: 10.1155/2015/126028. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4592721/">PMC全文</a></li>
+    <li><b>Maeoka H, Kitamura S. 2000.</b> An Anatomical Consideration on the Safety of a Meridian Point (Danchu, CV17) in Acupuncture Therapy. Journal of the Japan Society of Acupuncture and Moxibustion. 50(1):103–110. DOI: 10.3777/jjsam.50.103. <a href="https://www.jstage.jst.go.jp/article/jjsam1981/50/1/50_1_103/_article">J-STAGE</a></li>
+    <li><b>Cheng WP, Dong SP. 2012.</b> Discussion on the safe angle and depth of acupuncture at Jiuwei (CV15). Zhongguo Zhen Jiu. 32(6):515–518. PMID 22741258. <a href="https://pubmed.ncbi.nlm.nih.gov/22741258/">PubMed</a></li>
+    <li><b>Chen HN, Lin JG, Ying LC, Huang CC, Lin CH. 2009.</b> The Therapeutic Depth of Abdominal Acupuncture Points Approaches the Safe Depth in Overweight and in Older Children. J Altern Complement Med. 15(9):1033–1037. DOI: 10.1089/acm.2008.0582. <a href="https://pubmed.ncbi.nlm.nih.gov/19715462/">PubMed</a>｜<a href="https://journals.sagepub.com/doi/pdf/10.1089/acm.2008.0582">期刊PDF</a></li>
+    <li><b>Chen HN, Lin JG, Yang AD, Chang SK. 2008.</b> Safe depth of abdominal acupoints in pediatric patients. Complementary Therapies in Medicine. 16(6):331–335. DOI: 10.1016/j.ctim.2008.05.004. <a href="https://pubmed.ncbi.nlm.nih.gov/19028333/">PubMed</a></li>
+    <li><b>Chu H et al. 2022.</b> An Observational Study Using Ultrasound to Assess Allowable Needle Insertion Range of Acupoint CV12. Healthcare (Basel). 10(9):1707. DOI: 10.3390/healthcare10091707. <a href="https://pubmed.ncbi.nlm.nih.gov/36141319/">PubMed</a>｜<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9498562/">PMC全文</a></li>
+    <li><b>Chu H et al. 2023.</b> An Observational Study on the Anatomical Characteristics of Acupoint CV23 (Lianquan) with Ultrasonography. Perspectives on Integrative Medicine. 2(1):49–55. DOI: 10.56986/pim.2023.02.007. <a href="https://www.integrmed.org/journal/view.php?doi=10.56986%2Fpim.2023.02.007">期刊页面</a></li>
+    <li><b>Shen Y, Zhou Q, Sun X, Qiu Z, Jia Y, Li S, Zhang W. 2021.</b> Safe needling depth at abdominal traditional acupuncture points: a ultrasonographic study of cadavers. <i>Acupuncture in Medicine</i>. 39(2):156–158. DOI: 10.1177/0964528420922241. <a href="https://pubmed.ncbi.nlm.nih.gov/32551810/">PubMed</a></li>
+    <li><b>Park HI, Yang HJ, Park SK, Lee KH. 2015.</b> Needling Depth of Cheonchu (ST25) with Computed Tomography: a Retrospective Study. <i>The Acupuncture</i>. 32(3):61–67. DOI: 10.13045/acupunct.2015039. <a href="https://kiss.kstudy.com/Detail/Ar?key=3353761">KCI</a>｜<a href="https://doi.org/10.13045/acupunct.2015039">DOI</a></li>
+  </ol>
+
+  <h2>七、数据边界与使用说明</h2>
+  <div class="note">
+    <p><b>1）本表优先“宁缺毋滥”。</b> 对于我无法从权威公开页面直接核验完整毫米数的穴位，明确写“—”，不拿教材寸数、商业网站或论坛数字冒充实测危险深度。</p>
+    <p><b>2）“安全深度”不是一个全球统一定义。</b> 2013系统综述明确指出，不同研究在安全深度定义、测量工具、受试者和进针细节方面存在显著不一致，而且没有统一的危险深度/安全深度/治疗深度国际标准。</p>
+    <p><b>3）均值 ≠ 个体阈值。</b> 尤其是CV4、CV6，20具尸体研究显示最浅端只有约3 mm量级，而平均值约13 mm；这正是你前面说的“离散”必须保留的原因。</p>
+    <p><b>4）“疗效深度”和“解剖危险深度”是两套变量。</b> 目前只有少数研究直接比较疗效深度与安全边界，因此不能用“越深越有效”作为通用规则。</p>
+    <p><b>5）适用于文献整理与风险理解，不替代受训医师的临床判断、个体超声/影像评估或当地针灸执业规范。</b></p>
+  </div>
+
+  <div class="footer">
+    本页为研究资料整理页。网页中的链接指向 PubMed、PMC、J-STAGE、期刊官网等可核验入口。
+    资料核验日期：2026-10-07。
+  </div>
+</div>
+</body>
+</html>
