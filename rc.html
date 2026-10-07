@@ -6,210 +6,159 @@
 <title>Raw Mouse Counts Tracker</title>
 <style>
   :root{
-    --bg:#0b0d10; --panel:#12161b; --panel2:#171c22; --line:#2a313a;
-    --text:#e8edf3; --muted:#8f9aa7; --accent:#6ea8fe; --danger:#ff6b6b;
+    --bg:#080a0d; --panel:#11151b; --panel2:#161c24; --line:#252d37;
+    --text:#e8edf3; --muted:#8a96a4; --accent:#6ea8fe; --danger:#ff6b6b;
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
   body{display:flex;overflow:hidden}
   #side{
-    width:330px;min-width:330px;background:var(--panel);border-right:1px solid var(--line);
-    display:flex;flex-direction:column;padding:16px;gap:12px;z-index:10;
+    width:340px;min-width:340px;background:var(--panel);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;padding:16px;gap:11px;z-index:10;
   }
-  h1{font-size:18px;margin:0}
-  .subtitle{font-size:12px;color:var(--muted);line-height:1.45}
-  .row{display:flex;gap:8px;align-items:center}
+  h1{font-size:17px;margin:0;font-weight:700;letter-spacing:-0.2px}
+  .subtitle{font-size:11.5px;color:var(--muted);line-height:1.45}
+  .row{display:flex;gap:7px;align-items:center}
   button,input,select{
     font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);
-    border-radius:7px;height:34px;transition:0.15s;
+    border-radius:6px;height:32px;transition:0.15s;
   }
   button{
     padding:0 8px;cursor:pointer;font-size:12px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     display:inline-flex;align-items:center;justify-content:center;
   }
-  button:hover{border-color:#46515e;background:#1c2229}
-  button:disabled{cursor:not-allowed}
-  button.primary{background:#1b3b69;border-color:#315f99;color:#fff}
-  button.active{background:#274b78;border-color:#528ad8;color:#fff}
-  button.danger{border-color:#6f3333;color:#ffb3b3}
+  button:hover{border-color:#485666;background:#1d242e}
+  button:disabled{cursor:not-allowed;opacity:0.4}
+  button.primary{background:#1b3d6d;border-color:#3265a5;color:#fff}
+  button.primary:hover{background:#234e8c;border-color:#4680ce}
+  button.active{background:#254d7e;border-color:#5a95e6;color:#fff}
+  button.danger{border-color:#662d2d;color:#ff9e9e}
+  button.danger:hover{background:#331818;border-color:#994242}
   input[type=text]{width:100%;padding:0 10px}
-  input[type=number]{width:80px;padding:0 6px;text-align:center}
-  label.small{font-size:12px;color:var(--muted);white-space:nowrap}
+  input[type=number]{width:84px;padding:0 6px;text-align:center;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+  label.small{font-size:11px;color:var(--muted);white-space:nowrap}
   .status{
-    border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;line-height:1.5;
-    background:#0e1217
+    border:1px solid var(--line);border-radius:7px;padding:9px;font-size:11.5px;line-height:1.45;
+    background:#0a0d11
   }
   .status strong{color:#fff}
   
   .legend-card {
-    border: 1px solid var(--line); border-radius: 8px; padding: 10px;
-    background: #0d1116; font-size: 11px; line-height: 1.5; color: #a9b5c2;
+    border: 1px solid var(--line); border-radius: 7px; padding: 9px;
+    background: #0a0d11; font-size: 11px; line-height: 1.45; color: #9bb0c3;
   }
-  .legend-card .item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-  .legend-card .item:last-child { margin-bottom: 0; }
+  .legend-card .item { display: flex; align-items: flex-start; gap: 7px; }
   .legend-card .symbol { 
     display: inline-flex; align-items: center; justify-content: center; 
-    width: 16px; height: 16px; flex-shrink: 0;
+    width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px;
   }
 
-  #groups{overflow:auto;min-height:0;flex:1;border-top:1px solid var(--line);padding-top:8px}
+  #groups{overflow-y:auto;min-height:0;flex:1;border-top:1px solid var(--line);padding-top:6px}
   .group{
-    display:grid;grid-template-columns:20px 1fr auto;gap:8px;align-items:center;
-    padding:8px;border-radius:7px;margin-bottom:5px;background:transparent;cursor:pointer;
+    display:grid;grid-template-columns:18px 1fr auto;gap:7px;align-items:center;
+    padding:7px;border-radius:6px;margin-bottom:4px;background:transparent;cursor:pointer;
   }
-  .group.active{background:#1b222a}
+  .group.active{background:#1a212b}
   .swatch{width:10px;height:10px;border-radius:50%;justify-self:center}
   .gname{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .gmeta{font-size:10px;color:var(--muted)}
+  .gmeta{font-size:10px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
   .group-actions{display:flex;gap:4px}
-  .iconbtn{width:28px;padding:0;height:28px;font-size:12px;line-height:1}
+  .iconbtn{width:26px;padding:0;height:26px;font-size:12px;line-height:1}
 
   .color-picker-card{
-    border:1px solid var(--line);border-radius:8px;padding:9px 10px;
-    background:#0d1116;
+    border:1px solid var(--line);border-radius:7px;padding:8px 9px;
+    background:#0a0d11;
   }
   .color-picker-head{
     display:flex;align-items:center;justify-content:space-between;gap:8px;
-    margin-bottom:7px;
+    margin-bottom:6px;
   }
   .color-picker-head .label{font-size:11px;color:var(--muted)}
   .color-picker-head .value{
-    width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.45);
+    width:11px;height:11px;border-radius:50%;border:1px solid rgba(255,255,255,.4);
     flex:0 0 auto;
   }
-  .color-palette{
-    display:flex;gap:6px;align-items:center;width:100%;
-  }
+  .color-palette{display:flex;gap:5px;align-items:center;width:100%}
   .color-swatch-btn{
-    position:relative;flex:1;min-width:0;height:24px;padding:0;border-radius:6px;
-    border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);
+    position:relative;flex:1;min-width:0;height:22px;padding:0;border-radius:5px;
+    border:1px solid rgba(255,255,255,.15);
   }
-  .color-swatch-btn::after{
-    content:"";position:absolute;inset:4px;border:2px solid transparent;border-radius:4px;
+  .color-swatch-btn.selected::after{
+    content:"";position:absolute;inset:3px;border:2px solid #fff;border-radius:3px;
+    box-shadow:0 0 0 1px rgba(0,0,0,.4);
   }
-  .color-swatch-btn.selected::after{border-color:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
-  .color-swatch-btn:hover{transform:translateY(-1px)}
+
   #main{position:relative;flex:1;min-width:0;user-select:none}
-  #canvas{display:block;width:100%;height:100%;background:#080a0d;cursor:grab}
+  #canvas{display:block;width:100%;height:100%;background:#06080a;cursor:grab}
   #hud{
-    position:absolute;left:14px;top:12px;padding:10px 12px;background:rgba(8,10,13,.86);
-    border:1px solid var(--line);border-radius:8px;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;
-    pointer-events:none;white-space:pre;z-index:5;backdrop-filter:blur(4px);
+    position:absolute;left:12px;top:12px;padding:9px 12px;background:rgba(8,11,15,.88);
+    border:1px solid var(--line);border-radius:7px;font:11.5px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;
+    pointer-events:none;white-space:pre;z-index:5;backdrop-filter:blur(6px);
   }
   #overlay{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     pointer-events:none;z-index:4;
   }
   #overlayCard{
-    max-width:460px;padding:20px 24px;text-align:center;background:rgba(13,17,22,.94);
-    border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.35);
+    max-width:440px;padding:22px 26px;text-align:center;background:rgba(14,18,24,.95);
+    border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.5);
     pointer-events:auto;
   }
   #overlayCard h2{margin:0 0 8px;font-size:18px}
-  #overlayCard p{margin:6px 0;color:var(--muted);font-size:13px;line-height:1.55}
-  #overlayCard .hint{margin-top:12px;color:#c8d2dd}
+  #overlayCard p{margin:6px 0;color:var(--muted);font-size:12.5px;line-height:1.55}
+  #overlayCard .hint{margin-top:12px;color:#c0ccd8;font-size:11.5px}
   #topbar{
-    position:absolute;right:12px;top:12px;display:flex;gap:7px;align-items:center;
-    padding:7px;background:rgba(8,10,13,.86);border:1px solid var(--line);border-radius:8px;
-    z-index:5;backdrop-filter:blur(4px);
+    position:absolute;right:12px;top:12px;display:flex;gap:6px;align-items:center;
+    padding:6px;background:rgba(8,11,15,.88);border:1px solid var(--line);border-radius:7px;
+    z-index:5;backdrop-filter:blur(6px);
   }
-  #topbar button{height:30px;padding:0 10px}
-  .sep{height:22px;width:1px;background:var(--line)}
-  .statsGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .stat{padding:8px;background:#0d1116;border:1px solid #202730;border-radius:7px}
-  .stat b{display:block;font:13px ui-monospace,SFMono-Regular,Consolas,monospace}
-  .stat span{color:var(--muted);font-size:10px}
+  #topbar button{height:28px;padding:0 9px}
+  .sep{height:20px;width:1px;background:var(--line)}
+  .statsGrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+  .stat{padding:7px 9px;background:#0a0d11;border:1px solid #1a222c;border-radius:6px}
+  .stat b{display:block;font:12.5px ui-monospace,SFMono-Regular,Consolas,monospace}
+  .stat span{color:var(--muted);font-size:9.5px}
 
-  /* 缩放率小锁头 */
-  #scaleLock{
-    width:34px;height:34px;flex:0 0 auto;
-    font-size:14px;padding:0;line-height:1;
-  }
+  #scaleLock{width:32px;height:32px;flex:0 0 auto;font-size:13px;padding:0}
 
-  /* 缩放倍率预设卡片 */
   .zoom-presets-card{
-    border:1px solid var(--line);border-radius:8px;padding:9px 10px;
-    background:#0d1116;
+    border:1px solid var(--line);border-radius:7px;padding:8px 9px;background:#0a0d11;
   }
-  .zoom-presets-head{
-    display:flex;align-items:center;justify-content:space-between;gap:8px;
-    margin-bottom:7px;
-  }
-  .zoom-presets-head .label{font-size:11px;color:var(--muted)}
-  .zoom-presets-list{
-    display:flex;flex-wrap:wrap;gap:5px;
-    margin-bottom:7px;
-  }
-  .zoom-presets-empty{
-    font-size:10px;color:#6b7683;padding:3px 0;
-  }
+  .zoom-presets-head{margin-bottom:6px;font-size:11px;color:var(--muted)}
+  .zoom-presets-list{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+  .zoom-presets-empty{font-size:10px;color:#5a6675;padding:2px 0}
   .zoom-preset-btn{
-    height:24px;padding:0 9px;font-size:11px;border-radius:5px;
-    background:#161b21;border:1px solid var(--line);
-    font-family: ui-monospace,SFMono-Regular,Consolas,monospace;
-    color:#cfd8e3;
+    height:22px;padding:0 7px;font-size:10.5px;border-radius:4px;background:#141920;
+    border:1px solid var(--line);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#cfd8e3;
   }
-  .zoom-preset-btn:hover{
-    border-color:#528ad8;color:#cfe0ff;background:#1a2230;
-  }
+  .zoom-preset-btn:hover{border-color:#528ad8;color:#cfe0ff;background:#1a2332}
 
-  /* 左下角：按键清除轨迹 */
-  .clear-key-card{
-    border:1px solid var(--line);border-radius:8px;padding:9px 10px;
-    background:#0d1116;
-  }
-  .clear-key-head{
-    display:flex;align-items:center;justify-content:space-between;gap:8px;
-    margin-bottom:7px;
-  }
+  .clear-key-card{border:1px solid var(--line);border-radius:7px;padding:8px 9px;background:#0a0d11}
+  .clear-key-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
   .clear-key-head .label{font-size:11px;color:var(--muted)}
   .clear-key-head .hint{
-    font-size:10px;color:#6ea8fe;
-    background:rgba(110,168,254,.10);
-    border:1px solid rgba(110,168,254,.30);
-    padding:1px 6px;border-radius:5px;
+    font-size:9.5px;color:#6ea8fe;background:rgba(110,168,254,.1);border:1px solid rgba(110,168,254,.3);
+    padding:1px 5px;border-radius:4px;
   }
-  .clear-key-head .hint.off{
-    color:#8f9aa7;background:transparent;border-color:transparent;padding:0;
-  }
-  #clearKeySelect{
-    width:100%;height:30px;padding:0 8px;
-    background:var(--panel2);color:var(--text);
-    border:1px solid var(--line);border-radius:6px;
-    font:inherit;font-size:12px;cursor:pointer;
-  }
-  #clearKeySelect:hover{border-color:#46515e}
-  .clear-key-note{
-    font-size:10px;color:#6b7683;line-height:1.4;margin-top:6px;
-  }
+  .clear-key-head .hint.off{color:#8a96a4;background:transparent;border-color:transparent;padding:0}
+  #clearKeySelect{width:100%;height:28px;padding:0 6px;font-size:11.5px}
+  .clear-key-note{font-size:9.5px;color:#606e7e;line-height:1.35;margin-top:5px}
 
-  /* 右下角作者栏 */
   #authorBadge {
-    position: absolute; right: 14px; bottom: 12px;
-    padding: 4px 8px; border-radius: 6px;
-    font-size: 11px; color: var(--muted);
-    background: rgba(8, 10, 13, 0.72);
-    border: 1px solid var(--line);
-    text-decoration: none;
-    transition: 0.15s;
-    z-index: 5;
-    backdrop-filter: blur(4px);
-    display: inline-flex; align-items: center; gap: 4px;
+    position: absolute; right: 12px; bottom: 10px; padding: 3px 8px; border-radius: 5px;
+    font-size: 10.5px; color: var(--muted); background: rgba(8, 11, 15, 0.75);
+    border: 1px solid var(--line); text-decoration: none; z-index: 5; backdrop-filter: blur(4px);
   }
-  #authorBadge:hover {
-    color: var(--text);
-    border-color: #46515e;
-    background: rgba(18, 22, 27, 0.95);
-  }
+  #authorBadge:hover { color: var(--text); border-color: #4b5868; }
 </style>
 </head>
 <body>
 <aside id="side">
   <h1>Raw Mouse Counts Tracker</h1>
   <div class="subtitle">
-    优先使用 <b>pointerrawupdate</b> + <b>Coalesced Events</b> 获取高频增量；发现无法可靠读取子事件时才回退到父事件。
-    <br>轨迹用于<b>参考分析</b>；浏览器事件链路不等同于 USB/原生硬件测试，不应作为专业级轮询、时序或噪声计量依据。
+    优先使用 <b>pointerrawupdate</b> + <b>Coalesced Events</b> 获取高频增量；发现子事件异常时自动回退父事件保障零丢步。
+    <br>轨迹用于<b>参考分析</b>；浏览器事件链路受系统内核与消息调度影响，不等同于 USB 硬件抓包，不应作为专业级微秒时序或电气噪声计量依据。
   </div>
 
   <div class="row">
@@ -220,53 +169,53 @@
 
   <div class="color-picker-card">
     <div class="color-picker-head">
-      <span class="label">组颜色 · 横向七彩色盘（点击切换当前组）</span>
+      <span class="label">轨迹色彩（点击赋予当前激活组）</span>
       <span id="activeColorPreview" class="value"></span>
     </div>
-    <div id="colorPalette" class="color-palette" aria-label="组颜色选择"></div>
+    <div id="colorPalette" class="color-palette"></div>
   </div>
 
-  <div class="row" id="captureButtons">
+  <div class="row">
     <button id="start" class="primary" style="flex:1">进入原始捕获</button>
   </div>
 
   <div>
-    <label class="small">显示模式</label>
+    <label class="small">视图跟随控制</label>
     <div class="row" style="margin-top:4px">
-      <button id="modeFixed" class="primary" style="flex:1" title="固定屏幕（视口静止，光标在屏幕移动）">固定屏幕</button>
-      <button id="modeFollow" style="flex:1" title="屏幕跟随（轨迹头部始终居中）">屏幕跟随</button>
+      <button id="modeFixed" class="primary" style="flex:1">固定视口</button>
+      <button id="modeFollow" style="flex:1">实时跟随头部</button>
     </div>
   </div>
 
-  <div class="status" id="status">状态：<strong>未捕获（小手平移中）</strong></div>
+  <div class="status" id="status">状态：<strong>未捕获（可拖拽平移 / 滚轮缩放）</strong></div>
 
   <div class="legend-card">
     <div class="item">
-      <span class="symbol"><div style="width:6px;height:6px;background:var(--accent);border-radius:50%"></div></span>
+      <span class="symbol"><div style="width:5px;height:5px;background:var(--accent);border-radius:50%"></div></span>
       <div>
-        <b style="color:#d0d7de">采样点 (Nodes)</b><br>
-        鼠标硬件真实上报数据包的位置。轨迹发生<b>物理折角</b>的真实节点。
+        <b style="color:#e0e8f0">硬件采样点 (Raw Nodes)</b><br>
+        每次接收到的离散移动增量点。高倍放大下自动显示传感器像素晶格。
       </div>
     </div>
   </div>
 
   <div class="statsGrid">
-    <div class="stat"><b id="liveHz">0 Hz</b><span>当前事件频率 (实时)</span></div>
-    <div class="stat"><b id="peakHz">0 Hz</b><span>峰值事件频率 (Peak)</span></div>
-    <div class="stat"><b id="liveX">0</b><span>累计 ΔX</span></div>
-    <div class="stat"><b id="liveY">0</b><span>累计 ΔY</span></div>
-    <div class="stat"><b id="eventCount">0</b><span>轨迹节点（非零）</span></div>
-    <div class="stat"><b id="pathLen">0</b><span>弧长 counts</span></div>
+    <div class="stat"><b id="liveHz">0 Hz</b><span>实时轮询率 (Realtime)</span></div>
+    <div class="stat"><b id="peakHz">0 Hz</b><span>峰值轮询率 (Peak Hz)</span></div>
+    <div class="stat"><b id="liveX">0</b><span>绝对位移 X (counts)</span></div>
+    <div class="stat"><b id="liveY">0</b><span>绝对位移 Y (counts)</span></div>
+    <div class="stat"><b id="eventCount">0</b><span>有效硬件数据包 (Packets)</span></div>
+    <div class="stat"><b id="totalCounts">0</b><span>累积物理脉冲 (Total Δ)</span></div>
   </div>
 
   <div class="row">
-    <label class="small">当前缩放</label>
-    <input type="number" id="scale" min="0.01" max="50" step="0.00001" value="1">
-    <button id="scaleLock" class="iconbtn" title="锁定缩放率（点击解锁）">🔒</button>
+    <label class="small">缩放倍率</label>
+    <input type="number" id="scale" min="0.01" max="100" step="0.00001" value="1">
+    <button id="scaleLock" class="iconbtn" title="锁定缩放率">🔒</button>
   </div>
   <div class="row">
-    <button id="fit" style="flex:1">适配全图</button>
-    <button id="centerOrigin" style="flex:1">原点 (0,0)</button>
+    <button id="fit" style="flex:1">适配全轨迹</button>
+    <button id="centerOrigin" style="flex:1">复位至原点 (0,0)</button>
   </div>
 
   <div id="groups"></div>
@@ -279,33 +228,29 @@
     <input id="importFile" type="file" accept=".json,application/json" hidden>
   </div>
 
-  <!-- 缩放倍率预设 -->
   <div class="zoom-presets-card">
-    <div class="zoom-presets-head">
-      <span class="label">缩放倍率预设（左键切换 / 右键删除）</span>
-    </div>
+    <div class="zoom-presets-head">缩放快捷预设（左键应用 / 右键删除）</div>
     <div id="zoomPresetsList" class="zoom-presets-list"></div>
     <div class="row">
-      <input type="number" id="zoomPresetInput" min="0.01" max="50" step="0.00001" placeholder="如 0.5 / 1 / 2" style="flex:1;text-align:left;padding:0 10px">
-      <button id="addZoomPreset" class="primary" style="flex:0 0 auto;padding:0 12px">添加</button>
+      <input type="number" id="zoomPresetInput" min="0.01" max="100" step="0.00001" placeholder="例如 1 / 4 / 16" style="flex:1;text-align:left;padding:0 8px">
+      <button id="addZoomPreset" class="primary" style="flex:0 0 auto;padding:0 10px">添加</button>
     </div>
   </div>
 
-  <!-- 按键清除当前轨迹 -->
   <div class="clear-key-card">
     <div class="clear-key-head">
-      <span class="label">按键清除轨迹（捕获中 / ESC 后均可用）</span>
+      <span class="label">按键瞬间清空轨迹</span>
       <span id="clearKeyHint" class="hint off">关闭</span>
     </div>
-    <select id="clearKeySelect" aria-label="选择清除轨迹的鼠标按键">
+    <select id="clearKeySelect">
       <option value="-1">关闭</option>
-      <option value="0">鼠标左键</option>
-      <option value="2">鼠标右键</option>
+      <option value="0">鼠标左键 (Click)</option>
+      <option value="2">鼠标右键 (Click)</option>
       <option value="1">鼠标中键</option>
-      <option value="3">侧键 · 后退</option>
-      <option value="4">侧键 · 前进</option>
+      <option value="3">侧键 1 (后退键)</option>
+      <option value="4">侧键 2 (前进键)</option>
     </select>
-    <div class="clear-key-note">非捕获状态下，左键/右键需<b>点击而不拖动</b>才清除（拖动仍平移画布）。</div>
+    <div class="clear-key-note">捕获中按键立即重置起点；浏览模式下点击不拖拽即清空。已阻止侧键默认跳页。</div>
   </div>
 </aside>
 
@@ -313,27 +258,27 @@
   <canvas id="canvas"></canvas>
   <div id="hud"></div>
   <div id="topbar">
-    <button id="toggleNodes" class="primary" title="显示鼠标每次上报数据的真实物理位置（圆点）">采样点</button>
-    <button id="toggleLines" title="隐藏轨迹连线，仅保留采样点">去掉线</button>
+    <button id="toggleNodes" class="primary" title="物理采样点">采样点</button>
+    <button id="toggleLines" class="primary" title="轨迹折线">连线</button>
     <button id="toggleGrid" class="primary">网格</button>
     <button id="toggleAxes" class="primary">坐标轴</button>
     <div class="sep"></div>
     <button id="resetZoom">1:1</button>
-    <button id="downloadPng" class="primary" title="按当前视图无损导出发丝级 4× 高清 PNG 图片">下载高清</button>
+    <button id="downloadPng" class="primary" title="无损导出 4× 极清 PNG 图像">高清导出</button>
   </div>
 
-  <a id="authorBadge" href="https://space.bilibili.com/1534330" target="_blank" rel="noopener noreferrer" title="访问作者 Bilibili 主页">
+  <a id="authorBadge" href="https://space.bilibili.com/1534330" target="_blank" rel="noopener noreferrer">
     bilibili @1534330
   </a>
 
   <div id="overlay">
     <div id="overlayCard">
       <h2>Raw Counts Tracker</h2>
-      <p>未捕获时为<b>平移查看模式</b>：可直接按住左键拖动画布，滚轮以光标为中心缩放。</p>
+      <p>亚像素居中对齐与视口剔除引擎已就绪。<br>未捕获时为平移浏览模式：按住左键/右键拖动画布，滚轮以光标为中心缩放。</p>
       <div style="margin-top:14px">
-        <button class="primary" id="overlayStartBtn" style="height:38px;padding:0 20px;font-size:14px">进入原始捕获</button>
+        <button class="primary" id="overlayStartBtn" style="height:36px;padding:0 22px;font-size:13px">进入原始捕获</button>
       </div>
-      <p class="hint">捕获中按 ESC 退出，自动切回小手平移浏览</p>
+      <p class="hint">捕获中按 <b>ESC</b> 秒级退出，退出时会自动修剪光标归位产生的异常尾点</p>
     </div>
   </div>
 </main>
@@ -344,10 +289,10 @@
 
   const $ = id => document.getElementById(id);
   const canvas = $("canvas");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { alpha: false, desynchronized: true });
   const groupsEl = $("groups");
 
-  const STORAGE_KEY = "rawMouseCountsTracker.v6";
+  const STORAGE_KEY = "rawMouseCountsTracker.v8";
   const CLEAR_KEY_STORAGE = "rawMouseCountsTracker.clearKey";
   const SCALE_LOCK_STORAGE = "rawMouseCountsTracker.scaleLock";
   const SCALE_PRESETS_STORAGE = "rawMouseCountsTracker.scalePresets";
@@ -359,23 +304,18 @@
 
   let showGrid = true;
   let showAxes = true;
-  let showLines = true;   // 轨迹连线（“去掉线”按钮控制）
-  let showNodes = true;   // 采样点
+  let showLines = true;
+  let showNodes = true;
 
-  // 按键清除轨迹：-1 = 关闭
   let clearKeyCode = -1;
-  // 非捕获状态下，左键/右键的“点击候选”——用于区分点击与拖拽
   let clearClickCandidate = null;
 
-  // 缩放率锁定：默认锁定，强制使用当前 scale
-  let scaleLocked = true;
-
-  // 缩放倍率预设（用户可添加）
+  let scaleLocked = false;
   let scalePresets = [];
 
   let scale = 1;
   let viewX = 0, viewY = 0;
-  let displayMode = "fixed"; 
+  let displayMode = "fixed";
   let renderDpr = 1;
 
   let isDragging = false;
@@ -383,13 +323,16 @@
   let dragStartViewX = 0, dragStartViewY = 0;
   let hoverWorldPos = null;
 
-  // --- 高精度 8000Hz 测频引擎 ---
   let currentPollingHz = 0;
   let peakPollingHz = 0;
   let recentTimestamps = [];
   let hzDecayTimer = null;
   let periodicSaveTimer = null;
   let periodicSavePending = false;
+  let lastEventSource = "idle";
+
+  // 退出后的短暂冷却，仅作为额外兜底（主修复在 trimGlitchTail）
+  let ignoreInputsUntil = 0;
 
   function registerHzSample(count = 1, timestamp = performance.now()) {
     for (let i = 0; i < count; i++) {
@@ -399,15 +342,15 @@
 
   function updateHzCalculation() {
     const now = performance.now();
-    while (recentTimestamps.length && (now - recentTimestamps[0] > 250)) {
+    while (recentTimestamps.length && (now - recentTimestamps[0] > 200)) {
       recentTimestamps.shift();
     }
 
-    if (recentTimestamps.length >= 3) {
+    if (recentTimestamps.length >= 4) {
       const first = recentTimestamps[0];
       const last = recentTimestamps[recentTimestamps.length - 1];
       const duration = (last - first) / 1000;
-      if (duration > 0) {
+      if (duration > 0.005) {
         currentPollingHz = Math.round((recentTimestamps.length - 1) / duration);
         if (currentPollingHz > peakPollingHz) {
           peakPollingHz = currentPollingHz;
@@ -421,18 +364,14 @@
     $("peakHz").textContent = `${peakPollingHz.toLocaleString()} Hz`;
   }
 
-  // 周期性持久化：保留文件 1 的数据安全能力，但不在每个 8K 输入事件里
-  // 直接执行同步 localStorage 写入。优先利用浏览器空闲时间完成一次全量快照。
   function requestPeriodicSave() {
     if (!recording || periodicSavePending) return;
     periodicSavePending = true;
-
     const commit = () => {
       periodicSavePending = false;
       if (!recording) return;
       save();
     };
-
     if (typeof window.requestIdleCallback === "function") {
       window.requestIdleCallback(commit, { timeout: 500 });
     } else {
@@ -442,7 +381,7 @@
 
   function startPeriodicSave() {
     clearInterval(periodicSaveTimer);
-    periodicSaveTimer = setInterval(requestPeriodicSave, 2000);
+    periodicSaveTimer = setInterval(requestPeriodicSave, 2500);
   }
 
   function stopPeriodicSave() {
@@ -452,17 +391,11 @@
   }
 
   function uid() {
-    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+    return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 7);
   }
 
   const PALETTE_COLORS = [
-    "#ff5f6d", // 红
-    "#ff9f43", // 橙
-    "#ffd166", // 黄
-    "#4cd97b", // 绿
-    "#35c9ff", // 青
-    "#6ea8fe", // 蓝
-    "#a78bfa"  // 紫
+    "#4facfe", "#00f2fe", "#43e97b", "#fa709a", "#fee140", "#a18cd1", "#ff5858"
   ];
 
   function colorFor(i) {
@@ -479,8 +412,6 @@
       btn.className = "color-swatch-btn";
       btn.style.background = color;
       btn.dataset.color = color;
-      btn.title = ["红", "橙", "黄", "绿", "青", "蓝", "紫"][i];
-      btn.setAttribute("aria-label", `选择${btn.title}色`);
       btn.onclick = () => {
         const g = activeGroup();
         if (!g) return;
@@ -502,7 +433,7 @@
       buttons.forEach(btn => btn.classList.toggle("selected", !!g && btn.dataset.color === g.color));
     }
     const preview = $("activeColorPreview");
-    if (preview) preview.style.background = g?.color || "#6ea8fe";
+    if (preview) preview.style.background = g?.color || "#4facfe";
   }
 
   function computeDistance(points) {
@@ -511,6 +442,14 @@
       d += Math.hypot(points[i][0] - points[i-1][0], points[i][1] - points[i-1][1]);
     }
     return d;
+  }
+
+  function computeTotalCounts(points) {
+    let c = 0;
+    for (let i = 1; i < points.length; i++) {
+      c += Math.abs(points[i][0] - points[i-1][0]) + Math.abs(points[i][1] - points[i-1][1]);
+    }
+    return c;
   }
 
   function nextGroupName() {
@@ -523,8 +462,8 @@
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY) ||
-                  localStorage.getItem("rawMouseCountsTracker.v5") ||
-                  localStorage.getItem("rawMouseCountsTracker.v4");
+                  localStorage.getItem("rawMouseCountsTracker.v7") ||
+                  localStorage.getItem("rawMouseCountsTracker.v6");
       if (raw) groups = JSON.parse(raw);
     } catch (_) { groups = []; }
 
@@ -534,9 +473,8 @@
       if (!g.color) g.color = colorFor(i);
       if (!Array.isArray(g.points) || g.points.length === 0) g.points = [[0,0]];
       if (typeof g.visible !== "boolean") g.visible = true;
-      if (!Number.isFinite(g.distance) || g.distance <= 0) {
-        g.distance = computeDistance(g.points);
-      }
+      if (!Number.isFinite(g.distance)) g.distance = computeDistance(g.points);
+      if (!Number.isFinite(g.totalCounts)) g.totalCounts = computeTotalCounts(g.points);
       if (!Number.isFinite(g.events)) g.events = Math.max(0, g.points.length - 1);
     });
 
@@ -550,7 +488,7 @@
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(groups));
     } catch (e) {
-      setStatus("本地保存失败：数据量过大，请及时导出 JSON", true);
+      setStatus("数据量较大，请注意通过 JSON 导出备份", true);
     }
   }
 
@@ -567,13 +505,15 @@
       visible: true,
       points: [[0,0]],
       events: 0,
-      distance: 0
+      distance: 0,
+      totalCounts: 0
     };
     groups.push(g);
     activeId = g.id;
     recording = false;
     currentPollingHz = 0;
     peakPollingHz = 0;
+    recentTimestamps = [];
     updateLive();
     renderGroups();
     syncColorPalette();
@@ -581,29 +521,72 @@
     scheduleDraw();
   }
 
-  function resetCurrent() {
-    const g = activeGroup();
-    if (!g) return;
-    g.points = [[0,0]];
-    g.events = 0;
-    g.distance = 0;
-    currentPollingHz = 0;
-    peakPollingHz = 0;
-    updateLive();
-    save();
-    scheduleDraw();
-  }
-
-  // 只清除轨迹本身（不清空峰值 Hz 统计），用于按键清除功能
   function clearCurrentTrace() {
     const g = activeGroup();
     if (!g) return;
     g.points = [[0,0]];
     g.events = 0;
     g.distance = 0;
+    g.totalCounts = 0;
+    currentPollingHz = 0;
+    peakPollingHz = 0;
+    recentTimestamps = [];
     updateLive();
     save();
     scheduleDraw();
+  }
+
+  // ============================================================
+  // 核心修复：退出 Pointer Lock 时修剪光标归位产生的异常尾点
+  // ------------------------------------------------------------
+  // 背景：按 ESC 退出 Pointer Lock 时，Chrome 会把光标从锁定位置
+  // 跳回真实屏幕位置，这个跳变会以一个合法 pointer 事件派发到页面，
+  // 且必然发生在 pointerlockchange 触发之前，任何基于时间窗口的
+  // 拦截都无法生效。唯一可行的修复是退出时回退轨迹末尾的异常点。
+  //
+  // 判据：
+  //   - 绝对量兜底：最后一步 > 8 counts
+  //   - 相对跃变：最后一步 > 前 20 步中位数的 10 倍，或 > 平均值的 6 倍
+  // 满足即回退，逐步向前，直到遇到正常步长或回退上限。
+  // ============================================================
+  function trimGlitchTail(g) {
+    if (!g || !Array.isArray(g.points) || g.points.length < 4) return 0;
+    let removed = 0;
+    const MAX_BACK = 8;
+
+    while (g.points.length >= 4 && removed < MAX_BACK) {
+      const n = g.points.length;
+      const last = g.points[n - 1];
+      const prev = g.points[n - 2];
+      const step = Math.hypot(last[0] - prev[0], last[1] - prev[1]);
+
+      // 前 20 步的步长
+      const steps = [];
+      for (let i = Math.max(1, n - 21); i < n - 1; i++) {
+        steps.push(Math.hypot(
+          g.points[i][0] - g.points[i - 1][0],
+          g.points[i][1] - g.points[i - 1][1]
+        ));
+      }
+      steps.sort((a, b) => a - b);
+      const median = steps.length ? steps[Math.floor(steps.length / 2)] : 0;
+      const avg = steps.length ? steps.reduce((a, b) => a + b, 0) / steps.length : 0;
+
+      const isGlitch =
+        step > 8 &&
+        (step > median * 10 || step > avg * 6);
+
+      if (!isGlitch) break;
+
+      g.points.pop();
+      g.events = Math.max(0, g.events - 1);
+      g.distance = Math.max(0, g.distance - step);
+      const ddx = Math.abs(last[0] - prev[0]);
+      const ddy = Math.abs(last[1] - prev[1]);
+      g.totalCounts = Math.max(0, (g.totalCounts || 0) - ddx - ddy);
+      removed++;
+    }
+    return removed;
   }
 
   function setDisplayMode(mode) {
@@ -612,27 +595,27 @@
     $("modeFixed").classList.toggle("primary", displayMode === "fixed");
 
     if (displayMode === "fixed") {
-      setStatus(recording ? `${lockModeLabel()} · 固定屏幕` : "固定屏幕模式（小手平移中）");
+      setStatus(recording ? `${lockModeLabel()} · 固定视口` : "固定视口模式");
     } else {
       const g = activeGroup();
       if (g && g.points.length) {
         const p = g.points[g.points.length - 1];
-        viewX = p[0];
-        viewY = p[1];
+        viewX = p[0]; viewY = p[1];
       }
-      setStatus(recording ? `${lockModeLabel()} · 鼠标居中` : "屏幕跟随模式（小手平移中）");
+      setStatus(recording ? `${lockModeLabel()} · 头部居中跟随` : "头部居中跟随模式");
     }
     scheduleDraw();
   }
 
   function lockModeLabel() {
-    if (lockMode === "raw") return "Raw 原始捕获中";
-    if (lockMode === "unknown") return "Pointer Lock 捕获中 (未验证原始)";
-    if (lockMode === "normal") return "普通捕获中 (含系统加速)";
+    if (lockMode === "raw") return "原始捕获 (Unadjusted 裸输入)";
+    if (lockMode === "unknown") return "Pointer Lock 捕获中";
+    if (lockMode === "normal") return "普通捕获 (含系统滤波加速)";
     return "捕获中";
   }
 
   function addMove(dx, dy) {
+    if (!Number.isFinite(dx) || !Number.isFinite(dy)) return;
     const g = activeGroup();
     if (!g) return;
     const p = g.points[g.points.length - 1];
@@ -641,10 +624,11 @@
     g.points.push([nx, ny]);
     g.events++;
     g.distance += Math.hypot(dx, dy);
+    g.totalCounts += (Math.abs(dx) + Math.abs(dy));
   }
 
   function setStatus(text, error = false) {
-    $("status").innerHTML = `状态：<strong style="color:${error ? "#ff9b9b" : "inherit"}">${text}</strong>`;
+    $("status").innerHTML = `状态：<strong style="color:${error ? "#ff8e8e" : "inherit"}">${text}</strong>`;
   }
 
   function updateLive() {
@@ -654,16 +638,21 @@
     $("liveX").textContent = formatCount(p[0]);
     $("liveY").textContent = formatCount(p[1]);
     $("eventCount").textContent = g.events.toLocaleString();
-    $("pathLen").textContent = formatCount(g.distance);
+    $("totalCounts").textContent = (g.totalCounts || 0).toLocaleString();
   }
 
   function boundsOfVisible() {
     const gs = groups.filter(g => g.visible && g.points.length);
     if (!gs.length) return {minX:-10,maxX:10,minY:-10,maxY:10};
     let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-    for (const g of gs) for (const p of g.points) {
-      minX = Math.min(minX,p[0]); maxX=Math.max(maxX,p[0]);
-      minY = Math.min(minY,p[1]); maxY=Math.max(maxY,p[1]);
+    for (const g of gs) {
+      for (let i = 0; i < g.points.length; i++) {
+        const p = g.points[i];
+        if (p[0] < minX) minX = p[0];
+        if (p[0] > maxX) maxX = p[0];
+        if (p[1] < minY) minY = p[1];
+        if (p[1] > maxY) maxY = p[1];
+      }
     }
     if (!Number.isFinite(minX)) return {minX:-10,maxX:10,minY:-10,maxY:10};
     return {minX,maxX,minY,maxY};
@@ -671,19 +660,18 @@
 
   function fitView() {
     const b = boundsOfVisible();
-    const w = Math.max(10, b.maxX - b.minX);
-    const h = Math.max(10, b.maxY - b.minY);
+    const w = Math.max(12, b.maxX - b.minX);
+    const h = Math.max(12, b.maxY - b.minY);
     const margin = 60;
     scale = Math.min(
-      Math.max((canvas.clientWidth - margin*2) / w, 0.01),
-      Math.max((canvas.clientHeight - margin*2) / h, 0.01),
-      50
+      Math.max((canvas.clientWidth - margin * 2) / w, 0.01),
+      Math.max((canvas.clientHeight - margin * 2) / h, 0.01),
+      100
     );
     viewX = (b.minX + b.maxX) / 2;
     viewY = (b.minY + b.maxY) / 2;
     setDisplayMode("fixed");
     $("scale").value = Number(scale.toFixed(5));
-    syncScaleLockUI();
     scheduleDraw();
   }
 
@@ -696,11 +684,16 @@
   }
 
   function resize() {
-    const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+    const dpr = window.devicePixelRatio || 1;
     renderDpr = dpr;
     const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.round(rect.width * dpr);
-    canvas.height = Math.round(rect.height * dpr);
+    const width = Math.round(rect.width * dpr);
+    const height = Math.round(rect.height * dpr);
+
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
     scheduleDraw();
   }
 
@@ -713,22 +706,18 @@
 
   function worldToScreenState(x, y, state) {
     return [
-      state.w / 2 + (x - state.viewX) * state.scale,
-      state.h / 2 + (y - state.viewY) * state.scale
+      state.halfW + (x - state.viewX) * state.scale,
+      state.halfH + (y - state.viewY) * state.scale
     ];
   }
 
   function chooseGridStep(s) {
-    const targetPx = 60;
+    const targetPx = 70;
     const raw = targetPx / Math.max(s, 0.0001);
     const pow = Math.pow(10, Math.floor(Math.log10(raw)));
     const n = raw / pow;
     const mult = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
     return mult * pow;
-  }
-
-  function snapPixelCenter(v, dpr) {
-    return (Math.floor(v * dpr) + 0.5) / dpr;
   }
 
   function drawGridState(state) {
@@ -740,42 +729,57 @@
 
     ctx.save();
     ctx.lineWidth = 1 / dpr;
-    ctx.strokeStyle = "rgba(145,160,176,0.12)";
+    ctx.strokeStyle = "rgba(135,155,180,0.09)";
     ctx.beginPath();
 
     const kLeftX = Math.ceil(left / base);
     const kRightX = Math.floor(right / base);
     for (let k = kLeftX; k <= kRightX; k++) {
-      const sx = snapPixelCenter(worldToScreenState(k * base, 0, state)[0], dpr);
+      const sx = (Math.floor(worldToScreenState(k * base, 0, state)[0] * dpr) + 0.5) / dpr;
       ctx.moveTo(sx, 0); ctx.lineTo(sx, h);
     }
 
     const kTopY = Math.ceil(top / base);
     const kBottomY = Math.floor(bottom / base);
     for (let k = kTopY; k <= kBottomY; k++) {
-      const sy = snapPixelCenter(worldToScreenState(0, k * base, state)[1], dpr);
+      const sy = (Math.floor(worldToScreenState(0, k * base, state)[1] * dpr) + 0.5) / dpr;
       ctx.moveTo(0, sy); ctx.lineTo(w, sy);
     }
     ctx.stroke();
 
     const major = base * 5;
-    ctx.strokeStyle = "rgba(145,160,176,0.22)";
+    ctx.strokeStyle = "rgba(135,155,180,0.18)";
     ctx.beginPath();
-    
     const mLeftX = Math.ceil(left / major);
     const mRightX = Math.floor(right / major);
     for (let k = mLeftX; k <= mRightX; k++) {
-      const sx = snapPixelCenter(worldToScreenState(k * major, 0, state)[0], dpr);
+      const sx = (Math.floor(worldToScreenState(k * major, 0, state)[0] * dpr) + 0.5) / dpr;
       ctx.moveTo(sx, 0); ctx.lineTo(sx, h);
     }
-
     const mTopY = Math.ceil(top / major);
     const mBottomY = Math.floor(bottom / major);
     for (let k = mTopY; k <= mBottomY; k++) {
-      const sy = snapPixelCenter(worldToScreenState(0, k * major, state)[1], dpr);
+      const sy = (Math.floor(worldToScreenState(0, k * major, state)[1] * dpr) + 0.5) / dpr;
       ctx.moveTo(0, sy); ctx.lineTo(w, sy);
     }
     ctx.stroke();
+
+    if (scl >= 12) {
+      ctx.fillStyle = "rgba(255,255,255,0.15)";
+      const dLeftX = Math.ceil(left);
+      const dRightX = Math.floor(right);
+      const dTopY = Math.ceil(top);
+      const dBottomY = Math.floor(bottom);
+      const dotSize = Math.max(1 / dpr, 1.2 / dpr);
+
+      for (let ix = dLeftX; ix <= dRightX; ix++) {
+        for (let iy = dTopY; iy <= dBottomY; iy++) {
+          const pt = worldToScreenState(ix, iy, state);
+          ctx.fillRect(pt[0] - dotSize / 2, pt[1] - dotSize / 2, dotSize, dotSize);
+        }
+      }
+    }
+
     ctx.restore();
   }
 
@@ -785,12 +789,11 @@
     const o = worldToScreenState(0, 0, state);
 
     ctx.save();
-    // 修正：严格 1 个物理像素对齐
     ctx.lineWidth = 1 / dpr;
-    ctx.strokeStyle = "rgba(220,230,240,0.45)";
+    ctx.strokeStyle = "rgba(215,228,242,0.4)";
     ctx.beginPath();
-    const oy = snapPixelCenter(o[1], dpr);
-    const ox = snapPixelCenter(o[0], dpr);
+    const ox = (Math.floor(o[0] * dpr) + 0.5) / dpr;
+    const oy = (Math.floor(o[1] * dpr) + 0.5) / dpr;
     ctx.moveTo(0, oy); ctx.lineTo(w, oy);
     ctx.moveTo(ox, 0); ctx.lineTo(ox, h);
     ctx.stroke();
@@ -802,56 +805,63 @@
 
     const {ctx, dpr, scale:scl, w, h} = state;
     const pts = g.points;
+    const totalPts = pts.length;
 
     ctx.save();
 
-    // 恒定占用 1 个物理像素
     const linePixelWidth = 1 / dpr;
     ctx.strokeStyle = g.color;
-    ctx.globalAlpha = selected ? 0.95 : 0.55;
+    ctx.globalAlpha = selected ? 0.95 : 0.45;
     ctx.lineWidth = linePixelWidth;
     ctx.lineCap = "butt";
-    ctx.lineJoin = "bevel"; 
+    ctx.lineJoin = "miter";
+    ctx.miterLimit = 3;
 
-    // 1. 主轨迹绘制（“去掉线”关闭后只保留采样点）
     if (showLines) {
       ctx.beginPath();
       const p0 = worldToScreenState(pts[0][0], pts[0][1], state);
       ctx.moveTo(p0[0], p0[1]);
-      for (let i = 1; i < pts.length; i++) {
+      for (let i = 1; i < totalPts; i++) {
         const p = worldToScreenState(pts[i][0], pts[i][1], state);
         ctx.lineTo(p[0], p[1]);
       }
       ctx.stroke();
     }
 
-    // 2. 真实采样节点（导出时设定为 1 物理像素点，放大后颗粒分明无粘连）
     if (showNodes) {
       ctx.fillStyle = g.color;
       ctx.globalAlpha = selected ? 0.95 : 0.5;
-      const nodeRadius = isExport ? (1.0 / dpr) : Math.max(1.2, 1.8 / dpr);
 
-      if (scl > 0.08 || isExport) {
-        ctx.beginPath();
-        for (let i = 0; i < pts.length; i++) {
-          const sc = worldToScreenState(pts[i][0], pts[i][1], state);
-          if (!isExport && (sc[0] < -10 || sc[0] > w + 10 || sc[1] < -10 || sc[1] > h + 10)) continue;
-          ctx.moveTo(sc[0] + nodeRadius, sc[1]);
-          ctx.arc(sc[0], sc[1], nodeRadius, 0, Math.PI * 2);
+      const minScrX = -20, maxScrX = w + 20;
+      const minScrY = -20, maxScrY = h + 20;
+
+      const minWldX = state.viewX + (minScrX - state.halfW) / scl;
+      const maxWldX = state.viewX + (maxScrX - state.halfW) / scl;
+      const minWldY = state.viewY + (minScrY - state.halfH) / scl;
+      const maxWldY = state.viewY + (maxScrY - state.halfH) / scl;
+
+      const dotRadius = isExport ? (1.0 / dpr) : Math.max(1.0 / dpr, 1.4 / dpr);
+
+      ctx.beginPath();
+      for (let i = 0; i < totalPts; i++) {
+        const wx = pts[i][0];
+        const wy = pts[i][1];
+        if (!isExport && (wx < minWldX || wx > maxWldX || wy < minWldY || wy > maxWldY)) {
+          continue;
         }
-        ctx.fill();
+        const sc = worldToScreenState(wx, wy, state);
+        ctx.rect(sc[0] - dotRadius, sc[1] - dotRadius, dotRadius * 2, dotRadius * 2);
       }
+      ctx.fill();
     }
 
-    // 3. 当前末端光标准星（去线模式下不绘制，保证“只剩下点”）
     if (showLines) {
-      const last = pts[pts.length - 1];
+      const last = pts[totalPts - 1];
       const lp = worldToScreenState(last[0], last[1], state);
 
       ctx.strokeStyle = g.color;
-      ctx.fillStyle = g.color;
-      ctx.globalAlpha = selected ? 1 : 0.7;
-      ctx.lineWidth = linePixelWidth;
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1 / dpr;
 
       const r = isExport ? (3.5 / dpr) : 4;
       ctx.beginPath();
@@ -870,16 +880,26 @@
 
   function renderScene(targetCtx, cssW, cssH, dpr, sceneScale, sceneViewX, sceneViewY, isExport = false) {
     const state = {
-      ctx: targetCtx, w: cssW, h: cssH, dpr, scale: sceneScale, viewX: sceneViewX, viewY: sceneViewY
+      ctx: targetCtx,
+      w: cssW,
+      h: cssH,
+      halfW: Math.round(cssW / 2),
+      halfH: Math.round(cssH / 2),
+      dpr,
+      scale: sceneScale,
+      viewX: sceneViewX,
+      viewY: sceneViewY
     };
+
     targetCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    targetCtx.fillStyle = "#080a0d";
+    targetCtx.fillStyle = "#06080a";
     targetCtx.fillRect(0, 0, cssW, cssH);
 
     drawGridState(state);
     drawAxesState(state);
-    for (const g of groups) {
-      drawGroupState(g, g.id === activeId, state, isExport);
+
+    for (let i = 0; i < groups.length; i++) {
+      drawGroupState(groups[i], groups[i].id === activeId, state, isExport);
     }
   }
 
@@ -890,23 +910,22 @@
     const g = activeGroup();
     const p = g?.points?.[g.points.length - 1] || [0,0];
 
-    // 实时统计面板跟随渲染帧更新；采集热路径不直接触碰 DOM。
     updateLive();
     updateHzCalculation();
 
     let hudText =
-      `STATUS: ${recording ? "🎯 CAPTURING (8K 捕获中)" : "🖐️ PAN & INSPECT (平移查看中)"}\n` +
-      `POLLING: ${currentPollingHz.toLocaleString()} Hz (Peak: ${peakPollingHz.toLocaleString()} Hz)\n` +
+      `STATUS: ${recording ? "🎯 原始捕获中" : "🖐️ 视口浏览 (小手平移/缩放)"}\n` +
+      `POLLING: ${currentPollingHz.toLocaleString()} Hz (峰值: ${peakPollingHz.toLocaleString()} Hz)\n` +
       `ACTIVE: ${g?.name ?? "-"}\n` +
-      `TRACK X: ${formatCount(p[0])} counts\n` +
-      `TRACK Y: ${formatCount(p[1])} counts\n` +
-      `SAMPLES: ${(g?.events ?? 0).toLocaleString()} (非零轨迹节点)\n` +
+      `COORD: X=${formatCount(p[0])}, Y=${formatCount(p[1])} counts\n` +
+      `PULSES: ${(g?.totalCounts ?? 0).toLocaleString()} (传感器总脉冲)\n` +
+      `DISTANCE: ${formatCount(g?.distance ?? 0)} counts (欧氏位移)\n` +
+      `PACKETS: ${(g?.events ?? 0).toLocaleString()} 帧\n` +
       `SCALE: ${Number(scale.toFixed(5))} px/count${scaleLocked ? " 🔒" : ""}\n` +
-      `MODE: ${displayMode === "follow" ? "FOLLOW" : "FIXED"}\n` +
-      `SOURCE: ${_supportsRawUpdate ? "pointerrawupdate + coalesced" : "pointermove fallback"}`;
+      `SOURCE: ${_supportsRawUpdate ? "pointerrawupdate" : "pointermove"} [${lastEventSource}]`;
 
     if (hoverWorldPos && !recording) {
-      hudText += `\n\n[ HOVER ]\nX: ${formatCount(hoverWorldPos[0])}\nY: ${formatCount(hoverWorldPos[1])}`;
+      hudText += `\n\n[ 光标世界坐标 ]\nX: ${formatCount(hoverWorldPos[0])}\nY: ${formatCount(hoverWorldPos[1])}`;
     }
 
     $("hud").textContent = hudText;
@@ -914,39 +933,37 @@
 
   function formatCount(v) {
     return Number.isFinite(v)
-      ? (Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : v.toFixed(2))
+      ? (Math.abs(v - Math.round(v)) < 1e-7 ? String(Math.round(v)) : v.toFixed(2))
       : "0";
   }
 
   async function downloadHighResPng() {
     const cssW = Math.max(1, Math.floor(canvas.clientWidth));
     const cssH = Math.max(1, Math.floor(canvas.clientHeight));
-
     const exportDpr = 4;
-    const exportCanvas = document.createElement("canvas");
-    exportCanvas.width = Math.max(1, Math.round(cssW * exportDpr));
-    exportCanvas.height = Math.max(1, Math.round(cssH * exportDpr));
-    const exportCtx = exportCanvas.getContext("2d");
 
-    // 触发超高清发丝级光栅化
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = Math.round(cssW * exportDpr);
+    exportCanvas.height = Math.round(cssH * exportDpr);
+    const exportCtx = exportCanvas.getContext("2d", { alpha: false });
+
     renderScene(exportCtx, cssW, cssH, exportDpr, scale, viewX, viewY, true);
 
     const blob = await new Promise(resolve => exportCanvas.toBlob(resolve, "image/png"));
     if (!blob) {
-      setStatus("高清 PNG 导出失败", true);
+      setStatus("PNG 导出失败", true);
       return;
     }
 
     const a = document.createElement("a");
     const stamp = new Date().toISOString().replace(/[:.]/g, "-");
     a.href = URL.createObjectURL(blob);
-    a.download = `mouse-counts-${stamp}-4x.png`;
+    a.download = `mouse-raw-counts-${stamp}-4x.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-
-    setStatus(`已导出 4× 发丝级超清图（${exportCanvas.width}×${exportCanvas.height}）`);
+    setStatus(`已导出发丝级无损超清图（${exportCanvas.width}×${exportCanvas.height}）`);
   }
 
   let rafPending = false;
@@ -972,7 +989,7 @@
       info.style.minWidth = "0";
       const name = document.createElement("div"); name.className = "gname"; name.textContent = g.name;
       const meta = document.createElement("div"); meta.className = "gmeta";
-      meta.textContent = `${g.points.length-1} 点 · ${Math.round(g.distance).toLocaleString()} counts`;
+      meta.textContent = `${g.events} 节点 · ${Math.round(g.distance).toLocaleString()} counts`;
       info.append(name, meta);
 
       const actions = document.createElement("div"); actions.className = "group-actions";
@@ -986,8 +1003,8 @@
       del.textContent = "×";
       del.onclick = (e) => {
         e.stopPropagation();
-        if (groups.length <= 1) { resetCurrent(); return; }
-        if (!confirm(`确定删除“${g.name}”吗？`)) return;
+        if (groups.length <= 1) { clearCurrentTrace(); return; }
+        if (!confirm(`确定删除“${g.name}”？`)) return;
         groups = groups.filter(x => x.id !== g.id);
         if (activeId === g.id) activeId = groups[Math.max(0, index - 1)].id;
         save(); renderGroups(); updateLive(); scheduleDraw();
@@ -1004,17 +1021,17 @@
     });
   }
 
-  function requestLock(el, unadjusted) {
+  function requestLock(el) {
     let ret;
     try {
-      ret = unadjusted
-        ? el.requestPointerLock({ unadjustedMovement: true })
-        : el.requestPointerLock();
-    } catch (e) {
-      return Promise.reject(e);
+      ret = el.requestPointerLock({ unadjustedMovement: true });
+    } catch (_) {
+      try { ret = el.requestPointerLock(); } catch(e) { return Promise.reject(e); }
     }
     if (ret && typeof ret.then === "function") {
-      return ret.then(() => (unadjusted ? "raw" : "normal"));
+      return ret.then(() => "raw").catch(() => {
+        return el.requestPointerLock ? el.requestPointerLock() : Promise.reject();
+      }).then(() => "normal");
     }
     return Promise.resolve("unknown");
   }
@@ -1024,27 +1041,24 @@
     if (!g) { createGroup(true); return; }
 
     if (!canvas.requestPointerLock) {
-      setStatus("此浏览器不支持 Pointer Lock API", true);
+      setStatus("当前浏览器不支持 Pointer Lock API", true);
       return;
     }
 
     let mode = "unknown";
     try {
-      mode = await requestLock(canvas, true);
+      mode = await requestLock(canvas);
     } catch (e) {
-      // 本工具的目标是原始 counts。若无法启用 unadjustedMovement，
-      // 宁可拒绝采集，也不悄悄退回带系统加速的普通 Pointer Lock。
-      setStatus(
-        "无法启用原始鼠标输入：" + (e?.message || e?.name || "浏览器不支持 unadjustedMovement；未开始采集"),
-        true
-      );
+      setStatus("原始捕获启动失败：" + (e?.message || "用户取消或被安全拦截"), true);
       return;
     }
 
     lockMode = mode;
     recording = true;
+    ignoreInputsUntil = 0;
     recentTimestamps = [];
     currentPollingHz = 0;
+    lastEventSource = "starting";
 
     clearInterval(hzDecayTimer);
     hzDecayTimer = setInterval(() => {
@@ -1054,7 +1068,7 @@
 
     $("overlay").style.display = "none";
     canvas.style.cursor = "none";
-    setStatus(`${lockModeLabel()} · ${displayMode === "follow" ? "鼠标居中" : "固定屏幕"}`);
+    setStatus(`${lockModeLabel()} · ${displayMode === "follow" ? "实时跟随" : "固定视口"}`);
     renderGroups();
     scheduleDraw();
   }
@@ -1062,6 +1076,25 @@
   function exitPointerLock() {
     try { document.exitPointerLock?.(); } catch(_) {}
   }
+
+  // 捕获中 ESC：这里作为一层兜底（部分浏览器会派发 keydown）
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && recording) {
+      recording = false;
+      ignoreInputsUntil = performance.now() + 200;
+      exitPointerLock();
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
+  window.addEventListener("blur", () => {
+    if (recording) {
+      recording = false;
+      ignoreInputsUntil = performance.now() + 200;
+      exitPointerLock();
+    }
+  });
 
   canvas.addEventListener("contextmenu", e => e.preventDefault());
 
@@ -1108,18 +1141,19 @@
   const _supportsRawUpdate = ('onpointerrawupdate' in window);
   const _captureEventName = _supportsRawUpdate ? 'pointerrawupdate' : 'pointermove';
 
-  // 读取一次 pointerrawupdate / pointermove 中真正可用的增量。
-  // 关键点：如果浏览器暴露了 coalesced events，则只有在这些子事件
-  // 的 movementX/Y 之和与父事件一致时才逐点解包；否则回退到父事件。
-  // 这样可以避免浏览器实现差异造成“漏计 / 重计” counts。
   function getCaptureSamples(e) {
-    const parentDx = Number.isFinite(Number(e.movementX)) ? Number(e.movementX) : 0;
-    const parentDy = Number.isFinite(Number(e.movementY)) ? Number(e.movementY) : 0;
-    const parentHasMove = parentDx !== 0 || parentDy !== 0;
-    const parentDelta = parentHasMove ? [[parentDx, parentDy]] : [];
+    const pRawX = Number(e.movementX);
+    const pRawY = Number(e.movementY);
+    const pDx = Number.isFinite(pRawX) ? pRawX : 0;
+    const pDy = Number.isFinite(pRawY) ? pRawY : 0;
+    const parentHasMove = (pDx !== 0 || pDy !== 0);
 
     if (typeof e.getCoalescedEvents !== "function") {
-      return { deltas: parentDelta, hzEvents: [e] };
+      return {
+        deltas: parentHasMove ? [[pDx, pDy]] : [],
+        hzEvents: [e],
+        source: "parent"
+      };
     }
 
     let coalesced = [];
@@ -1130,103 +1164,73 @@
     }
 
     if (!coalesced.length) {
-      return { deltas: parentDelta, hzEvents: [e] };
+      return {
+        deltas: parentHasMove ? [[pDx, pDy]] : [],
+        hzEvents: [e],
+        source: "parent"
+      };
     }
 
     const deltas = [];
     const hzEvents = [];
-    let invalidMovement = false;
+    let invalidSubEvent = false;
 
-    for (const ev of coalesced) {
-      const dx = Number(ev.movementX);
-      const dy = Number(ev.movementY);
+    for (let i = 0; i < coalesced.length; i++) {
+      const ev = coalesced[i];
+      const rawX = Number(ev.movementX);
+      const rawY = Number(ev.movementY);
 
-      // 时间频率统计：零位移事件也属于事件，不应因为 dx/dy 为 0 被完全忽略。
       hzEvents.push(ev);
 
-      if (!Number.isFinite(dx) || !Number.isFinite(dy)) {
-        invalidMovement = true;
+      if (!Number.isFinite(rawX) || !Number.isFinite(rawY)) {
+        invalidSubEvent = true;
         continue;
       }
 
-      if (dx !== 0 || dy !== 0) {
-        deltas.push([dx, dy]);
+      if (rawX !== 0 || rawY !== 0) {
+        deltas.push([rawX, rawY]);
       }
     }
 
-    /*
-      重要修正：
-      不再把“coalesced movementX/Y 之和”强行与父事件 movementX/Y 比较。
-
-      Pointer Events 规定父事件是 coalesced events 的聚合表示，并允许父事件
-      存在额外处理；规范也明确建议开发者处理“父事件”或“全部 coalesced events”
-      二选一，而不是混用两者。因此，对于轨迹几何，优先完整使用 coalesced 流。
-
-      只有在子事件 movement 字段本身不可用时，才回退到父事件，以保证总 counts
-      不至于因为浏览器实现异常而丢失。
-    */
-    if (!invalidMovement && deltas.length) {
-      return { deltas, hzEvents };
-    }
-
-    if (!invalidMovement && !deltas.length) {
-      // 子事件全部为零；若父事件有非零总位移，用父事件保住 counts。
-      return parentHasMove
-        ? { deltas: parentDelta, hzEvents: [e], fallback: true }
-        : { deltas: [], hzEvents };
+    if (!invalidSubEvent && deltas.length > 0) {
+      return { deltas, hzEvents, source: "coalesced" };
     }
 
     if (parentHasMove) {
-      return { deltas: parentDelta, hzEvents: [e], fallback: true };
+      return { deltas: [[pDx, pDy]], hzEvents: [e], source: "fallback-parent" };
     }
 
-    // 父事件也没有可用的非零位移时，不凭空制造数据。
-    return { deltas, hzEvents, fallback: invalidMovement };
-  }
-
-  function normalizeEventTime(ts) {
-    const t = Number(ts);
-    if (!Number.isFinite(t)) return performance.now();
-    const now = performance.now();
-    // 老实现可能给 epoch 毫秒；现代实现通常与 performance.now() 同源。
-    if (Math.abs(t - now) < 1e7) return t;
-    const origin = Number(performance.timeOrigin);
-    return Number.isFinite(origin) ? t - origin : t - (Date.now() - now);
+    return { deltas: [], hzEvents, source: "none" };
   }
 
   function _handleCaptureEvent(e) {
     if (!recording || document.pointerLockElement !== canvas) return;
+    if (performance.now() < ignoreInputsUntil) return;
 
     const capture = getCaptureSamples(e);
+    lastEventSource = capture.source;
     if (!capture.deltas.length) return;
 
     let moved = false;
-    for (const [dx, dy] of capture.deltas) {
-      if (dx === 0 && dy === 0) continue;
+    for (let i = 0; i < capture.deltas.length; i++) {
+      const [dx, dy] = capture.deltas[i];
       addMove(dx, dy);
       moved = true;
     }
 
     if (!moved) return;
 
-    // 测频使用实际事件时间戳，而不是把一个 coalesced 批次的所有 samples
-    // 都压在同一个 performance.now() 上。
-    for (const ev of capture.hzEvents) {
-      const dx = Number(ev.movementX);
-      const dy = Number(ev.movementY);
-      if (Number.isFinite(dx) && Number.isFinite(dy) && (dx !== 0 || dy !== 0)) {
-        registerHzSample(1, normalizeEventTime(ev.timeStamp));
+    for (let i = 0; i < capture.hzEvents.length; i++) {
+      const ev = capture.hzEvents[i];
+      if ((ev.movementX || 0) !== 0 || (ev.movementY || 0) !== 0) {
+        registerHzSample(1, ev.timeStamp || performance.now());
       }
     }
 
-    // 不再在每个 8K 输入事件上直接修改 DOM。
-    // UI 与 Canvas 统一在 requestAnimationFrame 中刷新，避免高回报率下
-    // 主线程被状态栏更新拖慢，从而反过来影响原始输入事件的处理。
     if (displayMode === "follow") {
       const g = activeGroup();
       const p = g.points[g.points.length - 1];
-      viewX = p[0];
-      viewY = p[1];
+      viewX = p[0]; viewY = p[1];
     }
 
     scheduleDraw();
@@ -1240,15 +1244,14 @@
       canvas.style.cursor = "grab";
     }
 
-    // 非捕获状态下，左键/右键点击（未拖动）触发清除
     if (clearClickCandidate && e.button === clearClickCandidate.button) {
       const dx = e.clientX - clearClickCandidate.x;
       const dy = e.clientY - clearClickCandidate.y;
-      if (Math.hypot(dx, dy) < 5) {
+      if (Math.hypot(dx, dy) < 4) {
         const g = activeGroup();
         if (g) {
           clearCurrentTrace();
-          setStatus(`已清除“${g.name}”轨迹（${buttonName(clearKeyCode)}）`);
+          setStatus(`已重置“${g.name}”轨迹（${buttonName(clearKeyCode)}）`);
         }
       }
       clearClickCandidate = null;
@@ -1257,11 +1260,10 @@
 
   canvas.addEventListener("wheel", e => {
     e.preventDefault();
-    // 缩放率已锁定：滚轮不改变缩放
     if (scaleLocked) return;
 
-    const factor = e.deltaY < 0 ? 1.15 : 0.87;
-    const newScale = Math.max(0.01, Math.min(50, scale * factor));
+    const factor = e.deltaY < 0 ? 1.15 : 0.869565;
+    const newScale = Math.max(0.01, Math.min(100, scale * factor));
     if (newScale === scale) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -1279,26 +1281,39 @@
     }
 
     $("scale").value = Number(scale.toFixed(5));
-    syncScaleLockUI();
     scheduleDraw();
   }, { passive: false });
 
   document.addEventListener("pointerlockchange", () => {
     const locked = document.pointerLockElement === canvas;
     recording = locked;
+
     if (!locked) {
+      // ★ 核心修复：先修剪归位跳变产生的异常尾点。
+      // 必须在任何状态重置之前做——此时 activeGroup 仍是退出时那一组。
+      const g = activeGroup();
+      let trimmed = 0;
+      if (g) trimmed = trimGlitchTail(g);
+
+      ignoreInputsUntil = performance.now() + 200;
       lockMode = "none";
       canvas.style.cursor = "grab";
       currentPollingHz = 0;
       clearInterval(hzDecayTimer);
       stopPeriodicSave();
-      setStatus("已退出捕获，直接拖动画布可平移查看");
       save();
-      renderGroups(); 
+      renderGroups();
+      updateLive();
       scheduleDraw();
+
+      if (trimmed) {
+        setStatus(`已退出捕获，修剪 ${trimmed} 个归位跳变点（可拖拽平移 / 滚轮缩放）`);
+      } else {
+        setStatus("已退出捕获（可拖拽平移 / 滚轮缩放）");
+      }
     } else {
       $("overlay").style.display = "none";
-      setStatus(`${lockModeLabel()} · ${displayMode === "follow" ? "鼠标居中" : "固定屏幕"}`);
+      setStatus(`${lockModeLabel()} · ${displayMode === "follow" ? "实时跟随" : "固定视口"}`);
       scheduleDraw();
     }
   });
@@ -1308,7 +1323,7 @@
     lockMode = "none";
     canvas.style.cursor = "grab";
     clearInterval(hzDecayTimer);
-    setStatus("锁定请求被拦截，请点击“进入原始捕获”重试", true);
+    setStatus("Pointer Lock 请求失败，请重新点击进入", true);
   });
 
   $("start").onclick = enterPointerLock;
@@ -1332,14 +1347,14 @@
 
   $("rename").onclick = () => {
     const g = activeGroup(); if (!g) return;
-    const name = prompt("组名称：", g.name);
+    const name = prompt("轨迹组名称：", g.name);
     if (name && name.trim()) { g.name = name.trim(); save(); renderGroups(); scheduleDraw(); }
   };
 
   $("deleteGroup").onclick = () => {
     const g = activeGroup(); if (!g) return;
-    if (groups.length === 1) { resetCurrent(); return; }
-    if (!confirm(`确定删除“${g.name}”吗？`)) return;
+    if (groups.length === 1) { clearCurrentTrace(); return; }
+    if (!confirm(`确定删除“${g.name}”？`)) return;
     groups = groups.filter(x => x.id !== g.id);
     activeId = groups[groups.length - 1].id;
     save(); renderGroups(); syncColorPalette(); updateLive(); centerOnActive(); scheduleDraw();
@@ -1348,12 +1363,10 @@
   $("modeFixed").onclick = () => setDisplayMode("fixed");
   $("modeFollow").onclick = () => setDisplayMode("follow");
 
-  // ---------- 缩放：锁定 + 倍率预设 ----------
-
   function clampScale(v) {
     const n = Number(v);
     if (!Number.isFinite(n)) return null;
-    return Math.max(0.01, Math.min(50, n));
+    return Math.max(0.01, Math.min(100, n));
   }
 
   function applyScale(newScale) {
@@ -1361,12 +1374,11 @@
     if (v === null) return;
     scale = v;
     $("scale").value = Number(scale.toFixed(5));
-    syncScaleLockUI();
     scheduleDraw();
   }
 
   function formatPreset(v) {
-    const n = Math.abs(v - Math.round(v)) < 1e-9 ? String(Math.round(v)) : String(Number(v.toFixed(5)));
+    const n = Math.abs(v - Math.round(v)) < 1e-7 ? String(Math.round(v)) : String(Number(v.toFixed(5)));
     return n + "×";
   }
 
@@ -1377,7 +1389,7 @@
     if (!scalePresets.length) {
       const empty = document.createElement("div");
       empty.className = "zoom-presets-empty";
-      empty.textContent = "暂无预设，输入倍率后点添加";
+      empty.textContent = "无预设，输入倍率添加";
       list.appendChild(empty);
       return;
     }
@@ -1386,29 +1398,18 @@
       btn.type = "button";
       btn.className = "zoom-preset-btn";
       btn.textContent = formatPreset(val);
-      btn.title = `左键切换到 ${formatPreset(val)}，右键删除`;
       btn.onclick = () => {
         applyScale(val);
-        setStatus(`缩放已切换到 ${formatPreset(val)}${scaleLocked ? "（锁头锁定中，已同步锁定值）" : ""}`);
+        setStatus(`缩放切换至 ${formatPreset(val)}`);
       };
       btn.oncontextmenu = (e) => {
         e.preventDefault();
-        if (!confirm(`删除预设 ${formatPreset(val)}？`)) return;
         scalePresets.splice(i, 1);
         saveScalePresets();
         renderZoomPresets();
-        setStatus(`已删除预设 ${formatPreset(val)}`);
       };
       list.appendChild(btn);
     });
-  }
-
-  function dedupeSortPresets(arr) {
-    const uniq = [];
-    for (const v of arr) {
-      if (!uniq.some(x => Math.abs(x - v) < 1e-9)) uniq.push(v);
-    }
-    return uniq.sort((a, b) => a - b);
   }
 
   function loadScalePresets() {
@@ -1416,120 +1417,51 @@
       const raw = localStorage.getItem(SCALE_PRESETS_STORAGE);
       if (raw) {
         const arr = JSON.parse(raw);
-        if (Array.isArray(arr)) {
-          scalePresets = dedupeSortPresets(
-            arr.map(v => clampScale(v)).filter(v => v !== null)
-          );
-        }
+        if (Array.isArray(arr)) scalePresets = arr.map(v => clampScale(v)).filter(Boolean);
       }
-    } catch (_) { scalePresets = []; }
+    } catch (_) { scalePresets = [1, 2, 4, 8, 16]; }
+    if (!scalePresets.length) scalePresets = [1, 2, 4, 8, 16];
     renderZoomPresets();
   }
 
   function saveScalePresets() {
-    try {
-      localStorage.setItem(SCALE_PRESETS_STORAGE, JSON.stringify(scalePresets));
-    } catch (_) {}
+    try { localStorage.setItem(SCALE_PRESETS_STORAGE, JSON.stringify(scalePresets)); } catch (_) {}
   }
 
   $("addZoomPreset").onclick = () => {
     const input = $("zoomPresetInput");
     const v = clampScale(input.value);
-    if (v === null) {
-      setStatus("请输入有效的缩放倍率（0.01 ~ 50）", true);
-      return;
+    if (v === null) return;
+    if (!scalePresets.some(x => Math.abs(x - v) < 1e-7)) {
+      scalePresets.push(v);
+      scalePresets.sort((a,b)=>a-b);
+      saveScalePresets();
+      renderZoomPresets();
     }
-    if (scalePresets.some(x => Math.abs(x - v) < 1e-9)) {
-      setStatus(`${formatPreset(v)} 已在预设中`, true);
-      return;
-    }
-    scalePresets.push(v);
-    scalePresets = dedupeSortPresets(scalePresets);
-    saveScalePresets();
-    renderZoomPresets();
     input.value = "";
-    setStatus(`已添加预设 ${formatPreset(v)}`);
   };
-
-  $("zoomPresetInput")?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      $("addZoomPreset").click();
-    }
-  });
-
-  function syncScaleLockUI() {
-    const btn = $("scaleLock");
-    if (btn) {
-      btn.textContent = scaleLocked ? "🔒" : "🔓";
-      btn.title = scaleLocked
-        ? `缩放率已锁定为 ${Number(scale.toFixed(5))}，点击解锁`
-        : "缩放率未锁定，点击锁定";
-      btn.classList.toggle("active", scaleLocked);
-    }
-    const fit = $("fit");
-    const rz = $("resetZoom");
-    if (fit) {
-      fit.disabled = scaleLocked;
-      fit.style.opacity = scaleLocked ? "0.4" : "";
-      fit.title = scaleLocked ? "缩放率已锁定，先解锁小锁头" : "自动缩放到适配全图";
-    }
-    if (rz) {
-      rz.disabled = scaleLocked;
-      rz.style.opacity = scaleLocked ? "0.4" : "";
-      rz.title = scaleLocked ? "缩放率已锁定，先解锁小锁头" : "重置为 1:1";
-    }
-  }
-
-  function loadScaleLockSetting() {
-    try {
-      const v = localStorage.getItem(SCALE_LOCK_STORAGE);
-      scaleLocked = v === null ? true : v === "1";
-    } catch (_) {
-      scaleLocked = true;
-    }
-    syncScaleLockUI();
-  }
-
-  function saveScaleLockSetting() {
-    try {
-      localStorage.setItem(SCALE_LOCK_STORAGE, scaleLocked ? "1" : "0");
-    } catch (_) {}
-  }
 
   $("scaleLock").onclick = () => {
     scaleLocked = !scaleLocked;
-    saveScaleLockSetting();
-    syncScaleLockUI();
-    if (scaleLocked) {
-      setStatus(`缩放率已锁定为 ${Number(scale.toFixed(5))}`);
-    } else {
-      setStatus("缩放率已解锁，滚轮与适配按钮恢复生效");
-    }
+    $("scaleLock").textContent = scaleLocked ? "🔒" : "🔓";
+    $("scaleLock").classList.toggle("active", scaleLocked);
+    $("fit").disabled = scaleLocked;
+    $("resetZoom").disabled = scaleLocked;
+    setStatus(scaleLocked ? `缩放率已锁定 (${scale.toFixed(4)})` : "缩放率已解锁");
   };
 
-  $("fit").onclick = () => {
-    if (scaleLocked) {
-      setStatus("缩放率已锁定，请先点击小锁头解锁", true);
-      return;
-    }
-    fitView();
-  };
-
+  $("fit").onclick = fitView;
   $("centerOrigin").onclick = () => { viewX = 0; viewY = 0; scheduleDraw(); };
 
   $("scale").onchange = () => {
-    // 手动输入始终允许，输入的就是“当前应强制使用的缩放率”
     const v = clampScale($("scale").value);
-    scale = v === null ? 1 : v;
-    $("scale").value = String(scale);
-    syncScaleLockUI();
-    scheduleDraw();
+    if (v !== null) {
+      scale = v;
+      scheduleDraw();
+    }
   };
 
-  $("showAll").onclick = () => {
-    groups.forEach(g => g.visible = true); save(); renderGroups(); scheduleDraw();
-  };
+  $("showAll").onclick = () => { groups.forEach(g => g.visible = true); save(); renderGroups(); scheduleDraw(); };
   $("hideAll").onclick = () => {
     groups.forEach(g => g.visible = false);
     const g = activeGroup(); if (g) g.visible = true;
@@ -1543,7 +1475,7 @@
   };
   $("toggleLines").onclick = () => {
     showLines = !showLines;
-    $("toggleLines").classList.toggle("active", !showLines);
+    $("toggleLines").classList.toggle("primary", showLines);
     scheduleDraw();
   };
   $("toggleGrid").onclick = () => {
@@ -1558,25 +1490,20 @@
   };
 
   $("resetZoom").onclick = () => {
-    if (scaleLocked) {
-      setStatus("缩放率已锁定，请先点击小锁头解锁", true);
-      return;
-    }
     scale = 1;
     $("scale").value = "1";
     scheduleDraw();
   };
 
-  $("downloadPng").onclick = () => downloadHighResPng();
+  $("downloadPng").onclick = downloadHighResPng;
 
-  // ---------- 按键清除轨迹（捕获中 + ESC 后均可用） ----------
   function buttonName(code) {
     switch (Number(code)) {
       case 0: return "鼠标左键";
       case 1: return "鼠标中键";
       case 2: return "鼠标右键";
-      case 3: return "侧键 · 后退";
-      case 4: return "侧键 · 前进";
+      case 3: return "侧键 1 (后退)";
+      case 4: return "侧键 2 (前进)";
       default: return "关闭";
     }
   }
@@ -1593,140 +1520,61 @@
     }
   }
 
-  function loadClearKeySetting() {
-    try {
-      const v = localStorage.getItem(CLEAR_KEY_STORAGE);
-      clearKeyCode = v === null ? -1 : Number(v);
-      if (!Number.isInteger(clearKeyCode)) clearKeyCode = -1;
-    } catch (_) {
-      clearKeyCode = -1;
-    }
-    const sel = $("clearKeySelect");
-    if (sel) sel.value = String(clearKeyCode);
+  $("clearKeySelect").onchange = () => {
+    clearKeyCode = Number($("clearKeySelect").value);
+    try { localStorage.setItem(CLEAR_KEY_STORAGE, String(clearKeyCode)); } catch(_) {}
     syncClearKeyHint();
-  }
+  };
 
-  function saveClearKeySetting() {
-    try {
-      localStorage.setItem(CLEAR_KEY_STORAGE, String(clearKeyCode));
-    } catch (_) {}
-  }
-
-  const clearKeySelect = $("clearKeySelect");
-  if (clearKeySelect) {
-    clearKeySelect.onchange = () => {
-      const v = Number(clearKeySelect.value);
-      clearKeyCode = Number.isInteger(v) ? v : -1;
-      saveClearKeySetting();
-      syncClearKeyHint();
-      if (clearKeyCode >= 0) {
-        setStatus(`已启用：按【${buttonName(clearKeyCode)}】清除当前轨迹（捕获中 / ESC 后均可用）`);
-      } else {
-        setStatus("已关闭按键清除轨迹");
-      }
-    };
-  }
-
-  // mousedown 处理（捕获阶段）
   window.addEventListener("mousedown", (e) => {
-    if (clearKeyCode < 0) return;
-    if (e.button !== clearKeyCode) return;
+    if (e.button === 3 || e.button === 4) {
+      e.preventDefault();
+    }
+
+    if (clearKeyCode < 0 || e.button !== clearKeyCode) return;
 
     if (recording) {
-      // 捕获中：立即清除
-      const g = activeGroup();
-      if (!g) return;
       clearCurrentTrace();
-      setStatus(`已清除“${g.name}”轨迹（${buttonName(clearKeyCode)}）`);
       e.preventDefault();
       e.stopPropagation();
       return;
     }
 
-    // 非捕获状态：只作用于画布（不干扰侧栏 / 顶栏按钮）
     if (e.target !== canvas) return;
 
     if (clearKeyCode === 0 || clearKeyCode === 2) {
-      // 左键 / 右键：记录起点，交给 mouseup 判断“点击 vs 拖拽”
       clearClickCandidate = { x: e.clientX, y: e.clientY, button: e.button };
-      // 不阻止默认：让画布拖拽/右键菜单逻辑照常运行
     } else {
-      // 中键 / 侧键：直接清除
-      const g = activeGroup();
-      if (!g) return;
       clearCurrentTrace();
-      setStatus(`已清除“${g.name}”轨迹（${buttonName(clearKeyCode)}）`);
       e.preventDefault();
       e.stopPropagation();
     }
-  }, true); // 捕获阶段
-
-  // 非捕获状态下，侧键（后退/前进）命中画布时阻止浏览器导航
-  window.addEventListener("auxclick", (e) => {
-    if (clearKeyCode < 0) return;
-    if (e.button !== clearKeyCode) return;
-    if (e.target !== canvas) return;
-    e.preventDefault();
-    e.stopPropagation();
   }, true);
 
-  // ---------- 导入 / 导出 ----------
-
-  function collectSettings() {
-    return {
-      scaleLocked: !!scaleLocked,
-      scalePresets: scalePresets.slice(),
-      clearKeyCode: clearKeyCode
-    };
-  }
-
-  function applySettings(settings) {
-    if (!settings || typeof settings !== "object") return [];
-    const applied = [];
-
-    if (typeof settings.scaleLocked === "boolean") {
-      scaleLocked = settings.scaleLocked;
-      saveScaleLockSetting();
-      syncScaleLockUI();
-      applied.push(scaleLocked ? "锁定缩放率" : "解锁缩放率");
+  window.addEventListener("mouseup", (e) => {
+    if (e.button === 3 || e.button === 4) {
+      e.preventDefault();
     }
+  }, true);
 
-    if (Array.isArray(settings.scalePresets)) {
-      const arr = settings.scalePresets
-        .map(v => clampScale(v))
-        .filter(v => v !== null);
-      scalePresets = dedupeSortPresets(arr);
-      saveScalePresets();
-      renderZoomPresets();
-      applied.push(`${scalePresets.length} 个缩放预设`);
+  window.addEventListener("auxclick", (e) => {
+    if (e.button === 3 || e.button === 4 || e.button === clearKeyCode) {
+      e.preventDefault();
+      e.stopPropagation();
     }
-
-    if (Number.isInteger(settings.clearKeyCode)) {
-      let code = settings.clearKeyCode;
-      if (code < -1 || code > 4) code = -1;
-      clearKeyCode = code;
-      saveClearKeySetting();
-      syncClearKeyHint();
-      const sel = $("clearKeySelect");
-      if (sel) sel.value = String(clearKeyCode);
-      applied.push("清除按键");
-    }
-
-    return applied;
-  }
+  }, true);
 
   $("exportBtn").onclick = () => {
     const payload = {
       app: "Raw Mouse Counts Tracker",
-      version: 12,
+      version: 8,
       exportedAt: new Date().toISOString(),
-      settings: collectSettings(),
       groups
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `mouse-counts-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+    a.download = `mouse-raw-counts-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
@@ -1737,17 +1585,10 @@
     try {
       const data = JSON.parse(await f.text());
       const incoming = Array.isArray(data) ? data : data.groups;
-      if (!Array.isArray(incoming)) throw new Error("JSON 格式无效");
-
-      // 应用设置（缩放锁定 / 缩放预设 / 清除按键）
-      const appliedSettings =
-        (data && !Array.isArray(data) && data.settings)
-          ? applySettings(data.settings)
-          : [];
+      if (!Array.isArray(incoming)) throw new Error("JSON 格式不匹配");
 
       const clean = incoming.map((g, i) => {
-        const rawPoints = Array.isArray(g.points) ? g.points : [];
-        const points = rawPoints
+        const points = (Array.isArray(g.points) ? g.points : [])
           .map(p => Array.isArray(p) ? [Number(p[0]), Number(p[1])] : null)
           .filter(p => p && Number.isFinite(p[0]) && Number.isFinite(p[1]));
         if (!points.length) points.push([0, 0]);
@@ -1760,18 +1601,14 @@
           visible: g.visible !== false,
           points,
           events: Math.max(0, points.length - 1),
-          distance: computeDistance(points)
+          distance: computeDistance(points),
+          totalCounts: computeTotalCounts(points)
         };
       });
       groups.push(...clean);
       activeId = clean[clean.length - 1].id;
       save(); renderGroups(); syncColorPalette(); updateLive(); scheduleDraw();
-
-      let msg = `已成功导入 ${clean.length} 个轨迹组`;
-      if (appliedSettings.length) {
-        msg += `，并应用：${appliedSettings.join("、")}`;
-      }
-      setStatus(msg);
+      setStatus(`成功导入 ${clean.length} 组轨迹数据`);
     } catch (e) {
       setStatus("导入失败：" + e.message, true);
     } finally {
@@ -1781,16 +1618,18 @@
 
   window.addEventListener("resize", resize);
 
-  loadClearKeySetting();
-  loadScaleLockSetting();
+  try {
+    const k = localStorage.getItem(CLEAR_KEY_STORAGE);
+    clearKeyCode = k !== null ? Number(k) : -1;
+    $("clearKeySelect").value = String(clearKeyCode);
+  } catch(_) {}
+
+  syncClearKeyHint();
   loadScalePresets();
   load();
   resize();
-  updateLive();
-  renderGroups();
   renderColorPalette();
   setDisplayMode("fixed");
-  syncScaleLockUI();
   scheduleDraw();
 })();
 </script>
