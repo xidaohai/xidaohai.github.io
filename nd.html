@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>菲茨定律：虚拟与物理空间映射模型（标准与变体）</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --primary: #1d4ed8;
+      --primary-light: #eff6ff;
+      --accent: #6d28d9;
+      --accent-light: #f5f3ff;
+      --success: #15803d;
+      --success-light: #f0fdf4;
+      --radius: 12px;
+      /* 全局物理标定像素密度 */
+      --px-per-cm: 37.795px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      padding: clamp(10px, 2.5vw, 24px);
+      padding-bottom: 80px; /* 留出底部作者栏空间 */
+    }
+
+    /* 顶层主框架栅格 */
+    .dashboard-layout {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-frame {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--border);
+      padding: clamp(16px, 3.5vw, 24px);
+    }
+
+    .card-frame.variant-frame {
+      border-color: #ddd6fe;
+      box-shadow: 0 4px 24px -2px rgba(109, 40, 217, 0.08);
+    }
+
+    /* 顶部标尺全幅跨度栏 */
+    .top-calib-wrapper {
+      max-width: 1440px;
+      margin: 0 auto 16px auto;
+    }
+
+    .calib-panel {
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+
+    .calib-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #92400e;
+      margin-bottom: 4px;
+    }
+
+    .calib-tip {
+      font-size: 0.72rem;
+      color: #b45309;
+      margin-bottom: 8px;
+    }
+
+    .ruler-container {
+      background: #ffffff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #fde68a;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .ruler-svg {
+      display: block;
+      height: 38px;
+    }
+
+    .calib-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .calib-controls input[type=range] {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .calib-val {
+      font-family: ui-monospace, monospace;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    .calib-sub-btn {
+      background: #ffffff;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* 标题与头部 */
+    .frame-header {
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    .frame-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    h1, h2 {
+      font-size: clamp(1.1rem, 2.5vw, 1.25rem);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .frame-badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-family: ui-monospace, monospace;
+    }
+
+    .badge-std { background: #dbeafe; color: var(--primary); }
+    .badge-var { background: #ede9fe; color: var(--accent); }
+
+    .sync-btn {
+      background: #f5f3ff;
+      border: 1px solid #ddd6fe;
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sync-btn:hover { background: #ede9fe; }
+
+    .subtitle {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* 数学公式展板 */
+    .formula-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    @media (max-width: 580px) {
+      .formula-panel {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+
+    .formula-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .formula-card.highlight { background: var(--primary-light); border-color: #bfdbfe; }
+    .formula-card.var-highlight { background: var(--accent-light); border-color: #ddd6fe; }
+
+    .formula-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .formula-card.highlight .formula-title { color: var(--primary); }
+    .formula-card.var-highlight .formula-title { color: var(--accent); }
+
+    .unit-tag {
+      font-size: 0.62rem;
+      background: #ffffff;
+      border: 1px solid #c4b5fd;
+      padding: 1px 4px;
+      border-radius: 4px;
+      color: var(--accent);
+      font-family: ui-monospace, monospace;
+    }
+
+    .math-row {
+      display: flex;
+      align-items: center;
+      font-family: "Times New Roman", Times, Cambria, serif;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: var(--text);
+      flex-wrap: wrap;
+    }
+
+    .math-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+      font-size: 0.9em;
+    }
+
+    .math-num {
+      border-bottom: 1.5px solid currentColor;
+      line-height: 1.1;
+      padding-bottom: 1px;
+    }
+
+    .math-den {
+      line-height: 1.1;
+      padding-top: 1px;
+    }
+
+    .formula-desc {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 5px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* 画布外框 */
+    .viz-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .viz-card.phys {
+      background: #faf8ff;
+      border-color: #ede9fe;
+    }
+
+    .viz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .viz-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .viz-header .val {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .scale-badge {
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: var(--muted);
+      font-family: ui-monospace, monospace;
+      font-weight: 600;
+    }
+
+    .scale-badge.true-scale { background: #dbeafe; color: var(--primary); }
+    .scale-badge.var-true { background: #ede9fe; color: var(--accent); }
+
+    /* 标准模型导轨固定高度 */
+    .svg-wrap-std {
+      width: 100%;
+      height: 86px;
+      background: #fbfcfe;
+      border-radius: 8px;
+      border: 1px solid #f1f5f9;
+      overflow: hidden;
+    }
+
+    .viz-card.phys .svg-wrap-std {
+      background: #ffffff;
+      border-color: #f3f0ff;
+    }
+
+    /* 变体球体模型：支持向右侧和下侧无极拉伸 */
+    .svg-wrap-var {
+      width: 100%;
+      height: 150px;
+      min-height: 120px;
+      max-height: 500px;
+      min-width: 50%;
+      max-width: 100%; /* 防止拉伸撑破页面 */
+      background: #faf8ff;
+      border-radius: 8px;
+      border: 1px solid #ede9fe;
+      overflow: hidden;
+      position: relative;
+      resize: both; /* 允许纵横双向拉伸 */
+    }
+
+    .viz-card.phys .svg-wrap-var {
+      background: #ffffff;
+      border-color: #f3f0ff;
+    }
+
+    .resize-hint {
+      position: absolute;
+      right: 2px;
+      bottom: 2px;
+      font-size: 0.68rem;
+      color: #8b5cf6;
+      pointer-events: none;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 1px 4px;
+      border-radius: 4px;
+      font-weight: 600;
+      backdrop-filter: blur(4px);
+    }
+
+    svg.track-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* 指标栏 */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    @media (max-width: 520px) {
+      .metrics-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .metric-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: background-color 0.25s ease;
+    }
+
+    .metric-box.highlight { background: var(--primary-light); border-color: #bfdbfe; }
+    .metric-box.var-highlight { background: var(--accent-light); border-color: #ddd6fe; }
+    .metric-box.flash { background-color: #fef08a !important; }
+
+    .metric-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .metric-box.highlight .metric-label { color: var(--primary); }
+    .metric-box.var-highlight .metric-label { color: var(--accent); }
+
+    .metric-num {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .metric-box.highlight .metric-num { color: var(--primary); }
+    .metric-box.var-highlight .metric-num { color: var(--accent); }
+
+    .metric-unit {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: 2px;
+      font-weight: normal;
+    }
+
+    .metric-sub {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .delta-badge {
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-top: 2px;
+      display: inline-block;
+    }
+    .delta-easier { background: var(--success-light); color: var(--success); }
+    .delta-harder { background: #fee2e2; color: #b91c1c; }
+    .delta-zero { background: #fef3c7; color: #b45309; }
+
+    /* 控件区 */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ctrl-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      min-width: 175px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ctrl-tag {
+      font-family: ui-monospace, monospace;
+      font-size: 0.7rem;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .ctrl-tag.blue { background: #dbeafe; color: var(--primary); }
+    .ctrl-tag.purple { background: #ede9fe; color: var(--accent); }
+
+    .slider-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    @media (max-width: 540px) {
+      .control-row {
+        flex-wrap: wrap;
+        gap: 6px;
+        background: #f8fafc;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #f1f5f9;
+      }
+      .ctrl-label { min-width: 0; }
+      .num-input-wrap { margin-left: auto; }
+      .slider-wrap { width: 100%; flex: 0 0 100%; padding-top: 4px; }
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      outline: none;
+      touch-action: pan-y;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      background: #ffffff;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    }
+
+    input[type=range].purple::-webkit-slider-thumb { border-color: var(--accent); }
+
+    .num-input-wrap {
+      width: 82px;
+      flex-shrink: 0;
+    }
+
+    .num-input-wrap input {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: right;
+      color: var(--text);
+      outline: none;
+    }
+
+    .num-input-wrap input:focus { border-color: var(--primary); }
+    .ctrl-hint { font-size: 0.72rem; color: var(--muted); margin-top: -6px; }
+
+    /* 反解按钮 */
+    .solve-btn {
+      flex-shrink: 0;
+      background: var(--accent-light);
+      border: 1px solid #ddd6fe;
+      color: var(--accent);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .solve-btn:hover { background: #ede9fe; border-color: #c4b5fd; }
+    .solve-btn:active { transform: scale(0.95); }
+
+    /* 目标 ID 输入行 */
+    .id-target-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+
+    .id-target-wrap input[type=number] {
+      width: 88px;
+      border: 1px solid #ddd6fe;
+      background: #ffffff;
+      border-radius: 6px;
+      padding: 5px 7px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-align: right;
+      color: var(--accent);
+      outline: none;
+      flex-shrink: 0;
+    }
+    .id-target-wrap input[type=number]:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #ede9fe; }
+
+    .id-target-hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    /* 物理硬锁定提示条 */
+    .lock-banner {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      color: #92400e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: -2px;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    /* 作者专属徽章 */
+    .author-tag {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid #e2e8f0;
+      padding: 8px 16px;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #475569;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+
+    .author-tag:hover {
+      color: var(--primary);
+      border-color: #bfdbfe;
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+      transform: translateY(-2px);
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- 顶部常驻直尺校准模块 -->
+  <div class="top-calib-wrapper">
+    <div class="calib-panel">
+      <div class="calib-header">
+        <span>📏 屏幕物理尺寸直尺校准 (贴上真实直尺比对 · 驱动全局渲染)</span>
+        <button type="button" class="calib-sub-btn" id="resetCalibBtn">恢复默认(96DPI)</button>
+      </div>
+      <div class="calib-tip">
+        拿一把真实的实体直尺贴在屏幕上，调节滑块使下方黄色标尺<strong>刚好等于真实直尺上的 5 厘米</strong>。系统将以此密度 1:1 渲染所有图形。
+      </div>
+      <div class="ruler-container">
+        <svg class="ruler-svg" id="rulerSvg"></svg>
+      </div>
+      <div class="calib-controls">
+        <span style="font-size:0.75rem; color:#92400e; font-weight:600;">调节标尺缩放:</span>
+        <input type="range" id="calibSlider" min="20" max="80" step="0.5" value="37.8">
+        <span class="calib-val" id="calibValText">37.8 px/cm</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 双独立框架容器 -->
+  <main class="dashboard-layout">
+    
+    <!-- ==================== 框架一：经典菲茨标准模型 ==================== -->
+    <section class="card-frame" id="standardFrame">
+      <div class="frame-header">
+        <div class="frame-title-row">
+          <h1>框架一：经典一维平板模型</h1>
+          <span class="frame-badge badge-std">标准 Fitts 基准</span>
+        </div>
+        <div class="subtitle">1D Physical Plate Model · 沿运动轴容错厚度 W（无量纲抵消）</div>
+      </div>
+
+      <!-- 公式展板 -->
+      <div class="formula-panel">
+        <div class="formula-card highlight">
+          <div class="formula-title">
+            <span>难度指数 (标准 ID)</span>
+            <span class="unit-tag">无量纲 (纯数)</span>
+          </div>
+          <div class="math-row">
+            <span>ID = log<sub>2</sub></span>
+            <span>(</span>
+            <div class="math-frac">
+              <span class="math-num">2D</span>
+              <span class="math-den">W</span>
+            </div>
+            <span>)</span>
+          </div>
+          <div class="formula-desc">D 为移动距离，W 为目标宽度（单位 cm/cm 自然约分）</div>
+        </div>
+
+        <div class="formula-card">
+          <div class="formula-title">物理等价性原理 (Equivalence)</div>
+          <div class="math-row">
+            <div class="math-frac">
+              <span class="math-num">2 (D &middot; S)</span>
+              <span class="math-den">W &middot; S</span>
+            </div>
+            <span>&equiv;</span>
+            <div class="math-frac">
+              <span class="math-num">2D</span>
+              <span class="math-den">W</span>
+            </div>
+          </div>
+          <div class="formula-desc">S 在分子分母均为 1 次方，完全抵消，<strong>S 不改变标准 ID</strong></div>
+        </div>
+      </div>
+
+      <!-- 可视化 1：屏幕显示尺寸 -->
+      <div class="viz-card">
+        <div class="viz-header">
+          <span>① 屏幕显示尺寸 (平板靶板)</span>
+          <div class="viz-meta">
+            <span class="val" id="virtText">D: 15.00cm | W: 3.00cm</span>
+            <span class="scale-badge true-scale" id="virtBadge">📏 1:1 直尺等长</span>
+          </div>
+        </div>
+        <div class="svg-wrap-std" id="virtWrap">
+          <svg class="track-svg" id="virtSvg"></svg>
+        </div>
+      </div>
+
+      <!-- 可视化 2：桌面手部位移 -->
+      <div class="viz-card phys">
+        <div class="viz-header">
+          <span style="color: var(--primary);">② 桌面手部物理位移 (鼠标垫实测)</span>
+          <div class="viz-meta">
+            <span class="val" id="physText">D: 9.00cm | W: 1.80cm</span>
+            <span class="scale-badge true-scale" id="physBadge">📏 1:1 直尺等长</span>
+          </div>
+        </div>
+        <div class="svg-wrap-std" id="physWrap">
+          <svg class="track-svg" id="physSvg"></svg>
+        </div>
+      </div>
+
+      <!-- 关键指标条 -->
+      <div class="metrics-bar">
+        <div class="metric-box highlight" id="boxId">
+          <div class="metric-label">难度指数 ID</div>
+          <div><span class="metric-num" id="valId">3.32</span><span class="metric-unit">bits</span></div>
+          <div class="metric-sub">S 调节恒定锁定</div>
+        </div>
+        <div class="metric-box highlight" id="boxTime">
+          <div class="metric-label">归一化相对时间 MT</div>
+          <div><span class="metric-num" id="valTime">3.32</span><span class="metric-unit">基准单位</span></div>
+          <div class="metric-sub">MT &equiv; ID (a=0, b=1)</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">桌面位移 D</div>
+          <div><span class="metric-num" id="valPhysD">9.00</span><span class="metric-unit">cm</span></div>
+          <div class="metric-sub">肌肉行程</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">桌面宽度 W</div>
+          <div><span class="metric-num" id="valPhysW">1.80</span><span class="metric-unit">cm</span></div>
+          <div class="metric-sub">平板厚度</div>
+        </div>
+      </div>
+
+      <!-- 标准模型独立控制器 -->
+      <div class="controls">
+        <div class="control-row">
+          <div class="ctrl-label">
+            <span>屏幕距离 (cm)</span>
+            <span class="ctrl-tag blue">D</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="dRange" min="1.0" max="50.0" step="0.01">
+          </div>
+          <div class="num-input-wrap">
+            <input type="number" id="dNum" min="1.0" max="50.0" step="0.01">
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="ctrl-label">
+            <span>目标宽度 (cm)</span>
+            <span class="ctrl-tag blue">W</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="wRange" min="0.2" max="15.0" step="0.01">
+          </div>
+          <div class="num-input-wrap">
+            <input type="number" id="wNum" min="0.2" max="15.0" step="0.01">
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="ctrl-label">
+            <span>硬件灵敏度 (手/屏比)</span>
+            <span class="ctrl-tag purple">S</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="sRange" class="purple" min="0.05" max="5.00" step="0.01">
+          </div>
+          <div class="num-input-wrap">
+            <input type="number" id="sNum" min="0.05" max="5.00" step="0.01">
+          </div>
+        </div>
+        <div class="ctrl-hint">
+            <!-- 1954 真实文献档案 -->
+      <div class="info-card">
+        <h3>1954 菲茨原始实验真实档案与动作机制</h3>
+        <div class="fact-item">
+          <strong>1. 受试人群与样本量：</strong> 共 <strong>16 名成年男性</strong>（俄亥俄州立大学在校人员与航空心理学实验室人员，全员惯用右手）。受试者在 1 盎司与 1 磅两种负重条件下均完整完成 16 组梯度测试。
+        </div>
+        <div class="fact-item">
+          <strong>2. 任务形态与参数：</strong> <strong>15 秒连续往复敲击（Reciprocal Tapping）</strong>。靶板宽 W（0.25~2.0 英寸，合 0.635~5.08 cm），间距 D（2~16 英寸，合 5.08~40.64 cm），16 个难度梯度（ID 跨度 1.0~7.0 bits），平均失误率严控在 <strong>1.24%</strong>。
+        </div>
+        <div class="fact-item">
+          <strong>3. 定位动作机制：</strong> <strong>ID &le; 2（&lt;200ms）</strong>为一次性弹道直达；<strong>ID &ge; 3.5（&gt;400ms）</strong>必然触发粗冲刺 + 1至数次闭环微调（二次/多次定位）。
+        </div>
+        <div class="fact-item">
+          <strong>4. 简化归一化模型（MT &equiv; ID）：</strong> 令启动延迟 a=0，传输斜率 b=1，公式即严格退化为 <strong>MT = ID</strong>。
+        </div>
+    </section>
+
+    <!-- ==================== 框架二：球体目标变体模型（物理硬锁定防穿透） ==================== -->
+    <section class="card-frame variant-frame" id="variantFrame">
+      <div class="frame-header">
+        <div class="frame-title-row">
+          <h2 style="color: var(--accent);">框架二：瞄准模型（注意耗时相等，≤3为可单次定位，≥5为易二次）</h2>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="sync-btn" id="syncFromLeftBtn">🔄 同步左侧参数</button>
+            <span class="frame-badge badge-var">西岛海基准</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 变体数学公式展板 -->
+      <div class="formula-panel">
+        <div class="formula-card var-highlight">
+          <div class="formula-title">
+            <span>物理桌面变体难度 (ID<sub>alt</sub>)</span>
+            <span class="unit-tag" style="background:#f5f3ff; color:var(--accent); font-weight:700;">必须以 cm 为单位</span>
+          </div>
+          <div class="math-row">
+            <span>ID<sub>alt</sub> = log<sub>2</sub></span>
+            <span>(</span>
+            <span>1 + </span>
+            <div class="math-frac">
+              <span class="math-num">D<sub>phys</sub></span>
+              <span class="math-den">W<sub>phys</sub><sup>2</sup></span>
+            </div>
+            <span>)</span>
+          </div>
+          <div class="formula-desc"><strong>边界零判定：</strong>若起点已被球体覆盖，物理有效位移为 0，<strong>ID 强制归零</strong></div>
+        </div>
+
+        <div class="formula-card var-highlight">
+          <div class="formula-title">灵敏度 S 无法抵消原理 (S-Coupling)</div>
+          <div class="math-row">
+            <div class="math-frac">
+              <span class="math-num">D &middot; S</span>
+              <span class="math-den">(W &middot; S)<sup>2</sup></span>
+            </div>
+            <span>=</span>
+            <div class="math-frac">
+              <span class="math-num">D</span>
+              <span class="math-den">W<sup>2</sup> &middot; <strong>S</strong></span>
+            </div>
+          </div>
+          <div class="formula-desc">分母残留 <strong>S</strong>！改变硬件灵敏度 S 将不可逆地改变手部空间捕获难度</div>
+        </div>
+      </div>
+
+      <!-- 可视化 1：屏幕空间球体（支持右侧与底边自由拉伸放大） -->
+      <div class="viz-card">
+        <div class="viz-header">
+          <span>① 屏幕空间 (球体截面 · 直尺实测)</span>
+          <div class="viz-meta">
+            <span class="val" id="virtSphereText">D: 15.00cm | ⌀: 3.00cm</span>
+            <span class="scale-badge var-true" id="virtSphereBadge">📏 1:1 直尺等长</span>
+          </div>
+        </div>
+        <div class="svg-wrap-var" id="virtSphereWrap">
+          <svg class="track-svg" id="virtSphereSvg"></svg>
+          <div class="resize-hint">⤡ 拖拽右下角拉伸窗口</div>
+        </div>
+      </div>
+
+      <!-- 可视化 2：桌面手部球体位移（支持右侧与底边自由拉伸放大） -->
+      <div class="viz-card phys">
+        <div class="viz-header">
+          <span style="color: var(--accent);">② 桌面手部物理位移 (鼠标垫实测)</span>
+          <div class="viz-meta">
+            <span class="val" id="physSphereText">D: 9.00cm | ⌀: 1.80cm</span>
+            <span class="scale-badge var-true" id="physSphereBadge">📏 1:1 直尺等长</span>
+          </div>
+        </div>
+        <div class="svg-wrap-var" id="physSphereWrap">
+          <svg class="track-svg" id="physSphereSvg"></svg>
+          <div class="resize-hint">⤡ 拖拽右下角拉伸窗口</div>
+        </div>
+      </div>
+
+      <!-- 变体关键指标栏 -->
+      <div class="metrics-bar">
+        <div class="metric-box var-highlight" id="boxIdAlt">
+          <div class="metric-label">手部物理难度 ID<sub>alt</sub></div>
+          <div><span class="metric-num" id="valIdAlt">1.92</span><span class="metric-unit">bits</span></div>
+          <div class="metric-sub" id="deltaBadgeWrap"><span class="delta-badge delta-easier" id="deltaBadge">手感更易 (-1.40)</span></div>
+        </div>
+        
+        <div class="metric-box var-highlight">
+          <div class="metric-label">耗时 MT</div>
+          <div><span class="metric-num" style="color: var(--primary);" id="valIdCompare">3.32</span><span class="metric-unit">基准单位</span></div>
+          <div class="metric-sub">胳膊舒适摆动范围情况下，耗时相等</div>
+        </div>
+
+        <div class="metric-box">
+          <div class="metric-label">球体落点直径 ⌀</div>
+          <div><span class="metric-num" id="valPhysSphereW">1.80</span><span class="metric-unit">cm</span></div>
+          <div class="metric-sub">手部物理捕获窗口</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">等效空间容积 V</div>
+          <div><span class="metric-num" id="valPhysSphereVol">3.05</span><span class="metric-unit">cm³</span></div>
+          <div class="metric-sub">4/3 &middot; &pi; &middot; r³</div>
+        </div>
+      </div>
+
+      <!-- 变体专属独立控制器 (彻底锁死不后退) -->
+      <div class="controls">
+
+        <!-- 新增：目标难度 ID 填入框 -->
+        <div class="control-row">
+          <div class="ctrl-label">
+            <span>目标难度 ID</span>
+            <span class="ctrl-tag purple">ID*</span>
+          </div>
+          <div class="id-target-wrap">
+            <input type="number" id="idTargetNum" min="0" max="10" step="0.01" value="1.92">
+            <span class="id-target-hint">填入后 → 点右侧「求解 D / 求解 W」按钮</span>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="ctrl-label">
+            <span>变体距离 (cm)</span>
+            <span class="ctrl-tag purple">D_alt</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="dRangeAlt" class="purple" min="1.0" max="50.0" step="0.01">
+          </div>
+          <div class="num-input-wrap">
+            <input type="number" id="dNumAlt" min="1.0" max="50.0" step="0.01">
+          </div>
+          <button type="button" class="solve-btn" id="solveDBtn" title="保持球体直径与灵敏度不变，按目标 ID 反解距离 D">求解D</button>
+        </div>
+
+        <div class="control-row">
+          <div class="ctrl-label">
+            <span>球体直径 (cm)</span>
+            <span class="ctrl-tag purple">W_alt</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="wRangeAlt" class="purple" min="0.2" max="30.0" step="0.01">
+          </div>
+          <div class="num-input-wrap">
+            <input type="number" id="wNumAlt" min="0.2" max="30.0" step="0.01">
+          </div>
+          <button type="button" class="solve-btn" id="solveWBtn" title="保持距离与灵敏度不变，按目标 ID 反解球体直径 W">求解W</button>
+        </div>
+
+        <div class="control-row">
+          <div class="ctrl-label">
+            <span>变体灵敏度 (手/屏比)</span>
+            <span class="ctrl-tag purple">S_alt</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="sRangeAlt" class="purple" min="0.05" max="5.00" step="0.01">
+          </div>
+          <div class="num-input-wrap">
+            <input type="number" id="sNumAlt" min="0.05" max="5.00" step="0.01">
+          </div>
+        </div>
+
+        <div class="lock-banner" id="boundaryLockBanner">
+          <span id="lockStatusText">✅ 物理空间充足：您可以自由调节滑块</span>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- 右下角作者专属跳转徽章 -->
+  <a href="https://space.bilibili.com/1534330" target="_blank" class="author-tag">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+    瞄准难度公式（菲茨定律变体）作者：西岛海_xlm
+  </a>
+
+  <script>
+    (function() {
+      // ---- 标准模型 DOM ----
+      const dRange = document.getElementById('dRange');
+      const wRange = document.getElementById('wRange');
+      const sRange = document.getElementById('sRange');
+      const dNum = document.getElementById('dNum');
+      const wNum = document.getElementById('wNum');
+      const sNum = document.getElementById('sNum');
+
+      const valId = document.getElementById('valId');
+      const valTime = document.getElementById('valTime');
+      const valPhysD = document.getElementById('valPhysD');
+      const valPhysW = document.getElementById('valPhysW');
+      const virtText = document.getElementById('virtText');
+      const physText = document.getElementById('physText');
+      const virtSvg = document.getElementById('virtSvg');
+      const physSvg = document.getElementById('physSvg');
+      const virtWrap = document.getElementById('virtWrap');
+      const physWrap = document.getElementById('physWrap');
+      const virtBadge = document.getElementById('virtBadge');
+      const physBadge = document.getElementById('physBadge');
+      const boxId = document.getElementById('boxId');
+      const boxTime = document.getElementById('boxTime');
+
+      // ---- 变体模型专属 DOM ----
+      const dRangeAlt = document.getElementById('dRangeAlt');
+      const wRangeAlt = document.getElementById('wRangeAlt');
+      const sRangeAlt = document.getElementById('sRangeAlt');
+      const dNumAlt = document.getElementById('dNumAlt');
+      const wNumAlt = document.getElementById('wNumAlt');
+      const sNumAlt = document.getElementById('sNumAlt');
+      const lockStatusText = document.getElementById('lockStatusText');
+      const syncFromLeftBtn = document.getElementById('syncFromLeftBtn');
+
+      const valIdAlt = document.getElementById('valIdAlt');
+      const valIdCompare = document.getElementById('valIdCompare');
+      const valPhysSphereW = document.getElementById('valPhysSphereW');
+      const valPhysSphereVol = document.getElementById('valPhysSphereVol');
+      const deltaBadge = document.getElementById('deltaBadge');
+      const virtSphereText = document.getElementById('virtSphereText');
+      const physSphereText = document.getElementById('physSphereText');
+      const virtSphereSvg = document.getElementById('virtSphereSvg');
+      const physSphereSvg = document.getElementById('physSphereSvg');
+      const virtSphereWrap = document.getElementById('virtSphereWrap');
+      const physSphereWrap = document.getElementById('physSphereWrap');
+      const boxIdAlt = document.getElementById('boxIdAlt');
+
+      // ---- 反解模块 DOM ----
+      const idTargetNum = document.getElementById('idTargetNum');
+      const solveDBtn = document.getElementById('solveDBtn');
+      const solveWBtn = document.getElementById('solveWBtn');
+
+      // 校准模块 DOM
+      const resetCalibBtn = document.getElementById('resetCalibBtn');
+      const calibSlider = document.getElementById('calibSlider');
+      const calibValText = document.getElementById('calibValText');
+      const rulerSvg = document.getElementById('rulerSvg');
+
+      const DEFAULT_PX_PER_CM = 37.795;
+      let pxPerCm = parseFloat(localStorage.getItem('fitts_px_cm')) || DEFAULT_PX_PER_CM;
+
+      // 左右完全独立状态
+      let stateStd = { D: 15.0, W: 3.0, S: 0.60 };
+      let stateAlt = { D: 15.0, W: 3.0, S: 0.60 };
+
+      const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+      const fmt = (v) => v.toFixed(2);
+
+      function setLockStatus(msg, color) {
+        lockStatusText.textContent = msg;
+        lockStatusText.style.color = color || '#92400e';
+      }
+
+      function flashBox(el) {
+        if (!el) return;
+        el.classList.remove('flash');
+        void el.offsetWidth;
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 450);
+      }
+
+      function renderCalibrationRuler() {
+        const totalCm = 5.0;
+        const totalWidthPx = totalCm * pxPerCm;
+        rulerSvg.setAttribute('width', Math.max(totalWidthPx + 20, 100));
+        rulerSvg.setAttribute('height', 38);
+
+        let ticksHtml = `<rect x="0" y="0" width="${totalWidthPx}" height="36" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" rx="3"/>`;
+
+        const totalMm = Math.round(totalCm * 10);
+        for (let i = 0; i <= totalMm; i++) {
+          const x = (i / 10) * pxPerCm;
+          let h = 8;
+          let isCm = i % 10 === 0;
+          let isHalfCm = i % 5 === 0 && !isCm;
+
+          if (isCm) h = 18;
+          else if (isHalfCm) h = 12;
+
+          ticksHtml += `<line x1="${x}" y1="0" x2="${x}" y2="${h}" stroke="#b45309" stroke-width="${isCm ? 1.5 : 1}"/>`;
+
+          if (isCm) {
+            ticksHtml += `<text x="${x + (i === 0 ? 2 : (i === totalMm ? -2 : 0))}" y="30" font-size="11" font-weight="700" fill="#92400e" text-anchor="${i === 0 ? 'start' : (i === totalMm ? 'end' : 'middle')}" font-family="monospace">${i / 10}</text>`;
+          }
+        }
+
+        rulerSvg.innerHTML = ticksHtml;
+        calibSlider.value = pxPerCm.toFixed(1);
+        calibValText.textContent = `${pxPerCm.toFixed(1)} px/cm`;
+      }
+
+      function renderPlateTrack(svg, wrapEl, badgeEl, D_val, W_val, color) {
+        const availWidth = wrapEl.clientWidth || 500;
+        const svgH = 86;
+        const padX = 36;
+        const yMid = svgH / 2;
+
+        const realD_px = D_val * pxPerCm;
+        const realW_px = Math.max(W_val * pxPerCm, 3);
+        const idealTotalWidth = padX + realD_px + realW_px / 2 + padX;
+
+        let targetCenterX = padX + realD_px;
+        let bandW = realW_px;
+
+        if (idealTotalWidth <= availWidth) {
+          badgeEl.textContent = '📏 1:1 直尺等长';
+          badgeEl.className = 'scale-badge true-scale';
+        } else {
+          const safeAvailW = availWidth - padX * 2;
+          const fitScale = safeAvailW / (realD_px + realW_px / 2);
+          targetCenterX = padX + realD_px * fitScale;
+          bandW = Math.max(realW_px * fitScale, 3);
+          badgeEl.textContent = '🔍 全景拉通';
+          badgeEl.className = 'scale-badge';
+        }
+
+        svg.setAttribute('width', availWidth);
+        svg.setAttribute('height', svgH);
+
+        svg.innerHTML = `
+          <line x1="12" y1="${yMid}" x2="${availWidth - 12}" y2="${yMid}" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <line x1="${padX}" y1="${yMid}" x2="${targetCenterX}" y2="${yMid}" stroke="${color}" stroke-width="3" stroke-linecap="round"/>
+          <line x1="${padX}" y1="12" x2="${padX}" y2="${svgH - 12}" stroke="${color}" stroke-width="2"/>
+          <circle cx="${padX}" cy="${yMid}" r="4.5" fill="${color}"/>
+          <text x="${padX}" y="${svgH - 6}" font-size="10" font-weight="600" fill="#64748b" text-anchor="middle">起点</text>
+          <rect x="${targetCenterX - bandW / 2}" y="8" width="${bandW}" height="${svgH - 24}" rx="4" fill="${color}" fill-opacity="0.16" stroke="${color}" stroke-width="1.8"/>
+          <line x1="${targetCenterX}" y1="8" x2="${targetCenterX}" y2="${svgH - 16}" stroke="${color}" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <text x="${targetCenterX}" y="${svgH - 4}" font-size="10" font-weight="700" fill="${color}" text-anchor="middle">平板</text>
+        `;
+      }
+
+      // 绝对硬核防穿透渲染：永远保持 1:1，绝不缩小！
+      function renderSphereTrack(svg, wrapEl, D_val, W_val) {
+        const availWidth = wrapEl.clientWidth || 500;
+        const svgH = wrapEl.clientHeight || 150;
+        const padX = 40;
+        const yMid = Math.round(svgH / 2);
+
+        // 严格 1:1 计算物理像素
+        const realD_px = D_val * pxPerCm;
+        const diameter = Math.max(W_val * pxPerCm, 4);
+
+        const targetCenterX = padX + realD_px;
+        const radius = diameter / 2;
+        const leftSurfaceX = targetCenterX - radius;
+        // 如果起点碰到球边缘，判定为吞没（物理归零）
+        const isSwallowed = leftSurfaceX <= padX + 0.5;
+
+        // 让 SVG 铺满用户拉伸的可用宽度
+        svg.setAttribute('width', availWidth);
+        svg.setAttribute('height', svgH);
+
+        svg.innerHTML = `
+          <defs>
+            <radialGradient id="sphereGrad" cx="32%" cy="28%" r="72%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="25%" stop-color="#ddd6fe"/>
+              <stop offset="65%" stop-color="#7c3aed"/>
+              <stop offset="100%" stop-color="#4c1d95"/>
+            </radialGradient>
+            <radialGradient id="shadowGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(109, 40, 217, 0.35)"/>
+              <stop offset="100%" stop-color="rgba(109, 40, 217, 0)"/>
+            </radialGradient>
+          </defs>
+
+          <!-- 导轨中轴线 -->
+          <line x1="10" y1="${yMid}" x2="${availWidth - 10}" y2="${yMid}" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="4 4"/>
+          
+          <!-- 实际需跨越的间隙距离 -->
+          ${!isSwallowed ? `
+            <line x1="${padX}" y1="${yMid}" x2="${leftSurfaceX}" y2="${yMid}" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+          ` : `
+            <line x1="${leftSurfaceX}" y1="${yMid}" x2="${padX}" y2="${yMid}" stroke="#ef4444" stroke-width="3" stroke-dasharray="3 3"/>
+          `}
+
+          <!-- 起点准星 -->
+          <line x1="${padX}" y1="${Math.max(8, yMid - 36)}" x2="${padX}" y2="${Math.min(svgH - 8, yMid + 36)}" stroke="${isSwallowed ? '#ef4444' : 'var(--accent)'}" stroke-width="2"/>
+          <circle cx="${padX}" cy="${yMid}" r="5" fill="${isSwallowed ? '#ef4444' : 'var(--accent)'}"/>
+          <text x="${padX}" y="${Math.min(svgH - 6, yMid + 50)}" font-size="10" font-weight="700" fill="${isSwallowed ? '#ef4444' : '#64748b'}" text-anchor="middle">
+            ${isSwallowed ? '起点已重合' : '起点'}
+          </text>
+
+          <!-- 只有在不被切断的视觉范围内渲染阴影 -->
+          ${(yMid + radius * 0.95 < svgH) ? `<ellipse cx="${targetCenterX}" cy="${yMid + radius * 0.96}" rx="${radius * 0.88}" ry="${Math.min(radius * 0.28, 16)}" fill="url(#shadowGrad)"/>` : ''}
+
+          <!-- 3D 真实球体 -->
+          <circle cx="${targetCenterX}" cy="${yMid}" r="${radius}" fill="url(#sphereGrad)" stroke="#5b21b6" stroke-width="1.5"/>
+
+          <!-- 3D 经纬深度感参考圈 -->
+          <ellipse cx="${targetCenterX}" cy="${yMid}" rx="${radius}" ry="${radius * 0.32}" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1" stroke-dasharray="2 3"/>
+
+          <!-- 镜面高光点 -->
+          <ellipse cx="${targetCenterX - radius * 0.32}" cy="${yMid - radius * 0.35}" rx="${Math.max(radius * 0.22, 2)}" ry="${Math.max(radius * 0.14, 1.5)}" fill="#ffffff" fill-opacity="0.75"/>
+          
+          <circle cx="${targetCenterX}" cy="${yMid}" r="2.5" fill="#ffffff"/>
+          ${(yMid + radius + 15 < svgH) ? `<text x="${targetCenterX}" y="${yMid + radius + 15}" font-size="10" font-weight="700" fill="var(--accent)" text-anchor="middle">球体 (⌀ ${W_val.toFixed(2)}cm)</text>` : ''}
+        `;
+      }
+
+      // 获取当前视口长宽高允许的极大与极小物理限制约束
+      function getConstraints(wrapEl) {
+        return {
+          availW: wrapEl.clientWidth || 500,
+          availH: wrapEl.clientHeight || 150,
+          padX: 40,
+          padY: 30 // 预留上下文字与阴影安全间距
+        };
+      }
+
+      function getMaxAllowedW() {
+        const c1 = getConstraints(virtSphereWrap);
+        const c2 = getConstraints(physSphereWrap);
+
+        // 1. 垂直高度不允许球体破框
+        const maxW_H1 = (c1.availH - c1.padY) / pxPerCm;
+        const maxW_H2 = (c2.availH - c2.padY) / (pxPerCm * stateAlt.S);
+
+        // 2. 水平宽度不允许球体破框 (即 W/2 <= 宽度 - 2*padX - D)
+        const maxW_W1 = 2 * ((c1.availW - 2 * c1.padX) / pxPerCm - stateAlt.D);
+        const maxW_W2 = 2 * ((c2.availW - 2 * c2.padX) / (pxPerCm * stateAlt.S) - stateAlt.D);
+
+        // 3. 严禁球体吞没起点：W 不能超过 2*D
+        const maxW_Start = stateAlt.D * 2.0;
+
+        return Math.max(0.2, Math.min(maxW_H1, maxW_H2, maxW_W1, maxW_W2, maxW_Start, 30.0));
+      }
+
+      function getMinAllowedD() {
+        // D 永远不能小于当前球半径，否则吞没倒推
+        return stateAlt.W / 2.0;
+      }
+
+      function getMaxAllowedD() {
+        const c1 = getConstraints(virtSphereWrap);
+        const c2 = getConstraints(physSphereWrap);
+
+        // D 受制于整体宽度减去球半径
+        const maxD_W1 = (c1.availW - 2 * c1.padX) / pxPerCm - stateAlt.W / 2.0;
+        const maxD_W2 = (c2.availW - 2 * c2.padX) / (pxPerCm * stateAlt.S) - stateAlt.W / 2.0;
+
+        return Math.max(getMinAllowedD(), Math.min(maxD_W1, maxD_W2, 50.0));
+      }
+
+      // 获取最大安全灵敏度 S (防破框)
+      function getMaxAllowedS() {
+        const c2 = getConstraints(physSphereWrap);
+        // S_max = Height / W
+        const maxS_H = (c2.availH - c2.padY) / (stateAlt.W * pxPerCm);
+        // S_max = Width / (D + W/2)
+        const maxS_W = (c2.availW - 2 * c2.padX) / ((stateAlt.D + stateAlt.W / 2.0) * pxPerCm);
+
+        return Math.max(0.05, Math.min(maxS_H, maxS_W, 5.00));
+      }
+
+      // 全局演算调度
+      function updateAll(triggerSensPulse = false) {
+        // --- 标准模型计算 ---
+        const D_std = stateStd.D;
+        const W_std = stateStd.W;
+        const S_std = stateStd.S;
+
+        const d_phys_std = D_std * S_std;
+        const w_phys_std = W_std * S_std;
+
+        const ratioStd = (2 * D_std) / W_std;
+        const idStd = Math.max(0, Math.log2(Math.max(ratioStd, 1e-5)));
+
+        valId.textContent = fmt(idStd);
+        valTime.textContent = fmt(idStd);
+        valPhysD.textContent = fmt(d_phys_std);
+        valPhysW.textContent = fmt(w_phys_std);
+        virtText.textContent = `D: ${fmt(D_std)}cm | W: ${fmt(W_std)}cm`;
+        physText.textContent = `D: ${fmt(d_phys_std)}cm | W: ${fmt(w_phys_std)}cm`;
+
+        renderPlateTrack(virtSvg, virtWrap, virtBadge, D_std, W_std, "var(--primary)");
+        renderPlateTrack(physSvg, physWrap, physBadge, d_phys_std, w_phys_std, "var(--primary)");
+
+        // --- 变体模型计算 ---
+        const D_alt = stateAlt.D;
+        const W_alt = stateAlt.W;
+        const S_alt = stateAlt.S;
+
+        const d_phys_alt = D_alt * S_alt;
+        const w_phys_alt = W_alt * S_alt;
+        const r_phys_alt = w_phys_alt / 2;
+        const sphereVol = (4 / 3) * Math.PI * Math.pow(r_phys_alt, 3);
+
+        // 物理精准归零逻辑
+        let idAltPhys = 0;
+        const isSwallowed = (W_alt / 2) >= (D_alt - 0.05);
+
+        if (isSwallowed) {
+          idAltPhys = 0.00;
+        } else {
+          // 次幂从 1.5 调整为 2
+          const denomAltPhys = Math.pow(Math.max(w_phys_alt, 1e-4), 2);
+          idAltPhys = Math.max(0, Math.log2(1 + d_phys_alt / denomAltPhys));
+        }
+
+        const diff = idAltPhys - idStd;
+
+        valIdAlt.textContent = fmt(idAltPhys);
+        valIdCompare.textContent = fmt(idStd);
+        valPhysSphereW.textContent = fmt(w_phys_alt);
+        valPhysSphereVol.textContent = fmt(sphereVol);
+        virtSphereText.textContent = `D: ${fmt(D_alt)}cm | ⌀: ${fmt(W_alt)}cm`;
+        physSphereText.textContent = `D: ${fmt(d_phys_alt)}cm | ⌀: ${fmt(w_phys_alt)}cm`;
+
+        if (isSwallowed) {
+          deltaBadge.textContent = `🟢 起点已接触/重合 (难度=0)`;
+          deltaBadge.className = 'delta-badge delta-zero';
+        } else if (diff < -0.005) {
+          deltaBadge.textContent = `手感更易 (${diff.toFixed(2)})`;
+          deltaBadge.className = 'delta-badge delta-easier';
+        } else if (diff > 0.005) {
+          deltaBadge.textContent = `手感更难 (+${diff.toFixed(2)})`;
+          deltaBadge.className = 'delta-badge delta-harder';
+        } else {
+          deltaBadge.textContent = `临界平衡 (±0.00)`;
+          deltaBadge.className = 'delta-badge';
+        }
+
+        renderSphereTrack(virtSphereSvg, virtSphereWrap, D_alt, W_alt);
+        renderSphereTrack(physSphereSvg, physSphereWrap, d_phys_alt, w_phys_alt);
+
+        if (triggerSensPulse) {
+          flashBox(boxIdAlt);
+        }
+      }
+
+      // 标准模型拉杆绑定
+      function bindControlStd(slider, numInput, min, max, key) {
+        slider.addEventListener('input', () => {
+          const val = clamp(parseFloat(slider.value), min, max);
+          stateStd[key] = val;
+          numInput.value = fmt(val);
+          updateAll(false);
+        });
+        numInput.addEventListener('input', () => {
+          const raw = parseFloat(numInput.value);
+          if (!isNaN(raw) && raw >= min && raw <= max) {
+            stateStd[key] = raw;
+            slider.value = raw;
+            updateAll(false);
+          }
+        });
+        numInput.addEventListener('blur', () => {
+          let val = parseFloat(numInput.value);
+          if (isNaN(val) || val < min) val = min;
+          if (val > max) val = max;
+          stateStd[key] = val;
+          slider.value = val;
+          numInput.value = fmt(val);
+          updateAll(false);
+        });
+      }
+
+      bindControlStd(dRange, dNum, 1.0, 50.0, 'D');
+      bindControlStd(wRange, wNum, 0.2, 15.0, 'W');
+      bindControlStd(sRange, sNum, 0.05, 5.00, 'S');
+
+      // 变体模型拉杆物理强锁定机制
+      wRangeAlt.addEventListener('input', () => {
+        const maxW = getMaxAllowedW();
+        let reqVal = parseFloat(wRangeAlt.value);
+
+        if (reqVal >= maxW) {
+          reqVal = maxW;
+          wRangeAlt.value = reqVal;
+          setLockStatus(`🔒 物理空间已触界：拉杆已锁定（请向右/向下拖拽放大窗口以解锁）`, '#ef4444');
+        } else {
+          setLockStatus(`✅ 物理空间充足：您可以自由调节滑块`, '#92400e');
+        }
+
+        stateAlt.W = reqVal;
+        wNumAlt.value = fmt(reqVal);
+        updateAll(false);
+      });
+
+      dRangeAlt.addEventListener('input', () => {
+        const maxD = getMaxAllowedD();
+        const minD = getMinAllowedD();
+        let reqVal = parseFloat(dRangeAlt.value);
+
+        if (reqVal >= maxD) {
+          reqVal = maxD;
+          dRangeAlt.value = reqVal;
+          setLockStatus(`🔒 物理宽度触界：拉杆已锁定（请向右拖拉窗口边界放大画布）`, '#ef4444');
+        } else if (reqVal <= minD) {
+          reqVal = minD;
+          dRangeAlt.value = reqVal;
+          setLockStatus(`🔒 起点触界限制：球边缘已碰到起点，拉杆已锁死`, '#ef4444');
+        } else {
+          setLockStatus(`✅ 物理空间充足：您可以自由调节滑块`, '#92400e');
+        }
+
+        stateAlt.D = reqVal;
+        dNumAlt.value = fmt(reqVal);
+        updateAll(false);
+      });
+
+      sRangeAlt.addEventListener('input', () => {
+        const maxS = getMaxAllowedS();
+        let reqVal = parseFloat(sRangeAlt.value);
+
+        if (reqVal >= maxS) {
+          reqVal = maxS;
+          sRangeAlt.value = reqVal;
+          setLockStatus(`🔒 物理灵敏度超载：缩放触碰画布边界（请放大窗口解锁）`, '#ef4444');
+        } else {
+          setLockStatus(`✅ 物理空间充足：您可以自由调节滑块`, '#92400e');
+        }
+
+        stateAlt.S = reqVal;
+        sNumAlt.value = fmt(reqVal);
+        updateAll(true);
+      });
+
+      // 失焦恢复处理
+      [wNumAlt, dNumAlt, sNumAlt].forEach(el => {
+        el.addEventListener('blur', () => {
+          let reqVal = parseFloat(el.value);
+          if (isNaN(reqVal)) return;
+
+          if (el.id === 'wNumAlt') {
+            const maxW = getMaxAllowedW();
+            if (reqVal > maxW) reqVal = maxW;
+            if (reqVal < 0.2) reqVal = 0.2;
+            stateAlt.W = reqVal;
+            wRangeAlt.value = reqVal;
+            wNumAlt.value = fmt(reqVal);
+          } else if (el.id === 'dNumAlt') {
+            const maxD = getMaxAllowedD();
+            const minD = getMinAllowedD();
+            if (reqVal > maxD) reqVal = maxD;
+            if (reqVal < minD) reqVal = minD;
+            stateAlt.D = reqVal;
+            dRangeAlt.value = reqVal;
+            dNumAlt.value = fmt(reqVal);
+          } else if (el.id === 'sNumAlt') {
+            const maxS = getMaxAllowedS();
+            if (reqVal > maxS) reqVal = maxS;
+            if (reqVal < 0.05) reqVal = 0.05;
+            stateAlt.S = reqVal;
+            sRangeAlt.value = reqVal;
+            sNumAlt.value = fmt(reqVal);
+          }
+          updateAll(el.id === 'sNumAlt');
+        });
+      });
+
+      /* ============================================================
+         反解模块：填入目标 ID → 点「求解D」或「求解W」
+         ID = log2(1 + D·S / (W·S)^2)
+         ⇒  D·S = (2^ID − 1) · (W·S)^2
+         ⇒  (W·S)^2 = D·S / (2^ID − 1)
+         ============================================================ */
+
+      function readTargetId() {
+        const v = parseFloat(idTargetNum.value);
+        if (isNaN(v)) return null;
+        return clamp(v, 0, 10);
+      }
+
+      function solveAltForD() {
+        const targetID = readTargetId();
+        if (targetID === null || targetID <= 0) {
+          setLockStatus('⚠️ 请先在「目标难度 ID」填入一个大于 0 的数值', '#b91c1c');
+          return;
+        }
+        if (stateAlt.S <= 0) return;
+
+        const wPhys = stateAlt.W * stateAlt.S;
+        // 次幂从 1.5 调整为 2
+        const dPhysNeeded = (Math.pow(2, targetID) - 1) * Math.pow(wPhys, 2);
+        let newD = dPhysNeeded / stateAlt.S;
+
+        const maxD = getMaxAllowedD();
+        const minD = getMinAllowedD();
+        let clampedMsg = '';
+
+        if (newD > maxD) {
+          newD = maxD;
+          clampedMsg = '（受画布边界限制已取最大值，实际 ID 将低于目标值）';
+        } else if (newD < minD) {
+          newD = minD;
+          clampedMsg = '（起点将被球体吞没，已锁在临界值，此时 ID 归零）';
+        }
+
+        stateAlt.D = newD;
+        dRangeAlt.value = newD;
+        dNumAlt.value = fmt(newD);
+        updateAll(false);
+        flashBox(boxIdAlt);
+
+        if (clampedMsg) {
+          setLockStatus(`🔒 反解受限 ${clampedMsg}`, '#b91c1c');
+        } else {
+          setLockStatus(`✅ 已按目标 ID = ${fmt(targetID)} 反解出距离 D = ${fmt(newD)} cm（直径 ${fmt(stateAlt.W)} cm 保持不变）`, '#15803d');
+        }
+      }
+
+      function solveAltForW() {
+        const targetID = readTargetId();
+        if (targetID === null || targetID <= 0) {
+          setLockStatus('⚠️ 请先在「目标难度 ID」填入一个大于 0 的数值', '#b91c1c');
+          return;
+        }
+        if (stateAlt.S <= 0) return;
+
+        const dPhys = stateAlt.D * stateAlt.S;
+        const denom = Math.pow(2, targetID) - 1;
+        // 由开 1.5 次方（2/3 次幂）调整为开 2 次方（平方根）
+        const wPhysNeeded = Math.sqrt(dPhys / denom);
+        let newW = wPhysNeeded / stateAlt.S;
+
+        const maxW = getMaxAllowedW();
+        let clampedMsg = '';
+
+        if (newW > maxW) {
+          newW = maxW;
+          clampedMsg = '（球体已顶到画布边界，实际 ID 将低于目标值，可拖拉放大窗口后重试）';
+        } else if (newW < 0.2) {
+          newW = 0.2;
+          clampedMsg = '（直径已达物理下限 0.2 cm）';
+        } else if ((newW / 2) >= (stateAlt.D - 0.05)) {
+          newW = Math.max(0.2, stateAlt.D * 2.0);
+          clampedMsg = '（球体将吞没起点，已锁在临界值，此时 ID 归零）';
+        }
+
+        stateAlt.W = newW;
+        wRangeAlt.value = newW;
+        wNumAlt.value = fmt(newW);
+        updateAll(false);
+        flashBox(boxIdAlt);
+
+        if (clampedMsg) {
+          setLockStatus(`🔒 反解受限 ${clampedMsg}`, '#b91c1c');
+        } else {
+          setLockStatus(`✅ 已按目标 ID = ${fmt(targetID)} 反解出球体直径 W = ${fmt(newW)} cm（距离 ${fmt(stateAlt.D)} cm 保持不变）`, '#15803d');
+        }
+      }
+
+      solveDBtn.addEventListener('click', solveAltForD);
+      solveWBtn.addEventListener('click', solveAltForW);
+
+      idTargetNum.addEventListener('blur', () => {
+        let v = parseFloat(idTargetNum.value);
+        if (isNaN(v)) v = 0;
+        v = clamp(v, 0, 10);
+        idTargetNum.value = fmt(v);
+      });
+
+      idTargetNum.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          solveAltForD();
+        }
+      });
+
+      // 监听用户拖拽伸缩窗口 (ResizeObserver)，由于空间变大，重新解除锁止！
+      const resizeObserver = new ResizeObserver(() => {
+        setLockStatus(`✅ 物理空间已扩展：锁定限制刷新，可继续滑动`, '#15803d');
+        updateAll(false);
+      });
+      resizeObserver.observe(virtSphereWrap);
+      resizeObserver.observe(physSphereWrap);
+
+      // 一键同步左侧参数
+      syncFromLeftBtn.addEventListener('click', () => {
+        stateAlt.D = stateStd.D;
+        stateAlt.S = stateStd.S;
+        // 同步时校验目标环境能否装下
+        stateAlt.W = Math.min(stateStd.W, getMaxAllowedW());
+        stateAlt.D = Math.min(stateAlt.D, getMaxAllowedD());
+        stateAlt.D = Math.max(stateAlt.D, getMinAllowedD());
+
+        dRangeAlt.value = stateAlt.D;
+        dNumAlt.value = fmt(stateAlt.D);
+        wRangeAlt.value = stateAlt.W;
+        wNumAlt.value = fmt(stateAlt.W);
+        sRangeAlt.value = stateAlt.S;
+        sNumAlt.value = fmt(stateAlt.S);
+        updateAll(true);
+      });
+
+      // 标尺校准滑块联动
+      calibSlider.addEventListener('input', () => {
+        pxPerCm = parseFloat(calibSlider.value);
+        localStorage.setItem('fitts_px_cm', pxPerCm);
+        renderCalibrationRuler();
+        updateAll(false);
+      });
+
+      resetCalibBtn.addEventListener('click', () => {
+        pxPerCm = DEFAULT_PX_PER_CM;
+        localStorage.removeItem('fitts_px_cm');
+        renderCalibrationRuler();
+        updateAll(false);
+      });
+
+      window.addEventListener('resize', () => {
+        updateAll(false);
+      });
+
+      // 初始数据挂载
+      dRange.value = stateStd.D; dNum.value = fmt(stateStd.D);
+      wRange.value = stateStd.W; wNum.value = fmt(stateStd.W);
+      sRange.value = stateStd.S; sNum.value = fmt(stateStd.S);
+
+      dRangeAlt.value = stateAlt.D; dNumAlt.value = fmt(stateAlt.D);
+      wRangeAlt.value = stateAlt.W; wNumAlt.value = fmt(stateAlt.W);
+      sRangeAlt.value = stateAlt.S; sNumAlt.value = fmt(stateAlt.S);
+
+      renderCalibrationRuler();
+      updateAll(false);
+    })();
+  </script>
+</body>
+</html>
