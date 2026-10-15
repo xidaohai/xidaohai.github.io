@@ -11,21 +11,17 @@
       --bg-cream-dark: #f3ecdc;
       --paper: #fffefb;
       --paper-card: rgba(255, 253, 247, 0.92);
-      
       --ink-navy: #0d213a;
       --ink-navy-soft: #1e3552;
       --ink-muted: #5e6f84;
-      
       --gold-primary: #a77c37;
       --gold-light: #d8ba7f;
       --gold-faint: #f5edd8;
       --gold-border: #dfcaa2;
       --gold-badge: #e8d7b5;
-
-      --accent-tier1: #1f7a55; /* <=3 */
-      --accent-tier2: #b86e1b; /* 3~5 */
-      --accent-tier3: #aa2727; /* >=5 */
-
+      --accent-tier1: #1f7a55;
+      --accent-tier2: #b86e1b;
+      --accent-tier3: #aa2727;
       --radius-sm: 8px;
       --radius-md: 14px;
       --radius-lg: 16px;
@@ -35,10 +31,9 @@
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      min-width: 320px;
+      margin: 0; min-width: 320px;
       background: var(--bg-cream);
-      background-image: 
+      background-image:
         radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.7) 0%, transparent 75%),
         linear-gradient(to bottom, #fbf7ee, #f5efe1);
       color: var(--ink-navy);
@@ -53,9 +48,7 @@
 
     .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 
-    /* =========================================================
-       1. 海报区域
-       ========================================================= */
+    /* ===== 海报 ===== */
     .poster-board {
       position: relative; background: #fbf7ec; border: 1px solid var(--gold-border);
       border-radius: var(--radius-lg); box-shadow: var(--shadow-paper), inset 0 0 60px rgba(230, 214, 180, 0.2);
@@ -64,6 +57,72 @@
     .poster-board::before {
       content: ""; position: absolute; inset: 5px; border: 1px solid rgba(167, 124, 55, 0.2);
       border-radius: calc(var(--radius-lg) - 4px); pointer-events: none;
+    }
+
+    /* 右上角 W 指数选择器（预设 + 自定义） */
+    .exp-picker {
+      position: absolute; top: clamp(10px, 2vw, 16px); right: clamp(10px, 2vw, 16px);
+      z-index: 3;
+      display: flex; align-items: center; gap: 2px;
+      background: rgba(255, 254, 250, 0.94);
+      border: 1px solid var(--gold-border); border-radius: 999px;
+      padding: 3px 5px 3px 11px;
+      font-family: -apple-system, sans-serif; font-size: 0.72rem;
+      box-shadow: 0 1px 3px rgba(80, 50, 10, 0.06);
+      backdrop-filter: blur(6px);
+    }
+    .exp-picker-label {
+      color: #5a3c10; font-weight: 700; margin-right: 4px; letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .exp-picker-label em { font-style: italic; font-family: Cambria, serif; font-weight: 700; }
+    .exp-btn {
+      background: transparent; border: 1px solid transparent; border-radius: 999px;
+      padding: 2px 9px; font-size: 0.72rem; font-weight: 700; color: #6a4a15;
+      cursor: pointer; transition: all 0.15s ease; font-family: ui-monospace, monospace;
+      line-height: 1.2;
+    }
+    .exp-btn:hover { background: #fbf0d8; color: #3b2b10; }
+    .exp-btn.active {
+      background: linear-gradient(180deg, #fbf2dc, #eadeba);
+      border-color: #d4be8e;
+      color: #3b2b10;
+      box-shadow: 0 1px 2px rgba(60, 42, 10, 0.08);
+    }
+    .exp-sep {
+      display: inline-block;
+      width: 1px; height: 14px;
+      background: #dfcaa2;
+      margin: 0 4px;
+      vertical-align: middle;
+    }
+    .exp-input {
+      width: 46px;
+      background: transparent;
+      border: 1px solid #d4be8e;
+      border-radius: 999px;
+      padding: 2px 6px;
+      font-size: 0.72rem; font-weight: 700;
+      color: #3b2b10;
+      font-family: ui-monospace, monospace;
+      text-align: center;
+      outline: none;
+      transition: all 0.15s ease;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    .exp-input::-webkit-outer-spin-button,
+    .exp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .exp-input:hover { background: #fbf0d8; }
+    .exp-input:focus { border-color: #a77c37; background: #fff; box-shadow: 0 0 0 2px rgba(167, 124, 55, 0.15); }
+    @media (max-width: 700px) {
+      .exp-picker {
+        position: relative; top: auto; right: auto;
+        display: flex; width: max-content;
+        margin: 0 0 12px auto;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
     }
 
     .legend-list { display: flex; flex-direction: column; gap: 6px; max-width: 580px; font-size: 0.88rem; color: var(--ink-navy); }
@@ -109,28 +168,20 @@
     }
     .annotation-content { font-size: 0.82rem; color: #172c44; line-height: 1.55; font-weight: 500; }
     .annotation-content .dimmed { display: block; color: #6a7c91; font-size: 0.75rem; margin-top: 2px; }
+    .annotation-content em { font-style: italic; font-family: Cambria, serif; font-weight: 700; }
 
     .stamp-badge { display: flex; justify-content: flex-end; margin-top: 16px; }
     .stamp-pill {
       display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: linear-gradient(180deg, #fdfbf7, #f7eed8);
       border: 1px solid #d8c293; border-radius: 999px; font-size: 0.78rem; color: #4b3614; font-family: -apple-system, sans-serif; box-shadow: 0 2px 5px rgba(120, 90, 40, 0.06);
-      text-decoration: none; cursor: pointer;
-      transition: all 0.18s ease;
+      text-decoration: none; cursor: pointer; transition: all 0.18s ease;
     }
-    .stamp-pill:hover {
-      background: linear-gradient(180deg, #ffffff, #faecd0);
-      border-color: #b5985a;
-      box-shadow: 0 4px 10px rgba(120, 90, 40, 0.12);
-      transform: translateY(-1px);
-    }
+    .stamp-pill:hover { background: linear-gradient(180deg, #ffffff, #faecd0); border-color: #b5985a; box-shadow: 0 4px 10px rgba(120, 90, 40, 0.12); transform: translateY(-1px); }
     .stamp-pill:active { transform: translateY(0); }
     .stamp-diamond { color: #c4994e; font-size: 0.65rem; }
     .stamp-author { font-family: "KingHwa_OldSong", "Songti SC", serif; font-weight: 700; letter-spacing: 0.05em; }
 
-
-    /* =========================================================
-       2. 功能区公用组件
-       ========================================================= */
+    /* ===== 通用卡片 ===== */
     .section-card {
       background: var(--paper-card); border: 1px solid var(--gold-border); border-radius: var(--radius-lg);
       padding: clamp(16px, 2.2vw, 24px); box-shadow: var(--shadow-paper); display: flex; flex-direction: column;
@@ -141,6 +192,7 @@
     }
     .section-title { margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--ink-navy); }
     .section-subtitle { color: var(--ink-muted); font-size: 0.8rem; margin: 4px 0 0; font-family: -apple-system, sans-serif; line-height: 1.4; }
+    .section-subtitle sup { font-style: italic; font-family: Cambria, serif; }
 
     .btn-classical {
       background: linear-gradient(180deg, #fffcf6, #f7eedb); border: 1px solid #cfb684; color: #38240a;
@@ -150,9 +202,6 @@
     .btn-classical:hover { background: linear-gradient(180deg, #ffffff, #faecd0); border-color: #b5985a; transform: translateY(-1px); }
     .btn-classical:active { transform: translateY(1px); }
 
-    /* =========================================================
-       3. 可视化专区 (图示) - 上下双排
-       ========================================================= */
     .visual-grid { display: flex; flex-direction: column; gap: 16px; }
     .visual-block { background: #fffefb; border: 1px solid #eddabb; border-radius: var(--radius-md); padding: 12px 14px; }
     .visual-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.82rem; font-weight: 700; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;}
@@ -163,17 +212,12 @@
     }
     .stage-svg { display: block; }
 
-
-    /* =========================================================
-       4. 顶层网格：校准(左) + 控制台(右)
-       ========================================================= */
     .top-config-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 20px; align-items: stretch; }
 
-    /* 左侧：物理标尺校准 */
     .calib-bottom-group { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
     .calib-ruler-viewport { width: 100%; overflow-x: auto; background: #fffdfa; border: 1px solid #ebd9b5; border-radius: var(--radius-sm); padding: 10px; }
     #rulerSvg { display: block; height: 42px; margin: 0 auto; }
-    
+
     .calib-controls-wrap { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-family: -apple-system, sans-serif; font-size: 0.82rem; }
     .calib-label { width: 100%; font-weight: 600; color: #5a3c10; margin-bottom: -4px;}
     .stepper-group { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 140px; }
@@ -185,18 +229,17 @@
     .btn-micro:hover { background: #fbf0d8; }
     .btn-micro:active { transform: translateY(1px) scale(0.96); }
     .calib-slider-el { flex: 1; min-width: 60px; accent-color: #a37c3a; margin: 0; cursor: pointer; }
-    
+
     .calib-footer-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
     .calib-footer-hint { font-size: 0.72rem; color: var(--ink-muted); }
 
-    /* 右侧：解算与微调 */
     .metrics-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 14px; }
     .metric-card { background: #fffdf9; border: 1px solid #ebdabb; border-radius: var(--radius-md); padding: 10px 14px; }
     .metric-card.major { background: linear-gradient(145deg, #fffbf2, #fbf2dc); border-color: #d6be8c; }
     .metric-name { font-size: 0.75rem; color: var(--ink-muted); font-family: -apple-system, sans-serif; font-weight: 600; }
     .metric-digit { font-family: Cambria, Georgia, serif; font-size: 1.6rem; font-weight: 700; color: var(--ink-navy); line-height: 1.15; margin: 2px 0; }
     .metric-unit { font-size: 0.78rem; color: var(--gold-primary); margin-left: 3px; font-style: italic; }
-    
+
     .tier-indicator { display: inline-block; font-size: 0.7rem; font-family: -apple-system, sans-serif; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 2px; }
     .tier-single { background: #e9f7ee; color: var(--accent-tier1); border: 1px solid #c2e8ce; }
     .tier-mid { background: #fdf5e7; color: var(--accent-tier2); border: 1px solid #fae2b8; }
@@ -222,9 +265,6 @@
     .status-ribbon.warn { background: #fdf0f0; border-color: #f8cdcd; color: var(--accent-tier3); }
     .status-ribbon.ok { background: #f3faf5; border-color: #cdebd7; color: var(--accent-tier1); }
 
-    /* =========================================================
-       5. 横向游戏行动号召栏
-       ========================================================= */
     .game-banner {
       background: linear-gradient(135deg, #102642, #0b1a2d); border-radius: var(--radius-lg); padding: 20px 24px; color: #f7f2e4;
       display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
@@ -234,15 +274,13 @@
     .game-banner h3 { margin: 0; font-size: 1.1rem; color: #fceecb; letter-spacing: 0.02em; }
     .game-banner p { margin: 6px 0 0; font-size: 0.8rem; color: #abbdd4; line-height: 1.5; }
     .btn-primary-act {
-      background: linear-gradient(180deg, #1b385e, #0e2440); border: 1px solid #091a2e; color: #f7ecd5; 
+      background: linear-gradient(180deg, #1b385e, #0e2440); border: 1px solid #091a2e; color: #f7ecd5;
       box-shadow: 0 2px 6px rgba(14, 36, 64, 0.2); padding: 9px 20px; font-size: 0.9rem; border-radius: 8px; font-weight: 600;
     }
     .btn-primary-act:hover { background: linear-gradient(180deg, #224574, #122c4d); border-color: #0b1f36; color: #ffffff; transform: translateY(-1px); }
     .btn-primary-act:active { transform: translateY(1px); }
 
-    /* =========================================================
-       6. 2D 瞄准训练全屏覆层
-       ========================================================= */
+    /* ===== 训练场 ===== */
     .aim-overlay { position: fixed; inset: 0; z-index: 9999; background: #071220; display: flex; flex-direction: column; overflow: hidden; padding: 12px; color: #f4edd8; isolation: isolate; user-select: none; }
     .aim-overlay.hidden { display: none !important; }
     #aimCanvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: none; touch-action: none; z-index: 1; }
@@ -257,20 +295,27 @@
     .aim-ctrl-bar { width: 100%; display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; padding-top: 6px; border-top: 1px solid rgba(216, 186, 127, 0.15); font-size: 0.75rem; }
     .aim-dpi-box { display: flex; align-items: center; gap: 6px; }
     .aim-dpi-box input { width: 70px; background: #091729; border: 1px solid #4a6385; color: #fff; padding: 2px 6px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: 0.78rem; text-align: center;}
+    .aim-ctrl-bar select {
+      background: #091729; border: 1px solid #4a6385; color: #fff;
+      padding: 2px 6px; border-radius: 4px; font-size: 0.78rem;
+      cursor: pointer; font-family: inherit;
+    }
+    .aim-ctrl-bar select:focus { outline: 1px solid #d8ba7f; }
+    .aim-ctrl-bar .mode-meta { color: #92a7c4; font-size: 0.7rem; }
 
     .aim-center-notice { position: relative; z-index: 2; align-self: center; max-width: 600px; margin: auto; padding: 10px 20px; background: rgba(13, 28, 48, 0.86); border: 1px solid rgba(216, 186, 127, 0.38); border-radius: 8px; text-align: center; font-size: 0.84rem; color: #f7ecd5; line-height: 1.5; pointer-events: none; backdrop-filter: blur(8px); transition: all 0.3s; }
     .aim-center-notice.warn { border-color: #df8f4a; color: #feddbb; }
     .aim-center-notice.ok { border-color: #5ab682; color: #d1f7e0; }
+    .aim-center-notice:empty { display: none; }
 
     .aim-bottom-bar { position: relative; z-index: 2; align-self: center; font-size: 0.7rem; color: #889bb4; background: rgba(7, 18, 32, 0.7); padding: 4px 12px; border-radius: 6px; pointer-events: none; }
 
-    /* 响应式断点 */
     @media (max-width: 900px) {
       .top-config-grid { grid-template-columns: 1fr; }
       .annotation-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 500px) {
-      .ctrl-label-box { flex-basis: 100%; margin-bottom: 2px;} 
+      .ctrl-label-box { flex-basis: 100%; margin-bottom: 2px;}
     }
   </style>
 </head>
@@ -278,10 +323,19 @@
 
   <div class="container">
 
-    <!-- ==============================================
-         1. 顶部海报
-         ============================================== -->
     <header class="poster-board" aria-label="瞄准难度指数模型海报">
+
+      <!-- 右上角：W 指数选择（预设 + 自定义输入） -->
+      <div class="exp-picker" role="group" aria-label="W 次幂选择">
+        <span class="exp-picker-label"><em>W</em> 指数</span>
+        <button type="button" class="exp-btn" data-exp="1.5">1.5</button>
+        <button type="button" class="exp-btn active" data-exp="2">2</button>
+        <button type="button" class="exp-btn" data-exp="2.5">2.5</button>
+        <button type="button" class="exp-btn" data-exp="3">3</button>
+        <span class="exp-sep" aria-hidden="true"></span>
+        <input type="number" id="expCustom" class="exp-input" min="1" max="5" step="0.1" value="2" aria-label="自定义 W 指数" title="可自定义 1 ~ 5 之间的任意指数">
+      </div>
+
       <div class="legend-list">
         <div class="legend-item"><span class="pill-badge">ID</span><span class="legend-colon">:</span><span class="legend-cn">瞄准难度指数</span><span class="legend-en">(Information Difficulty)</span></div>
         <div class="legend-item"><span class="pill-badge">D</span><span class="legend-colon">:</span><span class="legend-cn">移动距离</span><span class="legend-en">(Distance)</span></div>
@@ -294,13 +348,16 @@
         <div class="hero-formula">
           <span class="math-id">ID</span><span class="math-op">=</span><span class="math-log">log</span><sub class="math-sub2">2</sub>
           <span class="paren-left">(</span><span>1</span><span class="math-op">+</span>
-          <div class="fraction"><span class="frac-top">L<span>0</span>D</span><span class="frac-bottom">W<sup>2</sup></span></div>
+          <div class="fraction">
+            <span class="frac-top">L<span>0</span>D</span>
+            <span class="frac-bottom">W<sup id="expSupTop">2</sup></span>
+          </div>
           <span class="paren-right">)</span>
         </div>
       </div>
 
       <div class="annotation-grid">
-        <div class="annotation-card"><div class="badge-number">1</div><div class="annotation-content">次幂范围应在 1.5 ~ 2.5 之间，这里取 2。<span class="dimmed">（极限不应超过 3）</span></div></div>
+        <div class="annotation-card"><div class="badge-number">1</div><div class="annotation-content">次幂范围应在 1.5 ~ 2.5 之间，当前取 <em id="expNote">2</em>。<span class="dimmed">（极限不应超过 3）</span></div></div>
         <div class="annotation-card"><div class="badge-number">2</div><div class="annotation-content">舒适摆动范围内命中时间理论一致；灵敏度越慢，实际命中越慢。</div></div>
         <div class="annotation-card"><div class="badge-number">3</div><div class="annotation-content">难度 ≤3 一般可单次定位，≥5 为易二次。</div></div>
       </div>
@@ -315,9 +372,6 @@
       </div>
     </header>
 
-    <!-- ==============================================
-         2. 可视化图示专区 (提至控制器上方，直观映射)
-         ============================================== -->
     <section class="section-card">
       <div class="section-header" style="margin-bottom: 12px;">
         <div>
@@ -339,13 +393,8 @@
       </div>
     </section>
 
-
-    <!-- ==============================================
-         3. 并排网格：左校准，右控制台
-         ============================================== -->
     <div class="top-config-grid">
-      
-      <!-- 左栏：完美修复高DPI设备下拉不动滑块问题的物理标尺 -->
+
       <section class="section-card">
         <div class="section-header" style="margin-bottom: 0;">
           <div>
@@ -374,12 +423,11 @@
         </div>
       </section>
 
-      <!-- 右栏：难度解算与微调 -->
       <section class="section-card">
         <div class="section-header" style="margin-bottom: 12px;">
           <div>
             <h2 class="section-title">变体难度解算与参数微调</h2>
-            <p class="section-subtitle">ID = log₂(1 + D·L₀ / (S·W²))，其中恒定 L₀ = 1 cm。</p>
+            <p class="section-subtitle">ID = log₂(1 + D·L₀ / (S·W<sup id="expSupSub">2</sup>))，其中恒定 L₀ = 1 cm。</p>
           </div>
         </div>
 
@@ -445,13 +493,10 @@
 
     </div>
 
-    <!-- ==============================================
-         4. 底部行动号召栏
-         ============================================== -->
     <div class="game-banner">
       <div class="game-banner-text">
         <h3>2D 平面瞄准微操实测</h3>
-        <p>基于变体 ② <strong>桌面手部物理空间</strong>。采用独立原始相对输入（unadjustedMovement，完全绕过系统加速度），在实战中体验定位手感与耗时。</p>
+        <p>基于变体 ② <strong>桌面手部物理空间</strong>。采用独立原始相对输入（unadjustedMovement，完全绕过系统加速度）。提供<strong>自由瞄准</strong>与<strong>定式定位</strong>两种训练模式。</p>
       </div>
       <button type="button" class="btn-classical btn-primary-act" id="openAimBtn">
         开启实测训练
@@ -460,9 +505,6 @@
 
   </div>
 
-  <!-- ==============================================
-       5. 2D 瞄准训练全屏覆层
-       ============================================== -->
   <section class="aim-overlay hidden" id="aimOverlay" role="dialog" aria-modal="true">
     <canvas id="aimCanvas"></canvas>
     <header class="aim-hud">
@@ -474,6 +516,21 @@
         <div class="aim-pill-stat"><span>平均反应</span><strong id="statRt">—</strong></div>
       </div>
       <div class="aim-ctrl-bar">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <label for="gameMode">模式：</label>
+          <select id="gameMode">
+            <option value="free">自由瞄准</option>
+            <option value="fixed">定式定位</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;" id="sideWrap">
+          <label for="gameSide">球侧：</label>
+          <select id="gameSide">
+            <option value="right">右侧</option>
+            <option value="left">左侧</option>
+          </select>
+          <span class="mode-meta" id="sideMeta">（定式定位生效）</span>
+        </div>
         <div style="display:flex; align-items:center; gap:8px;">
           <label for="gameSens">引擎乘数：</label>
           <input type="range" id="gameSens" min="0.1" max="5" step="0.1" value="1.0" style="width:100px;">
@@ -483,13 +540,10 @@
         <span style="color:#d8ba7f; margin-left:auto; font-weight:600;">点击画布任意处开镜射击 · 按 Esc 退出</span>
       </div>
     </header>
-    <div class="aim-center-notice" id="aimNotice">调节独立游戏灵敏度及鼠标硬件 DPI，点击画布任意区域开始训练。</div>
-    <div class="aim-bottom-bar">右侧已标出真实验证直尺（10 cm）；采用未加工相对位移，绝不退回系统指针加速模式。</div>
+    <div class="aim-center-notice" id="aimNotice"></div>
+    <div class="aim-bottom-bar" id="aimBottomBar">右侧已标出真实验证直尺（10 cm）；采用未加工相对位移，绝不退回系统指针加速模式。</div>
   </section>
 
-  <!-- ==============================================
-       核心原生逻辑引擎 (BUG修复升级版)
-       ============================================== -->
   <script>
   (() => {
     'use strict';
@@ -497,8 +551,10 @@
     const $ = (id) => document.getElementById(id);
     const REF_LENGTH_CM = 1.0;
     const LIMITS = { D: { min: 1, max: 50 }, W: { min: 0.2, max: 30 }, S: { min: 0.05, max: 5 }, targetId: { min: 0.1, max: 10 } };
-    
-    // 初始化像素密度 (支持保留到小数点后一位)
+    const W_EXP_PRESETS = [1.5, 2, 2.5, 3];
+    const W_EXP_MIN = 1;
+    const W_EXP_MAX = 5;
+
     let pxPerCm = (() => {
       try {
         const val = Number(localStorage.getItem('fitts_px_cm_poster'));
@@ -507,18 +563,137 @@
       return 37.8;
     })();
 
-    const state = { D: 15.00, W: 1.29, S: 0.60 };
+    // W 次幂（支持任意数值 1~5）
+    let wExp = (() => {
+      try {
+        const v = parseFloat(localStorage.getItem('fitts_w_exp'));
+        if (Number.isFinite(v) && v >= W_EXP_MIN && v <= W_EXP_MAX) return Math.round(v * 100) / 100;
+      } catch (_) {}
+      return 2;
+    })();
+
+    // 读取上次保存的鼠标 DPI
+    const savedDpi = (() => {
+      try {
+        const v = Number(localStorage.getItem('fitts_mouse_dpi'));
+        if (Number.isFinite(v) && v >= 100 && v <= 50000) return Math.round(v);
+      } catch (_) {}
+      return 800;
+    })();
+
+    // 读取上次保存的建模参数 (D/W/S)
+    const savedState = (() => {
+      const defaults = { D: 15.00, W: 1.29, S: 0.60 };
+      try {
+        const raw = localStorage.getItem('fitts_model_state');
+        if (!raw) return defaults;
+        const o = JSON.parse(raw);
+        const out = { ...defaults };
+        if (Number.isFinite(o.D) && o.D >= 1 && o.D <= 50) out.D = o.D;
+        if (Number.isFinite(o.W) && o.W >= 0.2 && o.W <= 30) out.W = o.W;
+        if (Number.isFinite(o.S) && o.S >= 0.05 && o.S <= 5) out.S = o.S;
+        return out;
+      } catch (_) { return defaults; }
+    })();
+
+    // 读取上次保存的训练偏好
+    const savedMode = (() => {
+      try {
+        const m = localStorage.getItem('fitts_game_mode');
+        if (m === 'free' || m === 'fixed') return m;
+      } catch (_) {}
+      return 'free';
+    })();
+    const savedSide = (() => {
+      try {
+        const s = localStorage.getItem('fitts_game_side');
+        if (s === 'left' || s === 'right') return s;
+      } catch (_) {}
+      return 'right';
+    })();
+    const savedSens = (() => {
+      try {
+        const v = Number(localStorage.getItem('fitts_game_sens'));
+        if (Number.isFinite(v) && v >= 0.1 && v <= 5) return v;
+      } catch (_) {}
+      return 1.0;
+    })();
+
+    const state = { ...savedState };
 
     const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
     const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
     const fmt = (n, d = 2) => Number.isFinite(n) ? n.toFixed(d) : '—';
     const log2 = (n) => Math.log(n) / Math.LN2;
+    // 指数显示：整数直接显示，小数最多两位且去尾 0
+    const fmtExp = (v) => {
+      if (!Number.isFinite(v)) return '';
+      if (Number.isInteger(v)) return String(v);
+      return String(Number(v.toFixed(2)));
+    };
 
     function setStatus(msg, type = '') {
       const box = $('statusBox'); box.textContent = msg; box.className = `status-ribbon ${type}`;
     }
 
-    // --- 尺子与精确输入控制器逻辑 ---
+    // ===== W 指数联动（含自定义） =====
+    function setWExp(v, opts = {}) {
+      const n = Number(v);
+      if (!Number.isFinite(n)) return;
+      const clamped = Math.round(clamp(n, W_EXP_MIN, W_EXP_MAX) * 100) / 100;
+      wExp = clamped;
+
+      // 按钮 active 状态
+      document.querySelectorAll('.exp-btn').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.exp) === clamped);
+      });
+
+      // 同步到自定义输入框（除非是用户正在输入）
+      const inp = $('expCustom');
+      if (inp && !opts.fromInput) {
+        const cur = parseFloat(inp.value);
+        if (!(Number.isFinite(cur) && Math.abs(cur - clamped) < 1e-9)) {
+          inp.value = fmtExp(clamped);
+        }
+      }
+
+      // 更新所有显示处
+      const s = fmtExp(clamped);
+      const tTop = $('expSupTop'); if (tTop) tTop.textContent = s;
+      const tSub = $('expSupSub'); if (tSub) tSub.textContent = s;
+      const tNote = $('expNote'); if (tNote) tNote.textContent = s;
+
+      try { localStorage.setItem('fitts_w_exp', String(clamped)); } catch (_) {}
+      refreshUI();
+    }
+
+    // 预设按钮
+    document.querySelectorAll('.exp-btn').forEach(btn => {
+      btn.addEventListener('click', () => setWExp(Number(btn.dataset.exp)));
+    });
+
+    // 自定义输入框
+    (() => {
+      const inp = $('expCustom');
+      if (!inp) return;
+      inp.value = fmtExp(wExp);
+
+      const applyFromInput = () => {
+        const raw = inp.value.trim();
+        if (raw === '') { inp.value = fmtExp(wExp); return; }
+        const v = parseFloat(raw);
+        if (!Number.isFinite(v)) { inp.value = fmtExp(wExp); return; }
+        setWExp(v, { fromInput: true });
+        inp.value = fmtExp(wExp);
+      };
+
+      inp.addEventListener('change', applyFromInput);
+      inp.addEventListener('blur', applyFromInput);
+      inp.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); inp.blur(); }
+      });
+    })();
+
     function setPxPerCm(val) {
       if (!Number.isFinite(val)) return;
       pxPerCm = Math.round(clamp(val, 20, 80) * 10) / 10;
@@ -526,7 +701,7 @@
       try { localStorage.setItem('fitts_px_cm_poster', pxPerCm.toFixed(1)); } catch (_) {}
       renderRuler(); refreshUI();
     }
-    
+
     $('calibSlider').addEventListener('input', (e) => setPxPerCm(Number(e.target.value)));
     $('calibMinus').addEventListener('click', () => setPxPerCm(pxPerCm - 0.1));
     $('calibPlus').addEventListener('click', () => setPxPerCm(pxPerCm + 0.1));
@@ -561,14 +736,13 @@
       $('calibSlider').value = pxPerCm.toFixed(1); $('calibNum').value = pxPerCm.toFixed(1);
     }
 
-    // --- 图形渲染核心 ---
     function renderSphereTrack(svg, viewport, D, W, strokeColor) {
       if (!Number.isFinite(D) || !Number.isFinite(W) || W <= 0) { svg.innerHTML = ''; return; }
-      const padX = 14; 
+      const padX = 14;
       const vpW = Math.max(200, viewport.clientWidth - 2), vpH = Math.max(100, viewport.clientHeight - 2);
       const diamPx = W * pxPerCm, strokeW = Math.min(1.4, Math.max(0.05, diamPx * 0.08)), radius = Math.max(0, (diamPx - strokeW) / 2);
       const isContact = D <= W / 2 + 1e-9, centerX = padX + D * pxPerCm, leftEdge = centerX - radius;
-      
+
       const width = Math.ceil(Math.max(vpW, centerX + radius + padX));
       const height = Math.ceil(Math.max(vpH, diamPx + 54));
       const centerY = height / 2;
@@ -598,11 +772,12 @@
       viewport.scrollTop = Math.max(0, centerY - viewport.clientHeight / 2);
     }
 
-    // --- 数据刷新与校验引擎 ---
     function refreshUI() {
       const D = state.D, W = state.W, S = state.S, dPhys = D * S, wPhys = W * S;
-      const id = (D <= (W / 2) + 1e-9) ? 0 : log2(1 + (dPhys * REF_LENGTH_CM) / (wPhys * wPhys));
-      
+      // ID = log₂(1 + D·L₀ / (S·W^p))
+      const denom = S * Math.pow(W, wExp);
+      const id = (D <= (W / 2) + 1e-9) ? 0 : log2(1 + (D * REF_LENGTH_CM) / denom);
+
       $('altIdVal').innerHTML = `${fmt(id)}<span class="metric-unit">bits</span>`;
       $('altPhysWVal').innerHTML = `${fmt(wPhys)}<span class="metric-unit">cm</span>`;
       $('sphereVolText').textContent = `物理体积: ${fmt((4 / 3) * Math.PI * Math.pow(wPhys / 2, 3), 3)} cm³`;
@@ -629,6 +804,7 @@
       if (key === 'W' && state.D < state.W / 2) { state.D = round2(state.W / 2); warnMsg = `宽度 W 侵入边界，系统被动推移距离 D 至 ${fmt(state.D)} cm 以防破位。`; }
       else if (key === 'D' && state.W > 2 * state.D) { state.W = round2(2 * state.D); warnMsg = `距离 D 缩小，系统被动挤压宽度 W 至 ${fmt(state.W)} cm。`; }
       if (warnMsg) setStatus(warnMsg, 'warn'); else setStatus('参数更新就绪。在模型界限内自由调节。', 'ok');
+      try { localStorage.setItem('fitts_model_state', JSON.stringify(state)); } catch (_) {}
       refreshUI();
     }
 
@@ -644,7 +820,6 @@
     }
     bindInputs('D'); bindInputs('W'); bindInputs('S');
 
-    // --- 反解器安全校验增强版 ---
     function parseSolverTarget() {
       const t = Number($('targetIdInput').value);
       if (!Number.isFinite(t) || t <= 0) { setStatus('请输入有效目标ID（>0）。', 'warn'); return null; }
@@ -652,7 +827,8 @@
     }
     $('solveDBtn').addEventListener('click', () => {
       const target = parseSolverTarget(); if (!target) return;
-      const neededD = ((Math.pow(2, target) - 1) * Math.pow(state.W * state.S, 2)) / (state.S * REF_LENGTH_CM);
+      // ID = log₂(1 + D·L₀ / (S·W^p))  =>  D = (2^ID - 1) · S · W^p / L₀
+      const neededD = ((Math.pow(2, target) - 1) * state.S * Math.pow(state.W, wExp)) / REF_LENGTH_CM;
       const safeD = Math.max(neededD, state.W / 2);
       applyStateChange('D', safeD);
       if (neededD > LIMITS.D.max || neededD < LIMITS.D.min || neededD < state.W / 2) {
@@ -663,7 +839,9 @@
     });
     $('solveWBtn').addEventListener('click', () => {
       const target = parseSolverTarget(); if (!target) return;
-      const neededW = Math.sqrt((state.D * state.S * REF_LENGTH_CM) / ((Math.pow(2, target) - 1) * state.S * state.S));
+      // ID = log₂(1 + D·L₀ / (S·W^p))  =>  W = (D·L₀ / ((2^ID - 1) · S))^(1/p)
+      const inner = (state.D * REF_LENGTH_CM) / ((Math.pow(2, target) - 1) * state.S);
+      const neededW = Math.pow(Math.max(inner, 1e-9), 1 / wExp);
       const safeW = Math.min(neededW, 2 * state.D);
       applyStateChange('W', safeW);
       if (neededW > LIMITS.W.max || neededW < LIMITS.W.min || neededW > 2 * state.D) {
@@ -673,7 +851,6 @@
       }
     });
 
-    // --- 高性能 Resize 防抖侦听器 (解决拖拽渲染闪烁/冲突) ---
     if ('ResizeObserver' in window) {
       let rafId = null;
       const ro = new ResizeObserver(() => {
@@ -687,10 +864,18 @@
     // =========================================================
     // 2D 瞄准微操游戏核心逻辑
     // =========================================================
+    const MARK_LIFE_MS = 500;
+    const MARK_RADIUS = 2.5;
+
     const aim = {
       active: false, started: false, w: 0, h: 0, dpr: 1,
       cx: 0, cy: 0, tx: 0, ty: 0, tr: 0,
-      hits: 0, miss: 0, rt: [], spawnTs: 0, hudBottom: 0
+      hits: 0, miss: 0, rt: [], spawnTs: 0, hudBottom: 0,
+      mode: 'free',
+      side: 'right',
+      originX: 0, originY: 0,
+      marks: [],
+      markRaf: null
     };
     const cvs = $('aimCanvas'), ctx = cvs.getContext('2d');
 
@@ -706,8 +891,35 @@
       cvs.width = aim.w * aim.dpr; cvs.height = aim.h * aim.dpr; cvs.style.width = `${aim.w}px`; cvs.style.height = `${aim.h}px`;
       ctx.setTransform(aim.dpr, 0, 0, aim.dpr, 0, 0); drawAim();
     }
-    
-    function setAimMsg(msg, type = '') { const el = $('aimNotice'); el.textContent = msg; el.className = `aim-center-notice ${type}`; }
+
+    function setAimMsg(msg, type = '') {
+      const el = $('aimNotice');
+      el.textContent = msg || '';
+      el.className = `aim-center-notice ${type}`;
+    }
+
+    function updateAimDesc() {
+      const modeLabel = aim.mode === 'fixed' ? '定式定位' : '自由瞄准';
+      const sideLabel = aim.mode === 'fixed' ? ` · 球在${aim.side === 'left' ? '左' : '右'}` : '';
+      $('aimParamDesc').textContent = `D_phys: ${fmt(state.D * state.S)} cm · W_phys: ${fmt(state.W * state.S)} cm · ${modeLabel}${sideLabel}`;
+    }
+
+    function addMark(x, y, isHit) {
+      aim.marks.push({ x, y, born: performance.now(), isHit });
+      if (aim.markRaf === null) {
+        const tick = () => {
+          const now = performance.now();
+          aim.marks = aim.marks.filter(m => now - m.born < MARK_LIFE_MS);
+          drawAim();
+          if (aim.marks.length > 0) {
+            aim.markRaf = requestAnimationFrame(tick);
+          } else {
+            aim.markRaf = null;
+          }
+        };
+        aim.markRaf = requestAnimationFrame(tick);
+      }
+    }
 
     function drawAim() {
       if (!aim.active) return;
@@ -727,6 +939,23 @@
       }
       ctx.stroke(); ctx.restore();
 
+      if (aim.mode === 'fixed' && aim.tr > 0 && aim.originX) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(216, 186, 127, 0.28)';
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(aim.originX, aim.originY);
+        ctx.lineTo(aim.tx, aim.ty);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(216, 186, 127, 0.55)';
+        ctx.beginPath();
+        ctx.arc(aim.originX, aim.originY, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
       if (aim.tr > 0) {
         ctx.save();
         if (aim.tr >= 5) {
@@ -735,10 +964,32 @@
           ctx.shadowColor = 'rgba(216, 186, 127, 0.3)'; ctx.shadowBlur = Math.min(22, aim.tr * 0.8);
           ctx.beginPath(); ctx.arc(aim.tx, aim.ty, aim.tr, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
           ctx.strokeStyle = '#d6ba7f'; ctx.lineWidth = Math.min(2, Math.max(0.7, aim.tr * 0.08)); ctx.stroke();
-        } else { ctx.beginPath(); ctx.arc(aim.tx, aim.ty, aim.tr, 0, Math.PI * 2); ctx.fillStyle = '#6490be'; ctx.fill(); }
+        } else {
+          ctx.beginPath(); ctx.arc(aim.tx, aim.ty, aim.tr, 0, Math.PI * 2); ctx.fillStyle = '#6490be'; ctx.fill();
+        }
         ctx.restore();
       }
-      
+
+      if (aim.marks.length > 0) {
+        const now = performance.now();
+        for (const m of aim.marks) {
+          const age = now - m.born;
+          const a = Math.max(0, 1 - age / MARK_LIFE_MS);
+          if (a <= 0) continue;
+          const color = m.isHit ? '#ff4a4a' : '#ffd54a';
+          const glow  = m.isHit ? 'rgba(255, 74, 74, 0.75)' : 'rgba(255, 213, 74, 0.8)';
+          ctx.save();
+          ctx.globalAlpha = a;
+          ctx.beginPath();
+          ctx.arc(m.x, m.y, MARK_RADIUS, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.shadowColor = glow;
+          ctx.shadowBlur = 7;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
       if (aim.started) {
         ctx.save(); ctx.lineWidth = 1; ctx.strokeStyle = '#ffffff'; ctx.beginPath();
         const g = 0.5, am = Math.max(2, aim.tr * 2);
@@ -748,9 +999,15 @@
       }
     }
 
-    function spawnAimTarget() {
-      aim.tr = (state.W * state.S * pxPerCm) / 2;
-      const dist = state.D * state.S * pxPerCm, top = (aim.hudBottom || getHudBottom()) + 16, cands = [];
+    function readModeFromUI() {
+      const m = $('gameMode');
+      const s = $('gameSide');
+      if (m) aim.mode = m.value;
+      if (s) aim.side = s.value;
+    }
+
+    function spawnFreeTarget(top) {
+      const dist = state.D * state.S * pxPerCm, cands = [];
       for (let i = 0; i < 360; i++) {
         const a = (i * Math.PI) / 180, tx = aim.cx + Math.cos(a) * dist, ty = aim.cy + Math.sin(a) * dist;
         if (tx >= aim.tr + 24 && tx <= aim.w - aim.tr - 24 && ty >= top + aim.tr + 10 && ty <= aim.h - aim.tr - 20) cands.push(a);
@@ -758,35 +1015,117 @@
       if (!cands.length) { aim.tr = 0; return false; }
       const a = cands[Math.floor(Math.random() * cands.length)];
       aim.tx = aim.cx + Math.cos(a) * dist; aim.ty = aim.cy + Math.sin(a) * dist;
+      aim.originX = 0; aim.originY = 0;
       aim.spawnTs = performance.now(); drawAim(); return true;
     }
 
+    function spawnFixedTarget(top) {
+      const margin = 30;
+      const availW = aim.w - 2 * margin;
+      const cy = (top + aim.h) / 2;
+
+      let distPx = state.D * state.S * pxPerCm;
+      const maxDist = Math.max(80, availW - 2 * aim.tr - 20);
+      if (distPx > maxDist) distPx = maxDist;
+      if (distPx < 40) distPx = 40;
+
+      let ox, tx;
+      if (aim.side === 'left') {
+        tx = (aim.w - distPx) / 2;
+        ox = tx + distPx;
+      } else {
+        ox = (aim.w - distPx) / 2;
+        tx = ox + distPx;
+      }
+
+      aim.originX = ox;
+      aim.originY = cy;
+      aim.cx = ox;
+      aim.cy = cy;
+      aim.tx = tx;
+      aim.ty = cy;
+      aim.spawnTs = performance.now();
+      drawAim();
+      return true;
+    }
+
+    function spawnAimTarget() {
+      readModeFromUI();
+      const top = (aim.hudBottom || getHudBottom()) + 16;
+      aim.tr = (state.W * state.S * pxPerCm) / 2;
+      if (aim.mode === 'fixed') return spawnFixedTarget(top);
+      return spawnFreeTarget(top);
+    }
+
     $('openAimBtn').addEventListener('click', () => {
-      aim.active = true; aim.started = false; aim.tr = 0; aim.hits = 0; aim.miss = 0; aim.rt = []; aim.hudBottom = 0;
-      $('statHits').textContent = '0'; $('statMisses').textContent = '0'; $('statAcc').textContent = '—'; $('statRt').textContent = '—';
-      $('aimParamDesc').textContent = `D_phys: ${fmt(state.D*state.S)} cm · W_phys: ${fmt(state.W*state.S)} cm`;
-      $('aimOverlay').classList.remove('hidden'); resizeAim(); aim.hudBottom = getHudBottom();
-      setAimMsg('点击画布任意空白处开镜锁定。');
+      readModeFromUI();
+
+      aim.active = true; aim.started = false; aim.tr = 0;
+      aim.hits = 0; aim.miss = 0; aim.rt = []; aim.hudBottom = 0;
+      aim.originX = 0; aim.originY = 0;
+      aim.marks = [];
+      if (aim.markRaf !== null) { cancelAnimationFrame(aim.markRaf); aim.markRaf = null; }
+
+      $('statHits').textContent = '0'; $('statMisses').textContent = '0';
+      $('statAcc').textContent = '—'; $('statRt').textContent = '—';
+
+      updateAimDesc();
+      $('aimOverlay').classList.remove('hidden');
+      resizeAim();
+      aim.hudBottom = getHudBottom();
+      setAimMsg('');
     });
 
-    $('gameSens').addEventListener('input', () => $('gameSensVal').textContent = `${Number($('gameSens').value).toFixed(1)}×`);
+    $('gameSens').addEventListener('input', () => {
+      const v = Number($('gameSens').value);
+      $('gameSensVal').textContent = `${v.toFixed(1)}×`;
+      try { localStorage.setItem('fitts_game_sens', v.toFixed(1)); } catch (_) {}
+    });
+
+    $('gameMode').addEventListener('change', () => {
+      try { localStorage.setItem('fitts_game_mode', $('gameMode').value); } catch (_) {}
+      if (!aim.active || !aim.started) return;
+      readModeFromUI();
+      spawnAimTarget();
+      updateAimDesc();
+    });
+    $('gameSide').addEventListener('change', () => {
+      try { localStorage.setItem('fitts_game_side', $('gameSide').value); } catch (_) {}
+      if (!aim.active || !aim.started) return;
+      readModeFromUI();
+      spawnAimTarget();
+      updateAimDesc();
+    });
 
     cvs.addEventListener('click', () => {
       if (!aim.active || aim.started) return;
       if (!cvs.requestPointerLock) { setAimMsg('浏览器不支持指针锁定', 'warn'); return; }
-      
-      resizeAim(); aim.cx = aim.w / 2; aim.hudBottom = getHudBottom(); aim.cy = (aim.hudBottom + 16 + aim.h) / 2;
+
+      readModeFromUI();
+      resizeAim();
+      aim.hudBottom = getHudBottom();
+      aim.cx = aim.w / 2;
+      aim.cy = (aim.hudBottom + 16 + aim.h) / 2;
+
       if (!spawnAimTarget()) { setAimMsg('空间不足以容纳物理步距，请全屏或缩小距离后重试。', 'warn'); return; }
-      
+
       aim.started = true;
+      drawAim();
+
+      updateAimDesc();
+
       const p = cvs.requestPointerLock({ unadjustedMovement: true });
-      if (p && typeof p.catch === 'function') { p.catch(() => setAimMsg('请求原始输入失败，可能受系统加速影响', 'warn')); }
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => setAimMsg('请求原始输入失败，可能受系统加速影响', 'warn'));
+      }
     });
 
     cvs.addEventListener('mousemove', (e) => {
       if (!aim.started || document.pointerLockElement !== cvs) return;
       const sens = Number($('gameSens').value) || 1.0, dpi = clamp(Number($('mouseDpi').value) || 800, 100, 50000);
-      const pxFactor = (2.54 * pxPerCm / dpi) * sens, topLimit = (aim.hudBottom || getHudBottom()) + 18, bottomLimit = Math.max(topLimit + 4, aim.h - 4);
+      const pxFactor = (2.54 * pxPerCm / dpi) * sens;
+      const topLimit = (aim.hudBottom || getHudBottom()) + 18;
+      const bottomLimit = Math.max(topLimit + 4, aim.h - 4);
       aim.cx = clamp(aim.cx + (e.movementX || 0) * pxFactor, 4, Math.max(8, aim.w - 4));
       aim.cy = clamp(aim.cy + (e.movementY || 0) * pxFactor, topLimit, bottomLimit);
       drawAim();
@@ -794,40 +1133,95 @@
 
     cvs.addEventListener('mousedown', (e) => {
       if (!aim.started || e.button !== 0 || aim.tr === 0) return;
+
+      const px = aim.cx, py = aim.cy;
+
       if (Math.hypot(aim.cx - aim.tx, aim.cy - aim.ty) <= aim.tr) {
-        aim.hits++; aim.rt.push(performance.now() - aim.spawnTs); setAimMsg('命中！新目标已生成。', 'ok'); 
-        if (!spawnAimTarget()) { setAimMsg('命中！但剩余空间不足以生成新目标，请按 Esc 退出。', 'warn'); }
-      } else { 
-        aim.miss++; setAimMsg('未命中，请微调准星后再次击发。', ''); drawAim(); 
+        aim.hits++;
+        aim.rt.push(performance.now() - aim.spawnTs);
+        addMark(px, py, true);
+        spawnAimTarget();
+      } else {
+        aim.miss++;
+        addMark(px, py, false);
+        drawAim();
       }
-      $('statHits').textContent = aim.hits; $('statMisses').textContent = aim.miss; const total = aim.hits + aim.miss;
+
+      $('statHits').textContent = aim.hits;
+      $('statMisses').textContent = aim.miss;
+      const total = aim.hits + aim.miss;
       $('statAcc').textContent = total > 0 ? `${(aim.hits / total * 100).toFixed(1)}%` : '—';
-      if (aim.rt.length > 0) $('statRt').textContent = `${Math.round(aim.rt.reduce((a,b)=>a+b,0)/aim.rt.length)} ms`;
+      if (aim.rt.length > 0) $('statRt').textContent = `${Math.round(aim.rt.reduce((a, b) => a + b, 0) / aim.rt.length)} ms`;
     });
 
+    function closeAim() {
+      if (!aim.active) return;
+      aim.active = false;
+      aim.started = false;
+      if (aim.markRaf !== null) { cancelAnimationFrame(aim.markRaf); aim.markRaf = null; }
+      aim.marks = [];
+      $('aimOverlay').classList.add('hidden');
+      if (document.pointerLockElement === cvs && document.exitPointerLock) {
+        document.exitPointerLock();
+      }
+    }
+
     document.addEventListener('pointerlockchange', () => {
-      if (document.pointerLockElement === cvs) { setAimMsg('原始未加速输入已锁定生效。按 Esc 结束训练。', 'ok'); } 
-      else if (aim.active) { aim.active = false; aim.started = false; $('aimOverlay').classList.add('hidden'); }
+      if (aim.active && document.pointerLockElement !== cvs) {
+        closeAim();
+      }
     });
-    
-    // 底层捕获报错
+
     document.addEventListener('pointerlockerror', () => {
       if (aim.active) { aim.started = false; setAimMsg('浏览器安全策略拒绝了锁定请求，请重试或在原生标签页中打开。', 'warn'); }
     });
 
-    document.addEventListener('keydown', (e) => { 
-      if (aim.active && (e.key === 'Escape' || e.key === 'Esc')) { 
-        aim.active = false; aim.started = false; $('aimOverlay').classList.add('hidden'); 
-        if (document.exitPointerLock) document.exitPointerLock();
-      } 
+    document.addEventListener('keydown', (e) => {
+      if (aim.active && (e.key === 'Escape' || e.key === 'Esc')) {
+        closeAim();
+      }
     });
-    
+
     let resizeTimer;
     window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { renderRuler(); refreshUI(); aim.hudBottom = 0; if(aim.active) resizeAim(); }, 100);
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { renderRuler(); refreshUI(); aim.hudBottom = 0; if (aim.active) resizeAim(); }, 100);
     });
-    
-    // 初始化系统
+
+    // DPI 持久化
+    (() => {
+      const dpiEl = $('mouseDpi');
+      if (!dpiEl) return;
+      dpiEl.value = savedDpi;
+      const persist = () => {
+        const v = Number(dpiEl.value);
+        if (Number.isFinite(v) && v >= 100 && v <= 50000) {
+          try { localStorage.setItem('fitts_mouse_dpi', String(Math.round(v))); } catch (_) {}
+        }
+      };
+      dpiEl.addEventListener('change', persist);
+      dpiEl.addEventListener('blur', persist);
+      dpiEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); dpiEl.blur(); } });
+    })();
+
+    // 训练偏好回填
+    (() => {
+      const modeEl = $('gameMode');
+      const sideEl = $('gameSide');
+      const sensEl = $('gameSens');
+      const sensValEl = $('gameSensVal');
+
+      if (modeEl) { modeEl.value = savedMode; aim.mode = savedMode; }
+      if (sideEl) { sideEl.value = savedSide; aim.side = savedSide; }
+      if (sensEl && sensValEl) {
+        sensEl.value = savedSens.toFixed(1);
+        sensValEl.textContent = `${savedSens.toFixed(1)}×`;
+      }
+    })();
+
+    // 初始化 W 指数（应用上标、副标题、注释卡 + refreshUI）
+    setWExp(wExp);
+
     setPxPerCm(pxPerCm);
   })();
   </script>
