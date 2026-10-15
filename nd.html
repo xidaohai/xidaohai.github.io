@@ -59,7 +59,6 @@
       border-radius: calc(var(--radius-lg) - 4px); pointer-events: none;
     }
 
-    /* 右上角 W 指数选择器（预设 + 自定义） */
     .exp-picker {
       position: absolute; top: clamp(10px, 2vw, 16px); right: clamp(10px, 2vw, 16px);
       z-index: 3;
@@ -154,6 +153,9 @@
     .hero-formula .fraction { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.82em; margin: 0 clamp(3px, 0.8vw, 8px); }
     .hero-formula .frac-top { border-bottom: 2px solid var(--ink-navy); padding: 0 6px 3px 6px; font-style: italic; line-height: 1.05; }
     .hero-formula .frac-top span { font-style: normal; }
+    .hero-formula .fraction sup, .hero-formula .fraction sub { font-size: 0.52em; font-style: normal; }
+    .hero-formula .frac-top sup { vertical-align: 0.55em; }
+    .hero-formula .frac-top sub { vertical-align: -0.12em; }
     .hero-formula .frac-bottom { padding: 3px 6px 0 6px; font-style: italic; line-height: 1.05; }
     .hero-formula .frac-bottom sup { font-size: 0.62em; font-style: normal; vertical-align: 0.45em; }
 
@@ -284,6 +286,7 @@
     .aim-overlay { position: fixed; inset: 0; z-index: 9999; background: #071220; display: flex; flex-direction: column; overflow: hidden; padding: 12px; color: #f4edd8; isolation: isolate; user-select: none; }
     .aim-overlay.hidden { display: none !important; }
     #aimCanvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: none; touch-action: none; z-index: 1; }
+    .aim-overlay.paused #aimCanvas { cursor: crosshair; }
 
     .aim-hud { position: relative; z-index: 2; background: rgba(13, 28, 48, 0.88); border: 1px solid rgba(216, 186, 127, 0.35); border-radius: var(--radius-md); padding: 10px 16px; backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
     .aim-title-meta h2 { margin: 0; font-size: 1rem; color: #faebd0; letter-spacing: 0.04em; }
@@ -302,6 +305,7 @@
     }
     .aim-ctrl-bar select:focus { outline: 1px solid #d8ba7f; }
     .aim-ctrl-bar .mode-meta { color: #92a7c4; font-size: 0.7rem; }
+    .aim-ctrl-bar input[type="range"] { accent-color: #c8a86b; cursor: pointer; }
 
     .aim-center-notice { position: relative; z-index: 2; align-self: center; max-width: 600px; margin: auto; padding: 10px 20px; background: rgba(13, 28, 48, 0.86); border: 1px solid rgba(216, 186, 127, 0.38); border-radius: 8px; text-align: center; font-size: 0.84rem; color: #f7ecd5; line-height: 1.5; pointer-events: none; backdrop-filter: blur(8px); transition: all 0.3s; }
     .aim-center-notice.warn { border-color: #df8f4a; color: #feddbb; }
@@ -325,7 +329,6 @@
 
     <header class="poster-board" aria-label="瞄准难度指数模型海报">
 
-      <!-- 右上角：W 指数选择（预设 + 自定义输入） -->
       <div class="exp-picker" role="group" aria-label="W 次幂选择">
         <span class="exp-picker-label"><em>W</em> 指数</span>
         <button type="button" class="exp-btn" data-exp="1.5">1.5</button>
@@ -333,15 +336,16 @@
         <button type="button" class="exp-btn" data-exp="2.5">2.5</button>
         <button type="button" class="exp-btn" data-exp="3">3</button>
         <span class="exp-sep" aria-hidden="true"></span>
-        <input type="number" id="expCustom" class="exp-input" min="1" max="5" step="0.1" value="2" aria-label="自定义 W 指数" title="可自定义 1 ~ 5 之间的任意指数">
+        <input type="number" id="expCustom" class="exp-input" min="0.1" max="999" step="0.01" value="2" aria-label="自定义 W 指数" title="允许范围 0.1–999；建议主要研究 1.5–2.5">
       </div>
 
       <div class="legend-list">
-        <div class="legend-item"><span class="pill-badge">ID</span><span class="legend-colon">:</span><span class="legend-cn">瞄准难度指数</span><span class="legend-en">(Information Difficulty)</span></div>
+        <div class="legend-item"><span class="pill-badge">ID</span><span class="legend-colon">:</span><span class="legend-cn">瞄准难度指数</span><span class="legend-en">(Aiming Difficulty Index)</span></div>
         <div class="legend-item"><span class="pill-badge">D</span><span class="legend-colon">:</span><span class="legend-cn">移动距离</span><span class="legend-en">(Distance)</span></div>
         <div class="legend-item"><span class="pill-badge">W</span><span class="legend-colon">:</span><span class="legend-cn">目标宽度</span><span class="legend-en">(Width)</span></div>
         <div class="legend-item"><span class="pill-badge">L<sub>0</sub></span><span class="legend-colon">:</span><span class="legend-cn">参考长度</span><span class="legend-en">(Reference Length)</span></div>
-        <div class="legend-subtext">L₀ = 1 cm（≈大众的半同身寸），物理量已按 L₀ 无量纲化，故默认数值不变。</div>
+        <div class="legend-item"><span class="pill-badge">S</span><span class="legend-colon">:</span><span class="legend-cn">手 / 屏位移比</span><span class="legend-en">(Hand / Screen Displacement Ratio)</span></div>
+        <div class="legend-subtext">L₀ 固定取 1 cm；D、W 均以 cm 输入。上方显示不含 S 的基础公式；下方解算器依据 D_phys = S·D、W_phys = S·W 将 S 正确代入。p 为 W 的次幂；D 不设人为上限。</div>
       </div>
 
       <div class="hero-formula-wrap">
@@ -349,7 +353,7 @@
           <span class="math-id">ID</span><span class="math-op">=</span><span class="math-log">log</span><sub class="math-sub2">2</sub>
           <span class="paren-left">(</span><span>1</span><span class="math-op">+</span>
           <div class="fraction">
-            <span class="frac-top">L<span>0</span>D</span>
+            <span class="frac-top">L<sub>0</sub><sup id="expL0Pow">1</sup>D</span>
             <span class="frac-bottom">W<sup id="expSupTop">2</sup></span>
           </div>
           <span class="paren-right">)</span>
@@ -357,9 +361,9 @@
       </div>
 
       <div class="annotation-grid">
-        <div class="annotation-card"><div class="badge-number">1</div><div class="annotation-content">次幂范围应在 1.5 ~ 2.5 之间，当前取 <em id="expNote">2</em>。<span class="dimmed">（极限不应超过 3）</span></div></div>
-        <div class="annotation-card"><div class="badge-number">2</div><div class="annotation-content">舒适摆动范围内命中时间理论一致；灵敏度越慢，实际命中越慢。</div></div>
-        <div class="annotation-card"><div class="badge-number">3</div><div class="annotation-content">难度 ≤3 一般可单次定位，≥5 为易二次。</div></div>
+        <div class="annotation-card"><div class="badge-number">1</div><div class="annotation-content">建议研究次幂范围为 1.5 ~ 2.5，当前取 <em id="expNote">2</em>。<span class="dimmed">可探索范围 0.1 ~ 999；数值越极端越需要注意数值稳定性与模型实证。</span></div></div>
+        <div class="annotation-card"><div class="badge-number">2</div><div class="annotation-content">待验证假设：舒适运动幅度内命中时间可能近似稳定；S 会改变映射到手部空间的距离与尺寸。</div></div>
+        <div class="annotation-card"><div class="badge-number">3</div><div class="annotation-content">阈值假设：ID ≤3 对应较易单次定位，ID ≥5 对应较易二次修正。<span class="dimmed">需要实测验证。</span></div></div>
       </div>
 
       <div class="stamp-badge">
@@ -376,7 +380,7 @@
       <div class="section-header" style="margin-bottom: 12px;">
         <div>
           <h2 class="section-title">空间几何投影可视化</h2>
-          <p class="section-subtitle">图形严格按下方校准标尺比例绘制，可在视窗内横向平移。<strong>右下角可拖拽改变视窗高度。</strong></p>
+          <p class="section-subtitle">常规距离按下方校准标尺比例绘制，可在视窗内横向平移；超大距离时图示自动缩放以避免页面崩溃，标签仍显示真实参数。<strong>右下角可拖拽改变视窗高度。</strong></p>
         </div>
       </div>
 
@@ -427,7 +431,8 @@
         <div class="section-header" style="margin-bottom: 12px;">
           <div>
             <h2 class="section-title">变体难度解算与参数微调</h2>
-            <p class="section-subtitle">ID = log₂(1 + D·L₀ / (S·W<sup id="expSupSub">2</sup>))，其中恒定 L₀ = 1 cm。</p>
+            <p class="section-subtitle">ID = log₂(1 + D·L₀<sup id="expL0PowSub">1</sup> / (S<sup id="expSPowSub">1</sup>·W<sup id="expSupSub">2</sup>))；由基础式在手部空间中代入 D_phys = S·D、W_phys = S·W 得出。L₀ = 1 cm，D、W 以 cm 输入。</p>
+            <p class="section-subtitle" style="margin-top:4px;">边界约定：D ≤ W/2 时，起点位于或接触圆形目标，工具单独按 ID = 0 处理；否则按上式计算。</p>
           </div>
         </div>
 
@@ -446,7 +451,7 @@
 
         <div class="solver-box">
           <span class="solver-title">目标反解：</span><span>设定 ID =</span>
-          <input type="number" class="solver-input" id="targetIdInput" min="0.1" max="10" step="0.1" value="4.00">
+          <input type="number" class="solver-input" id="targetIdInput" min="0.1" step="any" value="4.00">
           <button type="button" class="btn-classical" id="solveDBtn">反推 D</button>
           <button type="button" class="btn-classical" id="solveWBtn">反推 W</button>
         </div>
@@ -458,8 +463,8 @@
               <span class="ctrl-hint">起点到球心，单位 cm</span>
             </div>
             <div class="ctrl-input-wrap">
-              <input type="range" id="altDRange" class="param-slider" min="1" max="50" step="0.01">
-              <input type="number" class="num-input-gold" id="altDNum" step="0.01">
+              <input type="range" id="altDRange" class="param-slider" min="1" max="50" step="0.01" title="距离滑块范围随参数动态扩展；极大距离请用右侧数字输入">
+              <input type="number" class="num-input-gold" id="altDNum" min="1" step="any" title="D 无人为上限；输入任意可表示的正有限数值（单位 cm）">
             </div>
           </div>
 
@@ -487,7 +492,7 @@
         </div>
 
         <div class="status-ribbon" id="statusBox">
-          就绪。拖动滑块时，若触发空间重叠冲突，系统会自动推移边界保护计算。
+          就绪。若起点位于或接触圆形目标（D ≤ W/2），本工具按重叠目标规则将 ID 置为 0；该规则独立于主公式。反解时会提示无法同时满足目标 ID 与边界条件的情况。
         </div>
       </section>
 
@@ -533,11 +538,16 @@
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
           <label for="gameSens">引擎乘数：</label>
-          <input type="range" id="gameSens" min="0.1" max="5" step="0.1" value="1.0" style="width:100px;">
+          <input type="range" id="gameSens" min="0.1" max="5" step="0.1" value="1.0" style="width:90px;">
           <span id="gameSensVal" style="font-family:ui-monospace; font-weight:bold; color:#faebd0;">1.0×</span>
         </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <label for="crosshairWidth">准星粗细：</label>
+          <input type="range" id="crosshairWidth" min="0.5" max="5" step="0.1" value="1.0" style="width:80px;">
+          <span id="crosshairWidthVal" style="font-family:ui-monospace; font-weight:bold; color:#faebd0;">1.0</span>
+        </div>
         <div class="aim-dpi-box"><label for="mouseDpi">硬件 DPI：</label><input type="number" id="mouseDpi" min="100" max="50000" step="50" value="800"></div>
-        <span style="color:#d8ba7f; margin-left:auto; font-weight:600;">点击画布任意处开镜射击 · 按 Esc 退出</span>
+        <span id="aimHint" style="color:#d8ba7f; margin-left:auto; font-weight:600;">点击画布射击 · Esc 暂停 · 再按 Esc 退出</span>
       </div>
     </header>
     <div class="aim-center-notice" id="aimNotice"></div>
@@ -550,10 +560,10 @@
 
     const $ = (id) => document.getElementById(id);
     const REF_LENGTH_CM = 1.0;
-    const LIMITS = { D: { min: 1, max: 50 }, W: { min: 0.2, max: 30 }, S: { min: 0.05, max: 5 }, targetId: { min: 0.1, max: 10 } };
-    const W_EXP_PRESETS = [1.5, 2, 2.5, 3];
-    const W_EXP_MIN = 1;
-    const W_EXP_MAX = 5;
+    const LIMITS = { D: { min: 1, max: Number.MAX_VALUE }, W: { min: 0.2, max: 30 }, S: { min: 0.05, max: 5 }, targetId: { min: 0.1, max: Number.MAX_VALUE } };
+    const MAX_TRACK_PX = 8000;
+    const D_SLIDER_PRECISION_LIMIT = 1e6;
+    let dSliderMax = 50;
 
     let pxPerCm = (() => {
       try {
@@ -563,16 +573,27 @@
       return 37.8;
     })();
 
-    // W 次幂（支持任意数值 1~5）
+    // W 次幂。推荐研究区间为 1.5–2.5；允许探索范围为 0.1–999。
+    const MIN_W_EXP = 0.1;
+    const MAX_W_EXP = 999;
     let wExp = (() => {
       try {
         const v = parseFloat(localStorage.getItem('fitts_w_exp'));
-        if (Number.isFinite(v) && v >= W_EXP_MIN && v <= W_EXP_MAX) return Math.round(v * 100) / 100;
+        if (Number.isFinite(v)) return Math.round(Math.min(MAX_W_EXP, Math.max(MIN_W_EXP, v)) * 100) / 100;
       } catch (_) {}
       return 2;
     })();
 
-    // 读取上次保存的鼠标 DPI
+    // 准星粗细
+    let savedCrosshairWidth = (() => {
+      try {
+        const v = Number(localStorage.getItem('fitts_crosshair_width'));
+        if (Number.isFinite(v) && v >= 0.5 && v <= 5) return Math.round(v * 10) / 10;
+      } catch (_) {}
+      return 1.0;
+    })();
+
+    // 鼠标 DPI
     const savedDpi = (() => {
       try {
         const v = Number(localStorage.getItem('fitts_mouse_dpi'));
@@ -581,7 +602,7 @@
       return 800;
     })();
 
-    // 读取上次保存的建模参数 (D/W/S)
+    // 建模参数 (D/W/S)
     const savedState = (() => {
       const defaults = { D: 15.00, W: 1.29, S: 0.60 };
       try {
@@ -589,14 +610,14 @@
         if (!raw) return defaults;
         const o = JSON.parse(raw);
         const out = { ...defaults };
-        if (Number.isFinite(o.D) && o.D >= 1 && o.D <= 50) out.D = o.D;
+        if (Number.isFinite(o.D) && o.D >= 1) out.D = o.D;
         if (Number.isFinite(o.W) && o.W >= 0.2 && o.W <= 30) out.W = o.W;
         if (Number.isFinite(o.S) && o.S >= 0.05 && o.S <= 5) out.S = o.S;
         return out;
       } catch (_) { return defaults; }
     })();
 
-    // 读取上次保存的训练偏好
+    // 训练偏好
     const savedMode = (() => {
       try {
         const m = localStorage.getItem('fitts_game_mode');
@@ -622,10 +643,51 @@
     const state = { ...savedState };
 
     const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-    const round2 = (n) => Math.round((n + Number.EPSILON) * 100) / 100;
-    const fmt = (n, d = 2) => Number.isFinite(n) ? n.toFixed(d) : '—';
+    const round2 = (n) => !Number.isFinite(n) || Math.abs(n) >= 1e14 ? n : Math.round((n + Number.EPSILON) * 100) / 100;
+    const fmt = (n, d = 2) => Number.isNaN(n) ? '—' : n === Infinity ? '∞' : n === -Infinity ? '−∞' : n.toFixed(d);
     const log2 = (n) => Math.log(n) / Math.LN2;
-    // 指数显示：整数直接显示，小数最多两位且去尾 0
+    const LN2 = Math.LN2;
+    const LOG_MAX_NUMBER = Math.log(Number.MAX_VALUE);
+    const LOG_MIN_NUMBER = Math.log(Number.MIN_VALUE);
+
+    // Compute ID in log-space so p=999 does not overflow through W^p or S^(p-1).
+    function calculateModelId(D, W, S, p = wExp) {
+      if (![D, W, S, p].every(Number.isFinite) || D <= 0 || W <= 0 || S <= 0 || p <= 0) return NaN;
+      // Tool-specific overlap rule: origin inside/tangent to target means no movement is needed.
+      if (D <= W / 2 + 1e-9) return 0;
+      const logRatio = Math.log(D) + (p - 1) * Math.log(REF_LENGTH_CM)
+        - (p - 1) * Math.log(S) - p * Math.log(W);
+      if (Number.isNaN(logRatio)) return NaN;
+      if (logRatio > 40) return logRatio / LN2; // ln(1 + exp(x)) ~= x
+      if (logRatio < -40) return Math.exp(logRatio) / LN2;
+      return Math.log1p(Math.exp(logRatio)) / LN2;
+    }
+
+    // log(2^ID - 1), stable for both small and large ID.
+    function logRatioForId(id) {
+      if (!Number.isFinite(id) || id <= 0) return NaN;
+      const x = id * LN2;
+      if (x <= 0) return NaN;
+      if (x > 50) return x + Math.log1p(-Math.exp(-x));
+      return Math.log(Math.expm1(x));
+    }
+
+    function expFromLog(logValue) {
+      if (Number.isNaN(logValue)) return NaN;
+      if (logValue > LOG_MAX_NUMBER) return Infinity;
+      if (logValue < LOG_MIN_NUMBER) return 0;
+      return Math.exp(logValue);
+    }
+
+    function fmtProduct(a, b, d = 2) {
+      const product = a * b;
+      if (Number.isFinite(product)) return fmt(product, d);
+      if (!(a > 0) || !(b > 0) || !Number.isFinite(a) || !Number.isFinite(b)) return '超出数值范围';
+      const log10 = Math.log10(a) + Math.log10(b);
+      const exponent = Math.floor(log10);
+      const mantissa = Math.pow(10, log10 - exponent);
+      return `${mantissa.toFixed(d)}×10^${exponent}`;
+    }
     const fmtExp = (v) => {
       if (!Number.isFinite(v)) return '';
       if (Number.isInteger(v)) return String(v);
@@ -636,43 +698,39 @@
       const box = $('statusBox'); box.textContent = msg; box.className = `status-ribbon ${type}`;
     }
 
-    // ===== W 指数联动（含自定义） =====
-    function setWExp(v, opts = {}) {
+    // ===== W 指数联动 =====
+    // 公式允许 p 在 0.1–999 内探索；1.5–2.5 是建议研究区间。
+    function setWExp(v) {
       const n = Number(v);
       if (!Number.isFinite(n)) return;
-      const clamped = Math.round(clamp(n, W_EXP_MIN, W_EXP_MAX) * 100) / 100;
-      wExp = clamped;
+      const val = Math.round(clamp(n, MIN_W_EXP, MAX_W_EXP) * 100) / 100;
+      wExp = val;
 
-      // 按钮 active 状态
       document.querySelectorAll('.exp-btn').forEach(btn => {
-        btn.classList.toggle('active', Number(btn.dataset.exp) === clamped);
+        btn.classList.toggle('active', Math.abs(Number(btn.dataset.exp) - val) < 1e-9);
       });
 
-      // 同步到自定义输入框（除非是用户正在输入）
       const inp = $('expCustom');
-      if (inp && !opts.fromInput) {
-        const cur = parseFloat(inp.value);
-        if (!(Number.isFinite(cur) && Math.abs(cur - clamped) < 1e-9)) {
-          inp.value = fmtExp(clamped);
-        }
-      }
+      if (inp) inp.value = fmtExp(val);
 
-      // 更新所有显示处
-      const s = fmtExp(clamped);
+      const s = fmtExp(val);
+      const pMinusOne = fmtExp(val - 1);
       const tTop = $('expSupTop'); if (tTop) tTop.textContent = s;
       const tSub = $('expSupSub'); if (tSub) tSub.textContent = s;
+      const tL0 = $('expL0Pow'); if (tL0) { tL0.textContent = pMinusOne; tL0.hidden = Math.abs(val - 2) < 1e-9; }
+      const tL0Sub = $('expL0PowSub'); if (tL0Sub) { tL0Sub.textContent = pMinusOne; tL0Sub.hidden = Math.abs(val - 2) < 1e-9; }
+      const tS = $('expSPow'); if (tS) { tS.textContent = pMinusOne; tS.hidden = Math.abs(val - 2) < 1e-9; }
+      const tSSub = $('expSPowSub'); if (tSSub) { tSSub.textContent = pMinusOne; tSSub.hidden = Math.abs(val - 2) < 1e-9; }
       const tNote = $('expNote'); if (tNote) tNote.textContent = s;
 
-      try { localStorage.setItem('fitts_w_exp', String(clamped)); } catch (_) {}
+      try { localStorage.setItem('fitts_w_exp', String(val)); } catch (_) {}
       refreshUI();
     }
 
-    // 预设按钮
     document.querySelectorAll('.exp-btn').forEach(btn => {
       btn.addEventListener('click', () => setWExp(Number(btn.dataset.exp)));
     });
 
-    // 自定义输入框
     (() => {
       const inp = $('expCustom');
       if (!inp) return;
@@ -681,9 +739,9 @@
       const applyFromInput = () => {
         const raw = inp.value.trim();
         if (raw === '') { inp.value = fmtExp(wExp); return; }
-        const v = parseFloat(raw);
+        const v = Number(raw);
         if (!Number.isFinite(v)) { inp.value = fmtExp(wExp); return; }
-        setWExp(v, { fromInput: true });
+        setWExp(v);
         inp.value = fmtExp(wExp);
       };
 
@@ -736,20 +794,37 @@
       $('calibSlider').value = pxPerCm.toFixed(1); $('calibNum').value = pxPerCm.toFixed(1);
     }
 
-    function renderSphereTrack(svg, viewport, D, W, strokeColor) {
-      if (!Number.isFinite(D) || !Number.isFinite(W) || W <= 0) { svg.innerHTML = ''; return; }
+    function renderSphereTrack(svg, viewport, D, W, strokeColor, multiplier = 1) {
+      if (!Number.isFinite(D) || !Number.isFinite(W) || D < 0 || W <= 0 || !Number.isFinite(multiplier) || multiplier <= 0) {
+        svg.innerHTML = ''; return false;
+      }
       const padX = 14;
       const vpW = Math.max(200, viewport.clientWidth - 2), vpH = Math.max(100, viewport.clientHeight - 2);
-      const diamPx = W * pxPerCm, strokeW = Math.min(1.4, Math.max(0.05, diamPx * 0.08)), radius = Math.max(0, (diamPx - strokeW) / 2);
-      const isContact = D <= W / 2 + 1e-9, centerX = padX + D * pxPerCm, leftEdge = centerX - radius;
-
+      const displayD = D * multiplier, displayW = W * multiplier;
+      const totalDisplayCm = displayD + displayW;
+      const isScaled = !Number.isFinite(totalDisplayCm) || totalDisplayCm > MAX_TRACK_PX / pxPerCm;
+      let centerOffsetPx, diamPx;
+      if (isScaled) {
+        // In scaled mode the view keeps the D:W geometry but does not claim physical px/cm accuracy.
+        // Use base lengths so D*S overflow cannot make the SVG dimensions infinite.
+        const baseTotal = D + W;
+        centerOffsetPx = baseTotal > 0 ? (D / baseTotal) * MAX_TRACK_PX : 0;
+        diamPx = baseTotal > 0 ? (W / baseTotal) * MAX_TRACK_PX : 0;
+      } else {
+        centerOffsetPx = displayD * pxPerCm;
+        diamPx = displayW * pxPerCm;
+      }
+      const strokeW = Math.min(1.4, Math.max(0.05, diamPx * 0.08));
+      const radius = Math.max(0, (diamPx - strokeW) / 2);
+      const isContact = D <= W / 2 + 1e-9;
+      const centerX = padX + centerOffsetPx, leftEdge = centerX - radius;
       const width = Math.ceil(Math.max(vpW, centerX + radius + padX));
       const height = Math.ceil(Math.max(vpH, diamPx + 54));
       const centerY = height / 2;
 
       svg.setAttribute('width', width); svg.setAttribute('height', height); svg.style.width = `${width}px`; svg.style.height = `${height}px`;
       const gradId = `${svg.id}-sphere-grad`, shadowId = `${svg.id}-shadow`;
-
+      const scaledTag = isScaled ? `<text x="${width - 12}" y="16" text-anchor="end" font-size="11" fill="#aa2727" font-weight="700">图示已缩放（非实尺）</text>` : '';
       svg.innerHTML = `
         <defs>
           <radialGradient id="${gradId}" cx="32%" cy="26%" r="72%">
@@ -763,47 +838,73 @@
         ${!isContact ? `<line x1="${padX}" y1="${centerY}" x2="${Math.max(padX, leftEdge)}" y2="${centerY}" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round"/>` : `<line x1="${padX}" y1="${centerY}" x2="${Math.max(0, leftEdge)}" y2="${centerY}" stroke="#aa2727" stroke-width="2" stroke-dasharray="3 3"/>`}
         <line x1="${padX}" y1="${Math.max(6, centerY - 28)}" x2="${padX}" y2="${Math.min(height - 6, centerY + 28)}" stroke="${isContact ? '#aa2727' : strokeColor}" stroke-width="1.8"/>
         <circle cx="${padX}" cy="${centerY}" r="4" fill="${isContact ? '#aa2727' : strokeColor}"/>
-        ${W >= 0.2 ? `<ellipse cx="${centerX}" cy="${centerY + radius + 6}" rx="${Math.max(4, radius * 0.8)}" ry="${Math.max(1.8, Math.min(10, radius * 0.12))}" fill="url(#${shadowId})"/>` : ''}
+        ${diamPx >= 4 ? `<ellipse cx="${centerX}" cy="${centerY + radius + 6}" rx="${Math.max(4, radius * 0.8)}" ry="${Math.max(1.8, Math.min(10, radius * 0.12))}" fill="url(#${shadowId})"/>` : ''}
         <circle cx="${centerX}" cy="${centerY}" r="${radius}" fill="url(#${gradId})" stroke="#0b1b30" stroke-width="${strokeW}"/>
-        ${W >= 0.2 ? `<ellipse cx="${centerX}" cy="${centerY}" rx="${radius}" ry="${Math.max(1, radius * 0.3)}" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="0.8" stroke-dasharray="3 3"/><ellipse cx="${centerX - radius * 0.3}" cy="${centerY - radius * 0.33}" rx="${Math.max(1.5, radius * 0.18)}" ry="${Math.max(1, radius * 0.11)}" fill="#ffffff" fill-opacity=".7"/>` : ''}
-        <text x="${padX}" y="${Math.min(height - 2, centerY + 40)}" text-anchor="middle" font-size="10" fill="${isContact ? '#aa2727' : '#708096'}" font-weight="700">${isContact ? '界内' : '起点'}</text>
-        <text x="${centerX}" y="${Math.min(height - 2, centerY + radius + 20)}" text-anchor="middle" font-size="10.5" fill="${strokeColor}" font-weight="700">⌀ ${fmt(W)} cm</text>
+        ${diamPx >= 4 ? `<ellipse cx="${centerX}" cy="${centerY}" rx="${radius}" ry="${Math.max(1, radius * 0.3)}" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="0.8" stroke-dasharray="3 3"/><ellipse cx="${centerX - radius * 0.3}" cy="${centerY - radius * 0.33}" rx="${Math.max(1.5, radius * 0.18)}" ry="${Math.max(1, radius * 0.11)}" fill="#ffffff" fill-opacity=".7"/>` : ''}
+        <text x="${padX}" y="${Math.min(height - 2, centerY + 40)}" text-anchor="middle" font-size="10" fill="${isContact ? '#aa2727' : '#708096'}" font-weight="700">${isContact ? '接触/重叠' : '起点'}</text>
+        <text x="${centerX}" y="${Math.min(height - 2, centerY + radius + 20)}" text-anchor="middle" font-size="10.5" fill="${strokeColor}" font-weight="700">⌀ ${fmtProduct(W, multiplier)} cm</text>
+        ${scaledTag}
       `;
       viewport.scrollTop = Math.max(0, centerY - viewport.clientHeight / 2);
+      return isScaled;
     }
 
     function refreshUI() {
-      const D = state.D, W = state.W, S = state.S, dPhys = D * S, wPhys = W * S;
-      // ID = log₂(1 + D·L₀ / (S·W^p))
-      const denom = S * Math.pow(W, wExp);
-      const id = (D <= (W / 2) + 1e-9) ? 0 : log2(1 + (D * REF_LENGTH_CM) / denom);
+      const D = state.D, W = state.W, S = state.S;
+      const dPhys = D * S, wPhys = W * S;
+      // Base model in physical hand space: ID = log2(1 + L0^(p-1) Dphys / Wphys^p).
+      // Dphys = S*D and Wphys = S*W, so the S term is S^(p-1) in the denominator.
+      const id = calculateModelId(D, W, S, wExp);
 
       $('altIdVal').innerHTML = `${fmt(id)}<span class="metric-unit">bits</span>`;
       $('altPhysWVal').innerHTML = `${fmt(wPhys)}<span class="metric-unit">cm</span>`;
       $('sphereVolText').textContent = `物理体积: ${fmt((4 / 3) * Math.PI * Math.pow(wPhys / 2, 3), 3)} cm³`;
 
       const tierEl = $('tierBadge');
-      if (id <= 3.0 + 1e-9) { tierEl.className = 'tier-indicator tier-single'; tierEl.textContent = '单次定位推荐区 (ID ≤ 3)'; }
-      else if (id >= 5.0 - 1e-9) { tierEl.className = 'tier-indicator tier-multi'; tierEl.textContent = '易二次定位微调区 (ID ≥ 5)'; }
+      if (id <= 3.0 + 1e-9) { tierEl.className = 'tier-indicator tier-single'; tierEl.textContent = '假设单次定位区 (ID ≤ 3)'; }
+      else if (id >= 5.0 - 1e-9) { tierEl.className = 'tier-indicator tier-multi'; tierEl.textContent = '假设易二次修正区 (ID ≥ 5)'; }
       else { tierEl.className = 'tier-indicator tier-mid'; tierEl.textContent = '过渡修正区 (3 < ID < 5)'; }
 
-      $('altScreenText').textContent = `D ${fmt(D)} cm · ⌀ ${fmt(W)} cm`;
-      $('altPhysicalText').textContent = `D ${fmt(dPhys)} cm · ⌀ ${fmt(wPhys)} cm`;
-      renderSphereTrack($('altScreenSvg'), $('altScreenViewport'), D, W, '#1a365d');
-      renderSphereTrack($('altPhysicalSvg'), $('altPhysicalViewport'), dPhys, wPhys, '#9c7330');
+      const scaledScreen = renderSphereTrack($('altScreenSvg'), $('altScreenViewport'), D, W, '#1a365d');
+      const scaledPhysical = renderSphereTrack($('altPhysicalSvg'), $('altPhysicalViewport'), D, W, '#9c7330', S);
+      $('altScreenText').textContent = `D ${fmt(D)} cm · ⌀ ${fmt(W)} cm${scaledScreen ? ' · 图示缩放' : ''}`;
+      $('altPhysicalText').textContent = `D ${fmtProduct(D, S)} cm · ⌀ ${fmtProduct(W, S)} cm${scaledPhysical ? ' · 图示缩放' : ''}`;
 
-      $('altDRange').value = state.D; $('altDNum').value = fmt(state.D);
+      const dRange = $('altDRange');
+      if (D > D_SLIDER_PRECISION_LIMIT) {
+        dSliderMax = 50;
+        dRange.disabled = true;
+        dRange.max = '50'; dRange.value = '50';
+        dRange.title = '超大距离时滑块无法提供厘米级精度，请使用右侧数字输入；D 无人为上限。';
+      } else {
+        dRange.disabled = false;
+        // Keep the slider scale stable while dragging; expand it only when D reaches its current upper end.
+        if (D >= dSliderMax - 1e-9) {
+          dSliderMax = Math.min(D_SLIDER_PRECISION_LIMIT, Math.max(50, Math.ceil(Math.max(D, dSliderMax) * 1.5)));
+        } else if (D > dSliderMax) {
+          dSliderMax = Math.min(D_SLIDER_PRECISION_LIMIT, Math.ceil(D * 1.5));
+        }
+        dRange.max = String(Math.max(50, dSliderMax));
+        dRange.value = String(Math.min(D, Number(dRange.max)));
+        dRange.title = '滑块接近上限时会扩展范围；极大距离请使用右侧数字输入。';
+      }
+      $('altDNum').value = fmt(D);
       $('altWRange').value = state.W; $('altWNum').value = fmt(state.W);
       $('altSRange').value = state.S; $('altSNum').value = fmt(state.S);
     }
 
-    function applyStateChange(key, val) {
-      if (!Number.isFinite(val)) return;
-      val = round2(clamp(val, LIMITS[key].min, LIMITS[key].max)); state[key] = val;
+    function applyStateChange(key, val, options = {}) {
+      if (!Number.isFinite(val)) {
+        if (key === 'D') setStatus('D 超出当前浏览器可表示的有限数值范围。请降低输入值。', 'warn');
+        return;
+      }
+      const bounded = clamp(val, LIMITS[key].min, LIMITS[key].max);
+      val = options.preservePrecision ? bounded : round2(bounded);
+      state[key] = val;
       let warnMsg = '';
       if (key === 'W' && state.D < state.W / 2) { state.D = round2(state.W / 2); warnMsg = `宽度 W 侵入边界，系统被动推移距离 D 至 ${fmt(state.D)} cm 以防破位。`; }
       else if (key === 'D' && state.W > 2 * state.D) { state.W = round2(2 * state.D); warnMsg = `距离 D 缩小，系统被动挤压宽度 W 至 ${fmt(state.W)} cm。`; }
-      if (warnMsg) setStatus(warnMsg, 'warn'); else setStatus('参数更新就绪。在模型界限内自由调节。', 'ok');
+      if (warnMsg) setStatus(warnMsg, 'warn'); else setStatus('参数更新就绪。在模型界限内自由调节。D 不设人为上限。', 'ok');
       try { localStorage.setItem('fitts_model_state', JSON.stringify(state)); } catch (_) {}
       refreshUI();
     }
@@ -813,41 +914,61 @@
       range.addEventListener('input', () => { num.value = fmt(Number(range.value)); applyStateChange(key, Number(range.value)); });
       num.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); num.blur(); } });
       num.addEventListener('blur', () => {
-        const val = Number(num.value);
-        if (num.value.trim() !== '' && Number.isFinite(val)) applyStateChange(key, val);
-        else num.value = fmt(state[key]);
+        const raw = num.value.trim();
+        const val = raw === '' ? NaN : Number(raw);
+        if (Number.isFinite(val)) applyStateChange(key, val, { preservePrecision: key === 'D' });
+        else { num.value = fmt(state[key]); if (key === 'D') setStatus('D 必须是可表示的有限数值，且不能小于 1 cm。', 'warn'); }
       });
     }
     bindInputs('D'); bindInputs('W'); bindInputs('S');
 
     function parseSolverTarget() {
-      const t = Number($('targetIdInput').value);
-      if (!Number.isFinite(t) || t <= 0) { setStatus('请输入有效目标ID（>0）。', 'warn'); return null; }
+      const raw = $('targetIdInput').value.trim();
+      const t = raw === '' ? NaN : Number(raw);
+      if (!Number.isFinite(t) || t < LIMITS.targetId.min) { setStatus('请输入有效目标 ID（≥0.1）。', 'warn'); return null; }
       return t;
     }
+
     $('solveDBtn').addEventListener('click', () => {
-      const target = parseSolverTarget(); if (!target) return;
-      // ID = log₂(1 + D·L₀ / (S·W^p))  =>  D = (2^ID - 1) · S · W^p / L₀
-      const neededD = ((Math.pow(2, target) - 1) * state.S * Math.pow(state.W, wExp)) / REF_LENGTH_CM;
-      const safeD = Math.max(neededD, state.W / 2);
-      applyStateChange('D', safeD);
-      if (neededD > LIMITS.D.max || neededD < LIMITS.D.min || neededD < state.W / 2) {
-        setStatus(`已触达安全边界。强行阻断越界，距离 D 落位 ${fmt(state.D)} cm（与目标 ID ${fmt(target)} 有偏离）。`, 'warn');
+      const target = parseSolverTarget(); if (target === null) return;
+      const p = wExp;
+      const logTargetRatio = logRatioForId(target);
+      const logNeededD = logTargetRatio + (p - 1) * Math.log(state.S) + p * Math.log(state.W)
+        - (p - 1) * Math.log(REF_LENGTH_CM);
+      const neededD = expFromLog(logNeededD);
+      if (!Number.isFinite(neededD)) {
+        setStatus('该目标 ID 反解所需的 D 超出浏览器可表示的最大有限数值，无法写入输入框；可降低目标 ID 或指数。', 'warn');
+        return;
+      }
+      applyStateChange('D', neededD, { preservePrecision: true });
+      const achieved = calculateModelId(state.D, state.W, state.S, wExp);
+      const metTarget = Number.isFinite(achieved) && Math.abs(achieved - target) <= 0.015;
+      if (neededD < LIMITS.D.min || !metTarget) {
+        setStatus(`受到 D 最小值、目标重叠规则或浮点精度限制。当前 D = ${fmt(state.D)} cm，实际 ID = ${fmt(achieved)}，目标 ID = ${fmt(target)}。`, 'warn');
       } else {
-        setStatus(`已完美反解出距离 D = ${fmt(state.D)} cm（贴合目标 ID = ${fmt(target)}）。`, 'ok');
+        setStatus(`已反解距离 D = ${fmt(state.D)} cm（实际 ID = ${fmt(achieved)}，与目标 ${fmt(target)} 的误差不超过 0.015）。`, 'ok');
       }
     });
+
     $('solveWBtn').addEventListener('click', () => {
-      const target = parseSolverTarget(); if (!target) return;
-      // ID = log₂(1 + D·L₀ / (S·W^p))  =>  W = (D·L₀ / ((2^ID - 1) · S))^(1/p)
-      const inner = (state.D * REF_LENGTH_CM) / ((Math.pow(2, target) - 1) * state.S);
-      const neededW = Math.pow(Math.max(inner, 1e-9), 1 / wExp);
+      const target = parseSolverTarget(); if (target === null) return;
+      const p = wExp;
+      const logTargetRatio = logRatioForId(target);
+      const logNeededW = (Math.log(state.D) + (p - 1) * Math.log(REF_LENGTH_CM)
+        - logTargetRatio - (p - 1) * Math.log(state.S)) / p;
+      const neededW = expFromLog(logNeededW);
+      if (!Number.isFinite(neededW)) {
+        setStatus('该目标 ID 反解所需的 W 超出可表示数值范围，无法写入输入框。', 'warn');
+        return;
+      }
       const safeW = Math.min(neededW, 2 * state.D);
-      applyStateChange('W', safeW);
-      if (neededW > LIMITS.W.max || neededW < LIMITS.W.min || neededW > 2 * state.D) {
-        setStatus(`已触达安全边界。强行阻断越界，直径 W 落位 ${fmt(state.W)} cm（与目标 ID ${fmt(target)} 有偏离）。`, 'warn');
+      applyStateChange('W', safeW, { preservePrecision: true });
+      const achieved = calculateModelId(state.D, state.W, state.S, wExp);
+      const metTarget = Number.isFinite(achieved) && Math.abs(achieved - target) <= 0.015;
+      if (neededW > LIMITS.W.max || neededW < LIMITS.W.min || !metTarget) {
+        setStatus(`受到 W 范围、重叠边界或浮点精度限制。当前 W = ${fmt(state.W)} cm，实际 ID = ${fmt(achieved)}，目标 ID = ${fmt(target)}。`, 'warn');
       } else {
-        setStatus(`已完美反解出直径 W = ${fmt(state.W)} cm（贴合目标 ID = ${fmt(target)}）。`, 'ok');
+        setStatus(`已反解直径 W = ${fmt(state.W)} cm（实际 ID = ${fmt(achieved)}，与目标 ${fmt(target)} 的误差不超过 0.015）。`, 'ok');
       }
     });
 
@@ -875,9 +996,11 @@
       side: 'right',
       originX: 0, originY: 0,
       marks: [],
-      markRaf: null
+      markRaf: null,
+      crosshairWidth: 1.0
     };
     const cvs = $('aimCanvas'), ctx = cvs.getContext('2d');
+    const overlayEl = $('aimOverlay');
 
     function getHudBottom() {
       const hud = document.querySelector('.aim-hud');
@@ -898,10 +1021,19 @@
       el.className = `aim-center-notice ${type}`;
     }
 
+    function pauseForTargetFitFailure() {
+      if (aim.started) {
+        aim.started = false;
+        overlayEl.classList.add('paused');
+        if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
+      }
+      setAimMsg('当前画布空间不足以按原始参数绘制目标；请退出训练后调整 D/W、S，或增大窗口。', 'warn');
+    }
+
     function updateAimDesc() {
       const modeLabel = aim.mode === 'fixed' ? '定式定位' : '自由瞄准';
       const sideLabel = aim.mode === 'fixed' ? ` · 球在${aim.side === 'left' ? '左' : '右'}` : '';
-      $('aimParamDesc').textContent = `D_phys: ${fmt(state.D * state.S)} cm · W_phys: ${fmt(state.W * state.S)} cm · ${modeLabel}${sideLabel}`;
+      $('aimParamDesc').textContent = `D_phys: ${fmtProduct(state.D, state.S)} cm · W_phys: ${fmtProduct(state.W, state.S)} cm · ${modeLabel}${sideLabel}`;
     }
 
     function addMark(x, y, isHit) {
@@ -991,11 +1123,17 @@
       }
 
       if (aim.started) {
-        ctx.save(); ctx.lineWidth = 1; ctx.strokeStyle = '#ffffff'; ctx.beginPath();
+        ctx.save();
+        ctx.lineWidth = aim.crosshairWidth;
+        ctx.strokeStyle = '#ffffff';
+        ctx.beginPath();
         const g = 0.5, am = Math.max(2, aim.tr * 2);
-        ctx.moveTo(aim.cx - g - am, aim.cy); ctx.lineTo(aim.cx - g, aim.cy); ctx.moveTo(aim.cx + g, aim.cy); ctx.lineTo(aim.cx + g + am, aim.cy);
-        ctx.moveTo(aim.cx, aim.cy - g - am); ctx.lineTo(aim.cx, aim.cy - g); ctx.moveTo(aim.cx, aim.cy + g); ctx.lineTo(aim.cx, aim.cy + g + am);
-        ctx.stroke(); ctx.restore();
+        ctx.moveTo(aim.cx - g - am, aim.cy); ctx.lineTo(aim.cx - g, aim.cy);
+        ctx.moveTo(aim.cx + g, aim.cy); ctx.lineTo(aim.cx + g + am, aim.cy);
+        ctx.moveTo(aim.cx, aim.cy - g - am); ctx.lineTo(aim.cx, aim.cy - g);
+        ctx.moveTo(aim.cx, aim.cy + g); ctx.lineTo(aim.cx, aim.cy + g + am);
+        ctx.stroke();
+        ctx.restore();
       }
     }
 
@@ -1021,13 +1159,13 @@
 
     function spawnFixedTarget(top) {
       const margin = 30;
-      const availW = aim.w - 2 * margin;
       const cy = (top + aim.h) / 2;
-
-      let distPx = state.D * state.S * pxPerCm;
-      const maxDist = Math.max(80, availW - 2 * aim.tr - 20);
-      if (distPx > maxDist) distPx = maxDist;
-      if (distPx < 40) distPx = 40;
+      const distPx = state.D * state.S * pxPerCm;
+      const maxDist = aim.w - 2 * margin - 2 * aim.tr - 20;
+      const usableHeight = aim.h - top - 24;
+      // Never silently clamp the modeled distance/diameter: either draw the requested geometry,
+      // or tell the user the viewport is too small for a valid measurement.
+      if (maxDist <= 0 || distPx > maxDist || aim.tr * 2 > usableHeight || distPx <= 0) return false;
 
       let ox, tx;
       if (aim.side === 'left') {
@@ -1053,8 +1191,12 @@
       readModeFromUI();
       const top = (aim.hudBottom || getHudBottom()) + 16;
       aim.tr = (state.W * state.S * pxPerCm) / 2;
-      if (aim.mode === 'fixed') return spawnFixedTarget(top);
-      return spawnFreeTarget(top);
+      const ok = aim.mode === 'fixed' ? spawnFixedTarget(top) : spawnFreeTarget(top);
+      if (!ok) {
+        aim.tr = 0;
+        drawAim();
+      }
+      return ok;
     }
 
     $('openAimBtn').addEventListener('click', () => {
@@ -1070,30 +1212,43 @@
       $('statAcc').textContent = '—'; $('statRt').textContent = '—';
 
       updateAimDesc();
-      $('aimOverlay').classList.remove('hidden');
+      overlayEl.classList.remove('hidden');
+      overlayEl.classList.remove('paused');
       resizeAim();
       aim.hudBottom = getHudBottom();
       setAimMsg('');
     });
 
+    // 引擎乘数
     $('gameSens').addEventListener('input', () => {
       const v = Number($('gameSens').value);
       $('gameSensVal').textContent = `${v.toFixed(1)}×`;
       try { localStorage.setItem('fitts_game_sens', v.toFixed(1)); } catch (_) {}
     });
 
+    // 准星粗细
+    $('crosshairWidth').addEventListener('input', () => {
+      const v = Number($('crosshairWidth').value);
+      aim.crosshairWidth = v;
+      $('crosshairWidthVal').textContent = v.toFixed(1);
+      try { localStorage.setItem('fitts_crosshair_width', v.toFixed(1)); } catch (_) {}
+      drawAim();
+    });
+
     $('gameMode').addEventListener('change', () => {
       try { localStorage.setItem('fitts_game_mode', $('gameMode').value); } catch (_) {}
       if (!aim.active || !aim.started) return;
       readModeFromUI();
-      spawnAimTarget();
+      if (!spawnAimTarget()) pauseForTargetFitFailure();
+      else setAimMsg('');
       updateAimDesc();
     });
     $('gameSide').addEventListener('change', () => {
       try { localStorage.setItem('fitts_game_side', $('gameSide').value); } catch (_) {}
       if (!aim.active || !aim.started) return;
       readModeFromUI();
-      spawnAimTarget();
+      if (!spawnAimTarget()) pauseForTargetFitFailure();
+      else setAimMsg('');
       updateAimDesc();
     });
 
@@ -1107,11 +1262,12 @@
       aim.cx = aim.w / 2;
       aim.cy = (aim.hudBottom + 16 + aim.h) / 2;
 
-      if (!spawnAimTarget()) { setAimMsg('空间不足以容纳物理步距，请全屏或缩小距离后重试。', 'warn'); return; }
+      if (!spawnAimTarget()) { setAimMsg('当前画布空间不足以按原始参数容纳目标与步距；请调整 D、W、S 或增大窗口。', 'warn'); return; }
 
       aim.started = true;
+      overlayEl.classList.remove('paused');
+      setAimMsg('');
       drawAim();
-
       updateAimDesc();
 
       const p = cvs.requestPointerLock({ unadjustedMovement: true });
@@ -1140,7 +1296,12 @@
         aim.hits++;
         aim.rt.push(performance.now() - aim.spawnTs);
         addMark(px, py, true);
-        spawnAimTarget();
+        if (!spawnAimTarget()) {
+          aim.started = false;
+          overlayEl.classList.add('paused');
+          setAimMsg('下一目标无法在当前画布中按原始参数完整显示，训练已暂停；请调整参数或增大窗口。', 'warn');
+          if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
+        }
       } else {
         aim.miss++;
         addMark(px, py, false);
@@ -1154,32 +1315,68 @@
       if (aim.rt.length > 0) $('statRt').textContent = `${Math.round(aim.rt.reduce((a, b) => a + b, 0) / aim.rt.length)} ms`;
     });
 
-    function closeAim() {
-      if (!aim.active) return;
-      aim.active = false;
+    // ========== ESC 两级逻辑 ==========
+    // active=true, started=true   → 训练中
+    // active=true, started=false  → 暂停（指针可见，准星已隐藏）
+    // active=false                → 已关闭
+    let lockLostTs = 0;
+
+    function pauseAim() {
+      // 从训练中进入暂停：隐藏准星、退指针锁、显示提示
+      if (!aim.started) return;
       aim.started = false;
-      if (aim.markRaf !== null) { cancelAnimationFrame(aim.markRaf); aim.markRaf = null; }
-      aim.marks = [];
-      $('aimOverlay').classList.add('hidden');
+      overlayEl.classList.add('paused');
+      setAimMsg('已暂停 · 点击画布继续 · 再按 Esc 退出', '');
+      drawAim();
       if (document.pointerLockElement === cvs && document.exitPointerLock) {
         document.exitPointerLock();
       }
     }
 
+    function closeAim() {
+      if (!aim.active) return;
+      aim.active = false;
+      aim.started = false;
+      overlayEl.classList.remove('paused');
+      if (aim.markRaf !== null) { cancelAnimationFrame(aim.markRaf); aim.markRaf = null; }
+      aim.marks = [];
+      overlayEl.classList.add('hidden');
+      if (document.pointerLockElement === cvs && document.exitPointerLock) {
+        document.exitPointerLock();
+      }
+    }
+
+    // 指针锁丢失（用户 ESC 或切窗口）→ 只暂停，不退出
     document.addEventListener('pointerlockchange', () => {
       if (aim.active && document.pointerLockElement !== cvs) {
-        closeAim();
+        lockLostTs = performance.now();
+        if (aim.started) {
+          aim.started = false;
+          overlayEl.classList.add('paused');
+          setAimMsg('已暂停 · 点击画布继续 · 再按 Esc 退出', '');
+          drawAim();
+        }
       }
     });
 
     document.addEventListener('pointerlockerror', () => {
-      if (aim.active) { aim.started = false; setAimMsg('浏览器安全策略拒绝了锁定请求，请重试或在原生标签页中打开。', 'warn'); }
+      if (aim.active) {
+        aim.started = false;
+        overlayEl.classList.add('paused');
+        setAimMsg('浏览器安全策略拒绝了锁定请求，请重试或在原生标签页中打开。', 'warn');
+      }
     });
 
+    // ESC 状态机
     document.addEventListener('keydown', (e) => {
-      if (aim.active && (e.key === 'Escape' || e.key === 'Esc')) {
-        closeAim();
-      }
+      if (!aim.active) return;
+      if (e.key !== 'Escape' && e.key !== 'Esc') return;
+
+      // 若刚发生过 pointerlockchange（浏览器 ESC 的副作用），这次 keydown 忽略
+      if (performance.now() - lockLostTs < 200) return;
+
+      // 未锁指针 → 说明处于"暂停中"或"从未开始" → 真正退出
+      closeAim();
     });
 
     let resizeTimer;
@@ -1210,6 +1407,8 @@
       const sideEl = $('gameSide');
       const sensEl = $('gameSens');
       const sensValEl = $('gameSensVal');
+      const cwEl = $('crosshairWidth');
+      const cwValEl = $('crosshairWidthVal');
 
       if (modeEl) { modeEl.value = savedMode; aim.mode = savedMode; }
       if (sideEl) { sideEl.value = savedSide; aim.side = savedSide; }
@@ -1217,9 +1416,13 @@
         sensEl.value = savedSens.toFixed(1);
         sensValEl.textContent = `${savedSens.toFixed(1)}×`;
       }
+      if (cwEl && cwValEl) {
+        cwEl.value = savedCrosshairWidth.toFixed(1);
+        cwValEl.textContent = savedCrosshairWidth.toFixed(1);
+        aim.crosshairWidth = savedCrosshairWidth;
+      }
     })();
 
-    // 初始化 W 指数（应用上标、副标题、注释卡 + refreshUI）
     setWExp(wExp);
 
     setPxPerCm(pxPerCm);
