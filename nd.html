@@ -131,6 +131,51 @@
     .footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 18px 2px 0; color: #718096; font-size: .75rem; }
     .footer a { color: #4f5f76; text-decoration: none; font-weight: 700; }
     .footer a:hover { color: var(--blue); }
+    /* 2D aim-training overlay */
+    .aim-launch { margin-top: 14px; border-color: #cbd8f5; background: linear-gradient(135deg, #f5f8ff, #fff); }
+    .aim-launch-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    .aim-launch-copy { flex: 1 1 280px; min-width: 0; }
+    .aim-launch-copy p { margin: 5px 0 0; font-size: .76rem; color: #536177; }
+    .aim-game-overlay { position: fixed; inset: 0; z-index: 3000; display: flex; flex-direction: column; overflow: hidden; padding: 12px; color: #eff4ff; background: #07101e; isolation: isolate; }
+    .aim-game-overlay.hidden { display: none !important; }
+    #aimGameCanvas { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block; cursor: none; touch-action: none; }
+    .aim-game-hud { position: relative; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; padding: 12px 14px; border: 1px solid rgba(173,194,233,.22); border-radius: 14px; background: rgba(11,22,40,.9); box-shadow: 0 8px 28px rgba(0,0,0,.22); backdrop-filter: blur(12px); }
+    .aim-game-title { min-width: 180px; }
+    .aim-game-title h2 { margin: 0; font-size: 1rem; color: #fff; }
+    .aim-game-title p { margin: 4px 0 0; max-width: 470px; color: #aab9d2; font-size: .72rem; line-height: 1.45; }
+    .aim-game-stats { display: flex; flex-wrap: wrap; gap: 7px; }
+    .aim-stat { min-width: 72px; padding: 6px 9px; border: 1px solid rgba(173,194,233,.18); border-radius: 9px; background: rgba(255,255,255,.045); }
+    .aim-stat span { display: block; color: #9eb0cd; font-size: .65rem; }
+    .aim-stat strong { display: block; margin-top: 1px; color: #fff; font: 750 .95rem ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .aim-game-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; width: 100%; }
+    .aim-game-controls label { color: #c5d2e8; font-size: .74rem; font-weight: 700; white-space: nowrap; }
+    .aim-sens-wrap { display: flex; align-items: center; gap: 8px; flex: 1 1 220px; max-width: 370px; }
+    #aimGameSensitivity { min-width: 90px; accent-color: #a78bfa; }
+    #aimGameSensitivityValue { min-width: 42px; color: #ddd2ff; font: 750 .78rem ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .aim-dpi-wrap { display: flex; align-items: center; gap: 6px; }
+    #aimGameDpi { width: 86px; padding: 6px 7px; border: 1px solid #405272; border-radius: 7px; background: #0c1729; color: #fff; font: 750 .8rem ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .aim-ruler-legend { color: #d8e4f7; font-size: .68rem; font-weight: 700; }
+    @media (max-width: 620px) { #aimGameDpi { width: 74px; } }
+    .aim-game-overlay .btn { border-color: #405272; background: #17243a; color: #edf3ff; }
+    .aim-game-overlay .btn:hover { background: #223452; border-color: #617aa5; }
+    .aim-game-overlay .btn-purple { border-color: #7357bd; background: #33235d; color: #f1eaff; }
+    .aim-start-hint { color: #d8ccff; font-size: .76rem; font-weight: 750; padding: 6px 10px; border: 1px dashed rgba(167,139,250,.55); border-radius: 8px; }
+    .aim-game-notice { position: relative; z-index: 2; align-self: center; max-width: min(760px, calc(100vw - 32px)); margin: auto 0; padding: 12px 18px; border: 1px solid rgba(173,194,233,.22); border-radius: 12px; background: rgba(11,22,40,.85); color: #d8e4f7; text-align: center; font-size: .86rem; line-height: 1.55; pointer-events: none; backdrop-filter: blur(8px); }
+    .aim-game-notice:empty { display: none; }
+    .aim-game-notice.ok { color: #b8f5d6; border-color: rgba(83,202,143,.4); }
+    .aim-game-notice.warn { color: #ffe0a0; border-color: rgba(240,181,76,.42); }
+    .aim-game-footer { position: relative; z-index: 2; align-self: center; max-width: calc(100vw - 24px); margin-top: auto; padding: 6px 10px; color: #91a2be; background: rgba(7,16,30,.72); border-radius: 8px; text-align: center; font-size: .69rem; pointer-events: none; }
+    @media (max-width: 620px) {
+      .aim-game-overlay { padding: 7px; }
+      .aim-game-hud { padding: 9px; gap: 8px; }
+      .aim-game-title { min-width: 100%; }
+      .aim-game-stats { width: 100%; }
+      .aim-stat { flex: 1 1 65px; min-width: 0; }
+      .aim-game-controls { gap: 8px; }
+      .aim-sens-wrap { flex-basis: 100%; max-width: none; }
+      .aim-game-controls .btn { flex: 1 1 auto; }
+    }
+
     .hidden { display: none !important; }
     @media (max-width: 1120px) {
       .dashboard { grid-template-columns: minmax(0, 1fr); }
@@ -181,7 +226,7 @@
         </div>
         <button type="button" class="btn" id="resetCalibBtn">恢复默认近似值</button>
       </div>
-      <p>将实体直尺贴在屏幕上，调节滑块，使下方标尺的 5 cm 与实物直尺一致。若更改浏览器缩放、显示器或系统缩放，建议重新校准。</p>
+      <p>将实体直尺贴在屏幕上，调节滑块，使下方标尺从 0 cm 竖线中心到 5 cm 竖线中心的距离与实物直尺一致。请对齐两条刻度线的中心，不要以外框边缘或数字边缘作为端点。若更改浏览器缩放、显示器或系统缩放，建议重新校准。</p>
       <div class="ruler-viewport"><svg id="rulerSvg" aria-label="5厘米校准标尺"></svg></div>
       <div class="calib-controls">
         <label for="calibSlider">标尺显示密度（CSS px/cm）</label>
@@ -359,6 +404,17 @@
         </div>
         <div class="status" id="altStatus" role="status" aria-live="polite">准备就绪。球体接触边界时，按模型约定将 ID_alt 设为 0。</div>
 
+        <div class="info-box aim-launch" id="aimGameLaunchPanel">
+          <div class="aim-launch-row">
+            <div class="aim-launch-copy">
+              <h3>2D 平面瞄准训练</h3>
+              <p>训练严格以变体 <strong>② 桌面手部物理空间</strong> 为准：中心距取 D<sub>phys</sub> = D × S，目标直径取 W<sub>phys</sub> = W × S；每次命中后，新目标与上一个目标中心的距离固定，方向随机。</p>
+              <p><strong>独立输入：</strong>游戏只把浏览器提供的未加速原始相对鼠标增量乘以游戏灵敏度，不读取或修改 Windows 鼠标速度/加速度设置。若浏览器不能确认原始输入模式，将拒绝启动，不会静默退回受系统加速影响的模式。</p>
+            </div>
+            <button type="button" class="btn btn-purple" id="openAimGameBtn">打开 2D 瞄准训练</button>
+          </div>
+        </div>
+
         <div class="info-box">
           <h3>变体定义与约定</h3>
           <p><strong>量纲：</strong>参考长度固定为 L₀ = 1 cm。D<sub>phys</sub> × L₀ / W<sub>phys</sub>² 才是严格无量纲的比值；当距离、直径都以 cm 的数值代入时，因为 L₀ = 1 cm，计算数值与此前直接使用 cm 数值的形式一致。若更换长度单位，必须同步换算 L₀。</p>
@@ -373,6 +429,36 @@
       <a href="https://space.bilibili.com/1534330" target="_blank" rel="noopener noreferrer">瞄准难度公式作者：西岛海_xlm</a>
     </footer>
   </div>
+
+  <section class="aim-game-overlay hidden" id="aimGameOverlay" role="dialog" aria-modal="true" aria-labelledby="aimGameDialogTitle">
+    <canvas id="aimGameCanvas" aria-label="2D 平面瞄准训练区域"></canvas>
+    <header class="aim-game-hud" id="aimGameHud">
+      <div class="aim-game-title">
+        <h2 id="aimGameDialogTitle">2D 平面瞄准训练</h2>
+        <p id="aimGameParameters">等待读取当前变体参数。</p>
+      </div>
+      <div class="aim-game-stats" aria-live="polite">
+        <div class="aim-stat"><span>命中</span><strong id="aimGameHits">0</strong></div>
+        <div class="aim-stat"><span>未命中</span><strong id="aimGameMisses">0</strong></div>
+        <div class="aim-stat"><span>命中率</span><strong id="aimGameAccuracy">—</strong></div>
+        <div class="aim-stat"><span>平均反应</span><strong id="aimGameReaction">—</strong></div>
+      </div>
+      <div class="aim-game-controls">
+        <div class="aim-sens-wrap">
+          <label for="aimGameSensitivity">独立游戏灵敏度</label>
+          <input type="range" id="aimGameSensitivity" min="0.1" max="5" step="0.1" value="1">
+          <output id="aimGameSensitivityValue" for="aimGameSensitivity">1.0×</output>
+        </div>
+        <div class="aim-dpi-wrap">
+          <label for="aimGameDpi">鼠标 DPI</label>
+          <input type="number" id="aimGameDpi" min="100" max="50000" step="50" value="800" inputmode="numeric" aria-label="鼠标 DPI">
+        </div>
+        <span class="aim-start-hint" id="aimGameStartHint">点击游戏区域任意位置开始 · Esc 立即结束</span>
+      </div>
+    </header>
+    <div class="aim-game-notice" id="aimGameNotice">先调节独立游戏灵敏度；随后点击游戏区域任意位置即可开始。训练中按 Esc 立即结束并返回模型页面。</div>
+    <div class="aim-game-footer">尺子按主页面校准比例显示 10 cm；DPI 用于把原始移动量换算为物理距离。建议先核对鼠标实际 DPI，再以尺子验证 10 cm 竖直移动。</div>
+  </section>
 
   <script>
   (() => {
@@ -437,23 +523,27 @@
     function renderRuler() {
       const svg = $('rulerSvg');
       const totalCm = 5;
+      // Keep both endpoint ticks away from the SVG clipping edge. Measure center-to-center.
+      const endpointInset = 10;
       const rulerWidth = totalCm * pxPerCm;
-      const width = rulerWidth + 18;
+      const width = rulerWidth + endpointInset * 2;
       svg.setAttribute('width', width);
       svg.setAttribute('height', 38);
       svg.style.width = `${width}px`;
       svg.style.height = '38px';
-      let markup = `<rect x="0.5" y="0.5" width="${rulerWidth}" height="35" rx="3" fill="#fffbeb" stroke="#d6a243" stroke-width="1"/>`;
+      let markup = `<rect x="0.5" y="0.5" width="${width - 1}" height="35" rx="3" fill="#fffbeb" stroke="#d6a243" stroke-width="1"/>`;
       for (let mm = 0; mm <= 50; mm++) {
-        const x = (mm / 10) * pxPerCm;
+        const x = endpointInset + (mm / 10) * pxPerCm;
         const isCm = mm % 10 === 0;
+        const isEndpoint = mm === 0 || mm === 50;
         const isHalf = mm % 5 === 0 && !isCm;
-        const tickHeight = isCm ? 17 : (isHalf ? 11 : 6);
-        markup += `<line x1="${x}" y1="1" x2="${x}" y2="${tickHeight}" stroke="#a16207" stroke-width="${isCm ? 1.35 : 0.8}"/>`;
+        const tickHeight = isEndpoint ? 24 : (isCm ? 17 : (isHalf ? 11 : 6));
+        const tickWidth = isEndpoint ? 1.6 : (isCm ? 1.2 : 0.8);
+        markup += `<line x1="${x}" y1="1" x2="${x}" y2="${tickHeight}" stroke="${isEndpoint ? '#713f12' : '#a16207'}" stroke-width="${tickWidth}"/>`;
         if (isCm) {
           const anchor = mm === 0 ? 'start' : (mm === 50 ? 'end' : 'middle');
-          const labelX = mm === 0 ? 2 : (mm === 50 ? x - 2 : x);
-          markup += `<text x="${labelX}" y="30" text-anchor="${anchor}" font-family="ui-monospace,monospace" font-size="11" font-weight="700" fill="#80520c">${mm / 10}</text>`;
+          const labelX = mm === 0 ? x + 2 : (mm === 50 ? x - 2 : x);
+          markup += `<text x="${labelX}" y="32" text-anchor="${anchor}" font-family="ui-monospace,monospace" font-size="11" font-weight="700" fill="#80520c">${mm / 10}</text>`;
         }
       }
       svg.innerHTML = markup;
@@ -730,6 +820,458 @@
       renderRuler();
       updateAll();
     });
+
+
+    // ---- 2D aim trainer: browser Pointer Lock, with raw/unadjusted movement requested where supported ----
+    const aimGame = {
+      open: false, started: false, locked: false, rawRequested: false, fallbackInput: false,
+      config: null, width: 0, height: 0, dpr: 1,
+      cursorX: 0, cursorY: 0, targetX: 0, targetY: 0, targetR: 0,
+      targetPresent: false, hits: 0, misses: 0, spawnTime: 0, reactionTimes: [], sensitivity: 1, dpi: 800,
+      noticeKind: '', lastLockState: false
+    };
+    const aimCanvas = $('aimGameCanvas');
+    const aimCtx = aimCanvas.getContext('2d');
+
+    let aimNoticeTimer = null;
+    function setAimNotice(message, kind = '', hideAfterMs = 0) {
+      const el = $('aimGameNotice');
+      if (aimNoticeTimer !== null) { window.clearTimeout(aimNoticeTimer); aimNoticeTimer = null; }
+      el.textContent = message;
+      el.className = `aim-game-notice${kind ? ` ${kind}` : ''}`;
+      if (hideAfterMs > 0) {
+        aimNoticeTimer = window.setTimeout(() => {
+          if (el.textContent === message) { el.textContent = ''; el.className = 'aim-game-notice'; }
+          aimNoticeTimer = null;
+        }, hideAfterMs);
+      }
+    }
+
+    function aimPlayTop() {
+      const rect = $('aimGameHud').getBoundingClientRect();
+      return Math.max(100, rect.bottom + 16);
+    }
+
+    function resizeAimCanvas() {
+      if (!aimGame.open) return;
+      aimGame.width = Math.max(1, window.innerWidth);
+      aimGame.height = Math.max(1, window.innerHeight);
+      aimGame.dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+      aimCanvas.width = Math.round(aimGame.width * aimGame.dpr);
+      aimCanvas.height = Math.round(aimGame.height * aimGame.dpr);
+      aimCanvas.style.width = `${aimGame.width}px`;
+      aimCanvas.style.height = `${aimGame.height}px`;
+      aimCtx.setTransform(aimGame.dpr, 0, 0, aimGame.dpr, 0, 0);
+      if (aimGame.started && aimGame.targetPresent) {
+        const r = aimGame.targetR;
+        const top = aimPlayTop();
+        const inside = aimGame.targetX >= r + 18 && aimGame.targetX <= aimGame.width - r - 18 &&
+          aimGame.targetY >= top + r && aimGame.targetY <= aimGame.height - r - 20;
+        if (!inside) {
+          aimGame.targetPresent = false;
+          setAimNotice('窗口尺寸发生变化，当前空间无法完整容纳目标。请放大训练窗口或降低主页面设置的距离/球体直径，再重新打开训练。', 'warn');
+        }
+      }
+      drawAimGame();
+    }
+
+    function drawAimGame() {
+      if (!aimGame.open || !aimCtx) return;
+      const w = aimGame.width || window.innerWidth;
+      const h = aimGame.height || window.innerHeight;
+      aimCtx.clearRect(0, 0, w, h);
+      aimCtx.fillStyle = '#081322';
+      aimCtx.fillRect(0, 0, w, h);
+      aimCtx.lineWidth = 1;
+      aimCtx.strokeStyle = 'rgba(133, 157, 195, 0.09)';
+      const grid = 32;
+      for (let x = 0; x <= w; x += grid) {
+        aimCtx.beginPath(); aimCtx.moveTo(x, 0); aimCtx.lineTo(x, h); aimCtx.stroke();
+      }
+      for (let y = 0; y <= h; y += grid) {
+        aimCtx.beginPath(); aimCtx.moveTo(0, y); aimCtx.lineTo(w, y); aimCtx.stroke();
+      }
+      const top = aimPlayTop();
+      aimCtx.fillStyle = 'rgba(74, 99, 142, 0.035)';
+      aimCtx.fillRect(0, top, w, Math.max(0, h - top));
+
+      // Calibrated 10 cm vertical ruler, using the same CSS-pixel/cm scale as the model page.
+      const rulerScale = aimGame.config ? aimGame.config.pxPerCm : pxPerCm;
+      const rulerX = w - 28;
+      const rulerY = top + 18;
+      const rulerLength = 10 * rulerScale;
+      aimCtx.save();
+      aimCtx.fillStyle = 'rgba(7,16,30,.78)';
+      aimCtx.fillRect(w - 104, rulerY - 28, 92, Math.min(h - rulerY - 8, rulerLength + 42));
+      aimCtx.fillStyle = '#e2eaf8';
+      aimCtx.font = '700 11px system-ui, sans-serif';
+      aimCtx.textAlign = 'right';
+      aimCtx.fillText('10 cm', w - 38, rulerY - 12);
+      aimCtx.strokeStyle = '#d8e4f7';
+      aimCtx.lineWidth = 1;
+      aimCtx.beginPath();
+      aimCtx.moveTo(rulerX, rulerY); aimCtx.lineTo(rulerX, rulerY + rulerLength);
+      for (let mm = 0; mm <= 100; mm++) {
+        const yy = rulerY + rulerScale * mm / 10;
+        const tick = mm % 10 === 0 ? 13 : (mm % 5 === 0 ? 8 : 4);
+        aimCtx.moveTo(rulerX - tick, yy); aimCtx.lineTo(rulerX + 1, yy);
+        if (mm % 10 === 0) {
+          aimCtx.moveTo(rulerX - 17, yy); aimCtx.lineTo(rulerX - 13, yy);
+        }
+      }
+      aimCtx.stroke();
+      aimCtx.font = '10px ui-monospace, monospace';
+      aimCtx.textAlign = 'right';
+      for (let cm = 0; cm <= 10; cm++) {
+        aimCtx.fillStyle = '#d8e4f7';
+        aimCtx.fillText(String(cm), rulerX - 20, rulerY + cm * rulerScale + 3);
+      }
+      aimCtx.restore();
+
+      if (aimGame.targetPresent && aimGame.targetR > 0) {
+        const x = aimGame.targetX, y = aimGame.targetY, r = aimGame.targetR;
+        const d = r * 2;
+        aimCtx.save();
+        if (d >= 12) {
+          const gradient = aimCtx.createRadialGradient(x - r * 0.34, y - r * 0.38, Math.max(0.1, r * 0.03), x, y, r);
+          gradient.addColorStop(0, '#ffffff');
+          gradient.addColorStop(0.25, '#d9ccff');
+          gradient.addColorStop(0.68, '#9063ec');
+          gradient.addColorStop(1, '#4c2893');
+          aimCtx.shadowColor = 'rgba(150, 111, 255, .38)';
+          aimCtx.shadowBlur = Math.min(20, r * 0.6);
+          aimCtx.beginPath(); aimCtx.arc(x, y, r, 0, Math.PI * 2);
+          aimCtx.fillStyle = gradient; aimCtx.fill();
+          aimCtx.shadowBlur = 0;
+          aimCtx.strokeStyle = '#c7b4ff';
+          aimCtx.lineWidth = Math.min(1.8, Math.max(0.65, d * 0.045));
+          aimCtx.stroke();
+          // Decorative sphere details are intentionally omitted for small physical targets.
+          if (d >= 16) {
+            aimCtx.beginPath();
+            aimCtx.ellipse(x, y, r * .98, Math.max(.7, r * .31), 0, 0, Math.PI * 2);
+            aimCtx.strokeStyle = 'rgba(255,255,255,.34)'; aimCtx.lineWidth = Math.max(.6, Math.min(1.1, r * .06));
+            aimCtx.setLineDash([2.5, 3]); aimCtx.stroke(); aimCtx.setLineDash([]);
+            aimCtx.beginPath(); aimCtx.ellipse(x - r * .3, y - r * .34, Math.max(.8, r * .2), Math.max(.7, r * .12), -.3, 0, Math.PI * 2);
+            aimCtx.fillStyle = 'rgba(255,255,255,.68)'; aimCtx.fill();
+          }
+        } else {
+          // At sub-12px sizes, use a plain fill: no white centre/highlight and no oversized outline.
+          aimCtx.beginPath(); aimCtx.arc(x, y, r, 0, Math.PI * 2);
+          aimCtx.fillStyle = '#956de8'; aimCtx.fill();
+        }
+        aimCtx.restore();
+      }
+
+      if (aimGame.started) {
+        const x = aimGame.cursorX, y = aimGame.cursorY;
+        // Aim reticle is measured in CSS pixels, the same coordinate space as the rendered target.
+        // Keep a 1 CSS-pixel clear gap at the true cursor centre; each arm is exactly one target diameter long.
+        const centreGap = 1;
+        const halfGap = centreGap / 2;
+        const armLength = Math.max(1, aimGame.targetR * 2);
+        aimCtx.save();
+        aimCtx.lineWidth = 1;
+        aimCtx.lineCap = 'butt';
+        aimCtx.strokeStyle = 'rgba(255,255,255,.98)';
+        aimCtx.beginPath();
+        aimCtx.moveTo(x - halfGap - armLength, y); aimCtx.lineTo(x - halfGap, y);
+        aimCtx.moveTo(x + halfGap, y); aimCtx.lineTo(x + halfGap + armLength, y);
+        aimCtx.moveTo(x, y - halfGap - armLength); aimCtx.lineTo(x, y - halfGap);
+        aimCtx.moveTo(x, y + halfGap); aimCtx.lineTo(x, y + halfGap + armLength);
+        aimCtx.stroke();
+        // No centre dot/ring: it would cover the exact aim point and could obscure small targets.
+        aimCtx.restore();
+      }
+    }
+
+    function updateAimStats() {
+      $('aimGameHits').textContent = String(aimGame.hits);
+      $('aimGameMisses').textContent = String(aimGame.misses);
+      const attempts = aimGame.hits + aimGame.misses;
+      $('aimGameAccuracy').textContent = attempts ? `${(aimGame.hits / attempts * 100).toFixed(1)}%` : '—';
+      if (!aimGame.reactionTimes.length) {
+        $('aimGameReaction').textContent = '—';
+      } else {
+        const mean = aimGame.reactionTimes.reduce((sum, n) => sum + n, 0) / aimGame.reactionTimes.length;
+        $('aimGameReaction').textContent = `${Math.round(mean)} ms`;
+      }
+    }
+
+    function findNextAimTarget(anchorX = aimGame.cursorX, anchorY = aimGame.cursorY) {
+      if (!aimGame.config) return false;
+      // These are the exact physical values from variant visualisation ②, never the screen-space D/W.
+      const r = aimGame.targetR = aimGame.config.Wphys * aimGame.config.pxPerCm / 2;
+      const top = aimPlayTop();
+      const minX = r + 18;
+      const maxX = aimGame.width - r - 18;
+      const minY = top + r;
+      const maxY = aimGame.height - r - 20;
+      const distance = aimGame.config.Dphys * aimGame.config.pxPerCm;
+      if (minX > maxX || minY > maxY || distance <= 0 || Math.hypot(maxX - minX, maxY - minY) < distance) {
+        aimGame.targetPresent = false;
+        drawAimGame();
+        setAimNotice(`训练区域放不下变体②的物理中心距 ${fmt(aimGame.config.Dphys)} cm 和物理直径 ${fmt(aimGame.config.Wphys)} cm。请最大化窗口，或调整变体参数后重新打开。`, 'warn');
+        return false;
+      }
+      // Choose uniformly from legal one-degree directions. The target-to-target centre distance stays fixed.
+      const legalAngles = [];
+      const randomStart = Math.random() * Math.PI * 2;
+      for (let i = 0; i < 360; i++) {
+        const angle = randomStart + i * Math.PI / 180;
+        const tx = anchorX + Math.cos(angle) * distance;
+        const ty = anchorY + Math.sin(angle) * distance;
+        if (tx >= minX && tx <= maxX && ty >= minY && ty <= maxY) legalAngles.push(angle);
+      }
+      if (!legalAngles.length) {
+        aimGame.targetPresent = false;
+        drawAimGame();
+        setAimNotice('当前位置附近没有能完整显示且保持指定物理中心距的方向。请减小变体②的物理中心距，或重新打开训练。', 'warn');
+        return false;
+      }
+      const angle = legalAngles[Math.floor(Math.random() * legalAngles.length)];
+      aimGame.targetX = anchorX + Math.cos(angle) * distance;
+      aimGame.targetY = anchorY + Math.sin(angle) * distance;
+      aimGame.targetPresent = true;
+      aimGame.spawnTime = performance.now();
+      drawAimGame();
+      return true;
+    }
+
+    function resetAimRound() {
+      aimGame.hits = 0;
+      aimGame.misses = 0;
+      aimGame.reactionTimes = [];
+      aimGame.started = true;
+      aimGame.cursorX = aimGame.width / 2;
+      aimGame.cursorY = (aimPlayTop() + aimGame.height) / 2;
+      aimGame.targetR = aimGame.config.Wphys * aimGame.config.pxPerCm / 2;
+      updateAimStats();
+      return findNextAimTarget();
+    }
+
+    async function requestAimPointerLock() {
+      if (!aimGame.started || !aimGame.targetPresent) return;
+      if (!aimCanvas.requestPointerLock) {
+        aimGame.started = false;
+        aimGame.targetPresent = false;
+        drawAimGame();
+        setAimNotice('此浏览器不支持 Pointer Lock，无法保证独立于 Windows 鼠标速度/加速度的输入，因此训练未启动。请使用最新版桌面 Chrome 或 Edge。', 'warn');
+        return;
+      }
+      $('aimGameStartHint').textContent = '正在请求原始相对鼠标输入…';
+      setAimNotice('正在请求不受系统指针加速调整的原始相对移动输入…');
+      try {
+        const result = aimCanvas.requestPointerLock({ unadjustedMovement: true });
+        // A modern Promise result is required so the browser's acceptance of raw mode can be checked.
+        if (!result || typeof result.then !== 'function') {
+          aimGame.started = false;
+          aimGame.targetPresent = false;
+          aimGame.locked = false;
+          if (document.pointerLockElement === aimCanvas && document.exitPointerLock) document.exitPointerLock();
+          drawAimGame();
+          $('aimGameStartHint').textContent = '需要支持原始输入的浏览器';
+          setAimNotice('浏览器没有提供可确认原始输入模式的 Promise，已取消启动；不会退回可能受 Windows 鼠标加速影响的模式。请更新桌面 Chrome 或 Edge。', 'warn');
+          return;
+        }
+        await result;
+        if (document.pointerLockElement !== aimCanvas) {
+          const lockError = new Error('Pointer Lock was not acquired');
+          lockError.name = 'PointerLockNotAcquired';
+          throw lockError;
+        }
+        aimGame.rawRequested = true;
+        aimGame.fallbackInput = false;
+        if (document.pointerLockElement === aimCanvas) {
+          $('aimGameStartHint').textContent = '原始输入已启用 · Esc 退出';
+          setAimNotice('原始相对输入请求成功。移动量按输入 DPI 换算为物理距离，再按页面校准比例绘制；按 Esc 退出训练。', 'ok', 3200);
+        }
+      } catch (error) {
+        aimGame.rawRequested = false;
+        aimGame.fallbackInput = false;
+        aimGame.started = false;
+        aimGame.targetPresent = false;
+        aimGame.locked = false;
+        if (document.pointerLockElement === aimCanvas && document.exitPointerLock) document.exitPointerLock();
+        drawAimGame();
+        $('aimGameStartHint').textContent = '原始输入不可用';
+        const detail = error && error.name ? `（${error.name}）` : '';
+        setAimNotice(`浏览器未能启用 unadjustedMovement 原始输入${detail}。为保证灵敏度不受 Windows 指针加速影响，训练已取消，未退回普通鼠标输入。请使用最新版桌面 Chrome/Edge，并在独立标签页中打开文件。`, 'warn');
+      }
+    }
+
+    function openAimGame() {
+      aimGame.open = true;
+      aimGame.started = false;
+      aimGame.locked = false;
+      aimGame.rawRequested = false;
+      aimGame.fallbackInput = false;
+      aimGame.config = {
+        Dphys: stateAlt.D * stateAlt.S,
+        Wphys: stateAlt.W * stateAlt.S,
+        pxPerCm
+      };
+      aimGame.sensitivity = Number($('aimGameSensitivity').value) || 1;
+      aimGame.dpi = clamp(Number($('aimGameDpi').value) || 800, 100, 50000);
+      $('aimGameDpi').value = String(aimGame.dpi);
+      $('aimGameParameters').textContent = `严格按变体②：物理中心距 D_phys = ${fmt(aimGame.config.Dphys)} cm · 物理直径 W_phys = ${fmt(aimGame.config.Wphys)} cm · 页面校准 ${fmt(aimGame.config.pxPerCm, 1)} CSS px/cm · DPI ${Math.round(aimGame.dpi)}。灵敏度 1.0× 对应理论 1:1 物理距离映射。`;
+      $('aimGameOverlay').classList.remove('hidden');
+      $('aimGameStartHint').textContent = '点击游戏区域任意位置开始 · Esc 结束';
+      $('aimGameHits').textContent = '0'; $('aimGameMisses').textContent = '0';
+      $('aimGameAccuracy').textContent = '—'; $('aimGameReaction').textContent = '—';
+      resizeAimCanvas();
+      setAimNotice('可先调节上方独立游戏灵敏度，再点击界面任意空白位置开始。启动只使用原始相对输入；按 Esc 退出训练。');
+    }
+
+    function closeAimGame() {
+      const wasOpen = aimGame.open;
+      aimGame.open = false;
+      aimGame.started = false;
+      aimGame.targetPresent = false;
+      aimGame.locked = false;
+      aimGame.rawRequested = false;
+      if (document.pointerLockElement === aimCanvas && document.exitPointerLock) document.exitPointerLock();
+      $('aimGameOverlay').classList.add('hidden');
+      if (wasOpen) $('openAimGameBtn').focus({ preventScroll: true });
+    }
+
+    function startAimGameFromClick() {
+      if (!aimGame.open || aimGame.started || aimGame.locked) return;
+      resizeAimCanvas();
+      if (!resetAimRound()) {
+        aimGame.started = false;
+        drawAimGame();
+        return;
+      }
+      // This call is intentionally made in the user's click gesture so Pointer Lock can be granted.
+      requestAimPointerLock();
+    }
+
+    $('openAimGameBtn').addEventListener('click', openAimGame);
+    $('aimGameSensitivity').addEventListener('input', () => {
+      aimGame.sensitivity = Number($('aimGameSensitivity').value) || 1;
+      $('aimGameSensitivityValue').textContent = `${aimGame.sensitivity.toFixed(1)}×`;
+    });
+    $('aimGameDpi').addEventListener('change', () => {
+      const raw = Number($('aimGameDpi').value);
+      aimGame.dpi = clamp(Number.isFinite(raw) && raw > 0 ? raw : 800, 100, 50000);
+      $('aimGameDpi').value = String(Math.round(aimGame.dpi));
+      if (aimGame.open) {
+        const scale = aimGame.config ? aimGame.config.pxPerCm : pxPerCm;
+        $('aimGameParameters').textContent = `严格按变体②：物理中心距 D_phys = ${fmt(aimGame.config.Dphys)} cm · 物理直径 W_phys = ${fmt(aimGame.config.Wphys)} cm · 页面校准 ${fmt(scale, 1)} CSS px/cm · DPI ${Math.round(aimGame.dpi)}。灵敏度 1.0× 对应理论 1:1 物理距离映射。`;
+      }
+    });
+    // Esc is the end/exit command; the training layer deliberately has no extra end button.
+
+    // Only a click in the actual playfield starts training. HUD, ruler, notices and footer are inert.
+    function isAimRulerArea(x, y) {
+      const w = aimGame.width || window.innerWidth;
+      const h = aimGame.height || window.innerHeight;
+      const top = aimPlayTop();
+      const rulerScale = aimGame.config ? aimGame.config.pxPerCm : pxPerCm;
+      const rulerY = top + 18;
+      const rulerLength = 10 * rulerScale;
+      const bgX = w - 104;
+      const bgY = rulerY - 28;
+      const bgW = 92;
+      const bgH = Math.max(0, Math.min(h - rulerY - 8, rulerLength + 42));
+      // Slightly expand the visible ruler bounds to include its labels and anti-aliased edges.
+      return x >= bgX - 4 && x <= bgX + bgW + 4 &&
+        y >= bgY - 4 && y <= bgY + bgH + 4;
+    }
+
+    function isWithinRect(x, y, element) {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0 &&
+        x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    }
+
+    $('aimGameOverlay').addEventListener('click', (event) => {
+      if (!aimGame.open || aimGame.started) return;
+      // Require the canvas itself as the event target: clicking the HUD/overlay frame must do nothing.
+      if (event.target !== aimCanvas) return;
+      const x = event.clientX;
+      const y = event.clientY;
+      if (y < aimPlayTop() || isAimRulerArea(x, y) ||
+          isWithinRect(x, y, $('aimGameNotice')) ||
+          isWithinRect(x, y, document.querySelector('.aim-game-footer'))) return;
+      startAimGameFromClick();
+    });
+
+    aimCanvas.addEventListener('mousemove', (event) => {
+      if (!aimGame.open || !aimGame.started || document.pointerLockElement !== aimCanvas) return;
+      const dx = Number(event.movementX) || 0;
+      const dy = Number(event.movementY) || 0;
+      const minY = Math.min(aimGame.height - 8, aimPlayTop() + 4);
+      // Assumption: raw movement deltas represent mouse counts. Convert counts -> inches -> cm -> calibrated CSS px.
+      // This normalizes the base scale by entered DPI; sensitivity remains a dimensionless user multiplier.
+      const countToCssPx = (2.54 * aimGame.config.pxPerCm / aimGame.dpi) * aimGame.sensitivity;
+      aimGame.cursorX = clamp(aimGame.cursorX + dx * countToCssPx, 5, Math.max(5, aimGame.width - 5));
+      aimGame.cursorY = clamp(aimGame.cursorY + dy * countToCssPx, minY, Math.max(minY, aimGame.height - 8));
+      drawAimGame();
+    });
+
+    aimCanvas.addEventListener('mousedown', (event) => {
+      if (!aimGame.open || !aimGame.started || document.pointerLockElement !== aimCanvas || event.button !== 0 || !aimGame.targetPresent) return;
+      event.preventDefault();
+      const hit = Math.hypot(aimGame.cursorX - aimGame.targetX, aimGame.cursorY - aimGame.targetY) <= aimGame.targetR;
+      if (hit) {
+        aimGame.hits++;
+        aimGame.reactionTimes.push(Math.max(0, performance.now() - aimGame.spawnTime));
+        const previousTargetX = aimGame.targetX;
+        const previousTargetY = aimGame.targetY;
+        updateAimStats();
+        if (!findNextAimTarget(previousTargetX, previousTargetY)) return;
+        setAimNotice('命中。新目标与上一个目标中心保持变体②的固定物理距离，方向随机。', 'ok', 700);
+      } else {
+        aimGame.misses++;
+        updateAimStats();
+        setAimNotice('未命中。目标保持不变，继续瞄准后左键射击。', '', 650);
+      }
+    });
+
+    document.addEventListener('pointerlockchange', () => {
+      const isLocked = document.pointerLockElement === aimCanvas;
+      const wasLocked = aimGame.locked;
+      aimGame.locked = isLocked;
+      if (isLocked && aimGame.open) {
+        $('aimGameStartHint').textContent = aimGame.rawRequested ? '原始输入已启用 · Esc 退出' : '正在确认原始输入…';
+        if (aimGame.rawRequested) {
+          setAimNotice('原始相对输入模式已启用。移动量按输入 DPI 换算为物理距离，再按页面校准比例绘制。按 Esc 退出训练。', 'ok', 2600);
+        }
+        drawAimGame();
+      } else if (wasLocked && aimGame.open) {
+        // Esc releases Pointer Lock in the browser. Treat that release as exiting the whole training overlay.
+        closeAimGame();
+      }
+    });
+    document.addEventListener('pointerlockerror', () => {
+      if (aimGame.open) {
+        aimGame.started = false;
+        aimGame.targetPresent = false;
+        $('aimGameStartHint').textContent = '原始输入不可用';
+        drawAimGame();
+        setAimNotice('浏览器拒绝了原始鼠标输入请求。为保证不受 Windows 鼠标设置影响，训练没有启动；请使用最新版桌面 Chrome/Edge 并在独立标签页中打开。', 'warn');
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (!aimGame.open) return;
+      if (!aimGame.started && event.key === 'Enter') {
+        // Enter must never act as a start command or activate the previously focused launcher.
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      if (event.key === 'Escape' || event.key === 'Esc') {
+        event.preventDefault();
+        event.stopPropagation();
+        closeAimGame();
+      }
+    });
+    window.addEventListener('resize', () => {
+      if (aimGame.open) resizeAimCanvas();
+    }, { passive: true });
+
 
     function safeUpdate() { updateAll(); }
     window.addEventListener('resize', safeUpdate, { passive: true });
