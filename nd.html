@@ -91,6 +91,7 @@
       border-radius: 999px; font-family: "Times New Roman", serif; font-weight: 700; font-style: italic;
       font-size: 0.86rem; color: #3b2b10; box-shadow: 0 1px 2px rgba(60, 42, 10, 0.08); user-select: none;
     }
+    .pill-badge.sub, .pill-badge.wide { font-style: normal; font-family: inherit; font-size: 0.72rem; min-width: 52px; }
     .pill-badge sub { font-size: 0.68rem; font-style: normal; margin-left: 1px; margin-bottom: -2px; }
     .legend-colon { color: var(--gold-primary); font-weight: bold; }
     .legend-cn { font-weight: 600; letter-spacing: 0.02em; }
@@ -199,6 +200,7 @@
     .ctrl-input-wrap { flex: 2 1 160px; display: flex; align-items: center; gap: 10px; }
     input[type="range"].param-slider { flex-grow: 1; min-width: 70px; accent-color: #a37c3a; cursor: pointer; margin: 0; }
     .num-input-gold { width: 66px; flex-shrink: 0; border: 1px solid #d6be90; background: #fffdf9; color: var(--ink-navy); padding: 4px 6px; border-radius: 5px; font-family: ui-monospace, monospace; font-size: 0.85rem; font-weight: 700; text-align: right; }
+    .zoom-display { min-width: 52px; text-align: right; color: var(--ink-muted); font-family: ui-monospace, monospace; font-size: 0.85rem; font-weight: 700; }
     .status-ribbon { margin-top: 12px; padding: 8px 12px; border-radius: 8px; background: #f7efe0; border: 1px solid #e2cfab; font-size: 0.75rem; color: #553e1a; line-height: 1.4; transition: all 0.2s; }
     .status-ribbon.warn { background: #fdf0f0; border-color: #f8cdcd; color: var(--accent-tier3); }
     .status-ribbon.ok { background: #f3faf5; border-color: #cdebd7; color: var(--accent-tier1); }
@@ -266,8 +268,8 @@
         <div class="legend-item"><span class="pill-badge">D</span><span class="legend-colon">:</span><span class="legend-cn">移动距离</span><span class="legend-en">(Distance)</span></div>
         <div class="legend-item"><span class="pill-badge">W</span><span class="legend-colon">:</span><span class="legend-cn">目标宽度</span><span class="legend-en">(Width)</span></div>
         <div class="legend-item"><span class="pill-badge">L<sub>0</sub></span><span class="legend-colon">:</span><span class="legend-cn">参考长度</span><span class="legend-en">(Reference Length)</span></div>
-        <div class="legend-item"><span class="pill-badge">S</span><span class="legend-colon">:</span><span class="legend-cn">图示缩放</span><span class="legend-en">(View Scaling)</span></div>
-        <div class="legend-subtext">L₀ = 1 cm；D、W 均以 cm 输入。S 仅缩放图的显示比例，不参与 ID 计算。p 为 W 的次幂；D 不设人为上限。</div>
+        <div class="legend-item"><span class="pill-badge wide">缩放</span><span class="legend-colon">:</span><span class="legend-cn">视图缩放</span><span class="legend-en">(View Scaling)</span></div>
+        <div class="legend-subtext">L₀ = 1 cm；D、W 均以 cm 输入。视图缩放滑块按比例同时缩放 D 与 W 的数值（拖到 2 即同时乘 2，拖回 1 即复原）。p 为 W 的次幂；D 不设人为上限。</div>
       </div>
 
       <div class="hero-formula-wrap">
@@ -284,7 +286,7 @@
 
       <div class="annotation-grid">
         <div class="annotation-card"><div class="badge-number">1</div><div class="annotation-content">建议研究次幂范围为 1.5 ~ 2.5，当前取 <em id="expNote">2</em>。<span class="dimmed">可探索范围 0.1 ~ 999；数值越极端越需要注意数值稳定性与模型实证。</span></div></div>
-        <div class="annotation-card"><div class="badge-number">2</div><div class="annotation-content">待验证假设：舒适运动幅度内命中时间可能近似稳定；S 用于调整视图缩放，不影响 ID。</div></div>
+        <div class="annotation-card"><div class="badge-number">2</div><div class="annotation-content">视图缩放只等比缩放 D、W 数值本身，公式、反解、图形均以缩放后的数值为准。</div></div>
         <div class="annotation-card"><div class="badge-number">3</div><div class="annotation-content">阈值假设：ID ≤3 对应较易单次定位，ID ≥5 对应较易二次修正。<span class="dimmed">需要实测验证。</span></div></div>
       </div>
 
@@ -301,13 +303,13 @@
     <section class="section-card">
       <div class="section-header" style="margin-bottom: 12px;">
         <div>
-          <h2 class="section-title">空间几何投影可视化</h2>
-          <p class="section-subtitle">屏幕空间的球体截面。S 仅调整视图缩放（D、W 同步乘 S，比例不变）。<strong>右下角可拖拽改变视窗高度。</strong></p>
+          <h2 class="section-title">物理情况可视化</h2>
+<p class="section-subtitle">按下方校准标尺比例绘制。<strong>右下角可拖拽改变视窗高度。</strong></p>
         </div>
       </div>
       <div class="visual-grid">
         <div class="visual-block">
-          <div class="visual-head"><span>屏幕空间 · 球体截面（× S 缩放）</span><span class="visual-params" id="altScreenText">D 15.00 cm · ⌀ 1.29 cm</span></div>
+          <div class="visual-head"><span>物理情况</span><span class="visual-params" id="altScreenText">D 15.00 cm · ⌀ 1.29 cm</span></div>
           <div class="stage-viewport" id="altScreenViewport"><svg class="stage-svg" id="altScreenSvg"></svg></div>
         </div>
       </div>
@@ -343,7 +345,7 @@
         <div class="section-header" style="margin-bottom: 12px;">
           <div>
             <h2 class="section-title">变体难度解算与参数微调</h2>
-            <p class="section-subtitle">ID = log₂(1 + D·L₀ / W<sup id="expSupSub">2</sup>)；L₀ = 1 cm，D、W 以 cm 输入。S 仅缩放视图，不参与 ID。</p>
+            <p class="section-subtitle">ID = log₂(1 + D·L₀ / W<sup id="expSupSub">2</sup>)；L₀ = 1 cm，D、W 以 cm 输入。</p>
             <p class="section-subtitle" style="margin-top:4px;">边界约定：D ≤ W/2 时，起点位于或接触圆形目标，工具单独按 ID = 0 处理；否则按上式计算。</p>
           </div>
         </div>
@@ -391,12 +393,12 @@
           </div>
           <div class="control-row">
             <div class="ctrl-label-box">
-              <span class="ctrl-title">图示缩放 S</span>
-              <span class="ctrl-hint">仅缩放图；不影响 ID</span>
+              <span class="ctrl-title">视图缩放</span>
+              <span class="ctrl-hint">按比例同时缩放 D 与 W 的数值</span>
             </div>
             <div class="ctrl-input-wrap">
-              <input type="range" id="altSRange" class="param-slider" min="0.05" max="5" step="0.01">
-              <input type="number" class="num-input-gold" id="altSNum" step="0.01">
+              <input type="range" id="altSRange" class="param-slider" min="0.05" max="5" step="0.01" value="1">
+              <span class="zoom-display" id="altSDisplay">×1.00</span>
             </div>
           </div>
         </div>
@@ -465,7 +467,7 @@
     'use strict';
     const $ = (id) => document.getElementById(id);
     const REF_LENGTH_CM = 1.0;
-    const LIMITS = { D: { min: 1, max: Number.MAX_VALUE }, W: { min: 0.2, max: 30 }, S: { min: 0.05, max: 5 }, targetId: { min: 0.1, max: Number.MAX_VALUE } };
+    const LIMITS = { D: { min: 1, max: Number.MAX_VALUE }, W: { min: 0.2, max: 30 }, targetId: { min: 0.1, max: Number.MAX_VALUE } };
     const MAX_TRACK_PX = 8000;
     const D_SLIDER_PRECISION_LIMIT = 1e6;
     let dSliderMax = 50;
@@ -505,7 +507,7 @@
     })();
 
     const savedState = (() => {
-      const defaults = { D: 15.00, W: 1.29, S: 0.60 };
+      const defaults = { D: 15.00, W: 1.29 };
       try {
         const raw = localStorage.getItem('fitts_model_state');
         if (!raw) return defaults;
@@ -513,7 +515,6 @@
         const out = { ...defaults };
         if (Number.isFinite(o.D) && o.D >= 1) out.D = o.D;
         if (Number.isFinite(o.W) && o.W >= 0.2 && o.W <= 30) out.W = o.W;
-        if (Number.isFinite(o.S) && o.S >= 0.05 && o.S <= 5) out.S = o.S;
         return out;
       } catch (_) { return defaults; }
     })();
@@ -549,7 +550,7 @@
     const LOG_MAX_NUMBER = Math.log(Number.MAX_VALUE);
     const LOG_MIN_NUMBER = Math.log(Number.MIN_VALUE);
 
-    // 公式不含 S：ID = log₂(1 + L₀·D / W^p)
+    // 公式：ID = log₂(1 + L₀·D / W^p)
     function calculateModelId(D, W, p = wExp) {
       if (![D, W, p].every(Number.isFinite) || D <= 0 || W <= 0 || p <= 0) return NaN;
       if (D <= W / 2 + 1e-9) return 0;
@@ -575,15 +576,6 @@
       return Math.exp(logValue);
     }
 
-    function fmtProduct(a, b, d = 2) {
-      const product = a * b;
-      if (Number.isFinite(product)) return fmt(product, d);
-      if (!(a > 0) || !(b > 0) || !Number.isFinite(a) || !Number.isFinite(b)) return '超出数值范围';
-      const log10 = Math.log10(a) + Math.log10(b);
-      const exponent = Math.floor(log10);
-      const mantissa = Math.pow(10, log10 - exponent);
-      return `${mantissa.toFixed(d)}×10^${exponent}`;
-    }
     const fmtExp = (v) => {
       if (!Number.isFinite(v)) return '';
       if (Number.isInteger(v)) return String(v);
@@ -676,14 +668,13 @@
       $('calibSlider').value = pxPerCm.toFixed(1); $('calibNum').value = pxPerCm.toFixed(1);
     }
 
-    function renderSphereTrack(svg, viewport, D, W, strokeColor, multiplier = 1) {
-      if (!Number.isFinite(D) || !Number.isFinite(W) || D < 0 || W <= 0 || !Number.isFinite(multiplier) || multiplier <= 0) {
+    function renderSphereTrack(svg, viewport, D, W, strokeColor) {
+      if (!Number.isFinite(D) || !Number.isFinite(W) || D < 0 || W <= 0) {
         svg.innerHTML = ''; return false;
       }
       const padX = 14;
       const vpW = Math.max(200, viewport.clientWidth - 2), vpH = Math.max(100, viewport.clientHeight - 2);
-      const displayD = D * multiplier, displayW = W * multiplier;
-      const totalDisplayCm = displayD + displayW;
+      const totalDisplayCm = D + W;
       const isScaled = !Number.isFinite(totalDisplayCm) || totalDisplayCm > MAX_TRACK_PX / pxPerCm;
       let centerOffsetPx, diamPx;
       if (isScaled) {
@@ -691,8 +682,8 @@
         centerOffsetPx = baseTotal > 0 ? (D / baseTotal) * MAX_TRACK_PX : 0;
         diamPx = baseTotal > 0 ? (W / baseTotal) * MAX_TRACK_PX : 0;
       } else {
-        centerOffsetPx = displayD * pxPerCm;
-        diamPx = displayW * pxPerCm;
+        centerOffsetPx = D * pxPerCm;
+        diamPx = W * pxPerCm;
       }
       const strokeW = Math.min(1.4, Math.max(0.05, diamPx * 0.08));
       const radius = Math.max(0, (diamPx - strokeW) / 2);
@@ -721,7 +712,7 @@
         <circle cx="${centerX}" cy="${centerY}" r="${radius}" fill="url(#${gradId})" stroke="#0b1b30" stroke-width="${strokeW}"/>
         ${diamPx >= 4 ? `<ellipse cx="${centerX}" cy="${centerY}" rx="${radius}" ry="${Math.max(1, radius * 0.3)}" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="0.8" stroke-dasharray="3 3"/><ellipse cx="${centerX - radius * 0.3}" cy="${centerY - radius * 0.33}" rx="${Math.max(1.5, radius * 0.18)}" ry="${Math.max(1, radius * 0.11)}" fill="#ffffff" fill-opacity=".7"/>` : ''}
         <text x="${padX}" y="${Math.min(height - 2, centerY + 40)}" text-anchor="middle" font-size="10" fill="${isContact ? '#aa2727' : '#708096'}" font-weight="700">${isContact ? '接触/重叠' : '起点'}</text>
-        <text x="${centerX}" y="${Math.min(height - 2, centerY + radius + 20)}" text-anchor="middle" font-size="10.5" fill="${strokeColor}" font-weight="700">⌀ ${fmtProduct(W, multiplier)} cm</text>
+        <text x="${centerX}" y="${Math.min(height - 2, centerY + radius + 20)}" text-anchor="middle" font-size="10.5" fill="${strokeColor}" font-weight="700">⌀ ${fmt(W)} cm</text>
         ${scaledTag}
       `;
       viewport.scrollTop = Math.max(0, centerY - viewport.clientHeight / 2);
@@ -729,7 +720,7 @@
     }
 
     function refreshUI() {
-      const D = state.D, W = state.W, S = state.S;
+      const D = state.D, W = state.W;
       const id = calculateModelId(D, W, wExp);
 
       $('altIdVal').innerHTML = `${fmt(id)}<span class="metric-unit">bits</span>`;
@@ -740,9 +731,8 @@
       else if (id >= 5.0 - 1e-9) { tierEl.className = 'tier-indicator tier-multi'; tierEl.textContent = '假设易二次修正区 (ID ≥ 5)'; }
       else { tierEl.className = 'tier-indicator tier-mid'; tierEl.textContent = '过渡修正区 (3 < ID < 5)'; }
 
-      // 图：屏幕空间 × S 缩放
-      const scaledScreen = renderSphereTrack($('altScreenSvg'), $('altScreenViewport'), D, W, '#1a365d', S);
-      $('altScreenText').textContent = `D ${fmtProduct(D, S)} cm · ⌀ ${fmtProduct(W, S)} cm${scaledScreen ? ' · 图示缩放' : ''} · S=${fmt(S)}`;
+      const scaledScreen = renderSphereTrack($('altScreenSvg'), $('altScreenViewport'), D, W, '#1a365d');
+      $('altScreenText').textContent = `D ${fmt(D)} cm · ⌀ ${fmt(W)} cm${scaledScreen ? ' · 图示缩放' : ''}`;
 
       const dRange = $('altDRange');
       if (D > D_SLIDER_PRECISION_LIMIT) {
@@ -762,7 +752,6 @@
       }
       $('altDNum').value = fmt(D);
       $('altWRange').value = state.W; $('altWNum').value = fmt(state.W);
-      $('altSRange').value = state.S; $('altSNum').value = fmt(state.S);
     }
 
     function applyStateChange(key, val, options = {}) {
@@ -776,7 +765,7 @@
       let warnMsg = '';
       if (key === 'W' && state.D < state.W / 2) { state.D = round2(state.W / 2); warnMsg = `宽度 W 侵入边界，系统被动推移距离 D 至 ${fmt(state.D)} cm 以防破位。`; }
       else if (key === 'D' && state.W > 2 * state.D) { state.W = round2(2 * state.D); warnMsg = `距离 D 缩小，系统被动挤压宽度 W 至 ${fmt(state.W)} cm。`; }
-      if (warnMsg) setStatus(warnMsg, 'warn'); else setStatus('参数更新就绪。S 仅缩放图，不影响 ID。', 'ok');
+      if (warnMsg) setStatus(warnMsg, 'warn'); else setStatus('参数更新就绪。', 'ok');
       try { localStorage.setItem('fitts_model_state', JSON.stringify(state)); } catch (_) {}
       refreshUI();
     }
@@ -792,7 +781,41 @@
         else { num.value = fmt(state[key]); if (key === 'D') setStatus('D 必须是可表示的有限数值，且不能小于 1 cm。', 'warn'); }
       });
     }
-    bindInputs('D'); bindInputs('W'); bindInputs('S');
+    bindInputs('D'); bindInputs('W');
+
+    // ===== 视图缩放：按比例同时缩放 D 和 W 的数值 =====
+    let sAnchor = 1;
+    const sSlider = $('altSRange');
+    const sDisplay = $('altSDisplay');
+
+    function updateZoomDisplay() {
+      if (sDisplay) sDisplay.textContent = `×${Number(sSlider.value).toFixed(2)}`;
+    }
+
+    sSlider.addEventListener('input', () => {
+      const newS = Number(sSlider.value);
+      if (!Number.isFinite(newS) || newS <= 0) return;
+      if (Math.abs(newS - sAnchor) < 1e-9) { updateZoomDisplay(); return; }
+
+      const ratio = newS / sAnchor;
+      const newD = clamp(round2(state.D * ratio), LIMITS.D.min, LIMITS.D.max);
+      const newW = clamp(round2(state.W * ratio), LIMITS.W.min, LIMITS.W.max);
+      state.D = newD;
+      state.W = newW;
+      sAnchor = newS;
+
+      // 同步 D、W 的滑块和输入框
+      $('altDNum').value = fmt(state.D);
+      $('altWNum').value = fmt(state.W);
+      const dRange = $('altDRange');
+      if (state.D <= Number(dRange.max)) dRange.value = String(state.D);
+      $('altWRange').value = state.W;
+
+      try { localStorage.setItem('fitts_model_state', JSON.stringify(state)); } catch (_) {}
+      updateZoomDisplay();
+      setStatus(`视图缩放 ×${newS.toFixed(2)}：D 与 W 已按相同比例缩放。`, 'ok');
+      refreshUI();
+    });
 
     function parseSolverTarget() {
       const raw = $('targetIdInput').value.trim();
@@ -854,7 +877,7 @@
     }
 
     // =========================================================
-    // 2D 瞄准微操游戏核心逻辑（训练场仍按物理空间 D·S、W·S 绘制）
+    // 2D 瞄准微操游戏核心逻辑
     // =========================================================
     const MARK_LIFE_MS = 500;
     const MARK_RADIUS = 2.5;
@@ -894,13 +917,13 @@
         overlayEl.classList.add('paused');
         if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
       }
-      setAimMsg('当前画布空间不足以按原始参数绘制目标；请退出训练后调整 D/W、S，或增大窗口。', 'warn');
+      setAimMsg('当前画布空间不足以按原始参数绘制目标；请退出训练后调整 D/W，或增大窗口。', 'warn');
     }
 
     function updateAimDesc() {
       const modeLabel = aim.mode === 'fixed' ? '定式定位' : '自由瞄准';
       const sideLabel = aim.mode === 'fixed' ? ` · 球在${aim.side === 'left' ? '左' : '右'}` : '';
-      $('aimParamDesc').textContent = `D_phys: ${fmtProduct(state.D, state.S)} cm · W_phys: ${fmtProduct(state.W, state.S)} cm · ${modeLabel}${sideLabel}`;
+      $('aimParamDesc').textContent = `D: ${fmt(state.D)} cm · W: ${fmt(state.W)} cm · ${modeLabel}${sideLabel}`;
     }
 
     function addMark(x, y, isHit) {
@@ -1009,7 +1032,7 @@
     }
 
     function spawnFreeTarget(top) {
-      const dist = state.D * state.S * pxPerCm, cands = [];
+      const dist = state.D * pxPerCm, cands = [];
       for (let i = 0; i < 360; i++) {
         const a = (i * Math.PI) / 180, tx = aim.cx + Math.cos(a) * dist, ty = aim.cy + Math.sin(a) * dist;
         if (tx >= aim.tr + 24 && tx <= aim.w - aim.tr - 24 && ty >= top + aim.tr + 10 && ty <= aim.h - aim.tr - 20) cands.push(a);
@@ -1024,7 +1047,7 @@
     function spawnFixedTarget(top) {
       const margin = 30;
       const cy = (top + aim.h) / 2;
-      const distPx = state.D * state.S * pxPerCm;
+      const distPx = state.D * pxPerCm;
       const maxDist = aim.w - 2 * margin - 2 * aim.tr - 20;
       const usableHeight = aim.h - top - 24;
       if (maxDist <= 0 || distPx > maxDist || aim.tr * 2 > usableHeight || distPx <= 0) return false;
@@ -1038,7 +1061,7 @@
     function spawnAimTarget() {
       readModeFromUI();
       const top = (aim.hudBottom || getHudBottom()) + 16;
-      aim.tr = (state.W * state.S * pxPerCm) / 2;
+      aim.tr = (state.W * pxPerCm) / 2;
       const ok = aim.mode === 'fixed' ? spawnFixedTarget(top) : spawnFreeTarget(top);
       if (!ok) { aim.tr = 0; drawAim(); }
       return ok;
@@ -1229,6 +1252,7 @@
 
     setWExp(wExp);
     setPxPerCm(pxPerCm);
+    updateZoomDisplay();
   })();
   </script>
 </body>
