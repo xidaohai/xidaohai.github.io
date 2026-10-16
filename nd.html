@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <title>瞄准难度模型 · 西岛海_邢</title>
+  <title>菲茨·香农公式</title>
   <style>
     :root {
       --bg-cream: #fbf7ee;
@@ -72,7 +72,7 @@
     .exp-btn.active { background: linear-gradient(180deg, #fbf2dc, #eadeba); border-color: #d4be8e; color: #3b2b10; box-shadow: 0 1px 2px rgba(60, 42, 10, 0.08); }
     .exp-sep { display: inline-block; width: 1px; height: 14px; background: #dfcaa2; margin: 0 4px; vertical-align: middle; }
     .exp-input {
-      width: 46px; background: transparent; border: 1px solid #d4be8e; border-radius: 999px;
+      width: 52px; background: transparent; border: 1px solid #d4be8e; border-radius: 999px;
       padding: 2px 6px; font-size: 0.72rem; font-weight: 700; color: #3b2b10;
       font-family: ui-monospace, monospace; text-align: center; outline: none;
       transition: all 0.15s ease; -moz-appearance: textfield; appearance: textfield;
@@ -97,10 +97,16 @@
     .legend-cn { font-weight: 600; letter-spacing: 0.02em; }
     .legend-en { color: var(--ink-muted); font-size: 0.82rem; margin-left: 2px; font-family: -apple-system, sans-serif; }
     .legend-subtext { margin-left: 46px; margin-top: -3px; font-size: 0.78rem; color: var(--ink-navy-soft); line-height: 1.45; }
+    
     .hero-formula-wrap { margin: clamp(16px, 2.5vw, 24px) auto; text-align: center; padding: 4px 0; }
     .hero-formula {
       display: inline-flex; align-items: center; justify-content: center; font-family: Cambria, "Times New Roman", Georgia, serif;
       font-size: clamp(1.8rem, 4.5vw, 3.2rem); color: var(--ink-navy); line-height: 1; font-weight: 400; user-select: none;
+    }
+    .hero-formula .math-title {
+      font-family: -apple-system, BlinkMacSystemFont, "Songti SC", "Source Han Serif SC", serif;
+      font-size: 0.45em; font-weight: 700; margin-right: 1.5em;
+      color: var(--ink-navy-soft); letter-spacing: 0.05em; white-space: nowrap; vertical-align: middle;
     }
     .hero-formula .math-id { font-style: italic; font-weight: 600; letter-spacing: 0.03em; }
     .hero-formula .math-op { margin: 0 clamp(6px, 1.2vw, 14px); font-weight: 300; }
@@ -117,6 +123,7 @@
     .hero-formula .frac-top sub { vertical-align: -0.12em; }
     .hero-formula .frac-bottom { padding: 3px 6px 0 6px; font-style: italic; line-height: 1.05; }
     .hero-formula .frac-bottom sup { font-size: 0.62em; font-style: normal; vertical-align: 0.45em; }
+    
     .annotation-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.5vw, 16px); margin-top: 10px; }
     .annotation-card {
       background: rgba(255, 254, 250, 0.85); border: 1px solid #ebdcb7; border-radius: var(--radius-md);
@@ -129,7 +136,16 @@
     .annotation-content { font-size: 0.82rem; color: #172c44; line-height: 1.55; font-weight: 500; }
     .annotation-content .dimmed { display: block; color: #6a7c91; font-size: 0.75rem; margin-top: 2px; }
     .annotation-content em { font-style: italic; font-family: Cambria, serif; font-weight: 700; }
-    .stamp-badge { display: flex; justify-content: flex-end; margin-top: 16px; }
+    
+    .stamp-badge { 
+      position: fixed; 
+      bottom: 24px; 
+      right: 24px; 
+      z-index: 1000; 
+      display: flex; 
+      justify-content: flex-end; 
+      pointer-events: auto;
+    }
     .stamp-pill {
       display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: linear-gradient(180deg, #fdfbf7, #f7eed8);
       border: 1px solid #d8c293; border-radius: 999px; font-size: 0.78rem; color: #4b3614; font-family: -apple-system, sans-serif; box-shadow: 0 2px 5px rgba(120, 90, 40, 0.06);
@@ -138,6 +154,7 @@
     .stamp-pill:hover { background: linear-gradient(180deg, #ffffff, #faecd0); border-color: #b5985a; box-shadow: 0 4px 10px rgba(120, 90, 40, 0.12); transform: translateY(-1px); }
     .stamp-diamond { color: #c4994e; font-size: 0.65rem; }
     .stamp-author { font-family: "KingHwa_OldSong", "Songti SC", serif; font-weight: 700; letter-spacing: 0.05em; }
+    
     .section-card { background: var(--paper-card); border: 1px solid var(--gold-border); border-radius: var(--radius-lg); padding: clamp(16px, 2.2vw, 24px); box-shadow: var(--shadow-paper); display: flex; flex-direction: column; }
     .section-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--gold-faint); padding-bottom: 10px; margin-bottom: 16px; }
     .section-title { margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--ink-navy); }
@@ -182,10 +199,6 @@
     .metric-name { font-size: 0.75rem; color: var(--ink-muted); font-family: -apple-system, sans-serif; font-weight: 600; }
     .metric-digit { font-family: Cambria, Georgia, serif; font-size: 1.6rem; font-weight: 700; color: var(--ink-navy); line-height: 1.15; margin: 2px 0; }
     .metric-unit { font-size: 0.78rem; color: var(--gold-primary); margin-left: 3px; font-style: italic; }
-    .tier-indicator { display: inline-block; font-size: 0.7rem; font-family: -apple-system, sans-serif; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 2px; }
-    .tier-single { background: #e9f7ee; color: var(--accent-tier1); border: 1px solid #c2e8ce; }
-    .tier-mid { background: #fdf5e7; color: var(--accent-tier2); border: 1px solid #fae2b8; }
-    .tier-multi { background: #fdf0f0; color: var(--accent-tier3); border: 1px solid #f8cdcd; }
     .solver-box {
       background: linear-gradient(180deg, #fffdf8, #fbf4e5); border: 1px dashed #d3ba85; border-radius: var(--radius-sm);
       padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; font-size: 0.8rem;
@@ -199,7 +212,7 @@
     .ctrl-hint { display: block; font-size: 0.68rem; font-weight: 400; color: var(--ink-muted); white-space: nowrap; }
     .ctrl-input-wrap { flex: 2 1 160px; display: flex; align-items: center; gap: 10px; }
     input[type="range"].param-slider { flex-grow: 1; min-width: 70px; accent-color: #a37c3a; cursor: pointer; margin: 0; }
-    .num-input-gold { width: 66px; flex-shrink: 0; border: 1px solid #d6be90; background: #fffdf9; color: var(--ink-navy); padding: 4px 6px; border-radius: 5px; font-family: ui-monospace, monospace; font-size: 0.85rem; font-weight: 700; text-align: right; }
+    .num-input-gold { width: 76px; flex-shrink: 0; border: 1px solid #d6be90; background: #fffdf9; color: var(--ink-navy); padding: 4px 6px; border-radius: 5px; font-family: ui-monospace, monospace; font-size: 0.85rem; font-weight: 700; text-align: right; }
     .zoom-display { min-width: 52px; text-align: right; color: var(--ink-muted); font-family: ui-monospace, monospace; font-size: 0.85rem; font-weight: 700; }
     .status-ribbon { margin-top: 12px; padding: 8px 12px; border-radius: 8px; background: #f7efe0; border: 1px solid #e2cfab; font-size: 0.75rem; color: #553e1a; line-height: 1.4; transition: all 0.2s; }
     .status-ribbon.warn { background: #fdf0f0; border-color: #f8cdcd; color: var(--accent-tier3); }
@@ -255,12 +268,11 @@
     <header class="poster-board" aria-label="瞄准难度指数模型海报">
       <div class="exp-picker" role="group" aria-label="W 次幂选择">
         <span class="exp-picker-label"><em>W</em> 指数</span>
-        <button type="button" class="exp-btn" data-exp="1.5">1.5</button>
-        <button type="button" class="exp-btn active" data-exp="2">2</button>
-        <button type="button" class="exp-btn" data-exp="2.5">2.5</button>
-        <button type="button" class="exp-btn" data-exp="3">3</button>
+        <button type="button" class="exp-btn" data-exp="0.9">0.9</button>
+        <button type="button" class="exp-btn" data-exp="1.125">1.125</button>
+        <button type="button" class="exp-btn" data-exp="1.25">1.25</button>
         <span class="exp-sep" aria-hidden="true"></span>
-        <input type="number" id="expCustom" class="exp-input" min="0.1" max="999" step="0.01" value="2" aria-label="自定义 W 指数" title="允许范围 0.1–999">
+        <input type="number" id="expCustom" class="exp-input" min="0.1" max="999" step="0.001" value="1" aria-label="自定义 W 指数" title="允许范围 0.1–999">
       </div>
 
       <div class="legend-list">
@@ -269,34 +281,30 @@
         <div class="legend-item"><span class="pill-badge">W</span><span class="legend-colon">:</span><span class="legend-cn">目标宽度</span><span class="legend-en">(Width)</span></div>
         <div class="legend-item"><span class="pill-badge">L<sub>0</sub></span><span class="legend-colon">:</span><span class="legend-cn">参考长度</span><span class="legend-en">(Reference Length)</span></div>
         <div class="legend-item"><span class="pill-badge wide">缩放</span><span class="legend-colon">:</span><span class="legend-cn">视图缩放</span><span class="legend-en">(View Scaling)</span></div>
-        <div class="legend-subtext">L₀ = 1 cm；D、W 均以 cm 输入。视图缩放滑块按比例同时缩放 D 与 W 的数值（拖到 2 即同时乘 2，拖回 1 即复原）。p 为 W 的次幂；D 不设人为上限。</div>
+        <div class="legend-subtext">L₀ = 1 cm；D、W 均以 cm 输入。视图缩放范围扩展至 ×20；D 与 W 不设人为上限与强硬下限约束。</div>
       </div>
 
       <div class="hero-formula-wrap">
         <div class="hero-formula">
+          <span class="math-title">菲茨·香农公式</span>
           <span class="math-id">ID</span><span class="math-op">=</span><span class="math-log">log</span><sub class="math-sub2">2</sub>
           <span class="paren-left">(</span><span>1</span><span class="math-op">+</span>
           <div class="fraction">
             <span class="frac-top">L<sub>0</sub>D</span>
-            <span class="frac-bottom">W<sup id="expSupTop">2</sup></span>
+            <span class="frac-bottom">W<sup id="expSupTop"></sup></span>
           </div>
           <span class="paren-right">)</span>
         </div>
       </div>
 
       <div class="annotation-grid">
-        <div class="annotation-card"><div class="badge-number">1</div><div class="annotation-content">建议研究次幂范围为 1.5 ~ 2.5，当前取 <em id="expNote">2</em>。<span class="dimmed">可探索范围 0.1 ~ 999；数值越极端越需要注意数值稳定性与模型实证。</span></div></div>
-        <div class="annotation-card"><div class="badge-number">2</div><div class="annotation-content">视图缩放只等比缩放 D、W 数值本身，公式、反解、图形均以缩放后的数值为准。</div></div>
-        <div class="annotation-card"><div class="badge-number">3</div><div class="annotation-content">阈值假设：ID ≤3 对应较易单次定位，ID ≥5 对应较易二次修正。<span class="dimmed">需要实测验证。</span></div></div>
-      </div>
-
-      <div class="stamp-badge">
-        <a class="stamp-pill" href="https://space.bilibili.com/1534330" target="_blank" rel="noopener noreferrer" title="访问作者 B 站主页">
-          <span class="stamp-diamond">◆</span>
-          <span>2026.10.14</span>
-          <span class="stamp-author">西岛海_邢</span>
-          <span class="stamp-diamond">◆</span>
-        </a>
+        <div class="annotation-card" style="grid-column: 1 / -1;">
+          <div class="badge-number">✓</div>
+          <div class="annotation-content">
+            当前取 W 的次幂为 <em id="expNote">1</em>（香农原始形式）。
+            <span class="dimmed">理论上，相同 ID 对应相同 MT；现实中，相同 ID 下的 MT 大致相同，但存在个体和场景带来的偏差。</span>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -304,7 +312,7 @@
       <div class="section-header" style="margin-bottom: 12px;">
         <div>
           <h2 class="section-title">物理情况可视化</h2>
-<p class="section-subtitle">按下方校准标尺比例绘制。<strong>右下角可拖拽改变视窗高度。</strong></p>
+          <p class="section-subtitle">按下方校准标尺比例绘制。<strong>右下角可拖拽改变视窗高度。支持微观尺寸高亮渲染。</strong></p>
         </div>
       </div>
       <div class="visual-grid">
@@ -345,7 +353,7 @@
         <div class="section-header" style="margin-bottom: 12px;">
           <div>
             <h2 class="section-title">变体难度解算与参数微调</h2>
-            <p class="section-subtitle">ID = log₂(1 + D·L₀ / W<sup id="expSupSub">2</sup>)；L₀ = 1 cm，D、W 以 cm 输入。</p>
+            <p class="section-subtitle">ID = log₂(1 + D·L₀ / W<sup id="expSupSub"></sup>)；L₀ = 1 cm，D、W 以 cm 输入。</p>
             <p class="section-subtitle" style="margin-top:4px;">边界约定：D ≤ W/2 时，起点位于或接触圆形目标，工具单独按 ID = 0 处理；否则按上式计算。</p>
           </div>
         </div>
@@ -354,7 +362,6 @@
           <div class="metric-card major">
             <div class="metric-name">变体难度指数 ID</div>
             <div class="metric-digit" id="altIdVal">4.00<span class="metric-unit">bits</span></div>
-            <div id="tierBadge" class="tier-indicator tier-mid">过渡修正区 (3~5)</div>
           </div>
           <div class="metric-card">
             <div class="metric-name">球体几何体积</div>
@@ -365,7 +372,7 @@
 
         <div class="solver-box">
           <span class="solver-title">目标反解：</span><span>设定 ID =</span>
-          <input type="number" class="solver-input" id="targetIdInput" min="0.1" step="any" value="4.00">
+          <input type="number" class="solver-input" id="targetIdInput" min="0.001" step="any" value="4.00">
           <button type="button" class="btn-classical" id="solveDBtn">反推 D</button>
           <button type="button" class="btn-classical" id="solveWBtn">反推 W</button>
         </div>
@@ -377,8 +384,8 @@
               <span class="ctrl-hint">起点到球心，单位 cm</span>
             </div>
             <div class="ctrl-input-wrap">
-              <input type="range" id="altDRange" class="param-slider" min="1" max="50" step="0.01">
-              <input type="number" class="num-input-gold" id="altDNum" min="1" step="any">
+              <input type="range" id="altDRange" class="param-slider" min="0.0001" max="50" step="0.0001">
+              <input type="number" class="num-input-gold" id="altDNum" step="any">
             </div>
           </div>
           <div class="control-row">
@@ -387,8 +394,8 @@
               <span class="ctrl-hint">物理可见宽度，单位 cm</span>
             </div>
             <div class="ctrl-input-wrap">
-              <input type="range" id="altWRange" class="param-slider" min="0.2" max="30" step="0.01">
-              <input type="number" class="num-input-gold" id="altWNum" step="0.01">
+              <input type="range" id="altWRange" class="param-slider" min="0.00001" max="30" step="0.00001">
+              <input type="number" class="num-input-gold" id="altWNum" step="any">
             </div>
           </div>
           <div class="control-row">
@@ -397,14 +404,14 @@
               <span class="ctrl-hint">按比例同时缩放 D 与 W 的数值</span>
             </div>
             <div class="ctrl-input-wrap">
-              <input type="range" id="altSRange" class="param-slider" min="0.05" max="5" step="0.01" value="1">
+              <input type="range" id="altSRange" class="param-slider" min="0.01" max="20" step="0.01" value="1">
               <span class="zoom-display" id="altSDisplay">×1.00</span>
             </div>
           </div>
         </div>
 
         <div class="status-ribbon" id="statusBox">
-          就绪。若起点位于或接触圆形目标（D ≤ W/2），本工具按重叠目标规则将 ID 置为 0；该规则独立于主公式。
+          就绪。已解除数值上下限与强制关联约束，支持极微小目标与无限距离自由探索。
         </div>
       </section>
     </div>
@@ -462,12 +469,21 @@
     <div class="aim-bottom-bar" id="aimBottomBar">右侧已标出真实验证直尺（10 cm）；采用未加工相对位移，绝不退回系统指针加速模式。</div>
   </section>
 
+  <div class="stamp-badge">
+    <a class="stamp-pill" href="https://space.bilibili.com/1534330" target="_blank" rel="noopener noreferrer" title="访问作者 B 站主页">
+      <span class="stamp-diamond">◆</span>
+      <span>网页整理与W候选范围设定</span>
+      <span class="stamp-author">西岛海</span>
+      <span class="stamp-diamond">◆</span>
+    </a>
+  </div>
+
   <script>
   (() => {
     'use strict';
     const $ = (id) => document.getElementById(id);
     const REF_LENGTH_CM = 1.0;
-    const LIMITS = { D: { min: 1, max: Number.MAX_VALUE }, W: { min: 0.2, max: 30 }, targetId: { min: 0.1, max: Number.MAX_VALUE } };
+    const LIMITS = { D: { min: 1e-12, max: Number.MAX_VALUE }, W: { min: 1e-12, max: Number.MAX_VALUE }, targetId: { min: 1e-6, max: Number.MAX_VALUE } };
     const MAX_TRACK_PX = 8000;
     const D_SLIDER_PRECISION_LIMIT = 1e6;
     let dSliderMax = 50;
@@ -482,13 +498,8 @@
 
     const MIN_W_EXP = 0.1;
     const MAX_W_EXP = 999;
-    let wExp = (() => {
-      try {
-        const v = parseFloat(localStorage.getItem('fitts_w_exp'));
-        if (Number.isFinite(v)) return Math.round(Math.min(MAX_W_EXP, Math.max(MIN_W_EXP, v)) * 100) / 100;
-      } catch (_) {}
-      return 2;
-    })();
+    // 每次进入页面，W 次幂固定为 1（香农原始形式），不读取缓存
+    let wExp = 1;
 
     let savedCrosshairWidth = (() => {
       try {
@@ -512,9 +523,10 @@
         const raw = localStorage.getItem('fitts_model_state');
         if (!raw) return defaults;
         const o = JSON.parse(raw);
+        if (!o || typeof o !== 'object') return defaults;
         const out = { ...defaults };
-        if (Number.isFinite(o.D) && o.D >= 1) out.D = o.D;
-        if (Number.isFinite(o.W) && o.W >= 0.2 && o.W <= 30) out.W = o.W;
+        if (Number.isFinite(o.D) && o.D > 0) out.D = o.D;
+        if (Number.isFinite(o.W) && o.W > 0) out.W = o.W;
         return out;
       } catch (_) { return defaults; }
     })();
@@ -544,16 +556,27 @@
     const state = { ...savedState };
 
     const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-    const round2 = (n) => !Number.isFinite(n) || Math.abs(n) >= 1e14 ? n : Math.round((n + Number.EPSILON) * 100) / 100;
-    const fmt = (n, d = 2) => Number.isNaN(n) ? '—' : n === Infinity ? '∞' : n === -Infinity ? '−∞' : n.toFixed(d);
+    const roundPrecision = (n) => !Number.isFinite(n) || Math.abs(n) >= 1e14 ? n : Math.round((n + Number.EPSILON) * 1e10) / 1e10;
+    
+    const fmt = (n) => {
+      if (!Number.isFinite(n) || Number.isNaN(n)) return '0';
+      if (n === Infinity) return '1e308';
+      if (n === -Infinity) return '-1e308';
+      if (n === 0) return '0';
+      const abs = Math.abs(n);
+      if (abs >= 1e-4 && abs < 1e12) {
+        return parseFloat(n.toPrecision(10)).toString();
+      }
+      return n.toExponential(4);
+    };
+
     const LN2 = Math.LN2;
     const LOG_MAX_NUMBER = Math.log(Number.MAX_VALUE);
     const LOG_MIN_NUMBER = Math.log(Number.MIN_VALUE);
 
-    // 公式：ID = log₂(1 + L₀·D / W^p)
     function calculateModelId(D, W, p = wExp) {
       if (![D, W, p].every(Number.isFinite) || D <= 0 || W <= 0 || p <= 0) return NaN;
-      if (D <= W / 2 + 1e-9) return 0;
+      if (D <= W / 2 + 1e-12) return 0;
       const logRatio = Math.log(D) + Math.log(REF_LENGTH_CM) - p * Math.log(W);
       if (Number.isNaN(logRatio)) return NaN;
       if (logRatio > 40) return logRatio / LN2;
@@ -575,21 +598,22 @@
       if (logValue < LOG_MIN_NUMBER) return 0;
       return Math.exp(logValue);
     }
-
+    
     const fmtExp = (v) => {
       if (!Number.isFinite(v)) return '';
       if (Number.isInteger(v)) return String(v);
-      return String(Number(v.toFixed(2)));
+      return String(Number(v.toFixed(3)));
     };
 
     function setStatus(msg, type = '') {
-      const box = $('statusBox'); box.textContent = msg; box.className = `status-ribbon ${type}`;
+      const box = $('statusBox');
+      if (box) { box.textContent = msg; box.className = `status-ribbon ${type}`; }
     }
 
     function setWExp(v) {
       const n = Number(v);
       if (!Number.isFinite(n)) return;
-      const val = Math.round(clamp(n, MIN_W_EXP, MAX_W_EXP) * 100) / 100;
+      const val = Math.round(clamp(n, MIN_W_EXP, MAX_W_EXP) * 1000) / 1000;
       wExp = val;
       document.querySelectorAll('.exp-btn').forEach(btn => {
         btn.classList.toggle('active', Math.abs(Number(btn.dataset.exp) - val) < 1e-9);
@@ -597,10 +621,11 @@
       const inp = $('expCustom');
       if (inp) inp.value = fmtExp(val);
       const s = fmtExp(val);
-      const tTop = $('expSupTop'); if (tTop) tTop.textContent = s;
-      const tSub = $('expSupSub'); if (tSub) tSub.textContent = s;
+      const sDisplay = (Math.abs(val - 1) < 1e-9) ? '' : s;
+      const tTop = $('expSupTop'); if (tTop) tTop.textContent = sDisplay;
+      const tSub = $('expSupSub'); if (tSub) tSub.textContent = sDisplay;
       const tNote = $('expNote'); if (tNote) tNote.textContent = s;
-      try { localStorage.setItem('fitts_w_exp', String(val)); } catch (_) {}
+      // 不再写入 localStorage，每次进入都是默认 1
       refreshUI();
     }
 
@@ -630,24 +655,37 @@
     function setPxPerCm(val) {
       if (!Number.isFinite(val)) return;
       pxPerCm = Math.round(clamp(val, 20, 80) * 10) / 10;
-      $('calibSlider').value = pxPerCm.toFixed(1);
+      const slider = $('calibSlider');
+      if (slider) slider.value = pxPerCm.toFixed(1);
       try { localStorage.setItem('fitts_px_cm_poster', pxPerCm.toFixed(1)); } catch (_) {}
-      renderRuler(); refreshUI();
+      renderRuler();
+      refreshUI();
     }
 
-    $('calibSlider').addEventListener('input', (e) => setPxPerCm(Number(e.target.value)));
-    $('calibMinus').addEventListener('click', () => setPxPerCm(pxPerCm - 0.1));
-    $('calibPlus').addEventListener('click', () => setPxPerCm(pxPerCm + 0.1));
-    $('calibNum').addEventListener('change', (e) => setPxPerCm(Number(e.target.value)));
-    $('calibNum').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.target.blur(); } });
+    const calibSlider = $('calibSlider');
+    if (calibSlider) calibSlider.addEventListener('input', (e) => setPxPerCm(Number(e.target.value)));
+    const calibMinus = $('calibMinus');
+    if (calibMinus) calibMinus.addEventListener('click', () => setPxPerCm(pxPerCm - 0.1));
+    const calibPlus = $('calibPlus');
+    if (calibPlus) calibPlus.addEventListener('click', () => setPxPerCm(pxPerCm + 0.1));
+    const calibNum = $('calibNum');
+    if (calibNum) {
+      calibNum.addEventListener('change', (e) => setPxPerCm(Number(e.target.value)));
+      calibNum.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.target.blur(); } });
+    }
 
-    $('resetCalibBtn').addEventListener('click', () => {
-      try { localStorage.removeItem('fitts_px_cm_poster'); } catch (_) {}
-      setPxPerCm(37.8);
-    });
+    const resetCalibBtn = $('resetCalibBtn');
+    if (resetCalibBtn) {
+      resetCalibBtn.addEventListener('click', () => {
+        try { localStorage.removeItem('fitts_px_cm_poster'); } catch (_) {}
+        setPxPerCm(37.8);
+      });
+    }
 
     function renderRuler() {
-      const svg = $('rulerSvg'); const totalCm = 5, pad = 12;
+      const svg = $('rulerSvg');
+      if (!svg) return;
+      const totalCm = 5, pad = 12;
       const totalW = Math.ceil(totalCm * pxPerCm + pad * 2);
       svg.setAttribute('width', totalW); svg.setAttribute('height', 42); svg.style.width = `${totalW}px`;
       let html = `<rect x="0.5" y="0.5" width="${totalW - 1}" height="39" rx="4" fill="#fffdf9" stroke="#dfcaa2" stroke-width="1"/>`;
@@ -665,10 +703,12 @@
         }
       }
       svg.innerHTML = html;
-      $('calibSlider').value = pxPerCm.toFixed(1); $('calibNum').value = pxPerCm.toFixed(1);
+      const slider = $('calibSlider'); if (slider) slider.value = pxPerCm.toFixed(1);
+      const num = $('calibNum'); if (num) num.value = pxPerCm.toFixed(1);
     }
 
     function renderSphereTrack(svg, viewport, D, W, strokeColor) {
+      if (!svg || !viewport) return false;
       if (!Number.isFinite(D) || !Number.isFinite(W) || D < 0 || W <= 0) {
         svg.innerHTML = ''; return false;
       }
@@ -685,16 +725,22 @@
         centerOffsetPx = D * pxPerCm;
         diamPx = W * pxPerCm;
       }
-      const strokeW = Math.min(1.4, Math.max(0.05, diamPx * 0.08));
-      const radius = Math.max(0, (diamPx - strokeW) / 2);
-      const isContact = D <= W / 2 + 1e-9;
+
+      const isMicro = diamPx < 3;
+      const renderDiamPx = isMicro ? Math.max(2.5, diamPx) : diamPx;
+      const strokeW = Math.min(1.4, Math.max(0.05, renderDiamPx * 0.08));
+      const radius = Math.max(0.5, (renderDiamPx - strokeW) / 2);
+      const isContact = D <= W / 2 + 1e-12;
       const centerX = padX + centerOffsetPx, leftEdge = centerX - radius;
-      const width = Math.ceil(Math.max(vpW, centerX + radius + padX));
-      const height = Math.ceil(Math.max(vpH, diamPx + 54));
+      const width = Math.ceil(Math.max(vpW, centerX + radius + padX + 30));
+      const height = Math.ceil(Math.max(vpH, renderDiamPx + 54));
       const centerY = height / 2;
+      
       svg.setAttribute('width', width); svg.setAttribute('height', height); svg.style.width = `${width}px`; svg.style.height = `${height}px`;
       const gradId = `${svg.id}-sphere-grad`, shadowId = `${svg.id}-shadow`;
       const scaledTag = isScaled ? `<text x="${width - 12}" y="16" text-anchor="end" font-size="11" fill="#aa2727" font-weight="700">图示已缩放（非实尺）</text>` : '';
+      const microTag = isMicro ? `<text x="${centerX}" y="${Math.max(12, centerY - radius - 10)}" text-anchor="middle" font-size="9.5" fill="#b86e1b" font-weight="700">【极微小目标放大显示】</text>` : '';
+
       svg.innerHTML = `
         <defs>
           <radialGradient id="${gradId}" cx="32%" cy="26%" r="72%">
@@ -708,12 +754,13 @@
         ${!isContact ? `<line x1="${padX}" y1="${centerY}" x2="${Math.max(padX, leftEdge)}" y2="${centerY}" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round"/>` : `<line x1="${padX}" y1="${centerY}" x2="${Math.max(0, leftEdge)}" y2="${centerY}" stroke="#aa2727" stroke-width="2" stroke-dasharray="3 3"/>`}
         <line x1="${padX}" y1="${Math.max(6, centerY - 28)}" x2="${padX}" y2="${Math.min(height - 6, centerY + 28)}" stroke="${isContact ? '#aa2727' : strokeColor}" stroke-width="1.8"/>
         <circle cx="${padX}" cy="${centerY}" r="4" fill="${isContact ? '#aa2727' : strokeColor}"/>
-        ${diamPx >= 4 ? `<ellipse cx="${centerX}" cy="${centerY + radius + 6}" rx="${Math.max(4, radius * 0.8)}" ry="${Math.max(1.8, Math.min(10, radius * 0.12))}" fill="url(#${shadowId})"/>` : ''}
-        <circle cx="${centerX}" cy="${centerY}" r="${radius}" fill="url(#${gradId})" stroke="#0b1b30" stroke-width="${strokeW}"/>
-        ${diamPx >= 4 ? `<ellipse cx="${centerX}" cy="${centerY}" rx="${radius}" ry="${Math.max(1, radius * 0.3)}" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="0.8" stroke-dasharray="3 3"/><ellipse cx="${centerX - radius * 0.3}" cy="${centerY - radius * 0.33}" rx="${Math.max(1.5, radius * 0.18)}" ry="${Math.max(1, radius * 0.11)}" fill="#ffffff" fill-opacity=".7"/>` : ''}
+        ${renderDiamPx >= 4 ? `<ellipse cx="${centerX}" cy="${centerY + radius + 6}" rx="${Math.max(4, radius * 0.8)}" ry="${Math.max(1.8, Math.min(10, radius * 0.12))}" fill="url(#${shadowId})"/>` : ''}
+        <circle cx="${centerX}" cy="${centerY}" r="${radius}" fill="url(#${gradId})" stroke="${isMicro ? '#aa2727' : '#0b1b30'}" stroke-width="${strokeW}"/>
+        ${renderDiamPx >= 4 ? `<ellipse cx="${centerX}" cy="${centerY}" rx="${radius}" ry="${Math.max(1, radius * 0.3)}" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="0.8" stroke-dasharray="3 3"/><ellipse cx="${centerX - radius * 0.3}" cy="${centerY - radius * 0.33}" rx="${Math.max(1.5, radius * 0.18)}" ry="${Math.max(1, radius * 0.11)}" fill="#ffffff" fill-opacity=".7"/>` : ''}
         <text x="${padX}" y="${Math.min(height - 2, centerY + 40)}" text-anchor="middle" font-size="10" fill="${isContact ? '#aa2727' : '#708096'}" font-weight="700">${isContact ? '接触/重叠' : '起点'}</text>
         <text x="${centerX}" y="${Math.min(height - 2, centerY + radius + 20)}" text-anchor="middle" font-size="10.5" fill="${strokeColor}" font-weight="700">⌀ ${fmt(W)} cm</text>
         ${scaledTag}
+        ${microTag}
       `;
       viewport.scrollTop = Math.max(0, centerY - viewport.clientHeight / 2);
       return isScaled;
@@ -723,162 +770,154 @@
       const D = state.D, W = state.W;
       const id = calculateModelId(D, W, wExp);
 
-      $('altIdVal').innerHTML = `${fmt(id)}<span class="metric-unit">bits</span>`;
-      $('sphereVolText').innerHTML = `${fmt((4 / 3) * Math.PI * Math.pow(W / 2, 3), 3)}<span class="metric-unit">cm³</span>`;
+      const altIdVal = $('altIdVal');
+      if (altIdVal) altIdVal.innerHTML = `${Number.isFinite(id) ? id.toFixed(2) : '—'}<span class="metric-unit">bits</span>`;
+      
+      const sphereVolText = $('sphereVolText');
+      if (sphereVolText) sphereVolText.innerHTML = `${fmt((4 / 3) * Math.PI * Math.pow(W / 2, 3))}<span class="metric-unit">cm³</span>`;
 
-      const tierEl = $('tierBadge');
-      if (id <= 3.0 + 1e-9) { tierEl.className = 'tier-indicator tier-single'; tierEl.textContent = '假设单次定位区 (ID ≤ 3)'; }
-      else if (id >= 5.0 - 1e-9) { tierEl.className = 'tier-indicator tier-multi'; tierEl.textContent = '假设易二次修正区 (ID ≥ 5)'; }
-      else { tierEl.className = 'tier-indicator tier-mid'; tierEl.textContent = '过渡修正区 (3 < ID < 5)'; }
+      // tierBadge 相关逻辑已移除
 
       const scaledScreen = renderSphereTrack($('altScreenSvg'), $('altScreenViewport'), D, W, '#1a365d');
-      $('altScreenText').textContent = `D ${fmt(D)} cm · ⌀ ${fmt(W)} cm${scaledScreen ? ' · 图示缩放' : ''}`;
+      const altScreenText = $('altScreenText');
+      if (altScreenText) altScreenText.textContent = `D ${fmt(D)} cm · ⌀ ${fmt(W)} cm${scaledScreen ? ' · 图示缩放' : ''}`;
 
       const dRange = $('altDRange');
-      if (D > D_SLIDER_PRECISION_LIMIT) {
-        dSliderMax = 50;
-        dRange.disabled = true;
-        dRange.max = '50'; dRange.value = '50';
-        dRange.title = '超大距离时滑块无法提供厘米级精度，请使用右侧数字输入；D 无人为上限。';
-      } else {
-        dRange.disabled = false;
-        if (D >= dSliderMax - 1e-9) {
-          dSliderMax = Math.min(D_SLIDER_PRECISION_LIMIT, Math.max(50, Math.ceil(Math.max(D, dSliderMax) * 1.5)));
-        } else if (D > dSliderMax) {
-          dSliderMax = Math.min(D_SLIDER_PRECISION_LIMIT, Math.ceil(D * 1.5));
+      if (dRange) {
+        if (D > D_SLIDER_PRECISION_LIMIT) {
+          dSliderMax = 50;
+          dRange.disabled = true;
+          dRange.max = '50'; dRange.value = '50';
+          dRange.title = '超大距离时滑块无法提供厘米级精度，请使用右侧数字输入；D 无人为上限。';
+        } else {
+          dRange.disabled = false;
+          if (D >= dSliderMax - 1e-9) {
+            dSliderMax = Math.min(D_SLIDER_PRECISION_LIMIT, Math.max(50, Math.ceil(Math.max(D, dSliderMax) * 1.5)));
+          } else if (D > dSliderMax) {
+            dSliderMax = Math.min(D_SLIDER_PRECISION_LIMIT, Math.ceil(D * 1.5));
+          }
+          dRange.max = String(Math.max(50, dSliderMax));
+          dRange.value = String(Math.min(D, Number(dRange.max)));
         }
-        dRange.max = String(Math.max(50, dSliderMax));
-        dRange.value = String(Math.min(D, Number(dRange.max)));
       }
-      $('altDNum').value = fmt(D);
-      $('altWRange').value = state.W; $('altWNum').value = fmt(state.W);
+      const altDNum = $('altDNum'); if (altDNum) altDNum.value = fmt(D);
+      const altWRange = $('altWRange'); if (altWRange) altWRange.value = state.W;
+      const altWNum = $('altWNum'); if (altWNum) altWNum.value = fmt(state.W);
     }
 
     function applyStateChange(key, val, options = {}) {
       if (!Number.isFinite(val)) {
-        if (key === 'D') setStatus('D 超出当前浏览器可表示的有限数值范围。请降低输入值。', 'warn');
+        if (key === 'D') setStatus('D 超出当前浏览器可表示的有限数值范围。', 'warn');
         return;
       }
       const bounded = clamp(val, LIMITS[key].min, LIMITS[key].max);
-      val = options.preservePrecision ? bounded : round2(bounded);
+      val = options.preservePrecision ? bounded : roundPrecision(bounded);
       state[key] = val;
-      let warnMsg = '';
-      if (key === 'W' && state.D < state.W / 2) { state.D = round2(state.W / 2); warnMsg = `宽度 W 侵入边界，系统被动推移距离 D 至 ${fmt(state.D)} cm 以防破位。`; }
-      else if (key === 'D' && state.W > 2 * state.D) { state.W = round2(2 * state.D); warnMsg = `距离 D 缩小，系统被动挤压宽度 W 至 ${fmt(state.W)} cm。`; }
-      if (warnMsg) setStatus(warnMsg, 'warn'); else setStatus('参数更新就绪。', 'ok');
+      
+      setStatus('参数更新就绪。', 'ok');
       try { localStorage.setItem('fitts_model_state', JSON.stringify(state)); } catch (_) {}
       refreshUI();
     }
 
     function bindInputs(key) {
       const range = $(`alt${key}Range`), num = $(`alt${key}Num`);
+      if (!range || !num) return;
       range.addEventListener('input', () => { num.value = fmt(Number(range.value)); applyStateChange(key, Number(range.value)); });
       num.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); num.blur(); } });
       num.addEventListener('blur', () => {
         const raw = num.value.trim();
         const val = raw === '' ? NaN : Number(raw);
-        if (Number.isFinite(val)) applyStateChange(key, val, { preservePrecision: key === 'D' });
-        else { num.value = fmt(state[key]); if (key === 'D') setStatus('D 必须是可表示的有限数值，且不能小于 1 cm。', 'warn'); }
+        if (Number.isFinite(val) && val > 0) applyStateChange(key, val, { preservePrecision: true });
+        else { num.value = fmt(state[key]); setStatus(`${key} 必须是大于 0 的有效有限数值。`, 'warn'); }
       });
     }
     bindInputs('D'); bindInputs('W');
 
-    // ===== 视图缩放：按比例同时缩放 D 和 W 的数值 =====
     let sAnchor = 1;
     const sSlider = $('altSRange');
     const sDisplay = $('altSDisplay');
 
     function updateZoomDisplay() {
-      if (sDisplay) sDisplay.textContent = `×${Number(sSlider.value).toFixed(2)}`;
+      if (sDisplay && sSlider) sDisplay.textContent = `×${Number(sSlider.value).toFixed(2)}`;
     }
 
-    sSlider.addEventListener('input', () => {
-      const newS = Number(sSlider.value);
-      if (!Number.isFinite(newS) || newS <= 0) return;
-      if (Math.abs(newS - sAnchor) < 1e-9) { updateZoomDisplay(); return; }
+    if (sSlider) {
+      sSlider.addEventListener('input', () => {
+        const newS = Number(sSlider.value);
+        if (!Number.isFinite(newS) || newS <= 0) return;
+        if (Math.abs(newS - sAnchor) < 1e-9) { updateZoomDisplay(); return; }
 
-      const ratio = newS / sAnchor;
-      const newD = clamp(round2(state.D * ratio), LIMITS.D.min, LIMITS.D.max);
-      const newW = clamp(round2(state.W * ratio), LIMITS.W.min, LIMITS.W.max);
-      state.D = newD;
-      state.W = newW;
-      sAnchor = newS;
+        const ratio = newS / sAnchor;
+        const newD = clamp(state.D * ratio, LIMITS.D.min, LIMITS.D.max);
+        const newW = clamp(state.W * ratio, LIMITS.W.min, LIMITS.W.max);
+        state.D = newD;
+        state.W = newW;
+        sAnchor = newS;
 
-      // 同步 D、W 的滑块和输入框
-      $('altDNum').value = fmt(state.D);
-      $('altWNum').value = fmt(state.W);
-      const dRange = $('altDRange');
-      if (state.D <= Number(dRange.max)) dRange.value = String(state.D);
-      $('altWRange').value = state.W;
+        const altDNum = $('altDNum'); if (altDNum) altDNum.value = fmt(state.D);
+        const altWNum = $('altWNum'); if (altWNum) altWNum.value = fmt(state.W);
+        const dRange = $('altDRange');
+        if (dRange && state.D <= Number(dRange.max)) dRange.value = String(state.D);
+        const altWRange = $('altWRange'); if (altWRange) altWRange.value = state.W;
 
-      try { localStorage.setItem('fitts_model_state', JSON.stringify(state)); } catch (_) {}
-      updateZoomDisplay();
-      setStatus(`视图缩放 ×${newS.toFixed(2)}：D 与 W 已按相同比例缩放。`, 'ok');
-      refreshUI();
-    });
+        try { localStorage.setItem('fitts_model_state', JSON.stringify(state)); } catch (_) {}
+        updateZoomDisplay();
+        setStatus(`视图缩放 ×${newS.toFixed(2)}：D 与 W 已按相同比例精确缩放。`, 'ok');
+        refreshUI();
+      });
+    }
 
     function parseSolverTarget() {
-      const raw = $('targetIdInput').value.trim();
+      const targetIdInput = $('targetIdInput');
+      if (!targetIdInput) return null;
+      const raw = targetIdInput.value.trim();
       const t = raw === '' ? NaN : Number(raw);
-      if (!Number.isFinite(t) || t < LIMITS.targetId.min) { setStatus('请输入有效目标 ID（≥0.1）。', 'warn'); return null; }
+      if (!Number.isFinite(t) || t < 0) { setStatus('请输入有效目标 ID（≥0）。', 'warn'); return null; }
       return t;
     }
 
-    // 反解 D：ID = log₂(1 + L₀·D/W^p)  =>  D = (2^ID − 1) · W^p / L₀
-    $('solveDBtn').addEventListener('click', () => {
-      const target = parseSolverTarget(); if (target === null) return;
-      const p = wExp;
-      const logTargetRatio = logRatioForId(target);
-      const logNeededD = logTargetRatio + p * Math.log(state.W) - Math.log(REF_LENGTH_CM);
-      const neededD = expFromLog(logNeededD);
-      if (!Number.isFinite(neededD)) {
-        setStatus('该目标 ID 反解所需的 D 超出可表示范围。', 'warn');
-        return;
-      }
-      applyStateChange('D', neededD, { preservePrecision: true });
-      const achieved = calculateModelId(state.D, state.W, wExp);
-      const metTarget = Number.isFinite(achieved) && Math.abs(achieved - target) <= 0.015;
-      if (neededD < LIMITS.D.min || !metTarget) {
-        setStatus(`受到 D 最小值、重叠规则或浮点精度限制。当前 D = ${fmt(state.D)} cm，实际 ID = ${fmt(achieved)}，目标 ID = ${fmt(target)}。`, 'warn');
-      } else {
-        setStatus(`已反解距离 D = ${fmt(state.D)} cm（实际 ID = ${fmt(achieved)}）。`, 'ok');
-      }
-    });
+    const solveDBtn = $('solveDBtn');
+    if (solveDBtn) {
+      solveDBtn.addEventListener('click', () => {
+        const target = parseSolverTarget(); if (target === null) return;
+        const p = wExp;
+        const logTargetRatio = logRatioForId(target);
+        const logNeededD = logTargetRatio + p * Math.log(state.W) - Math.log(REF_LENGTH_CM);
+        const neededD = expFromLog(logNeededD);
+        if (!Number.isFinite(neededD)) { setStatus('该目标 ID 反解所需的 D 超出可表示范围。', 'warn'); return; }
+        applyStateChange('D', neededD, { preservePrecision: true });
+        const achieved = calculateModelId(state.D, state.W, wExp);
+        setStatus(`已反解距离 D = ${fmt(state.D)} cm（实际 ID = ${achieved.toFixed(2)}）。`, 'ok');
+      });
+    }
 
-    // 反解 W：ID = log₂(1 + L₀·D/W^p)  =>  W = (L₀·D / (2^ID − 1))^(1/p)
-    $('solveWBtn').addEventListener('click', () => {
-      const target = parseSolverTarget(); if (target === null) return;
-      const p = wExp;
-      const logTargetRatio = logRatioForId(target);
-      const logNeededW = (Math.log(state.D) + Math.log(REF_LENGTH_CM) - logTargetRatio) / p;
-      const neededW = expFromLog(logNeededW);
-      if (!Number.isFinite(neededW)) {
-        setStatus('该目标 ID 反解所需的 W 超出可表示范围。', 'warn');
-        return;
-      }
-      const safeW = Math.min(neededW, 2 * state.D);
-      applyStateChange('W', safeW, { preservePrecision: true });
-      const achieved = calculateModelId(state.D, state.W, wExp);
-      const metTarget = Number.isFinite(achieved) && Math.abs(achieved - target) <= 0.015;
-      if (neededW > LIMITS.W.max || neededW < LIMITS.W.min || !metTarget) {
-        setStatus(`受到 W 范围、重叠边界或浮点精度限制。当前 W = ${fmt(state.W)} cm，实际 ID = ${fmt(achieved)}。`, 'warn');
-      } else {
-        setStatus(`已反解直径 W = ${fmt(state.W)} cm（实际 ID = ${fmt(achieved)}）。`, 'ok');
-      }
-    });
+    const solveWBtn = $('solveWBtn');
+    if (solveWBtn) {
+      solveWBtn.addEventListener('click', () => {
+        const target = parseSolverTarget(); if (target === null) return;
+        const p = wExp;
+        const logTargetRatio = logRatioForId(target);
+        const logNeededW = (Math.log(state.D) + Math.log(REF_LENGTH_CM) - logTargetRatio) / p;
+        const neededW = expFromLog(logNeededW);
+        if (!Number.isFinite(neededW)) { setStatus('该目标 ID 反解所需的 W 超出可表示范围。', 'warn'); return; }
+        applyStateChange('W', neededW, { preservePrecision: true });
+        const achieved = calculateModelId(state.D, state.W, wExp);
+        setStatus(`已反解直径 W = ${fmt(state.W)} cm（实际 ID = ${achieved.toFixed(2)}）。`, 'ok');
+      });
+    }
 
     if ('ResizeObserver' in window) {
       let rafId = null;
-      const ro = new ResizeObserver(() => {
-        if (rafId !== null) return;
-        rafId = requestAnimationFrame(() => { rafId = null; refreshUI(); });
-      });
-      ro.observe($('altScreenViewport'));
+      const viewport = $('altScreenViewport');
+      if (viewport) {
+        const ro = new ResizeObserver(() => {
+          if (rafId !== null) return;
+          rafId = requestAnimationFrame(() => { rafId = null; refreshUI(); });
+        });
+        ro.observe(viewport);
+      }
     }
 
-    // =========================================================
-    // 2D 瞄准微操游戏核心逻辑
-    // =========================================================
     const MARK_LIFE_MS = 500;
     const MARK_RADIUS = 2.5;
 
@@ -889,7 +928,7 @@
       mode: 'free', side: 'right', originX: 0, originY: 0,
       marks: [], markRaf: null, crosshairWidth: 1.0
     };
-    const cvs = $('aimCanvas'), ctx = cvs.getContext('2d');
+    const cvs = $('aimCanvas'), ctx = cvs && cvs.getContext('2d');
     const overlayEl = $('aimOverlay');
 
     function getHudBottom() {
@@ -898,7 +937,7 @@
     }
 
     function resizeAim() {
-      if (!aim.active) return;
+      if (!aim.active || !cvs || !ctx) return;
       aim.w = window.innerWidth; aim.h = window.innerHeight; aim.dpr = Math.min(2.5, window.devicePixelRatio || 1);
       aim.hudBottom = getHudBottom();
       cvs.width = aim.w * aim.dpr; cvs.height = aim.h * aim.dpr; cvs.style.width = `${aim.w}px`; cvs.style.height = `${aim.h}px`;
@@ -907,23 +946,17 @@
 
     function setAimMsg(msg, type = '') {
       const el = $('aimNotice');
+      if (!el) return;
       el.textContent = msg || '';
       el.className = `aim-center-notice ${type}`;
     }
 
-    function pauseForTargetFitFailure() {
-      if (aim.started) {
-        aim.started = false;
-        overlayEl.classList.add('paused');
-        if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
-      }
-      setAimMsg('当前画布空间不足以按原始参数绘制目标；请退出训练后调整 D/W，或增大窗口。', 'warn');
-    }
-
     function updateAimDesc() {
+      const desc = $('aimParamDesc');
+      if (!desc) return;
       const modeLabel = aim.mode === 'fixed' ? '定式定位' : '自由瞄准';
       const sideLabel = aim.mode === 'fixed' ? ` · 球在${aim.side === 'left' ? '左' : '右'}` : '';
-      $('aimParamDesc').textContent = `D: ${fmt(state.D)} cm · W: ${fmt(state.W)} cm · ${modeLabel}${sideLabel}`;
+      desc.textContent = `D: ${fmt(state.D)} cm · W: ${fmt(state.W)} cm · ${modeLabel}${sideLabel}`;
     }
 
     function addMark(x, y, isHit) {
@@ -941,7 +974,7 @@
     }
 
     function drawAim() {
-      if (!aim.active) return;
+      if (!aim.active || !ctx) return;
       ctx.clearRect(0, 0, aim.w, aim.h); ctx.fillStyle = '#060f1b'; ctx.fillRect(0, 0, aim.w, aim.h);
       ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(167, 124, 55, 0.08)';
       for (let x = 0; x <= aim.w; x += 34) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, aim.h); ctx.stroke(); }
@@ -977,15 +1010,13 @@
 
       if (aim.tr > 0) {
         ctx.save();
-        if (aim.tr >= 5) {
-          const g = ctx.createRadialGradient(aim.tx - aim.tr * 0.35, aim.ty - aim.tr * 0.35, aim.tr * 0.05, aim.tx, aim.ty, aim.tr);
-          g.addColorStop(0, '#ffffff'); g.addColorStop(0.26, '#e2ecf9'); g.addColorStop(0.7, '#436f9e'); g.addColorStop(1, '#0c223c');
-          ctx.shadowColor = 'rgba(216, 186, 127, 0.3)'; ctx.shadowBlur = Math.min(22, aim.tr * 0.8);
-          ctx.beginPath(); ctx.arc(aim.tx, aim.ty, aim.tr, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
-          ctx.strokeStyle = '#d6ba7f'; ctx.lineWidth = Math.min(2, Math.max(0.7, aim.tr * 0.08)); ctx.stroke();
-        } else {
-          ctx.beginPath(); ctx.arc(aim.tx, aim.ty, aim.tr, 0, Math.PI * 2); ctx.fillStyle = '#6490be'; ctx.fill();
-        }
+        const drawRadius = Math.max(aim.tr, 3);
+        const g = ctx.createRadialGradient(aim.tx - drawRadius * 0.35, aim.ty - drawRadius * 0.35, drawRadius * 0.05, aim.tx, aim.ty, drawRadius);
+        g.addColorStop(0, '#ffffff'); g.addColorStop(0.26, '#e2ecf9'); g.addColorStop(0.7, '#436f9e'); g.addColorStop(1, '#0c223c');
+        ctx.shadowColor = 'rgba(216, 186, 127, 0.4)'; ctx.shadowBlur = Math.min(22, drawRadius * 0.8);
+        ctx.beginPath(); ctx.arc(aim.tx, aim.ty, drawRadius, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+        ctx.strokeStyle = aim.tr < 3 ? '#ff4a4a' : '#d6ba7f';
+        ctx.lineWidth = Math.min(2, Math.max(0.7, drawRadius * 0.08)); ctx.stroke();
         ctx.restore();
       }
 
@@ -1037,7 +1068,7 @@
         const a = (i * Math.PI) / 180, tx = aim.cx + Math.cos(a) * dist, ty = aim.cy + Math.sin(a) * dist;
         if (tx >= aim.tr + 24 && tx <= aim.w - aim.tr - 24 && ty >= top + aim.tr + 10 && ty <= aim.h - aim.tr - 20) cands.push(a);
       }
-      if (!cands.length) { aim.tr = 0; return false; }
+      if (!cands.length) { aim.tr = Math.max((state.W * pxPerCm) / 2, 3); return false; }
       const a = cands[Math.floor(Math.random() * cands.length)];
       aim.tx = aim.cx + Math.cos(a) * dist; aim.ty = aim.cy + Math.sin(a) * dist;
       aim.originX = 0; aim.originY = 0;
@@ -1063,123 +1094,161 @@
       const top = (aim.hudBottom || getHudBottom()) + 16;
       aim.tr = (state.W * pxPerCm) / 2;
       const ok = aim.mode === 'fixed' ? spawnFixedTarget(top) : spawnFreeTarget(top);
-      if (!ok) { aim.tr = 0; drawAim(); }
+      if (!ok) { aim.tr = Math.max((state.W * pxPerCm) / 2, 3); drawAim(); }
       return ok;
     }
 
-    $('openAimBtn').addEventListener('click', () => {
-      readModeFromUI();
-      aim.active = true; aim.started = false; aim.tr = 0;
-      aim.hits = 0; aim.miss = 0; aim.rt = []; aim.hudBottom = 0;
-      aim.originX = 0; aim.originY = 0; aim.marks = [];
-      if (aim.markRaf !== null) { cancelAnimationFrame(aim.markRaf); aim.markRaf = null; }
-      $('statHits').textContent = '0'; $('statMisses').textContent = '0';
-      $('statAcc').textContent = '—'; $('statRt').textContent = '—';
-      updateAimDesc();
-      overlayEl.classList.remove('hidden');
-      overlayEl.classList.remove('paused');
-      resizeAim();
-      aim.hudBottom = getHudBottom();
-      setAimMsg('');
-    });
-
-    $('gameSens').addEventListener('input', () => {
-      const v = Number($('gameSens').value);
-      $('gameSensVal').textContent = `${v.toFixed(1)}×`;
-      try { localStorage.setItem('fitts_game_sens', v.toFixed(1)); } catch (_) {}
-    });
-
-    $('crosshairWidth').addEventListener('input', () => {
-      const v = Number($('crosshairWidth').value);
-      aim.crosshairWidth = v;
-      $('crosshairWidthVal').textContent = v.toFixed(1);
-      try { localStorage.setItem('fitts_crosshair_width', v.toFixed(1)); } catch (_) {}
-      drawAim();
-    });
-
-    $('gameMode').addEventListener('change', () => {
-      try { localStorage.setItem('fitts_game_mode', $('gameMode').value); } catch (_) {}
-      if (!aim.active || !aim.started) return;
-      readModeFromUI();
-      if (!spawnAimTarget()) pauseForTargetFitFailure();
-      else setAimMsg('');
-      updateAimDesc();
-    });
-    $('gameSide').addEventListener('change', () => {
-      try { localStorage.setItem('fitts_game_side', $('gameSide').value); } catch (_) {}
-      if (!aim.active || !aim.started) return;
-      readModeFromUI();
-      if (!spawnAimTarget()) pauseForTargetFitFailure();
-      else setAimMsg('');
-      updateAimDesc();
-    });
-
-    cvs.addEventListener('click', () => {
-      if (!aim.active || aim.started) return;
-      if (!cvs.requestPointerLock) { setAimMsg('浏览器不支持指针锁定', 'warn'); return; }
-      readModeFromUI();
-      resizeAim();
-      aim.hudBottom = getHudBottom();
-      aim.cx = aim.w / 2;
-      aim.cy = (aim.hudBottom + 16 + aim.h) / 2;
-      if (!spawnAimTarget()) { setAimMsg('当前画布空间不足以按原始参数容纳目标与步距。', 'warn'); return; }
-      aim.started = true;
-      overlayEl.classList.remove('paused');
-      setAimMsg('');
-      drawAim();
-      updateAimDesc();
-      const p = cvs.requestPointerLock({ unadjustedMovement: true });
-      if (p && typeof p.catch === 'function') {
-        p.catch(() => setAimMsg('请求原始输入失败，可能受系统加速影响', 'warn'));
-      }
-    });
-
-    cvs.addEventListener('mousemove', (e) => {
-      if (!aim.started || document.pointerLockElement !== cvs) return;
-      const sens = Number($('gameSens').value) || 1.0, dpi = clamp(Number($('mouseDpi').value) || 800, 100, 50000);
-      const pxFactor = (2.54 * pxPerCm / dpi) * sens;
-      const topLimit = (aim.hudBottom || getHudBottom()) + 18;
-      const bottomLimit = Math.max(topLimit + 4, aim.h - 4);
-      aim.cx = clamp(aim.cx + (e.movementX || 0) * pxFactor, 4, Math.max(8, aim.w - 4));
-      aim.cy = clamp(aim.cy + (e.movementY || 0) * pxFactor, topLimit, bottomLimit);
-      drawAim();
-    });
-
-    cvs.addEventListener('mousedown', (e) => {
-      if (!aim.started || e.button !== 0 || aim.tr === 0) return;
-      const px = aim.cx, py = aim.cy;
-      if (Math.hypot(aim.cx - aim.tx, aim.cy - aim.ty) <= aim.tr) {
-        aim.hits++;
-        aim.rt.push(performance.now() - aim.spawnTs);
-        addMark(px, py, true);
-        if (!spawnAimTarget()) {
-          aim.started = false;
-          overlayEl.classList.add('paused');
-          setAimMsg('下一目标无法在当前画布中完整显示，训练已暂停。', 'warn');
-          if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
+    const openAimBtn = $('openAimBtn');
+    if (openAimBtn) {
+      openAimBtn.addEventListener('click', () => {
+        readModeFromUI();
+        aim.active = true; aim.started = false; aim.tr = 0;
+        aim.hits = 0; aim.miss = 0; aim.rt = []; aim.hudBottom = 0;
+        aim.originX = 0; aim.originY = 0; aim.marks = [];
+        if (aim.markRaf !== null) { cancelAnimationFrame(aim.markRaf); aim.markRaf = null; }
+        const hEl = $('statHits'); if (hEl) hEl.textContent = '0';
+        const mEl = $('statMisses'); if (mEl) mEl.textContent = '0';
+        const accEl = $('statAcc'); if (accEl) accEl.textContent = '—';
+        const rtEl = $('statRt'); if (rtEl) rtEl.textContent = '—';
+        updateAimDesc();
+        if (overlayEl) {
+          overlayEl.classList.remove('hidden');
+          overlayEl.classList.remove('paused');
         }
-      } else {
-        aim.miss++;
-        addMark(px, py, false);
+        resizeAim();
+        aim.hudBottom = getHudBottom();
+        setAimMsg('');
+      });
+    }
+
+    const gameSens = $('gameSens');
+    const gameSensVal = $('gameSensVal');
+    if (gameSens && gameSensVal) {
+      gameSens.addEventListener('input', () => {
+        const v = Number(gameSens.value);
+        gameSensVal.textContent = `${v.toFixed(1)}×`;
+        try { localStorage.setItem('fitts_game_sens', v.toFixed(1)); } catch (_) {}
+      });
+    }
+
+    const crosshairWidthEl = $('crosshairWidth');
+    const crosshairWidthVal = $('crosshairWidthVal');
+    if (crosshairWidthEl && crosshairWidthVal) {
+      crosshairWidthEl.addEventListener('input', () => {
+        const v = Number(crosshairWidthEl.value);
+        aim.crosshairWidth = v;
+        crosshairWidthVal.textContent = v.toFixed(1);
+        try { localStorage.setItem('fitts_crosshair_width', v.toFixed(1)); } catch (_) {}
         drawAim();
+      });
+    }
+
+    const gameModeEl = $('gameMode');
+    if (gameModeEl) {
+      gameModeEl.addEventListener('change', () => {
+        try { localStorage.setItem('fitts_game_mode', gameModeEl.value); } catch (_) {}
+        if (!aim.active || !aim.started) return;
+        readModeFromUI();
+        if (!spawnAimTarget()) pauseForTargetFitFailure();
+        else setAimMsg('');
+        updateAimDesc();
+      });
+    }
+
+    const gameSideEl = $('gameSide');
+    if (gameSideEl) {
+      gameSideEl.addEventListener('change', () => {
+        try { localStorage.setItem('fitts_game_side', gameSideEl.value); } catch (_) {}
+        if (!aim.active || !aim.started) return;
+        readModeFromUI();
+        if (!spawnAimTarget()) pauseForTargetFitFailure();
+        else setAimMsg('');
+        updateAimDesc();
+      });
+    }
+
+    function pauseForTargetFitFailure() {
+      if (aim.started) {
+        aim.started = false;
+        if (overlayEl) overlayEl.classList.add('paused');
+        if (cvs && document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
       }
-      $('statHits').textContent = aim.hits;
-      $('statMisses').textContent = aim.miss;
-      const total = aim.hits + aim.miss;
-      $('statAcc').textContent = total > 0 ? `${(aim.hits / total * 100).toFixed(1)}%` : '—';
-      if (aim.rt.length > 0) $('statRt').textContent = `${Math.round(aim.rt.reduce((a, b) => a + b, 0) / aim.rt.length)} ms`;
-    });
+      setAimMsg('当前画布空间不足以按当前参数绘制目标；请退出训练后调整参数，或增大窗口。', 'warn');
+    }
+
+    if (cvs) {
+      cvs.addEventListener('click', () => {
+        if (!aim.active || aim.started) return;
+        if (!cvs.requestPointerLock) { setAimMsg('浏览器不支持指针锁定', 'warn'); return; }
+        readModeFromUI();
+        resizeAim();
+        aim.hudBottom = getHudBottom();
+        aim.cx = aim.w / 2;
+        aim.cy = (aim.hudBottom + 16 + aim.h) / 2;
+        if (!spawnAimTarget()) { setAimMsg('当前画布空间不足以按当前参数容纳目标与步距。', 'warn'); return; }
+        aim.started = true;
+        if (overlayEl) overlayEl.classList.remove('paused');
+        setAimMsg('');
+        drawAim();
+        updateAimDesc();
+        const p = cvs.requestPointerLock({ unadjustedMovement: true });
+        if (p && typeof p.catch === 'function') {
+          p.catch(() => setAimMsg('请求原始输入失败，可能受系统加速影响', 'warn'));
+        }
+      });
+
+      cvs.addEventListener('mousemove', (e) => {
+        if (!aim.started || document.pointerLockElement !== cvs) return;
+        const sens = Number(gameSens ? gameSens.value : 1.0) || 1.0;
+        const dpiEl = $('mouseDpi');
+        const dpi = clamp(Number(dpiEl ? dpiEl.value : 800) || 800, 100, 50000);
+        const pxFactor = (2.54 * pxPerCm / dpi) * sens;
+        const topLimit = (aim.hudBottom || getHudBottom()) + 18;
+        const bottomLimit = Math.max(topLimit + 4, aim.h - 4);
+        aim.cx = clamp(aim.cx + (e.movementX || 0) * pxFactor, 4, Math.max(8, aim.w - 4));
+        aim.cy = clamp(aim.cy + (e.movementY || 0) * pxFactor, topLimit, bottomLimit);
+        drawAim();
+      });
+
+      cvs.addEventListener('mousedown', (e) => {
+        if (!aim.started || e.button !== 0 || aim.tr === 0) return;
+        const px = aim.cx, py = aim.cy;
+        const hitRadius = Math.max(aim.tr, 4);
+        if (Math.hypot(aim.cx - aim.tx, aim.cy - aim.ty) <= hitRadius) {
+          aim.hits++;
+          aim.rt.push(performance.now() - aim.spawnTs);
+          addMark(px, py, true);
+          if (!spawnAimTarget()) {
+            aim.started = false;
+            if (overlayEl) overlayEl.classList.add('paused');
+            setAimMsg('下一目标无法在当前画布中完整显示，训练已暂停。', 'warn');
+            if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
+          }
+        } else {
+          aim.miss++;
+          addMark(px, py, false);
+          drawAim();
+        }
+        const hEl = $('statHits'); if (hEl) hEl.textContent = aim.hits;
+        const mEl = $('statMisses'); if (mEl) mEl.textContent = aim.miss;
+        const total = aim.hits + aim.miss;
+        const accEl = $('statAcc'); if (accEl) accEl.textContent = total > 0 ? `${(aim.hits / total * 100).toFixed(1)}%` : '—';
+        const rtEl = $('statRt'); if (rtEl && aim.rt.length > 0) rtEl.textContent = `${Math.round(aim.rt.reduce((a, b) => a + b, 0) / aim.rt.length)} ms`;
+      });
+    }
 
     let lockLostTs = 0;
 
     function closeAim() {
       if (!aim.active) return;
       aim.active = false; aim.started = false;
-      overlayEl.classList.remove('paused');
+      if (overlayEl) {
+        overlayEl.classList.remove('paused');
+        overlayEl.classList.add('hidden');
+      }
       if (aim.markRaf !== null) { cancelAnimationFrame(aim.markRaf); aim.markRaf = null; }
       aim.marks = [];
-      overlayEl.classList.add('hidden');
-      if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
+      if (cvs && document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
     }
 
     document.addEventListener('pointerlockchange', () => {
@@ -1187,7 +1256,7 @@
         lockLostTs = performance.now();
         if (aim.started) {
           aim.started = false;
-          overlayEl.classList.add('paused');
+          if (overlayEl) overlayEl.classList.add('paused');
           setAimMsg('已暂停 · 点击画布继续 · 再按 Esc 退出', '');
           drawAim();
         }
@@ -1197,7 +1266,7 @@
     document.addEventListener('pointerlockerror', () => {
       if (aim.active) {
         aim.started = false;
-        overlayEl.classList.add('paused');
+        if (overlayEl) overlayEl.classList.add('paused');
         setAimMsg('浏览器安全策略拒绝了锁定请求，请重试或在原生标签页中打开。', 'warn');
       }
     });
