@@ -1,0 +1,2654 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>3D 瞄准难度模型 </title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary: #ef233c;
+            --primary-hover: #d90429;
+            --primary-light: rgba(239, 35, 60, 0.08);
+            --accent: #0284c7;
+            --accent-hover: #0369a1;
+            --border-glass: rgba(255, 255, 255, 0.85);
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --bg-header: #0f172a;
+            --text-main: #0f172a;
+            --text-sub: #334155;
+            --text-muted: #64748b;
+            --panel-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+        body { 
+            overflow: hidden; 
+            background-color: #f8fafc; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; 
+            width: 100vw; 
+            height: 100vh; 
+        }
+
+        #canvas-container { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #e2e8f0; }
+        #canvas-container canvas { display: block; width: 100% !important; height: 100% !important; }
+
+        /* 反馈点覆盖画布 */
+        #feedback-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 11;
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 准星容器 */
+        #crosshair-container { 
+            position: fixed; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            pointer-events: none; z-index: 10; 
+            display: flex; align-items: center; justify-content: center; 
+            transition: transform 0.08s ease; 
+        }
+        #crosshair-container.on-target { transform: translate(-50%, -50%) scale(1.22); }
+        body.aim-locked #crosshair-container, body.aim-locked .classic-crosshair-dot { transition: none !important; }
+        body.aim-locked #left-panel, body.aim-locked #right-panel, body.aim-locked #left-bottom-group, body.aim-locked #bottom-right-hud { 
+            visibility: hidden; opacity: 0; pointer-events: none; 
+        }
+
+        .classic-crosshair-dot { 
+            width: 3px; height: 3px; border-radius: 50%; position: relative; 
+        }
+        .classic-crosshair-dot::before, .classic-crosshair-dot::after { content: ''; position: absolute; background: inherit; }
+        .classic-crosshair-dot::before { top: -6px; bottom: -6px; left: 1px; right: 1px; }
+        .classic-crosshair-dot::after { left: -6px; right: -6px; top: 1px; bottom: 1px; }
+        #crosshair-container.on-target .classic-crosshair-dot { box-shadow: 0 0 10px currentColor; }
+
+        /* 顶部 HUD */
+        #top-hud { 
+            position: absolute; top: 14px; left: 16px; right: 16px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            pointer-events: none; z-index: 5; flex-wrap: wrap; gap: 8px; 
+        }
+        .hud-card { 
+            background: var(--bg-glass); 
+            backdrop-filter: blur(28px) saturate(190%); 
+            padding: 7px 16px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; 
+            color: var(--text-sub); border: 1px solid var(--border-glass); 
+            display: flex; align-items: center; gap: 13px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); flex-wrap: wrap; 
+        }
+        .hud-val { color: var(--accent); font-weight: 900; font-family: ui-monospace, monospace; }
+        .hud-output { color: var(--primary); font-weight: 900; font-size: 0.88rem; font-family: ui-monospace, monospace; }
+        .fps-val { color: #16a34a; font-weight: 900; }
+        .poll-val { color: #7c3aed; font-weight: 900; }
+
+        .hud-action-btn { 
+            background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; font-size: 0.64rem; font-weight: 800; 
+            color: #334155; padding: 2px 8px; border-radius: 4px; cursor: pointer; 
+            pointer-events: auto; transition: all 0.15s ease; white-space: nowrap; 
+        }
+        .hud-action-btn:hover { border-color: var(--accent); color: var(--accent); background: #e0f2fe; }
+
+        .f11-card { padding: 7px 16px; font-size: 0.78rem; font-weight: 900; cursor: pointer; pointer-events: auto; transition: 0.2s; }
+        .f11-card:hover { color: var(--primary); border-color: var(--primary); }
+
+        /* 玻璃面板 */
+        .glass-panel { 
+            background: var(--bg-glass); 
+            backdrop-filter: blur(28px) saturate(190%); 
+            border: 1px solid var(--border-glass); 
+            border-radius: 10px; padding: 0; 
+            box-shadow: var(--panel-shadow); 
+            max-height: 88vh; overflow-y: auto; 
+            display: flex; flex-direction: column; 
+            transition: opacity 0.15s, visibility 0.15s; 
+        }
+        .glass-panel::-webkit-scrollbar { width: 4px; }
+        .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+        #left-panel { position: fixed; left: 18px; top: 58px; width: min(395px, calc(100vw - 36px)); z-index: 20; }
+        #right-panel { position: fixed; right: 18px; top: 58px; width: min(380px, calc(100vw - 36px)); z-index: 19; }
+        #right-panel.collapsed .panel-body { display: none; }
+        #right-panel.collapsed .panel-header-dark { border-radius: 9px; }
+        #right-panel.collapsed #right-panel-toggle-icon { transform: rotate(-90deg); }
+
+        /* 左侧面板深灰+红标头部 */
+        .panel-header-dark { 
+            background: var(--bg-header); 
+            border-top: 4px solid var(--primary); 
+            padding: 10px 14px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-top-left-radius: 9px; border-top-right-radius: 9px; 
+        }
+        .panel-header-title { font-size: 0.84rem; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 8px; }
+        .panel-header-title::before { content: ''; display: inline-block; width: 6px; height: 13px; background: var(--primary); border-radius: 2px; }
+        .header-actions { display: flex; gap: 5px; align-items: center; }
+        .header-dark-btn { 
+            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); 
+            font-size: 0.64rem; font-weight: 800; color: #f8fafc; padding: 3px 8px; border-radius: 4px; cursor: pointer; transition: 0.15s; 
+        }
+        .header-dark-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .panel-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+
+        /* 公式框架选择器 */
+        .framework-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: rgba(226, 232, 240, 0.6);
+            padding: 3px;
+            border-radius: 6px;
+        }
+        .framework-btn {
+            border: none;
+            background: transparent;
+            color: #475569;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 6px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+        .framework-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+            font-weight: 900;
+        }
+
+        /* 公式 Hero 卡片 */
+        .formula-hero-card { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
+            border: 1px solid #334155; border-radius: 7px; padding: 10px 12px; 
+            text-align: center; color: #ffffff; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12); 
+            cursor: pointer; transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+            position: relative;
+        }
+        .formula-hero-card:hover {
+            transform: translateY(-1px);
+            border-color: #38bdf8;
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.25);
+        }
+        .formula-hero-card:active { transform: scale(0.99); }
+        .formula-hero-math { 
+            font-family: Cambria, "Times New Roman", Georgia, serif; 
+            font-size: 1.25rem; font-weight: bold; color: #ff4d6d; letter-spacing: 0.5px; 
+        }
+        .formula-hero-stat { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; display: flex; justify-content: center; align-items: center; gap: 5px; }
+        .formula-hero-val { color: #ffffff; font-size: 1.08rem; font-weight: 900; font-family: ui-monospace, monospace; }
+        .copy-hint-badge {
+            font-size: 0.58rem; background: rgba(2, 132, 199, 0.25); color: #38bdf8;
+            padding: 1px 6px; border-radius: 3px; font-weight: bold; margin-left: 4px;
+        }
+
+        .section-card { 
+            background: rgba(248, 250, 252, 0.75); 
+            border: 1px solid rgba(226, 232, 240, 0.9); 
+            border-radius: 6px; padding: 8px 10px; 
+        }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .section-label { font-size: 0.72rem; font-weight: 900; color: #1e293b; display: flex; align-items: center; gap: 5px; }
+
+        .preset-grid { display: grid; gap: 4px; margin-bottom: 6px; }
+        .preset-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .preset-grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        .pill-btn { 
+            min-width: 0; border: 1px solid #cbd5e1; background: #ffffff; 
+            color: #334155; font-size: 0.63rem; font-weight: 800; padding: 5px 3px; 
+            border-radius: 4px; cursor: pointer; transition: all 0.12s ease; 
+            text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        }
+        .pill-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f9ff; }
+        .pill-btn.active { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
+
+        .ctrl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+        .ctrl-row:last-child { margin-bottom: 0; }
+        .ctrl-row label { font-size: 0.68rem; font-weight: 700; color: #475569; width: 92px; flex-shrink: 0; white-space: nowrap; }
+        .ctrl-row input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; height: 4px; min-width: 50px; }
+
+        .stepper-box { display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; background: #ffffff; flex-shrink: 0; }
+        .step-btn { width: 20px; height: 22px; border: none; background: #f8fafc; color: var(--accent); font-size: 0.8rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .step-btn:hover { background: #e0f2fe; }
+        .num-input { width: 58px; height: 22px; border: none; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; font-family: ui-monospace, monospace; font-size: 0.72rem; font-weight: 800; text-align: center; color: var(--text-main); outline: none; background: #ffffff; }
+
+        /* 目标 ID 输入容器 */
+        .target-di-container {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border: 2px solid #0284c7;
+            border-radius: 6px;
+            padding: 4px 10px;
+            box-shadow: 0 2px 10px rgba(2, 132, 199, 0.1);
+            transition: all 0.2s ease;
+            margin-bottom: 6px;
+        }
+        .target-di-container:focus-within {
+            border-color: #ef233c;
+            box-shadow: 0 4px 16px rgba(239, 35, 60, 0.22);
+        }
+        .target-di-label {
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: #1e293b;
+            white-space: nowrap;
+            margin-right: 6px;
+        }
+        .target-di-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-family: ui-monospace, monospace;
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #ef233c;
+            background: transparent;
+            text-align: right;
+            padding-right: 4px;
+            min-width: 0;
+        }
+        .target-di-unit {
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: #64748b;
+            margin-left: 2px;
+        }
+
+        .btn-inverse-action {
+            flex: 1;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 6px 3px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .btn-inverse-action:hover {
+            border-color: #0284c7;
+            color: #0284c7;
+            background: #f0f9ff;
+            transform: translateY(-1px);
+        }
+
+        /* 换算器 */
+        .converter-box {
+            background: #ffffff;
+            border: 1.5px solid #0284c7;
+            border-radius: 7px;
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .converter-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .converter-title {
+            font-size: 0.75rem;
+            font-weight: 900;
+            color: #0f172a;
+        }
+        .converter-badge {
+            font-size: 0.58rem;
+            font-weight: 800;
+            color: #0284c7;
+            background: #e0f2fe;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .converter-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .converter-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: #475569;
+            width: 58px;
+            flex-shrink: 0;
+        }
+        .converter-input {
+            flex: 1;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            padding: 5px 8px;
+            font-family: ui-monospace, monospace;
+            font-size: 0.88rem;
+            font-weight: 900;
+            color: #ef233c;
+            outline: none;
+            background: #f8fafc;
+            min-width: 0;
+        }
+        .converter-input:focus {
+            border-color: #0284c7;
+            background: #ffffff;
+        }
+        .converter-result {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 6px 8px;
+            font-family: ui-monospace, monospace;
+            font-size: 0.68rem;
+            color: #475569;
+            line-height: 1.6;
+            min-height: 42px;
+            word-break: break-all;
+        }
+        .converter-result .hl { color: #0284c7; font-weight: 900; }
+        .converter-result .hl-red { color: #ef233c; font-weight: 900; }
+        .converter-btn-row {
+            display: flex;
+            gap: 5px;
+        }
+        .converter-btn {
+            flex: 1;
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 6px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.15s;
+            letter-spacing: 0.3px;
+        }
+        .converter-btn:hover { background: linear-gradient(135deg, #0369a1, #075985); }
+        .converter-btn.apply {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+        }
+        .converter-btn.apply:hover { background: linear-gradient(135deg, #15803d, #166534); }
+        .converter-btn.swap {
+            flex: 0 0 38px;
+            font-size: 0.95rem;
+        }
+
+        .divider { height: 1px; background: rgba(226, 232, 240, 0.9); margin: 6px 0; }
+
+        /* 测试卡片 */
+        .test-box { 
+            background: #ffffff; border: 1.5px solid #0284c7; border-radius: 7px; padding: 8px 10px; 
+            display: flex; flex-direction: column; gap: 6px; 
+        }
+        .test-btn { 
+            width: 100%; background: linear-gradient(135deg, #0284c7, #0369a1); 
+            color: #ffffff; border: none; border-radius: 5px; padding: 8px; 
+            font-size: 0.8rem; font-weight: 900; cursor: pointer; transition: 0.15s; letter-spacing: 0.5px; 
+        }
+        .test-btn:hover { background: linear-gradient(135deg, #0369a1, #075985); }
+        .test-btn.testing { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); animation: pulseTesting 1.2s infinite; }
+        @keyframes pulseTesting { 0%, 100% { opacity: 1; } 50% { opacity: 0.82; } }
+
+        .test-btn.reset-btn {
+            background: linear-gradient(135deg, #64748b, #475569);
+        }
+        .test-btn.reset-btn:hover {
+            background: linear-gradient(135deg, #475569, #334155);
+        }
+
+        .test-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; text-align: center; }
+        .stat-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px 2px; }
+        .stat-val { font-size: 0.76rem; font-weight: 900; color: #0f172a; font-family: ui-monospace, monospace; }
+        .stat-lbl { font-size: 0.56rem; color: #64748b; font-weight: bold; margin-top: 2px; }
+
+        .btn-start { 
+            width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); 
+            color: #ffffff; border: none; border-radius: 6px; padding: 10px; font-size: 0.9rem; font-weight: 900; 
+            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); letter-spacing: 0.5px; 
+        }
+        .btn-start:hover { background: linear-gradient(135deg, var(--accent-hover), #075985); }
+        .btn-start:disabled { background: #94a3b8 !important; cursor: not-allowed !important; box-shadow: none !important; }
+        .btn-start.armed { background: linear-gradient(135deg, #f59e0b, #d97706) !important; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35) !important; }
+
+        .swatches-grid-9 { display: grid; grid-template-columns: repeat(9, minmax(16px, 1fr)) 22px; gap: 3px; align-items: center; }
+        .round-swatch-btn { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cbd5e1; cursor: pointer; transition: transform 0.1s, border-color 0.1s; }
+        .round-swatch-btn:hover { transform: scale(1.15); border-color: var(--accent); }
+        .round-swatch-btn.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); transform: scale(1.1); }
+        .color-picker-input-wrap { position: relative; width: 18px; height: 18px; border-radius: 50%; overflow: hidden; border: 2px solid #cbd5e1; cursor: pointer; }
+        .color-picker-input-wrap input[type="color"] { position: absolute; left: -10px; top: -10px; width: 40px; height: 40px; border: none; cursor: pointer; }
+
+        /* 开场遮罩 */
+        #progress-overlay { 
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); 
+            backdrop-filter: blur(6px); z-index: 100; justify-content: center; align-items: center; flex-direction: column; gap: 20px; 
+            cursor: pointer;
+        }
+        .progress-hint { 
+            color: #fff; font-size: 1.15rem; font-weight: 800; letter-spacing: 1px; 
+            background: rgba(0, 0, 0, 0.35); padding: 8px 26px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.2); 
+        }
+        #progress-bar-container { width: 280px; height: 4px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; overflow: hidden; }
+        #progress-bar { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; }
+
+        /* 左下角调色板与作者卡片 */
+        #left-bottom-group { position: absolute; bottom: 16px; left: 16px; z-index: 15; display: flex; flex-direction: column; gap: 8px; }
+        .palette-card { 
+            background: var(--bg-glass); backdrop-filter: blur(24px) saturate(180%); 
+            padding: 7px 12px 8px 12px; border-radius: 8px; border: 1px solid var(--border-glass); 
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; gap: 4px; 
+        }
+        .palette-label { font-size: 0.64rem; font-weight: 900; color: #334155; display: flex; align-items: center; gap: 4px; }
+        #inp-floor-gray-r { background: linear-gradient(to right, #000000 0%, #7e8b9b 50%, #ffffff 100%); height: 6px; border-radius: 3px; border: 1px solid #cbd5e1; outline: none; width: 130px; cursor: pointer; }
+
+        #author-card { 
+            background: var(--bg-glass); backdrop-filter: blur(24px) saturate(180%); 
+            padding: 5px 14px 5px 5px; border-radius: 30px; border: 1px solid var(--border-glass); 
+            display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; 
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); transition: transform 0.15s, border-color 0.15s; 
+        }
+        #author-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+        .author-avatar-badge { 
+            width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); 
+            color: #ffffff; font-weight: 900; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25); 
+        }
+        .author-meta { display: flex; flex-direction: column; }
+        .author-name { font-size: 0.74rem; font-weight: 900; color: #0f172a; }
+        .author-tag { font-size: 0.58rem; color: #64748b; font-weight: bold; }
+
+        /* 右下角原理说明 HUD */
+        #bottom-right-hud { 
+            position: absolute; bottom: 16px; right: 16px; width: min(350px, calc(100vw - 32px)); 
+            background: var(--bg-glass); backdrop-filter: blur(28px) saturate(190%); 
+            padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-glass); 
+            border-left: 4px solid var(--accent); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06); 
+            z-index: 22; transition: opacity 0.15s, visibility 0.15s; 
+        }
+        .rel-title { font-size: 0.74rem; font-weight: 900; color: var(--accent); margin-bottom: 4px; }
+        .rel-formula { 
+            font-size: 0.68rem; font-weight: 700; color: #1e293b; background: rgba(2, 132, 199, 0.06); 
+            padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; line-height: 1.4; font-family: Cambria, serif; 
+        }
+        .rel-desc { font-size: 0.62rem; color: #64748b; line-height: 1.5; }
+
+        @media (max-width: 900px) {
+            #top-hud { top: 8px; left: 8px; right: 8px; }
+            .hud-card { padding: 6px 10px; gap: 8px; font-size: 0.68rem; }
+            #left-panel { left: 8px; top: 72px; width: min(400px, calc(100vw - 16px)); max-height: 78vh; }
+            #right-panel { right: 8px; top: auto; bottom: 8px; width: min(400px, calc(100vw - 16px)); max-height: 42vh; }
+            #bottom-right-hud { display: none; }
+            #left-bottom-group { left: 8px; bottom: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="crosshair-container">
+        <div id="crosshair-classic-inner" class="classic-crosshair-dot" style="background:#000000; color:#000000;"></div>
+    </div>
+
+    <!-- 反馈点覆盖画布 -->
+    <canvas id="feedback-canvas"></canvas>
+
+    <div id="canvas-container"></div>
+
+    <div id="top-hud">
+        <div class="hud-card">
+            <div>DPI: <span class="hud-val" id="hud-dpi">800</span></div>
+            <div>CM/360°: <span class="hud-val" id="hud-cm">50.00</span>cm</div>
+            <div>FOV: <span class="hud-val" id="hud-fov">103</span>°</div>
+            <div>水平偏航 (Yaw): <span class="hud-val" id="hud-yaw">0.000°</span></div>
+            <div>θx 角径: <span class="hud-val" id="hud-theta-x">4.50°</span></div>
+            <div>θy 偏角: <span class="hud-val" id="hud-target-ang">0.00°</span></div>
+            <div>难度: <span class="hud-output" id="hud-output-val">—</span></div>
+            <button class="hud-action-btn" id="btn-zero-yaw" title="视角立即回正到 0.000°">回正</button>
+            <button class="hud-action-btn" id="btn-center-target" title="将 θy 彻底归零，球体置于准星正中心">球体置中 (0°)</button>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <div class="hud-card f11-card" id="f11-box">F11全屏</div>
+            <div class="hud-card" style="gap:12px;">
+                <div>轮询: <span class="poll-val" id="hud-poll">--</span> Hz</div>
+                <div style="width:1.5px; height:14px; background:#cbd5e1; border-radius:1px;"></div>
+                <div>FPS: <span class="fps-val" id="hud-fps">--</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="progress-overlay">
+        <div class="progress-hint" id="progress-hint">
+            <span>点击左键锁定，沉浸式操控视野</span>
+        </div>
+        <div id="progress-bar-container" style="display:none;">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div id="left-bottom-group">
+        <div class="palette-card">
+            <div class="palette-label" style="justify-content:space-between; align-items:center;">
+                <span style="display:flex; align-items:center; gap:4px;">地面底色</span>
+                <button id="btn-creamy-yellow" class="pill-btn" style="padding:1px 7px; font-size:0.62rem; background:#faeed1; border-color:#e2c896; color:#78350f; font-weight:900;" onclick="setFloorColorPreset('#faeed1')">柔和奶黄</button>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                <span style="font-size:0.58rem; color:#475569; font-weight:800;">黑</span>
+                <input type="range" id="inp-floor-gray-r" min="0" max="100" step="1" value="97" oninput="onFloorGraySlider(this.value)" />
+                <span style="font-size:0.58rem; color:#475569; font-weight:800;">白</span>
+            </div>
+        </div>
+
+        <a href="https://space.bilibili.com/1534330" target="_blank" id="author-card" title="点击访问作者 B 站空间">
+            <div class="author-avatar-badge">海</div>
+            <div class="author-meta"><span class="author-name">网页作者：西岛海</span><span class="author-tag">3D 难度解算体系</span></div>
+        </a>
+    </div>
+
+    <div id="bottom-right-hud">
+        <div class="rel-title" id="hud-rel-title">3D 瞄准难度数学模型</div>
+        <div class="rel-formula" id="rel-formula-text">ID = log₂(1 + θy / θx^p)　[bits]</div>
+        <div class="rel-desc" id="hud-rel-desc">
+            • <strong>θx（直径/ω）</strong>：目标屏幕角直径（0.0°~36°）。<br>
+            • <strong>θy（距离/α）</strong>：中心偏角角距离（0.0°~180°）。<br>
+            • <strong>p（次幂指数）</strong>：对目标直径施加的幂次权重。<br>
+            • <strong>两套公式</strong>：Shannon-Fitts <code>log₂(1 + D/W)</code> 与 Fitts 原始 <code>log₂(2D/W)</code>。<br>
+            • <strong>快捷功能</strong>：点击上方公式卡片的难度数值，可直接复制填入反求框。
+        </div>
+    </div>
+
+    <!-- 左侧主面板 -->
+    <div class="glass-panel" id="left-panel">
+        <div class="panel-header-dark" id="panel-handle">
+            <span class="panel-header-title">3D 难度解算与目标控制</span>
+            <div class="header-actions">
+                <button class="header-dark-btn" id="btn-cloud-toggle" onclick="toggleClouds()">云朵: 开启</button>
+                <button class="header-dark-btn" id="btn-theme-toggle">日落暮色</button>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            <!-- 难度模型框架切换按钮组 -->
+            <div class="framework-selector">
+                <button class="framework-btn active" id="btn-model-shannon" onclick="setFormulaModel('shannon')">Shannon-Fitts 经典</button>
+                <button class="framework-btn" id="btn-model-fitts" onclick="setFormulaModel('fitts')">Fitts 原始公式</button>
+            </div>
+
+            <!-- 核心公式 Hero 展示区 -->
+            <div class="formula-hero-card" id="formula-hero-card" title="点击将当前 ID 复制填入下方反求框">
+                <div class="formula-hero-math" id="formula-math-display">ID = log₂(1 + θy / θx)</div>
+                <div class="formula-hero-stat">
+                    <span id="hero-stat-label">当前 Shannon-Fitts 难度值:</span>
+                    <span class="formula-hero-val" id="card-output-val">—</span>
+                    <span style="color:#ef233c; font-weight:800;" id="hero-unit-label">bits</span>
+                    <span class="copy-hint-badge">点击填入</span>
+                </div>
+            </div>
+
+            <!-- 参数控制区 -->
+            <div class="section-card">
+                <div class="section-header">
+                    <span class="section-label">目标几何角度参数</span>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span style="font-size:0.64rem; color:#64748b;">方位:</span>
+                        <select id="targetSideSelect" style="font-size:0.64rem; font-weight:800; border-radius:4px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; padding:1px 4px;">
+                            <option value="right" selected>右侧 (+θ)</option>
+                            <option value="left">左侧 (−θ)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- θx 直径 -->
+                <div class="ctrl-row">
+                    <label title="目标角直径 W 或 ω (度)">θx · 目标直径 (ω)</label>
+                    <input type="range" id="inp-x-r" min="0.0" max="36" step="0.1" value="4.5" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepParam('x', -0.1)">−</button>
+                        <input type="number" class="num-input" id="inp-x" value="4.50" min="0.0" max="36" step="0.1" />
+                        <button class="step-btn" onclick="stepParam('x', 0.1)">+</button>
+                    </div>
+                </div>
+
+                <!-- 次幂指数 p -->
+                <div class="ctrl-row" style="margin-top:2px;">
+                    <label title="目标直径参与运算的次幂指数">θx 次幂 (p)</label>
+                    <input type="range" id="inp-p-r" min="0.1" max="5.0" step="0.05" value="1.0" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepParam('p', -0.05)">−</button>
+                        <input type="number" class="num-input" id="inp-p" value="1.00" min="0.05" max="10.0" step="0.05" />
+                        <button class="step-btn" onclick="stepParam('p', 0.05)">+</button>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#64748b; margin-top:-1px; margin-bottom:5px; padding:0 2px;">
+                    <span id="power-hint-text">Shannon: p=1</span>
+                    <span>θx ↓ → 越小越难</span>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- θy 距离/偏角 -->
+                <div class="ctrl-row">
+                    <label title="目标中心角距离 A 或 α (度)">θy · 中心距离 (α)</label>
+                    <input type="range" id="inp-y-r" min="0.0" max="180" step="0.1" value="0.0" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepParam('y', -0.1)">−</button>
+                        <input type="number" class="num-input" id="inp-y" value="0.00" min="0.0" max="180" step="0.1" />
+                        <button class="step-btn" onclick="stepParam('y', 0.1)">+</button>
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.6rem; color:#64748b; margin-top:-2px; margin-bottom:2px; padding:0 2px;">
+                    <span>0.0° 正中 ｜ 180° 正背后</span>
+                    <span>θy ↑ → 越大越难</span>
+                </div>
+            </div>
+
+            <!-- ID 反求控制区 -->
+            <div class="section-card" style="background: rgba(241, 245, 249, 0.95); border: 1.5px solid #cbd5e1;">
+                <div class="section-header" style="margin-bottom:6px;">
+                    <span class="section-label">依据目标难度反求参数</span>
+                    <span style="font-size:0.6rem; color:#64748b; font-weight:700;">点击上方卡片可复制填入</span>
+                </div>
+                
+                <div class="target-di-container" id="target-di-box">
+                    <span class="target-di-label" id="target-di-tag">目标 ID:</span>
+                    <input type="number" class="target-di-input" id="inp-target-output" value="3" step="0.05" min="0" max="200" />
+                    <span class="target-di-unit">bits</span>
+                </div>
+
+                <div style="display:flex; gap:6px; width:100%; margin-bottom:5px;">
+                    <button class="btn-inverse-action" id="btn-solve-x">固定距离，反推直径</button>
+                    <button class="btn-inverse-action" id="btn-solve-y">固定直径，反推距离</button>
+                </div>
+
+                <div style="font-size:0.58rem; color:#64748b; text-align:center; line-height:1.4; font-family:ui-monospace, monospace;" id="inverse-formula-desc">
+                    θx = [ θy / (2^ID − 1) ]^(1/p)　｜　θy = θx^p · (2^ID − 1)
+                </div>
+            </div>
+
+            <!-- 香农 ↔ 菲茨 ID 换算器 -->
+            <div class="converter-box">
+                <div class="converter-title-row">
+                    <span class="converter-title">香农 ↔ 菲茨 ID 换算</span>
+                    <span class="converter-badge">双向精确</span>
+                </div>
+                <div class="converter-row">
+                    <span class="converter-label">香农 ID</span>
+                    <input type="number" class="converter-input" id="conv-shannon" step="any" placeholder="ID_S" />
+                </div>
+                <div class="converter-row">
+                    <span class="converter-label">菲茨 ID</span>
+                    <input type="number" class="converter-input" id="conv-fitts" step="any" placeholder="ID_F" />
+                </div>
+                <div class="converter-result" id="conv-result">输入任一 ID，会自动换算并显示推导过程。</div>
+                <div class="converter-btn-row">
+                    <button class="converter-btn apply" id="conv-apply" title="把当前公式对应的 ID 填入反求框">填入反求框</button>
+                    <button class="converter-btn swap" id="conv-swap" title="交换两栏数值">⇅</button>
+                </div>
+            </div>
+
+            <!-- 连续瞄准测试模块 -->
+            <div class="test-box">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.75rem; font-weight:900; color:#0f172a;">瞄准反应与命中实测</span>
+                    <span id="test-status-tag" style="font-size:0.6rem; font-weight:800; color:#0284c7; background:#e0f2fe; padding:2px 6px; border-radius:4px;">就绪</span>
+                </div>
+                
+                <button class="test-btn" id="btn-start-aim-test">点击开始连续瞄准测试</button>
+
+                <div class="test-stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-acc">100%</div>
+                        <div class="stat-lbl">命中率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-last-time">-- ms</div>
+                        <div class="stat-lbl">最近耗时</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-avg-time">-- ms</div>
+                        <div class="stat-lbl">平均耗时</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-score">0 / 0</div>
+                        <div class="stat-lbl">命中/总数</div>
+                    </div>
+                </div>
+
+                <button class="test-btn reset-btn" id="btn-reset-test-stats">重置测试统计</button>
+            </div>
+
+            <!-- 视角维度限制 -->
+            <div class="section-card" style="padding-bottom:6px;">
+                <div class="section-header" style="margin-bottom:4px;"><span class="section-label">视角模式</span></div>
+                <div class="preset-grid cols-2" style="margin-bottom:0;">
+                    <button class="pill-btn active" id="btn-lock-pitch">锁定纯水平 (推荐)</button>
+                    <button class="pill-btn" id="btn-unlock-pitch">解锁全向视角</button>
+                </div>
+            </div>
+
+            <button class="btn-start" id="btn-lock">进入 3D 靶场 (锁定鼠标)</button>
+        </div>
+    </div>
+
+    <!-- 右侧配置面板 -->
+    <div class="glass-panel" id="right-panel">
+        <div class="panel-header-dark" id="right-panel-header" style="background:#1e293b; border-top-color:#0284c7; cursor:pointer; user-select:none;">
+            <span class="panel-header-title">外设、视高与准星系统</span>
+            <span id="right-panel-toggle-icon" style="font-size:0.7rem; color:#94a3b8; font-weight:900; transition:transform 0.2s ease;">▼ 收起</span>
+        </div>
+
+        <div class="panel-body">
+            <div class="section-card">
+                <div class="section-header"><span class="section-label">物理灵敏度体系 (DPI / CM)</span></div>
+                <div class="preset-grid cols-4">
+                    <button class="pill-btn dpi-pill" data-val="400">400</button>
+                    <button class="pill-btn dpi-pill active" data-val="800">800</button>
+                    <button class="pill-btn dpi-pill" data-val="1200">1200</button>
+                    <button class="pill-btn dpi-pill" data-val="1600">1600</button>
+                </div>
+                <div class="ctrl-row">
+                    <label>鼠标 DPI</label>
+                    <input type="range" id="inp-dpi-r" min="100" max="3200" step="50" value="800" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-dpi', -50)">−</button>
+                        <input type="number" class="num-input" id="inp-dpi" value="800" min="50" max="32000" step="1" />
+                        <button class="step-btn" onclick="stepGlobal('inp-dpi', 50)">+</button>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="ctrl-row">
+                    <label>CM / 360°</label>
+                    <input type="range" id="inp-cm-r" min="0" max="1000" step="1" value="0" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-cm', -0.5)">−</button>
+                        <input type="number" class="num-input" id="inp-cm" value="50.00" min="0.1" step="0.01">
+                        <button class="step-btn" onclick="stepGlobal('inp-cm', 0.5)">+</button>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="ctrl-row">
+                    <label>水平 FOV (度)</label>
+                    <input type="range" id="inp-fov-r" min="50" max="140" step="1" value="103" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-fov', -1)">−</button>
+                        <input type="number" class="num-input" id="inp-fov" value="103.00" step="0.5" />
+                        <button class="step-btn" onclick="stepGlobal('inp-fov', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="ctrl-row">
+                    <label title="视角离地垂直高度 (最高支持 10m)">玩家视高 (m)</label>
+                    <input type="range" id="inp-height-r" min="0.5" max="10.0" step="0.005" value="1.625" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-height', -0.05)">−</button>
+                        <input type="number" class="num-input" id="inp-height" value="1.625" min="0.5" max="10.0" step="0.005" />
+                        <button class="step-btn" onclick="stepGlobal('inp-height', 0.05)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- X / Y 轴灵敏度独立设定 -->
+            <div class="section-card">
+                <div class="section-header">
+                    <span class="section-label">X / Y 轴灵敏度独立乘数</span>
+                </div>
+
+                <div class="ctrl-row">
+                    <label>X 轴 (水平倍率)</label>
+                    <input type="range" id="inp-sens-x-r" min="0.1" max="3.0" step="0.05" value="1.0" oninput="setSensX(this.value)" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-sens-x', -0.05)">−</button>
+                        <input type="number" class="num-input" id="inp-sens-x" value="1.00" min="0.1" max="5.0" step="0.05" />
+                        <button class="step-btn" onclick="stepGlobal('inp-sens-x', 0.05)">+</button>
+                    </div>
+                </div>
+
+                <div class="ctrl-row">
+                    <label>Y 轴 (垂直倍率)</label>
+                    <input type="range" id="inp-sens-y-r" min="0.1" max="3.0" step="0.05" value="1.0" oninput="setSensY(this.value)" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-sens-y', -0.05)">−</button>
+                        <input type="number" class="num-input" id="inp-sens-y" value="1.00" min="0.1" max="5.0" step="0.05" />
+                        <button class="step-btn" onclick="stepGlobal('inp-sens-y', 0.05)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header"><span class="section-label">准星形态与定制</span></div>
+                <div class="preset-grid cols-4" style="margin-bottom:6px;">
+                    <button class="pill-btn active" id="btn-cross-classic" onclick="setCrosshairType('classic')">经典测量</button>
+                    <button class="pill-btn" id="btn-cross-cross" onclick="setCrosshairType('cross')">十字准星</button>
+                    <button class="pill-btn" id="btn-cross-dot" onclick="setCrosshairType('dot')">实心圆点</button>
+                    <button class="pill-btn" id="btn-cross-circle_hollow" onclick="setCrosshairType('circle_hollow')">空心圆环</button>
+                </div>
+
+                <div class="ctrl-row" id="row-cross-size">
+                    <label id="lbl-cross-size">臂长 / 半径</label>
+                    <input type="range" id="inp-cross-size-r" min="1" max="50" step="0.5" value="8" oninput="syncCrossProp('size', this.value)" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-cross-size', -0.5)">−</button>
+                        <input type="number" class="num-input" id="inp-cross-size" value="8.00" step="0.5" />
+                        <button class="step-btn" onclick="stepGlobal('inp-cross-size', 0.5)">+</button>
+                    </div>
+                </div>
+
+                <div class="ctrl-row" id="row-cross-thick">
+                    <label>线条粗细</label>
+                    <input type="range" id="inp-cross-thick-r" min="1" max="15" step="0.5" value="2" oninput="syncCrossProp('thick', this.value)" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-cross-thick', -0.5)">−</button>
+                        <input type="number" class="num-input" id="inp-cross-thick" value="2.00" step="0.5" />
+                        <button class="step-btn" onclick="stepGlobal('inp-cross-thick', 0.5)">+</button>
+                    </div>
+                </div>
+
+                <div class="ctrl-row" id="row-cross-gap">
+                    <label>中心间隙</label>
+                    <input type="range" id="inp-cross-gap-r" min="0" max="25" step="0.5" value="3" oninput="syncCrossProp('gap', this.value)" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-cross-gap', -0.25)">−</button>
+                        <input type="number" class="num-input" id="inp-cross-gap" value="3.00" step="0.25" />
+                        <button class="step-btn" onclick="stepGlobal('inp-cross-gap', 0.25)">+</button>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="section-header" style="margin-bottom:3px;"><span class="section-label">默认静止准星颜色</span></div>
+                <div class="swatches-grid-9" id="swatches-default" style="margin-bottom:6px;"></div>
+
+                <div class="section-header" style="margin-bottom:3px;"><span class="section-label">瞄准/命中高亮色</span></div>
+                <div class="swatches-grid-9" id="swatches-target"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ISO_INCH_TO_CM = 2.54;
+        const CM_MAX = 1000000, CM_MIN = 0.1, CM_SLIDER_MAX = 1000, CM_EXP = 3.2;
+
+        const TX_MIN = 0.0, TX_MAX = 36.0;
+        const TY_MIN = 0.0, TY_MAX = 180.0;
+        const TARGET_BASE_COLOR = 0xef233c;
+
+        const COLOR_PRESETS = [
+            { name: '黑', hex: '#000000' }, { name: '白', hex: '#ffffff' }, { name: '赤', hex: '#ef4444' },
+            { name: '橙', hex: '#f97316' }, { name: '黄', hex: '#eab308' }, { name: '绿', hex: '#22c55e' },
+            { name: '青', hex: '#06b6d4' }, { name: '蓝', hex: '#3b82f6' }, { name: '紫', hex: '#a855f7' }
+        ];
+
+        // θx / θy 两套公式共用；只有 p 和反求 ID 各自独立
+        const _modelParams = {
+            shannon: { power: 1.0, targetID: '3' },
+            fitts:   { power: 1.0, targetID: '3' }
+        };
+
+        const modelState = {
+            formulaModel: 'shannon',
+            thetaX: 4.5,
+            thetaY: 0.0,
+            side: 'right',
+            allowVerticalLook: false,
+            visualCenter: true
+        };
+
+        function getCurrentPower() {
+            return _modelParams[modelState.formulaModel].power;
+        }
+        function setCurrentPower(v) {
+            _modelParams[modelState.formulaModel].power = clamp(Number(v) || 0, 0.05, 10.0);
+        }
+
+        const config = {
+            dpi: 800,
+            cmPer360: 50.0,
+            fovHorizontal: 103,
+            viewHeight: 1.625,
+            sensRatioX: 1.0,
+            sensRatioY: 1.0,
+            theme: 'day',
+            cloudsEnabled: true,
+            floorColor: '#f8fafc',
+            crosshair: { type: 'classic', size: 8, thick: 2, gap: 3, outline: 1.2 },
+            crosshairColor: { defaultColor: '#000000', targetColor: '#0284c7' }
+        };
+
+        const testState = {
+            active: false,
+            startTime: 0,
+            timeoutTimer: null,
+            hits: 0,
+            trials: 0,
+            lastTimeMs: 0,
+            timesList: [],
+            lastShotTime: 0
+        };
+
+        function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+        function getEl(id) { return document.getElementById(id); }
+        function setNum(id, v, digits = 2) { const e = getEl(id); if (e) e.value = Number(v).toFixed(digits); }
+        function numOr(v, fallback) { const n = parseFloat(v); return Number.isFinite(n) ? n : fallback; }
+
+        function hFovToVfov(hFov, aspect) {
+            const hRad = (hFov * Math.PI) / 180;
+            return (2 * Math.atan(Math.tan(hRad / 2) / aspect) * 180) / Math.PI;
+        }
+
+        function cmToSlider(cm) {
+            const ratio = Math.pow(Math.max(0, cm - CM_MIN) / (CM_MAX - CM_MIN), 1 / CM_EXP);
+            return Math.round(clamp(ratio, 0, 1) * CM_SLIDER_MAX);
+        }
+        function sliderToCm(r) {
+            const ratio = clamp(parseFloat(r) / CM_SLIDER_MAX, 0, 1);
+            return Math.pow(ratio, CM_EXP) * (CM_MAX - CM_MIN) + CM_MIN;
+        }
+
+        // ============================================================
+        // 反馈点系统
+        // ============================================================
+        const feedbackCanvas = getEl('feedback-canvas');
+        const feedbackCtx = feedbackCanvas ? feedbackCanvas.getContext('2d') : null;
+        const FEEDBACK_LIFE_MS = 700;
+        const FEEDBACK_WORLD_DISTANCE = 3.0;
+        const feedbackMarkers = [];
+
+        function resizeFeedbackCanvas() {
+            if (!feedbackCanvas) return;
+            const dpr = window.devicePixelRatio || 1;
+            feedbackCanvas.width = Math.floor(window.innerWidth * dpr);
+            feedbackCanvas.height = Math.floor(window.innerHeight * dpr);
+            feedbackCanvas.style.width = window.innerWidth + 'px';
+            feedbackCanvas.style.height = window.innerHeight + 'px';
+        }
+
+        function computeFeedbackRadiusPx() {
+            const halfH = (window.innerHeight || 800) / 2;
+            const vfovRad = (camera.fov * Math.PI) / 180;
+            const tanV = Math.tan(vfovRad / 2);
+            if (!(tanV > 0.0001)) return 2.0;
+
+            const halfAngleRad = (Math.max(0, modelState.thetaX) / 2) * Math.PI / 180;
+            const targetScreenR = (Math.tan(halfAngleRad) / tanV) * halfH;
+
+            return clamp(targetScreenR * 0.32, 1.0, 10.0);
+        }
+
+        function pushFeedbackMarker(isHit) {
+            if (!feedbackCanvas) return;
+            const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+            const worldPos = camera.position.clone().add(forward.multiplyScalar(FEEDBACK_WORLD_DISTANCE));
+            feedbackMarkers.push({
+                pos: worldPos,
+                born: performance.now(),
+                isHit: !!isHit,
+                radius: computeFeedbackRadiusPx()
+            });
+        }
+
+        function renderFeedbackMarkers(now) {
+            if (!feedbackCtx || !feedbackCanvas) return;
+            const dpr = window.devicePixelRatio || 1;
+            feedbackCtx.setTransform(1, 0, 0, 1, 0, 0);
+            feedbackCtx.clearRect(0, 0, feedbackCanvas.width, feedbackCanvas.height);
+            if (feedbackMarkers.length === 0) return;
+
+            for (let i = feedbackMarkers.length - 1; i >= 0; i--) {
+                if (now - feedbackMarkers[i].born >= FEEDBACK_LIFE_MS) {
+                    feedbackMarkers.splice(i, 1);
+                }
+            }
+            if (feedbackMarkers.length === 0) return;
+
+            feedbackCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+
+            camera.updateMatrixWorld(true);
+
+            for (let i = 0; i < feedbackMarkers.length; i++) {
+                const m = feedbackMarkers[i];
+                const projected = m.pos.clone().project(camera);
+
+                if (projected.z >= 1 || projected.z <= -1) continue;
+
+                const sx = (projected.x * 0.5 + 0.5) * w;
+                const sy = (-projected.y * 0.5 + 0.5) * h;
+
+                if (sx < -20 || sx > w + 20 || sy < -20 || sy > h + 20) continue;
+
+                const age = now - m.born;
+                let alpha = 1.0;
+                if (age > 420) {
+                    alpha = Math.max(0, 1 - (age - 420) / (FEEDBACK_LIFE_MS - 420));
+                }
+                if (alpha <= 0) continue;
+
+                const r = m.radius || 2.0;
+                const pad = Math.max(0.45, r * 0.18);
+                const core = Math.max(0.5, r * 0.32);
+                const waveMax = Math.max(2.2, r * 1.6);
+
+                feedbackCtx.save();
+                feedbackCtx.globalAlpha = alpha;
+
+                if (m.isHit) {
+                    if (age < 120) {
+                        const waveProgress = age / 120;
+                        feedbackCtx.save();
+                        feedbackCtx.globalAlpha = alpha * (1 - waveProgress) * 0.75;
+                        feedbackCtx.beginPath();
+                        feedbackCtx.arc(sx, sy, r + waveProgress * waveMax, 0, Math.PI * 2);
+                        feedbackCtx.strokeStyle = '#34d399';
+                        feedbackCtx.lineWidth = Math.max(0.7, r * 0.4);
+                        feedbackCtx.stroke();
+                        feedbackCtx.restore();
+                    }
+
+                    feedbackCtx.beginPath();
+                    feedbackCtx.arc(sx, sy, r + pad, 0, Math.PI * 2);
+                    feedbackCtx.fillStyle = '#022c12';
+                    feedbackCtx.fill();
+
+                    feedbackCtx.shadowColor = 'rgba(16, 185, 129, 0.9)';
+                    feedbackCtx.shadowBlur = Math.max(2, r * 1.4);
+                    feedbackCtx.fillStyle = '#10b981';
+                    feedbackCtx.beginPath();
+                    feedbackCtx.arc(sx, sy, r, 0, Math.PI * 2);
+                    feedbackCtx.fill();
+
+                    feedbackCtx.shadowBlur = 0;
+                    feedbackCtx.fillStyle = '#ffffff';
+                    feedbackCtx.beginPath();
+                    feedbackCtx.arc(sx, sy, core, 0, Math.PI * 2);
+                    feedbackCtx.fill();
+                } else {
+                    feedbackCtx.beginPath();
+                    feedbackCtx.arc(sx, sy, r + pad, 0, Math.PI * 2);
+                    feedbackCtx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+                    feedbackCtx.fill();
+
+                    feedbackCtx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+                    feedbackCtx.shadowBlur = Math.max(2, r * 1.2);
+                    feedbackCtx.fillStyle = '#0f172a';
+                    feedbackCtx.beginPath();
+                    feedbackCtx.arc(sx, sy, r, 0, Math.PI * 2);
+                    feedbackCtx.fill();
+                }
+
+                feedbackCtx.restore();
+            }
+        }
+
+        resizeFeedbackCanvas();
+        window.addEventListener('resize', resizeFeedbackCanvas);
+
+        // ============================================================
+        // 持久化存储
+        // ============================================================
+        const STORAGE_KEY = 'aim3d_lab_settings_v3';
+        let storageReady = false;
+        let persistTimer = null;
+
+        function collectSettings() {
+            return {
+                dpi: config.dpi,
+                cmPer360: config.cmPer360,
+                fovHorizontal: config.fovHorizontal,
+                viewHeight: config.viewHeight,
+                sensRatioX: config.sensRatioX,
+                sensRatioY: config.sensRatioY,
+                theme: config.theme,
+                cloudsEnabled: config.cloudsEnabled,
+                floorColor: config.floorColor,
+                crosshair: { ...config.crosshair },
+                crosshairColor: { ...config.crosshairColor },
+                formulaModel: modelState.formulaModel,
+                shannonParams: { ..._modelParams.shannon },
+                fittsParams: { ..._modelParams.fitts },
+                thetaX: modelState.thetaX,
+                thetaY: modelState.thetaY,
+                side: modelState.side,
+                allowVerticalLook: modelState.allowVerticalLook
+            };
+        }
+
+        function persistNow() {
+            if (!storageReady) return;
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(collectSettings())); } catch (e) {}
+        }
+        function persist() {
+            if (!storageReady) return;
+            if (persistTimer) clearTimeout(persistTimer);
+            persistTimer = setTimeout(persistNow, 160);
+        }
+        function readStored() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('aim3d_lab_settings_v2');
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        }
+
+        function applyStored(s) {
+            if (!s || typeof s !== 'object') return;
+            config.dpi = clamp(Math.round(numOr(s.dpi, config.dpi)), 50, 32000);
+            config.cmPer360 = clamp(numOr(s.cmPer360, config.cmPer360), CM_MIN, CM_MAX);
+            config.fovHorizontal = clamp(numOr(s.fovHorizontal, config.fovHorizontal), 50, 140);
+            config.viewHeight = clamp(numOr(s.viewHeight, config.viewHeight), 0.5, 10.0);
+            config.sensRatioX = clamp(numOr(s.sensRatioX, config.sensRatioX), 0.01, 10.0);
+            config.sensRatioY = clamp(numOr(s.sensRatioY, config.sensRatioY), 0.01, 10.0);
+            if (s.theme === 'day' || s.theme === 'sunset') config.theme = s.theme;
+            if (typeof s.cloudsEnabled === 'boolean') config.cloudsEnabled = s.cloudsEnabled;
+            if (typeof s.floorColor === 'string' && /^#[0-9a-fA-F]{6}$/.test(s.floorColor)) config.floorColor = s.floorColor;
+
+            if (s.crosshair && typeof s.crosshair === 'object') {
+                const c = s.crosshair;
+                if (['classic', 'cross', 'dot', 'circle_hollow'].includes(c.type)) config.crosshair.type = c.type;
+                config.crosshair.size = clamp(numOr(c.size, config.crosshair.size), 1, 50);
+                config.crosshair.thick = clamp(numOr(c.thick, config.crosshair.thick), 1, 15);
+                config.crosshair.gap = clamp(numOr(c.gap, config.crosshair.gap), 0, 25);
+                config.crosshair.outline = clamp(numOr(c.outline, config.crosshair.outline), 0, 10);
+            }
+            if (s.crosshairColor && typeof s.crosshairColor === 'object') {
+                if (typeof s.crosshairColor.defaultColor === 'string') config.crosshairColor.defaultColor = s.crosshairColor.defaultColor;
+                if (typeof s.crosshairColor.targetColor === 'string') config.crosshairColor.targetColor = s.crosshairColor.targetColor;
+            }
+
+            if (s.formulaModel === 'shannon' || s.formulaModel === 'fitts') modelState.formulaModel = s.formulaModel;
+
+            // θx / θy 共用
+            modelState.thetaX = clamp(numOr(s.thetaX, 4.5), TX_MIN, TX_MAX);
+            modelState.thetaY = clamp(numOr(s.thetaY, 0.0), TY_MIN, TY_MAX);
+
+            // p 和 targetID 各自独立
+            const legacyP = numOr(s.powerX, numOr(s.powerShannon, 1.0));
+            if (s.shannonParams) {
+                _modelParams.shannon.power = clamp(numOr(s.shannonParams.power, legacyP), 0.05, 10.0);
+                if (s.shannonParams.targetID !== undefined && s.shannonParams.targetID !== null) {
+                    _modelParams.shannon.targetID = String(s.shannonParams.targetID);
+                }
+            } else {
+                _modelParams.shannon.power = clamp(legacyP, 0.05, 10.0);
+                if (s.targetID !== undefined && s.targetID !== null) {
+                    _modelParams.shannon.targetID = String(s.targetID);
+                }
+            }
+            if (s.fittsParams) {
+                _modelParams.fitts.power = clamp(numOr(s.fittsParams.power, legacyP), 0.05, 10.0);
+                if (s.fittsParams.targetID !== undefined && s.fittsParams.targetID !== null) {
+                    _modelParams.fitts.targetID = String(s.fittsParams.targetID);
+                }
+            } else {
+                _modelParams.fitts.power = clamp(legacyP, 0.05, 10.0);
+                if (s.targetID !== undefined && s.targetID !== null) {
+                    _modelParams.fitts.targetID = String(s.targetID);
+                }
+            }
+            if (s.side === 'left' || s.side === 'right') modelState.side = s.side;
+            if (typeof s.allowVerticalLook === 'boolean') modelState.allowVerticalLook = s.allowVerticalLook;
+            modelState.visualCenter = (modelState.thetaY === 0);
+        }
+
+        function calculateOutput(thetaX, thetaY, p, model) {
+            if (p === undefined || p === null) p = getCurrentPower();
+            if (model === undefined || model === null) model = modelState.formulaModel;
+            if (![thetaX, thetaY, p].every(Number.isFinite) || thetaX < 0 || thetaY < 0 || p <= 0) return NaN;
+            if (thetaX === 0) {
+                return thetaY === 0 ? 0 : Infinity;
+            }
+            const denom = Math.pow(thetaX, p);
+            if (denom === 0) return thetaY === 0 ? 0 : Infinity;
+
+            if (model === 'fitts') {
+                if (thetaY === 0) return 0;
+                return Math.log2(2 * thetaY / denom);
+            }
+
+            const ratio = thetaY / denom;
+            return Math.log2(ratio + 1);
+        }
+
+        function setFormulaModel(modelType) {
+            // 先把当前公式的 ID 输入框值存回它自己的槽
+            const tidEl = getEl('inp-target-output');
+            if (tidEl) _modelParams[modelState.formulaModel].targetID = tidEl.value;
+
+            modelState.formulaModel = modelType;
+            modelState.visualCenter = (modelState.thetaY === 0);
+
+            // 再取新公式自己的 ID 值填进输入框
+            if (tidEl) tidEl.value = _modelParams[modelType].targetID;
+
+            const bS = getEl('btn-model-shannon');
+            const bF = getEl('btn-model-fitts');
+            if (bS) bS.classList.toggle('active', modelType === 'shannon');
+            if (bF) bF.classList.toggle('active', modelType === 'fitts');
+            refreshModelUI();
+            persist();
+        }
+
+        let radiansPerCount = 0.0;
+        function updateSensitivity() {
+            const totalCounts360 = (config.cmPer360 / ISO_INCH_TO_CM) * config.dpi;
+            radiansPerCount = (Math.PI * 2) / Math.max(1, totalCounts360);
+
+            const elDpi = getEl('hud-dpi'), elCm = getEl('hud-cm'), elFov = getEl('hud-fov');
+            if (elDpi) elDpi.innerText = config.dpi;
+            if (elCm) elCm.innerText = config.cmPer360.toFixed(2);
+            if (elFov) elFov.innerText = Math.round(config.fovHorizontal);
+
+            document.querySelectorAll('.dpi-pill').forEach(b =>
+                b.classList.toggle('active', parseInt(b.dataset.val) === config.dpi));
+        }
+
+        function setDpi(v) {
+            config.dpi = clamp(Math.round(numOr(v, 800)), 50, 32000);
+            setNum('inp-dpi', config.dpi, 0);
+            const r = getEl('inp-dpi-r'); if (r) r.value = clamp(config.dpi, 100, 3200);
+            updateSensitivity();
+            persist();
+        }
+        function setCm(v) {
+            config.cmPer360 = clamp(numOr(v, 50), CM_MIN, CM_MAX);
+            setNum('inp-cm', config.cmPer360, 2);
+            const r = getEl('inp-cm-r'); if (r) r.value = cmToSlider(config.cmPer360);
+            updateSensitivity();
+            persist();
+        }
+        function setFov(v) {
+            config.fovHorizontal = clamp(numOr(v, 103), 50, 140);
+            setNum('inp-fov', config.fovHorizontal, 2);
+            const r = getEl('inp-fov-r'); if (r) r.value = config.fovHorizontal;
+            updateCameraFov();
+            updateSensitivity();
+            persist();
+        }
+        function setViewHeight(v) {
+            config.viewHeight = clamp(numOr(v, 1.625), 0.5, 10.0);
+            setNum('inp-height', config.viewHeight, 3);
+            const r = getEl('inp-height-r'); if (r) r.value = config.viewHeight;
+            camera.position.y = config.viewHeight;
+            updateHorizon(config.viewHeight);
+            sync3DTarget();
+            persist();
+        }
+        function setSensX(v) {
+            config.sensRatioX = clamp(numOr(v, 1.0), 0.01, 10.0);
+            setNum('inp-sens-x', config.sensRatioX, 2);
+            const r = getEl('inp-sens-x-r'); if (r) r.value = config.sensRatioX;
+            persist();
+        }
+        function setSensY(v) {
+            config.sensRatioY = clamp(numOr(v, 1.0), 0.01, 10.0);
+            setNum('inp-sens-y', config.sensRatioY, 2);
+            const r = getEl('inp-sens-y-r'); if (r) r.value = config.sensRatioY;
+            persist();
+        }
+
+        function stepGlobal(id, delta) {
+            const el = getEl(id);
+            if (!el) return;
+            const cur = numOr(el.value, 0);
+            if (id === 'inp-dpi') setDpi(cur + delta);
+            else if (id === 'inp-cm') setCm(cur + delta);
+            else if (id === 'inp-fov') setFov(cur + delta);
+            else if (id === 'inp-height') setViewHeight(cur + delta);
+            else if (id === 'inp-sens-x') setSensX(cur + delta);
+            else if (id === 'inp-sens-y') setSensY(cur + delta);
+            else if (id.startsWith('inp-cross-')) syncCrossProp(id.replace('inp-cross-', ''), cur + delta);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playHitAudio() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1800, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.065);
+        }
+
+        function playMissAudio() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.055);
+        }
+
+        // ============================================================
+        // 防闪烁准星架构
+        // ============================================================
+        let currentCrosshairOnTarget = null;
+        let activeCrossColor = '';
+
+        function rebuildCrosshairDOM() {
+            const container = getEl('crosshair-container');
+            if (!container) return;
+            const { type, size, thick, gap, outline } = config.crosshair;
+            const color = (currentCrosshairOnTarget && !testState.active) ? config.crosshairColor.targetColor : config.crosshairColor.defaultColor;
+            activeCrossColor = color;
+
+            if (type === 'classic') {
+                container.innerHTML = `<div id="classic-dot" class="classic-crosshair-dot" style="background:${color}; color:${color};"></div>`;
+                return;
+            }
+
+            const dim = Math.max(120, (size + gap + outline) * 4);
+            const half = dim / 2;
+            const sw = Math.max(0, outline || 1.2);
+            let svg = `<svg id="cross-svg" width="${dim}" height="${dim}" viewBox="0 0 ${dim} ${dim}" xmlns="http://www.w3.org/2000/svg">`;
+
+            if (type === 'cross') {
+                const rects = [
+                    { x: half - thick / 2, y: half - gap - size, w: thick, h: size },
+                    { x: half - thick / 2, y: half + gap, w: thick, h: size },
+                    { x: half - gap - size, y: half - thick / 2, w: size, h: thick },
+                    { x: half + gap, y: half - thick / 2, w: size, h: thick }
+                ];
+                rects.forEach(r => {
+                    svg += `<rect class="ch-shape" x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${color}" stroke="#000000" stroke-width="${sw}" shape-rendering="crispEdges" />`;
+                });
+            } else if (type === 'dot') {
+                svg += `<circle class="ch-shape" cx="${half}" cy="${half}" r="${Math.max(1, size)}" fill="${color}" stroke="#000000" stroke-width="${sw}" />`;
+            } else if (type === 'circle_hollow') {
+                const inner = Math.max(1, gap);
+                const outer = inner + thick;
+                const mid = (inner + outer) / 2;
+                const rw = outer - inner;
+                svg += `<circle class="ch-stroke" cx="${half}" cy="${half}" r="${mid}" fill="none" stroke="${color}" stroke-width="${rw}" />`;
+                if (sw > 0) {
+                    svg += `<circle cx="${half}" cy="${half}" r="${outer}" fill="none" stroke="#000000" stroke-width="${sw}" />`;
+                    svg += `<circle cx="${half}" cy="${half}" r="${inner}" fill="none" stroke="#000000" stroke-width="${sw}" />`;
+                }
+            }
+            svg += `</svg>`;
+            container.innerHTML = svg;
+        }
+
+        function updateCrosshairStyle(onTarget) {
+            const effectiveOnTarget = testState.active ? false : !!onTarget;
+            if (currentCrosshairOnTarget === effectiveOnTarget) return;
+            currentCrosshairOnTarget = effectiveOnTarget;
+
+            const container = getEl('crosshair-container');
+            if (!container) return;
+            container.classList.toggle('on-target', effectiveOnTarget);
+
+            const color = effectiveOnTarget ? config.crosshairColor.targetColor : config.crosshairColor.defaultColor;
+            if (activeCrossColor === color) return;
+            activeCrossColor = color;
+
+            if (config.crosshair.type === 'classic') {
+                const dot = getEl('classic-dot');
+                if (dot) {
+                    dot.style.background = color;
+                    dot.style.color = color;
+                } else rebuildCrosshairDOM();
+            } else {
+                const shapes = container.querySelectorAll('.ch-shape');
+                shapes.forEach(el => el.setAttribute('fill', color));
+                const strokes = container.querySelectorAll('.ch-stroke');
+                strokes.forEach(el => el.setAttribute('stroke', color));
+                if (shapes.length === 0 && strokes.length === 0) rebuildCrosshairDOM();
+            }
+        }
+
+        function setCrosshairType(type) {
+            config.crosshair.type = type;
+            ['classic', 'cross', 'dot', 'circle_hollow'].forEach(t => {
+                const b = getEl(`btn-cross-${t}`);
+                if (b) b.classList.toggle('active', t === type);
+            });
+            const sR = getEl('row-cross-size'), tR = getEl('row-cross-thick'), gR = getEl('row-cross-gap');
+            if (type === 'classic') {
+                if (sR) sR.style.display = 'none';
+                if (tR) tR.style.display = 'none';
+                if (gR) gR.style.display = 'none';
+            } else {
+                if (sR) sR.style.display = type === 'circle_hollow' ? 'none' : 'flex';
+                if (tR) tR.style.display = type === 'dot' ? 'none' : 'flex';
+                if (gR) gR.style.display = type === 'dot' ? 'none' : 'flex';
+            }
+            rebuildCrosshairDOM();
+            persist();
+        }
+
+        function syncCrossProp(prop, val) {
+            val = parseFloat(val);
+            if (isNaN(val)) return;
+            config.crosshair[prop] = val;
+            setNum(`inp-cross-${prop}`, val, 2);
+            const rng = getEl(`inp-cross-${prop}-r`);
+            if (rng) rng.value = val;
+            rebuildCrosshairDOM();
+            persist();
+        }
+
+        function setupColorSwatchGrid(containerId, currentColor, onSelect) {
+            const c = getEl(containerId);
+            if (!c) return;
+            c.innerHTML = '';
+            COLOR_PRESETS.forEach(item => {
+                const b = document.createElement('div');
+                b.className = 'round-swatch-btn' + (item.hex.toLowerCase() === currentColor.toLowerCase() ? ' active' : '');
+                b.style.background = item.hex;
+                b.title = item.name;
+                b.onclick = () => {
+                    c.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
+                    b.classList.add('active');
+                    onSelect(item.hex);
+                };
+                c.appendChild(b);
+            });
+            const pickerWrap = document.createElement('div');
+            pickerWrap.className = 'color-picker-input-wrap';
+            pickerWrap.innerHTML = `<input type="color" value="${currentColor}" />`;
+            pickerWrap.querySelector('input').oninput = (e) => {
+                c.querySelectorAll('.round-swatch-btn').forEach(el => el.classList.remove('active'));
+                onSelect(e.target.value);
+            };
+            c.appendChild(pickerWrap);
+        }
+
+        // ============================================================
+        // 3D 场景引擎构建
+        // ============================================================
+        const canvasContainer = getEl('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000);
+        camera.position.set(0, config.viewHeight, 0);
+        camera.rotation.order = 'YXZ';
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance", desynchronized: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        canvasContainer.appendChild(renderer.domElement);
+
+        function updateCameraFov() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.fov = hFovToVfov(config.fovHorizontal, camera.aspect);
+            camera.updateProjectionMatrix();
+        }
+
+        function createSkyTexture(theme) {
+            const c = document.createElement('canvas');
+            c.width = 16;
+            c.height = 1024;
+            const ctx = c.getContext('2d');
+            const g = ctx.createLinearGradient(0, 0, 0, 1024);
+            if (theme === 'day') {
+                g.addColorStop(0.0, '#003bf3');
+                g.addColorStop(0.22, '#1d4ed8');
+                g.addColorStop(0.50, '#38bdf8');
+                g.addColorStop(0.80, '#bae6fd');
+                g.addColorStop(0.95, '#f0f9ff');
+                g.addColorStop(1.0, '#ffffff');
+            } else {
+                g.addColorStop(0.0, '#312e81');
+                g.addColorStop(0.35, '#6366f1');
+                g.addColorStop(0.65, '#f43f5e');
+                g.addColorStop(0.85, '#fdba74');
+                g.addColorStop(1.0, '#fff7ed');
+            }
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 16, 1024);
+            return new THREE.CanvasTexture(c);
+        }
+
+        const skyMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(240, 32, 16),
+            new THREE.MeshBasicMaterial({ map: createSkyTexture('day'), side: THREE.BackSide })
+        );
+        scene.add(skyMesh);
+
+        const cloudGroup = new THREE.Group();
+        scene.add(cloudGroup);
+        const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.68 });
+        for (let i = 0; i < 15; i++) {
+            const angle = (i / 15) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+            const dist = 75 + Math.random() * 65;
+            const x = Math.sin(angle) * dist, z = -Math.cos(angle) * dist, y = 48 + Math.random() * 20;
+            const w = 24 + Math.random() * 20, h = 2.5 + Math.random() * 1.5, d = 16 + Math.random() * 18;
+            const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), cloudMat);
+            mesh.position.set(x, y, z);
+            mesh.userData = { angle, dist, speed: 0.0015 + Math.random() * 0.002 };
+            cloudGroup.add(mesh);
+        }
+
+        function toggleClouds() {
+            config.cloudsEnabled = !config.cloudsEnabled;
+            cloudGroup.visible = config.cloudsEnabled;
+            const btn = getEl('btn-cloud-toggle');
+            if (btn) btn.textContent = config.cloudsEnabled ? '云朵: 开启' : '云朵: 关闭';
+            persist();
+        }
+
+        const ambientLight = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 0.95);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        sunLight.position.set(30, 60, 30);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.set(2048, 2048);
+        sunLight.shadow.bias = -0.0004;
+        scene.add(sunLight);
+
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.1, metalness: 0.02 });
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(320, 320), floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        let gridHelper = null;
+        function updateFloorAndGrid(hexStr) {
+            config.floorColor = hexStr;
+            const col = new THREE.Color(hexStr);
+            floorMat.color.copy(col);
+
+            const lum = 0.299 * col.r + 0.587 * col.g + 0.114 * col.b;
+            let main, sub;
+            const isCreamy = hexStr.toLowerCase() === '#faeed1' || hexStr.toLowerCase() === '#fdf2d0';
+
+            if (isCreamy) {
+                main = new THREE.Color(0xb0b8c4);
+                sub = new THREE.Color(0xdce2ea);
+            } else if (lum > 0.5) {
+                main = new THREE.Color(lum > 0.8 ? 0x94a3b8 : 0x64748b);
+                sub = new THREE.Color(lum > 0.8 ? 0xdbeafe : 0xa8b4c4);
+                if (col.r > col.b + 0.06) {
+                    main = new THREE.Color(0xa89f91);
+                    sub = new THREE.Color(0xe2dcd0);
+                }
+            } else {
+                main = new THREE.Color(0x64748b);
+                sub = new THREE.Color(lum < 0.2 ? 0x27354a : 0x475569);
+            }
+
+            if (gridHelper) {
+                scene.remove(gridHelper);
+                gridHelper.geometry.dispose();
+                gridHelper.material.dispose();
+            }
+            gridHelper = new THREE.GridHelper(300, 150, main, sub);
+            gridHelper.position.y = 0.001;
+            scene.add(gridHelper);
+
+            const btnC = getEl('btn-creamy-yellow'), rng = getEl('inp-floor-gray-r');
+            if (btnC) btnC.classList.toggle('active', isCreamy);
+            if (rng && !isCreamy) rng.value = Math.round(((col.r + col.g + col.b) / 3) * 100);
+            persist();
+        }
+        function setFloorColorPreset(hex) { updateFloorAndGrid(hex); }
+        function onFloorGraySlider(val) {
+            const v = Math.round(clamp(parseFloat(val), 0, 100) * 2.55).toString(16).padStart(2, '0');
+            updateFloorAndGrid(`#${v}${v}${v}`);
+        }
+
+        let horizonLine = null;
+        function updateHorizon(height) {
+            if (horizonLine) { scene.remove(horizonLine); horizonLine.geometry.dispose(); horizonLine.material.dispose(); }
+            const radius = 48, pts = [], segs = 72;
+            for (let i = 0; i <= segs; i++) {
+                const theta = (i / segs) * Math.PI * 2;
+                pts.push(new THREE.Vector3(radius * Math.cos(theta), height, radius * Math.sin(theta)));
+            }
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const mat = new THREE.LineDashedMaterial({ color: 0xffffff, dashSize: 0.45, gapSize: 0.3, transparent: true, opacity: 0.5 });
+            horizonLine = new THREE.Line(geo, mat);
+            horizonLine.computeLineDistances();
+            scene.add(horizonLine);
+        }
+        updateHorizon(config.viewHeight);
+
+        const COMPASS_RADIUS = 48.0;
+        const compassGroup = new THREE.Group();
+        scene.add(compassGroup);
+
+        function createUltraSharpSprite(text, isMain) {
+            const c = document.createElement('canvas');
+            c.width = 512; c.height = 256;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = isMain ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.92)';
+            ctx.beginPath(); ctx.roundRect(32, 48, 448, 160, 40); ctx.fill();
+            ctx.strokeStyle = isMain ? '#0284c7' : '#94a3b8';
+            ctx.lineWidth = 10; ctx.stroke();
+            ctx.fillStyle = isMain ? '#ffffff' : '#0f172a';
+            ctx.font = isMain ? 'bold 80px sans-serif' : 'bold 70px sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(text, 256, 128);
+            const tex = new THREE.CanvasTexture(c);
+            const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+            sp.scale.set(isMain ? 4.8 : 3.8, isMain ? 2.4 : 1.9, 1);
+            return sp;
+        }
+
+        for (let deg = 0; deg < 360; deg += 22.5) {
+            const rad = (deg * Math.PI) / 180;
+            const x = COMPASS_RADIUS * Math.sin(rad), z = -COMPASS_RADIUS * Math.cos(rad);
+            const isCardinal = (deg % 90 === 0), isSemi = (deg % 45 === 0);
+            const lm = new THREE.LineBasicMaterial({ color: isCardinal ? 0x0284c7 : (isSemi ? 0x64748b : 0x94a3b8) });
+            const pts = [new THREE.Vector3(x, 0.01, z), new THREE.Vector3(x, isCardinal ? 5.5 : (isSemi ? 4.0 : 2.5), z)];
+            compassGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lm));
+            let label = deg + '°';
+            if (deg === 0) label = '0° (前)';
+            else if (deg === 90) label = '90° (右)';
+            else if (deg === 180) label = '180° (后)';
+            else if (deg === 270) label = '270° (左)';
+            const sp = createUltraSharpSprite(label, isCardinal);
+            sp.position.set(x, isCardinal ? 7.0 : (isSemi ? 5.2 : 3.6), z);
+            compassGroup.add(sp);
+        }
+
+        const targetGroup = new THREE.Group();
+        scene.add(targetGroup);
+
+        const targetSphereMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(1, 48, 48),
+            new THREE.MeshStandardMaterial({
+                color: TARGET_BASE_COLOR, roughness: 0.2, metalness: 0.05
+            })
+        );
+        targetSphereMesh.castShadow = true;
+        targetSphereMesh.userData.isTarget = true;
+        targetGroup.add(targetSphereMesh);
+
+        const dropLineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -config.viewHeight, 0)]);
+        const dropLine = new THREE.Line(dropLineGeo, new THREE.LineDashedMaterial({ color: 0xef233c, dashSize: 0.4, gapSize: 0.25 }));
+        dropLine.computeLineDistances();
+        targetGroup.add(dropLine);
+
+        let targetWorldHeadingRad = 0.0;
+        let targetCurrentRadius = 1.0;
+        let hitFeedbackUntil = 0;
+
+        function sync3DTarget() {
+            const halfRadX = (modelState.thetaX * Math.PI) / 360;
+            targetCurrentRadius = Math.max(COMPASS_RADIUS * Math.sin(halfRadX), 0.000001);
+
+            targetSphereMesh.visible = modelState.thetaX > 0;
+            targetSphereMesh.scale.set(targetCurrentRadius, targetCurrentRadius, targetCurrentRadius);
+
+            let radY = 0;
+            if (modelState.visualCenter) {
+                radY = targetWorldHeadingRad;
+            } else {
+                const sign = (modelState.side === 'left') ? -1 : 1;
+                radY = (modelState.thetaY * Math.PI / 180) * sign;
+            }
+
+            while (radY > Math.PI) radY -= Math.PI * 2;
+            while (radY < -Math.PI) radY += Math.PI * 2;
+
+            const px = COMPASS_RADIUS * Math.sin(radY);
+            const pz = -COMPASS_RADIUS * Math.cos(radY);
+            const py = config.viewHeight;
+
+            targetGroup.position.set(px, py, pz);
+
+            const posAttr = dropLine.geometry.attributes.position;
+            posAttr.setY(1, -py);
+            posAttr.needsUpdate = true;
+            dropLine.computeLineDistances();
+        }
+
+        function refreshModelUI() {
+            const isFitts = (modelState.formulaModel === 'fitts');
+            const currentPower = getCurrentPower();
+            const id = calculateOutput(modelState.thetaX, modelState.thetaY, currentPower, modelState.formulaModel);
+
+            let idStr;
+            if (id === Infinity) idStr = '∞';
+            else if (id === -Infinity) idStr = '-∞';
+            else if (Number.isFinite(id)) idStr = id.toFixed(3);
+            else idStr = '0.000';
+
+            getEl('hud-output-val').innerText = `${idStr} bits`;
+            getEl('card-output-val').innerText = idStr;
+            getEl('hero-stat-label').innerText = isFitts ? '当前 Fitts 原始难度值:' : '当前 Shannon-Fitts 难度值:';
+            getEl('hero-unit-label').innerText = 'bits';
+            getEl('target-di-tag').innerText = '目标 ID:';
+
+            getEl('hud-theta-x').innerText = `${modelState.thetaX.toFixed(2)}°`;
+            getEl('hud-target-ang').innerText = `${modelState.thetaY.toFixed(2)}°`;
+
+            setNum('inp-x', modelState.thetaX, 2);
+            const xR = getEl('inp-x-r'); if (xR) xR.value = modelState.thetaX;
+
+            setNum('inp-p', currentPower, 2);
+            const pR = getEl('inp-p-r'); if (pR) pR.value = currentPower;
+
+            setNum('inp-y', modelState.thetaY, 2);
+            const yR = getEl('inp-y-r'); if (yR) yR.value = modelState.thetaY;
+
+            const sideSel = getEl('targetSideSelect');
+            if (sideSel) sideSel.value = modelState.side;
+
+            const isPowOne = Math.abs(currentPower - 1.0) < 0.001;
+            const powSup = isPowOne ? '' : `<sup>${currentPower.toFixed(2)}</sup>`;
+            const mathDisplay = getEl('formula-math-display');
+            const relTitle = getEl('hud-rel-title');
+            const relText = getEl('rel-formula-text');
+            const invDesc = getEl('inverse-formula-desc');
+            const powHint = getEl('power-hint-text');
+
+            if (isFitts) {
+                mathDisplay.innerHTML = `ID<sub>F</sub> = log₂( 2θy / θx${powSup} )`;
+                relTitle.innerText = 'Fitts 原始公式（3D 角度形式）';
+                relText.innerHTML = `ID<sub>F</sub> = log₂( 2θy / θx${powSup} )　[bits]`;
+                invDesc.innerHTML = isPowOne
+                    ? `θx = 2θy / 2^ID　｜　θy = θx · 2^ID / 2`
+                    : `θx = ( 2θy / 2^ID )^(1/${currentPower.toFixed(2)})　｜　θy = θx^${currentPower.toFixed(2)} · 2^ID / 2`;
+                powHint.innerText = `Fitts 原始: 当前 p=${currentPower.toFixed(2)}（经典 1.00）`;
+            } else {
+                mathDisplay.innerHTML = `ID = log₂(1 + θy / θx${powSup})`;
+                relTitle.innerText = 'Shannon-Fitts 瞄准难度公式（3D 角度幂次扩展版）';
+                relText.innerHTML = `ID = log₂(1 + θy / θx${powSup})　[bits]`;
+                invDesc.innerHTML = isPowOne
+                    ? `θx = θy / (2^ID − 1)　｜　θy = θx · (2^ID − 1)`
+                    : `θx = [ θy / (2^ID − 1) ]^(1/${currentPower.toFixed(2)})　｜　θy = θx^${currentPower.toFixed(2)} · (2^ID − 1)`;
+                powHint.innerText = `Shannon: 当前独立 p=${currentPower.toFixed(2)}（经典 1.00）`;
+            }
+
+            sync3DTarget();
+        }
+
+        function stepParam(param, delta) {
+            if (param === 'x') modelState.thetaX = clamp(modelState.thetaX + delta, TX_MIN, TX_MAX);
+            else if (param === 'p') setCurrentPower(getCurrentPower() + delta);
+            else if (param === 'y') {
+                modelState.thetaY = clamp(modelState.thetaY + delta, TY_MIN, TY_MAX);
+                modelState.visualCenter = (modelState.thetaY === 0);
+            }
+            refreshModelUI();
+            persist();
+        }
+
+        getEl('inp-x-r').addEventListener('input', (e) => {
+            modelState.thetaX = clamp(Number(e.target.value), TX_MIN, TX_MAX);
+            refreshModelUI();
+            persist();
+        });
+        getEl('inp-x').addEventListener('change', (e) => {
+            modelState.thetaX = clamp(numOr(e.target.value, 0.0), TX_MIN, TX_MAX);
+            refreshModelUI();
+            persist();
+        });
+
+        getEl('inp-p-r').addEventListener('input', (e) => {
+            setCurrentPower(e.target.value);
+            refreshModelUI();
+            persist();
+        });
+        getEl('inp-p').addEventListener('change', (e) => {
+            setCurrentPower(e.target.value);
+            refreshModelUI();
+            persist();
+        });
+
+        getEl('inp-y-r').addEventListener('input', (e) => {
+            modelState.thetaY = clamp(Number(e.target.value), TY_MIN, TY_MAX);
+            modelState.visualCenter = (modelState.thetaY === 0);
+            refreshModelUI();
+            persist();
+        });
+        getEl('inp-y').addEventListener('change', (e) => {
+            modelState.thetaY = clamp(numOr(e.target.value, 0.0), TY_MIN, TY_MAX);
+            modelState.visualCenter = (modelState.thetaY === 0);
+            refreshModelUI();
+            persist();
+        });
+        getEl('targetSideSelect').addEventListener('change', (e) => {
+            modelState.side = e.target.value;
+            modelState.visualCenter = false;
+            refreshModelUI();
+            persist();
+        });
+
+        // ============================================================
+        // 统一写入反求框 + 同步当前公式的 ID 槽
+        // ============================================================
+        function setCurrentTargetID(value) {
+            const targetInp = getEl('inp-target-output');
+            if (!targetInp) return;
+            targetInp.value = value;
+            _modelParams[modelState.formulaModel].targetID = String(value);
+        }
+
+        getEl('formula-hero-card').addEventListener('click', () => {
+            const currentId = calculateOutput(modelState.thetaX, modelState.thetaY, getCurrentPower(), modelState.formulaModel);
+            const targetBox = getEl('target-di-box');
+            if (currentId === Infinity) {
+                setCurrentTargetID(99);
+            } else if (currentId === -Infinity) {
+                setCurrentTargetID(0);
+            } else if (Number.isFinite(currentId)) {
+                setCurrentTargetID(currentId.toFixed(3));
+            }
+            if (targetBox) {
+                targetBox.style.borderColor = '#ef233c';
+                targetBox.style.boxShadow = '0 0 16px rgba(239, 35, 60, 0.35)';
+                setTimeout(() => {
+                    targetBox.style.borderColor = '#0284c7';
+                    targetBox.style.boxShadow = '0 2px 10px rgba(2, 132, 199, 0.1)';
+                }, 350);
+            }
+            persist();
+        });
+
+        // ============================================================
+        // 香农 ↔ 菲茨 ID 换算器
+        // ============================================================
+        const convS = getEl('conv-shannon');
+        const convF = getEl('conv-fitts');
+        const convResult = getEl('conv-result');
+
+        function fmtConv(n) {
+            if (!Number.isFinite(n)) return '—';
+            if (n === 0) return '0';
+            if (Math.abs(n) < 1e-6) return n.toExponential(4);
+            return n.toFixed(6).replace(/\.?0+$/, '');
+        }
+        function convShannonToFitts(idS) {
+            return Math.log2(2 * (Math.pow(2, idS) - 1));
+        }
+        function convFittsToShannon(idF) {
+            return Math.log2(Math.pow(2, idF - 1) + 1);
+        }
+        function convClear() {
+            convResult.textContent = '输入任一 ID，会自动换算并显示推导过程。';
+        }
+        function convFromShannon() {
+            const idS = parseFloat(convS.value);
+            if (!Number.isFinite(idS)) { convClear(); return; }
+            const twoPow = Math.pow(2, idS);
+            const ratio = twoPow - 1;
+            const inner = 2 * ratio;
+            const idF = Math.log2(inner);
+            convF.value = fmtConv(idF);
+            convResult.innerHTML =
+                `香农 <span class="hl-red">${fmtConv(idS)}</span> → 菲茨 <span class="hl">${fmtConv(idF)}</span><br>` +
+                `2^ID_S = <span class="hl">${fmtConv(twoPow)}</span>　D/W = <span class="hl">${fmtConv(ratio)}</span><br>` +
+                `ID_F = log₂(2·D/W) = log₂(${fmtConv(inner)})`;
+        }
+        function convFromFitts() {
+            const idF = parseFloat(convF.value);
+            if (!Number.isFinite(idF)) { convClear(); return; }
+            const half = Math.pow(2, idF - 1);
+            const inner = half + 1;
+            const idS = Math.log2(inner);
+            convS.value = fmtConv(idS);
+            convResult.innerHTML =
+                `菲茨 <span class="hl">${fmtConv(idF)}</span> → 香农 <span class="hl-red">${fmtConv(idS)}</span><br>` +
+                `D/W = 2^(ID_F−1) = <span class="hl">${fmtConv(half)}</span><br>` +
+                `ID_S = log₂(1 + D/W) = log₂(${fmtConv(inner)})`;
+        }
+        if (convS && convF && convResult) {
+            convS.addEventListener('input', () => {
+                if (convS.value.trim() === '') { convF.value = ''; convClear(); return; }
+                convFromShannon();
+            });
+            convF.addEventListener('input', () => {
+                if (convF.value.trim() === '') { convS.value = ''; convClear(); return; }
+                convFromFitts();
+            });
+            getEl('conv-swap').addEventListener('click', () => {
+                const s = convS.value;
+                convS.value = convF.value;
+                convF.value = s;
+                if (convS.value.trim() !== '') convFromShannon();
+                else if (convF.value.trim() !== '') convFromFitts();
+                else convClear();
+            });
+            getEl('conv-apply').addEventListener('click', () => {
+                // 取当前公式对应的换算结果
+                let val;
+                if (modelState.formulaModel === 'fitts') {
+                    val = convF.value.trim() !== '' ? convF.value : convS.value;
+                } else {
+                    val = convS.value.trim() !== '' ? convS.value : convF.value;
+                }
+                if (val === '' || !Number.isFinite(parseFloat(val))) return;
+                const applied = parseFloat(val).toFixed(3);
+                setCurrentTargetID(applied);
+                const targetBox = getEl('target-di-box');
+                if (targetBox) {
+                    targetBox.style.borderColor = '#16a34a';
+                    targetBox.style.boxShadow = '0 0 16px rgba(22, 163, 74, 0.35)';
+                    setTimeout(() => {
+                        targetBox.style.borderColor = '#0284c7';
+                        targetBox.style.boxShadow = '0 2px 10px rgba(2, 132, 199, 0.1)';
+                    }, 350);
+                }
+                persist();
+            });
+        }
+
+        // ============================================================
+        // 彻底回正与置中
+        // ============================================================
+        let currentYaw = 0.0;
+        let currentPitch = 0.0;
+        const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+
+        function updateHudYawDisplay() {
+            const el = getEl('hud-yaw');
+            if (!el) return;
+            const deg = ((-currentYaw * 180 / Math.PI) % 360 + 360) % 360;
+            const displayDeg = (Math.abs(deg) < 0.0005 || Math.abs(deg - 360) < 0.0005) ? 0 : deg;
+            let text = `${displayDeg.toFixed(3)}°`;
+            if (modelState.allowVerticalLook && Math.abs(currentPitch) > 0.001) {
+                const pitchDeg = (-currentPitch * 180 / Math.PI);
+                text += ` (P: ${pitchDeg > 0 ? '+' : ''}${pitchDeg.toFixed(2)}°)`;
+            }
+            el.textContent = text;
+        }
+
+        function resetAimOrigin(resetPitch = true) {
+            currentYaw = 0.0;
+            if (resetPitch || !modelState.allowVerticalLook) {
+                currentPitch = 0.0;
+            }
+            cameraEuler.set(currentPitch, currentYaw, 0);
+            camera.quaternion.setFromEuler(cameraEuler);
+            camera.updateMatrixWorld(true);
+            updateHudYawDisplay();
+        }
+
+        getEl('btn-zero-yaw').addEventListener('click', () => resetAimOrigin(false));
+
+        getEl('btn-center-target').addEventListener('click', () => {
+            modelState.thetaY = 0.0;
+            modelState.visualCenter = true;
+            targetWorldHeadingRad = 0.0;
+            resetAimOrigin(true);
+            refreshModelUI();
+            persist();
+        });
+
+        // ============================================================
+        // 依据 ID 反求直径与距离
+        // ============================================================
+        getEl('btn-solve-x').addEventListener('click', () => {
+            const idVal = numOr(getEl('inp-target-output').value, NaN);
+            if (!Number.isFinite(idVal)) return;
+
+            const isFitts = (modelState.formulaModel === 'fitts');
+            const p = getCurrentPower() || 1.0;
+            let newThetaX = NaN;
+
+            if (isFitts) {
+                const den = Math.pow(2, idVal);
+                if (den > 0 && modelState.thetaY >= 0) {
+                    newThetaX = Math.pow(2 * modelState.thetaY / den, 1 / p);
+                }
+            } else {
+                if (idVal <= 0) return;
+                const denom = Math.pow(2, idVal) - 1;
+                if (denom <= 0) return;
+                const ratio = modelState.thetaY / denom;
+                if (ratio >= 0) newThetaX = Math.pow(ratio, 1 / p);
+            }
+
+            if (Number.isFinite(newThetaX)) {
+                modelState.thetaX = clamp(newThetaX, TX_MIN, TX_MAX);
+                modelState.visualCenter = false;
+                // 反求后同步当前公式的 ID 槽
+                _modelParams[modelState.formulaModel].targetID = getEl('inp-target-output').value;
+                refreshModelUI();
+                persist();
+            }
+        });
+
+        getEl('btn-solve-y').addEventListener('click', () => {
+            const idVal = numOr(getEl('inp-target-output').value, NaN);
+            if (!Number.isFinite(idVal)) return;
+
+            const isFitts = (modelState.formulaModel === 'fitts');
+            const p = getCurrentPower() || 1.0;
+            const thetaXp = Math.pow(modelState.thetaX, p);
+
+            let newThetaY = NaN;
+            if (isFitts) {
+                newThetaY = thetaXp * Math.pow(2, idVal) / 2;
+            } else {
+                if (idVal < 0) return;
+                newThetaY = thetaXp * (Math.pow(2, idVal) - 1);
+            }
+
+            if (Number.isFinite(newThetaY)) {
+                modelState.thetaY = clamp(newThetaY, TY_MIN, TY_MAX);
+                modelState.visualCenter = (modelState.thetaY === 0);
+                // 反求后同步当前公式的 ID 槽
+                _modelParams[modelState.formulaModel].targetID = getEl('inp-target-output').value;
+                refreshModelUI();
+                persist();
+            }
+        });
+
+        getEl('btn-lock-pitch').addEventListener('click', () => {
+            modelState.allowVerticalLook = false;
+            getEl('btn-lock-pitch').classList.add('active');
+            getEl('btn-unlock-pitch').classList.remove('active');
+            currentPitch = 0.0;
+            cameraEuler.set(currentPitch, currentYaw, 0);
+            camera.quaternion.setFromEuler(cameraEuler);
+            updateHudYawDisplay();
+            persist();
+        });
+        getEl('btn-unlock-pitch').addEventListener('click', () => {
+            modelState.allowVerticalLook = true;
+            getEl('btn-unlock-pitch').classList.add('active');
+            getEl('btn-lock-pitch').classList.remove('active');
+            persist();
+        });
+
+        // ============================================================
+        // 连续瞄准测试与统计体系
+        // ============================================================
+        const btnStartAimTest = getEl('btn-start-aim-test');
+        const testStatusTag = getEl('test-status-tag');
+        const statAcc = getEl('stat-acc');
+        const statLastTime = getEl('stat-last-time');
+        const statAvgTime = getEl('stat-avg-time');
+        const statScore = getEl('stat-score');
+
+        function updateTestStatsUI() {
+            statScore.innerText = `${testState.hits} / ${testState.trials}`;
+            const acc = testState.trials > 0 ? ((testState.hits / testState.trials) * 100).toFixed(1) : '100.0';
+            statAcc.innerText = `${acc}%`;
+            statLastTime.innerText = testState.lastTimeMs > 0 ? `${testState.lastTimeMs} ms` : '-- ms';
+
+            if (testState.timesList.length > 0) {
+                const sum = testState.timesList.reduce((a, b) => a + b, 0);
+                statAvgTime.innerText = `${Math.round(sum / testState.timesList.length)} ms`;
+            } else {
+                statAvgTime.innerText = '-- ms';
+            }
+        }
+
+        function cancelAimTest(reason = 'timeout') {
+            if (!testState.active) return;
+            testState.active = false;
+            if (testState.timeoutTimer) { clearTimeout(testState.timeoutTimer); testState.timeoutTimer = null; }
+            if (testState._missFlashTimer) { clearTimeout(testState._missFlashTimer); testState._missFlashTimer = null; }
+            btnStartAimTest.classList.remove('testing');
+            btnStartAimTest.innerText = '点击开始连续瞄准测试';
+
+            if (reason === 'timeout') {
+                testState.trials++;
+                testStatusTag.innerText = '超时未命中 (已停止)';
+                testStatusTag.style.background = '#fee2e2';
+                testStatusTag.style.color = '#ef233c';
+                resetAimOrigin();
+                updateTestStatsUI();
+            } else if (reason === 'unlock') {
+                testStatusTag.innerText = '测试已中断';
+                testStatusTag.style.background = '#f1f5f9';
+                testStatusTag.style.color = '#64748b';
+                resetAimOrigin();
+            }
+            updateCrosshairStyle(false);
+        }
+
+        function triggerAimTestStart() {
+            if (testState.active) return;
+            testState.active = true;
+            updateCrosshairStyle(false);
+            btnStartAimTest.classList.add('testing');
+            btnStartAimTest.innerText = '测试中：迅速甩枪点击红球！';
+            testStatusTag.innerText = '计时中...';
+            testStatusTag.style.background = '#fef3c7';
+            testStatusTag.style.color = '#b45309';
+
+            resetAimOrigin();
+            testState.startTime = performance.now();
+
+            if (testState.timeoutTimer) clearTimeout(testState.timeoutTimer);
+            testState.timeoutTimer = setTimeout(() => cancelAimTest('timeout'), 8000);
+        }
+
+        getEl('btn-reset-test-stats').addEventListener('click', () => {
+            testState.hits = 0; testState.trials = 0; testState.lastTimeMs = 0; testState.timesList = [];
+            testStatusTag.innerText = '就绪';
+            testStatusTag.style.background = '#e0f2fe'; testStatusTag.style.color = '#0284c7';
+            updateTestStatsUI();
+            if (testState.timeoutTimer) { clearTimeout(testState.timeoutTimer); testState.timeoutTimer = null; }
+            if (testState._missFlashTimer) { clearTimeout(testState._missFlashTimer); testState._missFlashTimer = null; }
+            if (testState.active) {
+                testState.active = false;
+                btnStartAimTest.classList.remove('testing');
+                btnStartAimTest.innerText = '点击开始连续瞄准测试';
+            }
+            updateCrosshairStyle(false);
+        });
+
+        // ============================================================
+        // 指针锁定与输入
+        // ============================================================
+        let isArmed = false;
+        let pendingAction = null;
+        let armTimer = null;
+        let btnCooldownTimer = null;
+        const btnLock = getEl('btn-lock');
+        const progressOverlay = getEl('progress-overlay');
+        const raycaster = new THREE.Raycaster();
+        const centerVec = new THREE.Vector2(0, 0);
+
+        function showProgressOverlay() {
+            if (progressOverlay) progressOverlay.style.display = 'flex';
+            const hint = getEl('progress-hint');
+            const barWrap = getEl('progress-bar-container');
+            const bar = getEl('progress-bar');
+            if (hint) hint.style.display = 'flex';
+            if (barWrap) barWrap.style.display = 'none';
+            if (bar) { bar.style.transition = 'none'; bar.style.width = '0%'; }
+        }
+        function hideProgressOverlay() {
+            if (progressOverlay) progressOverlay.style.display = 'none';
+        }
+        function resetLockButtonLabel() {
+            btnLock.classList.remove('armed');
+            btnLock.innerText = '进入 3D 靶场 (锁定光标)';
+        }
+
+        function startButtonCooldown() {
+            if (!btnLock) return;
+            btnLock.disabled = true;
+            btnLock.classList.remove('armed');
+            if (btnCooldownTimer) clearInterval(btnCooldownTimer);
+            let remaining = 15;
+            btnLock.innerText = `准备就绪 (${(remaining / 10).toFixed(1)}s)...`;
+            btnCooldownTimer = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(btnCooldownTimer);
+                    btnCooldownTimer = null;
+                    btnLock.disabled = false;
+                    btnLock.innerText = '进入 3D 靶场 (锁定光标)';
+                } else {
+                    btnLock.innerText = `准备就绪 (${(remaining / 10).toFixed(1)}s)...`;
+                }
+            }, 100);
+        }
+
+        function cancelArmedPhase() {
+            isArmed = false;
+            pendingAction = null;
+            if (armTimer) { clearTimeout(armTimer); armTimer = null; }
+            hideProgressOverlay();
+            btnLock.classList.remove('armed');
+            btnLock.disabled = false;
+            btnLock.innerText = '进入 3D 靶场 (锁定光标)';
+        }
+
+        function requestPointerLockSafe() {
+            try {
+                const p = document.body.requestPointerLock({ unadjustedMovement: true });
+                if (p && typeof p.catch === 'function') {
+                    p.catch(() => {
+                        if (document.pointerLockElement !== document.body) {
+                            try { document.body.requestPointerLock(); } catch (_) {}
+                        }
+                    });
+                }
+            } catch (_) {
+                try { document.body.requestPointerLock(); } catch (_) {}
+            }
+        }
+
+        function startArmedPhase(action = null) {
+            if (isArmed) { pendingAction = action || pendingAction; return; }
+            isArmed = true;
+            pendingAction = action;
+
+            showProgressOverlay();
+            btnLock.innerText = '点击左键开始...';
+            btnLock.classList.add('armed');
+            btnLock.disabled = true;
+
+            requestPointerLockSafe();
+
+            if (armTimer) clearTimeout(armTimer);
+            armTimer = setTimeout(() => {
+                armTimer = null;
+                if (isArmed && document.pointerLockElement !== document.body) {
+                    cancelArmedPhase();
+                }
+            }, 2200);
+        }
+
+        function triggerRealStart() {
+            isArmed = false;
+            if (armTimer) { clearTimeout(armTimer); armTimer = null; }
+
+            const hint = getEl('progress-hint');
+            const barWrap = getEl('progress-bar-container');
+            const bar = getEl('progress-bar');
+            if (hint) hint.style.display = 'none';
+            if (barWrap) barWrap.style.display = 'block';
+            if (bar) {
+                bar.style.transition = 'none';
+                bar.style.width = '0%';
+                void bar.offsetHeight;
+                bar.style.transition = 'width 0.12s linear';
+                bar.style.width = '100%';
+            }
+
+            const act = pendingAction;
+            pendingAction = null;
+
+            setTimeout(() => {
+                hideProgressOverlay();
+                btnLock.classList.remove('armed');
+                btnLock.innerText = '进入 3D 靶场 (锁定光标)';
+                if (typeof act === 'function') {
+                    try { act(); } catch (e) { console.warn(e); }
+                }
+            }, 130);
+        }
+
+        btnLock.addEventListener('click', () => {
+            if (btnLock.disabled) return;
+            startArmedPhase(null);
+        });
+
+        if (progressOverlay) {
+            progressOverlay.addEventListener('mousedown', (e) => {
+                if (document.pointerLockElement !== document.body) {
+                    e.preventDefault();
+                    cancelArmedPhase();
+                }
+            });
+        }
+
+        document.addEventListener('pointerlockerror', () => {
+            if (isArmed && document.pointerLockElement !== document.body) {
+                cancelArmedPhase();
+            }
+        });
+
+        btnStartAimTest.addEventListener('click', () => {
+            if (document.pointerLockElement === document.body) {
+                triggerAimTestStart();
+            } else {
+                startArmedPhase(() => triggerAimTestStart());
+            }
+        });
+
+        let pollCount = 0, pollLastCalc = performance.now(), peakPollRate = 0;
+        const _supportsRaw = ('onpointerrawupdate' in window);
+
+        function handlePointerInput(e) {
+            const events = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : [e];
+            pollCount += events.length;
+            if (document.pointerLockElement !== document.body) return;
+            let dx = 0, dy = 0;
+            for (const ev of events) {
+                dx += ev.movementX || 0;
+                dy += ev.movementY || 0;
+            }
+            if (Math.abs(dx) > 3000 || Math.abs(dy) > 3000) return;
+
+            currentYaw -= dx * radiansPerCount * config.sensRatioX;
+            currentYaw = (currentYaw % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+
+            if (modelState.allowVerticalLook) {
+                currentPitch -= dy * radiansPerCount * config.sensRatioY;
+                currentPitch = clamp(currentPitch, -Math.PI / 2 + 0.001, Math.PI / 2 - 0.001);
+            } else {
+                currentPitch = 0;
+            }
+        }
+
+        if (_supportsRaw) window.addEventListener('pointerrawupdate', handlePointerInput, { passive: true });
+        else window.addEventListener('pointermove', handlePointerInput, { passive: true });
+
+        // ============================================================
+        // 高精度射击判定
+        // ============================================================
+        const targetWorldPos = new THREE.Vector3();
+
+        function checkTargetHit() {
+            if (modelState.thetaX <= 0) return false;
+
+            raycaster.setFromCamera(centerVec, camera);
+            const hits = raycaster.intersectObject(targetSphereMesh, false);
+            if (hits.length > 0) return true;
+
+            targetSphereMesh.getWorldPosition(targetWorldPos);
+            const ray = raycaster.ray;
+            const distToCenter = ray.distanceToPoint(targetWorldPos);
+
+            const tolerantRadius = targetCurrentRadius * 1.08;
+            if (distToCenter <= tolerantRadius) {
+                const toTarget = targetWorldPos.clone().sub(ray.origin);
+                return ray.direction.dot(toTarget) > 0;
+            }
+            return false;
+        }
+
+        window.addEventListener('mousedown', (e) => {
+            if (document.pointerLockElement === document.body && e.button === 0) {
+                if (isArmed) { triggerRealStart(); return; }
+
+                const now = performance.now();
+                if (now - testState.lastShotTime < 60) return;
+                testState.lastShotTime = now;
+
+                cameraEuler.set(currentPitch, currentYaw, 0);
+                camera.quaternion.setFromEuler(cameraEuler);
+                camera.updateMatrixWorld(true);
+                targetGroup.updateMatrixWorld(true);
+
+                const isHit = checkTargetHit();
+                pushFeedbackMarker(isHit);
+
+                if (isHit) {
+                    playHitAudio();
+                    hitFeedbackUntil = now + 65;
+
+                    if (testState.active) {
+                        const elapsed = Math.round(now - testState.startTime);
+                        if (testState.timeoutTimer) { clearTimeout(testState.timeoutTimer); testState.timeoutTimer = null; }
+
+                        testState.hits++;
+                        testState.trials++;
+                        testState.lastTimeMs = elapsed;
+                        testState.timesList.push(elapsed);
+
+                        testStatusTag.innerText = `命中! ${elapsed} ms`;
+                        testStatusTag.style.background = '#dcfce7';
+                        testStatusTag.style.color = '#15803d';
+
+                        updateTestStatsUI();
+                        resetAimOrigin();
+
+                        testState.startTime = performance.now();
+                        testState.timeoutTimer = setTimeout(() => cancelAimTest('timeout'), 8000);
+                    }
+                } else {
+                    playMissAudio();
+                    if (testState.active) {
+                        testState.trials++;
+                        updateTestStatsUI();
+
+                        testStatusTag.innerText = '未命中';
+                        testStatusTag.style.background = '#fee2e2';
+                        testStatusTag.style.color = '#ef233c';
+
+                        if (testState._missFlashTimer) clearTimeout(testState._missFlashTimer);
+                        testState._missFlashTimer = setTimeout(() => {
+                            if (testState.active) {
+                                testStatusTag.innerText = '计时中...';
+                                testStatusTag.style.background = '#fef3c7';
+                                testStatusTag.style.color = '#b45309';
+                            }
+                        }, 320);
+                    }
+                }
+            }
+        });
+
+        document.addEventListener('pointerlockchange', () => {
+            const isLocked = (document.pointerLockElement === document.body);
+            document.body.classList.toggle('aim-locked', isLocked);
+            if (!isLocked) {
+                if (isArmed) {
+                    isArmed = false;
+                    pendingAction = null;
+                    if (armTimer) { clearTimeout(armTimer); armTimer = null; }
+                    hideProgressOverlay();
+                }
+                resetLockButtonLabel();
+                startButtonCooldown();
+                cancelAimTest('unlock');
+            }
+        });
+
+        let lastFrame = performance.now(), frameCnt = 0, lastFpsCalc = performance.now();
+        const hudFps = getEl('hud-fps');
+        const hudPoll = getEl('hud-poll');
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+            const dt = Math.min((now - lastFrame) / 1000, 0.1);
+            lastFrame = now;
+
+            if (config.cloudsEnabled) {
+                cloudGroup.children.forEach(c => {
+                    c.userData.angle += c.userData.speed * dt;
+                    c.position.x = Math.sin(c.userData.angle) * c.userData.dist;
+                    c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
+                });
+            }
+
+            cameraEuler.set(currentPitch, currentYaw, 0);
+            camera.quaternion.setFromEuler(cameraEuler);
+
+            if (document.pointerLockElement === document.body) {
+                camera.updateMatrixWorld(true);
+                targetGroup.updateMatrixWorld(true);
+
+                if (!testState.active) {
+                    const isHovering = checkTargetHit();
+                    updateCrosshairStyle(isHovering);
+                } else {
+                    updateCrosshairStyle(false);
+                }
+            } else {
+                updateCrosshairStyle(false);
+            }
+
+            if (now < hitFeedbackUntil) {
+                targetSphereMesh.material.color.setHex(0xffffff);
+                const bumpScale = targetCurrentRadius * 1.15;
+                targetSphereMesh.scale.set(bumpScale, bumpScale, bumpScale);
+            } else {
+                targetSphereMesh.material.color.setHex(TARGET_BASE_COLOR);
+                targetSphereMesh.scale.set(targetCurrentRadius, targetCurrentRadius, targetCurrentRadius);
+            }
+
+            updateHudYawDisplay();
+
+            frameCnt++;
+            if (now - lastFpsCalc >= 400) {
+                if (hudFps) hudFps.textContent = Math.round((frameCnt * 1000) / (now - lastFpsCalc));
+                frameCnt = 0; lastFpsCalc = now;
+            }
+            if (now - pollLastCalc >= 400) {
+                const elSec = (now - pollLastCalc) / 1000;
+                const inst = Math.round(pollCount / elSec);
+                if (inst > 120) {
+                    peakPollRate = Math.max(peakPollRate, inst);
+                    if (hudPoll) hudPoll.textContent = peakPollRate;
+                } else if (hudPoll) hudPoll.textContent = '--';
+                pollCount = 0; pollLastCalc = now;
+            }
+
+            renderer.render(scene, camera);
+            renderFeedbackMarkers(now);
+        }
+
+        window.addEventListener('resize', () => {
+            updateCameraFov();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ============================================================
+        // 主题与全屏
+        // ============================================================
+        function applyTheme(theme) {
+            config.theme = theme;
+            const btnTheme = getEl('btn-theme-toggle');
+            if (btnTheme) btnTheme.innerText = (theme === 'day') ? '日落暮色' : '天青日间';
+
+            skyMesh.material.map = createSkyTexture(theme);
+            skyMesh.material.needsUpdate = true;
+
+            if (theme === 'sunset') {
+                ambientLight.color.setHex(0xffedd5);
+                ambientLight.groundColor.setHex(0xf3e8ff);
+            } else {
+                ambientLight.color.setHex(0xffffff);
+                ambientLight.groundColor.setHex(0xe2e8f0);
+            }
+        }
+
+        getEl('btn-theme-toggle').addEventListener('click', () => {
+            applyTheme(config.theme === 'day' ? 'sunset' : 'day');
+            persist();
+        });
+
+        // 右上角面板折叠
+        const rightPanelHeader = getEl('right-panel-header');
+        const rightPanel = getEl('right-panel');
+        const rightPanelIcon = getEl('right-panel-toggle-icon');
+        if (rightPanelHeader && rightPanel) {
+            rightPanelHeader.addEventListener('click', () => {
+                rightPanel.classList.toggle('collapsed');
+                if (rightPanelIcon) {
+                    rightPanelIcon.textContent = rightPanel.classList.contains('collapsed') ? '▶ 展开' : '▼ 收起';
+                }
+            });
+        }
+
+        const f11Box = getEl('f11-box');
+        f11Box.addEventListener('click', () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+            else if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                f11Box.innerText = '退出全屏';
+            } else {
+                f11Box.innerText = 'F11全屏';
+            }
+        });
+
+        // ============================================================
+        // 事件绑定
+        // ============================================================
+        getEl('inp-dpi-r').addEventListener('input', e => setDpi(e.target.value));
+        getEl('inp-cm-r').addEventListener('input', e => setCm(sliderToCm(e.target.value)));
+        getEl('inp-fov-r').addEventListener('input', e => setFov(e.target.value));
+        getEl('inp-height-r').addEventListener('input', e => setViewHeight(e.target.value));
+        document.querySelectorAll('.dpi-pill').forEach(b => b.addEventListener('click', () => setDpi(b.dataset.val)));
+
+        const numericBindings = {
+            'inp-dpi': v => setDpi(v),
+            'inp-cm': v => setCm(v),
+            'inp-fov': v => setFov(v),
+            'inp-height': v => setViewHeight(v),
+            'inp-sens-x': v => setSensX(v),
+            'inp-sens-y': v => setSensY(v),
+            'inp-cross-size': v => syncCrossProp('size', v),
+            'inp-cross-thick': v => syncCrossProp('thick', v),
+            'inp-cross-gap': v => syncCrossProp('gap', v)
+        };
+        Object.keys(numericBindings).forEach(id => {
+            const el = getEl(id);
+            if (!el) return;
+            el.addEventListener('change', e => numericBindings[id](e.target.value));
+            el.addEventListener('blur', e => numericBindings[id](e.target.value));
+            el.addEventListener('keydown', e => {
+                if (e.key === 'Enter') { e.target.blur(); }
+            });
+        });
+
+        getEl('inp-target-output').addEventListener('input', (e) => {
+            _modelParams[modelState.formulaModel].targetID = e.target.value;
+            persist();
+        });
+        getEl('inp-target-output').addEventListener('change', (e) => {
+            _modelParams[modelState.formulaModel].targetID = e.target.value;
+            persist();
+        });
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        function initApp() {
+            const saved = readStored();
+            applyStored(saved);
+
+            setDpi(config.dpi);
+            setCm(config.cmPer360);
+            setFov(config.fovHorizontal);
+            setViewHeight(config.viewHeight);
+            setSensX(config.sensRatioX);
+            setSensY(config.sensRatioY);
+            updateSensitivity();
+
+            cloudGroup.visible = config.cloudsEnabled;
+            const cloudBtn = getEl('btn-cloud-toggle');
+            if (cloudBtn) cloudBtn.textContent = config.cloudsEnabled ? '云朵: 开启' : '云朵: 关闭';
+
+            setCrosshairType(config.crosshair.type);
+            syncCrossProp('size', config.crosshair.size);
+            syncCrossProp('thick', config.crosshair.thick);
+            syncCrossProp('gap', config.crosshair.gap);
+
+            setupColorSwatchGrid('swatches-default', config.crosshairColor.defaultColor, (hex) => {
+                config.crosshairColor.defaultColor = hex;
+                rebuildCrosshairDOM();
+                persist();
+            });
+            setupColorSwatchGrid('swatches-target', config.crosshairColor.targetColor, (hex) => {
+                config.crosshairColor.targetColor = hex;
+                rebuildCrosshairDOM();
+                persist();
+            });
+
+            getEl('btn-model-shannon').classList.toggle('active', modelState.formulaModel === 'shannon');
+            getEl('btn-model-fitts').classList.toggle('active', modelState.formulaModel === 'fitts');
+
+            getEl('btn-lock-pitch').classList.toggle('active', !modelState.allowVerticalLook);
+            getEl('btn-unlock-pitch').classList.toggle('active', modelState.allowVerticalLook);
+
+            const tidEl = getEl('inp-target-output');
+            // 用当前公式自己的 targetID 初始化
+            tidEl.value = _modelParams[modelState.formulaModel].targetID;
+
+            updateFloorAndGrid(config.floorColor);
+            applyTheme(config.theme);
+
+            modelState.visualCenter = (modelState.thetaY === 0);
+            targetWorldHeadingRad = 0.0;
+            refreshModelUI();
+            resetAimOrigin();
+            updateTestStatsUI();
+
+            storageReady = true;
+            persistNow();
+
+            startButtonCooldown();
+            animate(performance.now());
+        }
+
+        window.addEventListener('beforeunload', persistNow);
+
+        initApp();
+    </script>
+</body>
+</html>
