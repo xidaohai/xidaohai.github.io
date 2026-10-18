@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>3D 瞄准难度模型 </title>
+    <title>3D 瞄准难度模型</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -33,7 +33,6 @@
         #canvas-container { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #e2e8f0; }
         #canvas-container canvas { display: block; width: 100% !important; height: 100% !important; }
 
-        /* 反馈点覆盖画布 */
         #feedback-canvas {
             position: fixed;
             inset: 0;
@@ -43,7 +42,6 @@
             height: 100%;
         }
 
-        /* 准星容器 */
         #crosshair-container {
             position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -53,7 +51,7 @@
         }
         #crosshair-container.on-target { transform: translate(-50%, -50%) scale(1.22); }
         body.aim-locked #crosshair-container, body.aim-locked .classic-crosshair-dot { transition: none !important; }
-        body.aim-locked #left-panel, body.aim-locked #right-panel, body.aim-locked #left-bottom-group, body.aim-locked #bottom-right-hud {
+        body.aim-locked #left-panel, body.aim-locked #right-panel, body.aim-locked #left-bottom-group, body.aim-locked #bottom-right-converter {
             visibility: hidden; opacity: 0; pointer-events: none;
         }
 
@@ -65,7 +63,6 @@
         .classic-crosshair-dot::after { left: -6px; right: -6px; top: 1px; bottom: 1px; }
         #crosshair-container.on-target .classic-crosshair-dot { box-shadow: 0 0 10px currentColor; }
 
-        /* 顶部 HUD */
         #top-hud {
             position: absolute; top: 14px; left: 16px; right: 16px;
             display: flex; justify-content: space-between; align-items: center;
@@ -94,7 +91,6 @@
         .f11-card { padding: 7px 16px; font-size: 0.78rem; font-weight: 900; cursor: pointer; pointer-events: auto; transition: 0.2s; }
         .f11-card:hover { color: var(--primary); border-color: var(--primary); }
 
-        /* 玻璃面板 */
         .glass-panel {
             background: var(--bg-glass);
             backdrop-filter: blur(28px) saturate(190%);
@@ -114,7 +110,6 @@
         #right-panel.collapsed .panel-header-dark { border-radius: 9px; }
         #right-panel.collapsed #right-panel-toggle-icon { transform: rotate(-90deg); }
 
-        /* 左侧面板深灰+红标头部 */
         .panel-header-dark {
             background: var(--bg-header);
             border-top: 4px solid var(--primary);
@@ -133,7 +128,6 @@
 
         .panel-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
 
-        /* 公式框架选择器 */
         .framework-selector {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -161,7 +155,6 @@
             font-weight: 900;
         }
 
-        /* 公式 Hero 卡片 */
         .formula-hero-card {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             border: 1px solid #334155; border-radius: 7px; padding: 10px 12px;
@@ -196,6 +189,7 @@
 
         .preset-grid { display: grid; gap: 4px; margin-bottom: 6px; }
         .preset-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .preset-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .preset-grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
         .pill-btn {
@@ -207,6 +201,41 @@
         .pill-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f9ff; }
         .pill-btn.active { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
 
+        #direction-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 2px solid var(--primary);
+            border-radius: 7px;
+            padding: 9px 10px;
+            box-shadow: 0 6px 18px rgba(239, 35, 60, 0.18);
+        }
+        #direction-card .section-header { margin-bottom: 7px; }
+        #direction-card .section-label { color: #ffffff; font-size: 0.8rem; letter-spacing: 0.2px; }
+        #direction-card .section-label::before {
+            content: ''; display: inline-block; width: 5px; height: 12px;
+            background: var(--primary); border-radius: 2px; margin-right: 2px;
+        }
+        #direction-hint { font-size: 0.58rem; color: #94a3b8; font-weight: 700; }
+        .dir-btn {
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 9px 4px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .dir-btn:hover { background: rgba(255, 255, 255, 0.18); border-color: #38bdf8; color: #fff; }
+        .dir-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(239, 35, 60, 0.45);
+        }
+
         .ctrl-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
         .ctrl-row:last-child { margin-bottom: 0; }
         .ctrl-row label { font-size: 0.68rem; font-weight: 700; color: #475569; width: 92px; flex-shrink: 0; white-space: nowrap; }
@@ -217,7 +246,6 @@
         .step-btn:hover { background: #e0f2fe; }
         .num-input { width: 58px; height: 22px; border: none; border-left: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; font-family: ui-monospace, monospace; font-size: 0.72rem; font-weight: 800; text-align: center; color: var(--text-main); outline: none; background: #ffffff; }
 
-        /* 目标 ID 输入容器 */
         .target-di-container {
             display: flex;
             align-items: center;
@@ -282,7 +310,6 @@
             transform: translateY(-1px);
         }
 
-        /* 换算器 */
         .converter-box {
             background: #ffffff;
             border: 1.5px solid #0284c7;
@@ -382,7 +409,6 @@
 
         .divider { height: 1px; background: rgba(226, 232, 240, 0.9); margin: 6px 0; }
 
-        /* 测试卡片 */
         .test-box {
             background: #ffffff; border: 1.5px solid #0284c7; border-radius: 7px; padding: 8px 10px;
             display: flex; flex-direction: column; gap: 6px;
@@ -424,7 +450,6 @@
         .color-picker-input-wrap { position: relative; width: 18px; height: 18px; border-radius: 50%; overflow: hidden; border: 2px solid #cbd5e1; cursor: pointer; }
         .color-picker-input-wrap input[type="color"] { position: absolute; left: -10px; top: -10px; width: 40px; height: 40px; border: none; cursor: pointer; }
 
-        /* 开场遮罩 */
         #progress-overlay {
             display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35);
             backdrop-filter: blur(6px); z-index: 100; justify-content: center; align-items: center; flex-direction: column; gap: 20px;
@@ -437,7 +462,6 @@
         #progress-bar-container { width: 280px; height: 4px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; overflow: hidden; }
         #progress-bar { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; }
 
-        /* 左下角调色板与作者卡片 */
         #left-bottom-group { position: absolute; bottom: 16px; left: 16px; z-index: 15; display: flex; flex-direction: column; gap: 8px; }
         .palette-card {
             background: var(--bg-glass); backdrop-filter: blur(24px) saturate(180%);
@@ -462,27 +486,27 @@
         .author-name { font-size: 0.74rem; font-weight: 900; color: #0f172a; }
         .author-tag { font-size: 0.58rem; color: #64748b; font-weight: bold; }
 
-        /* 右下角原理说明 HUD */
-        #bottom-right-hud {
-            position: absolute; bottom: 16px; right: 16px; width: min(350px, calc(100vw - 32px));
-            background: var(--bg-glass); backdrop-filter: blur(28px) saturate(190%);
-            padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-glass);
-            border-left: 4px solid var(--accent); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
-            z-index: 22; transition: opacity 0.15s, visibility 0.15s;
+        #bottom-right-converter {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            width: min(350px, calc(100vw - 32px));
+            z-index: 22;
+            transition: opacity 0.15s, visibility 0.15s;
         }
-        .rel-title { font-size: 0.74rem; font-weight: 900; color: var(--accent); margin-bottom: 4px; }
-        .rel-formula {
-            font-size: 0.68rem; font-weight: 700; color: #1e293b; background: rgba(2, 132, 199, 0.06);
-            padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; line-height: 1.4; font-family: Cambria, serif;
+        #bottom-right-converter .converter-box {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(28px) saturate(190%);
+            border: 1.5px solid rgba(2, 132, 199, 0.6);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
         }
-        .rel-desc { font-size: 0.62rem; color: #64748b; line-height: 1.5; }
 
         @media (max-width: 900px) {
             #top-hud { top: 8px; left: 8px; right: 8px; }
             .hud-card { padding: 6px 10px; gap: 8px; font-size: 0.68rem; }
             #left-panel { left: 8px; top: 72px; width: min(400px, calc(100vw - 16px)); max-height: 78vh; }
             #right-panel { right: 8px; top: auto; bottom: 8px; width: min(400px, calc(100vw - 16px)); max-height: 42vh; }
-            #bottom-right-hud { display: none; }
+            #bottom-right-converter { display: none; }
             #left-bottom-group { left: 8px; bottom: 8px; }
         }
     </style>
@@ -493,7 +517,6 @@
         <div id="crosshair-classic-inner" class="classic-crosshair-dot" style="background:#000000; color:#000000;"></div>
     </div>
 
-    <!-- 反馈点覆盖画布 -->
     <canvas id="feedback-canvas"></canvas>
 
     <div id="canvas-container"></div>
@@ -548,19 +571,28 @@
         </a>
     </div>
 
-    <div id="bottom-right-hud">
-        <div class="rel-title" id="hud-rel-title">3D 瞄准难度数学模型</div>
-        <div class="rel-formula" id="rel-formula-text">ID = log₂(1 + θy / θx^p)　[bits]</div>
-        <div class="rel-desc" id="hud-rel-desc">
-            • <strong>θx（直径/ω）</strong>：目标屏幕角直径（0.0°~36°）。<br>
-            • <strong>θy（距离/α）</strong>：中心偏角角距离（0.0°~180°）。<br>
-            • <strong>p（次幂指数）</strong>：对目标直径施加的幂次权重。<br>
-            • <strong>两套公式</strong>：Shannon-Fitts <code>log₂(1 + D/W)</code> 与 Fitts 原始 <code>log₂(2D/W)</code>。<br>
-            • <strong>快捷功能</strong>：点击上方公式卡片的难度数值，可直接复制填入反求框。
+    <div id="bottom-right-converter">
+        <div class="converter-box">
+            <div class="converter-title-row">
+                <span class="converter-title">香农 ↔ 菲茨 ID 换算</span>
+                <span class="converter-badge">双向精确</span>
+            </div>
+            <div class="converter-row">
+                <span class="converter-label">香农 ID</span>
+                <input type="number" class="converter-input" id="conv-shannon" step="any" placeholder="ID_S" />
+            </div>
+            <div class="converter-row">
+                <span class="converter-label">菲茨 ID</span>
+                <input type="number" class="converter-input" id="conv-fitts" step="any" placeholder="ID_F" />
+            </div>
+            <div class="converter-result" id="conv-result">输入任一 ID，会自动换算并显示推导过程。</div>
+            <div class="converter-btn-row">
+                <button class="converter-btn apply" id="conv-apply" title="把当前公式对应的 ID 填入反求框">填入反求框</button>
+                <button class="converter-btn swap" id="conv-swap" title="交换两栏数值">⇅</button>
+            </div>
         </div>
     </div>
 
-    <!-- 左侧主面板 -->
     <div class="glass-panel" id="left-panel">
         <div class="panel-header-dark" id="panel-handle">
             <span class="panel-header-title">3D 难度解算与目标控制</span>
@@ -571,13 +603,11 @@
         </div>
 
         <div class="panel-body">
-            <!-- 难度模型框架切换按钮组 -->
             <div class="framework-selector">
                 <button class="framework-btn active" id="btn-model-shannon" onclick="setFormulaModel('shannon')">Shannon-Fitts 经典</button>
                 <button class="framework-btn" id="btn-model-fitts" onclick="setFormulaModel('fitts')">Fitts 原始公式</button>
             </div>
 
-            <!-- 核心公式 Hero 展示区 -->
             <div class="formula-hero-card" id="formula-hero-card" title="点击将当前 ID 复制填入下方反求框">
                 <div class="formula-hero-math" id="formula-math-display">ID = log₂(1 + θy / θx)</div>
                 <div class="formula-hero-stat">
@@ -588,20 +618,12 @@
                 </div>
             </div>
 
-            <!-- 参数控制区 -->
             <div class="section-card">
                 <div class="section-header">
                     <span class="section-label">目标几何角度参数</span>
-                    <div style="display:flex; align-items:center; gap:4px;">
-                        <span style="font-size:0.64rem; color:#64748b;">方位:</span>
-                        <select id="targetSideSelect" style="font-size:0.64rem; font-weight:800; border-radius:4px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; padding:1px 4px;">
-                            <option value="right" selected>右侧 (+θ)</option>
-                            <option value="left">左侧 (−θ)</option>
-                        </select>
-                    </div>
+                    <span style="font-size:0.6rem; color:#64748b;">方位模式见下方</span>
                 </div>
 
-                <!-- θx 直径 -->
                 <div class="ctrl-row">
                     <label title="目标角直径 W 或 ω (度)">θx · 目标直径 (ω)</label>
                     <input type="range" id="inp-x-r" min="0.0" max="36" step="0.1" value="4.5" />
@@ -612,7 +634,6 @@
                     </div>
                 </div>
 
-                <!-- 次幂指数 p -->
                 <div class="ctrl-row" style="margin-top:2px;">
                     <label title="目标直径参与运算的次幂指数">θx 次幂 (p)</label>
                     <input type="range" id="inp-p-r" min="0.1" max="5.0" step="0.05" value="1.0" />
@@ -629,7 +650,6 @@
 
                 <div class="divider"></div>
 
-                <!-- θy 距离/偏角 -->
                 <div class="ctrl-row">
                     <label title="目标中心角距离 A 或 α (度)">θy · 中心距离 (α)</label>
                     <input type="range" id="inp-y-r" min="0.0" max="180" step="0.1" value="0.0" />
@@ -645,7 +665,6 @@
                 </div>
             </div>
 
-            <!-- ID 反求控制区 -->
             <div class="section-card" style="background: rgba(241, 245, 249, 0.95); border: 1.5px solid #cbd5e1;">
                 <div class="section-header" style="margin-bottom:6px;">
                     <span class="section-label">依据目标难度反求参数</span>
@@ -668,28 +687,18 @@
                 </div>
             </div>
 
-            <!-- 香农 ↔ 菲茨 ID 换算器 -->
-            <div class="converter-box">
-                <div class="converter-title-row">
-                    <span class="converter-title">香农 ↔ 菲茨 ID 换算</span>
-                    <span class="converter-badge">双向精确</span>
+            <div class="section-card" id="direction-card">
+                <div class="section-header">
+                    <span class="section-label">目标方位模式</span>
+                    <span id="direction-hint">固定右侧 (+θ)</span>
                 </div>
-                <div class="converter-row">
-                    <span class="converter-label">香农 ID</span>
-                    <input type="number" class="converter-input" id="conv-shannon" step="any" placeholder="ID_S" />
-                </div>
-                <div class="converter-row">
-                    <span class="converter-label">菲茨 ID</span>
-                    <input type="number" class="converter-input" id="conv-fitts" step="any" placeholder="ID_F" />
-                </div>
-                <div class="converter-result" id="conv-result">输入任一 ID，会自动换算并显示推导过程。</div>
-                <div class="converter-btn-row">
-                    <button class="converter-btn apply" id="conv-apply" title="把当前公式对应的 ID 填入反求框">填入反求框</button>
-                    <button class="converter-btn swap" id="conv-swap" title="交换两栏数值">⇅</button>
+                <div class="preset-grid cols-3" style="margin-bottom:0; gap:5px;">
+                    <button class="dir-btn active" data-mode="right">固定右侧</button>
+                    <button class="dir-btn" data-mode="left">固定左侧</button>
+                    <button class="dir-btn" data-mode="random">随机方向</button>
                 </div>
             </div>
 
-            <!-- 连续瞄准测试模块 -->
             <div class="test-box">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-size:0.75rem; font-weight:900; color:#0f172a;">瞄准反应与命中实测</span>
@@ -736,7 +745,6 @@
                 <button class="test-btn reset-btn" id="btn-reset-test-stats">重置测试统计</button>
             </div>
 
-            <!-- 视角维度限制 -->
             <div class="section-card" style="padding-bottom:6px;">
                 <div class="section-header" style="margin-bottom:4px;"><span class="section-label">视角模式</span></div>
                 <div class="preset-grid cols-2" style="margin-bottom:0;">
@@ -749,7 +757,6 @@
         </div>
     </div>
 
-    <!-- 右侧配置面板 -->
     <div class="glass-panel" id="right-panel">
         <div class="panel-header-dark" id="right-panel-header" style="background:#1e293b; border-top-color:#0284c7; cursor:pointer; user-select:none;">
             <span class="panel-header-title">外设、视高与准星系统</span>
@@ -802,17 +809,16 @@
                 <div class="divider"></div>
 
                 <div class="ctrl-row">
-                    <label title="视角离地垂直高度 (最高支持 10m)">玩家视高 (m)</label>
-                    <input type="range" id="inp-height-r" min="0.5" max="10.0" step="0.005" value="1.625" />
+                    <label title="视角离地垂直高度 (最高支持 25m)">玩家视高 (m)</label>
+                    <input type="range" id="inp-height-r" min="0.5" max="25.0" step="0.005" value="1.625" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepGlobal('inp-height', -0.05)">−</button>
-                        <input type="number" class="num-input" id="inp-height" value="1.625" min="0.5" max="10.0" step="0.005" />
+                        <input type="number" class="num-input" id="inp-height" value="1.625" min="0.5" max="25.0" step="0.005" />
                         <button class="step-btn" onclick="stepGlobal('inp-height', 0.05)">+</button>
                     </div>
                 </div>
             </div>
 
-            <!-- X / Y 轴灵敏度独立设定 -->
             <div class="section-card">
                 <div class="section-header">
                     <span class="section-label">X / Y 轴灵敏度独立乘数</span>
@@ -895,6 +901,7 @@
 
         const TX_MIN = 0.0, TX_MAX = 36.0;
         const TY_MIN = 0.0, TY_MAX = 180.0;
+        const VIEW_HEIGHT_MIN = 0.5, VIEW_HEIGHT_MAX = 25.0;
         const TARGET_BASE_COLOR = 0xef233c;
 
         const COLOR_PRESETS = [
@@ -903,7 +910,6 @@
             { name: '青', hex: '#06b6d4' }, { name: '蓝', hex: '#3b82f6' }, { name: '紫', hex: '#a855f7' }
         ];
 
-        // θx / θy 两套公式共用；只有 p 和反求 ID 各自独立
         const _modelParams = {
             shannon: { power: 1.0, targetID: '3' },
             fitts:   { power: 1.0, targetID: '3' }
@@ -914,6 +920,8 @@
             thetaX: 4.5,
             thetaY: 0.0,
             side: 'right',
+            directionMode: 'fixed',
+            randomPhi: Math.random() * Math.PI * 2,
             allowVerticalLook: false,
             visualCenter: true
         };
@@ -939,22 +947,19 @@
             crosshairColor: { defaultColor: '#000000', targetColor: '#0284c7' }
         };
 
-        // ============================================================
-        // 测试状态：命中/未命中分别累计耗时，超时单独计数
-        // ============================================================
         const testState = {
             active: false,
             startTime: 0,
             timeoutTimer: null,
             hits: 0,
             miss: 0,
-            trials: 0,       // 以点击结束的试次数（命中 + 未命中）
+            trials: 0,
             lastTimeMs: 0,
-            timesList: [],   // 兼容旧字段：只记录命中耗时
+            timesList: [],
             lastShotTime: 0,
-            hitTimes: [],    // 命中试次耗时
-            missTimes: [],   // 未命中试次耗时
-            timeoutCount: 0  // 超时次数（非点击试次，不进入 MT）
+            hitTimes: [],
+            missTimes: [],
+            timeoutCount: 0
         };
 
         function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
@@ -976,9 +981,6 @@
             return Math.pow(ratio, CM_EXP) * (CM_MAX - CM_MIN) + CM_MIN;
         }
 
-        // ============================================================
-        // 反馈点系统
-        // ============================================================
         const feedbackCanvas = getEl('feedback-canvas');
         const feedbackCtx = feedbackCanvas ? feedbackCanvas.getContext('2d') : null;
         const FEEDBACK_LIFE_MS = 700;
@@ -999,10 +1001,8 @@
             const vfovRad = (camera.fov * Math.PI) / 180;
             const tanV = Math.tan(vfovRad / 2);
             if (!(tanV > 0.0001)) return 2.0;
-
             const halfAngleRad = (Math.max(0, modelState.thetaX) / 2) * Math.PI / 180;
             const targetScreenR = (Math.tan(halfAngleRad) / tanV) * halfH;
-
             return clamp(targetScreenR * 0.32, 1.0, 10.0);
         }
 
@@ -1035,35 +1035,25 @@
             feedbackCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
             const w = window.innerWidth;
             const h = window.innerHeight;
-
             camera.updateMatrixWorld(true);
 
             for (let i = 0; i < feedbackMarkers.length; i++) {
                 const m = feedbackMarkers[i];
                 const projected = m.pos.clone().project(camera);
-
                 if (projected.z >= 1 || projected.z <= -1) continue;
-
                 const sx = (projected.x * 0.5 + 0.5) * w;
                 const sy = (-projected.y * 0.5 + 0.5) * h;
-
                 if (sx < -20 || sx > w + 20 || sy < -20 || sy > h + 20) continue;
-
                 const age = now - m.born;
                 let alpha = 1.0;
-                if (age > 420) {
-                    alpha = Math.max(0, 1 - (age - 420) / (FEEDBACK_LIFE_MS - 420));
-                }
+                if (age > 420) alpha = Math.max(0, 1 - (age - 420) / (FEEDBACK_LIFE_MS - 420));
                 if (alpha <= 0) continue;
-
                 const r = m.radius || 2.0;
                 const pad = Math.max(0.45, r * 0.18);
                 const core = Math.max(0.5, r * 0.32);
                 const waveMax = Math.max(2.2, r * 1.6);
-
                 feedbackCtx.save();
                 feedbackCtx.globalAlpha = alpha;
-
                 if (m.isHit) {
                     if (age < 120) {
                         const waveProgress = age / 120;
@@ -1076,19 +1066,16 @@
                         feedbackCtx.stroke();
                         feedbackCtx.restore();
                     }
-
                     feedbackCtx.beginPath();
                     feedbackCtx.arc(sx, sy, r + pad, 0, Math.PI * 2);
                     feedbackCtx.fillStyle = '#022c12';
                     feedbackCtx.fill();
-
                     feedbackCtx.shadowColor = 'rgba(16, 185, 129, 0.9)';
                     feedbackCtx.shadowBlur = Math.max(2, r * 1.4);
                     feedbackCtx.fillStyle = '#10b981';
                     feedbackCtx.beginPath();
                     feedbackCtx.arc(sx, sy, r, 0, Math.PI * 2);
                     feedbackCtx.fill();
-
                     feedbackCtx.shadowBlur = 0;
                     feedbackCtx.fillStyle = '#ffffff';
                     feedbackCtx.beginPath();
@@ -1099,7 +1086,6 @@
                     feedbackCtx.arc(sx, sy, r + pad, 0, Math.PI * 2);
                     feedbackCtx.fillStyle = 'rgba(255, 255, 255, 0.75)';
                     feedbackCtx.fill();
-
                     feedbackCtx.shadowColor = 'rgba(0, 0, 0, 0.45)';
                     feedbackCtx.shadowBlur = Math.max(2, r * 1.2);
                     feedbackCtx.fillStyle = '#0f172a';
@@ -1107,7 +1093,6 @@
                     feedbackCtx.arc(sx, sy, r, 0, Math.PI * 2);
                     feedbackCtx.fill();
                 }
-
                 feedbackCtx.restore();
             }
         }
@@ -1115,9 +1100,6 @@
         resizeFeedbackCanvas();
         window.addEventListener('resize', resizeFeedbackCanvas);
 
-        // ============================================================
-        // 持久化存储
-        // ============================================================
         const STORAGE_KEY = 'aim3d_lab_settings_v3';
         let storageReady = false;
         let persistTimer = null;
@@ -1141,6 +1123,7 @@
                 thetaX: modelState.thetaX,
                 thetaY: modelState.thetaY,
                 side: modelState.side,
+                directionMode: modelState.directionMode,
                 allowVerticalLook: modelState.allowVerticalLook
             };
         }
@@ -1166,7 +1149,7 @@
             config.dpi = clamp(Math.round(numOr(s.dpi, config.dpi)), 50, 32000);
             config.cmPer360 = clamp(numOr(s.cmPer360, config.cmPer360), CM_MIN, CM_MAX);
             config.fovHorizontal = clamp(numOr(s.fovHorizontal, config.fovHorizontal), 50, 140);
-            config.viewHeight = clamp(numOr(s.viewHeight, config.viewHeight), 0.5, 10.0);
+            config.viewHeight = clamp(numOr(s.viewHeight, config.viewHeight), VIEW_HEIGHT_MIN, VIEW_HEIGHT_MAX);
             config.sensRatioX = clamp(numOr(s.sensRatioX, config.sensRatioX), 0.01, 10.0);
             config.sensRatioY = clamp(numOr(s.sensRatioY, config.sensRatioY), 0.01, 10.0);
             if (s.theme === 'day' || s.theme === 'sunset') config.theme = s.theme;
@@ -1187,12 +1170,9 @@
             }
 
             if (s.formulaModel === 'shannon' || s.formulaModel === 'fitts') modelState.formulaModel = s.formulaModel;
-
-            // θx / θy 共用
             modelState.thetaX = clamp(numOr(s.thetaX, 4.5), TX_MIN, TX_MAX);
             modelState.thetaY = clamp(numOr(s.thetaY, 0.0), TY_MIN, TY_MAX);
 
-            // p 和 targetID 各自独立
             const legacyP = numOr(s.powerX, numOr(s.powerShannon, 1.0));
             if (s.shannonParams) {
                 _modelParams.shannon.power = clamp(numOr(s.shannonParams.power, legacyP), 0.05, 10.0);
@@ -1217,6 +1197,7 @@
                 }
             }
             if (s.side === 'left' || s.side === 'right') modelState.side = s.side;
+            if (s.directionMode === 'fixed' || s.directionMode === 'random') modelState.directionMode = s.directionMode;
             if (typeof s.allowVerticalLook === 'boolean') modelState.allowVerticalLook = s.allowVerticalLook;
             modelState.visualCenter = (modelState.thetaY === 0);
         }
@@ -1225,32 +1206,23 @@
             if (p === undefined || p === null) p = getCurrentPower();
             if (model === undefined || model === null) model = modelState.formulaModel;
             if (![thetaX, thetaY, p].every(Number.isFinite) || thetaX < 0 || thetaY < 0 || p <= 0) return NaN;
-            if (thetaX === 0) {
-                return thetaY === 0 ? 0 : Infinity;
-            }
+            if (thetaX === 0) return thetaY === 0 ? 0 : Infinity;
             const denom = Math.pow(thetaX, p);
             if (denom === 0) return thetaY === 0 ? 0 : Infinity;
-
             if (model === 'fitts') {
                 if (thetaY === 0) return 0;
                 return Math.log2(2 * thetaY / denom);
             }
-
             const ratio = thetaY / denom;
             return Math.log2(ratio + 1);
         }
 
         function setFormulaModel(modelType) {
-            // 先把当前公式的 ID 输入框值存回它自己的槽
             const tidEl = getEl('inp-target-output');
             if (tidEl) _modelParams[modelState.formulaModel].targetID = tidEl.value;
-
             modelState.formulaModel = modelType;
             modelState.visualCenter = (modelState.thetaY === 0);
-
-            // 再取新公式自己的 ID 值填进输入框
             if (tidEl) tidEl.value = _modelParams[modelType].targetID;
-
             const bS = getEl('btn-model-shannon');
             const bF = getEl('btn-model-fitts');
             if (bS) bS.classList.toggle('active', modelType === 'shannon');
@@ -1263,12 +1235,10 @@
         function updateSensitivity() {
             const totalCounts360 = (config.cmPer360 / ISO_INCH_TO_CM) * config.dpi;
             radiansPerCount = (Math.PI * 2) / Math.max(1, totalCounts360);
-
             const elDpi = getEl('hud-dpi'), elCm = getEl('hud-cm'), elFov = getEl('hud-fov');
             if (elDpi) elDpi.innerText = config.dpi;
             if (elCm) elCm.innerText = config.cmPer360.toFixed(2);
             if (elFov) elFov.innerText = Math.round(config.fovHorizontal);
-
             document.querySelectorAll('.dpi-pill').forEach(b =>
                 b.classList.toggle('active', parseInt(b.dataset.val) === config.dpi));
         }
@@ -1296,7 +1266,7 @@
             persist();
         }
         function setViewHeight(v) {
-            config.viewHeight = clamp(numOr(v, 1.625), 0.5, 10.0);
+            config.viewHeight = clamp(numOr(v, 1.625), VIEW_HEIGHT_MIN, VIEW_HEIGHT_MAX);
             setNum('inp-height', config.viewHeight, 3);
             const r = getEl('inp-height-r'); if (r) r.value = config.viewHeight;
             camera.position.y = config.viewHeight;
@@ -1356,9 +1326,6 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.055);
         }
 
-        // ============================================================
-        // 防闪烁准星架构
-        // ============================================================
         let currentCrosshairOnTarget = null;
         let activeCrossColor = '';
 
@@ -1368,17 +1335,14 @@
             const { type, size, thick, gap, outline } = config.crosshair;
             const color = (currentCrosshairOnTarget && !testState.active) ? config.crosshairColor.targetColor : config.crosshairColor.defaultColor;
             activeCrossColor = color;
-
             if (type === 'classic') {
                 container.innerHTML = `<div id="classic-dot" class="classic-crosshair-dot" style="background:${color}; color:${color};"></div>`;
                 return;
             }
-
             const dim = Math.max(120, (size + gap + outline) * 4);
             const half = dim / 2;
             const sw = Math.max(0, outline || 1.2);
             let svg = `<svg id="cross-svg" width="${dim}" height="${dim}" viewBox="0 0 ${dim} ${dim}" xmlns="http://www.w3.org/2000/svg">`;
-
             if (type === 'cross') {
                 const rects = [
                     { x: half - thick / 2, y: half - gap - size, w: thick, h: size },
@@ -1410,15 +1374,12 @@
             const effectiveOnTarget = testState.active ? false : !!onTarget;
             if (currentCrosshairOnTarget === effectiveOnTarget) return;
             currentCrosshairOnTarget = effectiveOnTarget;
-
             const container = getEl('crosshair-container');
             if (!container) return;
             container.classList.toggle('on-target', effectiveOnTarget);
-
             const color = effectiveOnTarget ? config.crosshairColor.targetColor : config.crosshairColor.defaultColor;
             if (activeCrossColor === color) return;
             activeCrossColor = color;
-
             if (config.crosshair.type === 'classic') {
                 const dot = getEl('classic-dot');
                 if (dot) {
@@ -1491,9 +1452,6 @@
             c.appendChild(pickerWrap);
         }
 
-        // ============================================================
-        // 3D 场景引擎构建
-        // ============================================================
         const canvasContainer = getEl('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 1000);
@@ -1587,11 +1545,9 @@
             config.floorColor = hexStr;
             const col = new THREE.Color(hexStr);
             floorMat.color.copy(col);
-
             const lum = 0.299 * col.r + 0.587 * col.g + 0.114 * col.b;
             let main, sub;
             const isCreamy = hexStr.toLowerCase() === '#faeed1' || hexStr.toLowerCase() === '#fdf2d0';
-
             if (isCreamy) {
                 main = new THREE.Color(0xb0b8c4);
                 sub = new THREE.Color(0xdce2ea);
@@ -1606,7 +1562,6 @@
                 main = new THREE.Color(0x64748b);
                 sub = new THREE.Color(lum < 0.2 ? 0x27354a : 0x475569);
             }
-
             if (gridHelper) {
                 scene.remove(gridHelper);
                 gridHelper.geometry.dispose();
@@ -1615,7 +1570,6 @@
             gridHelper = new THREE.GridHelper(300, 150, main, sub);
             gridHelper.position.y = 0.001;
             scene.add(gridHelper);
-
             const btnC = getEl('btn-creamy-yellow'), rng = getEl('inp-floor-gray-r');
             if (btnC) btnC.classList.toggle('active', isCreamy);
             if (rng && !isCreamy) rng.value = Math.round(((col.r + col.g + col.b) / 3) * 100);
@@ -1687,9 +1641,7 @@
 
         const targetSphereMesh = new THREE.Mesh(
             new THREE.SphereGeometry(1, 48, 48),
-            new THREE.MeshStandardMaterial({
-                color: TARGET_BASE_COLOR, roughness: 0.2, metalness: 0.05
-            })
+            new THREE.MeshStandardMaterial({ color: TARGET_BASE_COLOR, roughness: 0.2, metalness: 0.05 })
         );
         targetSphereMesh.castShadow = true;
         targetSphereMesh.userData.isTarget = true;
@@ -1700,40 +1652,105 @@
         dropLine.computeLineDistances();
         targetGroup.add(dropLine);
 
-        let targetWorldHeadingRad = 0.0;
         let targetCurrentRadius = 1.0;
         let hitFeedbackUntil = 0;
 
+        function computeRandomDirection() {
+            const camY = config.viewHeight;
+            const halfRadX = (modelState.thetaX * Math.PI) / 360;
+            const ballR = Math.max(COMPASS_RADIUS * Math.sin(halfRadX), 0.001);
+            const thetaRad = (modelState.thetaY || 0) * Math.PI / 180;
+            const sinT = Math.sin(thetaRad);
+            const cosT = Math.cos(thetaRad);
+            let phi = modelState.randomPhi;
+            if (sinT > 1e-6) {
+                const minSin = (ballR - camY) / (COMPASS_RADIUS * sinT);
+                if (minSin > -1) {
+                    const lo = Math.asin(clamp(minSin, -1, 1));
+                    const hi = Math.PI - lo;
+                    const TWO_PI = Math.PI * 2;
+                    let n = ((phi % TWO_PI) + TWO_PI) % TWO_PI;
+                    if (n < lo || n > hi) {
+                        const dLo = Math.min(Math.abs(n - lo), Math.abs(n - lo - TWO_PI), Math.abs(n - lo + TWO_PI));
+                        const dHi = Math.min(Math.abs(n - hi), Math.abs(n - hi - TWO_PI), Math.abs(n - hi + TWO_PI));
+                        n = (dLo <= dHi) ? lo : hi;
+                    }
+                    phi = n;
+                }
+            }
+            return new THREE.Vector3(sinT * Math.cos(phi), sinT * Math.sin(phi), -cosT);
+        }
+
+        function rerollTargetDirection() {
+            if (modelState.directionMode === 'random') {
+                modelState.randomPhi = Math.random() * Math.PI * 2;
+                sync3DTarget();
+            }
+        }
+
         function sync3DTarget() {
             const halfRadX = (modelState.thetaX * Math.PI) / 360;
-            targetCurrentRadius = Math.max(COMPASS_RADIUS * Math.sin(halfRadX), 0.000001);
-
+            const camY = config.viewHeight;
+            let px = 0, py = camY, pz = -COMPASS_RADIUS;
+            if (modelState.thetaY > 0.000001) {
+                if (modelState.directionMode === 'random') {
+                    const d = computeRandomDirection();
+                    px = d.x * COMPASS_RADIUS;
+                    py = camY + d.y * COMPASS_RADIUS;
+                    pz = d.z * COMPASS_RADIUS;
+                } else {
+                    const sign = (modelState.side === 'left') ? -1 : 1;
+                    const radY = (modelState.thetaY * Math.PI / 180) * sign;
+                    px = COMPASS_RADIUS * Math.sin(radY);
+                    pz = -COMPASS_RADIUS * Math.cos(radY);
+                }
+            }
+            const dist = Math.hypot(px, py - camY, pz) || COMPASS_RADIUS;
+            targetCurrentRadius = Math.max(dist * Math.sin(halfRadX), 0.000001);
             targetSphereMesh.visible = modelState.thetaX > 0;
             targetSphereMesh.scale.set(targetCurrentRadius, targetCurrentRadius, targetCurrentRadius);
-
-            let radY = 0;
-            if (modelState.visualCenter) {
-                radY = targetWorldHeadingRad;
-            } else {
-                const sign = (modelState.side === 'left') ? -1 : 1;
-                radY = (modelState.thetaY * Math.PI / 180) * sign;
-            }
-
-            while (radY > Math.PI) radY -= Math.PI * 2;
-            while (radY < -Math.PI) radY += Math.PI * 2;
-
-            const px = COMPASS_RADIUS * Math.sin(radY);
-            const pz = -COMPASS_RADIUS * Math.cos(radY);
-            const py = config.viewHeight;
-
             targetGroup.position.set(px, py, pz);
-
             const posAttr = dropLine.geometry.attributes.position;
             posAttr.setY(1, -py);
             posAttr.needsUpdate = true;
             dropLine.computeLineDistances();
         }
 
+        function refreshDirectionUI() {
+            document.querySelectorAll('.dir-btn').forEach(btn => {
+                const m = btn.dataset.mode;
+                const active = (modelState.directionMode === 'random')
+                    ? (m === 'random')
+                    : (m === modelState.side);
+                btn.classList.toggle('active', active);
+            });
+            const hint = getEl('direction-hint');
+            if (hint) {
+                if (modelState.directionMode === 'random') {
+                    hint.textContent = '随机方向 · 从准星正前方延伸';
+                } else {
+                    hint.textContent = modelState.side === 'left' ? '固定左侧 (−θ)' : '固定右侧 (+θ)';
+                }
+            }
+        }
+
+        function setDirectionMode(mode) {
+            if (mode === 'random') {
+                modelState.directionMode = 'random';
+                modelState.randomPhi = Math.random() * Math.PI * 2;
+            } else if (mode === 'left' || mode === 'right') {
+                modelState.directionMode = 'fixed';
+                modelState.side = mode;
+            }
+            modelState.visualCenter = (modelState.thetaY === 0);
+            refreshDirectionUI();
+            refreshModelUI();
+            persist();
+        }
+
+        // ============================================================
+        // 【关键补回】refreshModelUI：带空值保护，原文件里这个函数整段丢失
+        // ============================================================
         function refreshModelUI() {
             const isFitts = (modelState.formulaModel === 'fitts');
             const currentPower = getCurrentPower();
@@ -1745,14 +1762,14 @@
             else if (Number.isFinite(id)) idStr = id.toFixed(3);
             else idStr = '0.000';
 
-            getEl('hud-output-val').innerText = `${idStr} bits`;
-            getEl('card-output-val').innerText = idStr;
-            getEl('hero-stat-label').innerText = isFitts ? '当前 Fitts 原始难度值:' : '当前 Shannon-Fitts 难度值:';
-            getEl('hero-unit-label').innerText = 'bits';
-            getEl('target-di-tag').innerText = '目标 ID:';
+            const hudOut = getEl('hud-output-val'); if (hudOut) hudOut.innerText = `${idStr} bits`;
+            const cardOut = getEl('card-output-val'); if (cardOut) cardOut.innerText = idStr;
+            const heroLabel = getEl('hero-stat-label'); if (heroLabel) heroLabel.innerText = isFitts ? '当前 Fitts 原始难度值:' : '当前 Shannon-Fitts 难度值:';
+            const heroUnit = getEl('hero-unit-label'); if (heroUnit) heroUnit.innerText = 'bits';
+            const diTag = getEl('target-di-tag'); if (diTag) diTag.innerText = '目标 ID:';
 
-            getEl('hud-theta-x').innerText = `${modelState.thetaX.toFixed(2)}°`;
-            getEl('hud-target-ang').innerText = `${modelState.thetaY.toFixed(2)}°`;
+            const hudTx = getEl('hud-theta-x'); if (hudTx) hudTx.innerText = `${modelState.thetaX.toFixed(2)}°`;
+            const hudAng = getEl('hud-target-ang'); if (hudAng) hudAng.innerText = `${modelState.thetaY.toFixed(2)}°`;
 
             setNum('inp-x', modelState.thetaX, 2);
             const xR = getEl('inp-x-r'); if (xR) xR.value = modelState.thetaX;
@@ -1763,8 +1780,7 @@
             setNum('inp-y', modelState.thetaY, 2);
             const yR = getEl('inp-y-r'); if (yR) yR.value = modelState.thetaY;
 
-            const sideSel = getEl('targetSideSelect');
-            if (sideSel) sideSel.value = modelState.side;
+            refreshDirectionUI();
 
             const isPowOne = Math.abs(currentPower - 1.0) < 0.001;
             const powSup = isPowOne ? '' : `<sup>${currentPower.toFixed(2)}</sup>`;
@@ -1775,21 +1791,21 @@
             const powHint = getEl('power-hint-text');
 
             if (isFitts) {
-                mathDisplay.innerHTML = `ID<sub>F</sub> = log₂( 2θy / θx${powSup} )`;
-                relTitle.innerText = 'Fitts 原始公式（3D 角度形式）';
-                relText.innerHTML = `ID<sub>F</sub> = log₂( 2θy / θx${powSup} )　[bits]`;
-                invDesc.innerHTML = isPowOne
+                if (mathDisplay) mathDisplay.innerHTML = `ID<sub>F</sub> = log₂( 2θy / θx${powSup} )`;
+                if (relTitle) relTitle.innerText = 'Fitts 原始公式（3D 角度形式）';
+                if (relText) relText.innerHTML = `ID<sub>F</sub> = log₂( 2θy / θx${powSup} )　[bits]`;
+                if (invDesc) invDesc.innerHTML = isPowOne
                     ? `θx = 2θy / 2^ID　｜　θy = θx · 2^ID / 2`
                     : `θx = ( 2θy / 2^ID )^(1/${currentPower.toFixed(2)})　｜　θy = θx^${currentPower.toFixed(2)} · 2^ID / 2`;
-                powHint.innerText = `Fitts 原始: 当前 p=${currentPower.toFixed(2)}（经典 1.00）`;
+                if (powHint) powHint.innerText = `Fitts 原始: 当前 p=${currentPower.toFixed(2)}（经典 1.00）`;
             } else {
-                mathDisplay.innerHTML = `ID = log₂(1 + θy / θx${powSup})`;
-                relTitle.innerText = 'Shannon-Fitts 瞄准难度公式（3D 角度幂次扩展版）';
-                relText.innerHTML = `ID = log₂(1 + θy / θx${powSup})　[bits]`;
-                invDesc.innerHTML = isPowOne
+                if (mathDisplay) mathDisplay.innerHTML = `ID = log₂(1 + θy / θx${powSup})`;
+                if (relTitle) relTitle.innerText = 'Shannon-Fitts 瞄准难度公式（3D 角度幂次扩展版）';
+                if (relText) relText.innerHTML = `ID = log₂(1 + θy / θx${powSup})　[bits]`;
+                if (invDesc) invDesc.innerHTML = isPowOne
                     ? `θx = θy / (2^ID − 1)　｜　θy = θx · (2^ID − 1)`
                     : `θx = [ θy / (2^ID − 1) ]^(1/${currentPower.toFixed(2)})　｜　θy = θx^${currentPower.toFixed(2)} · (2^ID − 1)`;
-                powHint.innerText = `Shannon: 当前独立 p=${currentPower.toFixed(2)}（经典 1.00）`;
+                if (powHint) powHint.innerText = `Shannon: 当前独立 p=${currentPower.toFixed(2)}（经典 1.00）`;
             }
 
             sync3DTarget();
@@ -1816,7 +1832,6 @@
             refreshModelUI();
             persist();
         });
-
         getEl('inp-p-r').addEventListener('input', (e) => {
             setCurrentPower(e.target.value);
             refreshModelUI();
@@ -1827,7 +1842,6 @@
             refreshModelUI();
             persist();
         });
-
         getEl('inp-y-r').addEventListener('input', (e) => {
             modelState.thetaY = clamp(Number(e.target.value), TY_MIN, TY_MAX);
             modelState.visualCenter = (modelState.thetaY === 0);
@@ -1840,16 +1854,11 @@
             refreshModelUI();
             persist();
         });
-        getEl('targetSideSelect').addEventListener('change', (e) => {
-            modelState.side = e.target.value;
-            modelState.visualCenter = false;
-            refreshModelUI();
-            persist();
+
+        document.querySelectorAll('.dir-btn').forEach(btn => {
+            btn.addEventListener('click', () => setDirectionMode(btn.dataset.mode));
         });
 
-        // ============================================================
-        // 统一写入反求框 + 同步当前公式的 ID 槽
-        // ============================================================
         function setCurrentTargetID(value) {
             const targetInp = getEl('inp-target-output');
             if (!targetInp) return;
@@ -1860,13 +1869,9 @@
         getEl('formula-hero-card').addEventListener('click', () => {
             const currentId = calculateOutput(modelState.thetaX, modelState.thetaY, getCurrentPower(), modelState.formulaModel);
             const targetBox = getEl('target-di-box');
-            if (currentId === Infinity) {
-                setCurrentTargetID(99);
-            } else if (currentId === -Infinity) {
-                setCurrentTargetID(0);
-            } else if (Number.isFinite(currentId)) {
-                setCurrentTargetID(currentId.toFixed(3));
-            }
+            if (currentId === Infinity) setCurrentTargetID(99);
+            else if (currentId === -Infinity) setCurrentTargetID(0);
+            else if (Number.isFinite(currentId)) setCurrentTargetID(currentId.toFixed(3));
             if (targetBox) {
                 targetBox.style.borderColor = '#ef233c';
                 targetBox.style.boxShadow = '0 0 16px rgba(239, 35, 60, 0.35)';
@@ -1878,9 +1883,6 @@
             persist();
         });
 
-        // ============================================================
-        // 香农 ↔ 菲茨 ID 换算器
-        // ============================================================
         const convS = getEl('conv-shannon');
         const convF = getEl('conv-fitts');
         const convResult = getEl('conv-result');
@@ -1943,7 +1945,6 @@
                 else convClear();
             });
             getEl('conv-apply').addEventListener('click', () => {
-                // 取当前公式对应的换算结果
                 let val;
                 if (modelState.formulaModel === 'fitts') {
                     val = convF.value.trim() !== '' ? convF.value : convS.value;
@@ -1966,9 +1967,6 @@
             });
         }
 
-        // ============================================================
-        // 彻底回正与置中
-        // ============================================================
         let currentYaw = 0.0;
         let currentPitch = 0.0;
         const cameraEuler = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -2002,28 +2000,20 @@
         getEl('btn-center-target').addEventListener('click', () => {
             modelState.thetaY = 0.0;
             modelState.visualCenter = true;
-            targetWorldHeadingRad = 0.0;
             resetAimOrigin(true);
             refreshModelUI();
             persist();
         });
 
-        // ============================================================
-        // 依据 ID 反求直径与距离
-        // ============================================================
         getEl('btn-solve-x').addEventListener('click', () => {
             const idVal = numOr(getEl('inp-target-output').value, NaN);
             if (!Number.isFinite(idVal)) return;
-
             const isFitts = (modelState.formulaModel === 'fitts');
             const p = getCurrentPower() || 1.0;
             let newThetaX = NaN;
-
             if (isFitts) {
                 const den = Math.pow(2, idVal);
-                if (den > 0 && modelState.thetaY >= 0) {
-                    newThetaX = Math.pow(2 * modelState.thetaY / den, 1 / p);
-                }
+                if (den > 0 && modelState.thetaY >= 0) newThetaX = Math.pow(2 * modelState.thetaY / den, 1 / p);
             } else {
                 if (idVal <= 0) return;
                 const denom = Math.pow(2, idVal) - 1;
@@ -2031,11 +2021,9 @@
                 const ratio = modelState.thetaY / denom;
                 if (ratio >= 0) newThetaX = Math.pow(ratio, 1 / p);
             }
-
             if (Number.isFinite(newThetaX)) {
                 modelState.thetaX = clamp(newThetaX, TX_MIN, TX_MAX);
                 modelState.visualCenter = false;
-                // 反求后同步当前公式的 ID 槽
                 _modelParams[modelState.formulaModel].targetID = getEl('inp-target-output').value;
                 refreshModelUI();
                 persist();
@@ -2045,11 +2033,9 @@
         getEl('btn-solve-y').addEventListener('click', () => {
             const idVal = numOr(getEl('inp-target-output').value, NaN);
             if (!Number.isFinite(idVal)) return;
-
             const isFitts = (modelState.formulaModel === 'fitts');
             const p = getCurrentPower() || 1.0;
             const thetaXp = Math.pow(modelState.thetaX, p);
-
             let newThetaY = NaN;
             if (isFitts) {
                 newThetaY = thetaXp * Math.pow(2, idVal) / 2;
@@ -2057,11 +2043,9 @@
                 if (idVal < 0) return;
                 newThetaY = thetaXp * (Math.pow(2, idVal) - 1);
             }
-
             if (Number.isFinite(newThetaY)) {
                 modelState.thetaY = clamp(newThetaY, TY_MIN, TY_MAX);
                 modelState.visualCenter = (modelState.thetaY === 0);
-                // 反求后同步当前公式的 ID 槽
                 _modelParams[modelState.formulaModel].targetID = getEl('inp-target-output').value;
                 refreshModelUI();
                 persist();
@@ -2085,9 +2069,6 @@
             persist();
         });
 
-        // ============================================================
-        // 连续瞄准测试与统计体系
-        // ============================================================
         const btnStartAimTest = getEl('btn-start-aim-test');
         const testStatusTag = getEl('test-status-tag');
         const statAcc = getEl('stat-acc');
@@ -2108,7 +2089,6 @@
             if (statHitsCount) statHitsCount.innerText = String(testState.hits);
             if (statMissCount) statMissCount.innerText = String(testState.miss);
             if (statTimeoutCount) statTimeoutCount.innerText = String(testState.timeoutCount);
-
             if (statAcc) {
                 const acc = testState.trials > 0 ? ((testState.hits / testState.trials) * 100).toFixed(1) : '100.0';
                 statAcc.innerText = `${acc}%`;
@@ -2116,18 +2096,14 @@
             if (statLastTime) {
                 statLastTime.innerText = testState.lastTimeMs > 0 ? `${testState.lastTimeMs} ms` : '-- ms';
             }
-
             const hitAvg = avgOrNull(testState.hitTimes);
             if (statHitMt) statHitMt.innerText = hitAvg === null ? '-- ms' : `${Math.round(hitAvg)} ms`;
-
             const missAvg = avgOrNull(testState.missTimes);
             if (statMissMt) statMissMt.innerText = missAvg === null ? '-- ms' : `${Math.round(missAvg)} ms`;
-
             const combinedAvg = avgOrNull([...testState.hitTimes, ...testState.missTimes]);
             if (statCombinedMt) statCombinedMt.innerText = combinedAvg === null ? '-- ms' : `${Math.round(combinedAvg)} ms`;
         }
 
-        // 在浏览器控制台执行 get3DAimStats() 可获取完整统计表
         window.get3DAimStats = () => {
             const hitAvg = avgOrNull(testState.hitTimes);
             const missAvg = avgOrNull(testState.missTimes);
@@ -2151,9 +2127,7 @@
             if (testState._missFlashTimer) { clearTimeout(testState._missFlashTimer); testState._missFlashTimer = null; }
             btnStartAimTest.classList.remove('testing');
             btnStartAimTest.innerText = '点击开始连续瞄准测试';
-
             if (reason === 'timeout') {
-                // 超时没有点击结束信号，不进入 MT 统计，仅单独计数
                 testState.timeoutCount++;
                 testStatusTag.innerText = '超时未命中 (已停止)';
                 testStatusTag.style.background = '#fee2e2';
@@ -2178,10 +2152,9 @@
             testStatusTag.innerText = '计时中...';
             testStatusTag.style.background = '#fef3c7';
             testStatusTag.style.color = '#b45309';
-
             resetAimOrigin();
+            rerollTargetDirection();
             testState.startTime = performance.now();
-
             if (testState.timeoutTimer) clearTimeout(testState.timeoutTimer);
             testState.timeoutTimer = setTimeout(() => cancelAimTest('timeout'), 8000);
         }
@@ -2195,15 +2168,12 @@
             testState.hitTimes = [];
             testState.missTimes = [];
             testState.timeoutCount = 0;
-
             testStatusTag.innerText = '就绪';
             testStatusTag.style.background = '#e0f2fe';
             testStatusTag.style.color = '#0284c7';
             updateTestStatsUI();
-
             if (testState.timeoutTimer) { clearTimeout(testState.timeoutTimer); testState.timeoutTimer = null; }
             if (testState._missFlashTimer) { clearTimeout(testState._missFlashTimer); testState._missFlashTimer = null; }
-
             if (testState.active) {
                 testState.active = false;
                 btnStartAimTest.classList.remove('testing');
@@ -2212,9 +2182,6 @@
             updateCrosshairStyle(false);
         });
 
-        // ============================================================
-        // 指针锁定与输入
-        // ============================================================
         let isArmed = false;
         let pendingAction = null;
         let armTimer = null;
@@ -2290,14 +2257,11 @@
             if (isArmed) { pendingAction = action || pendingAction; return; }
             isArmed = true;
             pendingAction = action;
-
             showProgressOverlay();
             btnLock.innerText = '点击左键开始...';
             btnLock.classList.add('armed');
             btnLock.disabled = true;
-
             requestPointerLockSafe();
-
             if (armTimer) clearTimeout(armTimer);
             armTimer = setTimeout(() => {
                 armTimer = null;
@@ -2310,7 +2274,6 @@
         function triggerRealStart() {
             isArmed = false;
             if (armTimer) { clearTimeout(armTimer); armTimer = null; }
-
             const hint = getEl('progress-hint');
             const barWrap = getEl('progress-bar-container');
             const bar = getEl('progress-bar');
@@ -2323,10 +2286,8 @@
                 bar.style.transition = 'width 0.12s linear';
                 bar.style.width = '100%';
             }
-
             const act = pendingAction;
             pendingAction = null;
-
             setTimeout(() => {
                 hideProgressOverlay();
                 btnLock.classList.remove('armed');
@@ -2378,10 +2339,8 @@
                 dy += ev.movementY || 0;
             }
             if (Math.abs(dx) > 3000 || Math.abs(dy) > 3000) return;
-
             currentYaw -= dx * radiansPerCount * config.sensRatioX;
             currentYaw = (currentYaw % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-
             if (modelState.allowVerticalLook) {
                 currentPitch -= dy * radiansPerCount * config.sensRatioY;
                 currentPitch = clamp(currentPitch, -Math.PI / 2 + 0.001, Math.PI / 2 - 0.001);
@@ -2393,22 +2352,16 @@
         if (_supportsRaw) window.addEventListener('pointerrawupdate', handlePointerInput, { passive: true });
         else window.addEventListener('pointermove', handlePointerInput, { passive: true });
 
-        // ============================================================
-        // 高精度射击判定
-        // ============================================================
         const targetWorldPos = new THREE.Vector3();
 
         function checkTargetHit() {
             if (modelState.thetaX <= 0) return false;
-
             raycaster.setFromCamera(centerVec, camera);
             const hits = raycaster.intersectObject(targetSphereMesh, false);
             if (hits.length > 0) return true;
-
             targetSphereMesh.getWorldPosition(targetWorldPos);
             const ray = raycaster.ray;
             const distToCenter = ray.distanceToPoint(targetWorldPos);
-
             const tolerantRadius = targetCurrentRadius * 1.08;
             if (distToCenter <= tolerantRadius) {
                 const toTarget = targetWorldPos.clone().sub(ray.origin);
@@ -2418,45 +2371,34 @@
         }
 
         window.addEventListener('mousedown', (e) => {
-            if (document.pointerLockElement !== document.body && e.button === 0) {
-                // 非锁定状态不处理（如 UI 点击）
-            }
             if (document.pointerLockElement === document.body && e.button === 0) {
                 if (isArmed) { triggerRealStart(); return; }
-
                 const now = performance.now();
                 if (now - testState.lastShotTime < 60) return;
                 testState.lastShotTime = now;
-
                 cameraEuler.set(currentPitch, currentYaw, 0);
                 camera.quaternion.setFromEuler(cameraEuler);
                 camera.updateMatrixWorld(true);
                 targetGroup.updateMatrixWorld(true);
-
                 const isHit = checkTargetHit();
                 pushFeedbackMarker(isHit);
-
                 if (isHit) {
                     playHitAudio();
                     hitFeedbackUntil = now + 65;
-
                     if (testState.active) {
                         const elapsed = Math.round(now - testState.startTime);
                         if (testState.timeoutTimer) { clearTimeout(testState.timeoutTimer); testState.timeoutTimer = null; }
-
                         testState.hits++;
                         testState.trials++;
                         testState.lastTimeMs = elapsed;
                         testState.timesList.push(elapsed);
                         testState.hitTimes.push(elapsed);
-
                         testStatusTag.innerText = `命中! ${elapsed} ms`;
                         testStatusTag.style.background = '#dcfce7';
                         testStatusTag.style.color = '#15803d';
-
                         updateTestStatsUI();
                         resetAimOrigin();
-
+                        rerollTargetDirection();
                         testState.startTime = performance.now();
                         testState.timeoutTimer = setTimeout(() => cancelAimTest('timeout'), 8000);
                     }
@@ -2465,23 +2407,18 @@
                     if (testState.active) {
                         const elapsed = Math.round(now - testState.startTime);
                         if (testState.timeoutTimer) { clearTimeout(testState.timeoutTimer); testState.timeoutTimer = null; }
-
                         testState.miss++;
                         testState.trials++;
                         testState.lastTimeMs = elapsed;
                         testState.missTimes.push(elapsed);
-
                         testStatusTag.innerText = `未命中 ${elapsed} ms`;
                         testStatusTag.style.background = '#fee2e2';
                         testStatusTag.style.color = '#ef233c';
-
                         updateTestStatsUI();
-                        // 未命中同样回正视角并重新计时，保持下一次试次公平
                         resetAimOrigin();
-
+                        rerollTargetDirection();
                         testState.startTime = performance.now();
                         testState.timeoutTimer = setTimeout(() => cancelAimTest('timeout'), 8000);
-
                         if (testState._missFlashTimer) clearTimeout(testState._missFlashTimer);
                         testState._missFlashTimer = setTimeout(() => {
                             if (testState.active) {
@@ -2519,7 +2456,6 @@
             requestAnimationFrame(animate);
             const dt = Math.min((now - lastFrame) / 1000, 0.1);
             lastFrame = now;
-
             if (config.cloudsEnabled) {
                 cloudGroup.children.forEach(c => {
                     c.userData.angle += c.userData.speed * dt;
@@ -2527,14 +2463,11 @@
                     c.position.z = -Math.cos(c.userData.angle) * c.userData.dist;
                 });
             }
-
             cameraEuler.set(currentPitch, currentYaw, 0);
             camera.quaternion.setFromEuler(cameraEuler);
-
             if (document.pointerLockElement === document.body) {
                 camera.updateMatrixWorld(true);
                 targetGroup.updateMatrixWorld(true);
-
                 if (!testState.active) {
                     const isHovering = checkTargetHit();
                     updateCrosshairStyle(isHovering);
@@ -2544,7 +2477,6 @@
             } else {
                 updateCrosshairStyle(false);
             }
-
             if (now < hitFeedbackUntil) {
                 targetSphereMesh.material.color.setHex(0xffffff);
                 const bumpScale = targetCurrentRadius * 1.15;
@@ -2553,9 +2485,7 @@
                 targetSphereMesh.material.color.setHex(TARGET_BASE_COLOR);
                 targetSphereMesh.scale.set(targetCurrentRadius, targetCurrentRadius, targetCurrentRadius);
             }
-
             updateHudYawDisplay();
-
             frameCnt++;
             if (now - lastFpsCalc >= 400) {
                 if (hudFps) hudFps.textContent = Math.round((frameCnt * 1000) / (now - lastFpsCalc));
@@ -2570,7 +2500,6 @@
                 } else if (hudPoll) hudPoll.textContent = '--';
                 pollCount = 0; pollLastCalc = now;
             }
-
             renderer.render(scene, camera);
             renderFeedbackMarkers(now);
         }
@@ -2580,17 +2509,12 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // ============================================================
-        // 主题与全屏
-        // ============================================================
         function applyTheme(theme) {
             config.theme = theme;
             const btnTheme = getEl('btn-theme-toggle');
             if (btnTheme) btnTheme.innerText = (theme === 'day') ? '日落暮色' : '天青日间';
-
             skyMesh.material.map = createSkyTexture(theme);
             skyMesh.material.needsUpdate = true;
-
             if (theme === 'sunset') {
                 ambientLight.color.setHex(0xffedd5);
                 ambientLight.groundColor.setHex(0xf3e8ff);
@@ -2605,7 +2529,6 @@
             persist();
         });
 
-        // 右上角面板折叠
         const rightPanelHeader = getEl('right-panel-header');
         const rightPanel = getEl('right-panel');
         const rightPanelIcon = getEl('right-panel-toggle-icon');
@@ -2632,9 +2555,6 @@
             }
         });
 
-        // ============================================================
-        // 事件绑定
-        // ============================================================
         getEl('inp-dpi-r').addEventListener('input', e => setDpi(e.target.value));
         getEl('inp-cm-r').addEventListener('input', e => setCm(sliderToCm(e.target.value)));
         getEl('inp-fov-r').addEventListener('input', e => setFov(e.target.value));
@@ -2671,13 +2591,9 @@
             persist();
         });
 
-        // ============================================================
-        // 初始化
-        // ============================================================
         function initApp() {
             const saved = readStored();
             applyStored(saved);
-
             setDpi(config.dpi);
             setCm(config.cmPer360);
             setFov(config.fovHorizontal);
@@ -2708,19 +2624,17 @@
 
             getEl('btn-model-shannon').classList.toggle('active', modelState.formulaModel === 'shannon');
             getEl('btn-model-fitts').classList.toggle('active', modelState.formulaModel === 'fitts');
-
             getEl('btn-lock-pitch').classList.toggle('active', !modelState.allowVerticalLook);
             getEl('btn-unlock-pitch').classList.toggle('active', modelState.allowVerticalLook);
 
             const tidEl = getEl('inp-target-output');
-            // 用当前公式自己的 targetID 初始化
             tidEl.value = _modelParams[modelState.formulaModel].targetID;
 
             updateFloorAndGrid(config.floorColor);
             applyTheme(config.theme);
 
             modelState.visualCenter = (modelState.thetaY === 0);
-            targetWorldHeadingRad = 0.0;
+            refreshDirectionUI();
             refreshModelUI();
             resetAimOrigin();
             updateTestStatsUI();
