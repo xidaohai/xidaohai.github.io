@@ -22,12 +22,12 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-        body { 
-            overflow: hidden; 
-            background-color: #f8fafc; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; 
-            width: 100vw; 
-            height: 100vh; 
+        body {
+            overflow: hidden;
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            width: 100vw;
+            height: 100vh;
         }
 
         #canvas-container { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #e2e8f0; }
@@ -44,21 +44,21 @@
         }
 
         /* 准星容器 */
-        #crosshair-container { 
-            position: fixed; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); 
-            pointer-events: none; z-index: 10; 
-            display: flex; align-items: center; justify-content: center; 
-            transition: transform 0.08s ease; 
+        #crosshair-container {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 10;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.08s ease;
         }
         #crosshair-container.on-target { transform: translate(-50%, -50%) scale(1.22); }
         body.aim-locked #crosshair-container, body.aim-locked .classic-crosshair-dot { transition: none !important; }
-        body.aim-locked #left-panel, body.aim-locked #right-panel, body.aim-locked #left-bottom-group, body.aim-locked #bottom-right-hud { 
-            visibility: hidden; opacity: 0; pointer-events: none; 
+        body.aim-locked #left-panel, body.aim-locked #right-panel, body.aim-locked #left-bottom-group, body.aim-locked #bottom-right-hud {
+            visibility: hidden; opacity: 0; pointer-events: none;
         }
 
-        .classic-crosshair-dot { 
-            width: 3px; height: 3px; border-radius: 50%; position: relative; 
+        .classic-crosshair-dot {
+            width: 3px; height: 3px; border-radius: 50%; position: relative;
         }
         .classic-crosshair-dot::before, .classic-crosshair-dot::after { content: ''; position: absolute; background: inherit; }
         .classic-crosshair-dot::before { top: -6px; bottom: -6px; left: 1px; right: 1px; }
@@ -66,28 +66,28 @@
         #crosshair-container.on-target .classic-crosshair-dot { box-shadow: 0 0 10px currentColor; }
 
         /* 顶部 HUD */
-        #top-hud { 
-            position: absolute; top: 14px; left: 16px; right: 16px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            pointer-events: none; z-index: 5; flex-wrap: wrap; gap: 8px; 
+        #top-hud {
+            position: absolute; top: 14px; left: 16px; right: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            pointer-events: none; z-index: 5; flex-wrap: wrap; gap: 8px;
         }
-        .hud-card { 
-            background: var(--bg-glass); 
-            backdrop-filter: blur(28px) saturate(190%); 
-            padding: 7px 16px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; 
-            color: var(--text-sub); border: 1px solid var(--border-glass); 
-            display: flex; align-items: center; gap: 13px; 
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); flex-wrap: wrap; 
+        .hud-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(28px) saturate(190%);
+            padding: 7px 16px; border-radius: 8px; font-size: 0.74rem; font-weight: 700;
+            color: var(--text-sub); border: 1px solid var(--border-glass);
+            display: flex; align-items: center; gap: 13px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03); flex-wrap: wrap;
         }
         .hud-val { color: var(--accent); font-weight: 900; font-family: ui-monospace, monospace; }
         .hud-output { color: var(--primary); font-weight: 900; font-size: 0.88rem; font-family: ui-monospace, monospace; }
         .fps-val { color: #16a34a; font-weight: 900; }
         .poll-val { color: #7c3aed; font-weight: 900; }
 
-        .hud-action-btn { 
-            background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; font-size: 0.64rem; font-weight: 800; 
-            color: #334155; padding: 2px 8px; border-radius: 4px; cursor: pointer; 
-            pointer-events: auto; transition: all 0.15s ease; white-space: nowrap; 
+        .hud-action-btn {
+            background: rgba(255, 255, 255, 0.95); border: 1px solid #cbd5e1; font-size: 0.64rem; font-weight: 800;
+            color: #334155; padding: 2px 8px; border-radius: 4px; cursor: pointer;
+            pointer-events: auto; transition: all 0.15s ease; white-space: nowrap;
         }
         .hud-action-btn:hover { border-color: var(--accent); color: var(--accent); background: #e0f2fe; }
 
@@ -95,15 +95,15 @@
         .f11-card:hover { color: var(--primary); border-color: var(--primary); }
 
         /* 玻璃面板 */
-        .glass-panel { 
-            background: var(--bg-glass); 
-            backdrop-filter: blur(28px) saturate(190%); 
-            border: 1px solid var(--border-glass); 
-            border-radius: 10px; padding: 0; 
-            box-shadow: var(--panel-shadow); 
-            max-height: 88vh; overflow-y: auto; 
-            display: flex; flex-direction: column; 
-            transition: opacity 0.15s, visibility 0.15s; 
+        .glass-panel {
+            background: var(--bg-glass);
+            backdrop-filter: blur(28px) saturate(190%);
+            border: 1px solid var(--border-glass);
+            border-radius: 10px; padding: 0;
+            box-shadow: var(--panel-shadow);
+            max-height: 88vh; overflow-y: auto;
+            display: flex; flex-direction: column;
+            transition: opacity 0.15s, visibility 0.15s;
         }
         .glass-panel::-webkit-scrollbar { width: 4px; }
         .glass-panel::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -115,19 +115,19 @@
         #right-panel.collapsed #right-panel-toggle-icon { transform: rotate(-90deg); }
 
         /* 左侧面板深灰+红标头部 */
-        .panel-header-dark { 
-            background: var(--bg-header); 
-            border-top: 4px solid var(--primary); 
-            padding: 10px 14px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-top-left-radius: 9px; border-top-right-radius: 9px; 
+        .panel-header-dark {
+            background: var(--bg-header);
+            border-top: 4px solid var(--primary);
+            padding: 10px 14px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-top-left-radius: 9px; border-top-right-radius: 9px;
         }
         .panel-header-title { font-size: 0.84rem; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 8px; }
         .panel-header-title::before { content: ''; display: inline-block; width: 6px; height: 13px; background: var(--primary); border-radius: 2px; }
         .header-actions { display: flex; gap: 5px; align-items: center; }
-        .header-dark-btn { 
-            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); 
-            font-size: 0.64rem; font-weight: 800; color: #f8fafc; padding: 3px 8px; border-radius: 4px; cursor: pointer; transition: 0.15s; 
+        .header-dark-btn {
+            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25);
+            font-size: 0.64rem; font-weight: 800; color: #f8fafc; padding: 3px 8px; border-radius: 4px; cursor: pointer; transition: 0.15s;
         }
         .header-dark-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 
@@ -162,10 +162,10 @@
         }
 
         /* 公式 Hero 卡片 */
-        .formula-hero-card { 
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); 
-            border: 1px solid #334155; border-radius: 7px; padding: 10px 12px; 
-            text-align: center; color: #ffffff; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12); 
+        .formula-hero-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 1px solid #334155; border-radius: 7px; padding: 10px 12px;
+            text-align: center; color: #ffffff; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
             cursor: pointer; transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
             position: relative;
         }
@@ -175,9 +175,9 @@
             box-shadow: 0 6px 18px rgba(2, 132, 199, 0.25);
         }
         .formula-hero-card:active { transform: scale(0.99); }
-        .formula-hero-math { 
-            font-family: Cambria, "Times New Roman", Georgia, serif; 
-            font-size: 1.25rem; font-weight: bold; color: #ff4d6d; letter-spacing: 0.5px; 
+        .formula-hero-math {
+            font-family: Cambria, "Times New Roman", Georgia, serif;
+            font-size: 1.25rem; font-weight: bold; color: #ff4d6d; letter-spacing: 0.5px;
         }
         .formula-hero-stat { font-size: 0.72rem; color: #94a3b8; margin-top: 4px; display: flex; justify-content: center; align-items: center; gap: 5px; }
         .formula-hero-val { color: #ffffff; font-size: 1.08rem; font-weight: 900; font-family: ui-monospace, monospace; }
@@ -186,10 +186,10 @@
             padding: 1px 6px; border-radius: 3px; font-weight: bold; margin-left: 4px;
         }
 
-        .section-card { 
-            background: rgba(248, 250, 252, 0.75); 
-            border: 1px solid rgba(226, 232, 240, 0.9); 
-            border-radius: 6px; padding: 8px 10px; 
+        .section-card {
+            background: rgba(248, 250, 252, 0.75);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 6px; padding: 8px 10px;
         }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
         .section-label { font-size: 0.72rem; font-weight: 900; color: #1e293b; display: flex; align-items: center; gap: 5px; }
@@ -198,11 +198,11 @@
         .preset-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .preset-grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 
-        .pill-btn { 
-            min-width: 0; border: 1px solid #cbd5e1; background: #ffffff; 
-            color: #334155; font-size: 0.63rem; font-weight: 800; padding: 5px 3px; 
-            border-radius: 4px; cursor: pointer; transition: all 0.12s ease; 
-            text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        .pill-btn {
+            min-width: 0; border: 1px solid #cbd5e1; background: #ffffff;
+            color: #334155; font-size: 0.63rem; font-weight: 800; padding: 5px 3px;
+            border-radius: 4px; cursor: pointer; transition: all 0.12s ease;
+            text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .pill-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0f9ff; }
         .pill-btn.active { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
@@ -383,14 +383,14 @@
         .divider { height: 1px; background: rgba(226, 232, 240, 0.9); margin: 6px 0; }
 
         /* 测试卡片 */
-        .test-box { 
-            background: #ffffff; border: 1.5px solid #0284c7; border-radius: 7px; padding: 8px 10px; 
-            display: flex; flex-direction: column; gap: 6px; 
+        .test-box {
+            background: #ffffff; border: 1.5px solid #0284c7; border-radius: 7px; padding: 8px 10px;
+            display: flex; flex-direction: column; gap: 6px;
         }
-        .test-btn { 
-            width: 100%; background: linear-gradient(135deg, #0284c7, #0369a1); 
-            color: #ffffff; border: none; border-radius: 5px; padding: 8px; 
-            font-size: 0.8rem; font-weight: 900; cursor: pointer; transition: 0.15s; letter-spacing: 0.5px; 
+        .test-btn {
+            width: 100%; background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #ffffff; border: none; border-radius: 5px; padding: 8px;
+            font-size: 0.8rem; font-weight: 900; cursor: pointer; transition: 0.15s; letter-spacing: 0.5px;
         }
         .test-btn:hover { background: linear-gradient(135deg, #0369a1, #075985); }
         .test-btn.testing { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); animation: pulseTesting 1.2s infinite; }
@@ -408,10 +408,10 @@
         .stat-val { font-size: 0.76rem; font-weight: 900; color: #0f172a; font-family: ui-monospace, monospace; }
         .stat-lbl { font-size: 0.56rem; color: #64748b; font-weight: bold; margin-top: 2px; }
 
-        .btn-start { 
-            width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); 
-            color: #ffffff; border: none; border-radius: 6px; padding: 10px; font-size: 0.9rem; font-weight: 900; 
-            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); letter-spacing: 0.5px; 
+        .btn-start {
+            width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: #ffffff; border: none; border-radius: 6px; padding: 10px; font-size: 0.9rem; font-weight: 900;
+            cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25); letter-spacing: 0.5px;
         }
         .btn-start:hover { background: linear-gradient(135deg, var(--accent-hover), #075985); }
         .btn-start:disabled { background: #94a3b8 !important; cursor: not-allowed !important; box-shadow: none !important; }
@@ -425,55 +425,55 @@
         .color-picker-input-wrap input[type="color"] { position: absolute; left: -10px; top: -10px; width: 40px; height: 40px; border: none; cursor: pointer; }
 
         /* 开场遮罩 */
-        #progress-overlay { 
-            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35); 
-            backdrop-filter: blur(6px); z-index: 100; justify-content: center; align-items: center; flex-direction: column; gap: 20px; 
+        #progress-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(6px); z-index: 100; justify-content: center; align-items: center; flex-direction: column; gap: 20px;
             cursor: pointer;
         }
-        .progress-hint { 
-            color: #fff; font-size: 1.15rem; font-weight: 800; letter-spacing: 1px; 
-            background: rgba(0, 0, 0, 0.35); padding: 8px 26px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.2); 
+        .progress-hint {
+            color: #fff; font-size: 1.15rem; font-weight: 800; letter-spacing: 1px;
+            background: rgba(0, 0, 0, 0.35); padding: 8px 26px; border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.2);
         }
         #progress-bar-container { width: 280px; height: 4px; background: rgba(255, 255, 255, 0.25); border-radius: 2px; overflow: hidden; }
         #progress-bar { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; }
 
         /* 左下角调色板与作者卡片 */
         #left-bottom-group { position: absolute; bottom: 16px; left: 16px; z-index: 15; display: flex; flex-direction: column; gap: 8px; }
-        .palette-card { 
-            background: var(--bg-glass); backdrop-filter: blur(24px) saturate(180%); 
-            padding: 7px 12px 8px 12px; border-radius: 8px; border: 1px solid var(--border-glass); 
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; gap: 4px; 
+        .palette-card {
+            background: var(--bg-glass); backdrop-filter: blur(24px) saturate(180%);
+            padding: 7px 12px 8px 12px; border-radius: 8px; border: 1px solid var(--border-glass);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); display: flex; flex-direction: column; gap: 4px;
         }
         .palette-label { font-size: 0.64rem; font-weight: 900; color: #334155; display: flex; align-items: center; gap: 4px; }
         #inp-floor-gray-r { background: linear-gradient(to right, #000000 0%, #7e8b9b 50%, #ffffff 100%); height: 6px; border-radius: 3px; border: 1px solid #cbd5e1; outline: none; width: 130px; cursor: pointer; }
 
-        #author-card { 
-            background: var(--bg-glass); backdrop-filter: blur(24px) saturate(180%); 
-            padding: 5px 14px 5px 5px; border-radius: 30px; border: 1px solid var(--border-glass); 
-            display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; 
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); transition: transform 0.15s, border-color 0.15s; 
+        #author-card {
+            background: var(--bg-glass); backdrop-filter: blur(24px) saturate(180%);
+            padding: 5px 14px 5px 5px; border-radius: 30px; border: 1px solid var(--border-glass);
+            display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); transition: transform 0.15s, border-color 0.15s;
         }
         #author-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-        .author-avatar-badge { 
-            width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-hover)); 
-            color: #ffffff; font-weight: 900; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25); 
+        .author-avatar-badge {
+            width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: #ffffff; font-weight: 900; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
         }
         .author-meta { display: flex; flex-direction: column; }
         .author-name { font-size: 0.74rem; font-weight: 900; color: #0f172a; }
         .author-tag { font-size: 0.58rem; color: #64748b; font-weight: bold; }
 
         /* 右下角原理说明 HUD */
-        #bottom-right-hud { 
-            position: absolute; bottom: 16px; right: 16px; width: min(350px, calc(100vw - 32px)); 
-            background: var(--bg-glass); backdrop-filter: blur(28px) saturate(190%); 
-            padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-glass); 
-            border-left: 4px solid var(--accent); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06); 
-            z-index: 22; transition: opacity 0.15s, visibility 0.15s; 
+        #bottom-right-hud {
+            position: absolute; bottom: 16px; right: 16px; width: min(350px, calc(100vw - 32px));
+            background: var(--bg-glass); backdrop-filter: blur(28px) saturate(190%);
+            padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-glass);
+            border-left: 4px solid var(--accent); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+            z-index: 22; transition: opacity 0.15s, visibility 0.15s;
         }
         .rel-title { font-size: 0.74rem; font-weight: 900; color: var(--accent); margin-bottom: 4px; }
-        .rel-formula { 
-            font-size: 0.68rem; font-weight: 700; color: #1e293b; background: rgba(2, 132, 199, 0.06); 
-            padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; line-height: 1.4; font-family: Cambria, serif; 
+        .rel-formula {
+            font-size: 0.68rem; font-weight: 700; color: #1e293b; background: rgba(2, 132, 199, 0.06);
+            padding: 4px 8px; border-radius: 4px; margin-bottom: 4px; line-height: 1.4; font-family: Cambria, serif;
         }
         .rel-desc { font-size: 0.62rem; color: #64748b; line-height: 1.5; }
 
@@ -651,7 +651,7 @@
                     <span class="section-label">依据目标难度反求参数</span>
                     <span style="font-size:0.6rem; color:#64748b; font-weight:700;">点击上方卡片可复制填入</span>
                 </div>
-                
+
                 <div class="target-di-container" id="target-di-box">
                     <span class="target-di-label" id="target-di-tag">目标 ID:</span>
                     <input type="number" class="target-di-input" id="inp-target-output" value="3" step="0.05" min="0" max="200" />
@@ -695,7 +695,7 @@
                     <span style="font-size:0.75rem; font-weight:900; color:#0f172a;">瞄准反应与命中实测</span>
                     <span id="test-status-tag" style="font-size:0.6rem; font-weight:800; color:#0284c7; background:#e0f2fe; padding:2px 6px; border-radius:4px;">就绪</span>
                 </div>
-                
+
                 <button class="test-btn" id="btn-start-aim-test">点击开始连续瞄准测试</button>
 
                 <div class="test-stats-grid">
@@ -704,16 +704,32 @@
                         <div class="stat-lbl">命中率</div>
                     </div>
                     <div class="stat-item">
+                        <div class="stat-val" id="stat-hits-count">0</div>
+                        <div class="stat-lbl">命中次数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-miss-count">0</div>
+                        <div class="stat-lbl">未命中次数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-timeout-count">0</div>
+                        <div class="stat-lbl">超时次数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-hit-mt">-- ms</div>
+                        <div class="stat-lbl">命中 MT</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-miss-mt">-- ms</div>
+                        <div class="stat-lbl">未命中 MT</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-val" id="stat-combined-mt">-- ms</div>
+                        <div class="stat-lbl">合并 MT</div>
+                    </div>
+                    <div class="stat-item">
                         <div class="stat-val" id="stat-last-time">-- ms</div>
                         <div class="stat-lbl">最近耗时</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-val" id="stat-avg-time">-- ms</div>
-                        <div class="stat-lbl">平均耗时</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-val" id="stat-score">0 / 0</div>
-                        <div class="stat-lbl">命中/总数</div>
                     </div>
                 </div>
 
@@ -923,15 +939,22 @@
             crosshairColor: { defaultColor: '#000000', targetColor: '#0284c7' }
         };
 
+        // ============================================================
+        // 测试状态：命中/未命中分别累计耗时，超时单独计数
+        // ============================================================
         const testState = {
             active: false,
             startTime: 0,
             timeoutTimer: null,
             hits: 0,
-            trials: 0,
+            miss: 0,
+            trials: 0,       // 以点击结束的试次数（命中 + 未命中）
             lastTimeMs: 0,
-            timesList: [],
-            lastShotTime: 0
+            timesList: [],   // 兼容旧字段：只记录命中耗时
+            lastShotTime: 0,
+            hitTimes: [],    // 命中试次耗时
+            missTimes: [],   // 未命中试次耗时
+            timeoutCount: 0  // 超时次数（非点击试次，不进入 MT）
         };
 
         function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
@@ -2069,22 +2092,57 @@
         const testStatusTag = getEl('test-status-tag');
         const statAcc = getEl('stat-acc');
         const statLastTime = getEl('stat-last-time');
-        const statAvgTime = getEl('stat-avg-time');
-        const statScore = getEl('stat-score');
+        const statHitMt = getEl('stat-hit-mt');
+        const statMissMt = getEl('stat-miss-mt');
+        const statCombinedMt = getEl('stat-combined-mt');
+        const statHitsCount = getEl('stat-hits-count');
+        const statMissCount = getEl('stat-miss-count');
+        const statTimeoutCount = getEl('stat-timeout-count');
+
+        function avgOrNull(arr) {
+            if (!arr || arr.length === 0) return null;
+            return arr.reduce((a, b) => a + b, 0) / arr.length;
+        }
 
         function updateTestStatsUI() {
-            statScore.innerText = `${testState.hits} / ${testState.trials}`;
-            const acc = testState.trials > 0 ? ((testState.hits / testState.trials) * 100).toFixed(1) : '100.0';
-            statAcc.innerText = `${acc}%`;
-            statLastTime.innerText = testState.lastTimeMs > 0 ? `${testState.lastTimeMs} ms` : '-- ms';
+            if (statHitsCount) statHitsCount.innerText = String(testState.hits);
+            if (statMissCount) statMissCount.innerText = String(testState.miss);
+            if (statTimeoutCount) statTimeoutCount.innerText = String(testState.timeoutCount);
 
-            if (testState.timesList.length > 0) {
-                const sum = testState.timesList.reduce((a, b) => a + b, 0);
-                statAvgTime.innerText = `${Math.round(sum / testState.timesList.length)} ms`;
-            } else {
-                statAvgTime.innerText = '-- ms';
+            if (statAcc) {
+                const acc = testState.trials > 0 ? ((testState.hits / testState.trials) * 100).toFixed(1) : '100.0';
+                statAcc.innerText = `${acc}%`;
             }
+            if (statLastTime) {
+                statLastTime.innerText = testState.lastTimeMs > 0 ? `${testState.lastTimeMs} ms` : '-- ms';
+            }
+
+            const hitAvg = avgOrNull(testState.hitTimes);
+            if (statHitMt) statHitMt.innerText = hitAvg === null ? '-- ms' : `${Math.round(hitAvg)} ms`;
+
+            const missAvg = avgOrNull(testState.missTimes);
+            if (statMissMt) statMissMt.innerText = missAvg === null ? '-- ms' : `${Math.round(missAvg)} ms`;
+
+            const combinedAvg = avgOrNull([...testState.hitTimes, ...testState.missTimes]);
+            if (statCombinedMt) statCombinedMt.innerText = combinedAvg === null ? '-- ms' : `${Math.round(combinedAvg)} ms`;
         }
+
+        // 在浏览器控制台执行 get3DAimStats() 可获取完整统计表
+        window.get3DAimStats = () => {
+            const hitAvg = avgOrNull(testState.hitTimes);
+            const missAvg = avgOrNull(testState.missTimes);
+            const allAvg = avgOrNull([...testState.hitTimes, ...testState.missTimes]);
+            const stats = {
+                命中次数: testState.hitTimes.length,
+                未命中次数: testState.missTimes.length,
+                超时次数: testState.timeoutCount,
+                命中平均运动时间_ms: hitAvg === null ? null : +hitAvg.toFixed(2),
+                未命中平均运动时间_ms: missAvg === null ? null : +missAvg.toFixed(2),
+                合并平均点击时间_ms: allAvg === null ? null : +allAvg.toFixed(2)
+            };
+            console.table(stats);
+            return stats;
+        };
 
         function cancelAimTest(reason = 'timeout') {
             if (!testState.active) return;
@@ -2095,7 +2153,8 @@
             btnStartAimTest.innerText = '点击开始连续瞄准测试';
 
             if (reason === 'timeout') {
-                testState.trials++;
+                // 超时没有点击结束信号，不进入 MT 统计，仅单独计数
+                testState.timeoutCount++;
                 testStatusTag.innerText = '超时未命中 (已停止)';
                 testStatusTag.style.background = '#fee2e2';
                 testStatusTag.style.color = '#ef233c';
@@ -2128,12 +2187,23 @@
         }
 
         getEl('btn-reset-test-stats').addEventListener('click', () => {
-            testState.hits = 0; testState.trials = 0; testState.lastTimeMs = 0; testState.timesList = [];
+            testState.hits = 0;
+            testState.miss = 0;
+            testState.trials = 0;
+            testState.lastTimeMs = 0;
+            testState.timesList = [];
+            testState.hitTimes = [];
+            testState.missTimes = [];
+            testState.timeoutCount = 0;
+
             testStatusTag.innerText = '就绪';
-            testStatusTag.style.background = '#e0f2fe'; testStatusTag.style.color = '#0284c7';
+            testStatusTag.style.background = '#e0f2fe';
+            testStatusTag.style.color = '#0284c7';
             updateTestStatsUI();
+
             if (testState.timeoutTimer) { clearTimeout(testState.timeoutTimer); testState.timeoutTimer = null; }
             if (testState._missFlashTimer) { clearTimeout(testState._missFlashTimer); testState._missFlashTimer = null; }
+
             if (testState.active) {
                 testState.active = false;
                 btnStartAimTest.classList.remove('testing');
@@ -2348,6 +2418,9 @@
         }
 
         window.addEventListener('mousedown', (e) => {
+            if (document.pointerLockElement !== document.body && e.button === 0) {
+                // 非锁定状态不处理（如 UI 点击）
+            }
             if (document.pointerLockElement === document.body && e.button === 0) {
                 if (isArmed) { triggerRealStart(); return; }
 
@@ -2375,6 +2448,7 @@
                         testState.trials++;
                         testState.lastTimeMs = elapsed;
                         testState.timesList.push(elapsed);
+                        testState.hitTimes.push(elapsed);
 
                         testStatusTag.innerText = `命中! ${elapsed} ms`;
                         testStatusTag.style.background = '#dcfce7';
@@ -2389,12 +2463,24 @@
                 } else {
                     playMissAudio();
                     if (testState.active) {
-                        testState.trials++;
-                        updateTestStatsUI();
+                        const elapsed = Math.round(now - testState.startTime);
+                        if (testState.timeoutTimer) { clearTimeout(testState.timeoutTimer); testState.timeoutTimer = null; }
 
-                        testStatusTag.innerText = '未命中';
+                        testState.miss++;
+                        testState.trials++;
+                        testState.lastTimeMs = elapsed;
+                        testState.missTimes.push(elapsed);
+
+                        testStatusTag.innerText = `未命中 ${elapsed} ms`;
                         testStatusTag.style.background = '#fee2e2';
                         testStatusTag.style.color = '#ef233c';
+
+                        updateTestStatsUI();
+                        // 未命中同样回正视角并重新计时，保持下一次试次公平
+                        resetAimOrigin();
+
+                        testState.startTime = performance.now();
+                        testState.timeoutTimer = setTimeout(() => cancelAimTest('timeout'), 8000);
 
                         if (testState._missFlashTimer) clearTimeout(testState._missFlashTimer);
                         testState._missFlashTimer = setTimeout(() => {

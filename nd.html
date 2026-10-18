@@ -98,7 +98,7 @@
     .legend-cn { font-weight: 600; letter-spacing: 0.02em; }
     .legend-en { color: var(--ink-muted); font-size: 0.82rem; margin-left: 2px; font-family: -apple-system, sans-serif; }
     .legend-subtext { margin-left: 46px; margin-top: -3px; font-size: 0.78rem; color: var(--ink-navy-soft); line-height: 1.45; }
-    
+
     .hero-formula-wrap { margin: clamp(16px, 2.5vw, 24px) auto; text-align: center; padding: 4px 0; }
     .hero-formula {
       display: inline-flex; align-items: center; justify-content: center; font-family: Cambria, "Times New Roman", Georgia, serif;
@@ -125,7 +125,7 @@
     .hero-formula .frac-bottom { padding: 3px 6px 0 6px; font-style: italic; line-height: 1.05; }
     .hero-formula .frac-bottom sup { font-size: 0.62em; font-style: normal; vertical-align: 0.45em; }
     .hero-formula #formulaFittsLead { font-style: normal; }
-    
+
     .annotation-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.5vw, 16px); margin-top: 10px; }
     .annotation-card {
       background: rgba(255, 254, 250, 0.85); border: 1px solid #ebdcb7; border-radius: var(--radius-md);
@@ -138,14 +138,14 @@
     .annotation-content { font-size: 0.82rem; color: #172c44; line-height: 1.55; font-weight: 500; }
     .annotation-content .dimmed { display: block; color: #6a7c91; font-size: 0.75rem; margin-top: 2px; }
     .annotation-content em { font-style: italic; font-family: Cambria, serif; font-weight: 700; }
-    
-    .stamp-badge { 
-      position: fixed; 
-      bottom: 24px; 
-      right: 24px; 
-      z-index: 1000; 
-      display: flex; 
-      justify-content: flex-end; 
+
+    .stamp-badge {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      justify-content: flex-end;
       pointer-events: auto;
     }
     .stamp-pill {
@@ -156,7 +156,7 @@
     .stamp-pill:hover { background: linear-gradient(180deg, #ffffff, #faecd0); border-color: #b5985a; box-shadow: 0 4px 10px rgba(120, 90, 40, 0.12); transform: translateY(-1px); }
     .stamp-diamond { color: #c4994e; font-size: 0.65rem; }
     .stamp-author { font-family: "KingHwa_OldSong", "Songti SC", serif; font-weight: 700; letter-spacing: 0.05em; }
-    
+
     .section-card { background: var(--paper-card); border: 1px solid var(--gold-border); border-radius: var(--radius-lg); padding: clamp(16px, 2.2vw, 24px); box-shadow: var(--shadow-paper); display: flex; flex-direction: column; }
     .section-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--gold-faint); padding-bottom: 10px; margin-bottom: 16px; }
     .section-title { margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--ink-navy); }
@@ -241,7 +241,7 @@
     .aim-hud { position: relative; z-index: 2; background: rgba(13, 28, 48, 0.88); border: 1px solid rgba(216, 186, 127, 0.35); border-radius: var(--radius-md); padding: 10px 16px; backdrop-filter: blur(12px); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
     .aim-title-meta h2 { margin: 0; font-size: 1rem; color: #faebd0; letter-spacing: 0.04em; }
     .aim-title-meta p { margin: 2px 0 0; font-size: 0.72rem; color: #9cb1cc; font-family: -apple-system, sans-serif; }
-    .aim-stats-deck { display: flex; gap: 8px; }
+    .aim-stats-deck { display: flex; gap: 8px; flex-wrap: wrap; }
     .aim-pill-stat { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(216, 186, 127, 0.2); border-radius: 6px; padding: 4px 10px; min-width: 62px; text-align: center; }
     .aim-pill-stat span { display: block; font-size: 0.62rem; color: #92a7c4; }
     .aim-pill-stat strong { display: block; font-family: ui-monospace, monospace; font-size: 0.95rem; color: #fff8e8; }
@@ -434,7 +434,9 @@
         <div class="aim-pill-stat"><span>命中</span><strong id="statHits">0</strong></div>
         <div class="aim-pill-stat"><span>未命中</span><strong id="statMisses">0</strong></div>
         <div class="aim-pill-stat"><span>命中率</span><strong id="statAcc">—</strong></div>
-        <div class="aim-pill-stat"><span>平均反应</span><strong id="statRt">—</strong></div>
+        <div class="aim-pill-stat"><span>命中 MT</span><strong id="statHitMt">—</strong></div>
+        <div class="aim-pill-stat"><span>未命中 MT</span><strong id="statMissMt">—</strong></div>
+        <div class="aim-pill-stat"><span>合并 MT</span><strong id="statCombinedMt">—</strong></div>
       </div>
       <div class="aim-ctrl-bar">
         <div style="display:flex; align-items:center; gap:6px;">
@@ -566,7 +568,7 @@
 
     const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
     const roundPrecision = (n) => !Number.isFinite(n) || Math.abs(n) >= 1e14 ? n : Math.round((n + Number.EPSILON) * 1e10) / 1e10;
-    
+
     const fmt = (n) => {
       if (!Number.isFinite(n) || Number.isNaN(n)) return '0';
       if (n === Infinity) return '1e308';
@@ -632,7 +634,7 @@
       if (logValue < LOG_MIN_NUMBER) return 0;
       return Math.exp(logValue);
     }
-    
+
     const fmtExp = (v) => {
       if (!Number.isFinite(v)) return '';
       if (Number.isInteger(v)) return String(v);
@@ -812,7 +814,7 @@
       const width = Math.ceil(Math.max(vpW, centerX + radius + padX + 30));
       const height = Math.ceil(Math.max(vpH, renderDiamPx + 54));
       const centerY = height / 2;
-      
+
       svg.setAttribute('width', width); svg.setAttribute('height', height); svg.style.width = `${width}px`; svg.style.height = `${height}px`;
       const gradId = `${svg.id}-sphere-grad`, shadowId = `${svg.id}-shadow`;
       const scaledTag = isScaled ? `<text x="${width - 12}" y="16" text-anchor="end" font-size="11" fill="#aa2727" font-weight="700">图示已缩放（非实尺）</text>` : '';
@@ -857,7 +859,7 @@
         altIdVal.innerHTML = `${text}<span class="metric-unit">bits</span>`;
         altIdVal.classList.toggle('negative', isNeg);
       }
-      
+
       const sphereVolText = $('sphereVolText');
       if (sphereVolText) sphereVolText.innerHTML = `${fmt((4 / 3) * Math.PI * Math.pow(W / 2, 3))}<span class="metric-unit">cm³</span>`;
 
@@ -896,7 +898,7 @@
       const bounded = clamp(val, LIMITS[key].min, LIMITS[key].max);
       val = options.preservePrecision ? bounded : roundPrecision(bounded);
       state[key] = val;
-      
+
       setStatus('参数更新就绪。', 'ok');
       try { localStorage.setItem('fitts_model_state', JSON.stringify(state)); } catch (_) {}
       refreshUI();
@@ -1019,9 +1021,10 @@
     const aim = {
       active: false, started: false, w: 0, h: 0, dpr: 1,
       cx: 0, cy: 0, tx: 0, ty: 0, tr: 0,
-      hits: 0, miss: 0, rt: [], spawnTs: 0, hudBottom: 0,
+      hits: 0, miss: 0, spawnTs: 0, hudBottom: 0,
       mode: 'free', side: 'right', originX: 0, originY: 0,
-      marks: [], markRaf: null, crosshairWidth: 1.0
+      marks: [], markRaf: null, crosshairWidth: 1.0,
+      hitRt: [], missRt: []
     };
     const cvs = $('aimCanvas'), ctx = cvs && cvs.getContext('2d');
     const overlayEl = $('aimOverlay');
@@ -1045,6 +1048,55 @@
       el.textContent = msg || '';
       el.className = `aim-center-notice ${type}`;
     }
+
+    // ============================================================
+    // 命中 / 未命中耗时统计
+    // ============================================================
+    function avgOrNull(arr) {
+      if (!arr || arr.length === 0) return null;
+      return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    function updateAimStatsHud() {
+      const hEl = $('statHits'); if (hEl) hEl.textContent = aim.hits;
+      const mEl = $('statMisses'); if (mEl) mEl.textContent = aim.miss;
+
+      const total = aim.hits + aim.miss;
+      const accEl = $('statAcc');
+      if (accEl) accEl.textContent = total > 0 ? `${(aim.hits / total * 100).toFixed(1)}%` : '—';
+
+      const hitMtEl = $('statHitMt');
+      if (hitMtEl) {
+        const v = avgOrNull(aim.hitRt);
+        hitMtEl.textContent = v === null ? '—' : `${Math.round(v)} ms`;
+      }
+      const missMtEl = $('statMissMt');
+      if (missMtEl) {
+        const v = avgOrNull(aim.missRt);
+        missMtEl.textContent = v === null ? '—' : `${Math.round(v)} ms`;
+      }
+      const combMtEl = $('statCombinedMt');
+      if (combMtEl) {
+        const v = avgOrNull([...aim.hitRt, ...aim.missRt]);
+        combMtEl.textContent = v === null ? '—' : `${Math.round(v)} ms`;
+      }
+    }
+
+    // 在浏览器控制台执行 get2DAimStats() 可获取完整统计表
+    window.get2DAimStats = () => {
+      const hitAvg = avgOrNull(aim.hitRt);
+      const missAvg = avgOrNull(aim.missRt);
+      const allAvg = avgOrNull([...aim.hitRt, ...aim.missRt]);
+      const stats = {
+        命中次数: aim.hitRt.length,
+        未命中次数: aim.missRt.length,
+        命中平均运动时间_ms: hitAvg === null ? null : +hitAvg.toFixed(2),
+        未命中平均运动时间_ms: missAvg === null ? null : +missAvg.toFixed(2),
+        合并平均点击时间_ms: allAvg === null ? null : +allAvg.toFixed(2)
+      };
+      console.table(stats);
+      return stats;
+    };
 
     function updateAimDesc() {
       const desc = $('aimParamDesc');
@@ -1199,13 +1251,12 @@
       openAimBtn.addEventListener('click', () => {
         readModeFromUI();
         aim.active = true; aim.started = false; aim.tr = 0;
-        aim.hits = 0; aim.miss = 0; aim.rt = []; aim.hudBottom = 0;
+        aim.hits = 0; aim.miss = 0; aim.hudBottom = 0;
+        aim.hitRt = []; aim.missRt = [];
         aim.originX = 0; aim.originY = 0; aim.marks = [];
         if (aim.markRaf !== null) { cancelAnimationFrame(aim.markRaf); aim.markRaf = null; }
-        const hEl = $('statHits'); if (hEl) hEl.textContent = '0';
-        const mEl = $('statMisses'); if (mEl) mEl.textContent = '0';
-        const accEl = $('statAcc'); if (accEl) accEl.textContent = '—';
-        const rtEl = $('statRt'); if (rtEl) rtEl.textContent = '—';
+
+        updateAimStatsHud();
         updateAimDesc();
         if (overlayEl) {
           overlayEl.classList.remove('hidden');
@@ -1306,30 +1357,35 @@
         drawAim();
       });
 
+      // ============================================================
+      // 射击：命中与未命中都以点击作为试次结束信号
+      // ============================================================
       cvs.addEventListener('mousedown', (e) => {
         if (!aim.started || e.button !== 0 || aim.tr === 0) return;
         const px = aim.cx, py = aim.cy;
         const hitRadius = Math.max(aim.tr, 4);
-        if (Math.hypot(aim.cx - aim.tx, aim.cy - aim.ty) <= hitRadius) {
+        const elapsed = performance.now() - aim.spawnTs; // 点击即结束信号
+        const isHit = Math.hypot(aim.cx - aim.tx, aim.cy - aim.ty) <= hitRadius;
+
+        if (isHit) {
           aim.hits++;
-          aim.rt.push(performance.now() - aim.spawnTs);
+          aim.hitRt.push(elapsed);
           addMark(px, py, true);
-          if (!spawnAimTarget()) {
-            aim.started = false;
-            if (overlayEl) overlayEl.classList.add('paused');
-            setAimMsg('下一目标无法在当前画布中完整显示，训练已暂停。', 'warn');
-            if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
-          }
         } else {
           aim.miss++;
+          aim.missRt.push(elapsed);
           addMark(px, py, false);
-          drawAim();
         }
-        const hEl = $('statHits'); if (hEl) hEl.textContent = aim.hits;
-        const mEl = $('statMisses'); if (mEl) mEl.textContent = aim.miss;
-        const total = aim.hits + aim.miss;
-        const accEl = $('statAcc'); if (accEl) accEl.textContent = total > 0 ? `${(aim.hits / total * 100).toFixed(1)}%` : '—';
-        const rtEl = $('statRt'); if (rtEl && aim.rt.length > 0) rtEl.textContent = `${Math.round(aim.rt.reduce((a, b) => a + b, 0) / aim.rt.length)} ms`;
+
+        updateAimStatsHud();
+
+        // 命中或未命中都视为完整试次；点击后立即生成下一目标
+        if (!spawnAimTarget()) {
+          aim.started = false;
+          if (overlayEl) overlayEl.classList.add('paused');
+          setAimMsg('下一目标无法在当前画布中完整显示，训练已暂停。', 'warn');
+          if (document.pointerLockElement === cvs && document.exitPointerLock) document.exitPointerLock();
+        }
       });
     }
 
@@ -1421,6 +1477,7 @@
     setWExp(wExp);
     setPxPerCm(pxPerCm);
     updateZoomDisplay();
+    updateAimStatsHud();
   })();
   </script>
 </body>
