@@ -687,15 +687,22 @@
                 </div>
             </div>
 
+            <!-- 方位模式卡片：固定四向 + 三种随机 -->
             <div class="section-card" id="direction-card">
                 <div class="section-header">
                     <span class="section-label">目标方位模式</span>
                     <span id="direction-hint">固定右侧 (+θ)</span>
                 </div>
-                <div class="preset-grid cols-3" style="margin-bottom:0; gap:5px;">
+                <div class="preset-grid cols-4" style="margin-bottom:5px; gap:5px;">
                     <button class="dir-btn active" data-mode="right">固定右侧</button>
                     <button class="dir-btn" data-mode="left">固定左侧</button>
+                    <button class="dir-btn" data-mode="up">固定上方</button>
+                    <button class="dir-btn" data-mode="down">固定下方</button>
+                </div>
+                <div class="preset-grid cols-3" style="margin-bottom:0; gap:5px;">
                     <button class="dir-btn" data-mode="random">随机方向</button>
+                    <button class="dir-btn" data-mode="lr-random">左右随机</button>
+                    <button class="dir-btn" data-mode="ud-random">上下随机</button>
                 </div>
             </div>
 
@@ -920,8 +927,9 @@
             thetaX: 4.5,
             thetaY: 0.0,
             side: 'right',
-            directionMode: 'fixed',
+            directionMode: 'fixed',   // 'fixed' | 'random' | 'lr-random' | 'ud-random'
             randomPhi: Math.random() * Math.PI * 2,
+            randomSide: 'right',      // lr-random -> 'left'|'right'；ud-random -> 'up'|'down'
             allowVerticalLook: false,
             visualCenter: true
         };
@@ -1124,6 +1132,7 @@
                 thetaY: modelState.thetaY,
                 side: modelState.side,
                 directionMode: modelState.directionMode,
+                randomSide: modelState.randomSide,
                 allowVerticalLook: modelState.allowVerticalLook
             };
         }
@@ -1196,8 +1205,9 @@
                     _modelParams.fitts.targetID = String(s.targetID);
                 }
             }
-            if (s.side === 'left' || s.side === 'right') modelState.side = s.side;
-            if (s.directionMode === 'fixed' || s.directionMode === 'random') modelState.directionMode = s.directionMode;
+            if (['left','right','up','down'].includes(s.side)) modelState.side = s.side;
+            if (['fixed','random','lr-random','ud-random'].includes(s.directionMode)) modelState.directionMode = s.directionMode;
+            if (['left','right','up','down'].includes(s.randomSide)) modelState.randomSide = s.randomSide;
             if (typeof s.allowVerticalLook === 'boolean') modelState.allowVerticalLook = s.allowVerticalLook;
             modelState.visualCenter = (modelState.thetaY === 0);
         }
@@ -1685,6 +1695,14 @@
             if (modelState.directionMode === 'random') {
                 modelState.randomPhi = Math.random() * Math.PI * 2;
                 sync3DTarget();
+            } else if (modelState.directionMode === 'lr-random') {
+                modelState.randomSide = Math.random() < 0.5 ? 'left' : 'right';
+                sync3DTarget();
+                refreshDirectionUI();
+            } else if (modelState.directionMode === 'ud-random') {
+                modelState.randomSide = Math.random() < 0.5 ? 'up' : 'down';
+                sync3DTarget();
+                refreshDirectionUI();
             }
         }
 
@@ -1699,10 +1717,28 @@
                     py = camY + d.y * COMPASS_RADIUS;
                     pz = d.z * COMPASS_RADIUS;
                 } else {
-                    const sign = (modelState.side === 'left') ? -1 : 1;
-                    const radY = (modelState.thetaY * Math.PI / 180) * sign;
-                    px = COMPASS_RADIUS * Math.sin(radY);
-                    pz = -COMPASS_RADIUS * Math.cos(radY);
+                    const useSide = (modelState.directionMode === 'lr-random' || modelState.directionMode === 'ud-random')
+                        ? modelState.randomSide
+                        : modelState.side;
+                    const radY = (modelState.thetaY * Math.PI / 180);
+                    const sinY = Math.sin(radY);
+                    const cosY = Math.cos(radY);
+                    if (useSide === 'left') {
+                        px = -COMPASS_RADIUS * sinY;
+                        pz = -COMPASS_RADIUS * cosY;
+                    } else if (useSide === 'right') {
+                        px = COMPASS_RADIUS * sinY;
+                        pz = -COMPASS_RADIUS * cosY;
+                    } else if (useSide === 'up') {
+                        py = camY + COMPASS_RADIUS * sinY;
+                        pz = -COMPASS_RADIUS * cosY;
+                    } else if (useSide === 'down') {
+                        py = camY - COMPASS_RADIUS * sinY;
+                        pz = -COMPASS_RADIUS * cosY;
+                    } else {
+                        px = COMPASS_RADIUS * sinY;
+                        pz = -COMPASS_RADIUS * cosY;
+                    }
                 }
             }
             const dist = Math.hypot(px, py - camY, pz) || COMPASS_RADIUS;
@@ -1719,18 +1755,27 @@
         function refreshDirectionUI() {
             document.querySelectorAll('.dir-btn').forEach(btn => {
                 const m = btn.dataset.mode;
-                const active = (modelState.directionMode === 'random')
-                    ? (m === 'random')
-                    : (m === modelState.side);
+                let active = false;
+                if (m === 'random' || m === 'lr-random' || m === 'ud-random') {
+                    active = (modelState.directionMode === m);
+                } else {
+                    active = (modelState.directionMode === 'fixed') && (m === modelState.side);
+                }
                 btn.classList.toggle('active', active);
             });
             const hint = getEl('direction-hint');
-            if (hint) {
-                if (modelState.directionMode === 'random') {
-                    hint.textContent = '随机方向 · 从准星正前方延伸';
-                } else {
-                    hint.textContent = modelState.side === 'left' ? '固定左侧 (−θ)' : '固定右侧 (+θ)';
-                }
+            if (!hint) return;
+            if (modelState.directionMode === 'random') {
+                hint.textContent = '随机方向 · 从准星正前方延伸';
+            } else if (modelState.directionMode === 'lr-random') {
+                const s = (modelState.randomSide === 'left') ? '左侧' : '右侧';
+                hint.textContent = `左右随机 · 当前：${s}`;
+            } else if (modelState.directionMode === 'ud-random') {
+                const s = (modelState.randomSide === 'up') ? '上方' : '下方';
+                hint.textContent = `上下随机 · 当前：${s}`;
+            } else {
+                const map = { left: '固定左侧 (−θ)', right: '固定右侧 (+θ)', up: '固定上方 (↑θ)', down: '固定下方 (↓θ)' };
+                hint.textContent = map[modelState.side] || '固定右侧 (+θ)';
             }
         }
 
@@ -1738,7 +1783,13 @@
             if (mode === 'random') {
                 modelState.directionMode = 'random';
                 modelState.randomPhi = Math.random() * Math.PI * 2;
-            } else if (mode === 'left' || mode === 'right') {
+            } else if (mode === 'lr-random') {
+                modelState.directionMode = 'lr-random';
+                modelState.randomSide = Math.random() < 0.5 ? 'left' : 'right';
+            } else if (mode === 'ud-random') {
+                modelState.directionMode = 'ud-random';
+                modelState.randomSide = Math.random() < 0.5 ? 'up' : 'down';
+            } else if (['left','right','up','down'].includes(mode)) {
                 modelState.directionMode = 'fixed';
                 modelState.side = mode;
             }
@@ -1748,9 +1799,6 @@
             persist();
         }
 
-        // ============================================================
-        // 【关键补回】refreshModelUI：带空值保护，原文件里这个函数整段丢失
-        // ============================================================
         function refreshModelUI() {
             const isFitts = (modelState.formulaModel === 'fitts');
             const currentPower = getCurrentPower();
@@ -2632,6 +2680,14 @@
 
             updateFloorAndGrid(config.floorColor);
             applyTheme(config.theme);
+
+            // 随机方向模式初始化校验
+            if (modelState.directionMode === 'lr-random' && !['left','right'].includes(modelState.randomSide)) {
+                modelState.randomSide = Math.random() < 0.5 ? 'left' : 'right';
+            }
+            if (modelState.directionMode === 'ud-random' && !['up','down'].includes(modelState.randomSide)) {
+                modelState.randomSide = Math.random() < 0.5 ? 'up' : 'down';
+            }
 
             modelState.visualCenter = (modelState.thetaY === 0);
             refreshDirectionUI();
