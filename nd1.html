@@ -501,6 +501,48 @@
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
         }
 
+        /* ===== 随机几何卡片 ===== */
+        #random-geo-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 2px solid #0284c7;
+            border-radius: 7px;
+            padding: 9px 10px;
+            box-shadow: 0 6px 18px rgba(2, 132, 199, 0.18);
+        }
+        #random-geo-card .section-header { margin-bottom: 7px; }
+        #random-geo-card .section-label { color: #ffffff; font-size: 0.8rem; letter-spacing: 0.2px; }
+        #random-geo-card .section-label::before {
+            content: ''; display: inline-block; width: 5px; height: 12px;
+            background: #38bdf8; border-radius: 2px; margin-right: 2px;
+        }
+        #random-geo-card .ctrl-row label { color: #cbd5e1; width: 76px; font-size: 0.64rem; }
+        #random-geo-card .ctrl-row input[type="range"] { accent-color: #38bdf8; }
+        #random-geo-card .stepper-box { border-color: rgba(255,255,255,0.22); background: rgba(255,255,255,0.08); }
+        #random-geo-card .step-btn { background: rgba(255,255,255,0.1); color: #7dd3fc; }
+        #random-geo-card .step-btn:hover { background: rgba(255,255,255,0.2); }
+        #random-geo-card .num-input { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); color: #ffffff; }
+        .rand-toggle-btn {
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 7px 4px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .rand-toggle-btn:hover { background: rgba(255, 255, 255, 0.18); border-color: #38bdf8; color: #fff; }
+        .rand-toggle-btn.active {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            border-color: #22c55e;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.45);
+        }
+        #rand-hint { font-size: 0.58rem; color: #94a3b8; font-weight: 700; }
+
         @media (max-width: 900px) {
             #top-hud { top: 8px; left: 8px; right: 8px; }
             .hud-card { padding: 6px 10px; gap: 8px; font-size: 0.68rem; }
@@ -703,6 +745,30 @@
                     <button class="dir-btn" data-mode="random">随机方向</button>
                     <button class="dir-btn" data-mode="lr-random">左右随机</button>
                     <button class="dir-btn" data-mode="ud-random">上下随机</button>
+                </div>
+            </div>
+
+            <!-- ===== 难度恒定 · 随机远近与大小 ===== -->
+            <div class="section-card" id="random-geo-card">
+                <div class="section-header">
+                    <span class="section-label">难度恒定 · 随机远近与大小</span>
+                    <span id="rand-id-lock-label" style="font-size:0.58rem; color:#38bdf8; font-weight:800; transition: color 0.2s;">当前固定 ID: --</span>
+                </div>
+                <div class="preset-grid cols-2" style="margin-bottom:6px; gap:5px;">
+                    <button class="rand-toggle-btn active" id="btn-rand-fixed" onclick="setRandMode(false)">固定距离与大小</button>
+                    <button class="rand-toggle-btn" id="btn-rand-random" onclick="setRandMode(true)">随机距离与大小</button>
+                </div>
+                <div class="ctrl-row" id="rand-range-row" style="margin-bottom:4px; opacity: 0.5; pointer-events: none;">
+                    <label title="θy 随机上限（度）">范围上限</label>
+                    <input type="range" id="inp-rand-range-r" min="1" max="90" step="1" value="90" oninput="setRandomRange(this.value)" />
+                    <div class="stepper-box">
+                        <button class="step-btn" onclick="stepGlobal('inp-rand-range', -5)">−</button>
+                        <input type="number" class="num-input" id="inp-rand-range" value="90" min="1" max="90" step="1" />
+                        <button class="step-btn" onclick="stepGlobal('inp-rand-range', 5)">+</button>
+                    </div>
+                </div>
+                <div id="rand-hint" style="text-align:center; line-height:1.45; font-family:ui-monospace, monospace;">
+                    未开启 · 保持当前 θx / θy 固定
                 </div>
             </div>
 
@@ -911,6 +977,12 @@
         const VIEW_HEIGHT_MIN = 0.5, VIEW_HEIGHT_MAX = 25.0;
         const TARGET_BASE_COLOR = 0xef233c;
 
+        // 随机几何时 θx 的可行边界（非测试状态）
+        const RAND_TX_MIN = 0.1;
+        const RAND_TX_MAX = TX_MAX;
+        // 瞄准测试中的 θx 下限（可等于 0.25）
+        const TEST_TX_MIN = 0.25;
+
         const COLOR_PRESETS = [
             { name: '黑', hex: '#000000' }, { name: '白', hex: '#ffffff' }, { name: '赤', hex: '#ef4444' },
             { name: '橙', hex: '#f97316' }, { name: '黄', hex: '#eab308' }, { name: '绿', hex: '#22c55e' },
@@ -931,7 +1003,10 @@
             randomPhi: Math.random() * Math.PI * 2,
             randomSide: 'right',      // lr-random -> 'left'|'right'；ud-random -> 'up'|'down'
             allowVerticalLook: false,
-            visualCenter: true
+            visualCenter: true,
+            // ===== 难度恒定随机几何 =====
+            randGeometry: false,      // 是否开启随机距离与大小
+            randomRange: 90           // θy 随机上限（度）
         };
 
         function getCurrentPower() {
@@ -1108,7 +1183,7 @@
         resizeFeedbackCanvas();
         window.addEventListener('resize', resizeFeedbackCanvas);
 
-        const STORAGE_KEY = 'aim3d_lab_settings_v3';
+        const STORAGE_KEY = 'aim3d_lab_settings_v5';
         let storageReady = false;
         let persistTimer = null;
 
@@ -1133,7 +1208,9 @@
                 side: modelState.side,
                 directionMode: modelState.directionMode,
                 randomSide: modelState.randomSide,
-                allowVerticalLook: modelState.allowVerticalLook
+                allowVerticalLook: modelState.allowVerticalLook,
+                randGeometry: modelState.randGeometry,
+                randomRange: modelState.randomRange
             };
         }
 
@@ -1148,7 +1225,10 @@
         }
         function readStored() {
             try {
-                const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('aim3d_lab_settings_v2');
+                const raw = localStorage.getItem(STORAGE_KEY)
+                    || localStorage.getItem('aim3d_lab_settings_v4')
+                    || localStorage.getItem('aim3d_lab_settings_v3')
+                    || localStorage.getItem('aim3d_lab_settings_v2');
                 return raw ? JSON.parse(raw) : null;
             } catch (e) { return null; }
         }
@@ -1209,6 +1289,17 @@
             if (['fixed','random','lr-random','ud-random'].includes(s.directionMode)) modelState.directionMode = s.directionMode;
             if (['left','right','up','down'].includes(s.randomSide)) modelState.randomSide = s.randomSide;
             if (typeof s.allowVerticalLook === 'boolean') modelState.allowVerticalLook = s.allowVerticalLook;
+
+            // 兼容新老版本的随机几何设置
+            if (typeof s.randGeometry === 'boolean') {
+                modelState.randGeometry = s.randGeometry;
+            } else {
+                if (typeof s.randSize === 'boolean' || typeof s.randDist === 'boolean') {
+                    modelState.randGeometry = !!(s.randSize || s.randDist);
+                }
+            }
+            modelState.randomRange = clamp(numOr(s.randomRange, 90), 1, 90);
+
             modelState.visualCenter = (modelState.thetaY === 0);
         }
 
@@ -1225,6 +1316,116 @@
             }
             const ratio = thetaY / denom;
             return Math.log2(ratio + 1);
+        }
+
+        /* ============================================================
+           难度恒定随机几何核心
+           θy = θx^p · (2^ID − 1)            [Shannon-Fitts]
+           θy = θx^p · 2^ID / 2              [Fitts 原始]
+           θx = ( θy / (2^ID − 1) )^(1/p)
+           θx = ( 2θy / 2^ID )^(1/p)
+           ============================================================ */
+        function thetaYFromThetaX(tx, id, p, isFitts) {
+            const txp = Math.pow(Math.max(tx, 0), p);
+            return isFitts ? (txp * Math.pow(2, id) / 2) : (txp * (Math.pow(2, id) - 1));
+        }
+        function thetaXFromThetaY(ty, id, p, isFitts) {
+            if (isFitts) {
+                const den = Math.pow(2, id);
+                if (!(den > 0)) return NaN;
+                return Math.pow(2 * ty / den, 1 / p);
+            }
+            const den = Math.pow(2, id) - 1;
+            if (!(den > 0)) return NaN;
+            return Math.pow(ty / den, 1 / p);
+        }
+
+        function randomizeGeometry() {
+            if (!modelState.randGeometry) return false;
+
+            const p = getCurrentPower() || 1.0;
+            const isFitts = (modelState.formulaModel === 'fitts');
+
+            let id = calculateOutput(modelState.thetaX, modelState.thetaY, p, modelState.formulaModel);
+            if (!Number.isFinite(id) || id === 0) {
+                const tidEl = getEl('inp-target-output');
+                const fb = tidEl ? numOr(tidEl.value, NaN) : NaN;
+                if (Number.isFinite(fb) && fb !== 0) id = fb;
+            }
+            if (!Number.isFinite(id) || id === 0) return false;
+
+            const maxRange = clamp(modelState.randomRange, 1, 90);
+
+            // θy 的可行区间：测试中 θx 下限为 0.25，其余状态为 0.1
+            const txMin = testState.active ? TEST_TX_MIN : RAND_TX_MIN;
+            let yLo = Math.max(0, thetaYFromThetaX(txMin, id, p, isFitts));
+            let yHi = thetaYFromThetaX(RAND_TX_MAX, id, p, isFitts);
+            if (!Number.isFinite(yLo) || !Number.isFinite(yHi)) return false;
+            yHi = Math.min(yHi, maxRange);
+            if (!(yHi > 0)) return false;
+            if (yHi <= yLo) {
+                // 可行域退化，退回边界值（多为 θx 下限被卡住）
+                yLo = Math.max(0, yHi * 0.98);
+            }
+
+            const xLo = thetaXFromThetaY(yLo, id, p, isFitts);
+            const xHi = thetaXFromThetaY(yHi, id, p, isFitts);
+
+            // 每次随机决定以大小为驱动还是以距离为驱动
+            const useSizeDriver = Math.random() < 0.5;
+
+            let newThetaX, newThetaY;
+            if (useSizeDriver && Number.isFinite(xLo) && Number.isFinite(xHi) && xHi > xLo) {
+                newThetaX = xLo + Math.random() * (xHi - xLo);
+                newThetaY = thetaYFromThetaX(newThetaX, id, p, isFitts);
+            } else {
+                newThetaY = yLo + Math.random() * (yHi - yLo);
+                newThetaX = thetaXFromThetaY(newThetaY, id, p, isFitts);
+            }
+            if (!Number.isFinite(newThetaX) || !Number.isFinite(newThetaY)) return false;
+
+            modelState.thetaX = clamp(newThetaX, TX_MIN, TX_MAX);
+            modelState.thetaY = clamp(newThetaY, TY_MIN, TY_MAX);
+            modelState.visualCenter = (modelState.thetaY === 0);
+            return true;
+        }
+
+        function refreshRandomUI() {
+            const bf = getEl('btn-rand-fixed');
+            if (bf) bf.classList.toggle('active', !modelState.randGeometry);
+            const br = getEl('btn-rand-random');
+            if (br) br.classList.toggle('active', modelState.randGeometry);
+
+            setNum('inp-rand-range', modelState.randomRange, 0);
+            const rng = getEl('inp-rand-range-r');
+            if (rng) rng.value = modelState.randomRange;
+
+            const rangeRow = getEl('rand-range-row');
+            if (rangeRow) {
+                rangeRow.style.opacity = modelState.randGeometry ? '1' : '0.5';
+                rangeRow.style.pointerEvents = modelState.randGeometry ? 'auto' : 'none';
+            }
+
+            const hint = getEl('rand-hint');
+            if (!hint) return;
+            if (!modelState.randGeometry) {
+                hint.textContent = '未开启 · 保持当前 θx / θy 固定';
+            } else {
+                hint.textContent = `每次命中后随机大小与距离 · θy 上限 ${modelState.randomRange}° · ID 恒定`;
+            }
+        }
+
+        function setRandomRange(v) {
+            modelState.randomRange = clamp(numOr(v, 90), 1, 90);
+            refreshRandomUI();
+            persist();
+        }
+
+        function setRandMode(isRandom) {
+            modelState.randGeometry = isRandom;
+            if (isRandom) randomizeGeometry();
+            refreshModelUI();
+            persist();
         }
 
         function setFormulaModel(modelType) {
@@ -1307,6 +1508,7 @@
             else if (id === 'inp-height') setViewHeight(cur + delta);
             else if (id === 'inp-sens-x') setSensX(cur + delta);
             else if (id === 'inp-sens-y') setSensY(cur + delta);
+            else if (id === 'inp-rand-range') setRandomRange(cur + delta);
             else if (id.startsWith('inp-cross-')) syncCrossProp(id.replace('inp-cross-', ''), cur + delta);
         }
 
@@ -1691,19 +1893,25 @@
             return new THREE.Vector3(sinT * Math.cos(phi), sinT * Math.sin(phi), -cosT);
         }
 
+        // 重构：随机几何 + 随机方向统一入口
         function rerollTargetDirection() {
+            let changed = randomizeGeometry();
+
             if (modelState.directionMode === 'random') {
                 modelState.randomPhi = Math.random() * Math.PI * 2;
-                sync3DTarget();
+                changed = true;
             } else if (modelState.directionMode === 'lr-random') {
                 modelState.randomSide = Math.random() < 0.5 ? 'left' : 'right';
-                sync3DTarget();
+                changed = true;
                 refreshDirectionUI();
             } else if (modelState.directionMode === 'ud-random') {
                 modelState.randomSide = Math.random() < 0.5 ? 'up' : 'down';
-                sync3DTarget();
+                changed = true;
                 refreshDirectionUI();
             }
+
+            if (changed) refreshModelUI();
+            else sync3DTarget();
         }
 
         function sync3DTarget() {
@@ -1828,7 +2036,19 @@
             setNum('inp-y', modelState.thetaY, 2);
             const yR = getEl('inp-y-r'); if (yR) yR.value = modelState.thetaY;
 
+            const randIdLabel = getEl('rand-id-lock-label');
+            if (randIdLabel) {
+                if (modelState.randGeometry) {
+                    randIdLabel.innerText = `ID 锁死不变于 ${idStr} bits`;
+                    randIdLabel.style.color = '#38bdf8';
+                } else {
+                    randIdLabel.innerText = `当前固定 ID: ${idStr} bits`;
+                    randIdLabel.style.color = '#94a3b8';
+                }
+            }
+
             refreshDirectionUI();
+            refreshRandomUI();
 
             const isPowOne = Math.abs(currentPower - 1.0) < 0.001;
             const powSup = isPowOne ? '' : `<sup>${currentPower.toFixed(2)}</sup>`;
@@ -2190,9 +2410,29 @@
             }
             updateCrosshairStyle(false);
         }
-
+        
         function triggerAimTestStart() {
             if (testState.active) return;
+
+            // 测试开始时限制小球角直径 θx 不低于 0.25（可等于 0.25），并保持难度 ID 不变
+            if (modelState.thetaX < 0.25) {
+                const id = calculateOutput(modelState.thetaX, modelState.thetaY, getCurrentPower(), modelState.formulaModel);
+                modelState.thetaX = 0.25;
+                if (Number.isFinite(id) && id > 0) {
+                    const p = getCurrentPower() || 1;
+                    const isFitts = (modelState.formulaModel === 'fitts');
+                    const newThetaY = isFitts
+                        ? Math.pow(0.25, p) * Math.pow(2, id) / 2
+                        : Math.pow(0.25, p) * (Math.pow(2, id) - 1);
+                    if (Number.isFinite(newThetaY)) {
+                        modelState.thetaY = clamp(newThetaY, TY_MIN, TY_MAX);
+                    }
+                }
+                modelState.visualCenter = (modelState.thetaY === 0);
+                refreshModelUI();
+                persist();
+            }
+
             testState.active = true;
             updateCrosshairStyle(false);
             btnStartAimTest.classList.add('testing');
@@ -2616,6 +2856,7 @@
             'inp-height': v => setViewHeight(v),
             'inp-sens-x': v => setSensX(v),
             'inp-sens-y': v => setSensY(v),
+            'inp-rand-range': v => setRandomRange(v),
             'inp-cross-size': v => syncCrossProp('size', v),
             'inp-cross-thick': v => syncCrossProp('thick', v),
             'inp-cross-gap': v => syncCrossProp('gap', v)
@@ -2688,6 +2929,9 @@
             if (modelState.directionMode === 'ud-random' && !['up','down'].includes(modelState.randomSide)) {
                 modelState.randomSide = Math.random() < 0.5 ? 'up' : 'down';
             }
+
+            // 随机几何 UI 同步
+            setRandomRange(modelState.randomRange);
 
             modelState.visualCenter = (modelState.thetaY === 0);
             refreshDirectionUI();
