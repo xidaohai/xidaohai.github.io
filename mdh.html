@@ -8,18 +8,14 @@
         :root {
             --bg-color: #121212;
             --surface-color: #1e1e1e;
-            --input-bg: #252525;
             --text-main: #e0e0e0;
             --text-sub: #a0a0a0;
-            
-            /* 核心色调 */
-            --primary: #00bcd4;   /* 标准/科技青 */
-            --accent: #bb86fc;    /* 理论/逻辑紫 */
-            --gold: #ffd700;      /* 经验/实战金 */
-            --warm: #ff7043;      /* 坐远/变小 */
-            --cool: #4caf50;      /* 坐近/变大 */
-            --error: #cf6679;     /* 错误/极端 */
-            
+            --primary: #00bcd4;
+            --accent: #bb86fc;
+            --gold: #ffd700;
+            --warm: #ff7043;
+            --cool: #4caf50;
+            --error: #cf6679;
             --radius: 12px;
             --shadow: 0 10px 40px rgba(0,0,0,0.4);
         }
@@ -46,18 +42,15 @@
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             position: relative;
-            /* 确保内容在移动端能排在悬浮窗的后面 */
             z-index: 10;
         }
 
-        /* 标题与排版 */
         h1 { margin-top: 0; color: var(--primary); text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; letter-spacing: 1px; }
         h2 { border-left: 4px solid var(--primary); padding-left: 15px; margin-top: 50px; color: #fff; font-size: 1.5em; }
         h3 { color: var(--text-main); margin-bottom: 15px; font-weight: 600; }
         p { color: var(--text-sub); margin-bottom: 15px; }
         strong { color: var(--text-main); }
 
-        /* 核心理论框 */
         .logic-box {
             background: rgba(187, 134, 252, 0.08);
             border: 1px solid rgba(187, 134, 252, 0.2);
@@ -69,9 +62,8 @@
         .logic-list li { margin-bottom: 10px; padding-left: 20px; position: relative; }
         .logic-list li::before { content: "•"; color: var(--accent); font-weight: bold; position: absolute; left: 0; }
 
-        /* 新增：经验公式框 (金色风格) */
         .tip-box {
-            background: rgba(255, 215, 0, 0.05); /* 金色背景淡化 */
+            background: rgba(255, 215, 0, 0.05);
             border: 1px solid rgba(255, 215, 0, 0.3);
             padding: 25px;
             border-radius: var(--radius);
@@ -89,31 +81,7 @@
             border-radius: 8px;
             margin-top: 15px;
         }
-        
-        /* 公式渲染优化，避免使用 LaTeX */
-        .formula-display {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--gold);
-            margin: 10px 0;
-            font-family: 'Times New Roman', serif; /* 更适合数学符号的字体 */
-        }
-        .fraction {
-            display: inline-block;
-            vertical-align: middle;
-            text-align: center;
-        }
-        .numerator {
-            display: block;
-            border-bottom: 1px solid currentColor;
-            padding-bottom: 1px;
-        }
-        .denominator {
-            display: block;
-            padding-top: 1px;
-        }
 
-        /* SVG 图示通用样式 */
         .diagram-container {
             width: 100%;
             background: #181818;
@@ -127,7 +95,6 @@
         svg { max-width: 100%; height: auto; }
         text { font-family: sans-serif; }
 
-        /* 场景对比卡片 */
         .scenario-section {
             display: flex;
             flex-wrap: wrap;
@@ -144,12 +111,7 @@
             border: 1px solid #333;
             text-align: center;
         }
-        @media (max-width: 768px) {
-            .scenario-section { flex-direction: column; }
-            .scenario-card { min-width: 100%; }
-        }
 
-        /* 计算器区域 */
         .calculator-section {
             background: #2a2a2a;
             padding: 30px;
@@ -161,6 +123,8 @@
         }
         @media (max-width: 768px) { 
             .calculator-section { grid-template-columns: 1fr; gap: 20px; } 
+            .scenario-section { flex-direction: column; }
+            .scenario-card { min-width: 100%; }
         }
 
         .input-group { margin-bottom: 20px; }
@@ -192,7 +156,6 @@
         .result-value { font-size: 3em; font-weight: bold; color: var(--primary); margin: 10px 0; }
         .result-desc { font-size: 0.9em; line-height: 1.5; }
 
-        /* 步骤列表 */
         .step-list { counter-reset: step; list-style: none; padding: 0; }
         .step-list li { position: relative; padding-left: 60px; margin-bottom: 25px; }
         .step-list li::before {
@@ -212,13 +175,11 @@
             border: 1px solid rgba(0, 188, 212, 0.3);
         }
 
-        /* 辅助类 */
         .highlight { color: var(--primary); font-weight: bold; }
         .text-warm { color: var(--warm); }
         .text-cool { color: var(--cool); }
         .text-error { color: var(--error); }
 
-        /* 作者信息 */
         .authors {
             position: fixed;
             bottom: 20px;
@@ -233,14 +194,7 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
         
-        .authors a {
-            color: var(--primary);
-            text-decoration: none;
-            margin: 0 8px;
-            transition: color 0.3s;
-            font-weight: 500;
-        }
-        
+        .authors a { color: var(--primary); text-decoration: none; margin: 0 8px; transition: color 0.3s; font-weight: 500; }
         .authors a:hover { color: var(--accent); text-decoration: underline; }
         .authors span { color: var(--text-sub); margin-right: 5px; }
         
@@ -249,50 +203,39 @@
             body { padding-bottom: 20px; }
         }
 
-        /* 左侧悬浮窗样式 */
         .floating-tip {
             position: fixed;
-            top: 100px;
+            top: 80px;
             left: 20px;
-            background: rgba(0, 188, 212, 0.15); /* 使用 primary 色调的半透明背景 */
+            background: rgba(0, 188, 212, 0.15);
             border: 1px solid var(--primary);
-            padding: 15px;
+            padding: 20px;
             border-radius: var(--radius);
             max-width: 280px;
             box-shadow: var(--shadow);
             z-index: 101;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
         }
-        .floating-tip h3 {
-            color: var(--primary); 
-            margin-top: 0; 
-            border-bottom: 1px solid rgba(0, 188, 212, 0.3); 
-            padding-bottom: 8px;
-        }
-        .floating-tip p, .floating-tip li {
-            color: var(--text-main); 
-            font-size: 0.9em;
-        }
-        .floating-tip ol {
-            padding-left: 20px;
-            margin-top: 10px;
-        }
-        .floating-tip strong {
-            color: var(--gold);
-        }
+        .floating-tip h3 { color: var(--primary); margin-top: 0; border-bottom: 1px solid rgba(0, 188, 212, 0.3); padding-bottom: 8px; }
+        .floating-tip p, .floating-tip li { color: var(--text-main); font-size: 0.9em; }
+        .floating-tip ol { padding-left: 20px; margin-top: 10px; }
+        .floating-tip strong { color: var(--gold); }
 
-        /* 新增：右侧计算器模块 (金色系) */
         .floating-calculator-right {
             position: fixed;
-            top: 100px;
+            top: 80px;
             right: 20px;
-            background: rgba(255, 215, 0, 0.05); /* 金色背景淡化 */
+            background: rgba(255, 215, 0, 0.05);
             border: 1px solid var(--gold);
-            padding: 15px;
+            padding: 20px;
             border-radius: var(--radius);
-            max-width: 260px;
+            width: 320px;
             box-shadow: var(--shadow);
             z-index: 101;
             font-size: 0.9em;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
         }
         .floating-calculator-right h3 {
             color: var(--gold);
@@ -301,15 +244,8 @@
             padding-bottom: 8px;
             font-size: 1.1em;
         }
-        .floating-calculator-right .input-group-small {
-            margin-bottom: 15px;
-        }
-        .floating-calculator-right label {
-            display: block;
-            color: var(--text-sub);
-            margin-bottom: 5px;
-            font-size: 0.85em;
-        }
+        .floating-calculator-right .input-group-small { margin-bottom: 15px; }
+        .floating-calculator-right label { display: block; color: var(--text-sub); margin-bottom: 5px; font-size: 0.85em; }
         .floating-calculator-right input {
             width: 100%;
             padding: 8px;
@@ -320,35 +256,34 @@
             border-radius: 6px;
             box-sizing: border-box;
         }
-        .floating-calculator-right input:focus {
-            border-color: var(--gold);
-        }
+        .floating-calculator-right input:focus { border-color: var(--gold); outline: none; }
         .calc-result-box {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 6px;
+            background: rgba(0,0,0,0.4);
+            padding: 15px;
+            border-radius: 8px;
             border: 1px dashed var(--gold);
         }
         .process-text {
             color: var(--text-sub);
             font-size: 0.8em;
-            margin-top: 8px;
+            margin-top: 12px;
             font-family: monospace;
-            line-height: 1.4;
+            line-height: 1.5;
+            border-top: 1px dashed #444;
+            padding-top: 10px;
         }
         
-        /* 移动端适配：悬浮窗变成普通块 */
-        @media (max-width: 1300px) {
+        @media (max-width: 1350px) {
+            body { flex-direction: column; align-items: center; }
             .floating-tip, .floating-calculator-right {
                 position: static; 
                 margin: 20px auto; 
-                max-width: 90%; 
                 width: 100%;
+                max-width: 900px;
+                max-height: none;
                 box-sizing: border-box;
             }
-            .container {
-                order: 0; /* 保持内容在上 */
-            }
+            .container { margin-top: 20px; }
         }
     </style>
 </head>
@@ -368,31 +303,34 @@
 
 <div class="floating-calculator-right">
     <h3>🔭 西岛海【极限、快适应值】算法</h3>
-    <p style="font-size: 0.9em; color: var(--gold); margin-top:-5px; text-align: center;">
-        <strong>公式：倍率 R(X) = 111 / (X + 111)</strong>
-    </p>
     
-    <div class="input-group-small">
-        <label>FOV 变化值 (X，填入减少的 FOV，如 -20)</label>
-        <input type="number" id="fovDiff" value="-60" placeholder="-20">
+    <!-- 正逆向公式展示 -->
+    <div style="font-size: 0.85em; color: var(--gold); margin-top:-5px; text-align: center; line-height: 1.5; background: rgba(255,215,0,0.1); padding: 8px; border-radius: 6px; margin-bottom: 15px;">
+        <strong>正向(收视野)：R = 111 / (111 + X)</strong><br>
+        <strong>逆向(放视野)：R' = (111 - X') / 111</strong><br>
+        <span style="font-size: 0.85em; color:#bbb;">（X为负，X'为正。正逆向完美闭环）</span>
     </div>
     
     <div class="input-group-small">
-        <label>腰射 CM/360° (基础灵敏度)</label>
+        <label>FOV 变化值 (X，收小填-98，还原填+98)</label>
+        <input type="number" id="fovDiff" value="-60" placeholder="如 -20">
+    </div>
+    
+    <div class="input-group-small">
+        <label>基础/当前 CM/360° (灵敏度)</label>
         <input type="number" id="cm360" value="60" placeholder="30">
     </div>
 
     <div class="calc-result-box">
-        <div style="margin-bottom: 5px;">换算后的 CM/360°:</div>
-        <div style="font-size: 1.5em; font-weight: bold; color: var(--gold);">
-            <span id="finalResult">105.00</span> <span style="font-size:0.5em;">cm</span>
+        <div style="margin-bottom: 5px; color: #ccc;" id="resultLabel">换算后的开镜 CM/360°:</div>
+        <div style="font-size: 1.6em; font-weight: bold; color: var(--gold);">
+            <span id="finalResult">130.59</span> <span style="font-size:0.5em;">cm</span>
         </div>
-<div class="process-text" id="calcProcess">
-    ① FOV 变化值 X = -60<br>
-    ② 倍率 R(X) = 111 / (-60 + 111)<br>
-    &nbsp;&nbsp;= 111 / 51 = <strong>2.1765</strong><br>
-    ③ 换算后的 CM/360° = 60 × 2.1765 = <strong>130.59 cm</strong>
-</div>
+        
+        <!-- 动态过程展示区 -->
+        <div class="process-text" id="calcProcess">
+            <!-- JS 动态生成 -->
+        </div>
     </div>
 </div>
 
@@ -500,38 +438,21 @@
             return;
         }
 
-        // 计算 MDH
         const mdh = (target / screenW) * 100;
         resDisplay.innerText = mdh.toFixed(2) + "%";
 
-        // 逻辑判断与反馈
         if (screenW < target) {
-            resDisplay.style.color = "#cf6679"; // Error Red
-            statusDisplay.innerHTML = `
-                <span class="text-error">⚠️ 极端视距警告</span><br>
-                屏幕在视野中太小了！你的标准甩枪会直接甩出屏幕外。<br>
-                (MDH > 100%)
-            `;
+            resDisplay.style.color = "#cf6679"; 
+            statusDisplay.innerHTML = `<span class="text-error">⚠️ 极端视距警告</span><br>屏幕在视野中太小了！你的标准甩枪会直接甩出屏幕外。<br>(MDH > 100%)`;
         } else if (mdh > 75) {
-            resDisplay.style.color = "#ff7043"; // Warm Orange
-            statusDisplay.innerHTML = `
-                <span class="text-warm">状态：坐得远 或 屏幕小</span><br>
-                你的甩枪动作占了屏幕很大比例。<br>
-                MDH 变大 (灵敏度系数变高) 以补偿视觉慢速。
-            `;
+            resDisplay.style.color = "#ff7043"; 
+            statusDisplay.innerHTML = `<span class="text-warm">状态：坐得远 或 屏幕小</span><br>你的甩枪动作占了屏幕很大比例。<br>MDH 变大 (灵敏度系数变高) 以补偿视觉慢速。`;
         } else if (mdh < 45) {
-            resDisplay.style.color = "#4caf50"; // Cool Green
-            statusDisplay.innerHTML = `
-                <span class="text-cool">状态：坐得近 或 屏幕大</span><br>
-                你的甩枪动作只占屏幕一小部分。<br>
-                MDH 变小 (灵敏度系数变低) 以防止视觉眩晕。
-            `;
+            resDisplay.style.color = "#4caf50"; 
+            statusDisplay.innerHTML = `<span class="text-cool">状态：坐得近 或 屏幕大</span><br>你的甩枪动作只占屏幕一小部分。<br>MDH 变小 (灵敏度系数变低) 以防止视觉眩晕。`;
         } else {
-            resDisplay.style.color = "#00bcd4"; // Primary Cyan
-            statusDisplay.innerHTML = `
-                <span style="color:#00bcd4;">状态：标准视距</span><br>
-                屏幕处于常规视觉范围内，手感最自然。
-            `;
+            resDisplay.style.color = "#00bcd4"; 
+            statusDisplay.innerHTML = `<span style="color:#00bcd4;">状态：标准视距</span><br>屏幕处于常规视觉范围内，手感最自然。`;
         }
     }
 
@@ -539,16 +460,15 @@
     screenInput.addEventListener('input', calculateMDH);
 
     // ==========================================
-    // FOV 倍率计算逻辑 (右侧悬浮窗)
-    // 公式：倍率 = 111 / (X + 111)，X 为 FOV 变化值
+    // FOV 倍率计算逻辑 (自动识别正向与逆向)
     // ==========================================
     const fovDiffInput = document.getElementById('fovDiff');
     const cm360Input = document.getElementById('cm360');
     const finalResultDisplay = document.getElementById('finalResult');
     const calcProcessDisplay = document.getElementById('calcProcess');
+    const resultLabel = document.getElementById('resultLabel');
 
     function calcFovRate() {
-        // 直接使用用户输入的 FOV 变化值 X
         const X = parseFloat(fovDiffInput.value); 
         const cm = parseFloat(cm360Input.value);
 
@@ -558,29 +478,46 @@
             return;
         }
 
-        // 验证分母
-        const rateDenominator = X + 111;
+        // 分母验证 (正向公式分母为 111 + X)
+        const rateDenominator = 111 + X;
         if (rateDenominator <= 0) {
              finalResultDisplay.innerText = "错误";
-             calcProcessDisplay.innerHTML = `分母小于或等于零 (FOV 变化值 X 必须大于 -140)`;
+             calcProcessDisplay.innerHTML = `分母小于或等于零<br>(FOV 变化值 X 必须大于 -111)`;
              return;
         }
 
-        // 公式：倍率 = 111 / (X + 111)
-        const rate = 111 / rateDenominator;
-        
-        // 结果 = 腰射 CM/360° * 倍率
-        const result = cm * rate;
+        if (X <= 0) {
+            // 【情况1：视野收小，正向计算】
+            const rate = 111 / rateDenominator; 
+            const result = cm * rate;           
 
-        finalResultDisplay.innerText = result.toFixed(2);
-        
-        // 显示计算过程
-        calcProcessDisplay.innerHTML = `
-            ① FOV 变化值 X = ${X}<br>
-            ② 倍率 R(X) = 111 / (${X} + 111)<br>
-            &nbsp;&nbsp;= 111 / ${rateDenominator.toFixed(0)} = <strong>${rate.toFixed(4)}</strong><br>
-            ③ 换算后的 CM/360° = ${cm} × ${rate.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong>
-        `;
+            resultLabel.innerText = "换算后的开镜 CM/360°:";
+            finalResultDisplay.innerText = result.toFixed(2);
+            
+            calcProcessDisplay.innerHTML = `
+                <div style="color:#00bcd4; font-weight:bold; margin-bottom:6px;">【正向：腰射 → 开镜】</div>
+                ① 输入变化值 X = ${X} (视野收小)<br>
+                ② 正向倍率 = 111 / (${X} + 111) = ${rate.toFixed(4)}<br>
+                ③ 开镜 CM = ${cm} × ${rate.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
+                <div style="color:#888; font-size:0.85em; margin-top:8px;">(若想还原，请填入正数 ${Math.abs(X)} 和当前开镜CM)</div>
+            `;
+        } else {
+            // 【情况2：视野放宽，逆向还原】
+            // 逆向公式强制为：(111 - X) / 111，因为 X 现在是正数
+            const reverseRate = (111 - X) / 111;
+            const result = cm * reverseRate;
+
+            resultLabel.innerText = "还原后的腰射 CM/360°:";
+            finalResultDisplay.innerText = result.toFixed(2);
+
+            calcProcessDisplay.innerHTML = `
+                <div style="color:#bb86fc; font-weight:bold; margin-bottom:6px;">【逆向：开镜 → 还原】</div>
+                ① 输入变化值 X = ${X} (视野放宽)<br>
+                ② 逆向倍率 = (111 - ${X}) / 111 = <strong>${reverseRate.toFixed(4)}</strong><br>
+                ③ 还原 CM = ${cm} × ${reverseRate.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
+                <div style="color:#4caf50; font-size:0.9em; margin-top:5px;">✅ 完美还原到原始灵敏度</div>
+            `;
+        }
     }
 
     fovDiffInput.addEventListener('input', calcFovRate);
