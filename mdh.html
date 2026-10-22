@@ -195,6 +195,20 @@
         .calc-content::-webkit-scrollbar { width: 6px; }
         .calc-content::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.3); border-radius: 3px; }
 
+        /* 公式按钮组 */
+        .rate-btn-group {
+            display: flex; gap: 5px; margin-bottom: 15px;
+        }
+        .rate-btn {
+            flex: 1; padding: 8px 0; font-size: 0.8em; border-radius: 6px;
+            border: 1px solid #444; background: #181818; color: #aaa;
+            cursor: pointer; transition: 0.2s; font-weight: bold;
+        }
+        .rate-btn:hover { background: #2a2a2a; color: #fff; }
+        .rate-btn.active {
+            background: rgba(255, 215, 0, 0.15); border-color: var(--gold); color: var(--gold);
+        }
+
         .input-group-small { margin-bottom: 15px; }
         .calc-content label { display: block; color: var(--text-sub); margin-bottom: 5px; font-size: 0.85em; }
         .calc-content input, .calc-content select {
@@ -284,28 +298,43 @@
         <button class="calc-tab" data-target="tab-fov">FOV 测量</button>
     </div>
     
-    <!-- Tab 1: 极限快适应值 -->
+    <!-- Tab 1: 极限快适应值 (四公式版) -->
     <div id="tab-ads" class="calc-content active">
-        <div style="font-size: 0.85em; color: var(--gold); text-align: center; line-height: 1.5; background: rgba(255,215,0,0.1); padding: 8px; border-radius: 6px; margin-bottom: 15px;">
-            <strong>正向(收视野)：R = 111 / (111 + X)</strong><br>
-            <strong>逆向(放视野)：R' = (111 - X') / 111</strong><br>
-            <span style="font-size: 0.85em; color:#bbb;">（X为负，X'为正。完美闭环）</span>
+        
+        <!-- 算法切换按钮 -->
+        <div class="rate-btn-group">
+            <button class="rate-btn active" data-type="111">老公式</button>
+            <button class="rate-btn" data-type="sqrt">平方根</button>
+            <button class="rate-btn" data-type="mid">0.75居中</button>
+            <button class="rate-btn" data-type="linear">纯比例</button>
+        </div>
+
+        <!-- 动态公式提示 -->
+        <div style="font-size: 0.85em; color: var(--gold); text-align: center; line-height: 1.5; background: rgba(255,215,0,0.1); padding: 8px; border-radius: 6px; margin-bottom: 15px;" id="formulaTipBox">
+            <!-- JS 渲染 -->
         </div>
         
-        <div class="input-group-small">
-            <label>FOV 变化值 (X，收小填-98，还原填+98)</label>
-            <input type="number" id="fovDiff" value="-60" placeholder="如 -20">
+        <!-- 统一输入区 -->
+        <div style="display: flex; gap: 10px;">
+            <div class="input-group-small" style="flex: 1;">
+                <label>腰射 FOV（度）</label>
+                <input type="number" id="fovHipRate" value="103" step="1">
+            </div>
+            <div class="input-group-small" style="flex: 1;">
+                <label>开镜 FOV（度）</label>
+                <input type="number" id="fovAdsRate" value="90" step="1">
+            </div>
         </div>
-        
+
         <div class="input-group-small">
             <label>基础/当前 CM/360° (灵敏度)</label>
-            <input type="number" id="cm360" value="60" placeholder="30">
+            <input type="number" id="cm360" value="50" placeholder="50">
         </div>
 
         <div class="calc-result-box">
             <div style="margin-bottom: 5px; color: #ccc;" id="resultLabel">换算后的开镜 CM/360°:</div>
             <div style="font-size: 1.6em; font-weight: bold; color: var(--gold);">
-                <span id="finalResult">130.59</span> <span style="font-size:0.5em;">cm</span>
+                <span id="finalResult">56.63</span> <span style="font-size:0.5em;">cm</span>
             </div>
             <div class="process-text" id="calcProcess"></div>
         </div>
@@ -406,11 +435,9 @@
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            // 移除所有激活状态
             tabs.forEach(t => t.classList.remove('active'));
             contents.forEach(c => c.classList.remove('active'));
             
-            // 激活当前
             tab.classList.add('active');
             const targetId = tab.getAttribute('data-target');
             document.getElementById(targetId).classList.add('active');
@@ -418,113 +445,121 @@
     });
 
     // ==========================================
-    // 1. 左侧 / 主界面 MDH 逻辑 (保持原样)
+    // 1. 右侧 Tab 1: 极限快适应值 (四算法切换)
     // ==========================================
-    const baseInput = document.getElementById('baseVal');
-    const screenInput = document.getElementById('screenVal');
-    const resDisplay = document.getElementById('mdhResult');
-    const statusDisplay = document.getElementById('statusMessage');
-
-    function calculateMDH() {
-        const target = parseFloat(baseInput.value);
-        const screenW = parseFloat(screenInput.value);
-
-        if (isNaN(target) || isNaN(screenW) || screenW === 0) {
-            resDisplay.innerText = "--%";
-            statusDisplay.innerHTML = "请输入有效数值";
-            resDisplay.style.color = "#777";
-            return;
-        }
-
-        const mdh = (target / screenW) * 100;
-        resDisplay.innerText = mdh.toFixed(2) + "%";
-
-        if (screenW < target) {
-            resDisplay.style.color = "#cf6679"; 
-            statusDisplay.innerHTML = `<span class="text-error">⚠️ 极端视距警告</span><br>屏幕在视野中太小了！你的标准甩枪会直接甩出屏幕外。<br>(MDH > 100%)`;
-        } else if (mdh > 75) {
-            resDisplay.style.color = "#ff7043"; 
-            statusDisplay.innerHTML = `<span class="text-warm">状态：坐得远 或 屏幕小</span><br>你的甩枪动作占了屏幕很大比例。<br>MDH 变大 (灵敏度系数变高) 以补偿视觉慢速。`;
-        } else if (mdh < 45) {
-            resDisplay.style.color = "#4caf50"; 
-            statusDisplay.innerHTML = `<span class="text-cool">状态：坐得近 或 屏幕大</span><br>你的甩枪动作只占屏幕一小部分。<br>MDH 变小 (灵敏度系数变低) 以防止视觉眩晕。`;
-        } else {
-            resDisplay.style.color = "#00bcd4"; 
-            statusDisplay.innerHTML = `<span style="color:#00bcd4;">状态：标准视距</span><br>屏幕处于常规视觉范围内，手感最自然。`;
-        }
-    }
-
-    if(baseInput && screenInput) {
-        baseInput.addEventListener('input', calculateMDH);
-        screenInput.addEventListener('input', calculateMDH);
-        calculateMDH();
-    }
-
-    // ==========================================
-    // 2. 右侧 Tab 1: 极限快适应值 FOV 倍率逻辑
-    // ==========================================
-    const fovDiffInput = document.getElementById('fovDiff');
+    let currentRateType = '111';
+    const fovHipRateInput = document.getElementById('fovHipRate');
+    const fovAdsRateInput = document.getElementById('fovAdsRate');
     const cm360Input = document.getElementById('cm360');
     const finalResultDisplay = document.getElementById('finalResult');
     const calcProcessDisplay = document.getElementById('calcProcess');
     const resultLabel = document.getElementById('resultLabel');
+    const formulaTipBox = document.getElementById('formulaTipBox');
+
+    // 切换按钮点击事件
+    document.querySelectorAll('.rate-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            currentRateType = e.target.getAttribute('data-type');
+            updateFormulaTip();
+            calcFovRate();
+        });
+    });
+
+    function updateFormulaTip() {
+        if (currentRateType === '111') {
+            formulaTipBox.innerHTML = `<strong>老公式：R = 111 / (111 + 变化量)</strong><br><span style="font-size: 0.85em; color:#bbb;">（纯线性压平，内部自动将FOV差转为变化量）</span>`;
+        } else if (currentRateType === 'sqrt') {
+            formulaTipBox.innerHTML = `<strong>近手极限：R = √(腰射FOV / 开镜FOV)</strong><br><span style="font-size: 0.85em; color:#bbb;">（开根号，最激进的压平）</span>`;
+        } else if (currentRateType === 'mid') {
+            formulaTipBox.innerHTML = `<strong>近眼近手：R = (腰射FOV / 开镜FOV)<sup>0.75</sup></strong><br><span style="font-size: 0.85em; color:#bbb;">（居中平衡，兼顾视觉与手腕）</span>`;
+        } else if (currentRateType === 'linear') {
+            formulaTipBox.innerHTML = `<strong>近眼极限：R = 腰射FOV / 开镜FOV</strong><br><span style="font-size: 0.85em; color:#bbb;">（纯比例，最接近几何边界）</span>`;
+        }
+    }
 
     function calcFovRate() {
-        const X = parseFloat(fovDiffInput.value); 
+        const hHip = parseFloat(fovHipRateInput.value);
+        const hAds = parseFloat(fovAdsRateInput.value);
         const cm = parseFloat(cm360Input.value);
 
-        if (isNaN(X) || isNaN(cm)) {
+        if (isNaN(hHip) || isNaN(hAds) || isNaN(cm)) {
             finalResultDisplay.innerText = "--";
             calcProcessDisplay.innerHTML = "请输入有效数字";
             return;
         }
 
-        const rateDenominator = 111 + X;
-        if (rateDenominator <= 0) {
-             finalResultDisplay.innerText = "错误";
-             calcProcessDisplay.innerHTML = `分母小于或等于零<br>(FOV 变化值 X 必须大于 -111)`;
-             return;
+        if (hAds <= 0 || hHip <= 0) {
+            finalResultDisplay.innerText = "错误";
+            calcProcessDisplay.innerHTML = "FOV 不能小于等于 0";
+            return;
         }
 
-        if (X <= 0) {
-            const rate = 111 / rateDenominator; 
-            const result = cm * rate;           
+        // 内部计算出变化量 X
+        const X = hAds - hHip;
+        
+        let rateHipToAds = 0;
+        let formulaStr = "";
 
+        if (currentRateType === '111') {
+            if (111 + X <= 0) {
+                 finalResultDisplay.innerText = "错误";
+                 calcProcessDisplay.innerHTML = "老公式分母(111+变化量)需大于0";
+                 return;
+            }
+            rateHipToAds = 111 / (111 + X);
+            formulaStr = `111 / (111 ${X >= 0 ? '+' : '-'} ${Math.abs(X)})`;
+        } else if (currentRateType === 'sqrt') {
+            rateHipToAds = Math.sqrt(hHip / hAds);
+            formulaStr = `√(${hHip} / ${hAds})`;
+        } else if (currentRateType === 'mid') {
+            rateHipToAds = Math.pow(hHip / hAds, 0.75);
+            formulaStr = `(${hHip} / ${hAds})^0.75`;
+        } else if (currentRateType === 'linear') {
+            rateHipToAds = hHip / hAds;
+            formulaStr = `${hHip} / ${hAds}`;
+        }
+
+        // 自动判断正向（收视野）还是逆向（放视野）
+        if (X <= 0) {
+            // 正向：腰射 -> 开镜
+            const result = cm * rateHipToAds;
             resultLabel.innerText = "换算后的开镜 CM/360°:";
             finalResultDisplay.innerText = result.toFixed(2);
             
             calcProcessDisplay.innerHTML = `
                 <div style="color:#00bcd4; font-weight:bold; margin-bottom:6px;">【正向：腰射 → 开镜】</div>
-                ① 输入变化值 X = ${X} (视野收小)<br>
-                ② 正向倍率 = 111 / (${X} + 111) = ${rate.toFixed(4)}<br>
-                ③ 开镜 CM = ${cm} × ${rate.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
-                <div style="color:#888; font-size:0.85em; margin-top:8px;">(若想还原，请填入正数 ${Math.abs(X)} 和当前开镜CM)</div>
+                ① 腰射 FOV = ${hHip}, 开镜 FOV = ${hAds} (变化量 X = ${X})<br>
+                ② 正向倍率 = ${formulaStr} = ${rateHipToAds.toFixed(4)}<br>
+                ③ 开镜 CM = ${cm} × ${rateHipToAds.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
             `;
         } else {
-            const reverseRate = (111 - X) / 111;
+            // 逆向：开镜 -> 腰射
+            const reverseRate = 1 / rateHipToAds;
             const result = cm * reverseRate;
-
+            
             resultLabel.innerText = "还原后的腰射 CM/360°:";
             finalResultDisplay.innerText = result.toFixed(2);
 
             calcProcessDisplay.innerHTML = `
                 <div style="color:#bb86fc; font-weight:bold; margin-bottom:6px;">【逆向：开镜 → 还原】</div>
-                ① 输入变化值 X = ${X} (视野放宽)<br>
-                ② 逆向倍率 = (111 - ${X}) / 111 = <strong>${reverseRate.toFixed(4)}</strong><br>
+                ① 开镜 FOV = ${hHip}, 还原目标 FOV = ${hAds} (视野放宽)<br>
+                ② 逆向倍率 = 1 / 正向倍率 = <strong>${reverseRate.toFixed(4)}</strong><br>
                 ③ 还原 CM = ${cm} × ${reverseRate.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
                 <div style="color:#4caf50; font-size:0.9em; margin-top:5px;">✅ 完美还原到原始灵敏度</div>
             `;
         }
     }
 
-    if(fovDiffInput && cm360Input) {
-        fovDiffInput.addEventListener('input', calcFovRate);
-        cm360Input.addEventListener('input', calcFovRate);
-        calcFovRate();
-    }
+    [fovHipRateInput, fovAdsRateInput, cm360Input].forEach(el => {
+        if(el) el.addEventListener('input', calcFovRate);
+    });
+    updateFormulaTip();
+    calcFovRate();
 
     // ==========================================
-    // 3. 右侧 Tab 2: 开镜 FOV 测量计算器逻辑
+    // 2. 右侧 Tab 2: 开镜 FOV 测量计算器逻辑
     // ==========================================
     const fovBaseFov = document.getElementById('fovBaseFov');
     const fovMeasureContainer = document.getElementById('fovMeasureContainer');
@@ -553,7 +588,7 @@
         calculateFovMeasure();
     }
 
-    function removeFovRow(id) {
+    window.removeFovRow = function(id) {
         const row = document.getElementById(id);
         if(row) {
             row.remove();
@@ -610,7 +645,6 @@
         `;
     }
 
-    // 初始化 FOV 测量行
     if(fovBaseFov) {
         fovBaseFov.addEventListener('input', calculateFovMeasure);
         document.getElementById('fovAddBtn').addEventListener('click', () => addFovRow());
