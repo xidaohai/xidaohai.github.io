@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>消失点反推 FOV 计算器（含交互图示）</title>
+<style>
+  :root{color-scheme:dark;--bg:#0d1320;--panel:#172235;--line:#30435f;--text:#e8effa;--muted:#9eafc8;--blue:#55b9ff;--green:#67e8b2;--orange:#ffbd70;--red:#ff8989}
+  *{box-sizing:border-box}
+  body{margin:0;padding:22px 22px 70px;background:radial-gradient(900px 420px at 50% -10%,#243653 0%,var(--bg) 75%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;display:flex;justify-content:center;line-height:1.5}
+  .container{width:100%;max-width:980px}
+  header{text-align:center;margin:4px 0 20px}
+  h1{font-size:clamp(23px,3vw,30px);margin:0 0 7px;color:white}
+  header p{margin:0;color:var(--muted);font-size:14px}
+  .panel{background:rgba(23,34,53,.96);border:1px solid var(--line);border-radius:14px;padding:17px;margin-bottom:15px;box-shadow:0 12px 30px #0003}
+  h2{font-size:17px;margin:0 0 13px;color:var(--orange)}
+  .hint{font-size:12px;color:var(--muted);margin:-4px 0 12px;line-height:1.65}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+  .basic{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0}
+  label{font-size:12px;color:#c5d2e5}
+  input{width:100%;min-width:0;padding:9px 10px;border:1px solid #40516b;border-radius:8px;background:#0b1220;color:#fff;font-size:15px}
+  input:focus{outline:2px solid #55b9ff66;border-color:var(--blue)}
+  .point-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .point{padding:11px;background:#0d1728;border:1px solid #273b57;border-radius:10px}
+  .point-title{font-weight:700;font-size:13px;margin-bottom:8px}
+  .point-title span{color:var(--muted);font-weight:400}
+  .xy{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .result{padding:13px;border:1px solid #285f55;background:#0b1d22;border-radius:10px;margin-top:13px}
+  .result .main{font-size:24px;font-weight:750;color:var(--green)}
+  .result .sub{font-size:12px;color:#b8c8da;margin-top:4px;overflow-wrap:anywhere}
+  .result.error{border-color:#7a4148;background:#25151d}
+  .result.error .main{font-size:15px;color:var(--red)}
+  .formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#0c1422;border:1px solid #263b55;padding:12px;border-radius:9px;margin-top:10px;font-size:13px;line-height:1.8}
+  .formula strong{color:white}
+  .bottom{display:grid;grid-template-columns:1.1fr .9fr;gap:15px}
+  .warn{border-color:#6b5636;background:#221e18}
+  .warn h2{color:var(--orange)}
+  .warn p,.notes p{font-size:13px;margin:6px 0;color:#c4d1e1}
+  .status{font-size:12px;color:var(--muted);margin-top:8px}
+
+  /* ===== 交互图示 ===== */
+  .canvas-box{background:#0d1728;border:1px solid #273b57;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:2/1;margin-bottom:12px}
+  .canvas-box svg{display:block;width:100%;height:100%}
+  .svg-label{font-size:12px;fill:#c5d2e5}
+  .svg-label-light{font-size:12px;fill:#7f92ad}
+  .svg-label-blue{font-size:13px;font-weight:600;fill:var(--blue)}
+  .svg-label-red{font-size:13px;font-weight:600;fill:var(--red)}
+
+  .legend{display:flex;gap:18px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-bottom:10px;padding-left:4px}
+  .legend-item{display:flex;align-items:center;gap:8px}
+  .line-dash{width:16px;height:2px;border-radius:2px}
+  .line-dash.blue{background:var(--blue)}
+  .line-dash.red{background:var(--red)}
+  .line-dash.white{background:#e8effa}
+
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0 16px}
+  .metric{background:#0d1728;border:1px solid #273b57;border-radius:10px;padding:12px 14px}
+  .metric-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .metric-value{font-size:26px;font-weight:750;color:var(--green);line-height:1.15;font-variant-numeric:tabular-nums}
+  .metric-value.blue{color:var(--blue)}
+  .metric-value small{font-size:14px;font-weight:400;color:var(--muted);margin-left:2px}
+
+  .btn-group{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .btn{
+    width:auto;padding:8px 16px;font-size:13px;font-weight:600;
+    background:#132036;border:1px solid #30435f;border-radius:8px;color:#c5d2e5;
+    cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .15s;
+  }
+  .btn:hover{background:#1b2b45;border-color:var(--blue);color:#fff;transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+
+  .controls{background:#0d1728;border:1px solid #273b57;border-radius:10px;padding:16px}
+  .slider-group{margin-bottom:16px}
+  .slider-group:last-child{margin-bottom:0}
+  .slider-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;color:#c5d2e5}
+  .slider-val{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:15px;font-weight:700;color:#fff}
+  .slider-val.a{color:var(--blue)}
+  .slider-val.b{color:var(--red)}
+
+  input[type=range]{
+    width:100%;padding:0;border:0;border-radius:0;background:transparent;
+    -webkit-appearance:none;appearance:none;cursor:pointer;
+  }
+  input[type=range]:focus{outline:none}
+  input[type=range]::-webkit-slider-runnable-track{width:100%;height:6px;background:#24344d;border-radius:3px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:18px;width:18px;border-radius:50%;background:#0d1320;border:2px solid var(--blue);margin-top:-6px;box-shadow:0 1px 4px #0009}
+  input[type=range]::-moz-range-track{width:100%;height:6px;background:#24344d;border-radius:3px}
+  input[type=range]::-moz-range-thumb{height:14px;width:14px;border:2px solid var(--blue);border-radius:50%;background:#0d1320}
+  #sliderB::-webkit-slider-thumb{border-color:var(--red)}
+  #sliderB::-moz-range-thumb{border-color:var(--red)}
+
+  /* ===== 右下角作者署名 ===== */
+  .author{
+    position:fixed;right:16px;bottom:14px;z-index:99;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 15px;border-radius:999px;
+    font-size:13px;font-weight:600;letter-spacing:.02em;
+    color:#b9cbe2;text-decoration:none;
+    background:rgba(13,19,32,.82);
+    border:1px solid var(--line);
+    box-shadow:0 8px 22px #0007;
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    transition:color .18s,border-color .18s,background .18s,transform .18s,box-shadow .18s;
+  }
+  .author .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px var(--blue)}
+  .author:hover{
+    color:#fff;border-color:var(--blue);
+    background:rgba(36,155,231,.22);
+    transform:translateY(-2px);
+    box-shadow:0 12px 26px #0009,0 0 0 3px #55b9ff22;
+  }
+  .author:active{transform:translateY(0)}
+  .author:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+  @media(max-width:700px){
+    body{padding:12px 12px 66px}
+    .grid,.bottom{grid-template-columns:1fr}
+    .panel{padding:13px}
+    .point-grid{gap:8px}
+    .point{padding:9px}
+    .basic{grid-template-columns:1fr 1fr}
+    .legend{gap:12px}
+  }
+  @media(max-width:390px){
+    .point-grid{grid-template-columns:1fr}
+    .main{font-size:22px}
+    .author{right:10px;bottom:10px;padding:7px 12px;font-size:12px}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>消失点反推 FOV 计算器</h1>
+    <p>修正焦距公式；输入两个互相垂直方向的消失点完整像素坐标</p>
+  </header>
+
+  <section class="panel">
+    <h2>1. 截图尺寸</h2>
+    <div class="basic">
+      <div class="field"><label for="imgWidth">截图宽度 W（像素）</label><input id="imgWidth" type="number" min="1" step="1" value="1920"></div>
+      <div class="field"><label for="imgHeight">截图高度 H（像素）</label><input id="imgHeight" type="number" min="1" step="1" value="1080"></div>
+    </div>
+    <p class="hint" style="margin-top:10px;margin-bottom:0">坐标原点取截图左上角；主点暂按截图中心 C=(W/2,H/2) 估计。消失点可以在截图之外，X 或 Y 坐标允许小于 0 或大于截图尺寸。</p>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>2. 腰射截图</h2>
+      <p class="hint">分别找到两组在三维场景中互相垂直的平行线，并延长得到各自的消失点。</p>
+      <div class="point-grid">
+        <div class="point">
+          <div class="point-title">消失点 V₁</div>
+          <div class="xy">
+            <div class="field"><label for="hipX1">X₁（像素）</label><input id="hipX1" type="number" step="any" value="300"></div>
+            <div class="field"><label for="hipY1">Y₁（像素）</label><input id="hipY1" type="number" step="any" value="180"></div>
+          </div>
+        </div>
+        <div class="point">
+          <div class="point-title">消失点 V₂</div>
+          <div class="xy">
+            <div class="field"><label for="hipX2">X₂（像素）</label><input id="hipX2" type="number" step="any" value="1600"></div>
+            <div class="field"><label for="hipY2">Y₂（像素）</label><input id="hipY2" type="number" step="any" value="180"></div>
+          </div>
+        </div>
+      </div>
+      <div class="result" id="hipResult"><div class="main" id="hipFovResult">腰射 FOV：--</div><div class="sub" id="hipDetails">焦距：-- 像素</div></div>
+    </section>
+
+    <section class="panel">
+      <h2>3. 开镜截图（开镜不建议用此方法，建议用尺寸法）</h2>
+      <p class="hint">请从开镜截图单独测量两个消失点；不能直接沿用腰射截图中的坐标。</p>
+      <div class="point-grid">
+        <div class="point">
+          <div class="point-title">消失点 V₁</div>
+          <div class="xy">
+            <div class="field"><label for="adsX1">X₁（像素）</label><input id="adsX1" type="number" step="any" value="200"></div>
+            <div class="field"><label for="adsY1">Y₁（像素）</label><input id="adsY1" type="number" step="any" value="220"></div>
+          </div>
+        </div>
+        <div class="point">
+          <div class="point-title">消失点 V₂</div>
+          <div class="xy">
+            <div class="field"><label for="adsX2">X₂（像素）</label><input id="adsX2" type="number" step="any" value="1720"></div>
+            <div class="field"><label for="adsY2">Y₂（像素）</label><input id="adsY2" type="number" step="any" value="220"></div>
+          </div>
+        </div>
+      </div>
+      <div class="result" id="adsResult"><div class="main" id="adsFovResult">开镜 FOV：--</div><div class="sub" id="adsDetails">焦距：-- 像素</div></div>
+    </section>
+  </div>
+
+  <div class="bottom">
+    <section class="panel">
+      <h2>焦距与 FOV 公式</h2>
+      <div class="formula">
+        C = (W/2, H/2)<br>
+        f² = −[(X₁−Cₓ)(X₂−Cₓ) + (Y₁−Cᵧ)(Y₂−Cᵧ)]<br>
+        f = √(f²)<br>
+        <strong>水平 FOV = 2 × atan(W / 2f)</strong>
+      </div>
+      <p class="status">这里的 f 是以像素为单位的焦距。旧版只用 X 坐标且采用错误的焦距公式，已改为完整二维坐标关系。</p>
+    </section>
+    <section class="panel warn">
+      <h2>使用前注意</h2>
+      <p>1. 只建议测腰射FOV，开镜的灭点很容易跑出图外。</p>
+      <p>2. 开镜建议用尺寸法，尺寸法即：</p>
+      <p>知道腰射FOV后，对比腰射和开镜的两个物体长度（准星不动），用画图工具看有多长像素点。</p>
+      <p>然后通过计算器算出结果。</p>
+    </section>
+  </div>
+  <section class="panel notes">
+    <h2>坐标怎么量</h2>
+    <p>截图左上角是 (0,0)，向右 X 增大，向下 Y 增大。用图片编辑器延长两组平行线，读出各自交点的 X、Y 坐标。交点可以在画面外，因此坐标超出宽高范围是允许的。</p>
+    <p><strong>注意：</strong>初始坐标仅用于试运行，不代表任何具体游戏的真实 FOV。请用你自己的截图重新测量。</p>
+  </section>
+
+  <!-- ===================== 交互图示 ===================== -->
+  <section class="panel">
+    <h2>4. 交互图示：消失点距离 → 焦距 → FOV</h2>
+    <p class="hint" style="margin-bottom:14px">
+      下面两幅图演示上面那条公式的几何含义：两组互相垂直的平行线在画面中各汇聚成一个消失点，两个消失点到主点的距离 <b style="color:var(--blue)">a</b>、<b style="color:var(--red)">b</b> 共同决定焦距 <b>f = √(a·b)</b>，再由 f 换算出水平 / 垂直 FOV。拖动滑块即可看到透视结构实时变化。滑块范围对应示例画布上的水平 FOV 约从 <b>110°</b>（a、b 取最小值）到 <b>60°</b>（取最大值）。
+    </p>
+
+    <!-- 图 1：俯视图 -->
+    <div class="canvas-box">
+      <svg id="svg-top" viewBox="0 0 560 280" preserveAspectRatio="xMidYMid meet">
+
+        <!-- 地平线 -->
+        <line x1="30" y1="140" x2="530" y2="140" stroke="#30435f" stroke-dasharray="6,4" stroke-width="1.5" />
+        <text x="495" y="132" class="svg-label-light" text-anchor="end" font-size="11">地平线（灭点应落在其上）</text>
+
+        <!-- 射线网格 -->
+        <g id="top-rays-blue" stroke="#55b9ff" stroke-width="1.2" opacity="0.35"></g>
+        <g id="top-rays-red" stroke="#ff8989" stroke-width="1.2" opacity="0.35"></g>
+
+        <!-- 距离标注 -->
+        <line id="top-dist-a" x1="280" y1="110" x2="500" y2="110" stroke="#7f92ad" stroke-width="1" />
+        <line id="top-dist-a-left" x1="280" y1="107" x2="280" y2="113" stroke="#7f92ad" stroke-width="1.2" />
+        <line id="top-dist-a-right" x1="500" y1="107" x2="500" y2="113" stroke="#7f92ad" stroke-width="1.2" />
+        <text id="top-text-a" x="390" y="103" class="svg-label" text-anchor="middle">a=220</text>
+
+        <line id="top-dist-b" x1="60" y1="110" x2="280" y2="110" stroke="#7f92ad" stroke-width="1" />
+        <line id="top-dist-b-left" x1="60" y1="107" x2="60" y2="113" stroke="#7f92ad" stroke-width="1.2" />
+        <text id="top-text-b" x="170" y="103" class="svg-label" text-anchor="middle">b=220</text>
+
+        <!-- 灭点与主点 -->
+        <circle id="top-vp1" cx="500" cy="140" r="5" fill="#55b9ff" />
+        <text id="top-text-vp1" x="500" y="160" class="svg-label-blue" text-anchor="middle">V₁</text>
+
+        <circle id="top-vp2" cx="60" cy="140" r="5" fill="#ff8989" />
+        <text id="top-text-vp2" x="60" y="160" class="svg-label-red" text-anchor="middle">V₂</text>
+
+        <path d="M 275 140 h 10 M 280 135 v 10" stroke="#c5d2e5" stroke-width="1.5" />
+        <text x="280" y="178" class="svg-label-light" text-anchor="middle">主点 c</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="line-dash blue"></div>网格线家族 A，延长交于 V₁</div>
+      <div class="legend-item"><div class="line-dash red"></div>网格线家族 B，延长交于 V₂</div>
+    </div>
+
+    <!-- 图 2：透视图 -->
+    <div class="canvas-box" style="margin-top:18px">
+      <svg id="svg-persp" viewBox="0 0 560 280" preserveAspectRatio="xMidYMid meet">
+        <line x1="30" y1="140" x2="530" y2="140" stroke="#30435f" stroke-dasharray="6,4" stroke-width="1.5" />
+
+        <line id="persp-dist-a" x1="280" y1="110" x2="500" y2="110" stroke="#7f92ad" stroke-width="1" />
+        <line id="persp-dist-a-left" x1="280" y1="107" x2="280" y2="113" stroke="#7f92ad" stroke-width="1.2" />
+        <line id="persp-dist-a-right" x1="500" y1="107" x2="500" y2="113" stroke="#7f92ad" stroke-width="1.2" />
+        <text id="persp-text-a" x="390" y="103" class="svg-label" text-anchor="middle">a=220</text>
+
+        <line id="persp-dist-b" x1="60" y1="110" x2="280" y2="110" stroke="#7f92ad" stroke-width="1" />
+        <line id="persp-dist-b-left" x1="60" y1="107" x2="60" y2="113" stroke="#7f92ad" stroke-width="1.2" />
+        <text id="persp-text-b" x="170" y="103" class="svg-label" text-anchor="middle">b=220</text>
+
+        <!-- 3D 结构 -->
+        <g id="persp-cube"></g>
+
+        <circle id="persp-vp1" cx="500" cy="140" r="5" fill="#55b9ff" />
+        <text id="persp-text-vp1" x="500" y="160" class="svg-label-blue" text-anchor="middle">V₁</text>
+
+        <circle id="persp-vp2" cx="60" cy="140" r="5" fill="#ff8989" />
+        <text id="persp-text-vp2" x="60" y="160" class="svg-label-red" text-anchor="middle">V₂</text>
+
+        <path d="M 275 140 h 10 M 280 135 v 10" stroke="#c5d2e5" stroke-width="1.5" />
+        <text x="295" y="144" class="svg-label-light">主点 c</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="line-dash blue"></div>棱族 A（纵深）：延长交于 V₁</div>
+      <div class="legend-item"><div class="line-dash red"></div>棱族 B（横向）：延长交于 V₂</div>
+      <div class="legend-item"><div class="line-dash white"></div>竖直棱：互相平行，灭点在无穷远，不参与计算</div>
+    </div>
+
+    <!-- 指标输出 -->
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">水平 FOV（示例画布 W=560）</div>
+        <div class="metric-value" id="out-hfov">--</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">垂直 FOV（示例画布 H=280）</div>
+        <div class="metric-value" id="out-vfov">--</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">焦距 f = √(a·b)</div>
+        <div class="metric-value blue" id="out-focal">--<small>px</small></div>
+      </div>
+    </div>
+
+    <!-- 按钮 -->
+    <div class="btn-group">
+      <button class="btn" id="btn-reset">复位（a=b=220，约 103°）</button>
+      <button class="btn" id="btn-align">对齐 60° 极值（a=b=485）</button>
+    </div>
+
+    <!-- 滑块 -->
+    <div class="controls">
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>V₁ 到主点的距离 <span style="color:var(--blue);font-weight:700">a</span></span>
+          <span class="slider-val a" id="valA">220</span>
+        </div>
+        <input type="range" id="sliderA" min="196" max="485" value="220" step="1">
+      </div>
+      <div class="slider-group">
+        <div class="slider-header">
+          <span>V₂ 到主点的距离 <span style="color:var(--red);font-weight:700">b</span></span>
+          <span class="slider-val b" id="valB">220</span>
+        </div>
+        <input type="range" id="sliderB" min="196" max="485" value="220" step="1">
+      </div>
+    </div>
+    <p class="status" style="margin-top:12px">
+      本图示与上方计算器使用同一关系式 f² = −(V₁−C)·(V₂−C)。当两个消失点分别位于主点的左右两侧、且都落在地平线上时，该式化简为 f² = a·b；上方计算器则直接使用完整的二维坐标式，因此消失点不在地平线上也能计算。窄 FOV 时消失点会远到画面之外，图中射线会从画布外射入，这与真实截图的观感一致。
+    </p>
+  </section>
+</div>
+
+<!-- ===== 右下角作者署名 ===== -->
+<a class="author"
+   href="https://space.bilibili.com/1534330"
+   target="_blank" rel="noopener noreferrer"
+   title="作者：西岛海 — 前往 B 站主页">
+  <span class="dot" aria-hidden="true"></span>作者：西岛海
+</a>
+
+<script>
+/* ================= 计算器 ================= */
+(function(){
+  const $ = id => document.getElementById(id);
+  const ids = ['imgWidth','imgHeight','hipX1','hipY1','hipX2','hipY2','adsX1','adsY1','adsX2','adsY2'];
+  const num = id => Number.parseFloat($(id).value);
+  const finite = x => Number.isFinite(x);
+
+  function calcFov(x1,y1,x2,y2,W,H){
+    const cx=W/2, cy=H/2;
+    // 正交方向消失点关系：f² = -[(v1-c)·(v2-c)]
+    const f2 = -((x1-cx)*(x2-cx) + (y1-cy)*(y2-cy));
+    if(!finite(f2) || f2 <= 0) {
+      return {ok:false, reason:'这两个点无法在当前假设下得到正焦距。请核对坐标、主点及两组方向是否互相垂直。'};
+    }
+    const f=Math.sqrt(f2);
+    if(!finite(f) || f<=0) return {ok:false,reason:'焦距无效，请检查输入。'};
+    const fov=2*Math.atan(W/(2*f))*180/Math.PI;
+    if(!finite(fov) || fov<=0 || fov>=180) return {ok:false,reason:'计算出的 FOV 超出有效范围。'};
+    return {ok:true,f,fov,f2,cx,cy};
+  }
+
+  function setError(boxId,mainId,detailId,message){
+    $(boxId).classList.add('error');
+    $(mainId).textContent=message;
+    $(detailId).textContent='请修正输入或重新选择消失点。';
+  }
+  function setGood(boxId,mainId,detailId,result,label){
+    $(boxId).classList.remove('error');
+    $(mainId).textContent=label+result.fov.toFixed(2)+'°';
+    $(detailId).textContent=`焦距 f：${result.f.toFixed(2)} px · f²：${result.f2.toFixed(2)} px²`;
+  }
+
+  function calculateAll(){
+    const W=num('imgWidth'), H=num('imgHeight');
+    if(!finite(W)||!finite(H)||W<=0||H<=0){
+      setError('hipResult','hipFovResult','hipDetails','截图宽度/高度必须大于 0');
+      setError('adsResult','adsFovResult','adsDetails','截图宽度/高度必须大于 0');
+      return;
+    }
+    const hipVals=['hipX1','hipY1','hipX2','hipY2'].map(num);
+    const adsVals=['adsX1','adsY1','adsX2','adsY2'].map(num);
+    if([...hipVals,...adsVals].some(v=>!finite(v))){
+      setError('hipResult','hipFovResult','hipDetails','请填写所有腰射消失点坐标');
+      setError('adsResult','adsFovResult','adsDetails','请填写所有开镜消失点坐标');
+      return;
+    }
+    const hip=calcFov(hipVals[0],hipVals[1],hipVals[2],hipVals[3],W,H);
+    const ads=calcFov(adsVals[0],adsVals[1],adsVals[2],adsVals[3],W,H);
+    if(hip.ok) setGood('hipResult','hipFovResult','hipDetails',hip,'腰射 FOV：');
+    else setError('hipResult','hipFovResult','hipDetails',hip.reason);
+    if(ads.ok) setGood('adsResult','adsFovResult','adsDetails',ads,'开镜 FOV：');
+    else setError('adsResult','adsFovResult','adsDetails',ads.reason);
+  }
+  ids.forEach(id=>$(id).addEventListener('input',calculateAll));
+  calculateAll();
+})();
+
+/* ================= 交互图示 ================= */
+(function(){
+  // 示例画布参数（固定，仅用于演示，与上方计算器的截图尺寸无关）
+  // 滑块范围 196~485 对应水平 FOV 约 110°~60°
+  const W = 560, H = 280;
+  const cx = W/2, cy = H/2;
+
+  const sliderA = document.getElementById('sliderA');
+  const sliderB = document.getElementById('sliderB');
+  const valA = document.getElementById('valA');
+  const valB = document.getElementById('valB');
+
+  const outHfov = document.getElementById('out-hfov');
+  const outVfov = document.getElementById('out-vfov');
+  const outFocal = document.getElementById('out-focal');
+
+  const topVp1 = document.getElementById('top-vp1'), topTextVp1 = document.getElementById('top-text-vp1');
+  const topVp2 = document.getElementById('top-vp2'), topTextVp2 = document.getElementById('top-text-vp2');
+  const topDistA = document.getElementById('top-dist-a'), topDistARight = document.getElementById('top-dist-a-right'), topTextA = document.getElementById('top-text-a');
+  const topDistB = document.getElementById('top-dist-b'), topDistBLeft = document.getElementById('top-dist-b-left'), topTextB = document.getElementById('top-text-b');
+
+  const perspVp1 = document.getElementById('persp-vp1'), perspTextVp1 = document.getElementById('persp-text-vp1');
+  const perspVp2 = document.getElementById('persp-vp2'), perspTextVp2 = document.getElementById('persp-text-vp2');
+  const perspDistA = document.getElementById('persp-dist-a'), perspDistARight = document.getElementById('persp-dist-a-right'), perspTextA = document.getElementById('persp-text-a');
+  const perspDistB = document.getElementById('persp-dist-b'), perspDistBLeft = document.getElementById('persp-dist-b-left'), perspTextB = document.getElementById('persp-text-b');
+
+  const topRaysBlue = document.getElementById('top-rays-blue');
+  const topRaysRed = document.getElementById('top-rays-red');
+  const perspCube = document.getElementById('persp-cube');
+
+  function update() {
+    const a = parseFloat(sliderA.value);
+    const b = parseFloat(sliderB.value);
+    valA.textContent = a;
+    valB.textContent = b;
+
+    // 1. 数值计算：f² = a·b
+    const f = Math.sqrt(a * b);
+    const hFov = 2 * Math.atan((W / 2) / f) * 180 / Math.PI;
+    const vFov = 2 * Math.atan((H / 2) / f) * 180 / Math.PI;
+
+    outHfov.textContent = hFov.toFixed(1) + '°';
+    outVfov.textContent = vFov.toFixed(1) + '°';
+    outFocal.innerHTML = f.toFixed(1) + '<small>px</small>';
+
+    const vp1X = cx + a;
+    const vp2X = cx - b;
+
+    // 2. 俯视图
+    topVp1.setAttribute('cx', vp1X); topTextVp1.setAttribute('x', vp1X);
+    topVp2.setAttribute('cx', vp2X); topTextVp2.setAttribute('x', vp2X);
+
+    topDistA.setAttribute('x2', vp1X);
+    topDistARight.setAttribute('x1', vp1X); topDistARight.setAttribute('x2', vp1X);
+    topTextA.setAttribute('x', (cx + vp1X) / 2); topTextA.textContent = 'a=' + a;
+
+    topDistB.setAttribute('x1', vp2X);
+    topDistBLeft.setAttribute('x1', vp2X); topDistBLeft.setAttribute('x2', vp2X);
+    topTextB.setAttribute('x', (cx + vp2X) / 2); topTextB.textContent = 'b=' + b;
+
+    let blueRays = '', redRays = '';
+    for (let i = 40; i <= 520; i += 80) {
+      blueRays += `<line x1="${vp1X}" y1="140" x2="${i}" y2="280" />`;
+      redRays  += `<line x1="${vp2X}" y1="140" x2="${i}" y2="280" />`;
+    }
+    topRaysBlue.innerHTML = blueRays;
+    topRaysRed.innerHTML = redRays;
+
+    // 3. 透视图
+    perspVp1.setAttribute('cx', vp1X); perspTextVp1.setAttribute('x', vp1X);
+    perspVp2.setAttribute('cx', vp2X); perspTextVp2.setAttribute('x', vp2X);
+
+    perspDistA.setAttribute('x2', vp1X);
+    perspDistARight.setAttribute('x1', vp1X); perspDistARight.setAttribute('x2', vp1X);
+    perspTextA.setAttribute('x', (cx + vp1X) / 2); perspTextA.textContent = 'a=' + a;
+
+    perspDistB.setAttribute('x1', vp2X);
+    perspDistBLeft.setAttribute('x1', vp2X); perspDistBLeft.setAttribute('x2', vp2X);
+    perspTextB.setAttribute('x', (cx + vp2X) / 2); perspTextB.textContent = 'b=' + b;
+
+    const c_yTop = 110, c_yBot = 190;
+    const r_x = cx + a * 0.35;
+    const l_x = cx - b * 0.35;
+
+    const r_yTop = 140 + (c_yTop - 140) * (vp1X - r_x) / (vp1X - cx);
+    const r_yBot = 140 + (c_yBot - 140) * (vp1X - r_x) / (vp1X - cx);
+    const l_yTop = 140 + (c_yTop - 140) * (l_x - vp2X) / (cx - vp2X);
+    const l_yBot = 140 + (c_yBot - 140) * (l_x - vp2X) / (cx - vp2X);
+
+    perspCube.innerHTML = `
+      <!-- 指向 V₁ 的辅助线（蓝） -->
+      <line x1="${l_x}" y1="${l_yTop}" x2="${vp1X}" y2="140" stroke="#55b9ff" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.75"/>
+      <line x1="${l_x}" y1="${l_yBot}" x2="${vp1X}" y2="140" stroke="#55b9ff" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.75"/>
+      <line x1="${r_x}" y1="${r_yTop}" x2="${vp1X}" y2="140" stroke="#55b9ff" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.75"/>
+      <line x1="${r_x}" y1="${r_yBot}" x2="${vp1X}" y2="140" stroke="#55b9ff" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.75"/>
+
+      <!-- 指向 V₂ 的辅助线（红） -->
+      <line x1="${r_x}" y1="${r_yTop}" x2="${vp2X}" y2="140" stroke="#ff8989" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.75"/>
+      <line x1="${r_x}" y1="${r_yBot}" x2="${vp2X}" y2="140" stroke="#ff8989" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.75"/>
+      <line x1="${l_x}" y1="${l_yTop}" x2="${vp2X}" y2="140" stroke="#ff8989" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.75"/>
+      <line x1="${l_x}" y1="${l_yBot}" x2="${vp2X}" y2="140" stroke="#ff8989" stroke-width="1.2" stroke-dasharray="5,4" opacity="0.75"/>
+
+      <!-- 实线：指向 V₁（蓝） -->
+      <line x1="${cx}" y1="${c_yTop}" x2="${r_x}" y2="${r_yTop}" stroke="#55b9ff" stroke-width="2"/>
+      <line x1="${cx}" y1="${c_yBot}" x2="${r_x}" y2="${r_yBot}" stroke="#55b9ff" stroke-width="2"/>
+
+      <!-- 实线：指向 V₂（红） -->
+      <line x1="${cx}" y1="${c_yTop}" x2="${l_x}" y2="${l_yTop}" stroke="#ff8989" stroke-width="2"/>
+      <line x1="${cx}" y1="${c_yBot}" x2="${l_x}" y2="${l_yBot}" stroke="#ff8989" stroke-width="2"/>
+
+      <!-- 竖直棱（白） -->
+      <line x1="${cx}" y1="${c_yTop}" x2="${cx}" y2="${c_yBot}" stroke="#e8effa" stroke-width="2.5"/>
+      <line x1="${l_x}" y1="${l_yTop}" x2="${l_x}" y2="${l_yBot}" stroke="#e8effa" stroke-width="2.5"/>
+      <line x1="${r_x}" y1="${r_yTop}" x2="${r_x}" y2="${r_yBot}" stroke="#e8effa" stroke-width="2.5"/>
+    `;
+  }
+
+  sliderA.addEventListener('input', update);
+  sliderB.addEventListener('input', update);
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    sliderA.value = 220; sliderB.value = 220; update();
+  });
+  document.getElementById('btn-align').addEventListener('click', () => {
+    sliderA.value = 485; sliderB.value = 485; update();
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>

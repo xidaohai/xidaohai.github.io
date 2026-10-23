@@ -282,12 +282,12 @@
 <div class="floating-tip">
     <h3>🎯 ADS 灵敏度校准提醒</h3>
     <p>
-        如果我没有MDH，只有ADS（开镜灵敏度）怎么办？很简单：
+        如果我嫌麻烦，想直接找一个能用的 ADS（开镜灵敏度）怎么办？
     </p>
     <ol>
-        <li>得到实用值：先得到"实用值 A"（即拉枪cm x e）。</li>
-        <li>记录拉枪：然后移动鼠标，让准星恰好落在此实用值对应的目标上，记录当前鼠标移动了多少 cm。</li>
-        <li>调整 ADS：开镜后，反复调整 ADS，直到与刚刚鼠标所移动的距离相同、准星的落点相同即可。</li>
+        <li>先得到腰射FOV和开镜后FOV（小众游戏可以用腰射灭点法、开镜像素尺寸测量法得到FOV）</li>
+        <li>然后用快适应值公式。得出自己的开镜CM/360°灵敏度。并且除以4，即Xcm/90°。</li>
+        <li>开镜后，反复调整 ADS 开镜灵敏度，直到转90°时与开镜CM/360°灵敏度除以4后的移动距离相同即可。</li>
     </ol>
 </div>
 
@@ -304,9 +304,9 @@
         <!-- 算法切换按钮 -->
         <div class="rate-btn-group">
             <button class="rate-btn active" data-type="111">老公式</button>
-            <button class="rate-btn" data-type="sqrt">平方根</button>
-            <button class="rate-btn" data-type="mid">0.75居中</button>
-            <button class="rate-btn" data-type="linear">纯比例</button>
+            <button class="rate-btn" data-type="sqrt">平方根公式</button>
+            <button class="rate-btn" data-type="mid">零七五公式</button>
+            <button class="rate-btn" data-type="linear">比例零七五折中公式</button>
         </div>
 
         <!-- 动态公式提示 -->
@@ -399,23 +399,13 @@
     </ul>
 
     <div class="tip-box">
-        <h3>西岛海经验公式 (实战)</h3>
+        <h3>西岛海经验公式 (结果为倍率，需要乘以腰射的CM/360°使用)</h3>
         <div class="formula-card">
-           【 核心公式：MDH% = [(常用最远拉枪距离 x e) / 屏幕一半距离] x [(当前开镜FOV+100)/200] 】（e≈2.72）
+           快适应值算法：（腰射FOV/开镜FOV)^0.75
         </div>
-        <p>主张实际用尺子量，而不是靠转换网站。<strong>【西岛海短TTK游戏开镜常用 实用值16.5cm、MDH60%左右】</strong>：</p>
-        <ul class="logic-list">
-            <li><strong>① 端尺取值：</strong>拿绳尺伸直量屏幕，想得一个你"常用最远"拉枪 cm 数。</li>
-            <li><strong>② 乘以e：</strong>将这个拉枪数值 <strong>x e</strong>，得到"实用值 A"。</li>
-            <li><strong>③ 除以半宽：</strong>用 <strong>A</strong> 除以 <strong>屏幕一侧长度（端尺测量值）</strong>。</li>
-        </ul>
         <div class="formula-card">
-            【 常见FOV下：MDH% = ( 常用最远拉枪长度 x e ) / 屏幕半宽长度 】
+           理论公式：【就是MDH的标准公式套上^0.75】 
         </div>
-        <ul class="logic-list">
-            <li><strong>【常用最远拉枪】概念：</strong>这个长度介于，【常用的甩枪距离】（最常见、也比较短），与，【不太常用的最远甩枪距离】（个别时候能用到），之间，【但属于"常用"的甩枪长度范围内】。</li>
-            <li><strong>【常用最远拉枪】参考：</strong>【西岛海短TTK开镜常用最远拉枪：5.5cm】。</li>
-        </ul>
     </div>
 </div>
 
@@ -471,11 +461,11 @@
         if (currentRateType === '111') {
             formulaTipBox.innerHTML = `<strong>老公式：R = 111 / (111 + 变化量)</strong><br><span style="font-size: 0.85em; color:#bbb;">（纯线性压平，内部自动将FOV差转为变化量）</span>`;
         } else if (currentRateType === 'sqrt') {
-            formulaTipBox.innerHTML = `<strong>近手极限：R = √(腰射FOV / 开镜FOV)</strong><br><span style="font-size: 0.85em; color:#bbb;">（开根号，最激进的压平）</span>`;
+            formulaTipBox.innerHTML = `<strong>近手极限（快）：R = √(腰射FOV / 开镜FOV)</strong><br><span style="font-size: 0.85em; color:#bbb;">（开根号，最激进的压平）</span>`;
         } else if (currentRateType === 'mid') {
-            formulaTipBox.innerHTML = `<strong>近眼近手：R = (腰射FOV / 开镜FOV)<sup>0.75</sup></strong><br><span style="font-size: 0.85em; color:#bbb;">（居中平衡，兼顾视觉与手腕）</span>`;
+            formulaTipBox.innerHTML = `<strong>近眼近手（中）：R = (腰射FOV / 开镜FOV)<sup>0.75</sup></strong><br><span style="font-size: 0.85em; color:#bbb;">（居中平衡，兼顾视觉与手腕）</span>`;
         } else if (currentRateType === 'linear') {
-            formulaTipBox.innerHTML = `<strong>近眼极限：R = 腰射FOV / 开镜FOV</strong><br><span style="font-size: 0.85em; color:#bbb;">（纯比例，最接近几何边界）</span>`;
+            formulaTipBox.innerHTML = `<strong>近眼极限（慢）：R = (纯比例 + 0.75居中) ÷ 2</strong><br><span style="font-size: 0.85em; color:#bbb;">（[腰射FOV/开镜FOV + (腰射FOV/开镜FOV)<sup>0.75</sup>] ÷ 2，兼顾几何边界与居中选择）</span>`;
         }
     }
 
@@ -517,8 +507,11 @@
             rateHipToAds = Math.pow(hHip / hAds, 0.75);
             formulaStr = `(${hHip} / ${hAds})^0.75`;
         } else if (currentRateType === 'linear') {
-            rateHipToAds = hHip / hAds;
-            formulaStr = `${hHip} / ${hAds}`;
+            // 折中：纯比例倍率 与 0.75居中倍率 取平均
+            const pureLinearRate = hHip / hAds;
+            const midRate = Math.pow(hHip / hAds, 0.75);
+            rateHipToAds = (pureLinearRate + midRate) / 2;
+            formulaStr = `[${hHip}/${hAds} + (${hHip}/${hAds})^0.75] / 2`;
         }
 
         // 自动判断正向（收视野）还是逆向（放视野）
@@ -536,18 +529,19 @@
             `;
         } else {
             // 逆向：开镜 -> 腰射
-            const reverseRate = 1 / rateHipToAds;
-            const result = cm * reverseRate;
-            
+            // 此时 hip 输入的是当前（开镜）FOV，ads 输入的是还原目标（腰射）FOV
+            // rateHipToAds 已经是 "当前 → 目标" 的倍率，直接相乘即可，不能再取倒数
+            const result = cm * rateHipToAds;
+
             resultLabel.innerText = "还原后的腰射 CM/360°:";
             finalResultDisplay.innerText = result.toFixed(2);
 
             calcProcessDisplay.innerHTML = `
-                <div style="color:#bb86fc; font-weight:bold; margin-bottom:6px;">【逆向：开镜 → 还原】</div>
-                ① 开镜 FOV = ${hHip}, 还原目标 FOV = ${hAds} (视野放宽)<br>
-                ② 逆向倍率 = 1 / 正向倍率 = <strong>${reverseRate.toFixed(4)}</strong><br>
-                ③ 还原 CM = ${cm} × ${reverseRate.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
-                <div style="color:#4caf50; font-size:0.9em; margin-top:5px;">✅ 完美还原到原始灵敏度</div>
+                <div style="color:#bb86fc; font-weight:bold; margin-bottom:6px;">【逆向：开镜 → 还原腰射】</div>
+                ① 当前开镜 FOV = ${hHip}, 还原目标 FOV = ${hAds} (视野放宽)<br>
+                ② 逆向倍率 = ${formulaStr} = <strong>${rateHipToAds.toFixed(4)}</strong><br>
+                ③ 还原 CM = ${cm} × ${rateHipToAds.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
+                <div style="color:#4caf50; font-size:0.9em; margin-top:5px;">✅ 已按逆向倍率换算回目标腰射。注意：老公式(111)不可严格逆，正逆往返会有约 1%~2% 的小误差，属公式本身特性。</div>
             `;
         }
     }
