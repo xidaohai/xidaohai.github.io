@@ -253,13 +253,13 @@
       
       <!-- 2. 核心换算 -->
       <div class="card">
-        <h2>2. 核心经验：<br>111与0.75公式为我创造；<br>0.5公式有人提过、1.0公式就是MDH100%<br>0.5偏快近手，0.75居中，1.0偏慢近眼</h2>
+        <h2>2. 核心经验：<br>111与0.75公式为我创造；<br>÷√2 为快边界（近手），×√2 为慢边界（近眼）<br>0.5公式有人提过、1.0公式就是MDH100%</h2>
         
         <div class="rate-btn-group">
           <button class="rate-btn" data-type="111">老公式(111)</button>
-          <button class="rate-btn" data-type="sqrt">（快）平方根公式</button>
+          <button class="rate-btn" data-type="sqrt">（快）零七五 ÷ √2</button>
           <button class="rate-btn active" data-type="mid">(居中)零七五公式</button>
-          <button class="rate-btn" data-type="linear">（慢）比例零七五折中公式</button>
+          <button class="rate-btn" data-type="linear">（慢）零七五 × √2</button>
         </div>
 
         <div class="formula-tip" id="formulaTipBox">
@@ -616,11 +616,11 @@
     if (currentRateType === '111') {
       formulaTipBox.innerHTML = `R = 111 / (111 + 变化量) <span>纯线性压平，内部自动将FOV差转为变化量</span>`;
     } else if (currentRateType === 'sqrt') {
-      formulaTipBox.innerHTML = `R = √(腰射FOV / 开镜FOV) <span>开根号，最激进的压平</span>`;
+      formulaTipBox.innerHTML = `R = (腰射FOV / 开镜FOV) ^ 0.75 ÷ √2 <span>零七五基准的下边界，偏快近手（最小值）</span>`;
     } else if (currentRateType === 'mid') {
-      formulaTipBox.innerHTML = `R = (腰射FOV / 开镜FOV) ^ 0.75 <span>居中平衡，兼顾视觉与手腕</span>`;
+      formulaTipBox.innerHTML = `R = (腰射FOV / 开镜FOV) ^ 0.75 <span>居中平衡，兼顾视觉与手腕（基准）</span>`;
     } else if (currentRateType === 'linear') {
-      formulaTipBox.innerHTML = `R = (纯比例 + 0.75居中) ÷ 2 <span>[腰射FOV/开镜FOV + (腰射FOV/开镜FOV)^0.75] ÷ 2，兼顾几何边界与居中选择</span>`;
+      formulaTipBox.innerHTML = `R = (腰射FOV / 开镜FOV) ^ 0.75 × √2 <span>零七五基准的上边界，偏慢近眼（最大值）</span>`;
     }
   }
 
@@ -639,14 +639,14 @@
       if (111 + X <= 0) return;
       R = 111 / (111 + X);
     } else if (currentRateType === 'sqrt') {
-      R = Math.sqrt(hip / ads);
+      // 零七五公式 ÷ √2 → 下边界（最小值）
+      R = Math.pow(hip / ads, 0.75) / Math.SQRT2;
     } else if (currentRateType === 'mid') {
+      // 零七五公式基准
       R = Math.pow(hip / ads, 0.75);
     } else if (currentRateType === 'linear') {
-      // 折中：纯比例倍率 与 0.75居中倍率 取平均
-      const pureLinearRate = hip / ads;
-      const midRate = Math.pow(hip / ads, 0.75);
-      R = (pureLinearRate + midRate) / 2;
+      // 零七五公式 × √2 → 上边界（最大值）
+      R = Math.pow(hip / ads, 0.75) * Math.SQRT2;
     }
 
     const targetCm = cm * R;

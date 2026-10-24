@@ -304,9 +304,9 @@
         <!-- 算法切换按钮 -->
         <div class="rate-btn-group">
             <button class="rate-btn active" data-type="111">老公式</button>
-            <button class="rate-btn" data-type="sqrt">平方根公式</button>
-            <button class="rate-btn" data-type="mid">零七五公式</button>
-            <button class="rate-btn" data-type="linear">比例零七五折中公式</button>
+            <button class="rate-btn" data-type="sqrt">÷√2</button>
+            <button class="rate-btn" data-type="mid">零七五</button>
+            <button class="rate-btn" data-type="linear">×√2</button>
         </div>
 
         <!-- 动态公式提示 -->
@@ -399,7 +399,7 @@
     </ul>
 
     <div class="tip-box">
-        <h3>西岛海经验公式 (结果为倍率，需要乘以腰射的CM/360°使用)</h3>
+        <h3>西岛海经验公式 (结果为倍率，需要乘以腰射的CM/360°使用) 最大值乘以根号2，最小值除以根号2</h3>
         <div class="formula-card">
            快适应值算法：（腰射FOV/开镜FOV)^0.75
         </div>
@@ -461,11 +461,11 @@
         if (currentRateType === '111') {
             formulaTipBox.innerHTML = `<strong>老公式：R = 111 / (111 + 变化量)</strong><br><span style="font-size: 0.85em; color:#bbb;">（纯线性压平，内部自动将FOV差转为变化量）</span>`;
         } else if (currentRateType === 'sqrt') {
-            formulaTipBox.innerHTML = `<strong>近手极限（快）：R = √(腰射FOV / 开镜FOV)</strong><br><span style="font-size: 0.85em; color:#bbb;">（开根号，最激进的压平）</span>`;
+            formulaTipBox.innerHTML = `<strong>零七五 ÷ √2：R = (腰射FOV / 开镜FOV)<sup>0.75</sup> ÷ √2</strong><br><span style="font-size: 0.85em; color:#bbb;">（零七五基准的下边界 / 最小值）</span>`;
         } else if (currentRateType === 'mid') {
-            formulaTipBox.innerHTML = `<strong>近眼近手（中）：R = (腰射FOV / 开镜FOV)<sup>0.75</sup></strong><br><span style="font-size: 0.85em; color:#bbb;">（居中平衡，兼顾视觉与手腕）</span>`;
+            formulaTipBox.innerHTML = `<strong>零七五公式：R = (腰射FOV / 开镜FOV)<sup>0.75</sup></strong><br><span style="font-size: 0.85em; color:#bbb;">（居中平衡，兼顾视觉与手腕）</span>`;
         } else if (currentRateType === 'linear') {
-            formulaTipBox.innerHTML = `<strong>近眼极限（慢）：R = (纯比例 + 0.75居中) ÷ 2</strong><br><span style="font-size: 0.85em; color:#bbb;">（[腰射FOV/开镜FOV + (腰射FOV/开镜FOV)<sup>0.75</sup>] ÷ 2，兼顾几何边界与居中选择）</span>`;
+            formulaTipBox.innerHTML = `<strong>零七五 × √2：R = (腰射FOV / 开镜FOV)<sup>0.75</sup> × √2</strong><br><span style="font-size: 0.85em; color:#bbb;">（零七五基准的上边界 / 最大值）</span>`;
         }
     }
 
@@ -501,17 +501,17 @@
             rateHipToAds = 111 / (111 + X);
             formulaStr = `111 / (111 ${X >= 0 ? '+' : '-'} ${Math.abs(X)})`;
         } else if (currentRateType === 'sqrt') {
-            rateHipToAds = Math.sqrt(hHip / hAds);
-            formulaStr = `√(${hHip} / ${hAds})`;
+            // 零七五公式 ÷ √2 → 下边界（最小值）
+            rateHipToAds = Math.pow(hHip / hAds, 0.75) / Math.SQRT2;
+            formulaStr = `(${hHip} / ${hAds})^0.75 ÷ √2`;
         } else if (currentRateType === 'mid') {
+            // 零七五公式基准
             rateHipToAds = Math.pow(hHip / hAds, 0.75);
             formulaStr = `(${hHip} / ${hAds})^0.75`;
         } else if (currentRateType === 'linear') {
-            // 折中：纯比例倍率 与 0.75居中倍率 取平均
-            const pureLinearRate = hHip / hAds;
-            const midRate = Math.pow(hHip / hAds, 0.75);
-            rateHipToAds = (pureLinearRate + midRate) / 2;
-            formulaStr = `[${hHip}/${hAds} + (${hHip}/${hAds})^0.75] / 2`;
+            // 零七五公式 × √2 → 上边界（最大值）
+            rateHipToAds = Math.pow(hHip / hAds, 0.75) * Math.SQRT2;
+            formulaStr = `(${hHip} / ${hAds})^0.75 × √2`;
         }
 
         // 自动判断正向（收视野）还是逆向（放视野）
