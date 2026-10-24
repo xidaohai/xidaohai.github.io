@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>同身寸 · 收束法 - 西岛海</title>
+    <title>同身寸 · 收束法（等比倍率版） - 西岛海</title>
     <style>
         :root {
             --bg: #dfd7cb;
@@ -21,11 +21,7 @@
             --border: #e2d9cc;
             --border-dark: #b8ab97;
         }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             padding: 14px 8px;
             background: var(--bg);
@@ -48,674 +44,97 @@
             border: 1px solid var(--border-dark);
             position: relative;
         }
-        @media (min-width:600px) {
-            .card {
-                padding: 22px 18px;
-            }
-        }
-        .card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 5px;
-            background: var(--gold);
-            border-radius: 12px 0 0 12px;
-        }
-        .header {
-            font-size: 1.15rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--blue-dark);
-            flex-wrap: wrap;
-            border-bottom: 1.5px dashed var(--border);
-            padding-bottom: 10px;
-        }
-        .header .date {
-            font-size: 1rem;
-            opacity: 0.85;
-        }
-        .header .badge {
-            background: var(--purple-dark);
-            color: #fff;
-            font-size: 0.68rem;
-            padding: 2px 10px;
-            border-radius: 10px;
-            font-weight: 700;
-        }
-        .k-link {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #fff;
-            background: var(--gold);
-            padding: 3px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-left: auto;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .k-link:hover {
-            background: #8b6914;
-        }
-
-        .top-row {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-bottom: 12px;
-            align-items: stretch;
-        }
-
-        .input-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.75);
-            border: 1.5px dashed var(--blue);
-            border-radius: 8px;
-            padding: 10px 12px;
-            height: 100%;
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 3px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--blue-dark);
-        }
-        .input-group input {
-            width: 100%;
-            background: #ffffff;
-            border: 1px solid rgba(2, 132, 199, 0.3);
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 800;
-            color: var(--blue-dark);
-            padding: 5px 6px;
-            text-align: center;
-            outline: none;
-            font-family: "SF Mono", monospace;
-        }
-        .input-group input:focus {
-            border-color: var(--purple);
-            background: #fff;
-        }
-        .input-group input:disabled {
-            background: #f1f5f9;
-            color: #64748b;
-            cursor: not-allowed;
-            border-color: #d1d5db;
-        }
-
-        .correction {
-            background: rgba(76, 29, 149, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 12px;
-        }
-        .correction .title {
-            font-size: 0.78rem;
-            font-weight: 800;
-            color: var(--purple-dark);
-        }
-        .correction .sub {
-            font-size: 0.65rem;
-            color: #64748b;
-            margin-left: 4px;
-        }
-        .correction .row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .correction .row .step-btn {
-            width: 26px;
-            height: 26px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            background: #ffffff;
-            color: var(--purple-dark);
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-        }
-        .correction .row .step-btn:hover {
-            border-color: var(--purple);
-        }
-        .correction .row input {
-            flex: 1;
-            background: #fff;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: var(--purple-dark);
-            padding: 3px 6px;
-            text-align: center;
-            outline: none;
-            font-family: "SF Mono", monospace;
-        }
-        .correction .slider {
-            width: 100%;
-            accent-color: var(--purple-dark);
-            cursor: pointer;
-            height: 4px;
-        }
-
-        .formula-card {
-            border: 1.5px solid var(--gold);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: rgba(184, 134, 11, 0.03);
-            transition: 0.25s;
-        }
-        .formula-card.track {
-            border-color: var(--purple);
-            background: rgba(76, 29, 149, 0.03);
-        }
-        .card-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
-        .f-title {
-            font-size: 0.88rem;
-            font-weight: 800;
-            color: #78350f;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .math-hero {
-            background: #ffffff;
-            border: 1px solid #e2d9cc;
-            border-radius: 8px;
-            padding: 10px 8px;
-            margin: 8px 0 6px 0;
-            text-align: center;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .math-row {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-family: "Cambria Math", "Latin Modern Math", serif;
-            font-size: 1.05rem;
-            color: #0f172a;
-            font-weight: bold;
-            flex-wrap: wrap;
-            gap: 4px;
-            row-gap: 8px;
-        }
-
-        .toggle-group {
-            display: flex;
-            gap: 4px;
-            background: rgba(0, 0, 0, 0.06);
-            border-radius: 6px;
-            padding: 4px;
-        }
-        .toggle-btn {
-            border: none;
-            background: transparent;
-            padding: 8px 18px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            border-radius: 4px;
-            cursor: pointer;
-            color: #475569;
-            transition: 0.15s;
-            line-height: 1.2;
-            white-space: nowrap;
-        }
-        .toggle-btn.active {
-            background: var(--gold);
-            color: #fff;
-        }
-        .toggle-btn.purple.active {
-            background: var(--purple-dark);
-            color: #fff;
-        }
-        .toggle-btn.track-sub.active {
-            background: #8b5cf6;
-            color: #fff;
-        }
-
-        .mode-badge {
-            font-size: 0.62rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-            background: rgba(184, 134, 11, 0.15);
-            color: #78350f;
-        }
-        .mode-badge.track {
-            background: rgba(76, 29, 149, 0.15);
-            color: var(--purple);
-        }
-
-        .five-col {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
-            margin-top: 6px;
-        }
-        @media(max-width:550px) {
-            .five-col {
-                gap: 2px;
-                font-size: 0.7rem;
-            }
-        }
-        .col-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 4px 2px;
-            border-radius: 4px;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid transparent;
-            min-height: 44px;
-            justify-content: center;
-            transition: 0.15s;
-        }
-        .col-item .tag {
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: #78350f;
-        }
-        .col-item .val {
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--gold);
-        }
-        .col-item .val.corrected {
-            color: var(--purple);
-        }
-        .col-item.clickable {
-            cursor: pointer;
-        }
-        .col-item.clickable:hover {
-            background: rgba(124, 58, 237, 0.08);
-        }
-        .col-item.anchor {
-            border-color: var(--anchor);
-            background: var(--glow);
-            box-shadow: 0 0 12px var(--glow);
-        }
-        .col-item .hint {
-            font-size: 0.5rem;
-            color: var(--anchor);
-            font-weight: 700;
-            opacity: 0;
-            transition: 0.2s;
-            margin-top: 1px;
-        }
-        .col-item.anchor .hint {
-            opacity: 1;
-        }
-
-        .status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 4px;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            margin-top: 6px;
-        }
-        .status .hl {
-            color: var(--purple);
-            font-weight: 700;
-        }
-
-        .chart-section {
-            background: rgba(255, 255, 255, 0.45);
-            border: 1px solid rgba(120, 100, 70, 0.25);
-            border-radius: 6px;
-            padding: 12px;
-            margin-top: 14px;
-        }
-        .chart-header {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: var(--blue-dark);
-            margin-bottom: 10px;
-        }
-        .interactive-chart-grid {
-            display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 12px;
-            align-items: center;
-        }
-        @media(max-width:750px) {
-            .interactive-chart-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .slider-control-card {
-            background: rgba(255, 255, 255, 0.65);
-            border: 1px solid rgba(2, 132, 199, 0.2);
-            border-radius: 6px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .ctrl-row {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .ctrl-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.72rem;
-            font-weight: bold;
-            color: var(--blue-dark);
-        }
-        .ctrl-input-num {
-            width: 76px;
-            padding: 2px 4px;
-            font-size: 0.82rem;
-            font-weight: bold;
-            text-align: right;
-            border: 1px solid rgba(2, 132, 199, 0.3);
-            border-radius: 3px;
-            outline: none;
-            background: #fff;
-            color: var(--blue-dark);
-        }
-        .ctrl-range {
-            width: 100%;
-            cursor: pointer;
-            accent-color: var(--blue);
-            margin-top: 2px;
-        }
-
-        .canvas-container {
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 4px;
-            position: relative;
-            padding: 8px 6px;
-        }
-        canvas {
-            width: 100%;
-            height: 250px;
-            display: block;
-        }
-
-        .chart-legend-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 10px;
-        }
-        @media(max-width:600px) {
-            .chart-legend-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        .legend-box {
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 4px;
-            padding: 5px 8px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            font-size: 0.65rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-        }
-        .legend-box.t3-max {
-            border-left: 3px solid #7c3aed;
-        }
-        .legend-box.s-max {
-            border-left: 3px solid #0284c7;
-        }
-        .legend-box.s-bal {
-            border-left: 3px dashed #38bdf8;
-        }
-        .legend-val {
-            font-size: 0.85rem;
-            font-weight: bold;
-            font-family: monospace;
-        }
-
-        .steps {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(180, 83, 9, 0.2);
-            border-radius: 6px;
-            padding: 8px 10px;
-            margin-top: 12px;
-            font-size: 0.85rem;
-        }
-        .steps .title {
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: #78350f;
-            margin-bottom: 6px;
-        }
-
-        .step-stage {
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: #fff;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin: 10px 0 4px 0;
-            display: inline-block;
-        }
-        .step-stage.cun {
-            background: var(--blue);
-        }
-        .step-stage.cun.track {
-            background: var(--purple);
-        }
-
-        .step-line {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 0;
-            color: #334155;
-            flex-wrap: wrap;
-            font-size: 0.78rem;
-        }
-        .step-num {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--gold);
-            color: #fff;
-            font-size: 0.65rem;
-            font-weight: bold;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .step-num.purple {
-            background: var(--purple);
-        }
-        .step-num.blue {
-            background: var(--blue);
-        }
-        .step-label {
-            font-weight: 600;
-            color: #475569;
-        }
-        .step-formula {
-            font-family: monospace;
-            background: rgba(0, 0, 0, 0.04);
-            padding: 1px 5px;
-            border-radius: 3px;
-        }
-        .step-result {
-            font-weight: bold;
-            color: var(--gold);
-        }
-        .step-result.purple {
-            color: var(--purple);
-        }
-        .step-result.blue {
-            color: var(--blue);
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 14px;
-            font-size: 0.82rem;
-            color: #475569;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding-top: 10px;
-            border-top: 1px dashed rgba(0, 0, 0, 0.08);
-        }
-        .footer-left {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .footer-left .desc {
-            font-size: 0.75rem;
-        }
-        .footer-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .footer-right .sig {
-            font-weight: bold;
-            color: var(--blue-dark);
-            font-size: 0.85rem;
-        }
-        .correction-badge {
-            background: var(--purple);
-            color: #fff;
-            font-size: 0.6rem;
-            font-weight: 700;
-            padding: 1px 8px;
-            border-radius: 10px;
-            margin-left: 6px;
-        }
-        .anchor-label {
-            font-size: 0.6rem;
-            color: var(--anchor);
-            font-weight: 700;
-            background: rgba(124, 58, 237, 0.12);
-            padding: 0 6px;
-            border-radius: 3px;
-            margin-left: 4px;
-        }
-        sup, sub {
-            font-size: 0.72em;
-        }
-        .ttk-tag {
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #e0e7ff;
-            color: #4338ca;
-            margin-left: 4px;
-        }
-        .ttk-tag.short {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        .ttk-tag.long {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-        .tooltip-container {
-            position: relative;
-            display: block;
-            width: 100%;
-        }
-        .tooltip-container .tooltip-text {
-            visibility: hidden;
-            width: 240px;
-            background-color: #ffffff;
-            color: #1e293b;
-            text-align: left;
-            border-radius: 6px;
-            padding: 8px 12px;
-            border: 1px solid #cbd5e1;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-            position: absolute;
-            z-index: 100;
-            bottom: 125%;
-            right: 0;
-            opacity: 0;
-            transition: opacity 0.25s;
-            font-weight: 400;
-            font-size: 0.8rem;
-            line-height: 1.5;
-            pointer-events: none;
-        }
-        .tooltip-container .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            right: 20px;
-            border-width: 6px;
-            border-style: solid;
-            border-color: #ffffff transparent transparent transparent;
-        }
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        #std-sub-toggle, #track-sub-toggle {
-            display: flex;
-        }
-        #track-sub-toggle {
-            display: none;
-        }
-        #stepsNatural {
-            display: none;
-        }
-        .steps {
-            display: none;
-        }
+        @media (min-width:600px) { .card { padding: 22px 18px; } }
+        .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--gold); border-radius: 12px 0 0 12px; }
+        .header { font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--blue-dark); flex-wrap: wrap; border-bottom: 1.5px dashed var(--border); padding-bottom: 10px; }
+        .header .date { font-size: 1rem; opacity: 0.85; }
+        .header .badge { background: var(--purple-dark); color: #fff; font-size: 0.68rem; padding: 2px 10px; border-radius: 10px; font-weight: 700; }
+        .k-link { font-size: 0.85rem; font-weight: 700; color: #fff; background: var(--gold); padding: 3px 10px; border-radius: 5px; text-decoration: none; margin-left: auto; cursor: pointer; transition: 0.2s; }
+        .k-link:hover { background: #8b6914; }
+        .top-row { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 12px; align-items: stretch; }
+        .input-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: rgba(255, 255, 255, 0.75); border: 1.5px dashed var(--blue); border-radius: 8px; padding: 10px 12px; height: 100%; }
+        .input-group { display: flex; flex-direction: column; justify-content: center; gap: 3px; font-size: 0.75rem; font-weight: 700; color: var(--blue-dark); }
+        .input-group input { width: 100%; background: #ffffff; border: 1px solid rgba(2, 132, 199, 0.3); border-radius: 4px; font-size: 0.9rem; font-weight: 800; color: var(--blue-dark); padding: 5px 6px; text-align: center; outline: none; font-family: "SF Mono", monospace; }
+        .input-group input:focus { border-color: var(--purple); background: #fff; }
+        .input-group input:disabled { background: #f1f5f9; color: #64748b; cursor: not-allowed; border-color: #d1d5db; }
+        .correction { background: rgba(76, 29, 149, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .correction .title { font-size: 0.78rem; font-weight: 800; color: var(--purple-dark); }
+        .correction .sub { font-size: 0.65rem; color: #64748b; margin-left: 4px; }
+        .correction .row { display: flex; align-items: center; gap: 6px; }
+        .correction .row .step-btn { width: 26px; height: 26px; border: 1px solid #cbd5e1; border-radius: 4px; background: #ffffff; color: var(--purple-dark); font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; }
+        .correction .row .step-btn:hover { border-color: var(--purple); }
+        .correction .row input { flex: 1; background: #fff; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.9rem; font-weight: bold; color: var(--purple-dark); padding: 3px 6px; text-align: center; outline: none; font-family: "SF Mono", monospace; }
+        .correction .slider { width: 100%; accent-color: var(--purple-dark); cursor: pointer; height: 4px; }
+        .formula-card { border: 1.5px solid var(--gold); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: rgba(184, 134, 11, 0.03); transition: 0.25s; }
+        .formula-card.track { border-color: var(--purple); background: rgba(76, 29, 149, 0.03); }
+        .card-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+        .f-title { font-size: 0.88rem; font-weight: 800; color: #78350f; display: flex; align-items: center; gap: 6px; }
+        .math-hero { background: #ffffff; border: 1px solid #e2d9cc; border-radius: 8px; padding: 10px 8px; margin: 8px 0 6px 0; text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03); min-height: 48px; display: flex; align-items: center; justify-content: center; }
+        .math-row { display: inline-flex; align-items: center; justify-content: center; font-family: "Cambria Math", "Latin Modern Math", serif; font-size: 1.05rem; color: #0f172a; font-weight: bold; flex-wrap: wrap; gap: 4px; row-gap: 8px; }
+        .toggle-group { display: flex; gap: 4px; background: rgba(0, 0, 0, 0.06); border-radius: 6px; padding: 4px; }
+        .toggle-btn { border: none; background: transparent; padding: 8px 18px; font-size: 0.9rem; font-weight: 700; border-radius: 4px; cursor: pointer; color: #475569; transition: 0.15s; line-height: 1.2; white-space: nowrap; }
+        .toggle-btn.active { background: var(--gold); color: #fff; }
+        .toggle-btn.purple.active { background: var(--purple-dark); color: #fff; }
+        .toggle-btn.track-sub.active { background: #8b5cf6; color: #fff; }
+        .mode-badge { font-size: 0.62rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; background: rgba(184, 134, 11, 0.15); color: #78350f; }
+        .mode-badge.track { background: rgba(76, 29, 149, 0.15); color: var(--purple); }
+        .five-col { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 6px; }
+        @media(max-width:550px) { .five-col { gap: 2px; font-size: 0.7rem; } }
+        .col-item { display: flex; flex-direction: column; align-items: center; padding: 4px 2px; border-radius: 4px; background: rgba(255, 255, 255, 0.3); border: 2px solid transparent; min-height: 44px; justify-content: center; transition: 0.15s; }
+        .col-item .tag { font-size: 0.6rem; font-weight: 600; color: #78350f; }
+        .col-item .val { font-size: 0.95rem; font-weight: bold; color: var(--gold); }
+        .col-item .val.corrected { color: var(--purple); }
+        .col-item.clickable { cursor: pointer; }
+        .col-item.clickable:hover { background: rgba(124, 58, 237, 0.08); }
+        .col-item.anchor { border-color: var(--anchor); background: var(--glow); box-shadow: 0 0 12px var(--glow); }
+        .col-item .hint { font-size: 0.5rem; color: var(--anchor); font-weight: 700; opacity: 0; transition: 0.2s; margin-top: 1px; }
+        .col-item.anchor .hint { opacity: 1; }
+        .status { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 0.7rem; color: #94a3b8; margin-top: 6px; }
+        .status .hl { color: var(--purple); font-weight: 700; }
+        .chart-section { background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(120, 100, 70, 0.25); border-radius: 6px; padding: 12px; margin-top: 14px; }
+        .chart-header { font-size: 0.85rem; font-weight: bold; color: var(--blue-dark); margin-bottom: 10px; }
+        .interactive-chart-grid { display: grid; grid-template-columns: 220px 1fr; gap: 12px; align-items: center; }
+        @media(max-width:750px) { .interactive-chart-grid { grid-template-columns: 1fr; } }
+        .slider-control-card { background: rgba(255, 255, 255, 0.65); border: 1px solid rgba(2, 132, 199, 0.2); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .ctrl-row { display: flex; flex-direction: column; gap: 2px; }
+        .ctrl-head { display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; font-weight: bold; color: var(--blue-dark); }
+        .ctrl-input-num { width: 76px; padding: 2px 4px; font-size: 0.82rem; font-weight: bold; text-align: right; border: 1px solid rgba(2, 132, 199, 0.3); border-radius: 3px; outline: none; background: #fff; color: var(--blue-dark); }
+        .ctrl-range { width: 100%; cursor: pointer; accent-color: var(--blue); margin-top: 2px; }
+        .canvas-container { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.08); border-radius: 4px; position: relative; padding: 8px 6px; }
+        canvas { width: 100%; height: 250px; display: block; }
+        .chart-legend-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+        @media(max-width:600px) { .chart-legend-grid { grid-template-columns: 1fr 1fr; } }
+        .legend-box { background: rgba(255, 255, 255, 0.7); border-radius: 4px; padding: 5px 8px; border: 1px solid rgba(0, 0, 0, 0.05); font-size: 0.65rem; display: flex; flex-direction: column; gap: 1px; }
+        .legend-box.t3-max { border-left: 3px solid #7c3aed; }
+        .legend-box.s-max { border-left: 3px solid #0284c7; }
+        .legend-box.s-bal { border-left: 3px dashed #38bdf8; }
+        .legend-val { font-size: 0.85rem; font-weight: bold; font-family: monospace; }
+        .steps { background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(180, 83, 9, 0.2); border-radius: 6px; padding: 8px 10px; margin-top: 12px; font-size: 0.85rem; }
+        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 0.82rem; color: #475569; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px dashed rgba(0, 0, 0, 0.08); }
+        .footer-left { display: flex; flex-direction: column; gap: 2px; }
+        .footer-left .desc { font-size: 0.75rem; }
+        .footer-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .footer-right .sig { font-weight: bold; color: var(--blue-dark); font-size: 0.85rem; }
+        .correction-badge { background: var(--purple); color: #fff; font-size: 0.6rem; font-weight: 700; padding: 1px 8px; border-radius: 10px; margin-left: 6px; }
+        .anchor-label { font-size: 0.6rem; color: var(--anchor); font-weight: 700; background: rgba(124, 58, 237, 0.12); padding: 0 6px; border-radius: 3px; margin-left: 4px; }
+        sup, sub { font-size: 0.72em; }
+        .ttk-tag { font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; background: #e0e7ff; color: #4338ca; margin-left: 4px; }
+        .ttk-tag.short { background: #dbeafe; color: #1e40af; }
+        .ttk-tag.long { background: #ede9fe; color: #6d28d9; }
+        .tooltip-container { position: relative; display: block; width: 100%; }
+        .tooltip-container .tooltip-text { visibility: hidden; width: 240px; background-color: #ffffff; color: #1e293b; text-align: left; border-radius: 6px; padding: 8px 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); position: absolute; z-index: 100; bottom: 125%; right: 0; opacity: 0; transition: opacity 0.25s; font-weight: 400; font-size: 0.8rem; line-height: 1.5; pointer-events: none; }
+        .tooltip-container .tooltip-text::after { content: ""; position: absolute; top: 100%; right: 20px; border-width: 6px; border-style: solid; border-color: #ffffff transparent transparent transparent; }
+        .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+        #std-sub-toggle, #track-sub-toggle { display: flex; }
+        #track-sub-toggle { display: none; }
+        #stepsNatural { display: none; }
+        .steps { display: none; }
     </style>
 </head>
 <body>
     <div class="card">
-
         <div class="header">
-            <span class="date">2026.9.17</span>
+            <span class="date">2026.10.24</span>
             <span>同身寸 · 收束法</span>
             <span class="badge" style="background:var(--blue-dark);">xlm</span>
             <a href="https://xidaohai.github.io/tsc.png" target="_blank" rel="noopener noreferrer" class="k-link">【说明】？</a>
@@ -775,12 +194,10 @@
                         <button type="button" class="toggle-btn active" id="btn-mode-std" onclick="setMode('standard')">普通</button>
                         <button type="button" class="toggle-btn purple" id="btn-mode-t3d" onclick="setMode('tracking_3d')">跟枪</button>
                     </div>
-                    <!-- 普通子切换 -->
                     <div class="toggle-group" id="std-sub-toggle">
                         <button type="button" class="toggle-btn" id="btn-std-simple" onclick="setStdSub('simple')">极简</button>
                         <button type="button" class="toggle-btn active" id="btn-std-full" onclick="setStdSub('full')">完整</button>
                     </div>
-                    <!-- 跟枪子切换 -->
                     <div class="toggle-group" id="track-sub-toggle">
                         <button type="button" class="toggle-btn track-sub active" id="btn-track-simple" onclick="setTrackSub('simple')">极简</button>
                         <button type="button" class="toggle-btn track-sub" id="btn-track-full" onclick="setTrackSub('full')">完整</button>
@@ -861,21 +278,20 @@
 
                 <div class="chart-legend-grid">
                     <div class="legend-box t3-max">
-                        <span style="color:#7c3aed; font-weight:bold;">[跟枪基准]</span>
+                        <span style="color:#7c3aed; font-weight:bold;">[跟枪基准 (最大值C)]</span>
                         <span class="legend-val" id="lbl-t3-max" style="color:#7c3aed;">-- cm</span>
                     </div>
                     <div class="legend-box s-max">
-                        <span style="color:#0284c7; font-weight:bold;">[普通最大]</span>
+                        <span style="color:#0284c7; font-weight:bold;">[普通最大 (最大值C)]</span>
                         <span class="legend-val" id="lbl-s-max" style="color:#0284c7;">-- cm</span>
                     </div>
                     <div class="legend-box s-bal">
-                        <span style="color:#38bdf8; font-weight:bold;">[普通均衡]</span>
+                        <span style="color:#38bdf8; font-weight:bold;">[普通均衡 (输出值B)]</span>
                         <span class="legend-val" id="lbl-s-bal" style="color:#38bdf8;">-- cm</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 步骤区域保留占位但不可见 -->
             <div class="steps" style="display:none;">
                 <div class="title" id="stepsTitle">📝 计算推导流程</div>
                 <div id="stepsNatural"></div>
@@ -890,19 +306,41 @@
                 <span class="sig">作者：西岛海</span>
             </div>
         </div>
-
     </div>
 
     <script>
         const PI = Math.PI;
+        const SQRT2 = Math.SQRT2; // 1.41421356
+        const INV_SQRT2 = 1 / SQRT2; // 0.70710678
+        
+        // 五档之间的等比倍数 (基于2的1/4次方)
+        const R4 = Math.pow(2, 0.25); // 约 1.1892
+        const INV_R4 = Math.pow(2, -0.25); // 约 0.8409
+        const R4_3 = Math.pow(2, -0.75); // 约 0.5946
 
         let currentMode = 'standard';
         let trackSubMode = 'simple';
         let stdSubMode = 'full';
         let currentAnchor = 'q2';
 
-        const RATIOS_STD = { half: 2 / 3, q1: 5 / 6, q2: 1, q3: 7 / 6, base: 4 / 3 };
-        const RATIOS_TRACK = { half: 0.5, q1: 0.625, q2: 0.75, q3: 0.875, base: 1.0 };
+        // 普通模式的比例（普通模式基准是 均衡B，所以B的比例是1）
+        const RATIOS_STD = { 
+            half: INV_SQRT2,  // 最小值 A = B / √2
+            q1: INV_R4,       // 偏快
+            q2: 1,            // 均衡 B (基准)
+            q3: R4,           // 偏慢
+            base: SQRT2       // 最大值 C = B * √2
+        };
+
+        // 跟枪模式的比例（跟枪模式基准是 最大值C，所以C的比例是1）
+        const RATIOS_TRACK = { 
+            half: 0.5,        // 最小值 A = C / 2
+            q1: R4_3,         // 偏快
+            q2: INV_SQRT2,    // 均衡 B = C / √2
+            q3: INV_R4,       // 偏慢
+            base: 1           // 最大值 C (基准)
+        };
+
         const KEY_NAMES = { half: '最小值', q1: '偏快', q2: '均衡', q3: '偏慢', base: '最大值' };
 
         // ---- 普通模式 ----
@@ -917,16 +355,14 @@
             }
         }
 
-        // ---- 跟枪模式（已修改） ----
+        // ---- 跟枪模式 ----
         function calcTracking(x, y, z, sub) {
             const x_safe = Math.max(0.001, x);
             const y_safe = Math.max(0.001, y);
             const z_safe = Math.max(0.1, z);
             if (sub === 'simple') {
-                // 跟枪极简：Max = 15.55 · x^0.125 · z^0.125
                 return { result: 15.55 * Math.pow(x_safe, 0.125) * Math.pow(z_safe, 0.125) };
             } else {
-                // 跟枪完整：Max = 10.50 · x^0.125 · y^0.0625 · z^0.125
                 return { result: 10.50 * Math.pow(x_safe, 0.125) * Math.pow(y_safe, 0.0625) * Math.pow(z_safe, 0.125) };
             }
         }
@@ -974,7 +410,6 @@
             calculate();
         }
 
-        // ---- 普通子模式切换 ----
         function setStdSub(sub) {
             stdSubMode = sub;
             document.getElementById('btn-std-simple').classList.toggle('active', sub === 'simple');
@@ -983,7 +418,6 @@
             calculate();
         }
 
-        // ---- 跟枪子模式切换 ----
         function setTrackSub(sub) {
             if (currentMode !== 'tracking_3d') {
                 setMode('tracking_3d');
@@ -995,35 +429,29 @@
             calculate();
         }
 
-        // ---- 更新公式显示 ----
         function updateDisplays() {
             const exprElem = document.getElementById('fExpr');
             const footerDesc = document.getElementById('footerDesc');
 
             if (currentMode === 'tracking_3d') {
                 if (trackSubMode === 'simple') {
-                    exprElem.innerHTML =
-                        `<div class="math-row"><span>Max = 15.55 · x<sup>0.125</sup> · z<sup>0.125</sup></span></div>`;
-                    footerDesc.innerHTML = `<strong>跟枪极简</strong>：15.55 · x<sup>0.125</sup> · z<sup>0.125</sup>`;
+                    exprElem.innerHTML = `<div class="math-row"><span>Max = 15.55 · x<sup>0.125</sup> · z<sup>0.125</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>跟枪极简</strong>：公式输出为最大值C，中间均衡B = C ÷ √2`;
                 } else {
-                    exprElem.innerHTML =
-                        `<div class="math-row"><span>Max = 10.50 · x<sup>0.125</sup> · y<sup>0.0625</sup> · z<sup>0.125</sup></span></div>`;
-                    footerDesc.innerHTML = `<strong>跟枪完整</strong>：10.50 · x<sup>0.125</sup> · y<sup>0.0625</sup> · z<sup>0.125</sup>`;
+                    exprElem.innerHTML = `<div class="math-row"><span>Max = 10.50 · x<sup>0.125</sup> · y<sup>0.0625</sup> · z<sup>0.125</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>跟枪完整</strong>：公式输出为最大值C，中间均衡B = C ÷ √2`;
                 }
             } else {
                 if (stdSubMode === 'simple') {
-                    exprElem.innerHTML =
-                        `<div class="math-row"><span>Output = (e + √2) · x<sup>1/3</sup></span></div>`;
-                    footerDesc.innerHTML = `<strong>普通极简</strong>：(e + √2) · x<sup>1/3</sup>`;
+                    exprElem.innerHTML = `<div class="math-row"><span>Output = (e + √2) · x<sup>1/3</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>普通极简</strong>：公式输出为均衡值B，最大C = B × √2`;
                 } else {
-                    exprElem.innerHTML =
-                        `<div class="math-row"><span>Output = 2.88 · x<sup>0.333</sup> · y<sup>0.0625</sup></span></div>`;
-                    footerDesc.innerHTML = `<strong>普通完整</strong>：2.88 · x<sup>0.333</sup> · y<sup>0.0625</sup>`;
+                    exprElem.innerHTML = `<div class="math-row"><span>Output = 2.88 · x<sup>0.333</sup> · y<sup>0.0625</sup></span></div>`;
+                    footerDesc.innerHTML = `<strong>普通完整</strong>：公式输出为均衡值B，最大C = B × √2`;
                 }
             }
         }
 
-        // ---- 同步函数 ----
         function syncFromTop() {
             let x = parseFloat(document.getElementById('input-x').value) || 0;
             let y = parseFloat(document.getElementById('input-y').value) || 0;
@@ -1152,22 +580,24 @@
 
             let t3_max = 0, s_max = 0, s_bal = 0;
             if (currentMode === 'tracking_3d') {
-                t3_max = trackResult;
+                t3_max = trackResult; // 跟枪输出是 C
                 const stdBase = calcStandard(x, y).result;
-                s_max = stdBase * 4 / 3;
-                s_bal = stdBase;
+                s_max = stdBase * SQRT2; // 普通最大 C = B × √2
+                s_bal = stdBase;         // 普通均衡 B
             } else {
-                s_bal = stdResult;
-                s_max = stdResult * 4 / 3;
-                t3_max = calcTracking(x, y, z, trackSubMode).result;
+                s_bal = stdResult;       // 普通输出是 B
+                s_max = stdResult * SQRT2; // 普通最大 C = B × √2
+                t3_max = calcTracking(x, y, z, trackSubMode).result; // 跟枪输出是 C
             }
 
             document.getElementById('lbl-t3-max').textContent = t3_max.toFixed(2) + ' cm';
             document.getElementById('lbl-s-max').textContent = s_max.toFixed(2) + ' cm';
             document.getElementById('lbl-s-bal').textContent = s_bal.toFixed(2) + ' cm';
 
+            // 根据当前模式决定基准值（普通模式基准为B，跟枪模式基准为C）
             let baseVal = currentMode === 'standard' ? stdResult : trackResult;
             const ratios = currentMode === 'standard' ? RATIOS_STD : RATIOS_TRACK;
+            
             const baseVals = {};
             for (const key of ['half', 'q1', 'q2', 'q3', 'base']) {
                 baseVals[key] = baseVal * ratios[key];
@@ -1175,7 +605,6 @@
             updateDisplayValues(baseVals, factor, ratios);
 
             document.getElementById('stepsNatural').innerHTML = '';
-
             drawChart(x, y, z, t3_max, s_max, s_bal);
         }
 
@@ -1221,7 +650,7 @@
             let maxY = Math.max(90, t3_max, s_max);
             for (let x_plot = 0; x_plot <= maxX; x_plot += 100) {
                 const std = calcStandard(x_plot, y_in);
-                const stdMax = std.result * 4 / 3;
+                const stdMax = std.result * SQRT2;
                 const trackSimple = calcTracking(x_plot, y_in, z_in, 'simple').result;
                 const trackFull = calcTracking(x_plot, y_in, z_in, 'full').result;
                 maxY = Math.max(maxY, stdMax, std.result, trackSimple, trackFull);
@@ -1260,7 +689,7 @@
                 ctx.fillText(xVal, p.px, h - pad.bottom + 12);
             }
 
-            // 普通最大值 (实线)
+            // 普通最大值 (实线) - 基于 Output * √2
             ctx.strokeStyle = '#0284c7';
             ctx.lineWidth = 1.8;
             ctx.setLineDash([]);
@@ -1268,12 +697,12 @@
             let first = true;
             for (let xp = 0; xp <= maxX; xp += 40) {
                 const r = calcStandard(xp, y_in);
-                const p = toPx(xp, r.result * 4 / 3);
+                const p = toPx(xp, r.result * SQRT2);
                 if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
             }
             ctx.stroke();
 
-            // 普通均衡 (虚线)
+            // 普通均衡 (虚线) - Output 本身
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 1.4;
             ctx.setLineDash([4, 3]);
@@ -1307,7 +736,7 @@
                 first = true;
                 for (let xp = 0; xp <= maxX; xp += 40) {
                     const r = calcTracking(xp, y_in, z_in, trackSubMode);
-                    const p = toPx(xp, r.result * 0.75);
+                    const p = toPx(xp, r.result * INV_SQRT2); // 跟枪 Max 变均衡 B，除以 √2
                     if (first) { ctx.moveTo(p.px, p.py); first = false; } else { ctx.lineTo(p.px, p.py); }
                 }
                 ctx.stroke();
@@ -1330,7 +759,7 @@
             // 绘制关键点与标签
             if (currentMode === 'tracking_3d') {
                 const p_max = toPx(x_in, t3_max);
-                const p_bal = toPx(x_in, t3_max * 0.75);
+                const p_bal = toPx(x_in, t3_max * INV_SQRT2); // 修改为除以 √2
                 ctx.fillStyle = '#7c3aed';
                 ctx.beginPath();
                 ctx.arc(p_max.px, p_max.py, 5, 0, 2 * PI);
@@ -1342,9 +771,9 @@
                 ctx.fillStyle = '#7c3aed';
                 ctx.font = 'bold 8.5px sans-serif';
                 ctx.textAlign = 'left';
-                ctx.fillText(`跟枪 ${t3_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
+                ctx.fillText(`跟枪(Max) ${t3_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
                 ctx.fillStyle = '#a78bfa';
-                ctx.fillText(`均衡 ${(t3_max * 0.75).toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
+                ctx.fillText(`均衡 ${(t3_max * INV_SQRT2).toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
             } else {
                 const p_max = toPx(x_in, s_max);
                 const p_bal = toPx(x_in, s_bal);
@@ -1359,9 +788,9 @@
                 ctx.fillStyle = '#0284c7';
                 ctx.font = 'bold 8.5px sans-serif';
                 ctx.textAlign = 'left';
-                ctx.fillText(`普通最大 ${s_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
+                ctx.fillText(`普通最大(Max) ${s_max.toFixed(1)}`, p_max.px + 6, p_max.py - 2);
                 ctx.fillStyle = '#38bdf8';
-                ctx.fillText(`均衡 ${s_bal.toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
+                ctx.fillText(`均衡(Output) ${s_bal.toFixed(1)}`, p_bal.px + 6, p_bal.py - 2);
             }
 
             const p_v = toPx(x_in, 0);
