@@ -375,26 +375,103 @@
             border-color: var(--primary);
             color: var(--primary);
         }
+        #user-presets-panel {
+            background: var(--bg-glass);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+        }
+        .user-presets-header {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            margin: 0 1px 5px; color: #334155; font-size: .68rem; font-weight: 900;
+        }
+        .user-presets-hint { color: #64748b; font-size: .56rem; font-weight: 600; line-height: 1.35; margin: 0 1px 7px; }
+        .user-preset-manage { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .user-presets-count { color: #64748b; font-size: .56rem; font-weight: 800; margin-right: 2px; font-variant-numeric: tabular-nums; }
+        .user-preset-manage-btn { border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 6px; background: #fff; color: #334155; font-size: .58rem; line-height: 1; font-weight: 900; cursor: pointer; }
+        .user-preset-manage-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: #f0f9ff; }
+        .user-preset-manage-btn:disabled { opacity: .4; cursor: not-allowed; }
+        .user-presets-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+        .user-preset-slot { min-width: 0; display: flex; align-items: stretch; gap: 4px; }
+        .user-preset-load {
+            min-width: 0; flex: 1; border: 1px solid #cbd5e1; border-radius: 5px;
+            padding: 3px 5px; background: rgba(255,255,255,.95); color: #334155;
+            display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+            gap: 2px; cursor: pointer; text-align: left; overflow: hidden;
+        }
+        .user-preset-load:hover { border-color: var(--primary); background: #f0f9ff; }
+        .user-preset-load.has-config { border-color: #7dd3fc; background: #f0f9ff; }
+        .user-preset-name { display: block; width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .63rem; font-weight: 900; }
+        .user-preset-status { color: #64748b; font-size: .50rem; line-height: 1.1; }
+        .user-presets-title { display:flex; align-items:center; gap:6px; min-width:0; }
+        .user-preset-current { display:inline-block; padding:3px 5px; border:1px solid #cbd5e1; border-radius:4px; background:#f1f5f9; color:#475569; font-size:.55rem; font-weight:900; white-space:nowrap; }
+        .user-preset-current.has-current { border-color:#60a5fa; background:#dbeafe; color:#1d4ed8; }
+        /* 已保存与未保存采用不同色系，当前使用项再加蓝色描边。 */
+        .user-preset-load.has-config { border-color:#34d399; background:#dcfce7; color:#065f46; }
+        .user-preset-load.has-config .user-preset-status { color:#047857; font-weight:900; }
+        .user-preset-load:not(.has-config) { border-color:#fdba74; background:#fff7ed; color:#7c2d12; }
+        .user-preset-load:not(.has-config) .user-preset-status { color:#c2410c; font-weight:900; }
+        .user-preset-load.is-current { outline:2px solid #2563eb; outline-offset:0; border-color:#1d4ed8 !important; box-shadow:0 0 0 2px rgba(37,99,235,.17); }
+        .user-preset-load.is-current.has-config { background:#dbeafe; }
+        .user-preset-load.is-current:not(.has-config) { background:#ffedd5; }
+        .user-preset-tools { display: flex; flex-direction: column; justify-content: center; gap: 3px; flex-shrink: 0; }
+        .user-preset-tool {
+            min-width: 34px; border: 1px solid #d7dee8; border-radius: 4px; padding: 4px 4px;
+            background: #fff; color: #475569; font-size: .55rem; line-height: 1.1; font-weight: 800; cursor: pointer;
+        }
+        .user-preset-tool:hover { border-color: var(--primary); color: var(--primary); background: #f0f9ff; }
         #bottom-right-hud {
             background: var(--bg-glass);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            padding: 10px 14px;
+            padding: 8px 11px;
             border-radius: 8px;
             border: 1px solid var(--border-glass);
             border-left: 3.5px solid var(--primary);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-            pointer-events: none;
+            pointer-events: auto;
         }
+        #bottom-right-hud.hud-collapsed > :not(.rel-title) { display: none !important; }
+        #bottom-right-hud-toggle {
+            align-self: flex-end;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 6px 10px;
+            border: 1px solid var(--border-glass);
+            border-left: 3px solid var(--primary);
+            border-radius: 7px;
+            background: var(--bg-glass);
+            color: var(--text-sub);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .05);
+            font-family: inherit;
+            font-size: .62rem;
+            font-weight: 800;
+            line-height: 1.2;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: border-color .15s ease, background .15s ease, color .15s ease;
+        }
+        #bottom-right-hud-toggle:hover { border-color: var(--primary); background: #f0f9ff; color: var(--primary); }
+        #bottom-right-hud-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
         .rel-title {
             font-size: 0.74rem;
             font-weight: 900;
             color: var(--primary);
-            margin-bottom: 4px;
+            margin-bottom: 0;
             display: flex;
             align-items: center;
             gap: 5px;
+            cursor: pointer;
+            user-select: none;
         }
+        #bottom-right-hud:not(.hud-collapsed) .rel-title { margin-bottom: 4px; }
+        .rel-toggle-hint { margin-left: auto; color: #64748b; font-size: .58rem; font-weight: 800; white-space: nowrap; }
+        #bottom-right-hud .rel-title:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 3px; }
         .rel-formula {
             font-size: 0.68rem;
             font-weight: 700;
@@ -821,6 +898,9 @@
         .step-btn:hover:not(:disabled) { background: #e0f2fe; }
         .step-btn:disabled { opacity: 0.35; cursor: not-allowed; color: #94a3b8; }
         .num-input {
+            user-select: text;
+            -webkit-user-select: text;
+            caret-color: var(--primary);
             width: 54px;
             height: 20px;
             border: none;
@@ -1618,7 +1698,7 @@
             
             <div class="hud-card interactive-hud-card" title="设置解锁模式最大渲染频率（0 = 不设人工上限）">
                 <span style="font-size:0.7rem;font-weight:800;">最大FPS:</span>
-                <input type="number" id="inp-max-fps" class="num-input" style="width:42px;height:18px;border-radius:3px;font-size:0.75rem;" value="0" min="0" max="720" oninput="setMaxFps(this.value)" />
+                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="inp-max-fps" class="num-input" style="width:42px;height:18px;border-radius:3px;font-size:0.75rem;" value="0" min="0" max="720" oninput="setMaxFps(this.value)" />
             </div>
             <div class="hud-card f11-card f11-highlight" id="f11-box" title="点击切换全屏">
                 <svg class="icon" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
@@ -1688,7 +1768,7 @@
                     <input type="range" id="inp-move-speed-r" min="1.0" max="20.0" step="0.05" value="7.5" oninput="setMoveSpeed(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-move-speed', -0.1)">−</button>
-                        <input type="number" class="num-input" id="inp-move-speed" value="7.50" step="0.05" min="0.5" max="30" />
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-move-speed" value="7.50" step="0.05" min="0.5" max="30" />
                         <button class="step-btn" onclick="stepValGlobal('inp-move-speed', 0.1)">+</button>
                     </div>
                 </div>
@@ -1698,7 +1778,7 @@
                     <input type="range" id="inp-crouch-speed-r" min="0.5" max="15.0" step="0.05" value="2.25" oninput="setCrouchSpeed(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-crouch-speed', -0.05)">−</button>
-                        <input type="number" class="num-input" id="inp-crouch-speed" value="2.25" step="0.05" min="0.1" max="15" />
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-crouch-speed" value="2.25" step="0.05" min="0.1" max="15" />
                         <button class="step-btn" onclick="stepValGlobal('inp-crouch-speed', 0.05)">+</button>
                     </div>
                 </div>
@@ -1708,7 +1788,7 @@
                     <input type="range" id="inp-crouch-depth-r" min="0.1" max="1.5" step="0.02" value="0.5" oninput="setCrouchDepth(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-crouch-depth', -0.02)">−</button>
-                        <input type="number" class="num-input" id="inp-crouch-depth" value="0.50" step="0.02" min="0.05" max="2" />
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-crouch-depth" value="0.50" step="0.02" min="0.05" max="2" />
                         <button class="step-btn" onclick="stepValGlobal('inp-crouch-depth', 0.02)">+</button>
                     </div>
                 </div>
@@ -1726,7 +1806,7 @@
                     <input type="range" id="inp-jump-height-r" min="0.1" max="4.0" step="0.02" value="1.25" oninput="setJumpHeight(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-jump-height', -0.02)">−</button>
-                        <input type="number" class="num-input" id="inp-jump-height" value="1.25" step="0.02" min="0.05" max="10" />
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-jump-height" value="1.25" step="0.02" min="0.05" max="10" />
                         <button class="step-btn" onclick="stepValGlobal('inp-jump-height', 0.02)">+</button>
                     </div>
                 </div>
@@ -1764,14 +1844,33 @@
             </button>
             <input type="file" id="file-import-input" accept=".json" style="display:none;" onchange="handleConfigFileImport(event)" />
         </div>
-        <div id="bottom-right-hud">
-            <div class="rel-title" id="br-title">
+        <div id="user-presets-panel">
+            <div class="user-presets-header">
+                <div class="user-presets-title">
+                    <span>用户预设</span>
+                    <span id="user-preset-current" class="user-preset-current">当前：未选择</span>
+                </div>
+                <div class="user-preset-manage">
+                    <span id="user-presets-count" class="user-presets-count">4/10</span>
+                    <button id="user-presets-add" class="user-preset-manage-btn" onclick="addUserPreset()" title="增加一个预设，最多10个">＋ 增加</button>
+                    <button id="user-presets-remove" class="user-preset-manage-btn" onclick="removeUserPreset()" title="减少最后一个预设">－ 减少</button>
+                </div>
+            </div>
+            <div class="user-presets-hint">点击预设名应用 · 存入覆盖当前配置 · 改名最多10字 · 清空后恢复默认</div>
+            <div class="user-presets-grid" id="user-presets-grid"></div>
+        </div>
+        <div id="bottom-right-hud" class="hud-collapsed" style="display:none;">
+            <div class="rel-title" id="br-title" role="button" tabindex="0" aria-controls="br-formula br-desc" aria-expanded="true" title="点击收起文字提示">
                 <svg class="icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
                 <span>物理手感与双锁安全</span>
+                <span class="rel-toggle-hint" id="br-toggle-hint">点击收起 ▴</span>
             </div>
             <div class="rel-formula" id="br-formula">• <strong>活动范围</strong>与<strong>目标距离</strong>均默认双重锁定<br />• 目标真实物理大小 100% 绝对保持恒定</div>
             <div class="rel-desc" id="br-desc">• <strong>命中 +1 分</strong> ｜ <strong>脱靶 -1 分</strong> ｜ 支持 R 键极速不掉锁重开。<br />• 自由模式支持无尽长时训练。</div>
         </div>
+        <button type="button" id="bottom-right-hud-toggle" aria-controls="bottom-right-hud" aria-expanded="false" title="展开右下角文字提示">
+            <span>提示说明</span><span aria-hidden="true">＋</span>
+        </button>
     </div>
 
     <!-- 进度与结果模态框 -->
@@ -1960,7 +2059,7 @@
                         <input type="range" id="inp-view-height-r" min="0.1" max="10" step="0.02" value="1.625" oninput="setViewHeight(parseFloat(this.value))" />
                         <div class="stepper-box">
                             <button class="step-btn" onclick="stepValGlobal('inp-view-height', -0.05)">−</button>
-                            <input type="number" class="num-input" id="inp-view-height" value="1.63" step="0.05" min="0.1" max="10" />
+                            <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-view-height" value="1.63" step="0.05" min="0.1" max="10" />
                             <button class="step-btn" onclick="stepValGlobal('inp-view-height', 0.05)">+</button>
                         </div>
                     </div>
@@ -1987,7 +2086,7 @@
                             <input type="range" id="inp-size-r" min="5" max="200" step="0.1" value="15.0" oninput="syncTargetSize(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-size', -0.5)">−</button>
-                                <input type="number" class="num-input" id="inp-size" value="15.00" step="0.5" min="5" max="200" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-size" value="15.00" step="0.5" min="5" max="200" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-size', 0.5)">+</button>
                             </div>
                         </div>
@@ -2089,7 +2188,7 @@
                             <input type="range" id="inp-speed-r" min="1" max="300" step="0.5" value="12.5" oninput="setSixshotSpeed(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-speed', -1)">−</button>
-                                <input type="number" class="num-input" id="inp-speed" value="12.50" step="1" min="0.1" max="300" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-speed" value="12.50" step="1" min="0.1" max="300" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-speed', 1)">+</button>
                             </div>
                         </div>
@@ -2107,7 +2206,7 @@
                                 <input type="range" id="inp-sixshot-freq-min-r" min="0" max="5.0" step="0.05" value="0.5" oninput="setSixshotMinInterval(parseFloat(this.value))" />
                                 <div class="stepper-box">
                                     <button class="step-btn" onclick="stepValGlobal('inp-sixshot-freq-min', -0.05)">−</button>
-                                    <input type="number" class="num-input" id="inp-sixshot-freq-min" value="0.50" step="0.05" min="0" max="10" />
+                                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-sixshot-freq-min" value="0.50" step="0.05" min="0" max="10" />
                                     <button class="step-btn" onclick="stepValGlobal('inp-sixshot-freq-min', 0.05)">+</button>
                                 </div>
                             </div>
@@ -2116,7 +2215,7 @@
                                 <input type="range" id="inp-sixshot-freq-max-r" min="0" max="5.0" step="0.05" value="1.5" oninput="setSixshotMaxInterval(parseFloat(this.value))" />
                                 <div class="stepper-box">
                                     <button class="step-btn" onclick="stepValGlobal('inp-sixshot-freq-max', -0.05)">−</button>
-                                    <input type="number" class="num-input" id="inp-sixshot-freq-max" value="1.50" step="0.05" min="0" max="10" />
+                                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-sixshot-freq-max" value="1.50" step="0.05" min="0" max="10" />
                                     <button class="step-btn" onclick="stepValGlobal('inp-sixshot-freq-max', 0.05)">+</button>
                                 </div>
                             </div>
@@ -2143,7 +2242,7 @@
                             <input type="range" id="inp-spawn-angle-r" min="10" max="150" step="0.2" value="45" disabled oninput="syncSpawnAngle(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-spawn-angle', -1)">−</button>
-                                <input type="number" class="num-input" id="inp-spawn-angle" value="45.00" step="0.5" min="10" max="150" disabled />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-spawn-angle" value="45.00" step="0.5" min="10" max="150" disabled />
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-spawn-angle', 1)">+</button>
                             </div>
                         </div>
@@ -2164,7 +2263,7 @@
                             <input type="range" id="inp-depth-sixshot-r" min="3" max="30" step="0.1" value="10.0" disabled oninput="setDepthSixshot(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-depth-sixshot', -0.5)">−</button>
-                                <input type="number" class="num-input" id="inp-depth-sixshot" value="10.00" step="0.5" min="3" max="30" disabled />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-depth-sixshot" value="10.00" step="0.5" min="3" max="30" disabled />
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-depth-sixshot', 0.5)">+</button>
                             </div>
                         </div>
@@ -2194,7 +2293,7 @@
                             <input type="range" id="inp-target-count-r" min="1" max="24" step="1" value="6" oninput="setSixshotTargetCount(parseInt(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-target-count', -1)">−</button>
-                                <input type="number" class="num-input" id="inp-target-count" value="6" step="1" min="1" max="24" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-target-count" value="6" step="1" min="1" max="24" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-target-count', 1)">+</button>
                             </div>
                         </div>
@@ -2231,7 +2330,7 @@
                             <input type="range" id="inp-track-speed-r" min="1" max="300" step="0.2" value="12.5" oninput="setTrackingSpeed(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-track-speed', -1)">−</button>
-                                <input type="number" class="num-input" id="inp-track-speed" value="12.50" step="1" min="0.1" max="300" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-track-speed" value="12.50" step="1" min="0.1" max="300" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-track-speed', 1)">+</button>
                             </div>
                         </div>
@@ -2272,7 +2371,7 @@
                             <input type="range" id="inp-track-angle-r" min="10" max="360" step="0.5" value="360" disabled oninput="setTrackingAngle(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-track-angle', -5)">−</button>
-                                <input type="number" class="num-input" id="inp-track-angle" value="360.00" step="1" min="10" max="360" disabled />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-track-angle" value="360.00" step="1" min="10" max="360" disabled />
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-track-angle', 5)">+</button>
                             </div>
                         </div>
@@ -2293,7 +2392,7 @@
                             <input type="range" id="inp-depth-tracking-r" min="3" max="30" step="0.1" value="10.0" disabled oninput="setDepthTracking(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-depth-tracking', -0.5)">−</button>
-                                <input type="number" class="num-input" id="inp-depth-tracking" value="10.00" step="0.5" min="3" max="30" disabled />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-depth-tracking" value="10.00" step="0.5" min="3" max="30" disabled />
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-depth-tracking', 0.5)">+</button>
                             </div>
                         </div>
@@ -2318,7 +2417,7 @@
                             <input type="range" id="inp-track-wallheight-r" min="1.0" max="25.0" step="0.1" value="5.0" oninput="setTrackingWallHeight(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-track-wallheight', -0.5)">−</button>
-                                <input type="number" class="num-input" id="inp-track-wallheight" value="5.00" step="0.5" min="1.0" max="30.0" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-track-wallheight" value="5.00" step="0.5" min="1.0" max="30.0" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-track-wallheight', 0.5)">+</button>
                             </div>
                         </div>
@@ -2327,7 +2426,7 @@
                             <input type="range" id="inp-track-depth3d-r" min="0" max="40" step="0.5" value="10.0" oninput="setTrackingDepthRange3D(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-track-depth3d', -0.5)">−</button>
-                                <input type="number" class="num-input" id="inp-track-depth3d" value="10.00" step="0.5" min="0" max="60" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-track-depth3d" value="10.00" step="0.5" min="0" max="60" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-track-depth3d', 0.5)">+</button>
                             </div>
                         </div>
@@ -2359,7 +2458,7 @@
                             <input type="range" id="inp-hold-gap-r" min="0.5" max="10.0" step="0.02" value="2.0" oninput="setHoldingGap(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-gap', -0.05)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-gap" value="2.00" step="0.05" min="0.5" max="10" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-gap" value="2.00" step="0.05" min="0.5" max="10" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-gap', 0.05)">+</button>
                             </div>
                         </div>
@@ -2368,7 +2467,7 @@
                             <input type="range" id="inp-hold-walldepth-r" min="3" max="30" step="0.05" value="15.0" oninput="setHoldingWallDepth(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-walldepth', -0.1)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-walldepth" value="15.00" step="0.1" min="3" max="30" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-walldepth" value="15.00" step="0.1" min="3" max="30" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-walldepth', 0.1)">+</button>
                             </div>
                         </div>
@@ -2377,7 +2476,7 @@
                             <input type="range" id="inp-hold-depth-r" min="3" max="35" step="0.05" value="15.5" oninput="setHoldingDepth(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-depth', -0.1)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-depth" value="15.50" step="0.1" min="3" max="35" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-depth" value="15.50" step="0.1" min="3" max="35" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-depth', 0.1)">+</button>
                             </div>
                         </div>
@@ -2386,7 +2485,7 @@
                             <input type="range" id="inp-hold-speed-r" min="1" max="30" step="0.05" value="5.0" oninput="setHoldingSpeed(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-speed', -0.1)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-speed" value="5.00" step="0.1" min="1" max="30" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-speed" value="5.00" step="0.1" min="1" max="30" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-speed', 0.1)">+</button>
                             </div>
                         </div>
@@ -2403,7 +2502,7 @@
                             <input type="range" id="inp-hold-interval-min-r" min="0" max="5.0" step="0.02" value="0.8" oninput="setHoldingIntervalMin(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-interval-min', -0.05)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-interval-min" value="0.80" step="0.05" min="0" max="10" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-interval-min" value="0.80" step="0.05" min="0" max="10" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-interval-min', 0.05)">+</button>
                             </div>
                         </div>
@@ -2412,7 +2511,7 @@
                             <input type="range" id="inp-hold-interval-max-r" min="0" max="5.0" step="0.02" value="1.8" oninput="setHoldingIntervalMax(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-interval-max', -0.05)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-interval-max" value="1.80" step="0.05" min="0" max="10" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-interval-max" value="1.80" step="0.05" min="0" max="10" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-interval-max', 0.05)">+</button>
                             </div>
                         </div>
@@ -2447,7 +2546,7 @@
                             <input type="range" id="inp-hold-basey-r" min="-5.0" max="10.0" step="0.02" value="1.625" oninput="setHoldingBaseY(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-basey', -0.05)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-basey" value="1.63" step="0.05" min="-10" max="20" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-basey" value="1.63" step="0.05" min="-10" max="20" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-basey', 0.05)">+</button>
                             </div>
                         </div>
@@ -2456,7 +2555,7 @@
                             <input type="range" id="inp-hold-range-r" min="0" max="5.0" step="0.02" value="1.0" oninput="setHoldingRangeY(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-range', -0.05)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-range" value="1.00" step="0.05" min="0" max="10" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-range" value="1.00" step="0.05" min="0" max="10" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-range', 0.05)">+</button>
                             </div>
                         </div>
@@ -2465,7 +2564,7 @@
                             <input type="range" id="inp-hold-rangez-r" min="0" max="25.0" step="0.2" value="0.0" oninput="setHoldingRangeZ(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-rangez', -0.5)">−</button>
-                                <input type="number" class="num-input" id="inp-hold-rangez" value="0.00" step="0.5" min="0" max="50" />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-hold-rangez" value="0.00" step="0.5" min="0" max="50" />
                                 <button class="step-btn" onclick="stepValGlobal('inp-hold-rangez', 0.5)">+</button>
                             </div>
                         </div>
@@ -2625,7 +2724,7 @@
                         <input type="range" id="inp-track-freq-min-r" min="0" max="5.0" step="0.02" value="0.8" oninput="setStrafeMin(parseFloat(this.value))" />
                         <div class="stepper-box">
                             <button class="step-btn" onclick="stepValGlobal('inp-track-freq-min', -0.05)">−</button>
-                            <input type="number" class="num-input" id="inp-track-freq-min" value="0.80" step="0.05" min="0" max="10" />
+                            <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-track-freq-min" value="0.80" step="0.05" min="0" max="10" />
                             <button class="step-btn" onclick="stepValGlobal('inp-track-freq-min', 0.05)">+</button>
                         </div>
                     </div>
@@ -2634,7 +2733,7 @@
                         <input type="range" id="inp-track-freq-max-r" min="0" max="5.0" step="0.02" value="1.8" oninput="setStrafeMax(parseFloat(this.value))" />
                         <div class="stepper-box">
                             <button class="step-btn" onclick="stepValGlobal('inp-track-freq-max', -0.05)">−</button>
-                            <input type="number" class="num-input" id="inp-track-freq-max" value="1.80" step="0.05" min="0" max="10" />
+                            <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-track-freq-max" value="1.80" step="0.05" min="0" max="10" />
                             <button class="step-btn" onclick="stepValGlobal('inp-track-freq-max', 0.05)">+</button>
                         </div>
                     </div>
@@ -2655,7 +2754,7 @@
                                 <input type="range" id="inp-radial-freq-min-r" min="0" max="5.0" step="0.02" value="0.8" oninput="setRadialStrafeMin(parseFloat(this.value))" />
                                 <div class="stepper-box">
                                     <button class="step-btn" onclick="stepValGlobal('inp-radial-freq-min', -0.05)">−</button>
-                                    <input type="number" class="num-input" id="inp-radial-freq-min" value="0.80" step="0.05" min="0" max="10" oninput="setRadialStrafeMin(parseFloat(this.value))" />
+                                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-radial-freq-min" value="0.80" step="0.05" min="0" max="10" oninput="setRadialStrafeMin(parseFloat(this.value))" />
                                     <button class="step-btn" onclick="stepValGlobal('inp-radial-freq-min', 0.05)">+</button>
                                 </div>
                             </div>
@@ -2664,7 +2763,7 @@
                                 <input type="range" id="inp-radial-freq-max-r" min="0" max="5.0" step="0.02" value="1.8" oninput="setRadialStrafeMax(parseFloat(this.value))" />
                                 <div class="stepper-box">
                                     <button class="step-btn" onclick="stepValGlobal('inp-radial-freq-max', -0.05)">−</button>
-                                    <input type="number" class="num-input" id="inp-radial-freq-max" value="1.80" step="0.05" min="0" max="10" oninput="setRadialStrafeMax(parseFloat(this.value))" />
+                                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-radial-freq-max" value="1.80" step="0.05" min="0" max="10" oninput="setRadialStrafeMax(parseFloat(this.value))" />
                                     <button class="step-btn" onclick="stepValGlobal('inp-radial-freq-max', 0.05)">+</button>
                                 </div>
                             </div>
@@ -2692,7 +2791,7 @@
                                 <div class="bias-vertical-value">
                                     <div class="stepper-box">
                                         <button class="step-btn" onclick="stepValGlobal('inp-radial-bias', -5)">−</button>
-                                        <input type="number" class="num-input" id="inp-radial-bias" value="50" step="5" min="0" max="100" />
+                                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-radial-bias" value="50" step="5" min="0" max="100" />
                                         <button class="step-btn" onclick="stepValGlobal('inp-radial-bias', 5)">+</button>
                                     </div>
                                 </div>
@@ -2749,7 +2848,7 @@
                         <input type="range" id="inp-wall-opacity-r" min="0" max="100" step="1" value="12" style="min-width:32px;" oninput="setWallOpacity(parseFloat(this.value))" />
                         <div class="stepper-box">
                             <button class="step-btn" onclick="stepValGlobal('inp-wall-opacity', -1)">−</button>
-                            <input type="number" class="num-input" id="inp-wall-opacity" value="12" step="1" min="0" max="100" />
+                            <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-wall-opacity" value="12" step="1" min="0" max="100" />
                             <button class="step-btn" onclick="stepValGlobal('inp-wall-opacity', 1)">+</button>
                         </div>
                     </div>
@@ -2808,7 +2907,7 @@
                         <input type="range" id="inp-sphere-seg-r" min="4" max="64" step="1" value="16" oninput="setSphereSegments(parseInt(this.value))" />
                         <div class="stepper-box">
                             <button class="step-btn" onclick="stepValGlobal('inp-sphere-seg', -1)">−</button>
-                            <input type="number" class="num-input" id="inp-sphere-seg" value="16" step="1" min="4" max="64" />
+                            <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-sphere-seg" value="16" step="1" min="4" max="64" />
                             <button class="step-btn" onclick="stepValGlobal('inp-sphere-seg', 1)">+</button>
                         </div>
                     </div>
@@ -2855,7 +2954,7 @@
                 <input type="range" id="inp-sound-vol-r" min="0" max="100" step="1" value="75" oninput="setSoundVolume(parseFloat(this.value))" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-sound-vol', -5)">−</button>
-                    <input type="number" class="num-input" id="inp-sound-vol" value="75" step="5" min="0" max="100" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-sound-vol" value="75" step="5" min="0" max="100" />
                     <button class="step-btn" onclick="stepValGlobal('inp-sound-vol', 5)">+</button>
                 </div>
             </div>
@@ -2877,7 +2976,7 @@
                 <input type="range" id="inp-cross-size-r" min="1" max="200" step="0.25" value="11.75" oninput="syncCrosshair('size',this.value)" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-size',-0.5)">−</button>
-                    <input type="number" class="num-input" id="inp-cross-size" value="11.75" step="0.5" min="1" max="500" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-cross-size" value="11.75" step="0.5" min="1" max="500" />
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-size',0.5)">+</button>
                 </div>
             </div>
@@ -2886,7 +2985,7 @@
                 <input type="range" id="inp-cross-thick-r" min="1" max="40" step="0.25" value="3" oninput="syncCrosshair('thick',this.value)" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-thick',-0.5)">−</button>
-                    <input type="number" class="num-input" id="inp-cross-thick" value="3.00" step="0.5" min="1" max="50" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-cross-thick" value="3.00" step="0.5" min="1" max="50" />
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-thick',0.5)">+</button>
                 </div>
             </div>
@@ -2895,26 +2994,12 @@
                 <input type="range" id="inp-cross-gap-r" min="0" max="40" step="0.25" value="1.5" oninput="syncCrosshair('gap',this.value)" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-gap',-0.25)">−</button>
-                    <input type="number" class="num-input" id="inp-cross-gap" value="1.50" step="0.25" min="0" max="50" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-cross-gap" value="1.50" step="0.25" min="0" max="50" />
                     <button class="step-btn" onclick="stepValGlobal('inp-cross-gap',0.25)">+</button>
                 </div>
             </div>
             <div class="section-header" style="margin-top:4px;"><span class="section-label">准星专属颜色</span></div>
             <div class="swatches-grid-9" id="swatches-crosshair"></div>
-        </div>
-
-        <div class="section-card" id="section-debug-mode">
-            <div class="section-header">
-                <span class="section-label">
-                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8m-4-4h8"/></svg>
-                    <span>调试测量模式</span>
-                </span>
-                <button class="pill-btn toggle-switch-btn" id="btn-debug-mode-toggle" onclick="toggleDebugMode()">已关闭</button>
-            </div>
-            <div style="font-size:0.62rem; color:#64748b; line-height:1.5;">
-                开启后：<strong style="color:#0284c7;">鼠标竖直移动</strong> → 映射为 <strong style="color:#0284c7;">水平旋转</strong>。
-                用尺子竖直移动鼠标 10cm，观察画面转过多少度，验证 DPI/CM360 换算是否准确。
-            </div>
         </div>
 
         <div class="section-card">
@@ -2934,7 +3019,7 @@
                 <input type="range" id="inp-dpi-r" min="50" max="6400" step="10" value="800" oninput="setDpiManual(parseFloat(this.value))" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-dpi',-50)">−</button>
-                    <input type="number" class="num-input" id="inp-dpi" value="800" min="50" max="32000" step="1" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-dpi" value="800" min="50" max="32000" step="1" />
                     <button class="step-btn" onclick="stepValGlobal('inp-dpi',50)">+</button>
                 </div>
             </div>
@@ -2964,7 +3049,7 @@
                 <input type="range" id="inp-cm-x-r" min="1" max="300" step="0.1" value="55" oninput="setCmX(parseFloat(this.value))" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cm-x',-0.5)">−</button>
-                    <input type="number" class="num-input" id="inp-cm-x" value="55.00" min="0.1" max="10000" step="0.01" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-cm-x" value="55.00" min="0.1" max="10000" step="0.01" />
                     <button class="step-btn" onclick="stepValGlobal('inp-cm-x',0.5)">+</button>
                 </div>
             </div>
@@ -2973,7 +3058,7 @@
                 <input type="range" id="inp-cm-y-r" min="1" max="300" step="0.1" value="55" oninput="setCmY(parseFloat(this.value))" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-cm-y',-0.5)">−</button>
-                    <input type="number" class="num-input" id="inp-cm-y" value="55.00" min="0.1" max="10000" step="0.01" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-cm-y" value="55.00" min="0.1" max="10000" step="0.01" />
                     <button class="step-btn" onclick="stepValGlobal('inp-cm-y',0.5)">+</button>
                 </div>
             </div>
@@ -2981,22 +3066,49 @@
 
         <div class="section-card">
             <div class="section-header"><span class="section-label"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="3"/></svg>水平视场角 (H-FOV)</span></div>
-            <div class="preset-grid cols-4" id="fov-preset-grid">
-                <button class="pill-btn" data-val="60" onclick="syncFov(60)">60°</button>
-                <button class="pill-btn" data-val="90" onclick="syncFov(90)">90°</button>
-                <button class="pill-btn active" data-val="103" onclick="syncFov(103)">103° (OW/VAL)</button>
-                <button class="pill-btn" data-val="110" onclick="syncFov(110)">110°</button>
+            <div id="fov-preset-grid" style="display:flex;flex-direction:column;gap:4px;">
+                <div class="preset-grid cols-5" aria-label="低视场角预设">
+                    <button class="pill-btn" data-val="1" title="设置水平视场角为 1°" onclick="syncFov(1)">1°</button>
+                    <button class="pill-btn" data-val="5" title="设置水平视场角为 5°" onclick="syncFov(5)">5°</button>
+                    <button class="pill-btn" data-val="10" title="设置水平视场角为 10°" onclick="syncFov(10)">10°</button>
+                    <button class="pill-btn" data-val="20" title="设置水平视场角为 20°" onclick="syncFov(20)">20°</button>
+                    <button class="pill-btn" data-val="30" title="设置水平视场角为 30°" onclick="syncFov(30)">30°</button>
+                </div>
+                <div class="preset-grid cols-4" aria-label="常用视场角预设">
+                    <button class="pill-btn" data-val="60" onclick="syncFov(60)">60°</button>
+                    <button class="pill-btn" data-val="90" onclick="syncFov(90)">90°</button>
+                    <button class="pill-btn active" data-val="103" title="Overwatch / VALORANT 常用参考值" onclick="syncFov(103)">103°</button>
+                    <button class="pill-btn" data-val="110" onclick="syncFov(110)">110°</button>
+                </div>
             </div>
             <div class="ctrl-row">
                 <label>微调 FOV</label>
-                <input type="range" id="inp-fov-r" min="10" max="140" step="0.5" value="103" oninput="syncFov(parseFloat(this.value))" />
+                <input type="range" id="inp-fov-r" min="1" max="140" step="0.5" value="103" oninput="syncFov(parseFloat(this.value))" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('inp-fov',-1)">−</button>
-                    <input type="number" class="num-input" id="inp-fov" value="103.00" step="0.5" min="10" max="140" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-fov" value="103.00" step="0.5" min="1" max="140" />
                     <button class="step-btn" onclick="stepValGlobal('inp-fov',1)">+</button>
                 </div>
             </div>
         </div>
+        <div class="section-card" id="section-debug-mode">
+            <div class="section-header">
+                <span class="section-label">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8m-4-4h8"/></svg>
+                    <span>调试测量模式</span>
+                </span>
+                <button class="pill-btn toggle-switch-btn" id="btn-debug-mode-toggle" onclick="toggleDebugMode()">已关闭</button>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin:2px 0 6px;">
+                <span style="font-size:0.62rem; color:#64748b; font-weight:700;">竖直移动时的旋转方向</span>
+                <button class="pill-btn" id="btn-debug-direction" onclick="toggleDebugDirection()" title="切换向上移动鼠标时的旋转方向">向上 → 左旋</button>
+            </div>
+            <div id="debug-mode-description" style="font-size:0.62rem; color:#64748b; line-height:1.5;">
+                开启后：<strong style="color:#0284c7;">鼠标竖直移动</strong> → 映射为 <strong style="color:#0284c7;">水平旋转</strong>。
+                用尺子竖直移动鼠标 10cm，观察画面转过多少度，验证 DPI/CM360 换算是否准确。
+            </div>
+        </div>
+
     </div>
 
     <!-- ============================================================
@@ -3136,6 +3248,7 @@
         soundVolume: 75,
         missSoundEnabled: true,
         debugMode: false,
+        debugInvertDirection: false, // false：鼠标向上=向左旋转；true：鼠标向上=向右旋转
         dpi: 800,
         cmPer360: 55.0,
         cmPer360X: 55.0,
@@ -3254,6 +3367,9 @@
         }
     };
 
+    // 用于补齐导入文件或旧预设中缺失的新版字段，不覆盖用户已配置的值。
+    const DEFAULT_CONFIG = JSON.parse(JSON.stringify(CFG));
+
     const STATE = {
         activeOfficialProject: null,
         _lastScoreStr: null,
@@ -3318,6 +3434,12 @@
 
     const STORAGE_KEY = 'XDH_AIM_TRAINER_V10_PRO';
     const CHART_STORAGE_KEY = 'XDH_PERF_CHART_STRICT_RECORD';
+    const USER_PRESETS_STORAGE_KEY = 'XDH_AIM_USER_PRESETS_V1';
+    const DEFAULT_USER_PRESET_COUNT = 4;
+    const MAX_USER_PRESETS = 10;
+    const DEFAULT_USER_PRESET_NAMES = Array.from({ length: MAX_USER_PRESETS }, (_, index) => `预设${index + 1}`);
+    let USER_PRESETS = loadUserPresets();
+    let ACTIVE_USER_PRESET_INDEX = Number.isInteger(USER_PRESETS.activeIndex) ? USER_PRESETS.activeIndex : null;
     const ISO_INCH_TO_CM = 2.54;
     let btnCooldownTimer = null;
     let lastQuickRestartTime = 0;
@@ -3330,8 +3452,18 @@
     function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
     function rand(min, max) { return min + Math.random() * (max - min); }
     function hexToThree(c) { return parseInt(c.replace('#', ''), 16); }
-    function setValF(id, v, f = 2) { const e = getEl(id); if (e) e.value = Number(v).toFixed(f); }
-    function setVal(id, v) { const e = getEl(id); if (e) e.value = v; }
+    function isFocusedNumericInput(element) {
+        return !!(element && element.classList && element.classList.contains('num-input')
+            && document.activeElement === element);
+    }
+    function setValF(id, v, f = 2) {
+        const e = getEl(id);
+        if (e && !isFocusedNumericInput(e)) e.value = Number(v).toFixed(f);
+    }
+    function setVal(id, v) {
+        const e = getEl(id);
+        if (e && !isFocusedNumericInput(e)) e.value = v;
+    }
 
     function formatKeyCode(code) {
         if (!code) return '--';
@@ -4014,6 +4146,28 @@
         frameBridge.port2.postMessage(0);
     }
 
+    function syncDebugDirectionUI() {
+        const direction = CFG.debugInvertDirection ? '右' : '左';
+        const button = getEl('btn-debug-direction');
+        if (button) {
+            button.textContent = `向上 → ${direction}旋`;
+            button.title = `当前：鼠标向上移动时画面向${direction}旋转；点击切换方向`;
+            button.classList.toggle('active', !!CFG.debugInvertDirection);
+        }
+        const indicator = getEl('debug-indicator');
+        if (indicator) indicator.textContent = `轴向已互换 · 竖直移动鼠标 = 水平旋转（向上→${direction}）`;
+        const description = getEl('debug-mode-description');
+        if (description) {
+            description.innerHTML = `开启后：<strong style="color:#0284c7;">鼠标向上移动</strong> → 画面向<strong style="color:#0284c7;">${direction}旋转</strong>。用尺子竖直移动鼠标 10cm，观察画面转过多少度，验证 DPI/CM360 换算是否准确。`;
+        }
+    }
+
+    window.toggleDebugDirection = function() {
+        CFG.debugInvertDirection = !CFG.debugInvertDirection;
+        syncDebugDirectionUI();
+        saveToLocalStorage();
+    };
+
     window.toggleDebugMode = function() {
         CFG.debugMode = !CFG.debugMode;
         const btn = getEl('btn-debug-mode-toggle');
@@ -4025,6 +4179,7 @@
         const guide = getEl('debug-horizon-guide');
         if (indicator) indicator.classList.toggle('active', CFG.debugMode);
         if (guide) guide.classList.toggle('active', CFG.debugMode);
+        syncDebugDirectionUI();
 
         if (CFG.debugMode) {
             STATE.pitch = 0;
@@ -5091,7 +5246,7 @@ function clearGroup(group) {
                 <input type="range" id="${prefix}s-r" min="5" max="150" step="0.05" value="${h.sizeCm || 23.0}" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('${prefix}s', -0.5)">−</button>
-                    <input type="number" class="num-input" id="${prefix}s" value="${(h.sizeCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}s" value="${(h.sizeCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
                     <button class="step-btn" onclick="stepValGlobal('${prefix}s', 0.5)">+</button>
                 </div>
             </div>
@@ -5101,9 +5256,9 @@ function clearGroup(group) {
                     <button class="size-lock-btn ${h.headSizeLocked ? 'active-lock' : 'unlocked'}" onclick="toggleHoldingLock('headSizeLocked')">${h.headSizeLocked ? '🔒 锁定比例' : '🔓 自由微调'}</button>
                 </div>
                 <div class="dim-card-grid">
-                    <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hw',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}hw" value="${(h.headWidthCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hw')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hw',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
-                    <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hh',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}hh" value="${(h.headHeightCm || 29.44).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hh')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hh',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
-                    <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hd',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}hd" value="${(h.headDepthCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hd')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hd',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hw',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}hw" value="${(h.headWidthCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hw')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hw',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hh',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}hh" value="${(h.headHeightCm || 29.44).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hh')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hh',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}hd',-0.5)" ${h.headSizeLocked ? 'disabled' : ''}>−</button><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}hd" value="${(h.headDepthCm || 23.0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hd')" ${h.headSizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}hd',0.5)" ${h.headSizeLocked ? 'disabled' : ''}>+</button></div></div>
                 </div>
             </div>
             <div class="dim-group ${h.bodySizeLocked ? 'is-locked' : ''}">
@@ -5112,9 +5267,9 @@ function clearGroup(group) {
                     <button class="size-lock-btn ${h.bodySizeLocked ? 'active-lock' : 'unlocked'}" onclick="toggleHoldingLock('bodySizeLocked')">${h.bodySizeLocked ? '🔒 锁定比例' : '🔓 自由微调'}</button>
                 </div>
                 <div class="dim-card-grid">
-                    <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bw',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}bw" value="${(h.bodyWidthCm || 38.87).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bw')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bw',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
-                    <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bh',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}bh" value="${(h.bodyHeightCm || 156.17).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bh')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bh',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
-                    <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bd',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="number" class="num-input" id="${prefix}bd" value="${(h.bodyDepthCm || 25.30).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bd')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bd',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">宽 (X)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bw',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}bw" value="${(h.bodyWidthCm || 38.87).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bw')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bw',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">高 (Y)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bh',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}bh" value="${(h.bodyHeightCm || 156.17).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bh')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bh',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
+                    <div class="dim-item"><span class="dim-item-title">深 (Z)</span><div class="mini-stepper"><button class="step-btn" onclick="stepValGlobal('${prefix}bd',-1)" ${h.bodySizeLocked ? 'disabled' : ''}>−</button><input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}bd" value="${(h.bodyDepthCm || 25.30).toFixed(1)}" step="1" oninput="updateHoldingDummy(parseFloat(this.value),'bd')" ${h.bodySizeLocked ? 'disabled' : ''} /><button class="step-btn" onclick="stepValGlobal('${prefix}bd',1)" ${h.bodySizeLocked ? 'disabled' : ''}>+</button></div></div>
                 </div>
             </div>
             <div class="ctrl-row" style="margin-top:6px;">
@@ -5127,7 +5282,7 @@ function clearGroup(group) {
                 <input type="range" id="${prefix}hy-r" min="-40" max="40" step="0.2" value="${h.headOffsetY}" ${h.headLocked ? 'disabled' : ''} oninput="updateHoldingDummy(parseFloat(this.value),'hy')" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('${prefix}hy',-0.5)" ${h.headLocked ? 'disabled' : ''}>−</button>
-                    <input type="number" class="num-input" id="${prefix}hy" value="${(h.headOffsetY || 0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hy')" ${h.headLocked ? 'disabled' : ''} />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}hy" value="${(h.headOffsetY || 0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hy')" ${h.headLocked ? 'disabled' : ''} />
                     <button class="step-btn" onclick="stepValGlobal('${prefix}hy',0.5)" ${h.headLocked ? 'disabled' : ''}>+</button>
                 </div>
             </div>
@@ -5136,7 +5291,7 @@ function clearGroup(group) {
                 <input type="range" id="${prefix}hx-r" min="-40" max="40" step="0.2" value="${h.headOffsetX}" ${h.headLocked ? 'disabled' : ''} oninput="updateHoldingDummy(parseFloat(this.value),'hx')" />
                 <div class="stepper-box">
                     <button class="step-btn" onclick="stepValGlobal('${prefix}hx',-0.5)" ${h.headLocked ? 'disabled' : ''}>−</button>
-                    <input type="number" class="num-input" id="${prefix}hx" value="${(h.headOffsetX || 0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hx')" ${h.headLocked ? 'disabled' : ''} />
+                    <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="${prefix}hx" value="${(h.headOffsetX || 0).toFixed(1)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'hx')" ${h.headLocked ? 'disabled' : ''} />
                     <button class="step-btn" onclick="stepValGlobal('${prefix}hx',0.5)" ${h.headLocked ? 'disabled' : ''}>+</button>
                 </div>
             </div>
@@ -5153,7 +5308,7 @@ function clearGroup(group) {
                     <input type="range" id="inp-h-s-r" min="1" max="150" step="0.05" value="${h.sizeCm || 23.0}" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-h-s', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-h-s" value="${(h.sizeCm || 23.0).toFixed(2)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-h-s" value="${(h.sizeCm || 23.0).toFixed(2)}" step="0.5" oninput="updateHoldingDummy(parseFloat(this.value),'s')" />
                         <button class="step-btn" onclick="stepValGlobal('inp-h-s', 0.5)">+</button>
                     </div>
                 </div>`;
@@ -5183,7 +5338,7 @@ function clearGroup(group) {
                     <input type="range" id="inp-track-size-r" min="1" max="500" step="0.1" value="${CFG.tracking.targetSizeCm}" oninput="syncTrackingTargetSize(parseFloat(this.value))" />
                     <div class="stepper-box">
                         <button class="step-btn" onclick="stepValGlobal('inp-track-size', -0.5)">−</button>
-                        <input type="number" class="num-input" id="inp-track-size" value="${CFG.tracking.targetSizeCm.toFixed(2)}" step="0.5" min="1" max="500" />
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-track-size" value="${CFG.tracking.targetSizeCm.toFixed(2)}" step="0.5" min="1" max="500" />
                         <button class="step-btn" onclick="stepValGlobal('inp-track-size', 0.5)">+</button>
                     </div>
                 </div>`;
@@ -7162,7 +7317,8 @@ function clearGroup(group) {
         if (Math.abs(dx) > 8000 || Math.abs(dy) > 8000) return;
 
         if (CFG.debugMode) {
-            STATE.yaw -= dy * radiansPerCountY;
+            // 默认向上移动（dy<0）时向左旋转；开启反转后则向右旋转。
+            STATE.yaw += (CFG.debugInvertDirection ? dy : -dy) * radiansPerCountY;
             STATE.pitch = 0;
         } else {
             STATE.yaw -= dx * radiansPerCountX;
@@ -8360,6 +8516,10 @@ function finishChallenge() {
         setValF('inp-cm-y', CFG.cmPer360Y || CFG.cmPer360 || 55);
         const cmxr = getEl('inp-cm-x-r'); if (cmxr) cmxr.value = CFG.cmPer360X || 55;
         const cmyr = getEl('inp-cm-y-r'); if (cmyr) cmyr.value = CFG.cmPer360Y || 55;
+
+        // UI 数值还原后，同步实际相机投影与每个鼠标计数对应的旋转量。
+        applyFovToCamera();
+        updateSensitivity();
     }
 
     function initColorPickers() {
@@ -8518,12 +8678,59 @@ function finishChallenge() {
         saveToLocalStorage();
     };
 
+    // 数值输入统一使用文本编辑：聚焦时全选，粘贴时整段替换；输入过程中不格式化小数，避免光标跳动和自动补零。
+    document.addEventListener('pointerdown', (e) => {
+        const el = e.target && e.target.closest ? e.target.closest('.num-input') : null;
+        if (!el || el.disabled || document.activeElement !== el) return;
+        // 输入框已获得焦点时，再次点击也保持“整框替换”行为。
+        e.preventDefault();
+        if (typeof el.select === 'function') el.select();
+    }, true);
+
+    document.addEventListener('focusin', (e) => {
+        const el = e.target;
+        if (!el || !el.classList || !el.classList.contains('num-input') || el.disabled) return;
+        const raw = String(el.value ?? '').trim();
+        if (raw && Number.isFinite(Number(raw))) el.dataset.lastValidValue = el.value;
+        window.setTimeout(() => {
+            if (document.activeElement === el && typeof el.select === 'function') el.select();
+        }, 0);
+    });
+
+    // 即使用户在输入框中间单击后粘贴，也始终以剪贴板文本完整替换原值。
+    document.addEventListener('paste', (e) => {
+        const el = e.target && e.target.closest ? e.target.closest('.num-input') : null;
+        if (!el || el.disabled) return;
+        const clipboard = e.clipboardData || window.clipboardData;
+        if (!clipboard) return;
+        e.preventDefault();
+        el.value = clipboard.getData('text').trim();
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+    }, true);
+
     document.addEventListener('input', (e) => {
         const el = e.target;
         if (!el || !el.classList || !el.classList.contains('num-input') || el.disabled) return;
-        if (el.hasAttribute('oninput')) return;
-        const val = parseFloat(el.value);
-        if (!isNaN(val)) dispatchGlobalValue(el.id, val);
+        const raw = String(el.value ?? '').trim();
+        if (!raw) return; // 允许用户先清空，再继续输入。
+        const val = Number(raw);
+        if (!Number.isFinite(val)) return; // 暂时的 '.', '-' 等输入状态不触发配置写回。
+        el.dataset.lastValidValue = el.value;
+        if (el.hasAttribute('oninput')) return; // 有内联处理的控件由其原有逻辑处理。
+        dispatchGlobalValue(el.id, val);
+    });
+
+    document.addEventListener('focusout', (e) => {
+        const el = e.target;
+        if (!el || !el.classList || !el.classList.contains('num-input') || el.disabled) return;
+        const raw = String(el.value ?? '').trim();
+        if (!raw || !Number.isFinite(Number(raw))) {
+            // 若用户删除后未输入有效值，恢复上一次有效值，不让空值污染配置。
+            const fallback = el.dataset.lastValidValue || el.defaultValue || '';
+            if (fallback !== '') el.value = fallback;
+        } else {
+            el.dataset.lastValidValue = el.value;
+        }
     });
 
     window.switchTrainMode = function(mode) {
@@ -9052,6 +9259,7 @@ function finishChallenge() {
         const r = getEl('inp-dpi-r'); if (r) r.value = CFG.dpi;
         updateSensitivity();
         syncAllButtonStates();
+        saveToLocalStorage();
     };
 
     window.setDpiManual = function(v) {
@@ -9059,6 +9267,7 @@ function finishChallenge() {
         setVal('inp-dpi', CFG.dpi);
         updateSensitivity();
         syncAllButtonStates();
+        saveToLocalStorage();
     };
 
     window.toggleCmLock = function() {
@@ -9067,6 +9276,7 @@ function finishChallenge() {
         const txt = getEl('txt-cm-lock');
         if (btn) btn.classList.toggle('unlocked', !STATE.cmLocked);
         if (txt) txt.innerText = STATE.cmLocked ? '🔒 XY联动' : '🔓 XY独立';
+        saveToLocalStorage();
     };
 
     window.setCmX = function(v) {
@@ -9079,6 +9289,7 @@ function finishChallenge() {
             const ry = getEl('inp-cm-y-r'); if (ry) ry.value = v;
         }
         updateSensitivity();
+        saveToLocalStorage();
     };
 
     window.setCmY = function(v) {
@@ -9091,6 +9302,7 @@ function finishChallenge() {
             const rx = getEl('inp-cm-x-r'); if (rx) rx.value = v;
         }
         updateSensitivity();
+        saveToLocalStorage();
     };
 
     window.setCmPreset = function(v) {
@@ -9104,6 +9316,7 @@ function finishChallenge() {
             b.classList.toggle('active', Math.abs(parseFloat(b.dataset.val) - v) < 0.1);
         });
         updateSensitivity();
+        saveToLocalStorage();
     };
 
     window.onFloorGraySlider = function(val) {
@@ -9149,6 +9362,331 @@ function finishChallenge() {
         saveToLocalStorage();
     };
 
+    function cloneJson(value) {
+        return JSON.parse(JSON.stringify(value));
+    }
+
+    function defaultUserPresetName(index) {
+        return DEFAULT_USER_PRESET_NAMES[index] || `预设${index + 1}`;
+    }
+
+    function normalizePresetName(name, index) {
+        const cleaned = Array.from(String(name ?? '').trim()).slice(0, 10).join('');
+        return cleaned || defaultUserPresetName(index);
+    }
+
+    function makeEmptyUserPreset(index) {
+        return { name: defaultUserPresetName(index), config: null };
+    }
+
+    function loadUserPresets() {
+        const makeDefaults = (count = DEFAULT_USER_PRESET_COUNT) => ({
+            version: 1,
+            activeIndex: null,
+            slots: Array.from({ length: count }, (_, index) => makeEmptyUserPreset(index))
+        });
+        try {
+            const raw = localStorage.getItem(USER_PRESETS_STORAGE_KEY);
+            if (!raw) return makeDefaults();
+            const parsed = JSON.parse(raw);
+            if (!parsed || !Array.isArray(parsed.slots)) return makeDefaults();
+            // 兼容原有4槽格式，并允许新版保存1至10个槽位。
+            const count = clamp(parsed.slots.length || DEFAULT_USER_PRESET_COUNT, 1, MAX_USER_PRESETS);
+            const activeIndex = Number.isInteger(parsed.activeIndex) && parsed.activeIndex >= 0 && parsed.activeIndex < count
+                ? parsed.activeIndex : null;
+            return {
+                version: 1,
+                activeIndex,
+                slots: Array.from({ length: count }, (_, index) => {
+                    const fallback = defaultUserPresetName(index);
+                    const item = parsed.slots[index] || {};
+                    const candidate = item.config;
+                    return {
+                        name: normalizePresetName(item.name ?? fallback, index),
+                        config: candidate && typeof candidate === 'object' && !Array.isArray(candidate) ? candidate : null
+                    };
+                })
+            };
+        } catch (_) {
+            return makeDefaults();
+        }
+    }
+
+    function persistUserPresets() {
+        const oldActiveIndex = USER_PRESETS.activeIndex ?? null;
+        const isValidActive = Number.isInteger(ACTIVE_USER_PRESET_INDEX)
+            && ACTIVE_USER_PRESET_INDEX >= 0 && ACTIVE_USER_PRESET_INDEX < USER_PRESETS.slots.length;
+        USER_PRESETS.activeIndex = isValidActive ? ACTIVE_USER_PRESET_INDEX : null;
+        try {
+            localStorage.setItem(USER_PRESETS_STORAGE_KEY, JSON.stringify(USER_PRESETS));
+            return true;
+        } catch (err) {
+            USER_PRESETS.activeIndex = oldActiveIndex;
+            alert('预设保存失败：浏览器本地存储不可用或空间不足。');
+            return false;
+        }
+    }
+
+    function persistUserPresetSelection() {
+        const oldActiveIndex = USER_PRESETS.activeIndex ?? null;
+        const isValidActive = Number.isInteger(ACTIVE_USER_PRESET_INDEX)
+            && ACTIVE_USER_PRESET_INDEX >= 0 && ACTIVE_USER_PRESET_INDEX < USER_PRESETS.slots.length;
+        USER_PRESETS.activeIndex = isValidActive ? ACTIVE_USER_PRESET_INDEX : null;
+        try {
+            localStorage.setItem(USER_PRESETS_STORAGE_KEY, JSON.stringify(USER_PRESETS));
+        } catch (_) {
+            USER_PRESETS.activeIndex = oldActiveIndex;
+        }
+    }
+
+    function makePresetToolButton(label, title, action) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'user-preset-tool';
+        button.textContent = label;
+        button.title = title;
+        button.addEventListener('click', action);
+        return button;
+    }
+
+    function renderUserPresetButtons() {
+        const grid = getEl('user-presets-grid');
+        if (!grid) return;
+        grid.replaceChildren();
+
+        USER_PRESETS.slots.forEach((slot, index) => {
+            const slotEl = document.createElement('div');
+            slotEl.className = 'user-preset-slot';
+
+            const loadBtn = document.createElement('button');
+            loadBtn.type = 'button';
+            loadBtn.id = `user-preset-load-${index}`;
+            loadBtn.className = 'user-preset-load';
+            loadBtn.addEventListener('click', () => window.applyUserPreset(index));
+            loadBtn.title = slot.config ? `点击应用「${slot.name}」` : `「${slot.name}」尚未保存配置`;
+
+            const nameEl = document.createElement('span');
+            nameEl.className = 'user-preset-name';
+            nameEl.textContent = slot.name;
+            const statusEl = document.createElement('small');
+            statusEl.className = 'user-preset-status';
+            const isCurrent = ACTIVE_USER_PRESET_INDEX === index;
+            statusEl.textContent = isCurrent
+                ? (slot.config ? '当前 · 已保存' : '当前 · 未保存')
+                : (slot.config ? '已保存 · 点击应用' : '未保存');
+            loadBtn.append(nameEl, statusEl);
+            loadBtn.classList.toggle('has-config', !!slot.config);
+            loadBtn.classList.toggle('is-current', isCurrent);
+
+            const tools = document.createElement('div');
+            tools.className = 'user-preset-tools';
+            tools.append(
+                makePresetToolButton('存入', `保存当前配置到「${slot.name}」`, () => window.saveUserPreset(index)),
+                makePresetToolButton('改名', `修改「${slot.name}」名称（最多10个字符）`, () => window.renameUserPreset(index)),
+                makePresetToolButton('清空', `删除「${slot.name}」已保存的配置并恢复默认名称`, () => window.clearUserPreset(index))
+            );
+            slotEl.append(loadBtn, tools);
+            grid.appendChild(slotEl);
+        });
+
+        const countEl = getEl('user-presets-count');
+        if (countEl) countEl.textContent = `${USER_PRESETS.slots.length}/${MAX_USER_PRESETS}`;
+        const currentEl = getEl('user-preset-current');
+        if (currentEl) {
+            const validCurrent = Number.isInteger(ACTIVE_USER_PRESET_INDEX)
+                && ACTIVE_USER_PRESET_INDEX >= 0 && ACTIVE_USER_PRESET_INDEX < USER_PRESETS.slots.length;
+            currentEl.textContent = validCurrent ? `当前：预设${ACTIVE_USER_PRESET_INDEX + 1}` : '当前：未选择';
+            currentEl.classList.toggle('has-current', validCurrent);
+        }
+        const addBtn = getEl('user-presets-add');
+        const removeBtn = getEl('user-presets-remove');
+        if (addBtn) addBtn.disabled = USER_PRESETS.slots.length >= MAX_USER_PRESETS;
+        if (removeBtn) removeBtn.disabled = USER_PRESETS.slots.length <= 1;
+    }
+
+    window.addUserPreset = function() {
+        if (USER_PRESETS.slots.length >= MAX_USER_PRESETS) {
+            alert(`最多只能创建${MAX_USER_PRESETS}个预设。`);
+            return;
+        }
+        const oldSlots = USER_PRESETS.slots;
+        USER_PRESETS.slots = [...oldSlots, makeEmptyUserPreset(oldSlots.length)];
+        if (persistUserPresets()) {
+            if (ACTIVE_USER_PRESET_INDEX !== null && ACTIVE_USER_PRESET_INDEX >= USER_PRESETS.slots.length) {
+                ACTIVE_USER_PRESET_INDEX = null;
+            }
+            renderUserPresetButtons();
+        } else {
+            USER_PRESETS.slots = oldSlots;
+            renderUserPresetButtons();
+        }
+    };
+
+    window.removeUserPreset = function() {
+        const count = USER_PRESETS.slots.length;
+        if (count <= 1) {
+            alert('至少保留1个预设。');
+            return;
+        }
+        const last = USER_PRESETS.slots[count - 1];
+        if (last.config || last.name !== defaultUserPresetName(count - 1)) {
+            const ok = window.confirm(`减少预设数量将移除最后一个预设「${last.name}」及其中保存的配置，无法撤销。是否继续？`);
+            if (!ok) return;
+        }
+        const oldSlots = USER_PRESETS.slots;
+        const oldActiveIndex = ACTIVE_USER_PRESET_INDEX;
+        USER_PRESETS.slots = oldSlots.slice(0, -1);
+        if (ACTIVE_USER_PRESET_INDEX !== null && ACTIVE_USER_PRESET_INDEX >= USER_PRESETS.slots.length) {
+            ACTIVE_USER_PRESET_INDEX = null;
+        }
+        if (persistUserPresets()) {
+            renderUserPresetButtons();
+        } else {
+            USER_PRESETS.slots = oldSlots;
+            ACTIVE_USER_PRESET_INDEX = oldActiveIndex;
+            renderUserPresetButtons();
+        }
+    };
+
+    window.clearUserPreset = function(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= USER_PRESETS.slots.length) return;
+        const slot = USER_PRESETS.slots[index];
+        if (slot.config) {
+            const ok = window.confirm(`确定删除「${slot.name}」中已保存的配置，并将名称恢复为「${defaultUserPresetName(index)}」？`);
+            if (!ok) return;
+        }
+        const oldSlot = cloneJson(slot);
+        const oldActiveIndex = ACTIVE_USER_PRESET_INDEX;
+        USER_PRESETS.slots[index] = makeEmptyUserPreset(index);
+        if (ACTIVE_USER_PRESET_INDEX === index) ACTIVE_USER_PRESET_INDEX = null;
+        if (persistUserPresets()) {
+            renderUserPresetButtons();
+        } else {
+            USER_PRESETS.slots[index] = oldSlot;
+            ACTIVE_USER_PRESET_INDEX = oldActiveIndex;
+            renderUserPresetButtons();
+        }
+    };
+
+    function fillMissingConfigDefaults(target, defaults) {
+        for (const [key, defaultValue] of Object.entries(defaults)) {
+            const current = target[key];
+            if (defaultValue && typeof defaultValue === 'object' && !Array.isArray(defaultValue)) {
+                if (!current || typeof current !== 'object' || Array.isArray(current)) {
+                    target[key] = cloneJson(defaultValue);
+                } else {
+                    fillMissingConfigDefaults(current, defaultValue);
+                }
+            } else if (current === undefined || current === null) {
+                target[key] = defaultValue;
+            }
+        }
+    }
+
+    function applyLoadedConfigToRuntime(sourceConfig = null) {
+        // 兼容旧配置只保存 cmPer360 的格式，避免补默认值时覆盖旧灵敏度。
+        if (sourceConfig && sourceConfig.cmPer360X === undefined && sourceConfig.cmPer360Y === undefined
+            && sourceConfig.cmPer360 !== undefined && sourceConfig.cmPer360 !== null) {
+            CFG.cmPer360X = Number(sourceConfig.cmPer360);
+            CFG.cmPer360Y = Number(sourceConfig.cmPer360);
+        }
+        fillMissingConfigDefaults(CFG, DEFAULT_CONFIG);
+        if (CFG.environmentScene === 'wood') CFG.environmentScene = 'outdoor';
+        if (!CFG.dynamic.bungee)  CFG.dynamic.bungee  = { height: 3.0, heightJitter: 0.5, period: 2.0, driftSpeed: 2.0 };
+        if (!CFG.tracking.bungee) CFG.tracking.bungee = { height: 3.0, heightJitter: 0.5, period: 2.0, driftSpeed: 2.0 };
+        if (CFG.dynamic.bungee.heightJitter  === undefined) CFG.dynamic.bungee.heightJitter  = 0.5;
+        if (CFG.tracking.bungee.heightJitter === undefined) CFG.tracking.bungee.heightJitter = 0.5;
+        if (CFG.tracking.radialStrafeMin === undefined) CFG.tracking.radialStrafeMin = 0.8;
+        if (CFG.tracking.radialStrafeMax === undefined) CFG.tracking.radialStrafeMax = 1.8;
+        if (CFG.tracking.radialBias === undefined) CFG.tracking.radialBias = 0.5;
+        if (CFG.tracking.strafeSpeedAlgo === undefined) CFG.tracking.strafeSpeedAlgo = 'segmented';
+        if (CFG.tracking.strafeSpeedAmpSegmented === undefined) CFG.tracking.strafeSpeedAmpSegmented = 30;
+        if (CFG.tracking.strafeSpeedAmpOU === undefined) CFG.tracking.strafeSpeedAmpOU = 40;
+
+        STATE.targetCount = CFG.targetCount || 6;
+        if (typeof CFG.sizeLockSixshot === 'boolean') STATE.sizeLockSixshot = CFG.sizeLockSixshot;
+        if (typeof CFG.depthLockSixshot === 'boolean') STATE.depthLockSixshot = CFG.depthLockSixshot;
+        if (typeof CFG.sizeLockTracking === 'boolean') STATE.sizeLockTracking = CFG.sizeLockTracking;
+        if (typeof CFG.depthLockTracking === 'boolean') STATE.depthLockTracking = CFG.depthLockTracking;
+        if (typeof CFG.cmLocked === 'boolean') STATE.cmLocked = CFG.cmLocked;
+        const cmLockBtn = getEl('lock-cm-xy');
+        const cmLockTxt = getEl('txt-cm-lock');
+        if (cmLockBtn) cmLockBtn.classList.toggle('unlocked', !STATE.cmLocked);
+        if (cmLockTxt) cmLockTxt.innerText = STATE.cmLocked ? '🔒 XY联动' : '🔓 XY独立';
+        STATE.activeOfficialProject = null;
+        if (typeof syncProjectButtonsUI === 'function') syncProjectButtonsUI(null);
+        if (typeof showOfficialModeNotice === 'function') showOfficialModeNotice(null);
+        applyParameterLocks(false);
+
+        // 关键：CFG 中存储的是水平 FOV，而 PerspectiveCamera.fov 是垂直 FOV。
+        // 导入/切换预设后立即重算相机投影矩阵，不能只更新界面数字。
+        applyFovToCamera();
+        updateSensitivity();
+        updateScene();
+        initColorPickers();
+        applyModeUI();
+        syncAllInputsFromConfig();
+        // 再显式同步运行时值，避免控件还原与输入计算不同步。
+        applyFovToCamera();
+        updateSensitivity();
+        refreshMovementKeyButtons();
+        renderHoldingDummyUI();
+        if (typeof renderTrackingDummyUI === 'function') renderTrackingDummyUI();
+        setCrosshairType(CFG.crosshair.type);
+        syncAllButtonStates();
+        saveToLocalStorage();
+    }
+
+    window.saveUserPreset = function(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= USER_PRESETS.slots.length) return;
+        const oldConfig = USER_PRESETS.slots[index].config;
+        const oldActiveIndex = ACTIVE_USER_PRESET_INDEX;
+        USER_PRESETS.slots[index].config = cloneJson(CFG);
+        ACTIVE_USER_PRESET_INDEX = index;
+        if (persistUserPresets()) {
+            saveToLocalStorage();
+            renderUserPresetButtons();
+        } else {
+            USER_PRESETS.slots[index].config = oldConfig;
+            ACTIVE_USER_PRESET_INDEX = oldActiveIndex;
+            renderUserPresetButtons();
+        }
+    };
+
+    window.applyUserPreset = function(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= USER_PRESETS.slots.length) return;
+        const slot = USER_PRESETS.slots[index];
+        if (!slot?.config) {
+            alert(`「${slot?.name || defaultUserPresetName(index)}」还没有保存配置。请先点击“存入”。`);
+            return;
+        }
+        try {
+            safeMergeConfig(CFG, cloneJson(slot.config));
+            applyLoadedConfigToRuntime(slot.config);
+            ACTIVE_USER_PRESET_INDEX = index;
+            persistUserPresetSelection();
+            renderUserPresetButtons();
+        } catch (err) {
+            console.error('应用用户预设失败：', err);
+            alert('该预设无法应用，可能是配置数据已损坏。');
+        }
+    };
+
+    window.renameUserPreset = function(index) {
+        if (!Number.isInteger(index) || index < 0 || index >= USER_PRESETS.slots.length) return;
+        const slot = USER_PRESETS.slots[index];
+        const result = window.prompt('请输入预设名称（最多10个字符）：', slot.name);
+        if (result === null) return;
+        if (!String(result).trim()) {
+            alert('预设名称不能为空。');
+            return;
+        }
+        const oldName = slot.name;
+        slot.name = normalizePresetName(result, index);
+        if (persistUserPresets()) renderUserPresetButtons();
+        else { slot.name = oldName; renderUserPresetButtons(); }
+    };
+
     window.exportConfigFile = function() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(CFG, null, 2));
         const a = document.createElement('a');
@@ -9167,35 +9705,16 @@ function finishChallenge() {
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
-                safeMergeConfig(CFG, JSON.parse(event.target.result));
-                if (CFG.environmentScene === 'wood') CFG.environmentScene = 'outdoor';
-                if (!CFG.dynamic.bungee)  CFG.dynamic.bungee  = { height: 3.0, heightJitter: 0.5, period: 2.0, driftSpeed: 2.0 };
-                if (!CFG.tracking.bungee) CFG.tracking.bungee = { height: 3.0, heightJitter: 0.5, period: 2.0, driftSpeed: 2.0 };
-                if (CFG.dynamic.bungee.heightJitter  === undefined) CFG.dynamic.bungee.heightJitter  = 0.5;
-                if (CFG.tracking.bungee.heightJitter === undefined) CFG.tracking.bungee.heightJitter = 0.5;
-                if (CFG.tracking.radialStrafeMin === undefined) CFG.tracking.radialStrafeMin = 0.8;
-                if (CFG.tracking.radialStrafeMax === undefined) CFG.tracking.radialStrafeMax = 1.8;
-                if (CFG.tracking.radialBias === undefined) CFG.tracking.radialBias = 0.5;
-                if (CFG.tracking.strafeSpeedAlgo === undefined) CFG.tracking.strafeSpeedAlgo = 'segmented';
-                if (CFG.tracking.strafeSpeedAmpSegmented === undefined) CFG.tracking.strafeSpeedAmpSegmented = 30;
-                if (CFG.tracking.strafeSpeedAmpOU === undefined) CFG.tracking.strafeSpeedAmpOU = 40;
-                STATE.targetCount = CFG.targetCount || 6;
-                // 导入即切回自定义工坊，清掉官方项目残留的锁定与 UI 状态
-                STATE.activeOfficialProject = null;
-                if (typeof syncProjectButtonsUI === 'function') syncProjectButtonsUI(null);
-                if (typeof showOfficialModeNotice === 'function') showOfficialModeNotice(null);
-                applyParameterLocks(false);
-                updateScene();
-                initColorPickers();
-                applyModeUI();
-                syncAllInputsFromConfig();
-                refreshMovementKeyButtons();
-                renderHoldingDummyUI();
-                if (typeof renderTrackingDummyUI === 'function') renderTrackingDummyUI();
-                setCrosshairType(CFG.crosshair.type);
+                const importedConfig = JSON.parse(event.target.result);
+                if (!importedConfig || typeof importedConfig !== 'object' || Array.isArray(importedConfig)) {
+                    throw new Error('配置文件根节点不是对象');
+                }
+                safeMergeConfig(CFG, importedConfig);
+                applyLoadedConfigToRuntime(importedConfig);
                 alert('配置已全量成功还原！');
             } catch (err) {
-                alert('JSON 配置文件损坏！');
+                console.error('导入配置失败：', err);
+                alert('JSON 配置文件损坏或无法应用！');
             }
         };
         reader.readAsText(file);
@@ -11177,11 +11696,14 @@ window.addEventListener('keydown', (e) => {
         syncAllInputsFromConfig();
         refreshMovementKeyButtons();
 
+        renderUserPresetButtons();
+
         const dbgBtn = getEl('btn-debug-mode-toggle');
         if (dbgBtn) {
             dbgBtn.classList.toggle('active', CFG.debugMode);
             dbgBtn.innerText = CFG.debugMode ? '已开启' : '已关闭';
         }
+        syncDebugDirectionUI();
         const dbgInd = getEl('debug-indicator');
         const dbgGuide = getEl('debug-horizon-guide');
         if (dbgInd) dbgInd.classList.toggle('active', CFG.debugMode);
@@ -11241,6 +11763,34 @@ window.addEventListener('keydown', (e) => {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
             else document.exitFullscreen().catch(() => {});
         };
+
+        // 右下角文字提示默认完全隐藏；用小型「提示说明」按钮展开，点击标题可再次隐藏。
+        const rightHud = getEl('bottom-right-hud');
+        const rightHudTitle = getEl('br-title');
+        const rightHudHint = getEl('br-toggle-hint');
+        const rightHudToggle = getEl('bottom-right-hud-toggle');
+        const toggleRightHud = () => {
+            if (!rightHud || !rightHudTitle || !rightHudToggle) return;
+            const isVisible = rightHud.style.display !== 'none';
+            const shouldOpen = !isVisible;
+            rightHud.style.display = shouldOpen ? 'block' : 'none';
+            rightHud.classList.toggle('hud-collapsed', !shouldOpen);
+            rightHudToggle.style.display = shouldOpen ? 'none' : 'inline-flex';
+            rightHudToggle.setAttribute('aria-expanded', String(shouldOpen));
+            rightHudTitle.setAttribute('aria-expanded', String(shouldOpen));
+            rightHudTitle.title = shouldOpen ? '点击收起文字提示' : '点击展开文字提示';
+            if (rightHudHint) rightHudHint.textContent = shouldOpen ? '点击收起 ▴' : '点击展开 ▾';
+        };
+        if (rightHudToggle) rightHudToggle.addEventListener('click', toggleRightHud);
+        if (rightHudTitle) {
+            rightHudTitle.addEventListener('click', toggleRightHud);
+            rightHudTitle.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleRightHud();
+                }
+            });
+        }
 
         setTimeout(() => {
             const f11 = getEl('f11-box');
