@@ -70,6 +70,8 @@
             margin: 30px 0;
         }
         .tip-box h3 { color: var(--gold); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        
+        /* 公式卡片样式 */
         .formula-card {
             background: #121212;
             border: 1px dashed var(--gold);
@@ -80,6 +82,8 @@
             font-size: 1.1em;
             border-radius: 8px;
             margin-top: 15px;
+            font-family: monospace; /* 使用等宽字体使公式更整齐 */
+            line-height: 1.6;
         }
 
         .step-list { counter-reset: step; list-style: none; padding: 0; }
@@ -144,123 +148,46 @@
         .floating-tip ol { padding-left: 20px; margin-top: 10px; }
         .floating-tip strong { color: var(--gold); }
 
-        /* 右侧悬浮窗 (合并版) */
+        /* 右侧悬浮窗 (缩小版按钮) */
         .floating-calculator-right {
             position: fixed;
             top: 80px;
             right: 20px;
             background: rgba(255, 215, 0, 0.05);
             border: 1px solid var(--gold);
-            padding: 20px;
-            border-radius: var(--radius);
-            width: 320px;
+            padding: 12px 16px;
+            border-radius: 8px; /* 缩小圆角，更像按钮 */
+            width: auto;
+            height: auto;
             box-shadow: var(--shadow);
             z-index: 101;
-            font-size: 0.9em;
-            max-height: calc(100vh - 120px);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Tab 切换样式 */
-        .calc-tabs {
-            display: flex;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-            margin-bottom: 15px;
-        }
-        .calc-tab {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-sub);
-            padding: 10px 0;
-            font-size: 1em;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: bold;
-        }
-        .calc-tab:hover { color: #fff; }
-        .calc-tab.active {
-            color: var(--gold);
-            border-bottom: 2px solid var(--gold);
-        }
-
-        .calc-content {
-            display: none;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        .calc-content.active { display: block; }
-
-        .calc-content::-webkit-scrollbar { width: 6px; }
-        .calc-content::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.3); border-radius: 3px; }
-
-        /* 公式按钮组 */
-        .rate-btn-group {
-            display: flex; gap: 5px; margin-bottom: 15px;
-        }
-        .rate-btn {
-            flex: 1; padding: 8px 0; font-size: 0.8em; border-radius: 6px;
-            border: 1px solid #444; background: #181818; color: #aaa;
-            cursor: pointer; transition: 0.2s; font-weight: bold;
-        }
-        .rate-btn:hover { background: #2a2a2a; color: #fff; }
-        .rate-btn.active {
-            background: rgba(255, 215, 0, 0.15); border-color: var(--gold); color: var(--gold);
-        }
-
-        .input-group-small { margin-bottom: 15px; }
-        .calc-content label { display: block; color: var(--text-sub); margin-bottom: 5px; font-size: 0.85em; }
-        .calc-content input, .calc-content select {
-            width: 100%;
-            padding: 8px;
-            font-size: 1em;
-            background: #181818;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
             box-sizing: border-box;
         }
-        .calc-content input:focus, .calc-content select:focus { border-color: var(--gold); outline: none; }
         
-        .calc-result-box {
-            background: rgba(0,0,0,0.4);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px dashed var(--gold);
-            margin-top: 15px;
+        /* 链接内的文字样式 */
+        .floating-calculator-right span {
+            color: var(--gold);
+            font-size: 0.9em;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-align: center;
         }
-        .process-text {
-            color: var(--text-sub);
-            font-size: 0.8em;
-            margin-top: 12px;
-            font-family: monospace;
-            line-height: 1.5;
-            border-top: 1px dashed #444;
-            padding-top: 10px;
+        
+        .floating-calculator-right:hover {
+            background: rgba(255, 215, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            transform: translateY(-2px);
         }
-
-        /* FOV 测量专用样式 */
-        .fov-row {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 8px;
-            align-items: center;
-        }
-        .fov-row input { padding: 6px; font-size: 0.9em; }
-        .fov-row button {
-            background: #333; border: 1px solid #555; color: #fff;
-            border-radius: 4px; width: 24px; height: 24px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .fov-row button:hover { background: var(--error); border-color: var(--error); }
-        .fov-res-val { font-size: 1.8em; font-weight: bold; color: var(--primary); margin: 5px 0; }
-        .fov-res-desc { font-size: 0.8em; color: #aaa; }
 
         /* 移动端适配 */
         @media (max-width: 1350px) {
             body { flex-direction: column; align-items: center; }
-            .floating-tip, .floating-calculator-right {
+            .floating-tip {
                 position: static; 
                 margin: 20px auto; 
                 width: 100%;
@@ -268,8 +195,13 @@
                 max-height: none;
                 box-sizing: border-box;
             }
+            .floating-calculator-right {
+                position: static; 
+                margin: 10px auto; 
+                width: auto;
+                max-width: none;
+            }
             .container { margin-top: 20px; }
-            .calc-content { overflow-y: visible; }
         }
         @media (max-width: 768px) {
             .authors { position: static; margin-top: 30px; text-align: center; background: rgba(30, 30, 30, 0.7); backdrop-filter: none; }
@@ -291,80 +223,11 @@
     </ol>
 </div>
 
-<div class="floating-calculator-right">
-    <!-- Tab 切换 -->
-    <div class="calc-tabs">
-        <button class="calc-tab active" data-target="tab-ads">快适应值</button>
-        <button class="calc-tab" data-target="tab-fov">FOV 测量</button>
-    </div>
-    
-    <!-- Tab 1: 极限快适应值 (四公式版) -->
-    <div id="tab-ads" class="calc-content active">
-        
-        <!-- 算法切换按钮 -->
-        <div class="rate-btn-group">
-            <button class="rate-btn active" data-type="111">老公式</button>
-            <button class="rate-btn" data-type="sqrt">÷√2</button>
-            <button class="rate-btn" data-type="mid">零七五</button>
-            <button class="rate-btn" data-type="linear">×√2</button>
-        </div>
-
-        <!-- 动态公式提示 -->
-        <div style="font-size: 0.85em; color: var(--gold); text-align: center; line-height: 1.5; background: rgba(255,215,0,0.1); padding: 8px; border-radius: 6px; margin-bottom: 15px;" id="formulaTipBox">
-            <!-- JS 渲染 -->
-        </div>
-        
-        <!-- 统一输入区 -->
-        <div style="display: flex; gap: 10px;">
-            <div class="input-group-small" style="flex: 1;">
-                <label>腰射 FOV（度）</label>
-                <input type="number" id="fovHipRate" value="103" step="1">
-            </div>
-            <div class="input-group-small" style="flex: 1;">
-                <label>开镜 FOV（度）</label>
-                <input type="number" id="fovAdsRate" value="90" step="1">
-            </div>
-        </div>
-
-        <div class="input-group-small">
-            <label>基础/当前 CM/360° (灵敏度)</label>
-            <input type="number" id="cm360" value="50" placeholder="50">
-        </div>
-
-        <div class="calc-result-box">
-            <div style="margin-bottom: 5px; color: #ccc;" id="resultLabel">换算后的开镜 CM/360°:</div>
-            <div style="font-size: 1.6em; font-weight: bold; color: var(--gold);">
-                <span id="finalResult">56.63</span> <span style="font-size:0.5em;">cm</span>
-            </div>
-            <div class="process-text" id="calcProcess"></div>
-        </div>
-    </div>
-
-    <!-- Tab 2: 开镜 FOV 测量计算器 -->
-    <div id="tab-fov" class="calc-content">
-        <div class="input-group-small">
-            <label>腰射 FOV（度）</label>
-            <input type="number" id="fovBaseFov" value="103" min="1" max="179" step="0.1">
-        </div>
-        
-        <div class="input-group-small" style="margin-bottom: 10px;">
-            <label>输入测量值 (同目标的前后尺寸)</label>
-            <div style="display: flex; gap: 5px; font-size: 0.8em; color: #aaa; margin-bottom: 4px;">
-                <span style="flex:1;">腰射尺寸</span>
-                <span style="flex:1;">开镜尺寸</span>
-                <span style="width:24px;"></span>
-            </div>
-            <div id="fovMeasureContainer"></div>
-            <button id="fovAddBtn" style="background:transparent; border:1px dashed var(--primary); color:var(--primary); width:100%; padding:6px; border-radius:6px; cursor:pointer; margin-top:5px;">＋ 添加一组测量</button>
-        </div>
-
-        <div class="calc-result-box" style="border-color: var(--primary);">
-            <div class="fov-res-desc">估算的开镜 FOV</div>
-            <div class="fov-res-val" id="fovResultVal">—</div>
-            <div class="process-text" id="fovResProcess" style="border-top:none; padding-top:0; margin-top:5px;"></div>
-        </div>
-    </div>
-</div>
+<!-- ================= 右侧链接占位 ================= -->
+<a href="https://www.bilibili.com/toy/ads/index.html" target="_blank" class="floating-calculator-right">
+    <span>点击进入<br>计算器链接</span>
+</a>
+<!-- ============================================== -->
 
 <div class="container">
     <h1>📐 视觉瞄准校准理论</h1>
@@ -398,15 +261,24 @@
         </li>
     </ul>
 
+    <!-- ================= 公式已替换 ================= -->
     <div class="tip-box">
-        <h3>西岛海经验公式 (结果为倍率，需要乘以腰射的CM/360°使用) 最大值乘以根号2，最小值除以根号2</h3>
+        <h3>西岛海经验公式 (R乘以腰射CM/360°灵敏，即是开镜CM/360°灵敏度)</h3>
+        
         <div class="formula-card">
-           快适应值算法：（腰射FOV/开镜FOV)^0.75
+            R₀ = arctan(p × tan(F1/2)) ÷ arctan(p × tan(F2/2))<br>
+            <span style="font-size: 0.85em; color: #aaa; font-weight: normal;">p = MDH% / 100</span>
         </div>
-        <div class="formula-card">
-           理论公式：【就是MDH的标准公式套上^0.75】 
+        
+        <div class="formula-card" style="margin-top: 20px;">
+            R = R₀^(6/7)
+        </div>
+        
+        <div class="formula-card" style="margin-top: 20px;">
+            R = R₀^[1 − (1/7)(1 − 1/R₀)²]
         </div>
     </div>
+    <!-- ============================================ -->
 </div>
 
 <div class="authors">
@@ -415,236 +287,6 @@
     <span>顾问:</span>
     <a href="https://space.bilibili.com/10778584" target="_blank">墨澜城</a>
 </div>
-
-<script>
-    // ==========================================
-    // 0. Tab 切换逻辑
-    // ==========================================
-    const tabs = document.querySelectorAll('.calc-tab');
-    const contents = document.querySelectorAll('.calc-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            contents.forEach(c => c.classList.remove('active'));
-            
-            tab.classList.add('active');
-            const targetId = tab.getAttribute('data-target');
-            document.getElementById(targetId).classList.add('active');
-        });
-    });
-
-    // ==========================================
-    // 1. 右侧 Tab 1: 极限快适应值 (四算法切换)
-    // ==========================================
-    let currentRateType = '111';
-    const fovHipRateInput = document.getElementById('fovHipRate');
-    const fovAdsRateInput = document.getElementById('fovAdsRate');
-    const cm360Input = document.getElementById('cm360');
-    const finalResultDisplay = document.getElementById('finalResult');
-    const calcProcessDisplay = document.getElementById('calcProcess');
-    const resultLabel = document.getElementById('resultLabel');
-    const formulaTipBox = document.getElementById('formulaTipBox');
-
-    // 切换按钮点击事件
-    document.querySelectorAll('.rate-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            currentRateType = e.target.getAttribute('data-type');
-            updateFormulaTip();
-            calcFovRate();
-        });
-    });
-
-    function updateFormulaTip() {
-        if (currentRateType === '111') {
-            formulaTipBox.innerHTML = `<strong>老公式：R = 111 / (111 + 变化量)</strong><br><span style="font-size: 0.85em; color:#bbb;">（纯线性压平，内部自动将FOV差转为变化量）</span>`;
-        } else if (currentRateType === 'sqrt') {
-            formulaTipBox.innerHTML = `<strong>零七五 ÷ √2：R = (腰射FOV / 开镜FOV)<sup>0.75</sup> ÷ √2</strong><br><span style="font-size: 0.85em; color:#bbb;">（零七五基准的下边界 / 最小值）</span>`;
-        } else if (currentRateType === 'mid') {
-            formulaTipBox.innerHTML = `<strong>零七五公式：R = (腰射FOV / 开镜FOV)<sup>0.75</sup></strong><br><span style="font-size: 0.85em; color:#bbb;">（居中平衡，兼顾视觉与手腕）</span>`;
-        } else if (currentRateType === 'linear') {
-            formulaTipBox.innerHTML = `<strong>零七五 × √2：R = (腰射FOV / 开镜FOV)<sup>0.75</sup> × √2</strong><br><span style="font-size: 0.85em; color:#bbb;">（零七五基准的上边界 / 最大值）</span>`;
-        }
-    }
-
-    function calcFovRate() {
-        const hHip = parseFloat(fovHipRateInput.value);
-        const hAds = parseFloat(fovAdsRateInput.value);
-        const cm = parseFloat(cm360Input.value);
-
-        if (isNaN(hHip) || isNaN(hAds) || isNaN(cm)) {
-            finalResultDisplay.innerText = "--";
-            calcProcessDisplay.innerHTML = "请输入有效数字";
-            return;
-        }
-
-        if (hAds <= 0 || hHip <= 0) {
-            finalResultDisplay.innerText = "错误";
-            calcProcessDisplay.innerHTML = "FOV 不能小于等于 0";
-            return;
-        }
-
-        // 内部计算出变化量 X
-        const X = hAds - hHip;
-        
-        let rateHipToAds = 0;
-        let formulaStr = "";
-
-        if (currentRateType === '111') {
-            if (111 + X <= 0) {
-                 finalResultDisplay.innerText = "错误";
-                 calcProcessDisplay.innerHTML = "老公式分母(111+变化量)需大于0";
-                 return;
-            }
-            rateHipToAds = 111 / (111 + X);
-            formulaStr = `111 / (111 ${X >= 0 ? '+' : '-'} ${Math.abs(X)})`;
-        } else if (currentRateType === 'sqrt') {
-            // 零七五公式 ÷ √2 → 下边界（最小值）
-            rateHipToAds = Math.pow(hHip / hAds, 0.75) / Math.SQRT2;
-            formulaStr = `(${hHip} / ${hAds})^0.75 ÷ √2`;
-        } else if (currentRateType === 'mid') {
-            // 零七五公式基准
-            rateHipToAds = Math.pow(hHip / hAds, 0.75);
-            formulaStr = `(${hHip} / ${hAds})^0.75`;
-        } else if (currentRateType === 'linear') {
-            // 零七五公式 × √2 → 上边界（最大值）
-            rateHipToAds = Math.pow(hHip / hAds, 0.75) * Math.SQRT2;
-            formulaStr = `(${hHip} / ${hAds})^0.75 × √2`;
-        }
-
-        // 自动判断正向（收视野）还是逆向（放视野）
-        if (X <= 0) {
-            // 正向：腰射 -> 开镜
-            const result = cm * rateHipToAds;
-            resultLabel.innerText = "换算后的开镜 CM/360°:";
-            finalResultDisplay.innerText = result.toFixed(2);
-            
-            calcProcessDisplay.innerHTML = `
-                <div style="color:#00bcd4; font-weight:bold; margin-bottom:6px;">【正向：腰射 → 开镜】</div>
-                ① 腰射 FOV = ${hHip}, 开镜 FOV = ${hAds} (变化量 X = ${X})<br>
-                ② 正向倍率 = ${formulaStr} = ${rateHipToAds.toFixed(4)}<br>
-                ③ 开镜 CM = ${cm} × ${rateHipToAds.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
-            `;
-        } else {
-            // 逆向：开镜 -> 腰射
-            // 此时 hip 输入的是当前（开镜）FOV，ads 输入的是还原目标（腰射）FOV
-            // rateHipToAds 已经是 "当前 → 目标" 的倍率，直接相乘即可，不能再取倒数
-            const result = cm * rateHipToAds;
-
-            resultLabel.innerText = "还原后的腰射 CM/360°:";
-            finalResultDisplay.innerText = result.toFixed(2);
-
-            calcProcessDisplay.innerHTML = `
-                <div style="color:#bb86fc; font-weight:bold; margin-bottom:6px;">【逆向：开镜 → 还原腰射】</div>
-                ① 当前开镜 FOV = ${hHip}, 还原目标 FOV = ${hAds} (视野放宽)<br>
-                ② 逆向倍率 = ${formulaStr} = <strong>${rateHipToAds.toFixed(4)}</strong><br>
-                ③ 还原 CM = ${cm} × ${rateHipToAds.toFixed(4)} = <strong>${result.toFixed(2)} cm</strong><br>
-                <div style="color:#4caf50; font-size:0.9em; margin-top:5px;">✅ 已按逆向倍率换算回目标腰射。注意：老公式(111)不可严格逆，正逆往返会有约 1%~2% 的小误差，属公式本身特性。</div>
-            `;
-        }
-    }
-
-    [fovHipRateInput, fovAdsRateInput, cm360Input].forEach(el => {
-        if(el) el.addEventListener('input', calcFovRate);
-    });
-    updateFormulaTip();
-    calcFovRate();
-
-    // ==========================================
-    // 2. 右侧 Tab 2: 开镜 FOV 测量计算器逻辑
-    // ==========================================
-    const fovBaseFov = document.getElementById('fovBaseFov');
-    const fovMeasureContainer = document.getElementById('fovMeasureContainer');
-    const fovResultVal = document.getElementById('fovResultVal');
-    const fovResProcess = document.getElementById('fovResProcess');
-    
-    let fovRowCount = 0;
-
-    function addFovRow(hip = '', ads = '') {
-        fovRowCount++;
-        const rowId = `fov-row-${fovRowCount}`;
-        const rowDiv = document.createElement('div');
-        rowDiv.className = 'fov-row';
-        rowDiv.id = rowId;
-        rowDiv.innerHTML = `
-            <input type="number" class="fov-hip" placeholder="如 10" value="${hip}" style="flex:1;">
-            <input type="number" class="fov-ads" placeholder="如 12.6" value="${ads}" style="flex:1;">
-            <button type="button" onclick="removeFovRow('${rowId}')" title="删除">×</button>
-        `;
-        fovMeasureContainer.appendChild(rowDiv);
-        
-        rowDiv.querySelectorAll('input').forEach(inp => {
-            inp.addEventListener('input', calculateFovMeasure);
-        });
-        
-        calculateFovMeasure();
-    }
-
-    window.removeFovRow = function(id) {
-        const row = document.getElementById(id);
-        if(row) {
-            row.remove();
-            if(fovMeasureContainer.children.length === 0) {
-                addFovRow(); // 至少保留一行
-            }
-            calculateFovMeasure();
-        }
-    }
-
-    function median(values) {
-        const sorted = [...values].sort((a,b) => a-b);
-        const mid = Math.floor(sorted.length / 2);
-        return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-    }
-
-    function calculateFovMeasure() {
-        const baseFov = parseFloat(fovBaseFov.value);
-        if (!Number.isFinite(baseFov) || baseFov <= 0 || baseFov >= 180) {
-            fovResultVal.textContent = '—';
-            fovResProcess.innerHTML = '请输入有效的基础 FOV (1-179)';
-            return;
-        }
-
-        const ratios = [];
-        const rows = fovMeasureContainer.querySelectorAll('.fov-row');
-        
-        rows.forEach(row => {
-            const hipVal = row.querySelector('.fov-hip').value.trim();
-            const adsVal = row.querySelector('.fov-ads').value.trim();
-            const hip = parseFloat(hipVal);
-            const ads = parseFloat(adsVal);
-            
-            if(hipVal !== '' && adsVal !== '' && Number.isFinite(hip) && Number.isFinite(ads) && hip > 0 && ads > 0) {
-                ratios.push(ads / hip);
-            }
-        });
-
-        if (ratios.length === 0) {
-            fovResultVal.textContent = '—';
-            fovResProcess.innerHTML = '请至少输入一组有效的测量尺寸';
-            return;
-        }
-
-        const ratio = median(ratios);
-        const radians = baseFov * Math.PI / 180;
-        const resultFov = 2 * Math.atan(Math.tan(radians / 2) / ratio) * 180 / Math.PI;
-        
-        fovResultVal.textContent = resultFov.toFixed(2) + '°';
-        fovResProcess.innerHTML = `
-            放大倍率: <strong style="color:#fff;">${ratio.toFixed(3)}×</strong> <br>
-            有效测量组: <strong style="color:#fff;">${ratios.length} 组</strong> <br>
-            <span style="color:#888; font-size:0.9em;">(多组测量自动取中位数降低误差)</span>
-        `;
-    }
-
-    if(fovBaseFov) {
-        fovBaseFov.addEventListener('input', calculateFovMeasure);
-        document.getElementById('fovAddBtn').addEventListener('click', () => addFovRow());
-        addFovRow('10', '12.6'); // 初始示例数据
-    }
-</script>
 
 </body>
 </html>

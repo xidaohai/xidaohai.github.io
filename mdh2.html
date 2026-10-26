@@ -31,7 +31,6 @@
   header h1 { font-size: 26px; color: #fff; margin: 0 0 8px; letter-spacing: 1px; }
   header p { color: var(--dim); font-size: 14px; margin: 0;}
 
-  /* 主布局：左右分栏 */
   .main-layout {
     display: grid;
     grid-template-columns: 1.1fr 0.9fr;
@@ -42,7 +41,6 @@
     .main-layout { grid-template-columns: 1fr; }
   }
 
-  /* 卡片基础样式 */
   .card {
     background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
     padding: 24px; margin-bottom: 24px;
@@ -53,28 +51,33 @@
   .card.mdh-card h2 { border-left-color: var(--blue); }
   .card.purple-card h2 { border-left-color: var(--purple); }
   .card.gold-card h2 { border-left-color: var(--gold); }
+  .card.mod-card h2 { border-left-color: var(--green); }
 
-  /* 算法切换按钮组 */
-  .rate-btn-group { display: flex; gap: 6px; margin-bottom: 15px; flex-wrap: wrap; }
-  .rate-btn {
-    flex: 1; min-width: 70px; padding: 8px 0; font-size: 13px; border-radius: 6px;
-    border: 1px solid #444; background: #181818; color: #aaa;
-    cursor: pointer; transition: 0.2s; font-weight: bold;
+  .formula-btn-group {
+    display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+    padding: 6px; background: rgba(0, 188, 212, 0.06); border: 1px dashed rgba(0,188,212,0.35); border-radius: 8px;
   }
-  .rate-btn:hover { background: #2a2a2a; color: #fff; }
-  .rate-btn.active {
-    background: rgba(236, 72, 153, 0.15); border-color: var(--accent); color: var(--accent);
+  .formula-btn {
+    flex: 1; min-width: 100px; padding: 9px 0; font-size: 12.5px; border-radius: 6px;
+    border: 1px solid #3a4a5c; background: #131a24; color: #8fa3b8;
+    cursor: pointer; transition: 0.2s; font-weight: bold; line-height: 1.3;
+  }
+  .formula-btn:hover { background: #1c2632; color: #fff; }
+  .formula-btn.active {
+    background: rgba(0, 188, 212, 0.15); border-color: var(--primary); color: var(--primary);
+    box-shadow: 0 0 0 1px rgba(0,188,212,0.2) inset;
   }
 
-  /* 核心公式提示框 */
-  .formula-tip {
-    text-align: center; margin-bottom: 20px; background: rgba(236,72,153,0.08);
-    border: 1px dashed rgba(236,72,153,0.4); border-radius: 10px; padding: 15px;
-    color: var(--accent); font-family: "Courier New", monospace; font-size: 16px; font-weight: bold;
+  .group-label {
+    font-size: 11px; color: var(--dim); margin: 4px 0 6px; letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 6px;
   }
-  .formula-tip span { display: block; font-family: 'PingFang SC'; font-size: 12px; color: var(--dim); margin-top: 5px; font-weight: normal;}
+  .group-label::before {
+    content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--primary); opacity: 0.7;
+  }
+  .group-label.accent::before { background: var(--accent); }
 
-  /* 计算器面板通用样式 */
   .calc-panel {
     background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
     padding: 20px; border-radius: 10px;
@@ -94,16 +97,36 @@
   .input-row input.mdh-input:focus { border-color: var(--blue); }
   .input-row input.ruler-input:focus { border-color: var(--purple); }
 
+  .lock-wrap { display: flex; align-items: center; gap: 8px; }
+  .lock-btn {
+    width: 32px; height: 32px; padding: 0; border-radius: 6px; flex: 0 0 auto;
+    border: 1px solid #333; background: #090c12; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; line-height: 1; transition: all 0.2s;
+  }
+  .lock-btn.locked {
+    border-color: rgba(255,176,32,0.55); background: rgba(255,176,32,0.10);
+    box-shadow: 0 0 0 1px rgba(255,176,32,0.15) inset;
+  }
+  .lock-btn.unlocked {
+    border-color: var(--green); background: rgba(79,227,193,0.10);
+    box-shadow: 0 0 0 1px rgba(79,227,193,0.15) inset;
+  }
+  .lock-btn:hover { filter: brightness(1.35); }
+  .input-row input.mdh-percent-input:disabled {
+    background: #0a0d13; color: #5a6577; border-color: #232c3b;
+    cursor: not-allowed; opacity: 1;
+  }
+
   .result-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #333; }
   .result-row span { font-size: 14px; color: var(--dim); }
   .result-row .val { font-family: "Courier New", monospace; font-size: 22px; font-weight: bold; color: var(--green); }
 
-  /* 特殊盒子 */
   .mdh-box, .ruler-box, .edge-formula {
     text-align: center; margin-bottom: 20px; border-radius: 10px; padding: 15px;
   }
   .mdh-box { background: rgba(59,130,246,0.08); border: 1px dashed rgba(59,130,246,0.4); }
-  .mdh-box .formula { font-family: "Courier New", monospace; font-size: 16px; font-weight: bold; color: var(--blue); }
+  .mdh-box .formula { font-family: "Courier New", monospace; font-size: 15px; font-weight: bold; color: var(--blue); line-height: 1.6; word-break: break-word;}
   .ruler-box { background: rgba(167,139,250,0.08); border: 1px dashed rgba(167,139,250,0.4); }
   .ruler-box .formula { font-family: "Courier New", monospace; font-size: 16px; font-weight: bold; color: var(--purple); }
   
@@ -114,7 +137,20 @@
   .edge-text p { font-size: 14px; color: var(--dim); margin-bottom: 12px; }
   .edge-text strong { color: var(--ink); }
 
-  /* ====== FOV 测量专用（每组直接显示 FOV） ====== */
+  .base-def {
+    background: rgba(0,0,0,0.25); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;
+    font-family: "Courier New", monospace; font-size: 12.5px; color: #9fb3c8; line-height: 1.55;
+    text-align: center; word-break: break-word;
+  }
+  .base-def strong { color: #fff; }
+  .mod-formula {
+    font-family: "Courier New", monospace; font-size: 16px; font-weight: bold; color: var(--green);
+    text-align: center; padding: 12px 0;
+  }
+  .no-hip-tag {
+    font-size: 11px; color: #8d9bb0; text-align: center; margin-top: 4px;
+  }
+
   .fov-row {
     display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
   }
@@ -160,7 +196,6 @@
 
   #fovMeasureContainer { display: block; }
 
-  /* 左下角固定公式对照板 */
   .formula-float {
     position: fixed; bottom: 20px; left: 20px; z-index: 100;
     background: rgba(23, 28, 38, 0.85); backdrop-filter: blur(8px);
@@ -187,10 +222,7 @@
   .fb-line .eq { font-family: "Courier New", monospace; font-size: 13px; font-weight: bold; }
   .left .eq { color: var(--primary); }
   .right .eq { color: var(--gold); }
-  
-  .linear-warning { display: none; font-size: 11px; color: #ff9800; text-align: right; margin-top: -5px; margin-bottom: 10px; }
 
-  /* 悬浮作者框 */
   .author-float {
     position: fixed; bottom: 24px; right: 24px; z-index: 1000;
     background: rgba(23, 28, 38, 0.9); backdrop-filter: blur(8px);
@@ -205,13 +237,16 @@
   .author-float .name { font-size: 14px; font-weight: bold; color: #fff; }
   .author-float .sub { font-size: 11px; color: var(--dim); display: block; margin-top: -2px;}
 
-  /* 恢复默认按钮 */
   .reset-btn {
     display: inline-block; background: transparent; color: var(--dim);
     border: 1px solid var(--line); border-radius: 6px; padding: 8px 16px;
-    font-size: 13px; cursor: pointer; transition: all 0.2s; margin-top: 10px;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
   }
   .reset-btn:hover { color: #fff; border-color: #cf6679; background: rgba(207, 102, 121, 0.1); }
+
+  .reset-container {
+    display: flex; justify-content: flex-end; padding-right: 4px; margin-top: 8px;
+  }
 
 </style>
 </head>
@@ -225,10 +260,8 @@
 
   <div class="main-layout">
     
-    <!-- 左侧列 -->
     <div class="col-left">
       
-      <!-- 1. 未知 FOV 测量器 -->
       <div class="card gold-card">
         <h2>1. 🔍 未知 FOV 测量器</h2>
         <div class="calc-panel">
@@ -250,76 +283,14 @@
           </div>
         </div>
       </div>
-      
-      <!-- 2. 核心换算 -->
-      <div class="card">
-        <h2>2. 核心经验：<br>111与0.75公式为我创造；<br>÷√2 为快边界（近手），×√2 为慢边界（近眼）<br>0.5公式有人提过、1.0公式就是MDH100%</h2>
-        
-        <div class="rate-btn-group">
-          <button class="rate-btn" data-type="111">老公式(111)</button>
-          <button class="rate-btn" data-type="sqrt">（快）零七五 ÷ √2</button>
-          <button class="rate-btn active" data-type="mid">(居中)零七五公式</button>
-          <button class="rate-btn" data-type="linear">（慢）零七五 × √2</button>
-        </div>
 
-        <div class="formula-tip" id="formulaTipBox">
-            R = 111 / (111 + 变化量)
-            <span>纯线性压平，内部自动将FOV差转为变化量</span>
-        </div>
-
-        <div class="calc-panel">
-          <div class="input-grid-2">
-            <div>
-              <div class="input-row">
-                <label>腰射 FOV</label>
-                <input type="number" id="fovHip" value="103" step="1">
-              </div>
-              <div class="input-row">
-                <label>开镜 FOV</label>
-                <input type="number" id="fovAds" value="90" step="1">
-              </div>
-            </div>
-            <div>
-              <div class="input-row">
-                <label>基础 CM/360°</label>
-                <input type="number" id="cm360" value="50" step="1">
-              </div>
-              <div class="input-row" id="sliderInputRow" style="display: none;">
-                <label>你的腰射滑块</label>
-                <input type="number" id="sliderBase" value="1.0" step="0.1">
-              </div>
-            </div>
-          </div>
-          
-          <div class="input-row" style="margin-top: 10px; border-top: 1px dashed #333; padding-top: 15px;">
-            <label for="toggleSlider">开启游戏滑块换算</label>
-            <input type="checkbox" id="toggleSlider">
-          </div>
-          
-          <div class="linear-warning" id="linearWarning">
-            * 提示：仅当游戏滑块与物理距离为纯线性反比时，此结果才严格成立。
-          </div>
-
-          <div class="result-row" style="border-top:none; margin-top:0; padding-top:5px;">
-            <span>计算得出的【开镜 CM/360°】:</span>
-            <span class="val" id="resCmAds">--</span>
-          </div>
-          
-          <div class="result-row" id="sliderResultRow" style="margin-top:10px; padding-top:15px; display: none;">
-            <span>计算得出的【开镜滑块】应填:</span>
-            <span class="val" id="resSliderAds" style="color:var(--accent)">--</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. 终极物理校准 -->
       <div class="card">
         <h2>3. 终极物理校准：屏幕边缘法</h2>
         <div class="edge-text">
           <p>遇到高倍镜，转 90° 推不动？<strong>忘掉墙角，用你的显示器边缘作为绝对标尺！</strong></p>
           <div class="edge-formula">
             任意角度距离 = CM/360° × (角度 ÷ 360°)<br>
-            <span style="color:#fff; font-size:13px;">（屏幕边缘法：把角度设为 FOV ÷ 2）</span>
+            <span style="color:#fff; font-size:13px;" id="edgeFormulaHint">（屏幕边缘法：把角度设为 FOV ÷ 2）</span>
           </div>
         </div>
 
@@ -343,23 +314,26 @@
             </div>
           </div>
 
+          <div class="input-row" style="margin-top: 10px; border-top: 1px dashed #333; padding-top: 15px;">
+            <label for="toggleVisible">开镜四周有黑边（可见区域 &lt; 屏幕半宽）</label>
+            <input type="checkbox" id="toggleVisible">
+          </div>
+
+          <div class="input-row" id="visiblePercentRow" style="display: none;">
+            <label>准星到可见边缘占半宽的百分比</label>
+            <input type="number" id="visiblePercent" value="85" step="1" min="0" max="100">
+          </div>
+
           <div class="result-row">
             <span>鼠标垫上应剪的纸条长度：</span>
             <span class="val" id="resPaper" style="color:var(--accent)">-- cm</span>
           </div>
         </div>
       </div>
-
-      <!-- 恢复默认按钮 -->
-      <div style="text-align: right; padding-right: 10px; margin-top: -10px;">
-        <button class="reset-btn" id="resetBtn">↺ 恢复默认设置</button>
-      </div>
     </div>
 
-    <!-- 右侧列 -->
     <div class="col-right">
       
-      <!-- 模块 4：尺子反推 MDH -->
       <div class="card purple-card">
         <h2>📏 尺子量测：反推 MDH 比例</h2>
         <div class="ruler-box">
@@ -383,43 +357,63 @@
         </div>
       </div>
 
-      <!-- 模块 5：MDH 百分比换算 -->
-      <div class="card mdh-card">
-        <h2>📐 MDH 百分比换算</h2>
-        <div class="mdh-box">
-          <div class="formula">R_mdh = arctan(MDH% × tan(F1/2)) ÷ arctan(MDH% × tan(F2/2))</div>
+      <div class="card mod-card">
+        <h2>📐 MDH × 西岛海经验公式</h2>
+
+        <div class="base-def">
+          标准 MDH 比值：<br>
+          <strong>R₀ = arctan( MDH% × tan(F1/2) ) ÷ arctan( MDH% × tan(F2/2) )</strong>
+        </div>
+        <div class="no-hip-tag">※ 填入的mdh在此经验公式嵌套下，当填入常用拉枪距离得出mdh（硬要说其拉枪距离宁可短不可长）</div>
+
+        <div class="mdh-box" style="margin-top:12px;">
+          <div class="mod-formula" id="mdhModFormulaTip">R = R₀</div>
+          <div id="mdhModFormulaNote" style="font-size:11px; color:#8d9bb0; margin-top:4px;"></div>
+        </div>
+
+        <div class="group-label">对 R₀ 的调制方式</div>
+        <div class="formula-btn-group">
+          <button class="formula-btn active" data-mdh-formula="std">R = R₀（参考）</button>
+          <button class="formula-btn" data-mdh-formula="09">R = R₀<sup>6/7</sup>（七六简约公式）</button>
+          <button class="formula-btn" data-mdh-formula="0102">R = R₀<sup>1 − (1/7)(1 − 1/R₀)²</sup>（七一完整公式）</button>
         </div>
 
         <div class="calc-panel">
           <div class="input-row">
-            <label>腰射 FOV</label>
-            <input type="number" id="mdhFovHip" value="103" step="1">
+            <label>腰射 FOV (F1)</label>
+            <input type="number" id="mdhModFovHip" value="103" step="1">
           </div>
           <div class="input-row">
-            <label>开镜 FOV</label>
-            <input type="number" id="mdhFovAds" value="90" step="1">
+            <label>开镜 FOV (F2)</label>
+            <input type="number" id="mdhModFovAds" value="90" step="1">
           </div>
           <div class="input-row">
             <label>当前腰射 CM/360°</label>
-            <input type="number" id="mdhBaseCm" value="50" step="1">
+            <input type="number" id="mdhModBaseCm" value="50" step="1">
           </div>
           <div class="input-row">
-            <label>MDH 百分比 (填 70)</label>
-            <input type="number" id="mdhPercent" value="70" step="5" class="mdh-input">
+            <label>MDH 百分比 (默认 25，可填 0 取极限)</label>
+            <div class="lock-wrap">
+              <input type="number" id="mdhModPercent" value="25" step="5" min="0" class="mdh-percent-input" disabled>
+              <button type="button" id="mdhLockBtn" class="lock-btn locked" title="已锁定，点击解锁后可修改 MDH 百分比">🔒</button>
+            </div>
           </div>
           
           <div class="result-row">
-            <span>【目标开镜 CM/360°】:</span>
-            <span class="val" id="resMdhCm" style="color:var(--blue)">-- cm</span>
+            <span>【调制后开镜 CM/360°】:</span>
+            <span class="val" id="resMdhModCm" style="color:var(--green)">-- cm</span>
           </div>
         </div>
+      </div>
+
+      <div class="reset-container">
+        <button class="reset-btn" id="resetBtn">↺ 恢复默认设置</button>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- 全屏左下角：固定公式对照板 -->
 <div class="formula-float">
   <div class="formula-board">
     <div class="fb-box left">
@@ -448,7 +442,6 @@
   </div>
 </div>
 
-<!-- 悬浮作者框 -->
 <a href="https://space.bilibili.com/1534330" target="_blank" class="author-float">
   <span class="icon">🎮</span>
   <div>
@@ -458,7 +451,8 @@
 </a>
 
 <script>
-  const STORAGE_KEY = 'aim_calibration_tool_v2';
+  const STORAGE_KEY = 'aim_calibration_tool_v10';
+  const STORAGE_VERSION = 2;
 
   const DEFAULTS = {
     fovBaseFov: '103',
@@ -466,43 +460,54 @@
     calcCm: '56.63',
     calcFovAds: '90',
     targetAngle: '45',
-    fovHip: '103',
-    fovAds: '90',
-    cm360: '50',
-    sliderBase: '1.0',
-    toggleSlider: false,
+    toggleVisible: false,
+    visiblePercent: '85',
     rulerScreenHalf: '29.9',
     rulerTargetLen: '19.25',
-    mdhFovHip: '103',
-    mdhFovAds: '90',
-    mdhBaseCm: '50',
-    mdhPercent: '70'
+    mdhModFovHip: '103',
+    mdhModFovAds: '90',
+    mdhModBaseCm: '50',
+    mdhModPercent: '25',
+    mdhBaseFormula: 'std',
+    mdhLocked: true
   };
 
   const fovBaseFov = document.getElementById('fovBaseFov');
   const fovMeasureContainer = document.getElementById('fovMeasureContainer');
 
+  const calcCmIn = document.getElementById('calcCm');
+  const calcFovAdsIn = document.getElementById('calcFovAds');
+  const targetAngleIn = document.getElementById('targetAngle');
+  const resPaper = document.getElementById('resPaper');
+  const toggleVisible = document.getElementById('toggleVisible');
+  const visiblePercentRow = document.getElementById('visiblePercentRow');
+  const visiblePercentIn = document.getElementById('visiblePercent');
+  const edgeFormulaHint = document.getElementById('edgeFormulaHint');
+
+  let mdhBaseFormula = 'std';
+  let mdhLocked = true;
+
   function saveState() {
     const state = {
+      version: STORAGE_VERSION,
       fovBaseFov: fovBaseFov.value,
       fovRows: Array.from(fovMeasureContainer.querySelectorAll('.fov-row')).map(row => [
         row.querySelector('.fov-hip').value,
         row.querySelector('.fov-ads').value
       ]),
-      calcCm: document.getElementById('calcCm').value,
-      calcFovAds: document.getElementById('calcFovAds').value,
-      targetAngle: document.getElementById('targetAngle').value,
-      fovHip: document.getElementById('fovHip').value,
-      fovAds: document.getElementById('fovAds').value,
-      cm360: document.getElementById('cm360').value,
-      sliderBase: document.getElementById('sliderBase').value,
-      toggleSlider: document.getElementById('toggleSlider').checked,
+      calcCm: calcCmIn.value,
+      calcFovAds: calcFovAdsIn.value,
+      targetAngle: targetAngleIn.value,
+      toggleVisible: toggleVisible.checked,
+      visiblePercent: visiblePercentIn.value,
       rulerScreenHalf: document.getElementById('rulerScreenHalf').value,
       rulerTargetLen: document.getElementById('rulerTargetLen').value,
-      mdhFovHip: document.getElementById('mdhFovHip').value,
-      mdhFovAds: document.getElementById('mdhFovAds').value,
-      mdhBaseCm: document.getElementById('mdhBaseCm').value,
-      mdhPercent: document.getElementById('mdhPercent').value
+      mdhModFovHip: document.getElementById('mdhModFovHip').value,
+      mdhModFovAds: document.getElementById('mdhModFovAds').value,
+      mdhModBaseCm: document.getElementById('mdhModBaseCm').value,
+      mdhModPercent: document.getElementById('mdhModPercent').value,
+      mdhBaseFormula,
+      mdhLocked
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
@@ -512,10 +517,17 @@
     if (!saved) return;
     try {
       const state = JSON.parse(saved);
+
+      // ★ 旧版本数据迁移：没有 version 字段，强制 MDH 重置为 25 并上锁
+      if (state.version !== STORAGE_VERSION) {
+        state.mdhModPercent = DEFAULTS.mdhModPercent;
+        state.mdhLocked = true;
+      }
+
       const setVal = (id, val) => { if(val !== undefined) document.getElementById(id).value = val; };
-      
+
       setVal('fovBaseFov', state.fovBaseFov);
-      
+
       fovMeasureContainer.innerHTML = '';
       if (state.fovRows && Array.isArray(state.fovRows) && state.fovRows.length > 0) {
         state.fovRows.forEach(rowData => addFovRow(rowData[0], rowData[1]));
@@ -524,20 +536,28 @@
       setVal('calcCm', state.calcCm);
       setVal('calcFovAds', state.calcFovAds);
       setVal('targetAngle', state.targetAngle);
-      setVal('fovHip', state.fovHip);
-      setVal('fovAds', state.fovAds);
-      setVal('cm360', state.cm360);
-      setVal('sliderBase', state.sliderBase);
+      setVal('visiblePercent', state.visiblePercent);
       setVal('rulerScreenHalf', state.rulerScreenHalf);
       setVal('rulerTargetLen', state.rulerTargetLen);
-      setVal('mdhFovHip', state.mdhFovHip);
-      setVal('mdhFovAds', state.mdhFovAds);
-      setVal('mdhBaseCm', state.mdhBaseCm);
-      setVal('mdhPercent', state.mdhPercent);
+      setVal('mdhModFovHip', state.mdhModFovHip);
+      setVal('mdhModFovAds', state.mdhModFovAds);
+      setVal('mdhModBaseCm', state.mdhModBaseCm);
+      setVal('mdhModPercent', state.mdhModPercent);
 
-      if (state.toggleSlider !== undefined) {
-        document.getElementById('toggleSlider').checked = state.toggleSlider;
-        toggleSlider.dispatchEvent(new Event('change'));
+      if (typeof state.mdhLocked === 'boolean') {
+        mdhLocked = state.mdhLocked;
+      }
+
+      if (state.mdhBaseFormula === 'std' || state.mdhBaseFormula === '09' || state.mdhBaseFormula === '0102') {
+        mdhBaseFormula = state.mdhBaseFormula;
+      }
+      syncMdhFormulaButtons();
+      syncMdhLock();
+
+      if (state.toggleVisible !== undefined) {
+        toggleVisible.checked = state.toggleVisible;
+        visiblePercentRow.style.display = state.toggleVisible ? 'flex' : 'none';
+        updateEdgeHint();
       }
     } catch (e) {
       console.error("读取本地保存失败", e);
@@ -549,127 +569,75 @@
       localStorage.removeItem(STORAGE_KEY);
       const setVal = (id, val) => document.getElementById(id).value = val;
       setVal('fovBaseFov', DEFAULTS.fovBaseFov);
-      
+
       fovMeasureContainer.innerHTML = '';
       DEFAULTS.fovRows.forEach(r => addFovRow(r[0], r[1]));
 
       setVal('calcCm', DEFAULTS.calcCm);
       setVal('calcFovAds', DEFAULTS.calcFovAds);
       setVal('targetAngle', DEFAULTS.targetAngle);
-      setVal('fovHip', DEFAULTS.fovHip);
-      setVal('fovAds', DEFAULTS.fovAds);
-      setVal('cm360', DEFAULTS.cm360);
-      setVal('sliderBase', DEFAULTS.sliderBase);
+      setVal('visiblePercent', DEFAULTS.visiblePercent);
       setVal('rulerScreenHalf', DEFAULTS.rulerScreenHalf);
       setVal('rulerTargetLen', DEFAULTS.rulerTargetLen);
-      setVal('mdhFovHip', DEFAULTS.mdhFovHip);
-      setVal('mdhFovAds', DEFAULTS.mdhFovAds);
-      setVal('mdhBaseCm', DEFAULTS.mdhBaseCm);
-      setVal('mdhPercent', DEFAULTS.mdhPercent);
+      setVal('mdhModFovHip', DEFAULTS.mdhModFovHip);
+      setVal('mdhModFovAds', DEFAULTS.mdhModFovAds);
+      setVal('mdhModBaseCm', DEFAULTS.mdhModBaseCm);
+      setVal('mdhModPercent', DEFAULTS.mdhModPercent);
 
-      document.getElementById('toggleSlider').checked = DEFAULTS.toggleSlider;
-      toggleSlider.dispatchEvent(new Event('change'));
+      mdhBaseFormula = DEFAULTS.mdhBaseFormula;
+      mdhLocked = DEFAULTS.mdhLocked;
+      syncMdhFormulaButtons();
+      syncMdhLock();
+      updateMdhModFormulaTip();
 
-      calc1(); calc3(); calc4(); calculateFovMeasure();
+      toggleVisible.checked = DEFAULTS.toggleVisible;
+      visiblePercentRow.style.display = DEFAULTS.toggleVisible ? 'flex' : 'none';
+      updateEdgeHint();
+
+      calc3(); calc4(); calcMdhMod(); calculateFovMeasure();
     }
   });
 
-  const toggleSlider = document.getElementById('toggleSlider');
-  const sliderInputRow = document.getElementById('sliderInputRow');
-  const sliderResultRow = document.getElementById('sliderResultRow');
-  const linearWarning = document.getElementById('linearWarning');
-
-  toggleSlider.addEventListener('change', (e) => {
-    if (e.target.checked) {
-      sliderInputRow.style.display = 'flex';
-      sliderResultRow.style.display = 'flex';
-      linearWarning.style.display = 'block';
-    } else {
-      sliderInputRow.style.display = 'none';
-      sliderResultRow.style.display = 'none';
-      linearWarning.style.display = 'none';
-    }
-    calc1();
-    saveState();
-  });
-
-  let currentRateType = 'mid';
-  const fovHipIn = document.getElementById('fovHip');
-  const fovAdsIn = document.getElementById('fovAds');
-  const cm360In = document.getElementById('cm360');
-  const sliderBaseIn = document.getElementById('sliderBase');
-  const resCmAds = document.getElementById('resCmAds');
-  const resSliderAds = document.getElementById('resSliderAds');
-  const formulaTipBox = document.getElementById('formulaTipBox');
-
-  document.querySelectorAll('.rate-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.rate-btn').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      currentRateType = e.target.getAttribute('data-type');
-      updateFormulaTip();
-      calc1();
-    });
-  });
-
-  function updateFormulaTip() {
-    if (currentRateType === '111') {
-      formulaTipBox.innerHTML = `R = 111 / (111 + 变化量) <span>纯线性压平，内部自动将FOV差转为变化量</span>`;
-    } else if (currentRateType === 'sqrt') {
-      formulaTipBox.innerHTML = `R = (腰射FOV / 开镜FOV) ^ 0.75 ÷ √2 <span>零七五基准的下边界，偏快近手（最小值）</span>`;
-    } else if (currentRateType === 'mid') {
-      formulaTipBox.innerHTML = `R = (腰射FOV / 开镜FOV) ^ 0.75 <span>居中平衡，兼顾视觉与手腕（基准）</span>`;
-    } else if (currentRateType === 'linear') {
-      formulaTipBox.innerHTML = `R = (腰射FOV / 开镜FOV) ^ 0.75 × √2 <span>零七五基准的上边界，偏慢近眼（最大值）</span>`;
-    }
-  }
-
-  function calc1() {
-    const hip = parseFloat(fovHipIn.value);
-    const ads = parseFloat(fovAdsIn.value);
-    const cm = parseFloat(cm360In.value);
-    const baseSlider = parseFloat(sliderBaseIn.value);
-
-    if (!Number.isFinite(hip) || !Number.isFinite(ads) || !Number.isFinite(cm) || hip <= 0 || ads <= 0) return;
-
-    const X = ads - hip;
-    let R = 0;
-
-    if (currentRateType === '111') {
-      if (111 + X <= 0) return;
-      R = 111 / (111 + X);
-    } else if (currentRateType === 'sqrt') {
-      // 零七五公式 ÷ √2 → 下边界（最小值）
-      R = Math.pow(hip / ads, 0.75) / Math.SQRT2;
-    } else if (currentRateType === 'mid') {
-      // 零七五公式基准
-      R = Math.pow(hip / ads, 0.75);
-    } else if (currentRateType === 'linear') {
-      // 零七五公式 × √2 → 上边界（最大值）
-      R = Math.pow(hip / ads, 0.75) * Math.SQRT2;
-    }
-
-    const targetCm = cm * R;
-    resCmAds.innerText = targetCm.toFixed(2) + ' cm';
-
-    if (toggleSlider.checked && Number.isFinite(baseSlider)) {
-      const targetSlider = baseSlider / R;
-      resSliderAds.innerText = targetSlider.toFixed(3);
-    }
-
-    calcCmIn.value = targetCm.toFixed(2);
-    calcFovAdsIn.value = ads;
-    targetAngleIn.value = (ads / 2).toFixed(1);
+  toggleVisible.addEventListener('change', (e) => {
+    visiblePercentRow.style.display = e.target.checked ? 'flex' : 'none';
+    updateEdgeHint();
+    autoAngleFromFov();
     calc4();
     saveState();
+  });
+
+  visiblePercentIn.addEventListener('input', () => {
+    autoAngleFromFov();
+    calc4();
+    saveState();
+  });
+
+  function updateEdgeHint() {
+    if (toggleVisible.checked) {
+      const pct = parseFloat(visiblePercentIn.value) || 0;
+      edgeFormulaHint.innerHTML = `（黑边模式：可见角度 = FOV ÷ 2 × ${pct.toFixed(0)}%）`;
+    } else {
+      edgeFormulaHint.innerHTML = `（屏幕边缘法：把角度设为 FOV ÷ 2）`;
+    }
   }
 
-  [fovHipIn, fovAdsIn, cm360In, sliderBaseIn].forEach(el => el.addEventListener('input', calc1));
+  function autoAngleFromFov() {
+    const fov = parseFloat(calcFovAdsIn.value);
+    if (!Number.isFinite(fov) || fov <= 0) return;
+    let angle = fov / 2;
+    if (toggleVisible.checked) {
+      const pct = parseFloat(visiblePercentIn.value);
+      if (Number.isFinite(pct) && pct >= 0 && pct <= 100) {
+        angle = (fov / 2) * (pct / 100);
+      }
+    }
+    targetAngleIn.value = angle.toFixed(1);
+  }
 
   const rulerScreenHalfIn = document.getElementById('rulerScreenHalf');
   const rulerTargetLenIn = document.getElementById('rulerTargetLen');
   const resRulerPercent = document.getElementById('resRulerPercent');
-  const mdhPercentIn = document.getElementById('mdhPercent');
+  const mdhModPercentIn = document.getElementById('mdhModPercent');
 
   function calc3() {
     const screenHalf = parseFloat(rulerScreenHalfIn.value);
@@ -679,50 +647,126 @@
 
     const percent = (targetLen / screenHalf) * 100;
     resRulerPercent.innerText = percent.toFixed(1) + ' %';
-    
-    mdhPercentIn.value = percent.toFixed(1);
-    calc2();
+
+    if (!mdhLocked) {
+      mdhModPercentIn.value = percent.toFixed(1);
+      calcMdhMod();
+    }
     saveState();
   }
 
   [rulerScreenHalfIn, rulerTargetLenIn].forEach(el => el.addEventListener('input', calc3));
 
-  const mdhFovHipIn = document.getElementById('mdhFovHip');
-  const mdhFovAdsIn = document.getElementById('mdhFovAds');
-  const mdhBaseCmIn = document.getElementById('mdhBaseCm');
-  const resMdhCm = document.getElementById('resMdhCm');
+  const mdhModFovHipIn = document.getElementById('mdhModFovHip');
+  const mdhModFovAdsIn = document.getElementById('mdhModFovAds');
+  const mdhModBaseCmIn = document.getElementById('mdhModBaseCm');
+  const resMdhModCm = document.getElementById('resMdhModCm');
+  const mdhModFormulaTip = document.getElementById('mdhModFormulaTip');
+  const mdhModFormulaNote = document.getElementById('mdhModFormulaNote');
+  const mdhLockBtn = document.getElementById('mdhLockBtn');
 
-  function calc2() {
-    const hHip = parseFloat(mdhFovHipIn.value);
-    const hAds = parseFloat(mdhFovAdsIn.value);
-    const baseCm = parseFloat(mdhBaseCmIn.value);
-    
-    const inputPercent = parseFloat(mdhPercentIn.value);
-    const percent = inputPercent / 100; 
+  const mdhFormulaBtns = document.querySelectorAll('.formula-btn[data-mdh-formula]');
 
-    if (!Number.isFinite(hHip) || !Number.isFinite(hAds) || !Number.isFinite(baseCm) || !Number.isFinite(percent) || hHip <= 0 || hAds <= 0 || percent <= 0) return;
+  function syncMdhLock() {
+    mdhModPercentIn.disabled = mdhLocked;
+    mdhLockBtn.classList.toggle('locked', mdhLocked);
+    mdhLockBtn.classList.toggle('unlocked', !mdhLocked);
+    mdhLockBtn.textContent = mdhLocked ? '🔒' : '🔓';
+    mdhLockBtn.title = mdhLocked
+      ? '已锁定，点击解锁后可修改 MDH 百分比'
+      : '已解锁，点击重新锁定';
+  }
 
-    const radHip = (hHip / 2) * Math.PI / 180;
-    const radAds = (hAds / 2) * Math.PI / 180;
+  mdhLockBtn.addEventListener('click', () => {
+    mdhLocked = !mdhLocked;
+    syncMdhLock();
+    if (!mdhLocked) {
+      mdhModPercentIn.focus();
+      mdhModPercentIn.select();
+    }
+    saveState();
+  });
 
-    const R_mdh = Math.atan(percent * Math.tan(radHip)) / Math.atan(percent * Math.tan(radAds));
-    const targetCm = baseCm * R_mdh;
+  function syncMdhFormulaButtons() {
+    mdhFormulaBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-mdh-formula') === mdhBaseFormula);
+    });
+  }
 
-    resMdhCm.innerText = targetCm.toFixed(2) + ' cm';
-    
+  mdhFormulaBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      mdhBaseFormula = btn.getAttribute('data-mdh-formula');
+      syncMdhFormulaButtons();
+      updateMdhModFormulaTip();
+      calcMdhMod();
+    });
+  });
+
+  function mdhBaseR(percent, fovHip, fovAds) {
+    if (!(fovHip > 0) || !(fovAds > 0)) return 1;
+    const radHip = (fovHip / 2) * Math.PI / 180;
+    const radAds = (fovAds / 2) * Math.PI / 180;
+    if (percent === 0) {
+      return Math.tan(radHip) / Math.tan(radAds);
+    }
+    if (!(percent > 0)) return 1;
+    return Math.atan(percent * Math.tan(radHip)) / Math.atan(percent * Math.tan(radAds));
+  }
+
+  function mdhModulatedR(percent, fovHip, fovAds) {
+    const r0 = mdhBaseR(percent, fovHip, fovAds);
+    if (mdhBaseFormula === 'std') return r0;
+    if (mdhBaseFormula === '09') return Math.pow(r0, 6 / 7);
+    const d = 1 - 1 / r0;
+    const exp = 1 - (1 / 7) * d * d;
+    return Math.pow(r0, exp);
+  }
+
+  function updateMdhModFormulaTip() {
+    const inputPercent = parseFloat(mdhModPercentIn.value);
+    const isZero = (inputPercent === 0);
+
+    if (mdhBaseFormula === 'std') {
+      mdhModFormulaTip.innerHTML = `R = R₀`;
+      mdhModFormulaNote.textContent = isZero
+        ? '当前 MDH% = 0，R₀ 取极限值 tan(F1/2) ÷ tan(F2/2)'
+        : '标准 MDH 结果，不做任何调制';
+    } else if (mdhBaseFormula === '09') {
+      mdhModFormulaTip.innerHTML = `R = R₀<sup>6/7</sup>`;
+      mdhModFormulaNote.textContent = '将 R₀ 提升到 6/7 次幂（七分之六）';
+    } else {
+      mdhModFormulaTip.innerHTML = `R = R₀<sup>1 − (1/7)(1 − 1/R₀)²</sup>`;
+      mdhModFormulaNote.textContent = '将 R₀ 提升到 1 − (1/7)(1 − 1/R₀)² 次幂（七分之一）';
+    }
+
+    if (isZero && mdhBaseFormula !== 'std') {
+      mdhModFormulaNote.textContent += '；R₀ 已取 tan 极限';
+    }
+  }
+
+  function calcMdhMod() {
+    const fovHip = parseFloat(mdhModFovHipIn.value);
+    const fovAds = parseFloat(mdhModFovAdsIn.value);
+    const baseCm = parseFloat(mdhModBaseCmIn.value);
+    const percent = parseFloat(mdhModPercentIn.value) / 100;
+
+    updateMdhModFormulaTip();
+
+    if (!Number.isFinite(fovHip) || !Number.isFinite(fovAds) || !Number.isFinite(baseCm) || !Number.isFinite(percent) ||
+        fovHip <= 0 || fovAds <= 0 || baseCm <= 0 || percent < 0) return;
+
+    const R = mdhModulatedR(percent, fovHip, fovAds);
+    const targetCm = baseCm * R;
+    resMdhModCm.innerText = targetCm.toFixed(2) + ' cm';
+
     calcCmIn.value = targetCm.toFixed(2);
-    calcFovAdsIn.value = hAds;
-    targetAngleIn.value = (hAds / 2).toFixed(1);
+    calcFovAdsIn.value = fovAds;
+    autoAngleFromFov();
     calc4();
     saveState();
   }
 
-  [mdhFovHipIn, mdhFovAdsIn, mdhBaseCmIn, mdhPercentIn].forEach(el => el.addEventListener('input', calc2));
-
-  const calcCmIn = document.getElementById('calcCm');
-  const calcFovAdsIn = document.getElementById('calcFovAds');
-  const targetAngleIn = document.getElementById('targetAngle');
-  const resPaper = document.getElementById('resPaper');
+  [mdhModFovHipIn, mdhModFovAdsIn, mdhModBaseCmIn, mdhModPercentIn].forEach(el => el.addEventListener('input', calcMdhMod));
 
   function calc4() {
     const cm = parseFloat(calcCmIn.value);
@@ -734,9 +778,21 @@
     }
 
     const paperLength = cm * (Math.abs(angle) / 360);
-    
-    if (Math.abs(angle) === fov / 2) {
-      resPaper.innerHTML = `${paperLength.toFixed(2)} cm <span style="font-size:12px; color:#888; display:block; text-align:right;">(对应：对齐屏幕边缘)</span>`;
+
+    let idealAngle = fov / 2;
+    if (toggleVisible.checked) {
+      const pct = parseFloat(visiblePercentIn.value);
+      if (Number.isFinite(pct) && pct >= 0 && pct <= 100) {
+        idealAngle = (fov / 2) * (pct / 100);
+      }
+    }
+
+    const isAligned = Math.abs(Math.abs(angle) - idealAngle) < 0.05;
+    if (isAligned) {
+      const hintText = toggleVisible.checked
+        ? '(对应：对齐可见边缘)'
+        : '(对应：对齐屏幕边缘)';
+      resPaper.innerHTML = `${paperLength.toFixed(2)} cm <span style="font-size:12px; color:#888; display:block; text-align:right;">${hintText}</span>`;
     } else {
       resPaper.innerText = `${paperLength.toFixed(2)} cm`;
     }
@@ -745,16 +801,9 @@
 
   [calcCmIn, targetAngleIn].forEach(el => el.addEventListener('input', calc4));
   calcFovAdsIn.addEventListener('input', () => {
-    const fov = parseFloat(calcFovAdsIn.value);
-    if (Number.isFinite(fov)) {
-      targetAngleIn.value = (fov / 2).toFixed(1);
-    }
+    autoAngleFromFov();
     calc4();
   });
-
-  /* ============================================================
-     FOV 测量器：每组直接显示该组 FOV（无中位数、无汇总）
-     ============================================================ */
 
   function addFovRow(hip = '', ads = '') {
     const rowDiv = document.createElement('div');
@@ -833,11 +882,13 @@
   window.addEventListener('DOMContentLoaded', () => {
     loadState();
     if (fovMeasureContainer.children.length === 0) addFovRow('10', '12.6');
-    updateFormulaTip();
-    calc1(); 
-    calc2();
-    calc3(); 
+    syncMdhFormulaButtons();
+    syncMdhLock();
+    updateMdhModFormulaTip();
+    updateEdgeHint();
+    calc3();
     calc4();
+    calcMdhMod();
   });
 
 </script>
