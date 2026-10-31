@@ -289,8 +289,8 @@
         <div class="edge-text">
           <p>遇到高倍镜，转 90° 推不动？<strong>忘掉墙角，用你的显示器边缘作为绝对标尺！</strong></p>
           <div class="edge-formula">
-            任意角度距离 = CM/360° × (角度 ÷ 360°)<br>
-            <span style="color:#fff; font-size:13px;" id="edgeFormulaHint">（屏幕边缘法：把角度设为 FOV ÷ 2）</span>
+            鼠标距离 = CM₃₆₀ × (目标转角 ÷ 360°)<br>
+            <span style="color:#fff; font-size:13px;" id="edgeFormulaHint">（屏幕边缘法：中心至单侧边缘，角度 = FOV ÷ 2）</span>
           </div>
         </div>
 
@@ -325,8 +325,11 @@
           </div>
 
           <div class="result-row">
-            <span>鼠标垫上应剪的纸条长度：</span>
+            <span>对应的鼠标移动距离：</span>
             <span class="val" id="resPaper" style="color:var(--accent)">-- cm</span>
+          </div>
+          <div style="font-size:12px; color:var(--dim); margin-top:8px;">
+            对齐屏幕边缘时，结果是“屏幕中心 → 单侧边缘”的距离；左右两侧边缘之间的整屏距离为其 2 倍。
           </div>
         </div>
       </div>
@@ -371,11 +374,21 @@
           <div id="mdhModFormulaNote" style="font-size:11px; color:#8d9bb0; margin-top:4px;"></div>
         </div>
 
-        <div class="group-label">对 R₀ 的调制方式</div>
+        <div class="group-label">标准 MDH（基准）</div>
         <div class="formula-btn-group">
-          <button class="formula-btn active" data-mdh-formula="std">R = R₀（参考）</button>
-          <button class="formula-btn" data-mdh-formula="09">R = R₀<sup>6/7</sup>（七六简约公式）</button>
-          <button class="formula-btn" data-mdh-formula="0102">R = R₀<sup>1 − (1/7)(1 − 1/R₀)²</sup>（七一完整公式）</button>
+          <button class="formula-btn active" data-mdh-formula="std">R = R₀（标准 MDH）</button>
+        </div>
+
+        <div class="group-label">七分体系</div>
+        <div class="formula-btn-group">
+          <button class="formula-btn" data-mdh-formula="09">R = R₀<sup>6/7</sup>（简约公式）</button>
+          <button class="formula-btn" data-mdh-formula="0102">R = R₀<sup>1 − (1/7)(1 − 1/R₀)²</sup>（完整公式）</button>
+        </div>
+
+        <div class="group-label">十分体系</div>
+        <div class="formula-btn-group">
+          <button class="formula-btn" data-mdh-formula="pow09">R = R₀<sup>0.9</sup>（简约公式）</button>
+          <button class="formula-btn" data-mdh-formula="full10">R = R₀<sup>1 − (1/10)(1 − 1/R₀)²</sup>（完整公式）</button>
         </div>
 
         <div class="calc-panel">
@@ -548,7 +561,7 @@
         mdhLocked = state.mdhLocked;
       }
 
-      if (state.mdhBaseFormula === 'std' || state.mdhBaseFormula === '09' || state.mdhBaseFormula === '0102') {
+      if (['std', '09', '0102', 'pow09', 'full10'].includes(state.mdhBaseFormula)) {
         mdhBaseFormula = state.mdhBaseFormula;
       }
       syncMdhFormulaButtons();
@@ -607,31 +620,54 @@
   });
 
   visiblePercentIn.addEventListener('input', () => {
+    updateEdgeHint();
     autoAngleFromFov();
     calc4();
     saveState();
   });
 
-  function updateEdgeHint() {
+  // 将屏幕上的水平位置比例换算为透视投影下的真实视角。
+  // P=1 表示屏幕单侧边缘；P<1 表示黑边内侧的可见边缘。
+  function getEdgeAngleDegrees(fov, visibleRatio = 1) {
+    if (!Number.isFinite(fov) || fov <= 0 || fov >= 180 ||
+        !Number.isFinite(visibleRatio) || visibleRatio < 0 || visibleRatio > 1) {
+      return null;
+    }
+    const halfFovRad = (fov / 2) * Math.PI / 180;
+    return Math.atan(visibleRatio * Math.tan(halfFovRad)) * 180 / Math.PI;
+  }
+
+  function getCurrentEdgeAngle() {
+    const fov = parseFloat(calcFovAdsIn.value);
+    let visibleRatio = 1;
     if (toggleVisible.checked) {
-      const pct = parseFloat(visiblePercentIn.value) || 0;
-      edgeFormulaHint.innerHTML = `（黑边模式：可见角度 = FOV ÷ 2 × ${pct.toFixed(0)}%）`;
+      const pct = parseFloat(visiblePercentIn.value);
+      if (!Number.isFinite(pct) || pct < 0 || pct > 100) return null;
+      visibleRatio = pct / 100;
+    }
+    return getEdgeAngleDegrees(fov, visibleRatio);
+  }
+
+  function updateEdgeHint() {
+    const angle = getCurrentEdgeAngle();
+    if (toggleVisible.checked) {
+      const pct = parseFloat(visiblePercentIn.value);
+      if (angle === null) {
+        edgeFormulaHint.textContent = '（黑边模式：请输入 0–100 的可见边缘比例及有效水平 FOV）';
+      } else {
+        edgeFormulaHint.textContent = `（黑边模式：边缘角度 = arctan(${(pct / 100).toFixed(2)} × tan(FOV ÷ 2)) ≈ ${angle.toFixed(2)}°）`;
+      }
+    } else if (angle === null) {
+      edgeFormulaHint.textContent = '（请输入大于 0° 且小于 180° 的水平 FOV）';
     } else {
-      edgeFormulaHint.innerHTML = `（屏幕边缘法：把角度设为 FOV ÷ 2）`;
+      edgeFormulaHint.textContent = `（屏幕边缘法：中心至单侧边缘，角度 = FOV ÷ 2 = ${angle.toFixed(2)}°）`;
     }
   }
 
   function autoAngleFromFov() {
-    const fov = parseFloat(calcFovAdsIn.value);
-    if (!Number.isFinite(fov) || fov <= 0) return;
-    let angle = fov / 2;
-    if (toggleVisible.checked) {
-      const pct = parseFloat(visiblePercentIn.value);
-      if (Number.isFinite(pct) && pct >= 0 && pct <= 100) {
-        angle = (fov / 2) * (pct / 100);
-      }
-    }
-    targetAngleIn.value = angle.toFixed(1);
+    const angle = getCurrentEdgeAngle();
+    if (angle === null) return;
+    targetAngleIn.value = angle.toFixed(2);
   }
 
   const rulerScreenHalfIn = document.getElementById('rulerScreenHalf');
@@ -717,9 +753,16 @@
     const r0 = mdhBaseR(percent, fovHip, fovAds);
     if (mdhBaseFormula === 'std') return r0;
     if (mdhBaseFormula === '09') return Math.pow(r0, 6 / 7);
-    const d = 1 - 1 / r0;
-    const exp = 1 - (1 / 7) * d * d;
-    return Math.pow(r0, exp);
+    if (mdhBaseFormula === '0102') {
+      const d = 1 - 1 / r0;
+      return Math.pow(r0, 1 - (1 / 7) * d * d);
+    }
+    if (mdhBaseFormula === 'pow09') return Math.pow(r0, 0.9);
+    if (mdhBaseFormula === 'full10') {
+      const d = 1 - 1 / r0;
+      return Math.pow(r0, 1 - (1 / 10) * d * d);
+    }
+    return r0;
   }
 
   function updateMdhModFormulaTip() {
@@ -733,10 +776,16 @@
         : '标准 MDH 结果，不做任何调制';
     } else if (mdhBaseFormula === '09') {
       mdhModFormulaTip.innerHTML = `R = R₀<sup>6/7</sup>`;
-      mdhModFormulaNote.textContent = '将 R₀ 提升到 6/7 次幂（七分之六）';
-    } else {
+      mdhModFormulaNote.textContent = '七分体系简约公式：将 R₀ 提升到 6/7 次幂';
+    } else if (mdhBaseFormula === '0102') {
       mdhModFormulaTip.innerHTML = `R = R₀<sup>1 − (1/7)(1 − 1/R₀)²</sup>`;
-      mdhModFormulaNote.textContent = '将 R₀ 提升到 1 − (1/7)(1 − 1/R₀)² 次幂（七分之一）';
+      mdhModFormulaNote.textContent = '七分体系完整公式：指数为 1 − (1/7)(1 − 1/R₀)²';
+    } else if (mdhBaseFormula === 'pow09') {
+      mdhModFormulaTip.innerHTML = `R = R₀<sup>0.9</sup>`;
+      mdhModFormulaNote.textContent = '十分体系简约公式：将 R₀ 提升到 0.9 次幂';
+    } else if (mdhBaseFormula === 'full10') {
+      mdhModFormulaTip.innerHTML = `R = R₀<sup>1 − (1/10)(1 − 1/R₀)²</sup>`;
+      mdhModFormulaNote.textContent = '十分体系完整公式：指数为 1 − (1/10)(1 − 1/R₀)²';
     }
 
     if (isZero && mdhBaseFormula !== 'std') {
@@ -772,27 +821,22 @@
     const cm = parseFloat(calcCmIn.value);
     const fov = parseFloat(calcFovAdsIn.value);
     const angle = parseFloat(targetAngleIn.value);
+    const idealAngle = getCurrentEdgeAngle();
 
-    if (!Number.isFinite(cm) || !Number.isFinite(angle) || !Number.isFinite(fov) || cm <= 0) {
-      resPaper.innerText = '-- cm'; return;
+    if (!Number.isFinite(cm) || !Number.isFinite(angle) ||
+        !Number.isFinite(fov) || cm <= 0 || idealAngle === null) {
+      resPaper.innerText = '-- cm';
+      return;
     }
 
     const paperLength = cm * (Math.abs(angle) / 360);
-
-    let idealAngle = fov / 2;
-    if (toggleVisible.checked) {
-      const pct = parseFloat(visiblePercentIn.value);
-      if (Number.isFinite(pct) && pct >= 0 && pct <= 100) {
-        idealAngle = (fov / 2) * (pct / 100);
-      }
-    }
-
     const isAligned = Math.abs(Math.abs(angle) - idealAngle) < 0.05;
     if (isAligned) {
       const hintText = toggleVisible.checked
-        ? '(对应：对齐可见边缘)'
-        : '(对应：对齐屏幕边缘)';
-      resPaper.innerHTML = `${paperLength.toFixed(2)} cm <span style="font-size:12px; color:#888; display:block; text-align:right;">${hintText}</span>`;
+        ? '中心 → 单侧可见边缘'
+        : '中心 → 单侧屏幕边缘';
+      const fullWidthLength = paperLength * 2;
+      resPaper.innerHTML = `${paperLength.toFixed(2)} cm <span style="font-size:12px; color:#888; display:block; text-align:right;">${hintText}<br>整屏左右边缘对应：${fullWidthLength.toFixed(2)} cm</span>`;
     } else {
       resPaper.innerText = `${paperLength.toFixed(2)} cm`;
     }
@@ -801,6 +845,7 @@
 
   [calcCmIn, targetAngleIn].forEach(el => el.addEventListener('input', calc4));
   calcFovAdsIn.addEventListener('input', () => {
+    updateEdgeHint();
     autoAngleFromFov();
     calc4();
   });
