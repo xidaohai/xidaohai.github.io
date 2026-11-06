@@ -2239,10 +2239,10 @@
                         </div>
                         <div class="ctrl-row">
                             <label>水平范围</label>
-                            <input type="range" id="inp-spawn-angle-r" min="10" max="150" step="0.2" value="45" disabled oninput="syncSpawnAngle(parseFloat(this.value))" />
+                            <input type="range" id="inp-spawn-angle-r" min="1" max="150" step="0.2" value="45" disabled oninput="syncSpawnAngle(parseFloat(this.value))" />
                             <div class="stepper-box">
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-spawn-angle', -1)">−</button>
-                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-spawn-angle" value="45.00" step="0.5" min="10" max="150" disabled />
+                                <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" class="num-input" id="inp-spawn-angle" value="45.00" step="0.5" min="1" max="150" disabled />
                                 <button class="step-btn" disabled onclick="stepValGlobal('inp-spawn-angle', 1)">+</button>
                             </div>
                         </div>
@@ -8678,13 +8678,77 @@ function finishChallenge() {
         saveToLocalStorage();
     };
 
-    // 数值输入统一使用文本编辑：聚焦时全选，粘贴时整段替换；输入过程中不格式化小数，避免光标跳动和自动补零。
+    // 小数输入按小数点分段选择：点击点左侧选整数，点击点右侧选小数；
+    // 没有小数点的整数输入仍然整框选择。测量实际字体，避免固定字符宽度造成误判。
+    const numericMeasureCanvas = document.createElement('canvas');
+    const numericMeasureContext = numericMeasureCanvas.getContext('2d');
+
+    function selectNumericSegmentAtPointer(el, clientX) {
+        const value = String(el.value ?? '');
+        const dotIndex = value.indexOf('.');
+        if (dotIndex < 0) {
+            if (typeof el.select === 'function') el.select();
+            return;
+        }
+
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        const fontSize = parseFloat(style.fontSize) || 12;
+        const letterSpacing = style.letterSpacing === 'normal' ? 0 : (parseFloat(style.letterSpacing) || 0);
+
+        if (numericMeasureContext) {
+            numericMeasureContext.font = style.font || `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        }
+
+        const textWidth = (text) => {
+            const measured = numericMeasureContext
+                ? numericMeasureContext.measureText(text).width
+                : text.length * fontSize * 0.55;
+            return measured + Math.max(0, text.length - 1) * letterSpacing;
+        };
+
+        const borderLeft = parseFloat(style.borderLeftWidth) || 0;
+        const borderRight = parseFloat(style.borderRightWidth) || 0;
+        const paddingLeft = parseFloat(style.paddingLeft) || 0;
+        const paddingRight = parseFloat(style.paddingRight) || 0;
+        const contentLeft = rect.left + borderLeft + paddingLeft;
+        const contentWidth = Math.max(0, rect.width - borderLeft - borderRight - paddingLeft - paddingRight);
+        const fullTextWidth = textWidth(value);
+
+        let textStartX = contentLeft;
+        if (style.textAlign === 'center') {
+            textStartX += (contentWidth - fullTextWidth) / 2;
+        } else if (style.textAlign === 'right' || style.textAlign === 'end') {
+            textStartX += contentWidth - fullTextWidth;
+        }
+
+        const beforeDot = value.slice(0, dotIndex);
+        const dotWidth = numericMeasureContext
+            ? numericMeasureContext.measureText('.').width
+            : fontSize * 0.3;
+        // 加上点前最后一个字符与小数点之间的字距，得到小数点的中心位置。
+        const dotCenterX = textStartX + textWidth(beforeDot) + letterSpacing + dotWidth / 2;
+
+        if (clientX < dotCenterX) {
+            el.setSelectionRange(0, dotIndex);
+        } else {
+            el.setSelectionRange(dotIndex + 1, value.length);
+        }
+    }
+
     document.addEventListener('pointerdown', (e) => {
         const el = e.target && e.target.closest ? e.target.closest('.num-input') : null;
-        if (!el || el.disabled || document.activeElement !== el) return;
-        // 输入框已获得焦点时，再次点击也保持“整框替换”行为。
+        if (!el || el.disabled || (e.button !== undefined && e.button !== 0)) return;
+
+        // 首次点击时主动聚焦，并阻止浏览器随后把光标重新放到鼠标位置。
+        if (document.activeElement !== el) {
+            el.dataset.skipAutoSelectOnFocus = '1';
+            try { el.focus({ preventScroll: true }); }
+            catch (_) { el.focus(); }
+            if (document.activeElement !== el) delete el.dataset.skipAutoSelectOnFocus;
+        }
         e.preventDefault();
-        if (typeof el.select === 'function') el.select();
+        selectNumericSegmentAtPointer(el, e.clientX);
     }, true);
 
     document.addEventListener('focusin', (e) => {
@@ -8692,19 +8756,38 @@ function finishChallenge() {
         if (!el || !el.classList || !el.classList.contains('num-input') || el.disabled) return;
         const raw = String(el.value ?? '').trim();
         if (raw && Number.isFinite(Number(raw))) el.dataset.lastValidValue = el.value;
+
+        // 鼠标/触屏点击已在 pointerdown 中按位置完成分段选择；
+        // 键盘 Tab 等方式获得焦点时，仍保留原来的全选行为。
+        if (el.dataset.skipAutoSelectOnFocus === '1') {
+            delete el.dataset.skipAutoSelectOnFocus;
+            return;
+        }
         window.setTimeout(() => {
             if (document.activeElement === el && typeof el.select === 'function') el.select();
         }, 0);
     });
 
-    // 即使用户在输入框中间单击后粘贴，也始终以剪贴板文本完整替换原值。
+    // 粘贴遵循当前选区：点击整数部分后只替换整数，点击小数部分后只替换小数。
     document.addEventListener('paste', (e) => {
         const el = e.target && e.target.closest ? e.target.closest('.num-input') : null;
         if (!el || el.disabled) return;
         const clipboard = e.clipboardData || window.clipboardData;
         if (!clipboard) return;
         e.preventDefault();
-        el.value = clipboard.getData('text').trim();
+
+        const pastedText = clipboard.getData('text').trim();
+        const start = Number.isInteger(el.selectionStart) ? el.selectionStart : 0;
+        const end = Number.isInteger(el.selectionEnd) ? el.selectionEnd : start;
+
+        // 剪贴板若含小数点，视为完整数值；纯数字则替换当前选中的整数段或小数段。
+        if (pastedText.includes('.')) {
+            el.value = pastedText;
+        } else {
+            el.value = el.value.slice(0, start) + pastedText + el.value.slice(end);
+        }
+        const caret = el.value.length;
+        if (typeof el.setSelectionRange === 'function') el.setSelectionRange(caret, caret);
         el.dispatchEvent(new Event('input', { bubbles: true }));
     }, true);
 
@@ -10427,7 +10510,7 @@ window.addEventListener('keydown', (e) => {
     // 战绩性能曲线（高精度无锁时钟采样，杜绝 GC 与卡顿）
     // ============================================================
     let recordEnabled = localStorage.getItem(CHART_STORAGE_KEY) !== 'false';
-    const MAX_CHART_POINTS = 2400;
+    const MAX_CHART_POINTS = 7200; // 0.5 秒采样一次，支持约 60 分钟的连续训练。
     const timeData = new Float32Array(MAX_CHART_POINTS);
     const spmData = new Float32Array(MAX_CHART_POINTS);
     const accData = new Float32Array(MAX_CHART_POINTS);
@@ -10709,11 +10792,15 @@ window.addEventListener('keydown', (e) => {
             sampleTimer = null;
             if (!sessionStarted || !recordEnabled) return;
             takeSnapshot(false);
-            if (sessionStarted) {
-                const elapsed = getSessionElapsed();
-                const delay = Math.max(20, Math.min(500, (nextSampleElapsed - elapsed) * 1000));
-                sampleTimer = setTimeout(sampleLoop, delay);
-            }
+
+            // 达到采样容量后必须彻底停止唤醒。
+            // 否则 nextSampleElapsed 不再推进，delay 会长期落到 20ms，
+            // 形成每秒约 50 次的无效定时循环。
+            if (!sessionStarted || !recordEnabled || sampleCount >= MAX_CHART_POINTS) return;
+
+            const elapsed = getSessionElapsed();
+            const delay = Math.max(20, Math.min(500, (nextSampleElapsed - elapsed) * 1000));
+            sampleTimer = setTimeout(sampleLoop, delay);
         };
         takeSnapshot(true);
         sampleTimer = setTimeout(sampleLoop, CHART_SAMPLE_INTERVAL * 1000);
