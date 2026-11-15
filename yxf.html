@@ -141,6 +141,7 @@
         .btn-undo { background: transparent; color: var(--text-sub); }
         .btn-undo:not(:disabled):hover { color: #fff; border-color: #888; }
         .btn-mid { background: #2d2d35; color: #e0e0e0; }
+        .btn-equal { background: #1e2a2d; color: #b0e0e6; border-color: #315057; }
         .btn-target-mid { background: #1e2a2d; color: #b0e0e6; }
         .btn-manual { background: #2a1e2d; color: #e0b0e6; border-color: #443344; }
 
@@ -173,6 +174,7 @@
         .history-item.is-manual { border-left-color: var(--purple); background: rgba(191, 90, 242, 0.05); }
         .history-item.is-midpoint { border-left-color: var(--green); }
         .history-item.is-hybrid { border-left-color: var(--cyan); }
+        .history-item.is-equal { border-left-color: var(--cyan); background: rgba(0, 229, 255, 0.05); }
         .history-item b { font-family: var(--mono-font); color: var(--yellow); font-size: 14px; }
         .keep-badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-weight: bold; font-family: var(--mono-font); margin: 0 2px; font-size: 12px; }
 
@@ -253,6 +255,7 @@
 
         <div class="aux-btns">
             <button class="btn-aux btn-undo" id="btn-undo" disabled>撤销回溯</button>
+            <button class="btn-aux btn-equal" id="btn-equal" title="仅当目标函数严格单峰且 A、B 的真实效果相同时使用；保留 [A, B]">A、B效果相同：保留中间区间</button>
             <button class="btn-aux btn-mid" id="btn-mid">无法再选，取中点结果</button>
             <button class="btn-aux btn-target-mid adv-only" id="btn-target-mid">取参考 T 与 AB中点之间</button>
             <button class="btn-aux btn-manual adv-only" id="btn-manual-mode">精选模式：手动精准选取</button>
@@ -304,9 +307,20 @@
     }
 
     function init() {
-        iMin = parseFloat($('in-min').value) || 0;
-        iMax = parseFloat($('in-max').value) || 100;
-        if (iMin >= iMax) { alert("范围无效：下限需小于上限"); return; }
+        // 不使用 || 作为默认值判断，否则合法的 0 会被错误替换。
+        const rawMin = $('in-min').value.trim();
+        const rawMax = $('in-max').value.trim();
+        const nextMin = rawMin === '' ? NaN : Number(rawMin);
+        const nextMax = rawMax === '' ? NaN : Number(rawMax);
+        if (!Number.isFinite(nextMin) || !Number.isFinite(nextMax) || nextMin >= nextMax) {
+            alert("范围无效：请输入有效数字，且下限需小于上限");
+            // 恢复上一次有效范围，避免输入无效时界面与内部状态不一致。
+            $('in-min').value = Number.isFinite(iMin) ? iMin : 0;
+            $('in-max').value = Number.isFinite(iMax) ? iMax : 100;
+            return;
+        }
+        iMin = nextMin;
+        iMax = nextMax;
         cMin = iMin; cMax = iMax;
         vMin = iMin; vMax = iMax;
         anchorActive = false; 
@@ -386,6 +400,7 @@
         const start = Math.min(targetVal, abMid);
         const end = Math.max(targetVal, abMid);
         const stepSize = (end - start) / n;
+        if (stepSize <= 0) return; // 精选区间退化为单点时，不重复绘制重叠刻度。
         for (let i = 1; i < n; i++) {
             const val = start + stepSize * i;
             const mark = document.createElement('div');
@@ -427,6 +442,8 @@
             item.innerHTML = `<b>[决策]</b> 取区间中点 <span class="keep-badge" style="background:var(--green); color:#000">${f(sel)}</span>`;
         } else if (mode === 'hybrid') {
             item.innerHTML = `<b>[混合微调]</b> 参考点与中点间 <span class="keep-badge" style="background:var(--cyan); color:#000">${f(sel)}</span>`;
+        } else if (mode === 'equal') {
+            item.innerHTML = `<b>[STEP ${step}]</b> A、B效果相同，保留中间区间 <span class="keep-badge" style="background:var(--cyan); color:#000">[${f(cMin)}, ${f(cMax)}]</span><div style="font-size:11px; opacity:0.6; margin-top:4px">两端已排除</div>`;
         } else {
             item.innerHTML = `<b>[STEP ${step}]</b> 选择了 <span class="keep-badge" style="background:rgba(${type === 'A' ? '77,171,247' : '255,107,107'},0.2); color:var(--${type === 'A' ? 'blue' : 'red'})">方案 ${type}</span><div style="font-size:11px; opacity:0.6; margin-top:4px">新区间: [${f(cMin)}, ${f(cMax)}]</div>`;
         }
@@ -526,6 +543,19 @@
 
     $('btn-a').onclick = () => doStep('A');
     $('btn-b').onclick = () => doStep('B');
+    $('btn-equal').onclick = () => {
+        if (isAnimating) return;
+        const range = cMax - cMin;
+        const pA = cMin + (1 - PHI) * range;
+        const pB = cMin + PHI * range;
+        saveState();
+        // 严格单峰且两次测得效果相同时，最优点位于 A、B 之间。
+        cMin = pA;
+        cMax = pB;
+        step++;
+        logAction('EQUAL', (pA + pB) / 2, pA, pB, 'equal');
+        updateUI();
+    };
     $('btn-mid').onclick = () => {
         if (isAnimating) return;
         logAction('MID', (cMin + cMax) / 2, 0, 0, 'midpoint');
@@ -618,25 +648,52 @@
     $('in-max').onchange = init;
 
     let isDragging = false;
+
+    // 将屏幕横坐标映射到轨道比例。鼠标坐标通常按整数 CSS 像素报告，
+    // 而轨道边界可能是小数像素；若直接相除，最边缘会留下不足 1px 的误差，
+    // 导致拖到视觉端点时仍得不到精确的最小值/最大值。因此在两端各设置 1px 吸附区。
+    function getTrackPercent(clientX) {
+        const rect = $('track-box').getBoundingClientRect();
+        if (!Number.isFinite(clientX) || rect.width <= 0) return 0;
+
+        const edgeSnap = 1; // CSS 像素：补偿鼠标坐标整数化及边界小数像素误差
+        if (clientX <= rect.left + edgeSnap) return 0;
+        if (clientX >= rect.right - edgeSnap) return 1;
+
+        return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    }
+
     function handleTrackInteract(e) {
         // 一般模式下不允许点击轨道修改参考点
         if (!isAdvancedMode && !isManualMode) return;
 
-        const rect = $('track-box').getBoundingClientRect();
-        let clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        let pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        const clientX = e.type.includes('touch')
+            ? (e.touches[0] ? e.touches[0].clientX : null)
+            : e.clientX;
+        if (clientX === null || !Number.isFinite(clientX)) return;
+
+        const pct = getTrackPercent(clientX);
         let val = vMin + pct * (vMax - vMin);
 
         if (isManualMode) {
             const n = parseInt(document.querySelector('.btn-div.active').dataset.n);
-            if (n > 0 && targetVal !== null) {
+            if (targetVal !== null) {
                 const range = cMax - cMin;
                 const abMid = (cMin + (1 - PHI) * range + cMin + PHI * range) / 2;
                 const start = Math.min(targetVal, abMid);
                 const end = Math.max(targetVal, abMid);
-                const stepSize = (end - start) / n;
-                let closest = Math.round((val - start) / stepSize);
-                val = start + Math.max(0, Math.min(n, closest)) * stepSize;
+                // 无论自由选点还是分割选点，都只能落在界面标出的精选区间内。
+                val = Math.max(start, Math.min(end, val));
+                if (n > 0) {
+                    const stepSize = (end - start) / n;
+                    if (stepSize > 0) {
+                        const closest = Math.round((val - start) / stepSize);
+                        val = start + Math.max(0, Math.min(n, closest)) * stepSize;
+                    } else {
+                        // 参考点恰好等于 AB 中点时，精选区间退化为单点。
+                        val = start;
+                    }
+                }
             }
             tempSelectedVal = val;
             const valPct = getPct(val);
@@ -654,12 +711,25 @@
         }
     }
 
-    $('track-box').addEventListener('mousedown', (e) => { isDragging = true; handleTrackInteract(e); });
-    window.addEventListener('mouseup', () => isDragging = false);
-    $('track-box').addEventListener('mousemove', (e) => { if (isDragging) handleTrackInteract(e); });
-    $('track-box').addEventListener('touchstart', (e) => { isDragging = true; handleTrackInteract(e); }, {passive: true});
-    window.addEventListener('touchend', () => isDragging = false);
-    $('track-box').addEventListener('touchmove', (e) => { if (isDragging) handleTrackInteract(e); }, {passive: true});
+    $('track-box').addEventListener('mousedown', (e) => {
+        isDragging = true;
+        handleTrackInteract(e);
+    });
+    // 在 window 上监听移动：拖动越过轨道边缘时仍持续更新，并由比例映射自动钳制到端点。
+    window.addEventListener('mousemove', (e) => {
+        if (isDragging) handleTrackInteract(e);
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    $('track-box').addEventListener('touchstart', (e) => {
+        isDragging = true;
+        handleTrackInteract(e);
+    }, {passive: true});
+    window.addEventListener('touchmove', (e) => {
+        if (isDragging) handleTrackInteract(e);
+    }, {passive: true});
+    window.addEventListener('touchend', () => { isDragging = false; });
+    window.addEventListener('touchcancel', () => { isDragging = false; });
 
     // 动画开关控制
     $('btn-toggle-anim').onclick = () => {
