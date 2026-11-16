@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>专业曲线拟合分析工具 | Pro Curve Fitting</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/regression@2.0.1/dist/regression.min.js"></script>
     <style>
         :root {
             --bg-body: #f0f2f5;
@@ -72,15 +71,12 @@
         
         /* Firefox 适配 */
         * {
-            scrollbar-width: thin;
-            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-        }
-
-        * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
         }
         
         body {
@@ -270,6 +266,64 @@
             justify-content: space-between;
             align-items: center;
             transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .fit-panel-header { white-space: normal; min-height: 58px; gap: 10px; }
+        .fit-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 0.78rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            white-space: normal;
+        }
+        .fit-toolbar select {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            padding: 5px 7px;
+            font-size: 0.8rem;
+        }
+        .rounding-toggle {
+            padding: 6px 10px;
+            font-size: 0.78rem;
+        }
+        .rounding-toggle.active {
+            color: #fff;
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .rounding-note {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        .candidate-toggle {
+            padding: 6px 9px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            background: var(--bg-card);
+            font-size: 0.78rem;
+        }
+        .candidate-toggle:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .snap-toggle {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 0.82rem;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+        .snap-toggle input { margin-top: 3px; accent-color: var(--primary-color); }
+        .snap-hint { margin: 4px 0 0 24px; font-size: 0.72rem; color: var(--text-secondary); }
+        .chart-wrapper canvas { cursor: crosshair !important; }
+        @media (max-width: 900px) {
+            .fit-toolbar { justify-content: flex-start; }
         }
 
         .panel-content {
@@ -466,8 +520,11 @@
             transition: background-color 0.3s, border-color 0.3s;
         }
 
+        .chart-wrapper canvas { touch-action: none; }
+
         .resizer-horizontal {
             height: 14px;
+            touch-action: none;
             background: transparent;
             cursor: row-resize;
             display: flex;
@@ -504,6 +561,7 @@
 
         .resizer-vertical {
             width: 14px;
+            touch-action: none;
             height: 100%;
             background: transparent;
             cursor: col-resize;
@@ -560,6 +618,7 @@
 
         .formula-card {
             border: 1px solid var(--border-color);
+            cursor: pointer;
             border-radius: 6px;
             padding: 12px;
             transition: all 0.2s;
@@ -629,12 +688,6 @@
             align-items: center;
         }
 
-        .raw-box {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 1px solid transparent;
-        }
-
         .beautified-box {
             background: rgba(245, 158, 11, 0.1);
             color: #d97706;
@@ -644,15 +697,6 @@
         
         [data-theme="dark"] .beautified-box {
             color: #fbbf24;
-        }
-
-        .arrow-separator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            font-size: 1.2rem;
-            padding-top: 16px; 
         }
 
         .optimization-note {
@@ -774,11 +818,6 @@
         
         @media (max-width: 600px) {
             .formula-container-row { flex-direction: column; }
-            .arrow-separator {
-                padding-top: 0;
-                transform: rotate(90deg);
-                height: 20px;
-            }
         }
     </style>
 </head>
@@ -885,19 +924,19 @@
                                     <svg class="mini-chart-svg" viewBox="0 0 100 50">
                                         <path d="M10,40 L30,10 L50,40 L70,10 L90,40" />
                                     </svg>
-                                    <span class="mini-label">振荡衰减 (Oscillation)</span>
+                                    <span class="mini-label">阻尼振荡 (Damped Wave)</span>
                                 </div>
                                 <div class="mini-chart-card">
                                     <svg class="mini-chart-svg" viewBox="0 0 100 50">
                                         <path d="M10,10 L50,40 L90,10" />
                                     </svg>
-                                    <span class="mini-label">抛物线 (Parabola)</span>
+                                    <span class="mini-label">峰值曲线 (Gaussian)</span>
                                 </div>
                                 <div class="mini-chart-card">
                                     <svg class="mini-chart-svg" viewBox="0 0 100 50">
                                         <path d="M10,40 L30,40 L50,10 L70,10 L90,40" />
                                     </svg>
-                                    <span class="mini-label">阶梯函数 (Step)</span>
+                                    <span class="mini-label">饱和曲线 (Hill)</span>
                                 </div>
                                 <div class="mini-chart-card">
                                     <svg class="mini-chart-svg" viewBox="0 0 100 50">
@@ -927,7 +966,7 @@
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     <svg id="unlockedIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M18 11V7a5 5 0 0 0-8.4-3.5"/></svg>
-                    <span id="lockText">锁定拖动</span>
+                    <span id="lockText">拖动已解锁</span>
                 </button>
             </div>
             <div class="panel-content">
@@ -984,6 +1023,14 @@
                         </div>
                         <input type="range" min="0" max="30" step="5" value="10" oninput="updateChartConfig(this.value, 'xPadding')">
                     </div>
+
+                    <div class="control-item">
+                        <label class="snap-toggle" for="snapToCurveToggle">
+                            <input type="checkbox" id="snapToCurveToggle">
+                            <span>添加数据点时吸附到当前拟合曲线</span>
+                        </label>
+                        <div class="snap-hint">仅在光标距离曲线 18px 以内时吸附；关闭则按图表坐标自由添加。</div>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -1003,10 +1050,20 @@
             </div>
 
             <div class="formulas-wrapper">
-                <div class="panel-header">
-                    拟合结果分析 (<span id="fitCount">0 个结果</span>)
-                    <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 400; font-style: italic;">
-                        R² 越高，拟合优度越好 | 所有非线性模型均已启用 LMA 深度优化
+                <div class="panel-header fit-panel-header">
+                    <span>拟合结果分析 (<span id="fitCount">0 个结果</span>)</span>
+                    <div class="fit-toolbar">
+                        <span>按 AICc 权衡误差与复杂度；同类及近似曲线合并</span>
+                        <label for="roundingDigits">有效数字</label>
+                        <select id="roundingDigits" title="四舍五入后保留的有效数字">
+                            <option value="2">2 位</option>
+                            <option value="3" selected>3 位</option>
+                            <option value="4">4 位</option>
+                            <option value="5">5 位</option>
+                            <option value="6">6 位</option>
+                        </select>
+                        <button type="button" class="btn-lock rounding-toggle" id="roundingToggleBtn" aria-pressed="false">四舍五入：关闭</button>
+                        <button type="button" class="candidate-toggle" id="toggleMoreFitsBtn" hidden>显示其他候选</button>
                     </div>
                 </div>
                 <div class="formulas-grid" id="formulaGrid">
@@ -1020,7 +1077,7 @@
     
     <script>
         // =======================================================
-        // 【核心数据和配置】
+        // CurveLab：数据、图表与拟合核心
         // =======================================================
         let points = [];
         let editingIndex = -1;
@@ -1028,329 +1085,587 @@
         let chartConfig = {
             radius: 4,
             sampling: 100,
-            xPadding: 0.1, // 10%
-            theme: localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            xPadding: 0.1,
+            theme: (() => {
+                try {
+                    const saved = localStorage.getItem('theme');
+                    if (saved === 'dark' || saved === 'light') return saved;
+                } catch (_) {}
+                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            })()
         };
-        
-        let isDragging = false;
+
+        let dragEnabled = true;
+        let pointerDown = null;
         let draggingPoint = null;
-        let dragEnabled = true; // 控制是否允许拖动添加点功能
-        let shouldBlockClick = false; 
-        let dragStartPos = {x: 0, y: 0};
-        const DRAG_TOLERANCE = 5; 
+        let dragMoved = false;
+        let suppressNextClick = false;
+        const DRAG_TOLERANCE = 4;
+        let currentFitResults = [];
+        let activeFitIndex = 0;
+        let roundingEnabled = false;
+        let roundingDigits = 3;
+        let recommendedFitResults = [];
+        let showAllCandidates = false;
+        let snapToCurve = false;
+        const CURVE_SNAP_TOLERANCE = 18;
 
-        // 拟合模型类型枚举
-        const FIT_TYPES = {
-            LINEAR: 'linear',
-            POLYNOMIAL: 'polynomial',
-            EXPONENTIAL: 'exponential',
-            EXPONENTIAL_LM: 'exponential_lm',
-            LOGARITHMIC: 'logarithmic',
-            LOGARITHMIC_LM: 'logarithmic_lm',
-            POWER: 'power',
-            POWER_LM: 'power_lm',
-            SINE: 'sine',
-            SINE_FULL: 'sine_full',
-            GAUSSIAN: 'gaussian',
-            LORENTZIAN: 'lorentzian',
-            HYPERBOLIC: 'hyperbolic',
-            RATIONAL: 'rational',
-            RATIONAL_FULL: 'rational_full',
-            LOGISTIC: 'logistic',
-            LOGISTIC_LM: 'logistic_lm',
-            GOMPERTZ: 'gompertz',
-            GOMPERTZ_LM: 'gompertz_lm',
-            MICHAELIS_MENTEN: 'michaelis_menten',
-            INVERSE_PROPORTIONAL: 'inverse_proportional',
-            MODIFIED_EXPONENTIAL: 'modified_exponential',
-            MODIFIED_POWER: 'modified_power',
-            QUADRATIC_RATIONAL: 'quadratic_rational',
-            WEIBULL: 'weibull',
-            DOUBLE_EXPONENTIAL: 'double_exponential'
+        // =======================================================
+        // 通用数值工具
+        // =======================================================
+        const formatNumber = value => {
+            if (!Number.isFinite(value)) return String(value);
+            if (Math.abs(value) < 1e-12) return '0';
+            return Number(value.toPrecision(6)).toString();
         };
+        const signedTerm = value => value < 0 ? ` - ${formatNumber(Math.abs(value))}` : ` + ${formatNumber(value)}`;
+        const roundSignificant = (value, digits = 3) => {
+            if (!Number.isFinite(value) || value === 0) return value;
+            const rounded = Number(value.toPrecision(Math.max(1, Math.min(12, digits))));
+            return Object.is(rounded, -0) ? 0 : rounded;
+        };
+        const formatRounded = (value, digits = 3) => {
+            const rounded = roundSignificant(value, digits);
+            if (!Number.isFinite(rounded)) return String(rounded);
+            return Object.is(rounded, -0) ? '0' : String(rounded);
+        };
+        const signedRoundedTerm = (value, digits = 3) => value < 0
+            ? ` - ${formatRounded(Math.abs(value), digits)}`
+            : ` + ${formatRounded(value, digits)}`;
+        const roundedDifferenceTerm = (upper, lower, digits = 3) => upper >= lower
+            ? ` + (${formatRounded(upper, digits)} - ${formatRounded(lower, digits)})`
+            : ` - (${formatRounded(lower, digits)} - ${formatRounded(upper, digits)})`;
+        const roundArray = (values, digits) => values.map(value => roundSignificant(value, digits));
+        const mean = values => values.reduce((sum, value) => sum + value, 0) / values.length;
 
-        // =======================================================
-        // 【Levenberg-Marquardt 算法实现】
-        // =======================================================
+        function solveLinearSystem(matrix, vector) {
+            const n = vector.length;
+            if (!n || matrix.length !== n || matrix.some(row => row.length !== n)) return null;
+            const augmented = matrix.map((row, i) => [...row, vector[i]]);
 
-        function levenbergMarquardt(modelFunc, data, initialParams, jacobianFunc, options = {}) {
-            const {
-                maxIterations = 100,
-                tolerance = 1e-6,
-                lambda0 = 0.001,
-                lambdaFactor = 10
-            } = options;
+            for (let col = 0; col < n; col++) {
+                let pivotRow = col;
+                for (let row = col + 1; row < n; row++) {
+                    if (Math.abs(augmented[row][col]) > Math.abs(augmented[pivotRow][col])) pivotRow = row;
+                }
+                const pivot = augmented[pivotRow][col];
+                if (!Number.isFinite(pivot) || Math.abs(pivot) < 1e-14) return null;
+                [augmented[col], augmented[pivotRow]] = [augmented[pivotRow], augmented[col]];
 
-            let params = [...initialParams];
-            let lambda = lambda0;
-            let iteration = 0;
+                for (let row = col + 1; row < n; row++) {
+                    const factor = augmented[row][col] / augmented[col][col];
+                    for (let k = col; k <= n; k++) augmented[row][k] -= factor * augmented[col][k];
+                }
+            }
+
+            const solution = Array(n).fill(0);
+            for (let row = n - 1; row >= 0; row--) {
+                let value = augmented[row][n];
+                for (let col = row + 1; col < n; col++) value -= augmented[row][col] * solution[col];
+                const pivot = augmented[row][row];
+                if (!Number.isFinite(pivot) || Math.abs(pivot) < 1e-14) return null;
+                solution[row] = value / pivot;
+                if (!Number.isFinite(solution[row])) return null;
+            }
+            return solution;
+        }
+
+        function leastSquares(designRows, values) {
+            if (!designRows.length || designRows.length !== values.length) return null;
+            const columns = designRows[0].length;
+            // 先归一化设计矩阵的列，避免 X 单位很大或很小时正规方程病态。
+            const columnNorms = Array.from({ length: columns }, (_, col) =>
+                Math.sqrt(designRows.reduce((sum, row) => sum + row[col] * row[col], 0))
+            );
+            if (columnNorms.some(norm => !Number.isFinite(norm) || norm === 0)) return null;
+            const normal = Array.from({ length: columns }, () => Array(columns).fill(0));
+            const rhs = Array(columns).fill(0);
+            for (let row = 0; row < designRows.length; row++) {
+                for (let i = 0; i < columns; i++) {
+                    const vi = designRows[row][i] / columnNorms[i];
+                    rhs[i] += vi * values[row];
+                    for (let j = 0; j < columns; j++) {
+                        normal[i][j] += vi * (designRows[row][j] / columnNorms[j]);
+                    }
+                }
+            }
+            const normalizedSolution = solveLinearSystem(normal, rhs);
+            return normalizedSolution ? normalizedSolution.map((value, index) => value / columnNorms[index]) : null;
+        }
+
+        function linearFit(data) {
+            const xs = data.map(point => point[0]);
+            const ys = data.map(point => point[1]);
+            const xMean = mean(xs), yMean = mean(ys);
+            let xx = 0, xy = 0;
+            for (let i = 0; i < data.length; i++) {
+                const dx = xs[i] - xMean;
+                xx += dx * dx;
+                xy += dx * (ys[i] - yMean);
+            }
+            if (!(xx > 0) || !Number.isFinite(xx)) return null;
+            const slope = xy / xx;
+            return { intercept: yMean - slope * xMean, slope };
+        }
+
+        function polynomialFit(data, degree) {
+            const xs = data.map(point => point[0]);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const center = (minX + maxX) / 2;
+            const scale = (maxX - minX) / 2;
+            if (!(scale > 0)) return null;
+            const z = x => (x - center) / scale;
+            const rows = data.map(([x]) => Array.from({ length: degree + 1 }, (_, power) => Math.pow(z(x), power)));
+            const coefficients = leastSquares(rows, data.map(point => point[1]));
+            if (!coefficients) return null;
+            return {
+                coefficients,
+                predict: x => coefficients.reduce((sum, coefficient, power) => sum + coefficient * Math.pow(z(x), power), 0),
+                formula: `y = ${coefficients.map((c, i) => `${i === 0 ? formatNumber(c) : (c < 0 ? ' - ' : ' + ') + formatNumber(Math.abs(c)) + '·z' + (i > 1 ? `^${i}` : (i === 1 ? '' : ''))}`).join('')}; z = (x - ${formatNumber(center)}) / ${formatNumber(scale)}`
+            };
+        }
+
+        function evaluateFit(data, predict) {
+            const ys = data.map(point => point[1]);
+            const yMean = mean(ys);
+            let ssResidual = 0, ssTotal = 0;
+            for (const [x, y] of data) {
+                const estimate = predict(x);
+                if (!Number.isFinite(estimate)) return null;
+                ssResidual += (y - estimate) ** 2;
+                ssTotal += (y - yMean) ** 2;
+            }
+            let r2;
+            if (ssTotal === 0) {
+                r2 = ssResidual === 0 ? 1 : 0;
+            } else {
+                r2 = 1 - ssResidual / ssTotal;
+            }
+            return { r2, rmse: Math.sqrt(ssResidual / data.length), ssResidual };
+        }
+
+        // Levenberg–Marquardt：数值雅可比、对角阻尼、奇异矩阵保护。
+        // 不再依赖容易出错且大量重复的手写偏导数。
+        function levenbergMarquardt(model, data, initialParams, options = {}) {
+            const maxIterations = options.maxIterations || 180;
+            const tolerance = options.tolerance || 1e-8;
+            let params = initialParams.slice();
+            let lambda = options.lambda0 || 1e-3;
+            let iterations = 0;
             let converged = false;
-            
-            function computeResiduals() {
-                return data.map(([x, y]) => y - modelFunc(params, x));
-            }
-            
-            function computeError(residuals) {
-                return residuals.reduce((sum, r) => sum + r * r, 0) / residuals.length;
-            }
-            
-            let residuals = computeResiduals();
-            let currentError = computeError(residuals);
+
+            const errorOf = candidate => {
+                let sum = 0;
+                for (const [x, y] of data) {
+                    let estimate;
+                    try { estimate = model(candidate, x); } catch (_) { return Infinity; }
+                    if (!Number.isFinite(estimate)) return Infinity;
+                    sum += (y - estimate) ** 2;
+                }
+                return sum / data.length;
+            };
+
+            let currentError = errorOf(params);
+            if (!Number.isFinite(currentError)) return { params: initialParams.slice(), error: Infinity, iterations, converged: false, success: false };
+            let bestParams = params.slice();
             let bestError = currentError;
-            let bestParams = [...params];
-            
-            while (iteration < maxIterations && !converged) {
-                const J = [];
-                for (let i = 0; i < data.length; i++) {
-                    const [x, y] = data[i];
-                    J.push(jacobianFunc(params, x));
+
+            while (iterations < maxIterations && lambda < 1e16) {
+                const m = params.length;
+                const scales = params.map(value => Math.max(Math.abs(value), 1e-3));
+                const jacobian = Array.from({ length: data.length }, () => Array(m).fill(0));
+                let jacobianValid = true;
+
+                for (let j = 0; j < m; j++) {
+                    const h = 1e-5 * scales[j];
+                    const plus = params.slice(), minus = params.slice();
+                    plus[j] += h;
+                    minus[j] -= h;
+                    for (let i = 0; i < data.length; i++) {
+                        const x = data[i][0];
+                        let fp, fm;
+                        try { fp = model(plus, x); fm = model(minus, x); } catch (_) { fp = fm = NaN; }
+                        if (Number.isFinite(fp) && Number.isFinite(fm)) jacobian[i][j] = (fp - fm) / (2 * h);
+                        else {
+                            let f0;
+                            try { f0 = model(params, x); } catch (_) { f0 = NaN; }
+                            if (Number.isFinite(fp) && Number.isFinite(f0)) jacobian[i][j] = (fp - f0) / h;
+                            else if (Number.isFinite(fm) && Number.isFinite(f0)) jacobian[i][j] = (f0 - fm) / h;
+                            else jacobianValid = false;
+                        }
+                    }
                 }
-                
-                const n = params.length;
-                const JTJ = Array(n).fill(0).map(() => Array(n).fill(0));
-                const JTr = Array(n).fill(0);
-                
-                for (let i = 0; i < n; i++) {
-                    for (let j = 0; j < n; j++) {
-                        JTJ[i][j] = J.reduce((sum, row, idx) => sum + row[i] * row[j], 0);
+                if (!jacobianValid) break;
+
+                const normal = Array.from({ length: m }, () => Array(m).fill(0));
+                const rhs = Array(m).fill(0);
+                for (let i = 0; i < m; i++) {
+                    for (let row = 0; row < data.length; row++) {
+                        const ji = jacobian[row][i] * scales[i];
+                        rhs[i] += ji * (data[row][1] - model(params, data[row][0]));
+                        for (let j = 0; j < m; j++) normal[i][j] += ji * jacobian[row][j] * scales[j];
                     }
-                    JTr[i] = J.reduce((sum, row, idx) => sum + row[i] * residuals[idx], 0);
+                    normal[i][i] += lambda * Math.max(normal[i][i], 1e-8);
                 }
-                
-                const A = JTJ.map((row, i) => 
-                    row.map((val, j) => val + (i === j ? lambda * val : 0))
-                );
-                
-                const delta = solveLinearSystem(A, JTr);
-                
-                const newParams = params.map((p, i) => p + delta[i]);
-                const newResiduals = data.map(([x, y]) => y - modelFunc(newParams, x));
-                const newError = computeError(newResiduals);
-                
-                if (newError < currentError) {
-                    params = newParams;
-                    residuals = newResiduals;
-                    currentError = newError;
-                    lambda /= lambdaFactor;
-                    
-                    if (currentError < bestError) {
-                        bestError = currentError;
-                        bestParams = [...params];
+
+                const scaledDelta = solveLinearSystem(normal, rhs);
+                if (!scaledDelta) {
+                    lambda *= 10;
+                    iterations++;
+                    continue;
+                }
+                const delta = scaledDelta.map((value, index) => value * scales[index]);
+                const candidate = params.map((value, index) => value + delta[index]);
+                const candidateError = errorOf(candidate);
+                iterations++;
+
+                if (candidateError < currentError) {
+                    const previousError = currentError;
+                    params = candidate;
+                    currentError = candidateError;
+                    if (candidateError < bestError) {
+                        bestError = candidateError;
+                        bestParams = candidate.slice();
                     }
-                    
-                    if (Math.abs(newError - currentError) < tolerance || 
-                        delta.reduce((max, d) => Math.max(max, Math.abs(d)), 0) < tolerance) {
-                        converged = true;
-                    }
+                    lambda = Math.max(lambda / 3, 1e-12);
+                    const relativeImprovement = (previousError - currentError) / Math.max(1, previousError);
+                    const relativeStep = Math.max(...delta.map((value, index) => Math.abs(value) / (1 + Math.abs(params[index]))));
+                    if (relativeImprovement < tolerance || relativeStep < tolerance) converged = true;
                 } else {
-                    lambda *= lambdaFactor;
+                    lambda *= 8;
                 }
-                iteration++;
+                if (converged) break;
             }
-            
+
             return {
                 params: bestParams,
                 error: bestError,
-                iterations: iteration,
-                converged: converged
+                iterations,
+                converged,
+                success: Number.isFinite(bestError) && bestError <= errorOf(initialParams)
             };
         }
 
-        function solveLinearSystem(A, b) {
-            const n = A.length;
-            const Ab = A.map((row, i) => [...row, b[i]]);
-            
-            for (let i = 0; i < n; i++) {
-                let maxRow = i;
-                for (let j = i + 1; j < n; j++) {
-                    if (Math.abs(Ab[j][i]) > Math.abs(Ab[maxRow][i])) {
-                        maxRow = j;
-                    }
-                }
-                
-                [Ab[i], Ab[maxRow]] = [Ab[maxRow], Ab[i]];
-                
-                for (let j = i + 1; j < n; j++) {
-                    const factor = Ab[j][i] / Ab[i][i];
-                    for (let k = i; k <= n; k++) {
-                        Ab[j][k] -= factor * Ab[i][k];
-                    }
+        function fitNonlinear(model, data, initialParams, options = {}) {
+            const result = levenbergMarquardt(model, data, initialParams, options);
+            return result.success ? result.params : null;
+        }
+
+        function stableSigmoid(value) {
+            if (value >= 0) {
+                const e = Math.exp(-Math.min(value, 700));
+                return 1 / (1 + e);
+            }
+            const e = Math.exp(Math.max(value, -700));
+            return e / (1 + e);
+        }
+
+        function generateFitPoints(data, predict) {
+            if (!data.length) return [];
+            const xs = data.map(point => point[0]);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const range = maxX - minX;
+            const padding = range === 0 ? 0 : range * chartConfig.xPadding;
+            const startX = minX - padding, endX = maxX + padding;
+            const count = Math.max(20, chartConfig.sampling);
+            const result = [];
+            for (let i = 0; i <= count; i++) {
+                const x = startX + (endX - startX) * i / count;
+                let y;
+                try { y = predict(x); } catch (_) { y = NaN; }
+                result.push({ x, y: Number.isFinite(y) ? y : null });
+            }
+            return result;
+        }
+
+        function getFitFamily(name) {
+            if (/分段线性/.test(name)) return '分段';
+            if (/线性拟合/.test(name)) return '线性';
+            if (/阶多项式/.test(name)) return '多项式';
+            if (/指数/.test(name)) return '指数';
+            if (/对数/.test(name)) return '对数';
+            if (/幂律/.test(name)) return '幂律';
+            if (/Logistic|Gompertz|Richards|Hill|米氏|Weibull/.test(name)) return '饱和 / 生长';
+            if (/高斯|洛伦兹/.test(name)) return '峰形';
+            if (/正弦/.test(name)) return '周期 / 振荡';
+            if (/反比例|有理函数/.test(name)) return '有理函数';
+            return name;
+        }
+
+        function compareFitQuality(a, b) {
+            const aAicc = Number.isFinite(a.aicc) ? a.aicc : Infinity;
+            const bAicc = Number.isFinite(b.aicc) ? b.aicc : Infinity;
+            if (aAicc !== bAicc) return aAicc - bAicc;
+            const aAdj = Number.isFinite(a.adjustedR2) ? a.adjustedR2 : -Infinity;
+            const bAdj = Number.isFinite(b.adjustedR2) ? b.adjustedR2 : -Infinity;
+            return bAdj - aAdj || a.parameterCount - b.parameterCount || b.r2 - a.r2;
+        }
+
+        function curvesAreRedundant(first, second) {
+            if (!first || !second || !points.length) return false;
+            const xs = points.map(point => point[0]);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const ys = points.map(point => point[1]);
+            const yScale = Math.max(Math.max(...ys) - Math.min(...ys), Math.abs(mean(ys)) * 1e-12, 1e-12);
+            let squared = 0, count = 0;
+            for (let i = 0; i <= 40; i++) {
+                const x = minX + (maxX - minX) * i / 40;
+                let y1, y2;
+                try { y1 = first.predict(x); y2 = second.predict(x); } catch (_) { return false; }
+                if (!Number.isFinite(y1) || !Number.isFinite(y2)) return false;
+                squared += ((y1 - y2) / yScale) ** 2;
+                count++;
+            }
+            return count > 0 && Math.sqrt(squared / count) < 0.0125;
+        }
+
+        function chooseRecommendedFits(results, limit = 7) {
+            // 每一类只保留一个代表，避免 Logistic / Gompertz / Richards 等相似模型挤占结果。
+            const ranked = results.slice().sort(compareFitQuality);
+            const familyWinners = new Map();
+            for (const result of ranked) {
+                const family = getFitFamily(result.name);
+                if (!familyWinners.has(family)) familyWinners.set(family, result);
+            }
+
+            const familyCandidates = [...familyWinners.values()].sort(compareFitQuality);
+            if (!familyCandidates.length) return [];
+
+            // ΔAICc ≤ 10 作为默认“仍值得比较”的候选范围；样本不足无法计算 AICc 时，改用调整 R²。
+            const finiteAicc = familyCandidates.filter(result => Number.isFinite(result.aicc));
+            let plausible = familyCandidates;
+            if (finiteAicc.length) {
+                const bestAicc = finiteAicc[0].aicc;
+                plausible = familyCandidates.filter(result => Number.isFinite(result.aicc) && result.aicc - bestAicc <= 10);
+            } else {
+                const finiteAdjusted = familyCandidates.filter(result => Number.isFinite(result.adjustedR2));
+                if (finiteAdjusted.length) {
+                    const bestAdjusted = Math.max(...finiteAdjusted.map(result => result.adjustedR2));
+                    plausible = familyCandidates.filter(result => Number.isFinite(result.adjustedR2) && result.adjustedR2 >= bestAdjusted - 0.25);
                 }
             }
-            
-            const x = Array(n).fill(0);
-            for (let i = n - 1; i >= 0; i--) {
-                x[i] = Ab[i][n];
-                for (let j = i + 1; j < n; j++) {
-                    x[i] -= Ab[i][j] * x[j];
-                }
-                x[i] /= Ab[i][i];
+            if (!plausible.length) plausible = [familyCandidates[0]];
+
+            const diverse = [];
+            for (const result of plausible) {
+                // 几乎重合的曲线视为当前数据下的重复解释，保留排名更好的那个。
+                if (diverse.some(existing => curvesAreRedundant(existing, result))) continue;
+                diverse.push(result);
             }
-            
-            return x;
+            return diverse.slice(0, limit);
+        }
+
+        function addFitResult(results, config) {
+            const metrics = evaluateFit(points, config.predict);
+            if (!metrics || !Number.isFinite(metrics.r2)) return;
+            const parameterCount = config.parameterCount || 2;
+            const n = points.length;
+            // 参数数达到或超过样本数时，模型无法提供可信的残差自由度。
+            if (parameterCount >= n) return;
+            const adjustedR2 = n > parameterCount + 1
+                ? 1 - (1 - metrics.r2) * (n - 1) / (n - parameterCount - 1)
+                : -Infinity;
+            const yMean = mean(points.map(point => point[1]));
+            const ssTotal = points.reduce((sum, point) => sum + (point[1] - yMean) ** 2, 0);
+            const rssFloor = Math.max(Number.MIN_VALUE, ssTotal * 1e-12);
+            const stableRSS = Math.max(metrics.ssResidual, rssFloor);
+            // 高斯残差假设下，AICc 的 K 同时计入模型系数和残差方差参数。
+            const estimatedParameterCount = parameterCount + 1;
+            const aic = n * Math.log(stableRSS / n) + 2 * estimatedParameterCount;
+            const aicc = n > estimatedParameterCount + 1
+                ? aic + (2 * estimatedParameterCount * (estimatedParameterCount + 1)) / (n - estimatedParameterCount - 1)
+                : Infinity;
+            results.push({
+                ...config,
+                ...metrics,
+                adjustedR2,
+                aicc,
+                family: getFitFamily(config.name),
+                points: generateFitPoints(points, config.predict),
+                parameterCount,
+                displayDetails: (useRounded = false, digits = 3) => {
+                    let formula = config.formula;
+                    let predict = config.predict;
+                    if (useRounded && typeof config.roundedView === 'function') {
+                        const rounded = config.roundedView(digits);
+                        formula = rounded.formula;
+                        predict = rounded.predict;
+                    }
+                    const viewMetrics = evaluateFit(points, predict);
+                    const valid = !!viewMetrics && Number.isFinite(viewMetrics.r2) && Number.isFinite(viewMetrics.rmse);
+                    const safeMetrics = valid ? viewMetrics : { r2: NaN, rmse: NaN };
+                    const viewAdjustedR2 = valid && n > parameterCount + 1
+                        ? 1 - (1 - safeMetrics.r2) * (n - 1) / (n - parameterCount - 1)
+                        : -Infinity;
+                    return {
+                        formula,
+                        r2: safeMetrics.r2,
+                        adjustedR2: viewAdjustedR2,
+                        rmse: safeMetrics.rmse,
+                        fitCategory: config.category || '数学模型',
+                        fitSubtype: config.subtype || '',
+                        points: useRounded ? generateFitPoints(points, predict) : generateFitPoints(points, config.predict),
+                        rounded: useRounded,
+                        valid
+                    };
+                }
+            });
+        }
+
+        function renderFitResults() {
+            const grid = document.getElementById('formulaGrid');
+            const countLabel = document.getElementById('fitCount');
+            const moreButton = document.getElementById('toggleMoreFitsBtn');
+            if (!grid || !countLabel) return;
+
+            const shown = showAllCandidates
+                ? currentFitResults.map((result, index) => ({ result, index }))
+                : recommendedFitResults.map(result => ({ result, index: currentFitResults.indexOf(result) }));
+
+            countLabel.textContent = showAllCandidates
+                ? `全部 ${currentFitResults.length} 个候选`
+                : `推荐 ${recommendedFitResults.length} / ${currentFitResults.length} 个候选`;
+            if (moreButton) {
+                const hiddenCount = Math.max(0, currentFitResults.length - recommendedFitResults.length);
+                moreButton.hidden = hiddenCount === 0;
+                moreButton.textContent = showAllCandidates ? '收起其他模型' : `显示其他 ${hiddenCount} 个候选`;
+                moreButton.setAttribute('aria-expanded', String(showAllCandidates));
+            }
+
+            grid.innerHTML = '';
+            if (!shown.length) {
+                grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary);">当前没有可显示的拟合结果。</div>';
+                updateChart([], null);
+                return;
+            }
+            if (!shown.some(item => item.index === activeFitIndex)) activeFitIndex = shown[0].index;
+            const detailsByIndex = new Map(shown.map(item => [item.index, item.result.displayDetails(roundingEnabled, roundingDigits)]));
+            const selectedView = detailsByIndex.get(activeFitIndex);
+            updateChart(selectedView.points, selectedView.r2);
+
+            shown.forEach(({ result, index }) => {
+                const details = detailsByIndex.get(index);
+                const card = document.createElement('div');
+                card.className = `formula-card ${index === activeFitIndex ? 'active' : ''}`;
+                card.tabIndex = 0;
+                card.setAttribute('role', 'button');
+                card.setAttribute('aria-label', `显示${result.name}曲线`);
+                const adjustedText = Number.isFinite(details.adjustedR2) ? details.adjustedR2.toFixed(4) : (details.valid ? '样本不足' : '无法计算');
+                const r2Text = Number.isFinite(details.r2) ? details.r2.toFixed(4) : '无法计算';
+                const rmseText = Number.isFinite(details.rmse) ? details.rmse.toPrecision(5) : '无法计算';
+                const formulaLabel = roundingEnabled ? `四舍五入公式（${roundingDigits} 位有效数字）` : '拟合公式（原始拟合精度）';
+                const familyText = result.family ? `模型类型：${result.family}` : details.fitCategory;
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span>${result.name}</span>
+                        <span class="r2-badge">R²: ${r2Text}</span>
+                    </div>
+                    <div class="fit-category">${familyText} · ${details.fitSubtype}</div>
+                    <div class="formula-container-row">
+                        <div class="formula-box">
+                            <div class="formula-box-label">${formulaLabel}</div>
+                            <div class="math-display-box beautified-box" title="${details.formula}">${details.formula}</div>
+                        </div>
+                    </div>
+                    <div class="optimization-note">调整 R²：${adjustedText}　|　RMSE：${rmseText}　|　参数：${result.parameterCount}${Number.isFinite(result.aicc) ? `　|　AICc：${result.aicc.toFixed(2)}` : '　|　样本不足以计算 AICc'}${roundingEnabled ? '　|　指标已按舍入后的曲线重算' : ''}${!details.valid ? '　|　该舍入精度下模型失效' : ''}</div>`;
+                const selectCard = () => {
+                    activeFitIndex = index;
+                    grid.querySelectorAll('.formula-card').forEach(item => item.classList.remove('active'));
+                    card.classList.add('active');
+                    updateChart(details.points, details.r2);
+                };
+                card.addEventListener('click', selectCard);
+                card.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        selectCard();
+                    }
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleRounding() {
+            roundingEnabled = !roundingEnabled;
+            const button = document.getElementById('roundingToggleBtn');
+            if (button) {
+                button.textContent = roundingEnabled ? '四舍五入：开启' : '四舍五入：关闭';
+                button.classList.toggle('active', roundingEnabled);
+                button.setAttribute('aria-pressed', String(roundingEnabled));
+            }
+            renderFitResults();
         }
 
         // =======================================================
-        // 【LM算法模型定义】
+        // 图表与主题
         // =======================================================
-
-        function exponentialModel(params, x) { const [a, b] = params; return a * Math.exp(b * x); }
-        function exponentialJacobian(params, x) { const [a, b] = params; const expVal = Math.exp(b * x); return [expVal, a * x * expVal]; }
-
-        function logarithmicModel(params, x) { const [a, b] = params; return a + b * Math.log(x); }
-        function logarithmicJacobian(params, x) { const [a, b] = params; return [1, Math.log(x)]; }
-
-        function powerModel(params, x) { const [a, b] = params; return a * Math.pow(x, b); }
-        function powerJacobian(params, x) { const [a, b] = params; const powVal = Math.pow(x, b); return [powVal, a * powVal * Math.log(x)]; }
-
-        function logisticModel(params, x) { const [L, k, x0, d] = params; return d + (L - d) / (1 + Math.exp(-k * (x - x0))); }
-        function logisticJacobian(params, x) {
-            const [L, k, x0, d] = params;
-            const expVal = Math.exp(-k * (x - x0));
-            const denom = 1 + expVal;
-            const denomSq = denom * denom;
-            return [1 / denom, (L - d) * (x - x0) * expVal / denomSq, -(L - d) * k * expVal / denomSq, 1 - 1 / denom];
+        function getCssColor(variable) {
+            return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
         }
-
-        function gompertzModel(params, x) { const [yMin, yMax, b, c] = params; return yMin + (yMax - yMin) * Math.exp(-Math.exp(-b * (x - c))); }
-        function gompertzJacobian(params, x) {
-            const [yMin, yMax, b, c] = params;
-            const inner = Math.exp(-b * (x - c));
-            const outer = Math.exp(-inner);
-            const amp = yMax - yMin;
-            return [1 - outer, outer, amp * outer * inner * (x - c), -amp * outer * inner * b];
-        }
-
-        function inverseProportionalModel(params, x) { const [a, b] = params; return a / (b + x); }
-        function inverseProportionalJacobian(params, x) { const [a, b] = params; const den = b + x; return [1 / den, -a / (den * den)]; }
-
-        function modifiedExponentialModel(params, x) { const [a, b, c] = params; return a * (1 - Math.exp(-b * x)) + c; }
-        function modifiedExponentialJacobian(params, x) { const [a, b, c] = params; const expVal = Math.exp(-b * x); return [1 - expVal, a * x * expVal, 1]; }
-
-        function modifiedPowerModel(params, x) { const [a, b, c] = params; return a * Math.pow(x, b) + c; }
-        function modifiedPowerJacobian(params, x) { const [a, b, c] = params; const powVal = Math.pow(x, b); return [powVal, a * powVal * Math.log(x), 1]; }
-
-        function quadraticRationalModel(params, x) { const [a, b, c, d] = params; return (a + b * x) / (1 + c * x + d * x * x); }
-        function quadraticRationalJacobian(params, x) {
-            const [a, b, c, d] = params;
-            const num = a + b * x;
-            const den = 1 + c * x + d * x * x;
-            const denSq = den * den;
-            return [1 / den, x / den, -num * x / denSq, -num * x * x / denSq];
-        }
-
-        function weibullModel(params, x) { const [a, b, c] = params; return c * (1 - Math.exp(-Math.pow(x / b, a))); }
-        function weibullJacobian(params, x) {
-            const [a, b, c] = params;
-            const r = x / b;
-            const powVal = Math.pow(r, a);
-            const expVal = Math.exp(-powVal);
-            return [c * expVal * powVal * Math.log(r), c * expVal * a * Math.pow(r, a) / b, 1 - expVal];
-        }
-
-        function doubleExponentialModel(params, x) { const [a, b, c, d] = params; return a * Math.exp(b * x) + c * Math.exp(d * x); }
-        function doubleExponentialJacobian(params, x) { 
-            const [a, b, c, d] = params; const e1 = Math.exp(b * x), e2 = Math.exp(d * x); 
-            return [e1, a * x * e1, e2, c * x * e2]; 
-        }
-
-        function gaussianModel(params, x) { const [A, mu, sigma] = params; return A * Math.exp(-Math.pow(x - mu, 2) / (2 * sigma * sigma)); }
-        function gaussianJacobian(params, x) {
-            const [A, mu, sigma] = params;
-            const expVal = Math.exp(-Math.pow(x - mu, 2) / (2 * sigma * sigma));
-            return [expVal, A * expVal * (x - mu) / (sigma * sigma), A * expVal * Math.pow(x - mu, 2) / (sigma * sigma * sigma)];
-        }
-
-        function lorentzianModel(params, x) { const [A, mu, gamma] = params; return A / (1 + Math.pow((x - mu) / gamma, 2)); }
-        function lorentzianJacobian(params, x) {
-            const [A, mu, gamma] = params;
-            const denom = 1 + Math.pow((x - mu) / gamma, 2);
-            return [1 / denom, (2 * A * (x - mu)) / (Math.pow(gamma, 2) * Math.pow(denom, 2)), (2 * A * Math.pow(x - mu, 2)) / (Math.pow(gamma, 3) * Math.pow(denom, 2))];
-        }
-
-        function michaelisMentenModel(params, x) { const [Vmax, Km] = params; return (Vmax * x) / (Km + x); }
-        function michaelisMentenJacobian(params, x) { const [Vmax, Km] = params; return [x / (Km + x), (-Vmax * x) / Math.pow(Km + x, 2)]; }
-
-        function sineFullModel(params, x) { const [a, b, c, d] = params; return a * Math.sin(b * x + c) + d; }
-        function sineFullJacobian(params, x) {
-            const [a, b, c, d] = params;
-            const cosVal = Math.cos(b * x + c);
-            return [Math.sin(b * x + c), a * x * cosVal, a * cosVal, 1];
-        }
-
-        function rationalFullModel(params, x) { const [a, b, c, d] = params; return (a + b * x) / (1 + c * x + d * x * x); }
-        function rationalFullJacobian(params, x) {
-            const [a, b, c, d] = params;
-            const num = a + b * x;
-            const den = 1 + c * x + d * x * x;
-            const denSq = den * den;
-            return [1 / den, x / den, -num * x / denSq, -num * x * x / denSq];
-        }
-
-        // =======================================================
-        // 【初始化与主题】
-        // =======================================================
 
         function initChart() {
-            const ctx = document.getElementById('fittingChart').getContext('2d');
-            const scatterData = points.map(p => ({x: p[0], y: p[1]}));
-            
-            const getChartColor = (cssVar) => {
-                const computed = getComputedStyle(document.documentElement).getPropertyValue(cssVar);
-                return computed ? computed.trim() : cssVar;
-            };
-            
-            chart = new Chart(ctx, {
+            const canvas = document.getElementById('fittingChart');
+            if (!canvas || typeof Chart === 'undefined') {
+                document.getElementById('formulaGrid').textContent = '图表库加载失败，请检查网络连接后刷新页面。';
+                return;
+            }
+            chart = new Chart(canvas.getContext('2d'), {
                 type: 'scatter',
                 data: {
-                    datasets: [{
-                        label: '数据点 (Data Points)',
-                        data: scatterData,
-                        backgroundColor: 'red', 
-                        borderColor: 'red', 
-                        pointRadius: chartConfig.radius,
-                        order: 1 
-                    }, {
-                        label: '拟合曲线 (Fit Curve)',
-                        data: [],
-                        type: 'line',
-                        fill: false,
-                        borderColor: getChartColor('--primary-color'),
-                        borderWidth: 2,
-                        pointBackgroundColor: 'transparent',
-                        pointBorderColor: 'transparent',
-                        pointRadius: 0,
-                        order: 2 
-                    }]
+                    datasets: [
+                        {
+                            label: '数据点',
+                            data: [],
+                            backgroundColor: '#ef4444',
+                            borderColor: '#ef4444',
+                            pointRadius: chartConfig.radius,
+                            pointHoverRadius: chartConfig.radius + 2,
+                            order: 1
+                        },
+                        {
+                            label: '拟合曲线',
+                            data: [],
+                            type: 'line',
+                            showLine: true,
+                            fill: false,
+                            borderColor: getCssColor('--primary-color'),
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHitRadius: 0,
+                            spanGaps: false,
+                            order: 2
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animation: { duration: 400 },
+                    animation: { duration: 250 },
+                    parsing: false,
                     scales: {
                         x: {
                             type: 'linear',
                             position: 'bottom',
-                            title: { display: true, text: 'X 轴 (自变量)', color: (ctx) => chartConfig.theme === 'dark' ? getChartColor('--chart-text') : getChartColor('--text-secondary') },
-                            grid: { color: (ctx) => getChartColor('--chart-grid') },
-                            ticks: { color: (ctx) => getChartColor('--chart-text') }
+                            title: { display: true, text: 'X 轴（自变量）', color: getCssColor('--text-secondary') },
+                            grid: { color: getCssColor('--chart-grid') },
+                            ticks: { color: getCssColor('--chart-text') }
                         },
                         y: {
                             type: 'linear',
-                            title: { display: true, text: 'Y 轴 (因变量)', color: (ctx) => chartConfig.theme === 'dark' ? getChartColor('--chart-text') : getChartColor('--text-secondary') },
-                            grid: { color: (ctx) => getChartColor('--chart-grid') },
-                            ticks: { color: (ctx) => getChartColor('--chart-text') }
+                            title: { display: true, text: 'Y 轴（因变量）', color: getCssColor('--text-secondary') },
+                            grid: { color: getCssColor('--chart-grid') },
+                            ticks: { color: getCssColor('--chart-text') }
                         }
                     },
                     plugins: {
-                        legend: { display: true, labels: { color: (ctx) => getChartColor('--text-primary') } },
+                        legend: { display: true, labels: { color: getCssColor('--text-primary') } },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.x !== null) label += `(X: ${context.parsed.x.toFixed(4)}, Y: ${context.parsed.y.toFixed(4)})`;
-                                    return label;
+                                label: context => {
+                                    const label = context.dataset.label ? `${context.dataset.label}: ` : '';
+                                    const x = Number.isFinite(context.parsed.x) ? context.parsed.x.toFixed(5) : '—';
+                                    const y = Number.isFinite(context.parsed.y) ? context.parsed.y.toFixed(5) : '断点';
+                                    return `${label}(X: ${x}, Y: ${y})`;
                                 }
                             }
                         }
@@ -1361,71 +1676,52 @@
             initWheelZoom();
         }
 
-        function updateChart(fitPoints, r2) {
+        function updateChart(fitPoints = [], r2 = null) {
             if (!chart) return;
-            const scatterData = points.map(p => ({x: p[0], y: p[1]}));
-            chart.data.datasets[0].data = scatterData;
-            if (fitPoints) {
-                chart.data.datasets[1].data = fitPoints;
-                chart.data.datasets[1].label = `拟合曲线 (Fit Curve, R²:${r2.toFixed(4)})`;
-            } else {
-                chart.data.datasets[1].data = [];
-                chart.data.datasets[1].label = '拟合曲线 (Fit Curve)';
-            }
+            chart.data.datasets[0].data = points.map(([x, y]) => ({ x, y }));
+            chart.data.datasets[1].data = fitPoints || [];
+            chart.data.datasets[1].label = Number.isFinite(r2) ? `拟合曲线（R²: ${r2.toFixed(4)}）` : '拟合曲线';
 
-            if (points.length > 0) {
-                const xValues = points.map(p => p[0]);
-                const xMin = Math.min(...xValues);
-                const xMax = Math.max(...xValues);
-                const xRange = xMax - xMin;
-                const padding = xRange === 0 ? 1 : xRange * chartConfig.xPadding;
-                chart.options.scales.x.min = xMin - padding;
-                chart.options.scales.x.max = xMax + padding;
+            const xs = points.map(point => point[0]);
+            if (xs.length) {
+                const minX = Math.min(...xs), maxX = Math.max(...xs);
+                const padding = maxX === minX ? Math.max(1, Math.abs(minX) * 0.05) : (maxX - minX) * chartConfig.xPadding;
+                chart.options.scales.x.min = minX - padding;
+                chart.options.scales.x.max = maxX + padding;
             } else {
                 chart.options.scales.x.min = undefined;
                 chart.options.scales.x.max = undefined;
             }
+            chart.options.scales.y.min = undefined;
+            chart.options.scales.y.max = undefined;
             chart.update();
+        }
+
+        function updateScatterPointsOnly() {
+            if (!chart) return;
+            chart.data.datasets[0].data = points.map(([x, y]) => ({ x, y }));
+            chart.update('none');
         }
 
         function updateChartTheme() {
             if (!chart) return;
-            const getChartColor = (cssVar) => getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
-            const textSecondary = getChartColor('--text-secondary');
-            const chartGrid = getChartColor('--chart-grid');
-            const chartText = getChartColor('--chart-text');
-
-            chart.options.scales.x.title.color = chartConfig.theme === 'dark' ? chartText : textSecondary;
-            chart.options.scales.x.grid.color = chartGrid;
-            chart.options.scales.x.ticks.color = chartText;
-            chart.options.scales.y.title.color = chartConfig.theme === 'dark' ? chartText : textSecondary;
-            chart.options.scales.y.grid.color = chartGrid;
-            chart.options.scales.y.ticks.color = chartText;
-            chart.data.datasets[1].borderColor = getChartColor('--primary-color');
-            chart.options.plugins.legend.labels.color = getChartColor('--text-primary');
+            chart.options.scales.x.title.color = getCssColor('--text-secondary');
+            chart.options.scales.y.title.color = getCssColor('--text-secondary');
+            chart.options.scales.x.grid.color = getCssColor('--chart-grid');
+            chart.options.scales.y.grid.color = getCssColor('--chart-grid');
+            chart.options.scales.x.ticks.color = getCssColor('--chart-text');
+            chart.options.scales.y.ticks.color = getCssColor('--chart-text');
+            chart.data.datasets[1].borderColor = getCssColor('--primary-color');
+            chart.options.plugins.legend.labels.color = getCssColor('--text-primary');
             chart.update('none');
-        }
-
-        function toggleTheme() {
-            const currentTheme = chartConfig.theme;
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            chartConfig.theme = newTheme;
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcons(newTheme);
-            updateChartTheme();
         }
 
         function updateThemeIcons(theme) {
             const sunIcon = document.getElementById('sunIcon');
             const moonIcon = document.getElementById('moonIcon');
-            if (theme === 'dark') {
-                sunIcon.style.display = 'block';
-                moonIcon.style.display = 'none';
-            } else {
-                sunIcon.style.display = 'none';
-                moonIcon.style.display = 'block';
-            }
+            if (!sunIcon || !moonIcon) return;
+            sunIcon.style.display = theme === 'dark' ? 'block' : 'none';
+            moonIcon.style.display = theme === 'dark' ? 'none' : 'block';
         }
 
         function applyInitialTheme() {
@@ -1433,819 +1729,1083 @@
             updateThemeIcons(chartConfig.theme);
         }
 
+        function toggleTheme() {
+            chartConfig.theme = chartConfig.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', chartConfig.theme);
+            try { localStorage.setItem('theme', chartConfig.theme); } catch (_) {}
+            updateThemeIcons(chartConfig.theme);
+            updateChartTheme();
+        }
+
         function updateChartConfig(value, type) {
+            const numericValue = Number(value);
             if (type === 'radius') {
-                chartConfig.radius = parseInt(value);
-                document.getElementById('radiusVal').textContent = `${value}px`;
-                if (chart && chart.data.datasets[0]) {
-                    chart.data.datasets[0].pointRadius = chartConfig.radius;
+                chartConfig.radius = numericValue;
+                document.getElementById('radiusVal').textContent = `${numericValue}px`;
+                if (chart) {
+                    chart.data.datasets[0].pointRadius = numericValue;
+                    chart.data.datasets[0].pointHoverRadius = numericValue + 2;
                     chart.update('none');
                 }
             } else if (type === 'sampling') {
-                chartConfig.sampling = parseInt(value);
-                document.getElementById('samplingVal').textContent = `${value} 个点`;
-                calculateAllFits(); 
+                chartConfig.sampling = Math.max(20, Math.min(500, Math.round(numericValue)));
+                document.getElementById('samplingVal').textContent = `${chartConfig.sampling} 个点`;
+                calculateAllFits();
             } else if (type === 'xPadding') {
-                chartConfig.xPadding = parseInt(value) / 100;
-                document.getElementById('xPaddingVal').textContent = `${value}%`;
-                calculateAllFits(); 
+                chartConfig.xPadding = Math.max(0, Math.min(0.3, numericValue / 100));
+                document.getElementById('xPaddingVal').textContent = `${Math.round(chartConfig.xPadding * 100)}%`;
+                calculateAllFits();
             }
         }
 
         // =======================================================
-        // 【数据点列表与CRUD操作】
+        // 数据点管理
         // =======================================================
-
         function updatePointsList() {
             const list = document.getElementById('pointsList');
+            if (!list) return;
             list.innerHTML = '';
-
-            if (points.length === 0) {
-                list.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-secondary);">暂无数据点</div>`;
+            if (!points.length) {
+                list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary);">暂无数据点</div>';
                 return;
             }
-
             points.forEach((point, index) => {
                 const row = document.createElement('div');
                 row.className = `data-row ${index === editingIndex ? 'editing' : ''}`;
-                row.setAttribute('data-index', index);
-
                 if (index === editingIndex) {
                     row.innerHTML = `
                         <div>${index + 1}.</div>
-                        <input type="number" id="editX_${index}" class="edit-input" value="${point[0]}" step="any">
-                        <input type="number" id="editY_${index}" class="edit-input" value="${point[1]}" step="any">
+                        <input type="number" id="editX_${index}" class="edit-input" value="${point[0]}" step="any" aria-label="X 值">
+                        <input type="number" id="editY_${index}" class="edit-input" value="${point[1]}" step="any" aria-label="Y 值">
                         <div class="edit-buttons">
-                            <button class="btn-primary edit-btn" onclick="saveEdit(${index})" title="保存"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
-                            <button class="btn-danger edit-btn" onclick="cancelEdit(${index})" title="取消"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-                        </div>
-                    `;
-                    row.onkeydown = (e) => { if (e.key === 'Enter') saveEdit(index); if (e.key === 'Escape') cancelEdit(index); };
+                            <button class="btn-primary edit-btn" onclick="saveEdit(${index})" title="保存" aria-label="保存">✓</button>
+                            <button class="btn-danger edit-btn" onclick="cancelEdit(${index})" title="取消" aria-label="取消">×</button>
+                        </div>`;
+                    row.onkeydown = event => {
+                        if (event.key === 'Enter') saveEdit(index);
+                        if (event.key === 'Escape') cancelEdit(index);
+                    };
                 } else {
                     row.innerHTML = `
-                        <div style="width: 15px; flex-shrink: 0;">${index + 1}.</div>
-                        <div style="flex-grow: 1; text-align: right;">X: ${point[0].toFixed(4)}</div>
-                        <div style="flex-grow: 1; text-align: right;">Y: ${point[1].toFixed(4)}</div>
-                        <div class="edit-buttons" style="width: 36px; flex-shrink: 0;">
-                            <button class="btn-ghost edit-btn" onclick="editPoint(${index})" title="编辑"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
-                            <button class="btn-ghost edit-btn" onclick="deletePoint(${index})" title="删除"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12v.01"/><path d="M14 12v.01"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/></svg></button>
-                        </div>
-                    `;
-                    row.onclick = (e) => { if (e.target.tagName !== 'BUTTON' && e.target.closest('button') === null) editPoint(index); };
+                        <div style="width:15px;flex-shrink:0;">${index + 1}.</div>
+                        <div style="flex-grow:1;text-align:right;">X: ${point[0].toFixed(4)}</div>
+                        <div style="flex-grow:1;text-align:right;">Y: ${point[1].toFixed(4)}</div>
+                        <div class="edit-buttons" style="width:48px;flex-shrink:0;">
+                            <button class="btn-ghost edit-btn" onclick="editPoint(${index})" title="编辑" aria-label="编辑">✎</button>
+                            <button class="btn-ghost edit-btn" onclick="deletePoint(${index})" title="删除" aria-label="删除">×</button>
+                        </div>`;
+                    row.onclick = event => {
+                        if (!event.target.closest('button')) editPoint(index);
+                    };
                 }
                 list.appendChild(row);
             });
         }
 
-        function addPoint(xVal = null, yVal = null) {
-            const xInput = document.getElementById('xInput');
-            const yInput = document.getElementById('yInput');
-            if (xVal === null) xVal = parseFloat(xInput.value);
-            if (yVal === null) yVal = parseFloat(yInput.value);
-
-            if (!isNaN(xVal) && !isNaN(yVal)) {
-                points.push([parseFloat(xVal.toFixed(4)), parseFloat(yVal.toFixed(4))]);
-                points.sort((a, b) => a[0] - b[0]);
-                xInput.value = '';
-                yInput.value = '';
-                xInput.focus();
-                updatePointsList();
-                calculateAllFits();
-            }
+        function normalizePoint(x, y) {
+            if (String(x).trim() === '' || String(y).trim() === '') return null;
+            const nx = Number(x), ny = Number(y);
+            if (!Number.isFinite(nx) || !Number.isFinite(ny)) return null;
+            return [nx, ny];
         }
 
-        function deletePoint(index) {
-            points.splice(index, 1);
-            editingIndex = -1;
+        function addPoint(xValue = null, yValue = null) {
+            const xInput = document.getElementById('xInput');
+            const yInput = document.getElementById('yInput');
+            const x = xValue === null ? xInput.value : xValue;
+            const y = yValue === null ? yInput.value : yValue;
+            const point = normalizePoint(x, y);
+            if (!point) {
+                alert('请输入有效且有限的 X、Y 数值。');
+                return;
+            }
+            points.push(point);
             points.sort((a, b) => a[0] - b[0]);
+            if (xInput) xInput.value = '';
+            if (yInput) yInput.value = '';
+            if (xInput) xInput.focus();
+            editingIndex = -1;
             updatePointsList();
             calculateAllFits();
         }
-        
+
+        function deletePoint(index) {
+            if (!Number.isInteger(index) || index < 0 || index >= points.length) return;
+            points.splice(index, 1);
+            editingIndex = -1;
+            updatePointsList();
+            calculateAllFits();
+        }
+
         function clearAllData() {
-            if (points.length > 0 && confirm("确定清空所有数据点吗？此操作不可撤销。")) {
-                points = [];
-                editingIndex = -1;
-                updatePointsList();
-                calculateAllFits();
-            } else if (points.length === 0) alert("当前列表已为空。");
+            if (!points.length) {
+                alert('当前列表已为空。');
+                return;
+            }
+            if (!confirm('确定清空所有数据点吗？此操作不可撤销。')) return;
+            points = [];
+            editingIndex = -1;
+            updatePointsList();
+            calculateAllFits();
         }
 
         function editPoint(index) {
-            if (editingIndex !== -1) cancelEdit(editingIndex);
+            if (editingIndex !== -1 && editingIndex !== index) editingIndex = -1;
             editingIndex = index;
             updatePointsList();
-            setTimeout(() => { const xInput = document.getElementById(`editX_${index}`); if (xInput) xInput.focus(); }, 0);
+            requestAnimationFrame(() => {
+                const input = document.getElementById(`editX_${index}`);
+                if (input) input.focus();
+            });
         }
 
         function saveEdit(index) {
-            const newX = parseFloat(document.getElementById(`editX_${index}`).value);
-            const newY = parseFloat(document.getElementById(`editY_${index}`).value);
-            if (!isNaN(newX) && !isNaN(newY)) {
-                points[index] = [parseFloat(newX.toFixed(4)), parseFloat(newY.toFixed(4))];
-                editingIndex = -1;
-                points.sort((a, b) => a[0] - b[0]);
-                updatePointsList();
-                calculateAllFits();
-            } else alert("X值或Y值无效，请重新输入。");
+            const xInput = document.getElementById(`editX_${index}`);
+            const yInput = document.getElementById(`editY_${index}`);
+            if (!xInput || !yInput) return;
+            const point = normalizePoint(xInput.value, yInput.value);
+            if (!point) {
+                alert('X 值或 Y 值无效，请重新输入。');
+                return;
+            }
+            points[index] = point;
+            points.sort((a, b) => a[0] - b[0]);
+            editingIndex = -1;
+            updatePointsList();
+            calculateAllFits();
         }
 
-        function cancelEdit(index) { editingIndex = -1; updatePointsList(); }
-        
+        function cancelEdit() {
+            editingIndex = -1;
+            updatePointsList();
+        }
+
         // =======================================================
-        // 【拖动交互】
+        // 图表拖动：Pointer Events 同时支持鼠标、触控笔与触屏
         // =======================================================
-        
+        function findClosestPoint(pixelX, pixelY) {
+            if (!chart) return null;
+            const tolerance = Math.max(10, chartConfig.radius + 7);
+            let closest = null;
+            let closestDistance = tolerance;
+            for (let index = 0; index < points.length; index++) {
+                const px = chart.scales.x.getPixelForValue(points[index][0]);
+                const py = chart.scales.y.getPixelForValue(points[index][1]);
+                const distance = Math.hypot(pixelX - px, pixelY - py);
+                if (distance <= closestDistance) {
+                    closestDistance = distance;
+                    closest = { index, distance };
+                }
+            }
+            return closest;
+        }
+
+        function pointerToChartPixel(event) {
+            const rect = chart.canvas.getBoundingClientRect();
+            return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+        }
+
+        function findNearestCurvePosition(pixelX, pixelY) {
+            if (!chart || !snapToCurve) return null;
+            const curve = chart.data.datasets[1]?.data || [];
+            if (curve.length < 2) return null;
+            const xScale = chart.scales.x, yScale = chart.scales.y;
+            let best = null;
+            for (let i = 0; i < curve.length - 1; i++) {
+                const a = curve[i], b = curve[i + 1];
+                if (!a || !b || !Number.isFinite(a.x) || !Number.isFinite(a.y) || !Number.isFinite(b.x) || !Number.isFinite(b.y)) continue;
+                const ax = xScale.getPixelForValue(a.x), ay = yScale.getPixelForValue(a.y);
+                const bx = xScale.getPixelForValue(b.x), by = yScale.getPixelForValue(b.y);
+                const dx = bx - ax, dy = by - ay;
+                const lengthSq = dx * dx + dy * dy;
+                const t = lengthSq > 0 ? Math.max(0, Math.min(1, ((pixelX - ax) * dx + (pixelY - ay) * dy) / lengthSq)) : 0;
+                const px = ax + t * dx, py = ay + t * dy;
+                const distance = Math.hypot(pixelX - px, pixelY - py);
+                if (!best || distance < best.distance) {
+                    best = {
+                        distance,
+                        x: a.x + t * (b.x - a.x),
+                        y: a.y + t * (b.y - a.y)
+                    };
+                }
+            }
+            return best && best.distance <= CURVE_SNAP_TOLERANCE ? best : null;
+        }
+
         function initDragHandling() {
             const canvas = document.getElementById('fittingChart');
             if (!canvas) return;
-            canvas.addEventListener('mousedown', handleMouseDown);
-            canvas.addEventListener('mousemove', handleMouseMove);
-            canvas.addEventListener('mouseup', handleMouseUp);
-            canvas.addEventListener('click', handleCanvasClick); 
-            canvas.style.cursor = dragEnabled ? 'grab' : 'default';
-        }
-        
-        function handleMouseDown(e) {
-            if (e.button !== 0 || !chart) return; 
-            const rect = chart.canvas.getBoundingClientRect();
-            dragStartPos = {x: e.clientX, y: e.clientY};
-            shouldBlockClick = false; 
-            draggingPoint = findClosestPoint(e.clientX - rect.left, e.clientY - rect.top);
-            if (draggingPoint) {
-                isDragging = true; 
-                chart.options.animation = { duration: 0 }; 
-                document.body.style.cursor = 'grabbing';
-                e.preventDefault();
-            }
-        }
-        
-        function handleMouseMove(e) {
-            if (!isDragging || !draggingPoint) return;
-            if (Math.abs(e.clientX - dragStartPos.x) > DRAG_TOLERANCE || Math.abs(e.clientY - dragStartPos.y) > DRAG_TOLERANCE) shouldBlockClick = true; 
-            const rect = chart.canvas.getBoundingClientRect();
-            points[draggingPoint.index] = [chart.scales.x.getValueForPixel(e.clientX - rect.left), chart.scales.y.getValueForPixel(e.clientY - rect.top)];
-            updateScatterPointsOnly();
-            e.preventDefault();
-        }
+            canvas.addEventListener('pointerdown', event => {
+                if (event.button !== 0 || !chart || !dragEnabled) return;
+                const pixel = pointerToChartPixel(event);
+                const area = chart.chartArea;
+                if (!area || pixel.x < area.left || pixel.x > area.right || pixel.y < area.top || pixel.y > area.bottom) return;
+                const nearest = findClosestPoint(pixel.x, pixel.y);
+                if (!nearest) return;
+                pointerDown = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+                draggingPoint = nearest.index;
+                dragMoved = false;
+                try { canvas.setPointerCapture(event.pointerId); } catch (_) {}
+                event.preventDefault();
+            });
 
-        function handleMouseUp(e) {
-            if (isDragging) {
-                isDragging = false;
-                document.body.style.cursor = dragEnabled ? 'grab' : 'default';
-                if (chart) chart.options.animation = { duration: 400 };
-                if (shouldBlockClick) { 
+            canvas.addEventListener('pointermove', event => {
+                if (!pointerDown || draggingPoint === null || event.pointerId !== pointerDown.pointerId) return;
+                if (!dragMoved && Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y) < DRAG_TOLERANCE) return;
+                dragMoved = true;
+                const pixel = pointerToChartPixel(event);
+                const area = chart.chartArea;
+                const xPixel = Math.max(area.left, Math.min(area.right, pixel.x));
+                const yPixel = Math.max(area.top, Math.min(area.bottom, pixel.y));
+                points[draggingPoint] = [chart.scales.x.getValueForPixel(xPixel), chart.scales.y.getValueForPixel(yPixel)];
+                updateScatterPointsOnly();
+                event.preventDefault();
+            });
+
+            const finishDrag = event => {
+                if (!pointerDown || (event && event.pointerId !== undefined && event.pointerId !== pointerDown.pointerId)) return;
+                if (dragMoved) {
                     points.sort((a, b) => a[0] - b[0]);
                     updatePointsList();
                     calculateAllFits();
+                    suppressNextClick = true;
+                    setTimeout(() => { suppressNextClick = false; }, 0);
                 }
+                pointerDown = null;
                 draggingPoint = null;
-            }
-        }
-        
-        function handleCanvasClick(e) {
-            if (shouldBlockClick) { shouldBlockClick = false; return; }
-            if (!dragEnabled) return; 
-            const rect = chart.canvas.getBoundingClientRect();
-            if (findClosestPoint(e.clientX - rect.left, e.clientY - rect.top)) return; 
-            const xVal = chart.scales.x.getValueForPixel(e.clientX - rect.left);
-            const yVal = chart.scales.y.getValueForPixel(e.clientY - rect.top);
-            if (xVal !== undefined && yVal !== undefined) {
-                points.push([parseFloat(xVal.toFixed(4)), parseFloat(yVal.toFixed(4))]);
-                points.sort((a, b) => a[0] - b[0]);
-                updatePointsList();
-                calculateAllFits();
-            }
+                dragMoved = false;
+            };
+            canvas.addEventListener('pointerup', finishDrag);
+            canvas.addEventListener('pointercancel', finishDrag);
+            window.addEventListener('pointerup', finishDrag);
+
+            canvas.addEventListener('click', event => {
+                if (suppressNextClick) {
+                    suppressNextClick = false;
+                    return;
+                }
+                if (!dragEnabled || !chart) return;
+                const pixel = pointerToChartPixel(event);
+                const area = chart.chartArea;
+                if (!area || pixel.x < area.left || pixel.x > area.right || pixel.y < area.top || pixel.y > area.bottom) return;
+                if (findClosestPoint(pixel.x, pixel.y)) return;
+                const snapped = findNearestCurvePosition(pixel.x, pixel.y);
+                const x = snapped ? snapped.x : chart.scales.x.getValueForPixel(pixel.x);
+                const y = snapped ? snapped.y : chart.scales.y.getValueForPixel(pixel.y);
+                addPoint(x, y);
+            });
+            canvas.addEventListener('dblclick', () => resetChartZoom());
+            updateDragButton();
         }
 
-        function findClosestPoint(x, y) {
-            if (!chart) return null;
-            const tolerance = chartConfig.radius + 8; 
-            for (let i = 0; i < points.length; i++) {
-                const pixelX = chart.scales.x.getPixelForValue(points[i][0]);
-                const pixelY = chart.scales.y.getPixelForValue(points[i][1]);
-                if (Math.sqrt(Math.pow(x - pixelX, 2) + Math.pow(y - pixelY, 2)) <= tolerance) return { index: i, point: points[i] };
-            }
-            return null;
+        function updateDragButton() {
+            const button = document.getElementById('dragLockBtn');
+            const lockedIcon = document.getElementById('lockedIcon');
+            const unlockedIcon = document.getElementById('unlockedIcon');
+            const text = document.getElementById('lockText');
+            const canvas = document.getElementById('fittingChart');
+            if (!button || !lockedIcon || !unlockedIcon || !text) return;
+            lockedIcon.style.display = dragEnabled ? 'none' : 'block';
+            unlockedIcon.style.display = dragEnabled ? 'block' : 'none';
+            text.textContent = dragEnabled ? '拖动已解锁' : '拖动已锁定';
+            button.classList.toggle('active', dragEnabled);
+            button.setAttribute('aria-pressed', String(dragEnabled));
+            if (canvas) canvas.style.cursor = 'crosshair';
         }
 
-        function updateScatterPointsOnly() {
-            if (!chart) return;
-            chart.data.datasets[0].data = points.map(p => ({x: p[0], y: p[1]}));
-            chart.update('none'); 
+        function toggleDragLock() {
+            dragEnabled = !dragEnabled;
+            if (!dragEnabled) {
+                pointerDown = null;
+                draggingPoint = null;
+                dragMoved = false;
+            }
+            updateDragButton();
         }
 
         // =======================================================
-        // 【缩放与窗口调整】
+        // 缩放与分栏尺寸
         // =======================================================
-
         function initWheelZoom() {
             const canvas = document.getElementById('fittingChart');
             if (!canvas) return;
-            canvas.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                if (!chart || points.length === 0) return; 
+            canvas.addEventListener('wheel', event => {
+                if (!chart || !points.length) return;
+                event.preventDefault();
                 const rect = canvas.getBoundingClientRect();
-                const xScale = chart.scales.x, yScale = chart.scales.y;
-                const mouseX = xScale.getValueForPixel(e.clientX - rect.left);
-                const mouseY = yScale.getValueForPixel(e.clientY - rect.top);
-                if (mouseX === undefined || mouseY === undefined) return;
-                const zoomFactor = e.deltaY < 0 ? 1.11 : 0.9;
-                if (e.shiftKey) {
-                    xScale.min = mouseX - (mouseX - xScale.min) * zoomFactor;
-                    xScale.max = mouseX + (xScale.max - mouseX) * zoomFactor;
-                } else {
-                    xScale.min = mouseX - (mouseX - xScale.min) * zoomFactor;
-                    xScale.max = mouseX + (xScale.max - mouseX) * zoomFactor;
-                    yScale.min = mouseY - (mouseY - yScale.min) * zoomFactor;
-                    yScale.max = mouseY + (yScale.max - mouseY) * zoomFactor;
+                const mouseX = chart.scales.x.getValueForPixel(event.clientX - rect.left);
+                const mouseY = chart.scales.y.getValueForPixel(event.clientY - rect.top);
+                const xOptions = chart.options.scales.x;
+                const yOptions = chart.options.scales.y;
+                const xMin = chart.scales.x.min, xMax = chart.scales.x.max;
+                const factor = event.deltaY < 0 ? 0.9 : 1.1;
+                xOptions.min = mouseX - (mouseX - xMin) * factor;
+                xOptions.max = mouseX + (xMax - mouseX) * factor;
+                if (!event.shiftKey) {
+                    const yMin = chart.scales.y.min, yMax = chart.scales.y.max;
+                    yOptions.min = mouseY - (mouseY - yMin) * factor;
+                    yOptions.max = mouseY + (yMax - mouseY) * factor;
                 }
                 chart.update('none');
             }, { passive: false });
         }
 
+        function resetChartZoom() {
+            if (!chart) return;
+            chart.options.scales.x.min = undefined;
+            chart.options.scales.x.max = undefined;
+            chart.options.scales.y.min = undefined;
+            chart.options.scales.y.max = undefined;
+            updateChart(chart.data.datasets[1].data, null);
+        }
+
         function initHorizontalResizer() {
-            const resizer = document.getElementById('horizontalDragHandle');
+            const handle = document.getElementById('horizontalDragHandle');
             const chartWrapper = document.getElementById('chartWrapper');
             const contentArea = document.getElementById('contentArea');
-            let isResizing = false, startY, startHeight;
-
-            resizer.addEventListener('mousedown', (e) => {
-                isResizing = true; startY = e.clientY; startHeight = chartWrapper.offsetHeight;
-                document.body.style.cursor = 'row-resize'; document.body.style.userSelect = 'none';
-                if(chart) chart.options.events = []; 
+            if (!handle || !chartWrapper || !contentArea) return;
+            let startY = 0, startHeight = 0, active = false;
+            handle.addEventListener('pointerdown', event => {
+                active = true;
+                startY = event.clientY;
+                startHeight = chartWrapper.getBoundingClientRect().height;
+                document.body.style.cursor = 'row-resize';
+                document.body.style.userSelect = 'none';
+                try { handle.setPointerCapture(event.pointerId); } catch (_) {}
+                event.preventDefault();
             });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isResizing) return;
-                let newHeight = Math.max(150, Math.min(startHeight + e.clientY - startY, contentArea.offsetHeight - resizer.offsetHeight - 150));
-                chartWrapper.style.flex = `0 0 ${newHeight}px`;
-                if(chart) chart.resize(); 
+            handle.addEventListener('pointermove', event => {
+                if (!active) return;
+                const maxHeight = Math.max(150, contentArea.clientHeight - handle.offsetHeight - 150);
+                const height = Math.max(150, Math.min(maxHeight, startHeight + event.clientY - startY));
+                chartWrapper.style.flex = `0 0 ${height}px`;
+                if (chart) chart.resize();
             });
-
-            document.addEventListener('mouseup', () => {
-                if (isResizing) {
-                    isResizing = false; document.body.style.cursor = ''; document.body.style.userSelect = '';
-                    if(chart) { chart.options.events = ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove']; chart.update('none'); }
-                }
-            });
+            const stop = () => {
+                if (!active) return;
+                active = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            };
+            handle.addEventListener('pointerup', stop);
+            handle.addEventListener('pointercancel', stop);
         }
 
         function initVerticalResizer() {
-            const resizer = document.getElementById('verticalDragHandle');
+            const handle = document.getElementById('verticalDragHandle');
             const sidebar = document.querySelector('.sidebar');
-            const mainLayout = document.getElementById('mainLayout');
-            let isResizing = false, startX, startWidth;
-
-            resizer.addEventListener('mousedown', (e) => {
-                isResizing = true; startX = e.clientX; startWidth = sidebar.offsetWidth;
-                document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
+            const layout = document.getElementById('mainLayout');
+            if (!handle || !sidebar || !layout) return;
+            let startX = 0, startWidth = 0, active = false;
+            handle.addEventListener('pointerdown', event => {
+                active = true;
+                startX = event.clientX;
+                startWidth = sidebar.getBoundingClientRect().width;
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+                try { handle.setPointerCapture(event.pointerId); } catch (_) {}
+                event.preventDefault();
             });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isResizing) return;
-                let newWidth = Math.max(250, Math.min(startWidth + e.clientX - startX, 500));
-                mainLayout.style.gridTemplateColumns = `${newWidth}px 14px 1fr`;
-                if(chart) chart.resize();
+            handle.addEventListener('pointermove', event => {
+                if (!active) return;
+                const width = Math.max(250, Math.min(500, startWidth + event.clientX - startX));
+                layout.style.gridTemplateColumns = `${width}px 14px minmax(0, 1fr)`;
+                if (chart) chart.resize();
             });
-
-            document.addEventListener('mouseup', () => {
-                if (isResizing) {
-                    isResizing = false; document.body.style.cursor = ''; document.body.style.userSelect = '';
-                    document.documentElement.style.setProperty('--sidebar-width', `${sidebar.offsetWidth}px`);
-                }
-            });
+            const stop = () => {
+                if (!active) return;
+                active = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                document.documentElement.style.setProperty('--sidebar-width', `${sidebar.getBoundingClientRect().width}px`);
+            };
+            handle.addEventListener('pointerup', stop);
+            handle.addEventListener('pointercancel', stop);
         }
 
         function setupInputs() {
-            const xInput = document.getElementById('xInput'), yInput = document.getElementById('yInput');
-            if (xInput) xInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); xInput.value && !yInput.value ? yInput.focus() : addPoint(); } });
-            if (yInput) yInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addPoint(); } });
+            const xInput = document.getElementById('xInput');
+            const yInput = document.getElementById('yInput');
+            if (xInput) xInput.addEventListener('keydown', event => {
+                if (event.key !== 'Enter') return;
+                event.preventDefault();
+                if (xInput.value !== '' && yInput.value === '') yInput.focus();
+                else addPoint();
+            });
+            if (yInput) yInput.addEventListener('keydown', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addPoint();
+                }
+            });
         }
 
         function importTxt(event) {
-            const file = event.target.files[0];
+            const file = event.target.files && event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const lines = e.target.result.trim().split(/\r?\n/).filter(line => line.trim() !== '');
-                points = [];
-                for (const line of lines) {
-                    const parts = line.trim().split(/[\s,]+/).filter(p => p !== '');
-                    if (parts.length >= 2) {
-                        const x = parseFloat(parts[0]), y = parseFloat(parts[1]);
-                        if (!isNaN(x) && !isNaN(y)) points.push([parseFloat(x.toFixed(4)), parseFloat(y.toFixed(4))]);
-                    }
+            reader.onload = loadEvent => {
+                const text = String(loadEvent.target.result || '');
+                const imported = [];
+                let skipped = 0;
+                for (const line of text.split(/\r?\n/)) {
+                    const trimmed = line.trim();
+                    if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('//')) continue;
+                    const fields = trimmed.split(/[\s,;]+/).filter(Boolean);
+                    if (fields.length < 2) { skipped++; continue; }
+                    const point = normalizePoint(fields[0], fields[1]);
+                    if (point) imported.push(point);
+                    else skipped++;
                 }
-                if (points.length > 0) {
-                    points.sort((a, b) => a[0] - b[0]);
-                    updatePointsList();
-                    calculateAllFits();
-                } else alert("未在文件中找到有效的格式数据");
-                event.target.value = ''; 
+                if (!imported.length) {
+                    alert('文件中没有找到有效的两列数值数据；原有数据未被更改。');
+                    event.target.value = '';
+                    return;
+                }
+                points = imported.sort((a, b) => a[0] - b[0]);
+                editingIndex = -1;
+                updatePointsList();
+                calculateAllFits();
+                alert(`成功导入 ${imported.length} 个数据点${skipped ? `，跳过 ${skipped} 行无效内容` : ''}。`);
+                event.target.value = '';
+            };
+            reader.onerror = () => {
+                alert('文件读取失败，原有数据未被更改。');
+                event.target.value = '';
             };
             reader.readAsText(file);
         }
 
         function exportTxt() {
-            if (points.length === 0) { alert("无数据可导出"); return; }
-            const url = URL.createObjectURL(new Blob([points.map(p => `${p[0]},${p[1]}`).join('\n')], {type: 'text/plain'}));
-            const a = document.createElement('a');
-            a.href = url; a.download = 'fitting_data.txt';
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            if (!points.length) {
+                alert('无数据可导出。');
+                return;
+            }
+            const content = points.map(([x, y]) => `${x}\t${y}`).join('\n');
+            const url = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = 'fitting_data.txt';
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
         // =======================================================
-        // 【核心修正区】 优美化功能
-        // =======================================================
-        
-        function calculateR2FromPrediction(data, predictFunc) {
-            if (data.length < 2) return 0;
-            const yValues = data.map(p => p[1]);
-            const yMean = yValues.reduce((sum, y) => sum + y, 0) / yValues.length;
-            let ssRes = 0, ssTot = 0;
-            for (const point of data) {
-                ssRes += Math.pow(point[1] - predictFunc(point[0]), 2);
-                ssTot += Math.pow(point[1] - yMean, 2);
-            }
-            return ssTot < 1e-10 ? 1 : 1 - (ssRes / ssTot);
-        }
-        
-        function generateFitPoints(data, predictFunc) {
-            if (data.length < 1) return [];
-            const xValues = data.map(p => p[0]);
-            const xMin = Math.min(...xValues), xMax = Math.max(...xValues), range = xMax - xMin;
-            const padding = range * chartConfig.xPadding;
-            const startX = xMin - padding, endX = xMax + padding;
-            const step = (endX - startX) / chartConfig.sampling;
-            const fitPoints = [];
-            for (let i = 0; i <= chartConfig.sampling; i++) {
-                const x = startX + i * step;
-                try {
-                    const y = predictFunc(x);
-                    if (isFinite(y)) fitPoints.push({x, y});
-                } catch (e) {}
-            }
-            return fitPoints;
-        }
-
-        function beautifyCoefficient(val, idx, operations) {
-            if (Math.abs(val) < 1e-10) return 0; 
-            const fractions = [1/2, 1/3, 2/3, 1/4, 3/4, 1/5, 2/5, 3/5, 4/5, 1/6, 5/6, Math.PI, Math.E];
-            let closestFraction = 0, minDiff = Infinity;
-            for (const f of fractions) {
-                const diff = Math.abs(Math.abs(val) - f);
-                if (diff < minDiff) { minDiff = diff; closestFraction = f; }
-            }
-            if (minDiff < 0.05 * Math.max(1, Math.abs(val))) {
-                const niceVal = (val < 0 ? -1 : 1) * closestFraction;
-                operations.push(`系数[${idx}] ${val.toFixed(4)} → 规整`);
-                return niceVal;
-            }
-            const rounded = Math.round(val);
-            if (Math.abs(val - rounded) < 0.05 * Math.max(1, Math.abs(val))) {
-                 if (Math.abs(val - rounded) > 1e-10) operations.push(`系数[${idx}] ${val.toFixed(4)} → 取整`);
-                return rounded;
-            }
-            return parseFloat(val.toFixed(4));
-        }
-        
-        function performBeautification(fitName, coefficients, rawTemplate, fitType) {
-            const operations = [];
-            const niceCoeffs = coefficients.map((c, idx) => beautifyCoefficient(c, idx, operations));
-            let displayFormula = '', fitCategory = '', fitSubtype = '', predictFunc;
-
-            switch (fitType) {
-                case FIT_TYPES.EXPONENTIAL_LM:
-                    const [a_exp, b_exp] = niceCoeffs;
-                    displayFormula = `y = ${a_exp}e${b_exp === 1 ? 'ˣ' : (b_exp === -1 ? '⁻ˣ' : `⁽${b_exp}ˣ⁾`)}`;
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '指数增长/衰减 (LMA)';
-                    predictFunc = x => a_exp * Math.exp(b_exp * x);
-                    break;
-                case FIT_TYPES.LOGARITHMIC_LM:
-                    const [a_log, b_log] = niceCoeffs;
-                    displayFormula = `y = ${a_log}${b_log > 0 ? ' + ' : ''}${b_log === 0 ? '' : b_log + ' ln(x)'}`.replace(/\+ -/g, '- ');
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '对数关系 (LMA)';
-                    predictFunc = x => a_log + b_log * Math.log(x);
-                    break;
-                case FIT_TYPES.POWER_LM:
-                    const [a_pow, b_pow] = niceCoeffs;
-                    displayFormula = `y = ${a_pow === 1 ? '' : a_pow}x${b_pow === 1 ? '' : (b_pow === -1 ? '⁻¹' : '⁽' + b_pow + '⁾')}`;
-                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '幂律关系 (LMA)';
-                    predictFunc = x => a_pow * Math.pow(x, b_pow);
-                    break;
-                case FIT_TYPES.LOGISTIC_LM:
-                    const [L_log, k_log, x0_log, d_log] = niceCoeffs;
-                    let x0_p_log = x0_log === 0 ? '' : (x0_log > 0 ? ` - ${x0_log}` : ` + ${-x0_log}`);
-                    displayFormula = `y = ${d_log} + ${(L_log - d_log)} / (1 + e^[${-k_log} (x${x0_p_log})])`.replace(/\+ -/g, '- ');
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = 'S型生长曲线 (LMA)';
-                    predictFunc = x => d_log + (L_log - d_log) / (1 + Math.exp(-k_log * (x - x0_log)));
-                    break;
-                case FIT_TYPES.GOMPERTZ_LM:
-                    const [yMin_g, yMax_g, b_g, c_g] = niceCoeffs;
-                    let c_p_g = c_g === 0 ? '' : (c_g > 0 ? ` - ${c_g}` : ` + ${-c_g}`);
-                    displayFormula = `y = ${yMin_g} + ${(yMax_g - yMin_g)} exp(-exp^[${-b_g} (x${c_p_g})])`.replace(/\+ -/g, '- ');
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '不对称生长曲线 (LMA)';
-                    predictFunc = x => yMin_g + (yMax_g - yMin_g) * Math.exp(-Math.exp(-b_g * (x - c_g)));
-                    break;
-                case FIT_TYPES.LINEAR: 
-                    const [a_lin, b_lin] = niceCoeffs;
-                    displayFormula = `y = ${b_lin === 0 ? '' : b_lin + 'x'}${b_lin !== 0 && a_lin > 0 ? ' + ' : ''}${a_lin === 0 ? (b_lin === 0 ? '0' : '') : a_lin}`.replace(/\+ -/g, '- ');
-                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '基本趋势分析';
-                    predictFunc = x => a_lin + b_lin * x;
-                    break;
-                case FIT_TYPES.POLYNOMIAL: 
-                    displayFormula = niceCoeffs.map((c, i) => i === 0 ? c : (c > 0 ? ` + ${c}x${i>1?'^'+i:''}` : ` - ${-c}x${i>1?'^'+i:''}`)).join('');
-                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = `${coefficients.length - 1} 阶多项式`;
-                    predictFunc = x => niceCoeffs.reduce((sum, c, i) => sum + c * Math.pow(x, i), 0);
-                    break;
-                case FIT_TYPES.SINE_FULL:
-                    const [a_sf, b_sf, c_sf, d_sf] = niceCoeffs;
-                    displayFormula = `y = ${a_sf}sin(${b_sf}x ${c_sf >= 0 ? '+ ' + c_sf : '- ' + Math.abs(c_sf)}) ${d_sf >= 0 ? '+ ' + d_sf : '- ' + Math.abs(d_sf)}`;
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '周期波动 (LMA)';
-                    predictFunc = x => a_sf * Math.sin(b_sf * x + c_sf) + d_sf;
-                    break;
-                case FIT_TYPES.GAUSSIAN:
-                    const [A_gau, mu_gau, sig_gau] = niceCoeffs;
-                    displayFormula = `y = ${A_gau}e^[-(x${mu_gau>=0?'-'+mu_gau:'+'+(-mu_gau)})² / ${2*sig_gau*sig_gau}]`;
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '高斯分布 (LMA)';
-                    predictFunc = x => A_gau * Math.exp(-Math.pow(x - mu_gau, 2) / (2 * sig_gau * sig_gau));
-                    break;
-                case FIT_TYPES.LORENTZIAN:
-                    const [A_lor, mu_lor, gam_lor] = niceCoeffs;
-                    displayFormula = `y = ${A_lor} / (1 + ((x${mu_lor>=0?'-'+mu_lor:'+'+(-mu_lor)})/${gam_lor})²)`;
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '洛伦兹线型 (LMA)';
-                    predictFunc = x => A_lor / (1 + Math.pow((x - mu_lor) / gam_lor, 2));
-                    break;
-                case FIT_TYPES.MICHAELIS_MENTEN:
-                    const [vm, km] = niceCoeffs;
-                    displayFormula = `y = (${vm}x) / (${km} + x)`;
-                    fitCategory = '动力学模型 (Kinetics)'; fitSubtype = '酶促反应 (LMA)';
-                    predictFunc = x => (vm * x) / (km + x);
-                    break;
-                case FIT_TYPES.INVERSE_PROPORTIONAL:
-                    const [a_inv, b_inv] = niceCoeffs;
-                    displayFormula = `y = ${a_inv} / (${b_inv} + x)`;
-                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '反比例关系 (LMA)';
-                    predictFunc = x => a_inv / (b_inv + x);
-                    break;
-                case FIT_TYPES.MODIFIED_EXPONENTIAL:
-                    const [a_me, b_me, c_me] = niceCoeffs;
-                    displayFormula = `y = ${a_me}(1 - e^[${-b_me}x]) + ${c_me}`.replace(/\+ -/g, '- ');
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '修正指数 (LMA)';
-                    predictFunc = x => a_me * (1 - Math.exp(-b_me * x)) + c_me;
-                    break;
-                case FIT_TYPES.MODIFIED_POWER:
-                    const [a_mp, b_mp, c_mp] = niceCoeffs;
-                    displayFormula = `y = ${a_mp}x^${b_mp} + ${c_mp}`.replace(/\+ -/g, '- ');
-                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '修正幂律 (LMA)';
-                    predictFunc = x => a_mp * Math.pow(x, b_mp) + c_mp;
-                    break;
-                case FIT_TYPES.QUADRATIC_RATIONAL:
-                    const [a_qr, b_qr, c_qr, d_qr] = niceCoeffs;
-                    displayFormula = `y = (${a_qr} + ${b_qr}x) / (1 + ${c_qr}x + ${d_qr}x²)`.replace(/\+ -/g, '- ');
-                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '二次有理 (LMA)';
-                    predictFunc = x => (a_qr + b_qr * x) / (1 + c_qr * x + d_qr * x * x);
-                    break;
-                case FIT_TYPES.WEIBULL:
-                    const [a_w, b_w, c_w] = niceCoeffs;
-                    displayFormula = `y = ${c_w}(1 - exp(-(x/${b_w})^${a_w}))`;
-                    fitCategory = '统计分布 (Statistical)'; fitSubtype = '韦伯分布 (LMA)';
-                    predictFunc = x => c_w * (1 - Math.exp(-Math.pow(x / b_w, a_w)));
-                    break;
-                case FIT_TYPES.DOUBLE_EXPONENTIAL:
-                    const [a_de, b_de, c_de, d_de] = niceCoeffs;
-                    displayFormula = `y = ${a_de}e^[${b_de}x] + ${c_de}e^[${d_de}x]`.replace(/\+ -/g, '- ');
-                    fitCategory = '超越模型 (Transcendental)'; fitSubtype = '双指数 (LMA)';
-                    predictFunc = x => a_de * Math.exp(b_de * x) + c_de * Math.exp(d_de * x);
-                    break;
-                case FIT_TYPES.RATIONAL_FULL:
-                    const [a_rat, b_rat, c_rat, d_rat] = niceCoeffs;
-                    displayFormula = `y = (${a_rat} + ${b_rat}x) / (1 + ${c_rat}x + ${d_rat}x²)`.replace(/\+ -/g, '- ');
-                    fitCategory = '代数模型 (Algebraic)'; fitSubtype = '有理函数 (LMA)';
-                    predictFunc = x => (a_rat + b_rat * x) / (1 + c_rat * x + d_rat * x * x);
-                    break;
-                default:
-                    displayFormula = '无法优美化'; predictFunc = x => 0;
-            }
-            const r2Optimized = calculateR2FromPrediction(points.map(p => [p[0], p[1]]), predictFunc);
-            return { formula: displayFormula, operations: operations, r2: r2Optimized, fitCategory: fitCategory, fitSubtype: fitSubtype };
-        }
-
-        // =======================================================
-        // 【拟合逻辑核心 - 整合 LMA 优化】
+        // 拟合模型
         // =======================================================
         function calculateAllFits() {
+            const grid = document.getElementById('formulaGrid');
+            const countLabel = document.getElementById('fitCount');
+            if (!grid || !countLabel) return;
             if (points.length < 2) {
+                currentFitResults = [];
+                recommendedFitResults = [];
+                showAllCandidates = false;
                 updateChart([], null);
-                document.getElementById('formulaGrid').innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">请至少输入2个点进行拟合</div>';
-                document.getElementById('fitCount').textContent = '0 个结果';
+                grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary);">请至少输入 2 个数据点进行拟合。</div>';
+                countLabel.textContent = '0 个结果';
+                const moreButton = document.getElementById('toggleMoreFitsBtn');
+                if (moreButton) moreButton.hidden = true;
                 return;
             }
 
-            const data = points.map(p => [p[0], p[1]]);
+            const data = points.map(point => point.slice());
+            const xs = data.map(point => point[0]);
+            const ys = data.map(point => point[1]);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const rangeX = maxX - minX;
+            const uniqueXCount = new Set(xs).size;
+            if (!(rangeX > 0) || !Number.isFinite(rangeX) || uniqueXCount < 2) {
+                currentFitResults = [];
+                recommendedFitResults = [];
+                showAllCandidates = false;
+                updateChart([], null);
+                grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary);">至少需要两个不同的 X 值，才能进行曲线拟合。</div>';
+                countLabel.textContent = '0 个结果';
+                const moreButton = document.getElementById('toggleMoreFitsBtn');
+                if (moreButton) moreButton.hidden = true;
+                return;
+            }
+
             const results = [];
-            const yValues = data.map(p => p[1]);
-            const xValues = data.map(p => p[0]);
-            const yMin = Math.min(...yValues), yMax = Math.max(...yValues);
-            const xMean = xValues.reduce((a, b) => a + b, 0) / xValues.length;
+            const n = data.length;
+            const yMin = Math.min(...ys), yMax = Math.max(...ys);
+            const yRange = yMax - yMin;
+            const xMean = mean(xs);
+            const z = x => (x - minX) / rangeX;
+            const zData = data.map(([x, y]) => [z(x), y]);
+            const add = addFitResult;
 
-            // 1. 线性拟合 (保持 OLS，因其解析解即最优)
-            try {
-                const linear = regression.linear(data);
-                const lp = x => linear.equation[0] + linear.equation[1] * x;
-                results.push({ name: '线性拟合', r2: calculateR2FromPrediction(data, lp), rawString: `y = ${linear.equation[1].toFixed(4)}x + ${linear.equation[0].toFixed(4)}`, points: generateFitPoints(data, lp), beautify: () => performBeautification('Linear', [linear.equation[0], linear.equation[1]], '', FIT_TYPES.LINEAR) });
-            } catch (e) {}
+            // 线性：解析最小二乘解。
+            const linear = linearFit(data);
+            if (linear) {
+                add(results, {
+                    name: '线性拟合', parameterCount: 2,
+                    predict: x => linear.intercept + linear.slope * x,
+                    formula: `y = ${formatNumber(linear.slope)}x${signedTerm(linear.intercept)}`,
+                    roundedView: digits => {
+                        const slope = roundSignificant(linear.slope, digits);
+                        const intercept = roundSignificant(linear.intercept, digits);
+                        return { predict: x => slope * x + intercept, formula: `y = ${formatRounded(slope, digits)}x${signedRoundedTerm(intercept, digits)}` };
+                    },
+                    category: '代数模型', subtype: '一次线性关系'
+                });
+            }
 
-            // 2. 多项式拟合 (保持 OLS)
-            for (let order = 2; order <= 3; order++) {
-                if (points.length > order) {
-                    try {
-                        const poly = regression.polynomial(data, { order: order });
-                        const pp = x => poly.equation.reduce((sum, c, i) => sum + c * Math.pow(x, i), 0);
-                        results.push({ name: `${order} 阶多项式`, r2: calculateR2FromPrediction(data, pp), rawString: `y = ...`, points: generateFitPoints(data, pp), beautify: () => performBeautification('Poly', poly.equation, '', FIT_TYPES.POLYNOMIAL) });
-                    } catch (e) {}
+            // 多项式只提供二次、三次；更高阶自动拟合很容易过拟合。
+            for (const degree of [2, 3]) {
+                const parameterCount = degree + 1;
+                if (n <= parameterCount + 1 || uniqueXCount < parameterCount) continue;
+                const fit = polynomialFit(data, degree);
+                if (!fit) continue;
+                add(results, {
+                    name: `${degree} 阶多项式`, parameterCount,
+                    predict: fit.predict,
+                    formula: fit.formula,
+                    roundedView: digits => {
+                        const coefficients = roundArray(fit.coefficients, digits);
+                        const center = roundSignificant((minX + maxX) / 2, digits);
+                        const scale = roundSignificant((maxX - minX) / 2, digits);
+                        const predict = x => coefficients.reduce((sum, coefficient, power) => sum + coefficient * Math.pow((x - center) / scale, power), 0);
+                        const terms = coefficients.map((coefficient, power) => {
+                            if (power === 0) return formatRounded(coefficient, digits);
+                            const variable = power === 1 ? 'z' : `z^${power}`;
+                            return `${coefficient < 0 ? ' - ' : ' + '}${formatRounded(Math.abs(coefficient), digits)}·${variable}`;
+                        }).join('');
+                        return { predict, formula: `y = ${terms}; z = (x - ${formatRounded(center, digits)}) / ${formatRounded(scale, digits)}` };
+                    },
+                    category: '代数模型', subtype: `${degree} 阶多项式（使用标准化 X，改善数值稳定性）`
+                });
+            }
+
+            // 分段线性：连续折线，自动搜索转折点，不等同于阶梯函数。
+            if (n >= 6 && uniqueXCount >= 4) {
+                const uniqueXs = [...new Set(xs)].sort((a, b) => a - b);
+                let bestPiecewise = null;
+                for (let index = 1; index < uniqueXs.length - 1; index++) {
+                    const knot = (uniqueXs[index] + uniqueXs[index + 1]) / 2;
+                    const rows = data.map(([x]) => [1, x - knot, Math.max(0, x - knot)]);
+                    const coefficients = leastSquares(rows, ys);
+                    if (!coefficients) continue;
+                    const predict = x => coefficients[0] + coefficients[1] * (x - knot) + coefficients[2] * Math.max(0, x - knot);
+                    const metrics = evaluateFit(data, predict);
+                    if (metrics && (!bestPiecewise || metrics.ssResidual < bestPiecewise.metrics.ssResidual)) {
+                        bestPiecewise = { knot, coefficients, predict, metrics };
+                    }
+                }
+                if (bestPiecewise) {
+                    const [a, b1, change] = bestPiecewise.coefficients;
+                    add(results, {
+                        name: '分段线性拟合', parameterCount: 4,
+                        predict: bestPiecewise.predict,
+                        formula: `y = ${formatNumber(a)} + ${formatNumber(b1)}(x - ${formatNumber(bestPiecewise.knot)}) + ${formatNumber(change)}·max(0, x - ${formatNumber(bestPiecewise.knot)})`,
+                        roundedView: digits => {
+                            const [ra, rb, rc] = roundArray(bestPiecewise.coefficients, digits);
+                            const knot = roundSignificant(bestPiecewise.knot, digits);
+                            return {
+                                predict: x => ra + rb * (x - knot) + rc * Math.max(0, x - knot),
+                                formula: `y = ${formatRounded(ra, digits)}${signedRoundedTerm(rb, digits)}(x - ${formatRounded(knot, digits)})${signedRoundedTerm(rc, digits)}·max(0, x - ${formatRounded(knot, digits)})`
+                            };
+                        },
+                        category: '分段模型', subtype: '连续折线 / 单一转折点'
+                    });
                 }
             }
 
-            // 3. 指数拟合 (合并：初猜 -> LMA)
-            try {
-                const initExp = regression.exponential(data);
-                const initialParams = [initExp.equation[0], initExp.equation[1]];
-                let params = initialParams;
-                let fitType = FIT_TYPES.EXPONENTIAL_LM;
-                
-                try {
-                    const lm = levenbergMarquardt(exponentialModel, data, initialParams, exponentialJacobian);
-                    if (lm.converged) params = lm.params;
-                } catch(e) {}
-
-                const ep = x => params[0] * Math.exp(params[1] * x);
-                const er2 = calculateR2FromPrediction(data, ep);
-                results.push({ name: '指数拟合', r2: er2, rawString: `y=${params[0].toFixed(4)}e^(${params[1].toFixed(4)}x)`, points: generateFitPoints(data, ep), beautify: () => performBeautification('Exp', params, '', FIT_TYPES.EXPONENTIAL_LM) });
-            } catch (e) {}
-
-            // 4. 对数拟合 (合并：初猜 -> LMA)
-            try {
-                const initLog = regression.logarithmic(data);
-                const initialParams = [initLog.equation[0], initLog.equation[1]];
-                let params = initialParams;
-
-                try {
-                    const lm = levenbergMarquardt(logarithmicModel, data, initialParams, logarithmicJacobian);
-                    if (lm.converged) params = lm.params;
-                } catch(e) {}
-
-                const lp = x => params[0] + params[1] * Math.log(x);
-                results.push({ name: '对数拟合', r2: calculateR2FromPrediction(data, lp), rawString: `y=${params[0].toFixed(4)}+${params[1].toFixed(4)}ln(x)`, points: generateFitPoints(data, lp), beautify: () => performBeautification('Log', params, '', FIT_TYPES.LOGARITHMIC_LM) });
-            } catch (e) {}
-
-            // 5. 幂律拟合 (合并：初猜 -> LMA)
-            try {
-                const initPow = regression.power(data);
-                const initialParams = [initPow.equation[0], initPow.equation[1]];
-                let params = initialParams;
-
-                try {
-                    const lm = levenbergMarquardt(powerModel, data, initialParams, powerJacobian);
-                    if (lm.converged) params = lm.params;
-                } catch(e) {}
-
-                const pp = x => params[0] * Math.pow(x, params[1]);
-                results.push({ name: '幂律拟合', r2: calculateR2FromPrediction(data, pp), rawString: `y=${params[0].toFixed(4)}x^${params[1].toFixed(4)}`, points: generateFitPoints(data, pp), beautify: () => performBeautification('Pow', params, '', FIT_TYPES.POWER_LM) });
-            } catch (e) {}
-
-            // 6. Logistic 拟合 (LMA)
-            if (points.length >= 4) {
-                try {
-                    const initialParams = [yMax, 1.0, data[Math.floor(data.length/2)][0], yMin];
-                    let params = initialParams;
-                    try {
-                        const lm = levenbergMarquardt(logisticModel, data, initialParams, logisticJacobian);
-                        if (lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const func = x => logisticModel(params, x);
-                    results.push({ name: 'Logistic 拟合', r2: calculateR2FromPrediction(data, func), rawString: `L=${params[0].toFixed(2)}, k=${params[1].toFixed(2)}...`, points: generateFitPoints(data, func), beautify: () => performBeautification('Logistic', params, '', FIT_TYPES.LOGISTIC_LM) });
-                } catch(e) {}
+            // 指数：先在线性化的 ln(|y|) 空间产生初值，再以原始 Y 误差进行 LM 精修。
+            if (n >= 4 && ys.every(y => y !== 0 && Math.sign(y) === Math.sign(ys[0]))) {
+                const sign = Math.sign(ys[0]);
+                const logFit = linearFit(data.map(([x, y]) => [x, Math.log(Math.abs(y))]));
+                if (logFit) {
+                    const model = (p, x) => p[0] * Math.exp(p[1] * x);
+                    const initial = [sign * Math.exp(logFit.intercept), logFit.slope];
+                    const params = fitNonlinear(model, data, initial) || initial;
+                    const predict = x => model(params, x);
+                    add(results, {
+                        name: '指数拟合', parameterCount: 2, predict,
+                        formula: `y = ${formatNumber(params[0])}·e^(${formatNumber(params[1])}x)`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            return { predict: x => model(p, x), formula: `y = ${formatRounded(p[0], digits)}·e^(${formatRounded(p[1], digits)}x)` };
+                        },
+                        category: '超越模型', subtype: '指数增长 / 衰减'
+                    });
+                }
             }
 
-            // 7. Gompertz 拟合 (LMA)
-            if (points.length >= 4) {
-                try {
-                    const initialParams = [yMin, yMax, 1.0, data[Math.floor(data.length/2)][0]];
-                    let params = initialParams;
-                    try {
-                        const lm = levenbergMarquardt(gompertzModel, data, initialParams, gompertzJacobian);
-                        if (lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const func = x => gompertzModel(params, x);
-                    results.push({ name: 'Gompertz 拟合', r2: calculateR2FromPrediction(data, func), rawString: `yMin=${params[0].toFixed(2)}...`, points: generateFitPoints(data, func), beautify: () => performBeautification('Gompertz', params, '', FIT_TYPES.GOMPERTZ_LM) });
-                } catch(e) {}
+            // 对数：定义域要求 X > 0。
+            if (n >= 4 && xs.every(x => x > 0)) {
+                const initialFit = linearFit(data.map(([x, y]) => [Math.log(x), y]));
+                if (initialFit) {
+                    const model = (p, x) => p[0] + p[1] * Math.log(x);
+                    const initial = [initialFit.intercept, initialFit.slope];
+                    const params = fitNonlinear(model, data, initial) || initial;
+                    const predict = x => model(params, x);
+                    add(results, {
+                        name: '对数拟合', parameterCount: 2, predict,
+                        formula: `y = ${formatNumber(params[0])}${signedTerm(params[1])}·ln(x)`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            return { predict: x => model(p, x), formula: `y = ${formatRounded(p[0], digits)}${signedRoundedTerm(p[1], digits)}·ln(x)` };
+                        },
+                        category: '超越模型', subtype: '对数关系（仅 X > 0）'
+                    });
+                }
             }
 
-            // 8. 峰值拟合 (Gaussian / Lorentzian) (LMA)
-            if (points.length >= 3) {
-                const maxIndex = yValues.indexOf(yMax);
-                const muEst = data[maxIndex][0];
-                const sigmaEst = Math.sqrt(xValues.reduce((s, x) => s + (x-xMean)**2, 0)/xValues.length) || 1;
-                
-                // Gaussian
-                try {
-                    let params = [yMax, muEst, sigmaEst];
-                    try {
-                        const lm = levenbergMarquardt(gaussianModel, data, params, gaussianJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const gp = x => gaussianModel(params, x);
-                    results.push({ name: '高斯拟合', r2: calculateR2FromPrediction(data, gp), rawString: `Gaus...`, points: generateFitPoints(data, gp), beautify: () => performBeautification('Gaussian', params, '', FIT_TYPES.GAUSSIAN) });
-                } catch(e) {}
-
-                // Lorentzian
-                try {
-                    let params = [yMax, muEst, 1.0];
-                    try {
-                        const lm = levenbergMarquardt(lorentzianModel, data, params, lorentzianJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const lp = x => lorentzianModel(params, x);
-                    results.push({ name: '洛伦兹拟合', r2: calculateR2FromPrediction(data, lp), rawString: `Lorentz...`, points: generateFitPoints(data, lp), beautify: () => performBeautification('Lorentzian', params, '', FIT_TYPES.LORENTZIAN) });
-                } catch(e) {}
+            // 幂律：要求 X > 0，Y 同号且非零，以免对数初值失效。
+            if (n >= 4 && xs.every(x => x > 0) && ys.every(y => y !== 0 && Math.sign(y) === Math.sign(ys[0]))) {
+                const sign = Math.sign(ys[0]);
+                const initialFit = linearFit(data.map(([x, y]) => [Math.log(x), Math.log(Math.abs(y))]));
+                if (initialFit) {
+                    const model = (p, x) => p[0] * Math.pow(x, p[1]);
+                    const initial = [sign * Math.exp(initialFit.intercept), initialFit.slope];
+                    const params = fitNonlinear(model, data, initial) || initial;
+                    const predict = x => model(params, x);
+                    add(results, {
+                        name: '幂律拟合', parameterCount: 2, predict,
+                        formula: `y = ${formatNumber(params[0])}·x^(${formatNumber(params[1])})`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            return { predict: x => model(p, x), formula: `y = ${formatRounded(p[0], digits)}·x^(${formatRounded(p[1], digits)})` };
+                        },
+                        category: '代数模型', subtype: '幂函数关系（仅 X > 0）'
+                    });
+                }
             }
 
-            // 9. 正弦拟合 (LMA)
-            if (points.length >= 4) {
-                try {
-                    const range = Math.max(...xValues) - Math.min(...xValues);
-                    let params = [(yMax-yMin)/2, (2*Math.PI)/range, 0, (yMax+yMin)/2];
-                    try {
-                        const lm = levenbergMarquardt(sineFullModel, data, params, sineFullJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const sp = x => sineFullModel(params, x);
-                    results.push({ name: '正弦拟合', r2: calculateR2FromPrediction(data, sp), rawString: `Sine...`, points: generateFitPoints(data, sp), beautify: () => performBeautification('Sine', params, '', FIT_TYPES.SINE_FULL) });
-                } catch(e) {}
-            }
-            
-            // 10. 米氏方程 (LMA)
-            if (points.length >= 3) {
-                try {
-                    // Lineweaver-Burk 线性化初猜
-                    const invData = data.filter(p=>p[0]>0 && p[1]>0).map(p=>[1/p[0], 1/p[1]]);
-                    const lin = regression.linear(invData);
-                    let params = [1/lin.equation[0], lin.equation[1]/lin.equation[0]]; // Vmax, Km
-                    if (isNaN(params[0]) || isNaN(params[1])) params = [yMax, xMean]; // 备用初猜
-
-                    try {
-                        const lm = levenbergMarquardt(michaelisMentenModel, data, params, michaelisMentenJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const mp = x => michaelisMentenModel(params, x);
-                    results.push({ name: '米氏方程', r2: calculateR2FromPrediction(data, mp), rawString: `MM...`, points: generateFitPoints(data, mp), beautify: () => performBeautification('MM', params, '', FIT_TYPES.MICHAELIS_MENTEN) });
-                } catch(e) {}
-            }
-            
-            // 11. 反比例 & 双曲 (LMA)
-            if (points.length >= 3) {
-                 try {
-                     let params = [yMax * xMean, xMean];
-                     try {
-                        const lm = levenbergMarquardt(inverseProportionalModel, data, params, inverseProportionalJacobian);
-                        if(lm.converged) params = lm.params;
-                     } catch(e) {}
-                     const ip = x => inverseProportionalModel(params, x);
-                     results.push({ name: '反比例/双曲拟合', r2: calculateR2FromPrediction(data, ip), rawString: `Inv...`, points: generateFitPoints(data, ip), beautify: () => performBeautification('Inverse', params, '', FIT_TYPES.INVERSE_PROPORTIONAL) });
-                 } catch(e) {}
+            // Logistic 四参数 S 曲线，使用归一化 X，初值按数据首尾方向确定。
+            if (n >= 6) {
+                const ascending = ys[ys.length - 1] >= ys[0];
+                const low = ascending ? ys[0] : ys[ys.length - 1];
+                const high = ascending ? ys[ys.length - 1] : ys[0];
+                const direction = ascending ? 1 : -1;
+                const model = (p, x) => p[0] + (p[1] - p[0]) * stableSigmoid(p[2] * (z(x) - p[3]));
+                const initial = [low, high, direction * 6, 0.5];
+                const params = fitNonlinear(model, data, initial);
+                if (params) {
+                    add(results, {
+                        name: 'Logistic 拟合', parameterCount: 4, predict: x => model(params, x),
+                        formula: `y = ${formatNumber(params[0])}${signedTerm(params[1] - params[0])} / (1 + e^(${formatNumber(-params[2])}(z - ${formatNumber(params[3])})))；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                            const rz = x => (x - x0) / xr;
+                            return {
+                                predict: x => p[0] + (p[1] - p[0]) * stableSigmoid(p[2] * (rz(x) - p[3])),
+                                formula: `y = ${formatRounded(p[0], digits)}${roundedDifferenceTerm(p[1], p[0], digits)} / (1 + e^(${formatRounded(-p[2], digits)}(z - ${formatRounded(p[3], digits)})))；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}`
+                            };
+                        },
+                        category: '生长 / 饱和模型', subtype: '对称 S 型曲线（四参数）'
+                    });
+                }
             }
 
-            // 12. 修正指数 (LMA)
-            if (points.length >= 4) {
-                try {
-                    let params = [yMax-yMin, 1.0, yMin];
-                    try {
-                        const lm = levenbergMarquardt(modifiedExponentialModel, data, params, modifiedExponentialJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const mep = x => modifiedExponentialModel(params, x);
-                    results.push({ name: '修正指数拟合', r2: calculateR2FromPrediction(data, mep), rawString: `ModExp...`, points: generateFitPoints(data, mep), beautify: () => performBeautification('ModExp', params, '', FIT_TYPES.MODIFIED_EXPONENTIAL) });
-                } catch(e) {}
-            }
-            
-            // 13. 修正幂律 (LMA)
-            if (points.length >= 4) {
-                try {
-                    let params = [1, 1, yMin];
-                    try {
-                        const lm = levenbergMarquardt(modifiedPowerModel, data, params, modifiedPowerJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const mpp = x => modifiedPowerModel(params, x);
-                    results.push({ name: '修正幂律拟合', r2: calculateR2FromPrediction(data, mpp), rawString: `ModPow...`, points: generateFitPoints(data, mpp), beautify: () => performBeautification('ModPow', params, '', FIT_TYPES.MODIFIED_POWER) });
-                } catch(e) {}
-            }
-            
-            // 14. 二次有理 (LMA)
-            if (points.length >= 5) {
-                try {
-                    const lin = regression.linear(data);
-                    let params = [lin.equation[0], lin.equation[1], 0.1, 0.01];
-                    try {
-                        const lm = levenbergMarquardt(quadraticRationalModel, data, params, quadraticRationalJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const qrp = x => quadraticRationalModel(params, x);
-                    results.push({ name: '二次有理拟合', r2: calculateR2FromPrediction(data, qrp), rawString: `QR...`, points: generateFitPoints(data, qrp), beautify: () => performBeautification('QuadRat', params, '', FIT_TYPES.QUADRATIC_RATIONAL) });
-                } catch(e) {}
-            }
-            
-            // 15. 有理函数 (LMA)
-            if (points.length >= 5) {
-                try {
-                    const lin = regression.linear(data);
-                    let params = [lin.equation[0], lin.equation[1], 0.01, 0.001];
-                    try {
-                         const lm = levenbergMarquardt(rationalFullModel, data, params, rationalFullJacobian);
-                         if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const rfp = x => rationalFullModel(params, x);
-                    results.push({ name: '有理函数拟合', r2: calculateR2FromPrediction(data, rfp), rawString: `Rational...`, points: generateFitPoints(data, rfp), beautify: () => performBeautification('Rational', params, '', FIT_TYPES.RATIONAL_FULL) });
-                } catch(e) {}
+            // Gompertz：非对称 S 型曲线。
+            if (n >= 6) {
+                const ascending = ys[ys.length - 1] >= ys[0];
+                const low = ascending ? ys[0] : ys[ys.length - 1];
+                const high = ascending ? ys[ys.length - 1] : ys[0];
+                const direction = ascending ? 1 : -1;
+                const model = (p, x) => p[0] + (p[1] - p[0]) * Math.exp(-Math.exp(Math.max(-50, Math.min(50, -p[2] * (z(x) - p[3])))));
+                const initial = [low, high, direction * 4, 0.5];
+                const params = fitNonlinear(model, data, initial);
+                if (params) {
+                    add(results, {
+                        name: 'Gompertz 拟合', parameterCount: 4, predict: x => model(params, x),
+                        formula: `y = ${formatNumber(params[0])}${signedTerm(params[1] - params[0])}·exp(-exp(${formatNumber(-params[2])}(z-${formatNumber(params[3])})))；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                            const rz = x => (x - x0) / xr;
+                            const predict = x => p[0] + (p[1] - p[0]) * Math.exp(-Math.exp(Math.max(-50, Math.min(50, -p[2] * (rz(x) - p[3])))));
+                            return { predict, formula: `y = ${formatRounded(p[0], digits)}${roundedDifferenceTerm(p[1], p[0], digits)}·exp(-exp(${formatRounded(-p[2], digits)}(z-${formatRounded(p[3], digits)})))；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}` };
+                        },
+                        category: '生长 / 饱和模型', subtype: '非对称 S 型曲线'
+                    });
+                }
             }
 
-            // 16. 韦伯分布 (LMA)
-            if (points.length >= 4) {
-                try {
-                    let params = [2.0, xMean, yMax];
-                    try {
-                        const lm = levenbergMarquardt(weibullModel, data, params, weibullJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const wp = x => weibullModel(params, x);
-                    results.push({ name: '韦伯分布', r2: calculateR2FromPrediction(data, wp), rawString: `Weibull...`, points: generateFitPoints(data, wp), beautify: () => performBeautification('Weibull', params, '', FIT_TYPES.WEIBULL) });
-                } catch(e) {}
-            }
-            
-            // 17. 双指数 (LMA)
-            if (points.length >= 6) {
-                try {
-                    let params = [yMax*0.6, 0.5, yMax*0.4, -0.1];
-                    try {
-                        const lm = levenbergMarquardt(doubleExponentialModel, data, params, doubleExponentialJacobian);
-                        if(lm.converged) params = lm.params;
-                    } catch(e) {}
-                    const dep = x => doubleExponentialModel(params, x);
-                    results.push({ name: '双指数拟合', r2: calculateR2FromPrediction(data, dep), rawString: `DoubleExp...`, points: generateFitPoints(data, dep), beautify: () => performBeautification('DoubleExp', params, '', FIT_TYPES.DOUBLE_EXPONENTIAL) });
-                } catch(e) {}
+            // Richards 广义 Logistic：增加形状参数，可拟合偏斜程度不同的 S 曲线。
+            if (n >= 7) {
+                const ascending = ys[ys.length - 1] >= ys[0];
+                const low = ascending ? ys[0] : ys[ys.length - 1];
+                const high = ascending ? ys[ys.length - 1] : ys[0];
+                const direction = ascending ? 1 : -1;
+                const richards = (p, x) => {
+                    const exponent = Math.max(-50, Math.min(50, -p[2] * (z(x) - p[3])));
+                    const shape = Math.exp(p[4]);
+                    const fraction = Math.exp(-Math.log1p(Math.exp(exponent)) / shape);
+                    return p[0] + (p[1] - p[0]) * fraction;
+                };
+                const initial = [low, high, direction * 6, 0.5, 0];
+                const params = fitNonlinear(richards, data, initial);
+                if (params) {
+                    add(results, {
+                        name: 'Richards 广义 Logistic', parameterCount: 5, predict: x => richards(params, x),
+                        formula: `y = ${formatNumber(params[0])}${signedTerm(params[1] - params[0])}·(1+e^(${formatNumber(-params[2])}(z-${formatNumber(params[3])})))^(-1/${formatNumber(Math.exp(params[4]))})；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                        roundedView: digits => {
+                            const p = roundArray(params.slice(0, 4), digits);
+                            const shape = Math.max(Number.MIN_VALUE, roundSignificant(Math.exp(params[4]), digits));
+                            const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                            const rz = x => (x - x0) / xr;
+                            const predict = x => {
+                                const exponent = Math.max(-50, Math.min(50, -p[2] * (rz(x) - p[3])));
+                                return p[0] + (p[1] - p[0]) * Math.exp(-Math.log1p(Math.exp(exponent)) / shape);
+                            };
+                            return { predict, formula: `y = ${formatRounded(p[0], digits)}${roundedDifferenceTerm(p[1], p[0], digits)}·(1+e^(${formatRounded(-p[2], digits)}(z-${formatRounded(p[3], digits)})))^(-1/${formatRounded(shape, digits)})；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}` };
+                        },
+                        category: '生长 / 饱和模型', subtype: '广义 Logistic（可调 S 曲线偏斜度）'
+                    });
+                }
             }
 
-            results.sort((a, b) => b.r2 - a.r2);
-            
-            document.getElementById('fitCount').textContent = `${results.length} 个结果`;
-            document.getElementById('formulaGrid').innerHTML = '';
-            
-            if (results.length > 0) {
-                const bestFit = results[0];
-                updateChart(bestFit.points, bestFit.r2);
-                
-                results.forEach((res, index) => {
-                    const isBest = index === 0;
-                    const beautified = res.beautify ? res.beautify() : {formula: 'N/A', operations: [], r2: res.r2, fitCategory: '未知', fitSubtype: ''};
-                    const r2Display = beautified.r2.toFixed(4);
-                    const card = document.createElement('div');
-                    card.className = `formula-card ${isBest ? 'active' : ''}`;
-                    card.innerHTML = `
-                        <div class="card-header">
-                            <span>${res.name}</span>
-                            <span class="r2-badge">R²: ${r2Display}</span>
-                        </div>
-                        <div class="fit-category">${beautified.fitCategory}</div>
-                        <div class="fit-subtype">${beautified.fitSubtype}</div>
-                        <div class="formula-container-row">
-                            <div class="formula-box">
-                                <div class="formula-box-label">原始拟合公式 (Raw)</div>
-                                <div class="math-display-box raw-box" title="${res.rawString}">${res.rawString}</div>
-                            </div>
-                            <div class="arrow-separator">&rarr;</div>
-                            <div class="formula-box">
-                                <div class="formula-box-label">极致优美化公式 (Beautified)</div>
-                                <div class="math-display-box beautified-box" title="${beautified.formula}">${beautified.formula}</div>
-                            </div>
-                        </div>
-                        ${beautified.operations.length > 0 ? `<div class="optimization-note">优化操作: ${beautified.operations.join(' | ')}</div>` : ''}
-                    `;
-                    document.getElementById('formulaGrid').appendChild(card);
+            // Gaussian 与 Lorentzian：加入基线项，能正确拟合峰或谷。
+            if (n >= 6) {
+                const baseline = (ys[0] + ys[ys.length - 1]) / 2;
+                let extremeIndex = 0;
+                for (let i = 1; i < data.length; i++) {
+                    if (Math.abs(ys[i] - baseline) > Math.abs(ys[extremeIndex] - baseline)) extremeIndex = i;
+                }
+                const amplitude = ys[extremeIndex] - baseline;
+                const centerZ = z(xs[extremeIndex]);
+                const sigma0 = 0.2;
+                const gaussian = (p, x) => {
+                    const sigma = Math.exp(p[2]);
+                    const q = (z(x) - p[1]) / sigma;
+                    return p[3] + p[0] * Math.exp(-0.5 * q * q);
+                };
+                const gaussianInitial = [amplitude || yRange || 1, centerZ, Math.log(sigma0), baseline];
+                const gaussianParams = fitNonlinear(gaussian, data, gaussianInitial);
+                if (gaussianParams) {
+                    const sigma = Math.exp(gaussianParams[2]);
+                    add(results, {
+                        name: '高斯拟合', parameterCount: 4, predict: x => gaussian(gaussianParams, x),
+                        formula: `y = ${formatNumber(gaussianParams[3])}${signedTerm(gaussianParams[0])}·exp(-(z-${formatNumber(gaussianParams[1])})²/(2·${formatNumber(sigma)}²))；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                        roundedView: digits => {
+                            const amplitudeR = roundSignificant(gaussianParams[0], digits);
+                            const centerR = roundSignificant(gaussianParams[1], digits);
+                            const sigmaR = Math.max(Number.MIN_VALUE, roundSignificant(sigma, digits));
+                            const baseR = roundSignificant(gaussianParams[3], digits);
+                            const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                            const rz = x => (x - x0) / xr;
+                            const predict = x => baseR + amplitudeR * Math.exp(-Math.pow(rz(x) - centerR, 2) / (2 * sigmaR * sigmaR));
+                            return { predict, formula: `y = ${formatRounded(baseR, digits)}${signedRoundedTerm(amplitudeR, digits)}·exp(-(z-${formatRounded(centerR, digits)})²/(2·${formatRounded(sigmaR, digits)}²))；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}` };
+                        },
+                        category: '峰形模型', subtype: '高斯峰（含基线）'
+                    });
+                }
+
+                const lorentzian = (p, x) => {
+                    const gamma = Math.exp(p[2]);
+                    const q = (z(x) - p[1]) / gamma;
+                    return p[3] + p[0] / (1 + q * q);
+                };
+                const lorentzInitial = [amplitude || yRange || 1, centerZ, Math.log(0.15), baseline];
+                const lorentzParams = fitNonlinear(lorentzian, data, lorentzInitial);
+                if (lorentzParams) {
+                    const gamma = Math.exp(lorentzParams[2]);
+                    add(results, {
+                        name: '洛伦兹拟合', parameterCount: 4, predict: x => lorentzian(lorentzParams, x),
+                        formula: `y = ${formatNumber(lorentzParams[3])}${signedTerm(lorentzParams[0])}/(1+((z-${formatNumber(lorentzParams[1])})/${formatNumber(gamma)})²)；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                    roundedView: digits => {
+                        const amplitudeR = roundSignificant(lorentzParams[0], digits);
+                        const centerR = roundSignificant(lorentzParams[1], digits);
+                        const gammaR = Math.max(Number.MIN_VALUE, roundSignificant(gamma, digits));
+                        const baseR = roundSignificant(lorentzParams[3], digits);
+                        const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                        const rz = x => (x - x0) / xr;
+                        const predict = x => baseR + amplitudeR / (1 + Math.pow((rz(x) - centerR) / gammaR, 2));
+                        return { predict, formula: `y = ${formatRounded(baseR, digits)}${signedRoundedTerm(amplitudeR, digits)}/(1+((z-${formatRounded(centerR, digits)})/${formatRounded(gammaR, digits)})²)；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}` };
+                    },
+                        category: '峰形模型', subtype: '洛伦兹线型（含基线）'
+                    });
+                }
+            }
+
+            // 正弦：对一组候选频率作线性初拟合，再由 LM 精修相位与频率。
+            let sineInitial = null;
+            if (n >= 6) {
+                let bestError = Infinity;
+                const maxCycles = Math.min(6, Math.max(1.5, Math.floor((n - 1) / 2)));
+                for (let step = 0; step <= 90; step++) {
+                    const cycles = 0.5 + (maxCycles - 0.5) * step / 90;
+                    const omega = 2 * Math.PI * cycles;
+                    const rows = zData.map(([value]) => [Math.sin(omega * value), Math.cos(omega * value), 1]);
+                    const coeff = leastSquares(rows, ys);
+                    if (!coeff) continue;
+                    const [sinCoeff, cosCoeff, offset] = coeff;
+                    const amplitude = Math.hypot(sinCoeff, cosCoeff);
+                    const phase = Math.atan2(cosCoeff, sinCoeff);
+                    const predict = x => amplitude * Math.sin(omega * z(x) + phase) + offset;
+                    const metric = evaluateFit(data, predict);
+                    if (metric && metric.ssResidual < bestError) {
+                        bestError = metric.ssResidual;
+                        sineInitial = [amplitude, omega, phase, offset];
+                    }
+                }
+            }
+            if (sineInitial) {
+                const sine = (p, x) => p[0] * Math.sin(p[1] * z(x) + p[2]) + p[3];
+                const sineParams = fitNonlinear(sine, data, sineInitial) || sineInitial;
+                add(results, {
+                    name: '正弦拟合', parameterCount: 4, predict: x => sine(sineParams, x),
+                    formula: `y = ${formatNumber(sineParams[0])}·sin(${formatNumber(sineParams[1])}z${signedTerm(sineParams[2])})${signedTerm(sineParams[3])}；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                    roundedView: digits => {
+                        const p = roundArray(sineParams, digits);
+                        const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                        const rz = x => (x - x0) / xr;
+                        return {
+                            predict: x => p[0] * Math.sin(p[1] * rz(x) + p[2]) + p[3],
+                            formula: `y = ${formatRounded(p[0], digits)}·sin(${formatRounded(p[1], digits)}z${signedRoundedTerm(p[2], digits)})${signedRoundedTerm(p[3], digits)}；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}`
+                        };
+                    },
+                    category: '周期模型', subtype: '正弦周期曲线'
                 });
-            } else {
-                 document.getElementById('formulaGrid').innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">无有效拟合结果</div>';
             }
+
+            // 阻尼正弦：常见于振动、衰减波动和回弹过程。
+            if (n >= 7 && sineInitial) {
+                const dampedSine = (p, x) => p[0] * Math.exp(-Math.exp(p[1]) * z(x)) * Math.sin(p[2] * z(x) + p[3]) + p[4];
+                const initial = [sineInitial[0], Math.log(0.8), sineInitial[1], sineInitial[2], sineInitial[3]];
+                const params = fitNonlinear(dampedSine, data, initial);
+                if (params) {
+                    add(results, {
+                        name: '阻尼正弦拟合', parameterCount: 5, predict: x => dampedSine(params, x),
+                        formula: `y = ${formatNumber(params[0])}·e^(-${formatNumber(Math.exp(params[1]))}z)·sin(${formatNumber(params[2])}z${signedTerm(params[3])})${signedTerm(params[4])}；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                        roundedView: digits => {
+                            const p = [roundSignificant(params[0], digits), roundSignificant(Math.exp(params[1]), digits), ...roundArray(params.slice(2), digits)];
+                            const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                            const rz = x => (x - x0) / xr;
+                            return {
+                                predict: x => p[0] * Math.exp(-p[1] * rz(x)) * Math.sin(p[2] * rz(x) + p[3]) + p[4],
+                                formula: `y = ${formatRounded(p[0], digits)}·e^(-${formatRounded(p[1], digits)}z)·sin(${formatRounded(p[2], digits)}z${signedRoundedTerm(p[3], digits)})${signedRoundedTerm(p[4], digits)}；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}`
+                            };
+                        },
+                        category: '周期模型', subtype: '指数衰减振荡'
+                    });
+                }
+            }
+
+            // Michaelis–Menten：Hill 曲线 n=1 的经典特例。
+            if (n >= 4 && xs.every(x => x >= 0) && yMin >= 0 && xMean > 0) {
+                const michaelis = (p, x) => p[0] * x / (Math.exp(p[1]) + x);
+                const initial = [Math.max(yMax, 1e-6), Math.log(Math.max(xMean, 1e-6))];
+                const params = fitNonlinear(michaelis, data, initial);
+                if (params) {
+                    add(results, {
+                        name: '米氏方程拟合', parameterCount: 2, predict: x => michaelis(params, x),
+                        formula: `y = (${formatNumber(params[0])}x)/(${formatNumber(Math.exp(params[1]))}+x)`,
+                        roundedView: digits => {
+                            const vmax = roundSignificant(params[0], digits);
+                            const km = Math.max(Number.MIN_VALUE, roundSignificant(Math.exp(params[1]), digits));
+                            return { predict: x => vmax * x / (km + x), formula: `y = (${formatRounded(vmax, digits)}x)/(${formatRounded(km, digits)}+x)` };
+                        },
+                        category: '动力学模型', subtype: 'Michaelis–Menten 饱和曲线'
+                    });
+                }
+            }
+
+            // Hill：对 Michaelis–Menten 的常用广义扩展，允许非单位 Hill 系数。
+            if (n >= 6 && xs.every(x => x >= 0) && xMean > 0) {
+                const hill = (p, x) => {
+                    if (x === 0) return p[0];
+                    const fraction = stableSigmoid(Math.exp(p[3]) * (Math.log(x) - p[2]));
+                    return p[0] + (p[1] - p[0]) * fraction;
+                };
+                const initial = [ys[0], ys[ys.length - 1], Math.log(Math.max(xMean, 1e-6)), 0];
+                const params = fitNonlinear(hill, data, initial);
+                if (params) {
+                    add(results, {
+                        name: 'Hill 饱和曲线', parameterCount: 4, predict: x => hill(params, x),
+                        formula: `y = ${formatNumber(params[0])} + (${formatNumber(params[1] - params[0])})·x^${formatNumber(Math.exp(params[3]))}/(${formatNumber(Math.exp(params[2]))}^${formatNumber(Math.exp(params[3]))}+x^${formatNumber(Math.exp(params[3]))})`,
+                        roundedView: digits => {
+                            const low = roundSignificant(params[0], digits);
+                            const high = roundSignificant(params[1], digits);
+                            const km = Math.max(Number.MIN_VALUE, roundSignificant(Math.exp(params[2]), digits));
+                            const hillN = Math.max(Number.MIN_VALUE, roundSignificant(Math.exp(params[3]), digits));
+                            const predict = x => {
+                                if (x === 0) return low;
+                                const fraction = stableSigmoid(hillN * (Math.log(x) - Math.log(km)));
+                                return low + (high - low) * fraction;
+                            };
+                            return { predict, formula: `y = ${formatRounded(low, digits)} + (${formatRounded(high, digits)} - ${formatRounded(low, digits)})·x^${formatRounded(hillN, digits)}/(${formatRounded(km, digits)}^${formatRounded(hillN, digits)}+x^${formatRounded(hillN, digits)})` };
+                        },
+                        category: '动力学 / 饱和模型', subtype: '广义 S 型剂量反应曲线'
+                    });
+                }
+            }
+
+            // 平移反比例 / 双曲线。
+            if (n >= 4 && ys.every(y => y !== 0)) {
+                const reciprocalFit = linearFit(data.map(([x, y]) => [x, 1 / y]));
+                if (reciprocalFit && Math.abs(reciprocalFit.slope) > 1e-12) {
+                    const initial = [1 / reciprocalFit.slope, reciprocalFit.intercept / reciprocalFit.slope];
+                    const inverse = (p, x) => p[0] / (p[1] + x);
+                    const params = fitNonlinear(inverse, data, initial);
+                    if (params) {
+                        add(results, {
+                            name: '反比例 / 双曲线拟合', parameterCount: 2, predict: x => inverse(params, x),
+                            formula: `y = ${formatNumber(params[0])}/(${formatNumber(params[1])}+x)`,
+                            roundedView: digits => {
+                                const p = roundArray(params, digits);
+                                return { predict: x => inverse(p, x), formula: `y = ${formatRounded(p[0], digits)}/(${formatRounded(p[1], digits)}+x)` };
+                            },
+                            category: '代数模型', subtype: '平移反比例 / 双曲线'
+                        });
+                    }
+                }
+            }
+
+            // 修正指数：以数据最左端为起点，减少 X 平移造成的数值问题。
+            if (n >= 5) {
+                const modifiedExp = (p, x) => p[2] + p[0] * (1 - Math.exp(-p[1] * z(x)));
+                const initial = [ys[ys.length - 1] - ys[0], 2, ys[0]];
+                const params = fitNonlinear(modifiedExp, data, initial);
+                if (params) {
+                    add(results, {
+                        name: '修正指数拟合', parameterCount: 3, predict: x => modifiedExp(params, x),
+                        formula: `y = ${formatNumber(params[2])}${signedTerm(params[0])}(1-e^(${formatNumber(-params[1])}z))；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                            const rz = x => (x - x0) / xr;
+                            return {
+                                predict: x => p[2] + p[0] * (1 - Math.exp(-p[1] * rz(x))),
+                                formula: `y = ${formatRounded(p[2], digits)}${signedRoundedTerm(p[0], digits)}(1-e^(${formatRounded(-p[1], digits)}z))；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}`
+                            };
+                        },
+                        category: '超越模型', subtype: '渐近饱和 / 指数趋近'
+                    });
+                }
+            }
+
+            // 修正幂律：允许纵向偏移，但仍要求 X > 0。
+            if (n >= 5 && xs.every(x => x > 0)) {
+                const modifiedPower = (p, x) => p[0] * Math.pow(x, p[1]) + p[2];
+                const initial = [yRange || 1, 1, yMin];
+                const params = fitNonlinear(modifiedPower, data, initial);
+                if (params) {
+                    add(results, {
+                        name: '修正幂律拟合', parameterCount: 3, predict: x => modifiedPower(params, x),
+                        formula: `y = ${formatNumber(params[0])}·x^(${formatNumber(params[1])})${signedTerm(params[2])}`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            return { predict: x => modifiedPower(p, x), formula: `y = ${formatRounded(p[0], digits)}·x^(${formatRounded(p[1], digits)})${signedRoundedTerm(p[2], digits)}` };
+                        },
+                        category: '代数模型', subtype: '带偏移的幂律关系'
+                    });
+                }
+            }
+
+            // 二次分母有理函数只保留一份；原文件的两个入口公式完全相同。
+            if (n >= 6) {
+                const rational = (p, x) => {
+                    const value = z(x);
+                    const denominator = 1 + p[2] * value + p[3] * value * value;
+                    if (Math.abs(denominator) < 1e-10) return NaN;
+                    return (p[0] + p[1] * value) / denominator;
+                };
+                const initial = [ys[0], ys[ys.length - 1] - ys[0], 0, 0];
+                const params = fitNonlinear(rational, data, initial);
+                if (params) {
+                    add(results, {
+                        name: '二次有理函数拟合', parameterCount: 4, predict: x => rational(params, x),
+                        formula: `y = (${formatNumber(params[0])}${signedTerm(params[1])}z)/(1${signedTerm(params[2])}z${signedTerm(params[3])}z²)；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                            const rz = x => (x - x0) / xr;
+                            const predict = x => {
+                                const value = rz(x);
+                                const denominator = 1 + p[2] * value + p[3] * value * value;
+                                return Math.abs(denominator) < 1e-12 ? NaN : (p[0] + p[1] * value) / denominator;
+                            };
+                            return { predict, formula: `y = (${formatRounded(p[0], digits)}${signedRoundedTerm(p[1], digits)}z)/(1${signedRoundedTerm(p[2], digits)}z${signedRoundedTerm(p[3], digits)}z²)；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}` };
+                        },
+                        category: '代数模型', subtype: '二次有理函数'
+                    });
+                }
+            }
+
+            // Weibull 累积分布形状：X >= 0，形状与尺度参数均保持为正。
+            if (n >= 6 && xs.every(x => x >= 0) && maxX > 0) {
+                const weibull = (p, x) => {
+                    const shape = Math.exp(p[0]), scale = Math.exp(p[1]);
+                    if (x === 0) return p[3];
+                    const power = Math.pow(x / scale, shape);
+                    return p[3] + p[2] * (1 - Math.exp(-power));
+                };
+                const initial = [Math.log(1.5), Math.log(Math.max(xMean, 1e-6)), ys[ys.length - 1] - ys[0], ys[0]];
+                const params = fitNonlinear(weibull, data, initial);
+                if (params) {
+                    add(results, {
+                        name: 'Weibull 拟合', parameterCount: 4, predict: x => weibull(params, x),
+                        formula: `y = ${formatNumber(params[3])}${signedTerm(params[2])}(1-e^(-(x/${formatNumber(Math.exp(params[1]))})^${formatNumber(Math.exp(params[0]))}))`,
+                        roundedView: digits => {
+                            const shape = Math.max(Number.MIN_VALUE, roundSignificant(Math.exp(params[0]), digits));
+                            const scale = Math.max(Number.MIN_VALUE, roundSignificant(Math.exp(params[1]), digits));
+                            const amplitudeR = roundSignificant(params[2], digits);
+                            const baseR = roundSignificant(params[3], digits);
+                            const predict = x => {
+                                if (x === 0) return baseR;
+                                const power = Math.pow(x / scale, shape);
+                                return baseR + amplitudeR * (1 - Math.exp(-power));
+                            };
+                            return { predict, formula: `y = ${formatRounded(baseR, digits)}${signedRoundedTerm(amplitudeR, digits)}(1-e^(-(x/${formatRounded(scale, digits)})^${formatRounded(shape, digits)}))` };
+                        },
+                        category: '统计 / 可靠性模型', subtype: 'Weibull 累积分布形状'
+                    });
+                }
+            }
+
+            // 双指数：保留但提高数据量门槛，避免少量点下严重不可辨识。
+            if (n >= 7) {
+                const doubleExp = (p, x) => p[0] * Math.exp(p[1] * z(x)) + p[2] * Math.exp(p[3] * z(x));
+                const initial = [ys[0] * 0.6, -1, ys[ys.length - 1] * 0.4, 0.5];
+                const params = fitNonlinear(doubleExp, data, initial, { maxIterations: 240 });
+                if (params) {
+                    add(results, {
+                        name: '双指数拟合（高参数）', parameterCount: 4, predict: x => doubleExp(params, x),
+                        formula: `y = ${formatNumber(params[0])}·e^(${formatNumber(params[1])}z)${signedTerm(params[2])}·e^(${formatNumber(params[3])}z)；z=(x-${formatNumber(minX)})/${formatNumber(rangeX)}`,
+                        roundedView: digits => {
+                            const p = roundArray(params, digits);
+                            const x0 = roundSignificant(minX, digits), xr = roundSignificant(rangeX, digits);
+                            const rz = x => (x - x0) / xr;
+                            return {
+                                predict: x => p[0] * Math.exp(p[1] * rz(x)) + p[2] * Math.exp(p[3] * rz(x)),
+                                formula: `y = ${formatRounded(p[0], digits)}·e^(${formatRounded(p[1], digits)}z)${signedRoundedTerm(p[2], digits)}·e^(${formatRounded(p[3], digits)}z)；z=(x-${formatRounded(x0, digits)})/${formatRounded(xr, digits)}`
+                            };
+                        },
+                        category: '超越模型', subtype: '双指数叠加（参数可辨识性较弱）'
+                    });
+                }
+            }
+
+            results.sort(compareFitQuality);
+
+            currentFitResults = results;
+            recommendedFitResults = chooseRecommendedFits(results, 7);
+            showAllCandidates = false;
+            activeFitIndex = recommendedFitResults.length ? currentFitResults.indexOf(recommendedFitResults[0]) : 0;
+            if (!results.length) {
+                grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-secondary);">当前数据范围内没有得到有效拟合结果。请检查数据点数量、X 值定义域或模型适用条件。</div>';
+                countLabel.textContent = '0 个结果';
+                const moreButton = document.getElementById('toggleMoreFitsBtn');
+                if (moreButton) moreButton.hidden = true;
+                updateChart([], null);
+                return;
+            }
+            renderFitResults();
         }
 
         // =======================================================
-        // 【启动】
+        // 启动
         // =======================================================
         function initializeExampleData() {
-            points = [[1.0, 1.2], [2.0, 3.8], [3.0, 8.5], [4.0, 16.2], [5.0, 25.1]];
-            points.sort((a, b) => a[0] - b[0]);
+            points = [[1, 1.2], [2, 3.8], [3, 8.5], [4, 16.2], [5, 25.1]];
             updatePointsList();
             calculateAllFits();
         }
@@ -2258,33 +2818,24 @@
             initializeExampleData();
             setupInputs();
             initDragHandling();
-
-            const lockBtn = document.getElementById('dragLockBtn');
-            if (lockBtn) {
-                lockBtn.onclick = () => {
-                    dragEnabled = !dragEnabled;
-                    const lockedIcon = document.getElementById('lockedIcon');
-                    const unlockedIcon = document.getElementById('unlockedIcon');
-                    const lockText = document.getElementById('lockText');
-                    const canvas = document.getElementById('fittingChart');
-                    
-                    if (dragEnabled) {
-                        lockedIcon.style.display = 'none'; unlockedIcon.style.display = 'block';
-                        lockBtn.classList.add('active'); lockText.textContent = '解锁拖动';
-                        canvas.style.cursor = 'grab';
-                    } else {
-                        lockedIcon.style.display = 'block'; unlockedIcon.style.display = 'none';
-                        lockBtn.classList.remove('active'); lockText.textContent = '锁定拖动';
-                        canvas.style.cursor = 'default';
-                    }
-                };
-                if (dragEnabled) {
-                    document.getElementById('lockedIcon').style.display = 'none';
-                    document.getElementById('unlockedIcon').style.display = 'block';
-                    lockBtn.classList.add('active');
-                    document.getElementById('lockText').textContent = '解锁拖动';
-                }
-            }
+            const lockButton = document.getElementById('dragLockBtn');
+            if (lockButton) lockButton.addEventListener('click', toggleDragLock);
+            const roundingButton = document.getElementById('roundingToggleBtn');
+            if (roundingButton) roundingButton.addEventListener('click', toggleRounding);
+            const digitsSelect = document.getElementById('roundingDigits');
+            if (digitsSelect) digitsSelect.addEventListener('change', () => {
+                roundingDigits = Math.max(2, Math.min(6, Number(digitsSelect.value) || 3));
+                if (roundingEnabled) renderFitResults();
+            });
+            const moreFitsButton = document.getElementById('toggleMoreFitsBtn');
+            if (moreFitsButton) moreFitsButton.addEventListener('click', () => {
+                showAllCandidates = !showAllCandidates;
+                renderFitResults();
+            });
+            const snapToggle = document.getElementById('snapToCurveToggle');
+            if (snapToggle) snapToggle.addEventListener('change', () => {
+                snapToCurve = snapToggle.checked;
+            });
         });
     </script>
 </body>
