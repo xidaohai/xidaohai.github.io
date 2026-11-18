@@ -1736,6 +1736,91 @@
       max-width: calc(100vw - 24px);
     }
 
+    /* 作者肖像展示框：只需替换下面的图片 URL；不依赖外部图片文件 */
+    .author-feature-card {
+      width: 136px;
+      align-self: flex-end;
+      padding: 5px;
+      border: 1px solid var(--dock-border);
+      border-radius: 17px;
+      background: var(--dock-bg);
+      backdrop-filter: blur(26px) saturate(175%);
+      -webkit-backdrop-filter: blur(26px) saturate(175%);
+      box-shadow: var(--dock-shadow);
+      overflow: hidden;
+    }
+
+    .author-feature-photo {
+      --author-photo-url: url("/xdh.png"); /* 作者头像 */
+      position: relative;
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: rgba(148, 116, 63, 0.16);
+      background-image:
+        linear-gradient(180deg, rgba(12, 12, 16, 0.02) 40%, rgba(12, 12, 16, 0.76) 100%),
+        var(--author-photo-url);
+      background-size: cover;
+      background-position: center;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .author-feature-photo::before,
+    .author-feature-photo::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .author-feature-photo::before {
+      inset: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.30);
+      border-radius: 8px;
+    }
+
+    .author-feature-photo::after {
+      top: 12px;
+      left: 12px;
+      width: 19px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 4px 0 rgba(255, 255, 255, 0.34);
+    }
+
+    .author-feature-caption {
+      position: absolute;
+      z-index: 1;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      color: #fff;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    .author-feature-kicker {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 8px;
+      line-height: 1.3;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      opacity: 0.82;
+    }
+
+    .author-feature-name {
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 650;
+      letter-spacing: 0.12em;
+    }
+
+    [data-theme="dark"] .author-feature-card {
+      border-color: rgba(216, 189, 137, 0.24);
+    }
+
     .dock-music-card {
       display: flex;
       align-items: center;
@@ -2143,7 +2228,7 @@
       .nav-item { padding: 5px 8px; font-size: 11.5px; }
 
       .page-shell {
-        padding: 20px 14px calc(155px + env(safe-area-inset-bottom));
+        padding: 20px 14px calc(275px + env(safe-area-inset-bottom));
         gap: 22px;
       }
 
@@ -2191,6 +2276,15 @@
         width: max-content;
         max-width: calc(100vw - 16px);
       }
+
+      /* 作者肖像在手机端缩小并右对齐，避免挤压底部快捷入口 */
+      .author-feature-card { width: 86px; padding: 4px; border-radius: 13px; }
+      .author-feature-photo { border-radius: 9px; }
+      .author-feature-photo::before { inset: 5px; border-radius: 6px; }
+      .author-feature-photo::after { top: 9px; left: 9px; width: 14px; }
+      .author-feature-caption { left: 9px; right: 9px; bottom: 8px; gap: 1px; }
+      .author-feature-kicker { font-size: 6px; letter-spacing: 0.14em; }
+      .author-feature-name { font-size: 11px; letter-spacing: 0.08em; }
 
       .dock-music-card { padding: 6px 10px; gap: 8px; }
       .music-meta { max-width: 130px; }
@@ -3099,6 +3193,16 @@
        右下角磨砂悬浮坞：背景音乐播放器 + 作者社区快捷栏
        ============================================================ -->
   <div class="bottom-right-dock" aria-label="音乐与作者快捷入口">
+    <!-- 作者肖像展示框：在 CSS 中替换 YOUR_IMAGE_URL 即可更换图片 -->
+    <div class="author-feature-card" role="img" aria-label="作者西岛海肖像展示框">
+      <div class="author-feature-photo">
+        <div class="author-feature-caption">
+          <span class="author-feature-kicker">AUTHOR · XIDAOHAI</span>
+          <strong class="author-feature-name">西岛海</strong>
+        </div>
+      </div>
+    </div>
+
     <!-- 音乐播放器 -->
     <div class="dock-music-card">
       <audio id="coreAudioPlayer" src="https://xidaohai.github.io/1.mp3" preload="none"></audio>
