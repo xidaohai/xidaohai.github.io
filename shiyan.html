@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>正交、均匀与响应面试验设计集成平台</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #0b0b0e;
+    --panel: rgba(22, 22, 26, 0.95);
+    --border: #2a2a2e;
+    --text: #f0f0f0;
+    --sub: #88888b;
+    --yellow: #ffd700;
+    --blue: #4dabf7;
+    --red: #ff6b6b;
+    --green: #00ff88;
+    --cyan: #00e5ff;
+    --purple: #bf5af2;
+    --radius: 14px;
+    --mono: 'JetBrains Mono', 'SFMono-Regular', 'Consolas', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 2px 2px, rgba(255,255,255,0.03) 1px, transparent 0),
+      radial-gradient(circle at 50% 50%, #1a1a22 0%, #0b0b0e 100%);
+    background-size: 24px 24px, 100% 100%;
+    color: var(--text);
+    font-family: "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app-container {
+    display: flex;
+    gap: 24px;
+    max-width: 1550px;
+    margin: 0 auto;
+    align-items: flex-start;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
+  }
+
+  /* 左侧：通俗说明与新手指南栏 */
+  .guide-panel {
+    flex: 1.1;
+    min-width: 360px;
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* 右侧：核心操作与分析面板 */
+  .core-panel {
+    flex: 1.5;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  @media (max-width: 1200px) {
+    .app-container { flex-direction: column; }
+    .guide-panel { position: static; max-height: none; width: 100%; min-width: 0; }
+    .core-panel { width: 100%; }
+  }
+
+  /* 顶部 Tab 切换 */
+  .mode-switch {
+    display: flex;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .mode-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--sub);
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .mode-btn.active.ortho {
+    background: rgba(255, 215, 0, 0.12);
+    color: var(--yellow);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
+  }
+  .mode-btn.active.uniform {
+    background: rgba(191, 90, 242, 0.12);
+    color: var(--purple);
+    box-shadow: 0 4px 15px rgba(191, 90, 242, 0.15);
+  }
+  .mode-btn.active.response {
+    background: rgba(77, 171, 247, 0.12);
+    color: var(--blue);
+    box-shadow: 0 4px 15px rgba(77, 171, 247, 0.15);
+  }
+
+  /* 通用样式 */
+  .section-title {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--sub);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 14px;
+    background: var(--yellow);
+    border-radius: 2px;
+  }
+  .mode-uniform .section-title::before { background: var(--purple); }
+
+  .setup-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .setup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+  }
+  .setup-item { display: flex; flex-direction: column; gap: 6px; }
+  .setup-item.full { grid-column: 1 / -1; }
+  .setup-item label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--sub);
+    letter-spacing: 0.5px;
+  }
+
+  select, input[type="number"], input[type="text"] {
+    appearance: none;
+    -webkit-appearance: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)), #0b0b0f;
+    border: 1px solid #35363d;
+    border-radius: 10px;
+    color: #e9e9ed;
+    padding: 11px 38px 11px 13px;
+    min-height: 42px;
+    font-size: 13px;
+    font-weight: 650;
+    outline: none;
+    width: 100%;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease;
+    font-family: inherit;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 1px 2px rgba(0,0,0,.25);
+  }
+  select {
+    cursor: pointer;
+    background-image:
+      linear-gradient(45deg, transparent 50%, #85868d 50%),
+      linear-gradient(135deg, #85868d 50%, transparent 50%),
+      linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012));
+    background-position: calc(100% - 17px) 18px, calc(100% - 12px) 18px, 0 0;
+    background-size: 5px 5px, 5px 5px, 100% 100%;
+    background-repeat: no-repeat;
+  }
+  input[type="number"] {
+    color: #f0f0f2;
+    font-family: var(--mono);
+    text-align: center;
+    padding-right: 13px;
+  }
+  select:hover, input[type="number"]:hover, input[type="text"]:hover {
+    border-color: #50515a;
+    background-color: #0e0e12;
+  }
+  select:focus, input[type="number"]:focus, input[type="text"]:focus {
+    transform: translateY(-1px);
+  }
+  select:focus {
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--yellow) 50%),
+      linear-gradient(135deg, var(--yellow) 50%, transparent 50%),
+      linear-gradient(180deg, rgba(255,215,0,.075), rgba(255,215,0,.018));
+    background-position: calc(100% - 17px) 18px, calc(100% - 12px) 18px, 0 0;
+    background-size: 5px 5px, 5px 5px, 100% 100%;
+    background-repeat: no-repeat;
+  }
+  .mode-uniform select:focus {
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--purple) 50%),
+      linear-gradient(135deg, var(--purple) 50%, transparent 50%),
+      linear-gradient(180deg, rgba(191,90,242,.085), rgba(191,90,242,.018));
+    background-position: calc(100% - 17px) 18px, calc(100% - 12px) 18px, 0 0;
+    background-size: 5px 5px, 5px 5px, 100% 100%;
+    background-repeat: no-repeat;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { opacity: .18; }
+  .mode-uniform select:focus, .mode-uniform input:focus {
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(191,90,242,0.12);
+  }
+  .mode-ortho select:focus, .mode-ortho input:focus {
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.1);
+  }
+  select option { background: #1a1a20; color: #f0f0f0; }
+  input[type="number"] { font-family: var(--mono); text-align: center; }
+
+  /* 防止选择框在窄列、窄屏中把网格撑开或让文字挤出边界 */
+  .setup-grid, .setup-item { min-width: 0; }
+  .setup-item select,
+  select {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    font-size: 12.5px;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  select option {
+    font-size: 12px;
+    white-space: normal;
+  }
+
+  /* 按钮 */
+  .btn-primary {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 900;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: 0.2s;
+  }
+  .mode-ortho .btn-primary {
+    background: linear-gradient(135deg, #ffd700, #d4af00);
+    color: #000;
+    box-shadow: 0 6px 20px rgba(255,215,0,0.18);
+  }
+  .mode-ortho .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
+  .mode-uniform .btn-primary {
+    background: linear-gradient(135deg, #bf5af2, #8e3fc4);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(191,90,242,0.2);
+  }
+  .mode-uniform .btn-primary:hover { filter: brightness(1.12); transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid #444;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s;
+    flex: 1;
+  }
+  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .action-row { display: flex; gap: 10px; margin-top: 10px; }
+
+  /* 因素名称卡片 */
+  .factor-names {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  .factor-name-item { display: flex; flex-direction: column; gap: 5px; }
+  .factor-name-item label { font-size: 10.5px; color: var(--sub); font-weight: 700; }
+  .factor-name-item input { text-align: center; padding: 8px; }
+
+  /* 表格样式 */
+  .table-scroll {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  th {
+    background: #17171c;
+    color: var(--sub);
+    font-weight: 800;
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    font-size: 11px;
+  }
+  td {
+    padding: 8px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.045);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+  .run-no { color: var(--sub); font-family: var(--mono); font-weight: 700; }
+  .level-cell { font-family: var(--mono); font-weight: 700; color: var(--cyan); }
+
+  .result-input {
+    width: 88px;
+    background: #0a0a0d;
+    border: 1px solid #333;
+    border-radius: 7px;
+    color: var(--yellow);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 8px;
+    text-align: center;
+    outline: none;
+    transition: 0.2s;
+  }
+  .mode-ortho .result-input:focus { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(255,215,0,0.12); }
+  .mode-uniform .result-input:focus { border-color: var(--purple); box-shadow: 0 0 0 2px rgba(191,90,242,0.15); }
+  .result-input::-webkit-outer-spin-button,
+  .result-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* 结果输入框：更精致、更易读 */
+  .result-input {
+    width: 108px;
+    min-height: 38px;
+    padding: 7px 12px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.018)),
+      #09090c;
+    border: 1px solid #3a3a40;
+    border-radius: 9px;
+    color: #f4f4f5;
+    caret-color: var(--yellow);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+    outline: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.035),
+      0 1px 2px rgba(0,0,0,0.35);
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease;
+  }
+  .result-input::placeholder {
+    color: #5f6067;
+    opacity: 1;
+    font-weight: 500;
+  }
+  .result-input:hover {
+    border-color: #55565e;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.02)),
+      #0b0b0f;
+  }
+  .result-input:focus {
+    color: var(--yellow);
+    border-color: var(--yellow);
+    background:
+      linear-gradient(180deg, rgba(255,215,0,0.075), rgba(255,215,0,0.018)),
+      #0b0b0e;
+    box-shadow:
+      0 0 0 3px rgba(255,215,0,0.10),
+      0 6px 18px rgba(0,0,0,0.22);
+    transform: translateY(-1px);
+  }
+  .mode-uniform .result-input:focus {
+    color: #e9d7ff;
+    border-color: var(--purple);
+    background:
+      linear-gradient(180deg, rgba(191,90,242,0.085), rgba(191,90,242,0.018)),
+      #0b0b0e;
+    box-shadow:
+      0 0 0 3px rgba(191,90,242,0.11),
+      0 6px 18px rgba(0,0,0,0.22);
+  }
+  .result-input::-webkit-inner-spin-button,
+  .result-input::-webkit-outer-spin-button {
+    opacity: 0;
+  }
+  @media (max-width: 600px) {
+    .result-input { width: 96px; min-height: 36px; }
+  }
+
+  /* 左侧说明面板卡片组件 */
+  .guide-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .guide-card h3 {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .guide-card p, .guide-card li {
+    font-size: 12px;
+    color: var(--sub);
+    line-height: 1.6;
+  }
+  .guide-card ol { margin: 0; }
+  .guide-card strong { color: #d8d8dc; }
+  .guide-card b { color: #e8e8eb; }
+  .guide-card ul { padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
+  .badge-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+  .badge-ortho { background: rgba(255,215,0,0.12); color: var(--yellow); border: 1px solid rgba(255,215,0,0.3); }
+  .badge-uniform { background: rgba(191,90,242,0.12); color: var(--purple); border: 1px solid rgba(191,90,242,0.3); }
+  .badge-response { background: rgba(77,171,247,0.12); color: var(--blue); border: 1px solid rgba(77,171,247,0.3); }
+
+  /* 分析结果样式 */
+  .result-container { display: flex; flex-direction: column; gap: 20px; }
+  .empty-state {
+    text-align: center;
+    color: var(--sub);
+    font-size: 13.5px;
+    padding: 50px 20px;
+    line-height: 1.8;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+  }
+  .empty-state small { font-size: 11.5px; opacity: 0.7; }
+
+  .result-block { display: flex; flex-direction: column; gap: 10px; }
+  .result-title {
+    font-size: 12.5px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .result-title::before {
+    content: '';
+    width: 5px;
+    height: 14px;
+    background: var(--cyan);
+    border-radius: 2px;
+  }
+
+  .analysis-table td { font-family: var(--mono); font-size: 12px; }
+  .factor-cell { font-family: inherit !important; font-weight: 800; color: var(--text); }
+  .best-cell { background: rgba(0, 255, 136, 0.1) !important; color: var(--green) !important; font-weight: 900 !important; }
+  .range-cell { color: var(--yellow) !important; font-weight: 800 !important; }
+  .sig-cell { color: var(--green) !important; font-weight: 900 !important; }
+  .error-row td { color: var(--sub); font-style: italic; }
+  .total-row td { font-weight: 800; color: var(--text); border-top: 1px solid var(--border); }
+
+  .rank-list { display: flex; flex-direction: column; gap: 6px; }
+  .rank-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border-left: 3px solid var(--sub);
+  }
+  .rank-item:nth-child(1) { border-left-color: var(--yellow); background: rgba(255,215,0,0.05); }
+  .mode-uniform .rank-item:nth-child(1) { border-left-color: var(--purple); background: rgba(191,90,242,0.06); }
+  .rank-no {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #2a2a2e;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10.5px; font-weight: 900; color: var(--sub);
+    flex-shrink: 0;
+  }
+  .rank-item:nth-child(1) .rank-no { background: var(--yellow); color: #000; }
+  .mode-uniform .rank-item:nth-child(1) .rank-no { background: var(--purple); color: #fff; }
+  .rank-name { font-weight: 800; flex: 1; font-size: 13px; }
+  .rank-r { font-family: var(--mono); font-size: 11.5px; color: var(--sub); font-weight: 700; }
+
+  .opt-combo {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--green);
+    letter-spacing: 1.2px;
+    padding: 14px;
+    text-align: center;
+    background: rgba(0,255,136,0.07);
+    border: 1px solid rgba(0,255,136,0.25);
+    border-radius: 10px;
+    text-shadow: 0 0 16px rgba(0,255,136,0.3);
+    word-break: break-all;
+  }
+  .opt-pred { font-size: 12.5px; color: var(--sub); text-align: center; }
+  .opt-pred b { color: var(--yellow); font-family: var(--mono); font-size: 15px; font-weight: 900; }
+  .opt-note { font-size: 11px; color: var(--sub); text-align: center; opacity: 0.75; }
+
+  .note-box {
+    font-size: 11px;
+    color: var(--sub);
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: rgba(0,229,255,0.04);
+    border-left: 3px solid var(--cyan);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .dev-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--purple);
+    background: rgba(191,90,242,0.1);
+    border: 1px solid rgba(191,90,242,0.3);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  /* 提示通知条 */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1e1e24;
+    border: 1px solid var(--border);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    font-size: 13px;
+    font-weight: 700;
+    z-index: 9999;
+    display: none;
+    animation: fadeInOut 0.3s ease;
+  }
+  @keyframes fadeInOut { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 999;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .loading-overlay.show { display: flex; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid #333;
+    border-top-color: var(--purple);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 12.5px; color: var(--sub); font-weight: 700; letter-spacing: 1px; }
+
+  .author-link {
+    color: var(--sub);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    transition: color .18s ease, border-color .18s ease;
+  }
+  .author-link:hover {
+    color: var(--text);
+    border-color: currentColor;
+  }
+
+
+  /* 响应面法 */
+  .mode-response .section-title::before { background: #4dabf7; }
+  .mode-response .btn-primary {
+    background: linear-gradient(135deg, #4dabf7, #3478c8);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(77,171,247,0.20);
+  }
+  .mode-response .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .mode-response select:focus, .mode-response input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(77,171,247,0.11);
+  }
+  .mode-response .result-input:focus {
+    color: #dff1ff;
+    border-color: var(--blue);
+    background: linear-gradient(180deg, rgba(77,171,247,0.085), rgba(77,171,247,0.018)), #0b0b0e;
+    box-shadow: 0 0 0 3px rgba(77,171,247,0.11), 0 6px 18px rgba(0,0,0,0.22);
+  }
+  .response-design-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:var(--mono); font-size:11.5px; font-weight:800;
+    color:var(--blue); background:rgba(77,171,247,.10);
+    border:1px solid rgba(77,171,247,.30); border-radius:20px; padding:3px 10px;
+  }
+  .response-code {
+    font-family:var(--mono); color:#8fd0ff; font-weight:800;
+  }
+  .response-opt {
+    border-color: rgba(77,171,247,.30);
+    background: rgba(77,171,247,.07);
+  }
+  .footer {
+    max-width: 1550px;
+    margin: 18px auto 0;
+    padding: 0 4px 8px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    text-align: right;
+    font-size: 12px;
+    color: #a7a7ad;
+    opacity: 0.88;
+  }
+  .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 9px;
+    background: rgba(255,255,255,.025);
+  }
+  .footer-label { color: #777880; }
+  .footer .author-link {
+    color: #d8d8dc;
+    border-bottom: none;
+    font-weight: 800;
+    letter-spacing: .2px;
+  }
+  .footer .author-link:hover { color: #fff; }
+  @media (max-width: 600px) {
+    body { padding: 10px; }
+    .app-container { gap: 12px; }
+    .panel { padding: 15px; border-radius: 12px; }
+    .guide-panel, .core-panel { gap: 14px; }
+    .mode-switch { overflow-x: auto; }
+    .mode-btn { min-width: 118px; padding: 10px 8px; font-size: 12px; }
+    .mode-btn small { display: none; }
+    .setup-grid { grid-template-columns: 1fr 1fr; }
+    .setup-item[style*="grid-column: span 2"] { grid-column: 1 / -1 !important; }
+    .action-row { flex-direction: column; }
+    .action-row .btn-primary, .action-row .btn-ghost { width: 100%; }
+    .factor-names { grid-template-columns: 1fr 1fr; }
+    .guide-card { padding: 13px; }
+    .footer {
+      justify-content: flex-end;
+      margin-top: 12px;
+      padding-bottom: 6px;
+      font-size: 11px;
+    }
+    .footer-brand { padding: 6px 9px; }
+  }
+  @media (max-width: 390px) {
+    .setup-grid, .factor-names { grid-template-columns: 1fr; }
+    .mode-btn { min-width: 108px; }
+  }
+</style>
+</head>
+<body class="mode-ortho" id="body-root">
+
+<div class="app-container">
+  <!-- ==================== 左侧：通俗说明与新手指南 ==================== -->
+  <div class="panel guide-panel">
+    <div>
+      <h2 style="font-size: 18px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 6px;">
+        试验设计工作台 <span style="color:var(--yellow);" id="title-accent">· 指南</span>
+      </h2>
+      <p style="font-size: 12px; color: var(--sub); line-height: 1.6;">
+        不用盲目穷举所有组合，用最少的试验次数锁定最优方案。
+      </p>
+    </div>
+
+    <!-- 新手说明：为什么需要试验设计 -->
+    <div class="guide-card">
+      <h3>为什么要做试验设计？</h3>
+      <p>
+        如果有很多个因素，而且每个因素都有多个可能的取值，把所有组合都试一遍会非常耗时。
+        试验设计就是用一套有规律的试验方案，挑出少量有代表性的组合进行测试，
+        再根据测试结果判断哪些因素更重要、哪些取值更合适。
+      </p>
+      <p>
+        例如 4 个因素、每个因素 4 个水平，全部组合需要测试
+        <b>4⁴ = 256 次</b>。合理的试验设计可以大幅减少需要实际测试的次数。
+      </p>
+    </div>
+
+    <!-- 新手说明：怎么选 -->
+    <div class="guide-card">
+      <h3>正交设计和均匀设计，怎么选？</h3>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:2px;">
+        <div>
+          <span class="badge-tag badge-ortho">正交设计</span>
+          <p style="margin-top:5px;">
+            适合因素和水平比较规整的情况，例如每个因素都是 2 水平、3 水平或 4 水平。
+            它的优点是各因素之间比较整齐，方便做<strong>极差分析</strong>和<strong>方差分析</strong>。
+          </p>
+        </div>
+        <div style="border-top:1px solid var(--border); padding-top:10px;">
+          <span class="badge-tag badge-uniform">均匀设计</span>
+          <p style="margin-top:5px;">
+            适合因素较多、水平较多，但实际能做的试验次数比较有限的情况。
+            它会尽量让试验点分散在整个参数空间中，再通过<strong>回归分析</strong>估计因素与结果之间的关系。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新手说明：具体怎么用 -->
+    <div class="guide-card">
+      <h3>第一次使用，按这几步做</h3>
+      <ol style="padding-left:18px; display:flex; flex-direction:column; gap:6px;">
+        <li><b>先选方法：</b>不知道怎么选时，如果因素和水平比较规整，先用「正交设计」。</li>
+        <li><b>设置参数：</b>填写因素数量、水平数量或选择合适的正交表，并选择结果是「越大越好」还是「越小越好」。</li>
+        <li><b>生成方案：</b>点击「生成试验方案」，下面会出现具体要做哪些试验。</li>
+        <li><b>填写结果：</b>每做完一次实际试验，就把测得的结果填到对应的「结果 y」框里。也可以先点击「填入示例数据」熟悉操作。</li>
+        <li><b>开始分析：</b>所有结果填好后，点击「开始分析」。程序会根据你的数据给出因素影响、较优水平和预测结果。</li>
+      </ol>
+    </div>
+
+
+    <div class="guide-card">
+      <h3>什么时候用响应面法？</h3>
+      <p>
+        当你已经知道几个关键因素的大致范围，而且怀疑“中间某个位置可能最好”，
+        响应面法比单纯比较几个离散水平更合适。
+      </p>
+      <p>
+        它会安排一组包含<strong>边缘点、轴点和中心点</strong>的试验，再拟合一个二次模型。
+        最后给出模型在你设置范围内预测的较优位置。
+      </p>
+      <p>
+        <strong>注意：</strong>这里的“最优”是模型预测结果，不等于已经实际验证过的最优值。
+        找到候选点后，最好再做一次验证试验。
+      </p>
+    </div>
+
+    <!-- 响应面法专用说明 -->
+    <div class="guide-card" id="guide-response-card" style="display:none;">
+      <h3>响应面法怎么用？</h3>
+      <p>
+        响应面法适合已经筛出少数关键因素、并且每个因素都有一个可以实际操作的连续范围时使用。
+        它不是用来一开始就筛几十个因素，而是用来在较小的范围内研究“哪里更好”。
+      </p>
+      <ol style="padding-left:18px; display:flex; flex-direction:column; gap:6px;">
+        <li><b>确定因素：</b>通常保留 2～5 个关键因素。</li>
+        <li><b>填写范围：</b>给每个因素填写实际下限和上限，例如温度 20～40℃。</li>
+        <li><b>生成方案：</b>程序使用中心复合设计（CCD），安排析因点、轴点和中心点。</li>
+        <li><b>实际试验：</b>严格按照表中的实际值进行试验，并把测得的结果填入“结果 y”。</li>
+        <li><b>开始分析：</b>程序拟合二次模型，并在你给定的范围内寻找模型预测的较优点。</li>
+        <li><b>最后验证：</b>预测点必须再做实际试验确认，不能把模型预测直接当成最终最佳值。</li>
+      </ol>
+      <div style="border-top:1px solid var(--border); padding-top:10px; display:flex; flex-direction:column; gap:8px;">
+        <p><strong>它是怎样安排试验的？</strong></p>
+        <ul>
+          <li><b>析因点：</b>把每个因素放在编码值 -1 或 +1，组合起来观察因素共同变化时的影响。</li>
+          <li><b>轴点：</b>每次只让一个因素走到范围的一端，其他因素保持在中心，用来识别曲线弯曲程度。</li>
+          <li><b>中心点：</b>所有因素都取中间值，并重复做几次。重复结果可以反映实验波动；不过当前程序尚未把纯误差单独拆出，也没有做失拟检验。</li>
+        </ul>
+        <p>
+          <strong>实际范围与编码值：</strong>填写的下限、上限会被换算到编码区间
+          -α 到 +α；本页面当前固定使用 α = √2。因此轴点位于所填范围两端，
+          析因点 ±1 位于范围内部，中心点为 0。
+        </p>
+        <p>
+          <strong>模型怎样得出？</strong>程序把每次试验的因素值整理成一组数学项：
+          常数项、各因素的一次项、平方项，以及因素两两相乘的交互项；
+          再用最小二乘法拟合系数。简单说，就是找一张尽量贴近实测数据的“弯曲曲面”，
+          用它估计不同因素组合下的结果。
+        </p>
+        <p>
+          <strong>较优点怎样寻找？</strong>拟合完成后，程序在设定范围内从多个起点反复搜索，
+          比较模型预测值，找出望大或望小时预测较好的位置。它是数值搜索结果，不是数学上保证的全局最优解。
+        </p>
+      </div>
+      <p>
+        <strong>算法边界：</strong>当前版本对所有因素数都固定使用 α = √2；
+        这并不等于 3～5 个因素时的标准可旋转全析因 CCD 设置。
+        若要求可旋转设计，全析因 CCD 通常按因素数取
+        α = (2^s)^(1/4)。因此本工具输出的结果应视为当前设定下的 CCD 方案，
+        不应仅凭“CCD”名称就认为它一定满足可旋转性。
+      </p>
+      <p>
+        <strong>最后验证：</strong>R²、调整 R² 和 RMSE 只能帮助检查模型对已有数据的拟合情况，
+        不能单独证明模型正确。找到候选点后，应安排实际验证试验；
+        若模型拟合欠佳或候选点靠近边界，应谨慎解释。
+      </p>
+    </div>
+
+    <!-- 新手说明：输入与结果怎么看 -->
+    <div class="guide-card">
+      <h3>几个最容易弄错的地方</h3>
+      <ul>
+        <li><b>结果 y：</b>就是你实际测出来的指标，例如准确率、时间、成本、强度等。</li>
+        <li><b>望大：</b>结果越大越好，例如命中率、产量、强度。</li>
+        <li><b>望小：</b>结果越小越好，例如延迟、成本、误差。</li>
+        <li><b>回车键：</b>在结果输入框中按回车，会自动跳到下一格；最后一格按回车会直接开始分析。</li>
+        <li><b>注意：</b>「示例数据」只是帮助你熟悉界面，不代表真实实验结果。</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ==================== 右侧：核心操作与分析面板 ==================== -->
+  <div class="panel core-panel">
+    <!-- 模式切换 Tab -->
+    <div class="mode-switch">
+      <button class="mode-btn active ortho" id="tab-ortho" onclick="switchMode('ortho')">
+        <span>正交试验设计 <small>(Orthogonal)</small></span>
+      </button>
+      <button class="mode-btn uniform" id="tab-uniform" onclick="switchMode('uniform')">
+        <span>均匀设计 <small>(Uniform)</small></span>
+      </button>
+      <button class="mode-btn response" id="tab-response" onclick="switchMode('response')">
+        <span>响应面法 <small>(RSM)</small></span>
+      </button>
+    </div>
+
+    <!-- ==================== 1. 正交设计视图 ==================== -->
+    <div id="view-ortho" style="display:flex; flex-direction:column; gap:20px;">
+      <header>
+        <h1 style="font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">正交试验设计 <span>Orthogonal Design</span></h1>
+        <p style="font-size: 12.5px; color: var(--sub); margin-top: 4px;">利用正交表「整齐可比、均衡分散」的特性，用最少试验次数评估多因素影响。</p>
+      </header>
+
+      <section class="setup-card">
+        <div class="setup-grid">
+          <div class="setup-item" style="grid-column: span 2;">
+            <label>正交表型号</label>
+            <select id="ortho-sel-table"></select>
+          </div>
+          <div class="setup-item">
+            <label>使用因素数</label>
+            <input type="number" id="ortho-in-factor" min="1" value="3">
+          </div>
+          <div class="setup-item">
+            <label>指标方向</label>
+            <select id="ortho-sel-goal">
+              <option value="max">望大（越大越好）</option>
+              <option value="min">望小（越小越好）</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateOrthoScheme()">生成正交试验方案</button>
+      </section>
+
+      <section id="ortho-factor-section" style="display:none;">
+        <h3 class="section-title">因素名称（可自定义）</h3>
+        <div class="factor-names" id="ortho-factor-names"></div>
+      </section>
+
+      <section id="ortho-table-section" style="display:none;">
+        <h3 class="section-title">试验方案与结果填报</h3>
+        <div class="table-scroll" id="ortho-table-container"></div>
+        <div class="action-row">
+          <button class="btn-ghost" onclick="fillOrthoDemo()">填入示例数据</button>
+          <button class="btn-primary" onclick="analyzeOrtho()">开始分析</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== 2. 均匀设计视图 ==================== -->
+    <div id="view-uniform" style="display:none; flex-direction:column; gap:20px;">
+      <header>
+        <h1 style="font-size: 20px; font-weight: 800; letter-spacing: -0.5px;">均匀设计 <span>Uniform Design</span></h1>
+        <p style="font-size: 12.5px; color: var(--sub); margin-top: 4px;">让试验点尽量均匀覆盖参数空间，再通过回归建模寻找值得验证的较优区域。</p>
+      </header>
+
+      <section class="setup-card">
+        <div class="setup-grid">
+          <div class="setup-item">
+            <label>因素数 s</label>
+            <input type="number" id="uni-in-s" min="1" max="25" value="3">
+          </div>
+          <div class="setup-item">
+            <label>水平数 q</label>
+            <input type="number" id="uni-in-q" min="2" max="30" value="10">
+          </div>
+          <div class="setup-item">
+            <label>试验次数 n (≥ q)</label>
+            <input type="number" id="uni-in-n" min="2" max="30" value="10">
+          </div>
+          <div class="setup-item">
+            <label>指标方向</label>
+            <select id="uni-sel-goal">
+              <option value="max">望大（越大越好）</option>
+              <option value="min">望小（越小越好）</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="generateUniformScheme()">生成均匀设计表（模拟退火优化）</button>
+      </section>
+
+      <section id="uni-quality-section" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <h3 class="section-title" style="margin-bottom:0;">设计质量评估</h3>
+          <span class="dev-badge" id="uni-dev-badge">CD2 偏差 —</span>
+        </div>
+        <div class="note-box" style="margin-top:10px;">
+          CD2 越小通常表示当前试验点集的空间覆盖更均匀。这里用模拟退火搜索较优设计，不保证得到全局最优设计。
+        </div>
+      </section>
+
+      <section id="uni-factor-section" style="display:none;">
+        <h3 class="section-title">因素名称（可自定义）</h3>
+        <div class="factor-names" id="uni-factor-names"></div>
+      </section>
+
+      <section id="uni-table-section" style="display:none;">
+        <h3 class="section-title">试验方案与结果填报</h3>
+        <div class="table-scroll" id="uni-table-container"></div>
+        <div class="action-row">
+          <button class="btn-ghost" onclick="fillUniformDemo()">填入示例数据</button>
+          <button class="btn-primary" onclick="analyzeUniform()">开始分析</button>
+        </div>
+      </section>
+    </div>
+
+
+    <!-- ==================== 3. 响应面法视图 ==================== -->
+    <div id="view-response" style="display:none; flex-direction:column; gap:20px;">
+      <header>
+        <h1 style="font-size:20px; font-weight:800; letter-spacing:-0.5px;">响应面法 <span>Response Surface Methodology</span></h1>
+        <p style="font-size:12.5px; color:var(--sub); margin-top:4px;">
+          用二次模型描述因素与结果之间的曲面关系，并在给定因素范围内寻找预测较优点。
+        </p>
+      </header>
+
+      <section class="setup-card">
+        <div class="setup-grid">
+          <div class="setup-item">
+            <label>因素数</label>
+            <input type="number" id="rsm-in-s" min="2" max="5" value="3">
+          </div>
+          <div class="setup-item">
+            <label>中心点次数</label>
+            <input type="number" id="rsm-in-center" min="3" max="10" value="5">
+          </div>
+          <div class="setup-item">
+            <label>指标方向</label>
+            <select id="rsm-sel-goal">
+              <option value="max">望大（越大越好）</option>
+              <option value="min">望小（越小越好）</option>
+            </select>
+          </div>
+          <div class="setup-item">
+            <label>设计类型</label>
+            <select id="rsm-sel-type">
+              <option value="ccd">中心复合设计（CCD）</option>
+            </select>
+          </div>
+        </div>
+        <div class="note-box">
+          本模块采用中心复合设计：包含两水平析因点、轴点和中心点，可拟合包含线性项、二次项和交互项的二次模型。
+          因素数目前限制为 2～5，以避免试验次数快速膨胀。
+        </div>
+        <button class="btn-primary" onclick="generateRSMDesign()">生成响应面试验方案</button>
+      </section>
+
+      <section id="rsm-factor-section" style="display:none;">
+        <h3 class="section-title">因素范围与名称</h3>
+        <div id="rsm-factor-settings" class="factor-names"></div>
+        <div class="note-box" style="margin-top:10px;">
+          每个因素都需要给出实际下限和上限。程序会把它们换算成编码值，用于建立二次回归模型。
+        </div>
+      </section>
+
+      <section id="rsm-quality-section" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <h3 class="section-title" style="margin-bottom:0;">设计信息</h3>
+          <span class="response-design-badge" id="rsm-design-badge">CCD</span>
+        </div>
+      </section>
+
+      <section id="rsm-table-section" style="display:none;">
+        <h3 class="section-title">试验方案与结果填报</h3>
+        <div class="table-scroll" id="rsm-table-container"></div>
+        <div class="action-row">
+          <button class="btn-ghost" onclick="fillRSMDemo()">填入示例数据</button>
+          <button class="btn-primary" onclick="analyzeRSM()">开始分析</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== 3. 分析结果展示区 ==================== -->
+    <div style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 20px;">
+      <h3 class="section-title" id="result-header-title">分析结果输出</h3>
+      <div id="result-container" class="result-container">
+        <div class="empty-state">
+          尚未开始分析<br>
+          <small>请在上方的方案表中填入测量结果 $y$，然后点击「开始分析」</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 加载蒙层与提示条 -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loading-text">正在计算...</div>
+</div>
+<div class="toast" id="toast-box"></div>
+
+<div class="footer">
+  <div class="footer-brand">
+    <span class="footer-label">网页作者</span>
+    <a class="author-link" href="https://space.bilibili.com/1534330" target="_blank" rel="noopener noreferrer">西岛海</a>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   全局通知与状态管理
+   ========================================================================= */
+function showToast(msg) {
+  const t = document.getElementById('toast-box');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2600);
+}
+
+let currentMode = 'ortho';
+
+function switchMode(mode) {
+  currentMode = mode;
+  const body = document.getElementById('body-root');
+  const btnOrtho = document.getElementById('tab-ortho');
+  const btnUni = document.getElementById('tab-uniform');
+  const btnRsm = document.getElementById('tab-response');
+  const viewOrtho = document.getElementById('view-ortho');
+  const viewUni = document.getElementById('view-uniform');
+  const viewRsm = document.getElementById('view-response');
+  const titleAccent = document.getElementById('title-accent');
+  const responseGuide = document.getElementById('guide-response-card');
+
+  body.className = 'mode-' + mode;
+  if (responseGuide) responseGuide.style.display = mode === 'response' ? 'flex' : 'none';
+  btnOrtho.className = 'mode-btn' + (mode === 'ortho' ? ' active ortho' : ' ortho');
+  btnUni.className = 'mode-btn' + (mode === 'uniform' ? ' active uniform' : ' uniform');
+  btnRsm.className = 'mode-btn' + (mode === 'response' ? ' active response' : ' response');
+  viewOrtho.style.display = mode === 'ortho' ? 'flex' : 'none';
+  viewUni.style.display = mode === 'uniform' ? 'flex' : 'none';
+  viewRsm.style.display = mode === 'response' ? 'flex' : 'none';
+  titleAccent.textContent = mode === 'ortho' ? '· 正交指南' : mode === 'uniform' ? '· 均匀指南' : '· 响应面指南';
+}
+
+/* =========================================================================
+   模块一：正交试验设计 (Orthogonal Design)
+   ========================================================================= */
+const ORTHO_TABLES = {
+  'L4(2^3)': { factors: 3, levels: 2, runs: 4, data: [[1,1,1],[1,2,2],[2,1,2],[2,2,1]] },
+  'L8(2^7)': { factors: 7, levels: 2, runs: 8, data: [
+    [1,1,1,1,1,1,1],[1,1,1,2,2,2,2],[1,2,2,1,1,2,2],[1,2,2,2,2,1,1],
+    [2,1,2,1,2,1,2],[2,1,2,2,1,2,1],[2,2,1,1,2,2,1],[2,2,1,2,1,1,2]
+  ]},
+  'L9(3^4)': { factors: 4, levels: 3, runs: 9, data: [
+    [1,1,1,1],[1,2,2,2],[1,3,3,3],
+    [2,1,2,3],[2,2,3,1],[2,3,1,2],
+    [3,1,3,2],[3,2,1,3],[3,3,2,1]
+  ]},
+  'L16(4^5)': { factors: 5, levels: 4, runs: 16, data: [
+    [1,1,1,1,1],[1,2,2,2,2],[1,3,3,3,3],[1,4,4,4,4],
+    [2,1,2,3,4],[2,2,1,4,3],[2,3,4,1,2],[2,4,3,2,1],
+    [3,1,3,4,2],[3,2,4,3,1],[3,3,1,2,4],[3,4,2,1,3],
+    [4,1,4,2,3],[4,2,3,1,4],[4,3,2,4,1],[4,4,1,3,2]
+  ]}
+};
+
+const orthoState = {
+  table: null,
+  factorCount: 0,
+  factorNames: [],
+  goal: 'max'
+};
+
+const orthoSel = document.getElementById('ortho-sel-table');
+Object.keys(ORTHO_TABLES).forEach(key => {
+  const t = ORTHO_TABLES[key];
+  const opt = document.createElement('option');
+  opt.value = key;
+  opt.textContent = `${key} — ${t.factors}因素 · ${t.levels}水平 · ${t.runs}次试验`;
+  orthoSel.appendChild(opt);
+});
+
+orthoSel.onchange = () => {
+  const t = ORTHO_TABLES[orthoSel.value];
+  const inp = document.getElementById('ortho-in-factor');
+  inp.max = t.factors;
+  inp.value = Math.min(t.factors, parseInt(inp.value) || 3);
+};
+orthoSel.onchange();
+
+function generateOrthoScheme() {
+  const t = ORTHO_TABLES[orthoSel.value];
+  const n = parseInt(document.getElementById('ortho-in-factor').value);
+  if (!n || n < 1 || n > t.factors) {
+    showToast(`因素数需在 1 到 ${t.factors} 之间`);
+    return;
+  }
+
+  orthoState.table = t;
+  orthoState.factorCount = n;
+  orthoState.factorNames = Array.from({length: n}, (_, i) => String.fromCharCode(65 + i));
+  orthoState.goal = document.getElementById('ortho-sel-goal').value;
+
+  renderOrthoFactorNames();
+  renderOrthoTable();
+
+  document.getElementById('ortho-factor-section').style.display = 'block';
+  document.getElementById('ortho-table-section').style.display = 'block';
+  document.getElementById('result-container').innerHTML = '<div class="empty-state">方案已生成<br><small>填入结果后点击「开始分析」</small></div>';
+  showToast('正交方案已生成');
+}
+
+function renderOrthoFactorNames() {
+  const container = document.getElementById('ortho-factor-names');
+  container.innerHTML = '';
+  orthoState.factorNames.forEach((name, i) => {
+    const item = document.createElement('div');
+    item.className = 'factor-name-item';
+    item.innerHTML = `<label>因素 ${i+1}</label><input type="text" value="${name}" maxlength="10">`;
+    const input = item.querySelector('input');
+    input.oninput = () => {
+      orthoState.factorNames[i] = input.value.trim() || String.fromCharCode(65 + i);
+      const th = document.querySelector(`#ortho-table th[data-col="${i}"]`);
+      if (th) th.textContent = orthoState.factorNames[i];
+    };
+    container.appendChild(item);
+  });
+}
+
+function renderOrthoTable() {
+  const t = orthoState.table;
+  const n = orthoState.factorCount;
+  let html = '<table id="ortho-table"><thead><tr><th>试验号</th>';
+  for (let j = 0; j < n; j++) html += `<th data-col="${j}">${orthoState.factorNames[j]}</th>`;
+  html += '<th>结果 y</th></tr></thead><tbody>';
+
+  for (let i = 0; i < t.runs; i++) {
+    html += `<tr><td class="run-no">${i+1}</td>`;
+    for (let j = 0; j < n; j++) html += `<td class="level-cell">${t.data[i][j]}</td>`;
+    html += `<td><input type="number" step="any" class="result-input ortho-input" data-run="${i}" placeholder="y${i+1}"></td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('ortho-table-container').innerHTML = html;
+}
+
+function fillOrthoDemo() {
+  if (!orthoState.table) return;
+  const t = orthoState.table;
+  const n = orthoState.factorCount;
+  const inputs = document.querySelectorAll('.ortho-input');
+  const effects = [];
+  for (let j = 0; j < n; j++) {
+    const scale = 15 * Math.pow(0.6, j);
+    const e = [];
+    for (let lv = 0; lv < t.levels; lv++) e.push((Math.random() * 2 - 1) * scale);
+    effects.push(e);
+  }
+  inputs.forEach((inp, i) => {
+    let v = 80;
+    for (let j = 0; j < n; j++) v += effects[j][t.data[i][j] - 1];
+    v += (Math.random() * 2 - 1) * 1.2;
+    inp.value = v.toFixed(1);
+  });
+  showToast('已填入模拟正交测试数据');
+}
+
+function analyzeOrtho() {
+  const t = orthoState.table;
+  const n = orthoState.factorCount;
+  const N = t.runs;
+  const L = t.levels;
+  const goal = document.getElementById('ortho-sel-goal').value;
+  orthoState.goal = goal;
+
+  const inputs = document.querySelectorAll('.ortho-input');
+  const results = [];
+  for (let i = 0; i < N; i++) {
+    const v = parseFloat(inputs[i].value);
+    if (!Number.isFinite(v)) {
+      showToast(`第 ${i+1} 号试验结果无效`);
+      inputs[i].focus();
+      return;
+    }
+    results.push(v);
+  }
+
+  const sumY = results.reduce((a,b)=>a+b, 0);
+  const meanY = sumY / N;
+
+  const factorResults = [];
+  for (let j = 0; j < n; j++) {
+    const K = new Array(L).fill(0);
+    const cnt = new Array(L).fill(0);
+    for (let i = 0; i < N; i++) {
+      const lv = t.data[i][j] - 1;
+      K[lv] += results[i];
+      cnt[lv]++;
+    }
+    const k = K.map((v, idx) => cnt[idx] > 0 ? v / cnt[idx] : 0);
+    const R = Math.max(...k) - Math.min(...k);
+    const bestLv = goal === 'max' ? k.indexOf(Math.max(...k)) + 1 : k.indexOf(Math.min(...k)) + 1;
+    let SS = 0;
+    for (let lv = 0; lv < L; lv++) SS += (K[lv]*K[lv]) / cnt[lv];
+    SS -= (sumY*sumY)/N;
+    factorResults.push({ name: orthoState.factorNames[j], K, k, R, bestLv, SS });
+  }
+
+  let errorSS = 0, errorDf = 0;
+  for (let j = n; j < t.factors; j++) {
+    const K = new Array(L).fill(0);
+    const cnt = new Array(L).fill(0);
+    for (let i = 0; i < N; i++) {
+      const lv = t.data[i][j] - 1;
+      K[lv] += results[i];
+      cnt[lv]++;
+    }
+    let ss = 0;
+    for (let lv = 0; lv < L; lv++) ss += (K[lv]*K[lv]) / cnt[lv];
+    ss -= (sumY*sumY)/N;
+    errorSS += ss;
+    errorDf += L - 1;
+  }
+
+  let totalSS = 0;
+  for (let i = 0; i < N; i++) totalSS += results[i]*results[i];
+  totalSS -= (sumY*sumY)/N;
+  const totalDf = N - 1;
+
+  let factorList = [...factorResults];
+  let pooledItem = null;
+  if (errorDf === 0) {
+    if (factorList.length > 1) {
+      let minIdx = 0;
+      for (let i = 1; i < factorList.length; i++) if (factorList[i].SS < factorList[minIdx].SS) minIdx = i;
+      pooledItem = factorList.splice(minIdx, 1)[0];
+      errorSS = pooledItem.SS;
+      errorDf = L - 1;
+    } else {
+      errorSS = totalSS - factorResults[0].SS;
+      errorDf = totalDf - (L - 1);
+    }
+  }
+  const MSE = errorDf > 0 ? errorSS / errorDf : 0;
+
+  renderOrthoResult({ factorResults, factorList, pooledItem, meanY, totalSS, totalDf, errorSS, errorDf, MSE, L });
+  showToast('正交分析完成');
+}
+
+function renderOrthoResult(d) {
+  const { factorResults, factorList, pooledItem, meanY, totalSS, totalDf, errorSS, errorDf, MSE, L } = d;
+  let html = '';
+
+  // 极差表
+  html += '<div class="result-block"><h3 class="result-title">极差分析表</h3>';
+  html += '<div class="table-scroll"><table class="analysis-table"><thead><tr><th>因素</th>';
+  for (let lv=1; lv<=L; lv++) html += `<th>K${lv}</th>`;
+  for (let lv=1; lv<=L; lv++) html += `<th>k${lv}</th>`;
+  html += '<th>极差 R</th><th>最优水平</th></tr></thead><tbody>';
+  factorResults.forEach(fr => {
+    html += `<tr><td class="factor-cell">${fr.name}</td>`;
+    for (let lv=0; lv<L; lv++) html += `<td>${fmt(fr.K[lv])}</td>`;
+    for (let lv=0; lv<L; lv++) {
+      const isBest = (lv+1) === fr.bestLv;
+      html += `<td class="${isBest ? 'best-cell' : ''}">${fmt(fr.k[lv])}</td>`;
+    }
+    html += `<td class="range-cell">${fmt(fr.R)}</td><td class="best-cell">${fr.name}${fr.bestLv}</td></tr>`;
+  });
+  html += '</tbody></table></div></div>';
+
+  // 主次排序
+  const sorted = [...factorResults].sort((a,b) => b.R - a.R);
+  html += '<div class="result-block"><h3 class="result-title">因素主次排序</h3><div class="rank-list">';
+  sorted.forEach((fr, i) => {
+    html += `<div class="rank-item"><span class="rank-no">${i+1}</span><span class="rank-name">${fr.name}</span><span class="rank-r">R = ${fmt(fr.R)}</span></div>`;
+  });
+  html += '</div></div>';
+
+  // 最优组合
+  const optCombo = factorResults.map(fr => `${fr.name}${fr.bestLv}`).join(' ');
+  const optSum = factorResults.reduce((s, fr) => s + fr.k[fr.bestLv - 1], 0);
+  const predicted = optSum - (factorResults.length - 1) * meanY;
+  html += '<div class="result-block"><h3 class="result-title">推荐最优组合</h3>';
+  html += `<div class="opt-combo">${optCombo}</div>`;
+  html += `<div class="opt-pred" style="margin-top:6px;">理论预测指标 ≈ <b>${fmt(predicted)}</b></div></div>`;
+
+  // 方差分析
+  html += '<div class="result-block"><h3 class="result-title">方差分析 (ANOVA)</h3>';
+  html += '<div class="table-scroll"><table class="analysis-table"><thead><tr><th>来源</th><th>SS</th><th>df</th><th>MS</th><th>F</th></tr></thead><tbody>';
+  factorList.forEach(fr => {
+    const df = L - 1;
+    const MS = df > 0 ? fr.SS / df : 0;
+    const F = MSE > 0 ? MS / MSE : 0;
+    html += `<tr><td class="factor-cell">${fr.name}</td><td>${fmt(fr.SS)}</td><td>${df}</td><td>${fmt(MS)}</td><td>${fmt(F)}</td></tr>`;
+  });
+  if (errorDf > 0) {
+    let lbl = pooledItem ? `误差(并入${pooledItem.name})` : '误差';
+    html += `<tr class="error-row"><td>${lbl}</td><td>${fmt(errorSS)}</td><td>${errorDf}</td><td>${fmt(MSE)}</td><td>—</td></tr>`;
+  }
+  html += `<tr class="total-row"><td>总和</td><td>${fmt(totalSS)}</td><td>${totalDf}</td><td>—</td><td>—</td></tr>`;
+  html += '</tbody></table></div></div>';
+
+  document.getElementById('result-container').innerHTML = html;
+}
+
+
+/* =========================================================================
+   模块二：均匀设计 (Uniform Design)
+   ========================================================================= */
+const uniState = {
+  s: 3, q: 10, n: 10,
+  design: [],
+  factorNames: [],
+  deviation: null,
+  goal: 'max'
+};
+
+function initColumn(n, q) {
+  const base = Math.floor(n / q), rem = n % q;
+  const col = [];
+  for (let lv = 1; lv <= q; lv++) {
+    const cnt = base + (lv <= rem ? 1 : 0);
+    for (let k = 0; k < cnt; k++) col.push(lv);
+  }
+  return shuffleArr(col);
+}
+
+function shuffleArr(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function cd2(X, n, s, q) {
+  let sum1 = 0;
+  for (let i = 0; i < n; i++) {
+    let prod = 1;
+    for (let j = 0; j < s; j++) {
+      const x = (X[i][j] - 0.5) / q;
+      const d = Math.abs(x - 0.5);
+      prod *= (1 + d / 2 - d * d / 2);
+    }
+    sum1 += prod;
+  }
+  let sum2 = 0;
+  for (let i = 0; i < n; i++) {
+    for (let k = 0; k < n; k++) {
+      let prod = 1;
+      for (let j = 0; j < s; j++) {
+        const xi = (X[i][j] - 0.5) / q;
+        const xk = (X[k][j] - 0.5) / q;
+        const d = Math.abs(xi - xk);
+        prod *= (1 + d / 2 - d * d / 2);
+      }
+      sum2 += prod;
+    }
+  }
+  return Math.pow(13 / 12, s) - (2 / n) * sum1 + (1 / (n * n)) * sum2;
+}
+
+function optimizeUniformDesign(n, q, s) {
+  const restarts = n > 15 ? 2 : 4;
+  const iterations = 1500;
+  let globalBestX = null, globalBestD = Infinity;
+
+  for (let r = 0; r < restarts; r++) {
+    let X = Array.from({length: n}, () => []);
+    for (let j = 0; j < s; j++) {
+      const col = initColumn(n, q);
+      for (let i = 0; i < n; i++) X[i][j] = col[i];
+    }
+    let curD = cd2(X, n, s, q);
+    let curBestX = X.map(r => [...r]), curBestD = curD;
+
+    for (let it = 0; it < iterations; it++) {
+      const j = Math.floor(Math.random() * s);
+      const i1 = Math.floor(Math.random() * n);
+      const i2 = Math.floor(Math.random() * n);
+      if (i1 === i2 || X[i1][j] === X[i2][j]) continue;
+
+      const tmp = X[i1][j]; X[i1][j] = X[i2][j]; X[i2][j] = tmp;
+      const newD = cd2(X, n, s, q);
+
+      if (newD < curD) {
+        curD = newD;
+        if (newD < curBestD) { curBestD = newD; curBestX = X.map(r => [...r]); }
+      } else {
+        const T = 0.02 * (1 - it / iterations);
+        if (Math.random() < Math.exp(-(newD - curD) / T)) {
+          curD = newD;
+        } else {
+          X[i1][j] = X[i2][j]; X[i2][j] = tmp; // rollback
+        }
+      }
+    }
+    if (curBestD < globalBestD) { globalBestD = curBestD; globalBestX = curBestX; }
+  }
+  return { design: globalBestX, deviation: globalBestD };
+}
+
+async function generateUniformScheme() {
+  const s = parseInt(document.getElementById('uni-in-s').value);
+  const q = parseInt(document.getElementById('uni-in-q').value);
+  const n = parseInt(document.getElementById('uni-in-n').value);
+
+  if (!s || s < 1) return showToast('因素数需 ≥ 1');
+  if (!q || q < 2) return showToast('水平数需 ≥ 2');
+  if (!n || n < q) return showToast('试验次数 n 必须 ≥ 水平数 q');
+  if (n > 30) return showToast('试验次数上限为 30');
+  if (s > n - 1) return showToast(`因素数 s 需 ≤ n-1 = ${n-1}`);
+
+  uniState.s = s; uniState.q = q; uniState.n = n;
+  uniState.goal = document.getElementById('uni-sel-goal').value;
+  uniState.factorNames = Array.from({length: s}, (_, i) => String.fromCharCode(65 + i));
+
+  document.getElementById('loading-overlay').classList.add('show');
+  document.getElementById('loading-text').textContent = '正在通过模拟退火计算最优均匀设计...';
+  await new Promise(r => setTimeout(r, 60));
+
+  const res = optimizeUniformDesign(n, q, s);
+  uniState.design = res.design;
+  uniState.deviation = res.deviation;
+
+  document.getElementById('loading-overlay').classList.remove('show');
+
+  renderUniformFactorNames();
+  renderUniformTable();
+  document.getElementById('uni-dev-badge').textContent = `CD2 偏差 = ${res.deviation.toFixed(6)}`;
+
+  document.getElementById('uni-quality-section').style.display = 'block';
+  document.getElementById('uni-factor-section').style.display = 'block';
+  document.getElementById('uni-table-section').style.display = 'block';
+  document.getElementById('result-container').innerHTML = '<div class="empty-state">均匀方案已生成<br><small>填入结果后点击「开始分析」</small></div>';
+  showToast('均匀设计表生成成功');
+}
+
+function renderUniformFactorNames() {
+  const container = document.getElementById('uni-factor-names');
+  container.innerHTML = '';
+  uniState.factorNames.forEach((name, i) => {
+    const item = document.createElement('div');
+    item.className = 'factor-name-item';
+    item.innerHTML = `<label>因素 ${i+1}</label><input type="text" value="${name}" maxlength="10">`;
+    const input = item.querySelector('input');
+    input.oninput = () => {
+      uniState.factorNames[i] = input.value.trim() || String.fromCharCode(65 + i);
+      const th = document.querySelector(`#uni-table th[data-col="${i}"]`);
+      if (th) th.textContent = uniState.factorNames[i];
+    };
+    container.appendChild(item);
+  });
+}
+
+function renderUniformTable() {
+  const { n, s, design, factorNames } = uniState;
+  let html = '<table id="uni-table"><thead><tr><th>试验号</th>';
+  for (let j = 0; j < s; j++) html += `<th data-col="${j}">${factorNames[j]}</th>`;
+  html += '<th>结果 y</th></tr></thead><tbody>';
+
+  for (let i = 0; i < n; i++) {
+    html += `<tr><td class="run-no">${i+1}</td>`;
+    for (let j = 0; j < s; j++) html += `<td class="level-cell">${design[i][j]}</td>`;
+    html += `<td><input type="number" step="any" class="result-input uni-input" data-run="${i}" placeholder="y${i+1}"></td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('uni-table-container').innerHTML = html;
+}
+
+function fillUniformDemo() {
+  if (!uniState.design.length) return;
+  const { n, s, q, design } = uniState;
+  const inputs = document.querySelectorAll('.uni-input');
+  const effects = [];
+  for (let j = 0; j < s; j++) {
+    const scale = 12 * Math.pow(0.55, j);
+    effects.push(scale * (Math.random() > 0.5 ? 1 : -1));
+  }
+  const center = (q + 1) / 2;
+  inputs.forEach((inp, i) => {
+    let v = 80;
+    for (let j = 0; j < s; j++) v += effects[j] * (design[i][j] - center);
+    v += (Math.random() * 2 - 1) * 1.5;
+    inp.value = v.toFixed(1);
+  });
+  showToast('已填入模拟均匀测试数据');
+}
+
+/* 矩阵运算辅助 */
+function matMul(A, B) {
+  const n = A.length, m = B[0].length, p = B.length;
+  const C = Array.from({length: n}, () => new Array(m).fill(0));
+  for (let i = 0; i < n; i++)
+    for (let k = 0; k < p; k++)
+      for (let j = 0; j < m; j++) C[i][j] += A[i][k] * B[k][j];
+  return C;
+}
+
+function matInverse(A) {
+  const n = A.length;
+  const M = A.map((row, i) => [...row, ...Array.from({length: n}, (_, j) => i === j ? 1 : 0)]);
+  for (let col = 0; col < n; col++) {
+    let pivot = col;
+    for (let r = col + 1; r < n; r++) if (Math.abs(M[r][col]) > Math.abs(M[pivot][col])) pivot = r;
+    if (Math.abs(M[pivot][col]) < 1e-12) return null;
+    [M[col], M[pivot]] = [M[pivot], M[col]];
+    const div = M[col][col];
+    for (let j = 0; j < 2*n; j++) M[col][j] /= div;
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const factor = M[r][col];
+      if (factor === 0) continue;
+      for (let j = 0; j < 2*n; j++) M[r][j] -= factor * M[col][j];
+    }
+  }
+  return M.map(row => row.slice(n));
+}
+
+function analyzeUniform() {
+  const { n, s, q, design, factorNames } = uniState;
+  if (!design.length) return;
+
+  const goal = document.getElementById('uni-sel-goal').value;
+  uniState.goal = goal;
+
+  const inputs = document.querySelectorAll('.uni-input');
+  const y = [];
+  for (let i = 0; i < n; i++) {
+    const v = parseFloat(inputs[i].value);
+    if (!Number.isFinite(v)) {
+      showToast(`第 ${i+1} 号试验结果无效`);
+      inputs[i].focus();
+      return;
+    }
+    y.push(v);
+  }
+
+  const sumY = y.reduce((a,b)=>a+b, 0);
+  const meanY = sumY / n;
+
+  // 极差分析参考
+  const factorResults = [];
+  for (let j = 0; j < s; j++) {
+    const K = new Array(q).fill(0);
+    const cnt = new Array(q).fill(0);
+    for (let i = 0; i < n; i++) {
+      const lv = design[i][j] - 1;
+      K[lv] += y[i];
+      cnt[lv]++;
+    }
+    const k = K.map((v, idx) => cnt[idx] > 0 ? v / cnt[idx] : 0);
+    const R = Math.max(...k) - Math.min(...k);
+    const bestLv = goal === 'max' ? k.indexOf(Math.max(...k)) + 1 : k.indexOf(Math.min(...k)) + 1;
+    factorResults.push({ name: factorNames[j], k, R, bestLv });
+  }
+
+  // 多元回归建模
+  const means = [];
+  for (let j = 0; j < s; j++) {
+    let sum = 0;
+    for (let i = 0; i < n; i++) sum += design[i][j];
+    means.push(sum / n);
+  }
+
+  const X = [];
+  for (let i = 0; i < n; i++) {
+    const row = [1];
+    for (let j = 0; j < s; j++) row.push(design[i][j] - means[j]);
+    X.push(row);
+  }
+  const yMat = y.map(v => [v]);
+  const Xt = [];
+  for (let j = 0; j <= s; j++) {
+    Xt.push([]);
+    for (let i = 0; i < n; i++) Xt[j].push(X[i][j]);
+  }
+
+  const XtX = matMul(Xt, X);
+  const Xty = matMul(Xt, yMat);
+  const XtX_inv = matInverse(XtX);
+
+  let regression = null;
+  if (XtX_inv) {
+    const beta = matMul(XtX_inv, Xty).map(r => r[0]);
+    const yHat = X.map(row => row.reduce((sum, v, k) => sum + v * beta[k], 0));
+    const SSE = y.reduce((s2, v, i) => s2 + Math.pow(v - yHat[i], 2), 0);
+    const SST = y.reduce((s2, v) => s2 + Math.pow(v - meanY, 2), 0);
+    const R2 = SST > 0 ? 1 - SSE / SST : 0;
+    const df = n - (s + 1);
+    const MSE = df > 0 ? SSE / df : 0;
+
+    const tVals = [];
+    for (let k = 0; k <= s; k++) {
+      const se = df > 0 && MSE > 0 ? Math.sqrt(MSE * XtX_inv[k][k]) : 0;
+      tVals.push(se > 0 ? beta[k] / se : 0);
+    }
+
+    const optLevels = [];
+    let optPred = beta[0];
+    for (let j = 0; j < s; j++) {
+      const bj = beta[j + 1];
+      let lv = (goal === 'max') ? (bj >= 0 ? q : 1) : (bj >= 0 ? 1 : q);
+      optLevels.push(lv);
+      optPred += bj * (lv - means[j]);
+    }
+    regression = { beta, R2, df, tVals, optLevels, optPred };
+  }
+
+  let bestIdx = 0;
+  for (let i = 1; i < n; i++) if (goal === 'max' ? y[i] > y[bestIdx] : y[i] < y[bestIdx]) bestIdx = i;
+
+  renderUniformResult({ factorResults, regression, bestIdx, y, design });
+  showToast('均匀设计回归分析完成');
+}
+
+function renderUniformResult(d) {
+  const { factorResults, regression, bestIdx, y, design } = d;
+  const { s, factorNames } = uniState;
+  let html = '';
+
+  // 极差参考表
+  html += '<div class="result-block"><h3 class="result-title">极差分析（参考）</h3>';
+  html += '<div class="table-scroll"><table class="analysis-table"><thead><tr><th>因素</th><th>极差 R</th><th>较优水平</th></tr></thead><tbody>';
+  factorResults.forEach(fr => {
+    html += `<tr><td class="factor-cell">${fr.name}</td><td class="range-cell">${fmt(fr.R)}</td><td class="best-cell">${fr.name}${fr.bestLv}</td></tr>`;
+  });
+  html += '</tbody></table></div></div>';
+
+  // 因素排序
+  const sorted = [...factorResults].sort((a,b) => b.R - a.R);
+  html += '<div class="result-block"><h3 class="result-title">因素主次排序（参考）</h3><div class="rank-list">';
+  sorted.forEach((fr, i) => {
+    html += `<div class="rank-item"><span class="rank-no">${i+1}</span><span class="rank-name">${fr.name}</span><span class="rank-r">R = ${fmt(fr.R)}</span></div>`;
+  });
+  html += '</div></div>';
+
+  // 回归分析
+  if (regression) {
+    const { beta, R2, df, tVals, optLevels, optPred } = regression;
+    html += '<div class="result-block"><h3 class="result-title">多元线性回归分析</h3>';
+    html += `<div class="note-box" style="margin-bottom:10px;">R² = ${fmt(R2)}　|　自由度 = ${df}</div>`;
+    html += '<div class="table-scroll"><table class="analysis-table"><thead><tr><th>项</th><th>系数 b</th><th>t 值</th><th>显著性</th></tr></thead><tbody>';
+    html += `<tr><td class="factor-cell">截距</td><td>${fmt(beta[0])}</td><td>${fmt(tVals[0])}</td><td>—</td></tr>`;
+    for (let j = 0; j < s; j++) {
+      const tv = tVals[j+1];
+      const sig = Math.abs(tv) >= 2.5 ? '★★' : Math.abs(tv) >= 1.5 ? '★' : '';
+      html += `<tr><td class="factor-cell">${factorNames[j]}</td><td>${fmt(beta[j+1])}</td><td>${fmt(tv)}</td><td class="${sig ? 'sig-cell' : ''}">${sig || '—'}</td></tr>`;
+    }
+    html += '</tbody></table></div></div>';
+
+    const combo = optLevels.map((lv, j) => `${factorNames[j]}${lv}`).join(' ');
+    html += '<div class="result-block"><h3 class="result-title">回归模型最优组合预测</h3>';
+    html += `<div class="opt-combo">${combo}</div>`;
+    html += `<div class="opt-pred" style="margin-top:6px;">预测指标 ≈ <b>${fmt(optPred)}</b></div></div>`;
+  }
+
+  // 已有试验最优
+  const bestCombo = [];
+  for (let j = 0; j < s; j++) bestCombo.push(`${factorNames[j]}${design[bestIdx][j]}`);
+  html += '<div class="result-block"><h3 class="result-title">实测最佳试验点</h3>';
+  html += `<div class="opt-combo">${bestCombo.join(' ')}</div>`;
+  html += `<div class="opt-pred" style="margin-top:6px;">第 ${bestIdx+1} 号试验　y = <b>${fmt(y[bestIdx])}</b></div></div>`;
+
+  document.getElementById('result-container').innerHTML = html;
+}
+
+
+/* =========================================================================
+   模块三：响应面法 (Response Surface Methodology)
+   ========================================================================= */
+const rsmState = {
+  s: 3,
+  center: 5,
+  alpha: Math.sqrt(2),
+  factorNames: [],
+  ranges: [],
+  design: [],
+  coded: []
+};
+
+function rsmBuildDesign(s, center, alpha) {
+  const rows = [];
+  // 2^s 析因点
+  const total = Math.pow(2, s);
+  for (let i = 0; i < total; i++) {
+    const x = [];
+    for (let j = 0; j < s; j++) x.push((i >> j) & 1 ? 1 : -1);
+    rows.push(x);
+  }
+  // 轴点
+  for (let j = 0; j < s; j++) {
+    const plus = new Array(s).fill(0);
+    const minus = new Array(s).fill(0);
+    plus[j] = alpha;
+    minus[j] = -alpha;
+    rows.push(plus, minus);
+  }
+  // 中心点
+  for (let i = 0; i < center; i++) rows.push(new Array(s).fill(0));
+  return rows;
+}
+
+function rsmActualValue(code, min, max) {
+  return min + ((code + rsmState.alpha) / (2 * rsmState.alpha)) * (max - min);
+}
+
+function rsmCodeFromActual(v, min, max) {
+  return ((v - min) / (max - min)) * (2 * rsmState.alpha) - rsmState.alpha;
+}
+
+function generateRSMDesign() {
+  const s = parseInt(document.getElementById('rsm-in-s').value);
+  const center = parseInt(document.getElementById('rsm-in-center').value);
+
+  if (!Number.isInteger(s) || s < 2 || s > 5) return showToast('响应面法目前支持 2～5 个因素');
+  if (!Number.isInteger(center) || center < 3 || center > 10) return showToast('中心点次数需为 3～10');
+
+  rsmState.s = s;
+  rsmState.center = center;
+  rsmState.factorNames = Array.from({length:s}, (_,i) => String.fromCharCode(65+i));
+  rsmState.ranges = Array.from({length:s}, () => ({min:0, max:100}));
+
+  renderRSMFactorSettings();
+  const design = rsmBuildDesign(s, center, rsmState.alpha);
+  rsmState.coded = design;
+  renderRSMTable();
+
+  document.getElementById('rsm-factor-section').style.display = 'block';
+  document.getElementById('rsm-quality-section').style.display = 'block';
+  document.getElementById('rsm-table-section').style.display = 'block';
+  document.getElementById('rsm-design-badge').textContent =
+    `CCD · ${design.length} 次试验 · α = ${rsmState.alpha.toFixed(3)}`;
+  document.getElementById('result-container').innerHTML =
+    '<div class="empty-state">响应面方案已生成<br><small>设置好因素范围并填入结果后点击「开始分析」</small></div>';
+  showToast(`响应面方案已生成，共 ${design.length} 次试验`);
+}
+
+function renderRSMFactorSettings() {
+  const c = document.getElementById('rsm-factor-settings');
+  c.innerHTML = '';
+  rsmState.factorNames.forEach((name, i) => {
+    const item = document.createElement('div');
+    item.className = 'factor-name-item';
+    item.style.minWidth = '170px';
+    item.innerHTML = `
+      <label>因素 ${i+1}</label>
+      <input type="text" value="${name}" maxlength="10" class="rsm-name">
+      <input type="number" step="any" value="0" class="rsm-min" placeholder="实际下限">
+      <input type="number" step="any" value="100" class="rsm-max" placeholder="实际上限">`;
+    const inputs = item.querySelectorAll('input');
+    inputs[0].oninput = () => {
+      rsmState.factorNames[i] = inputs[0].value.trim() || String.fromCharCode(65+i);
+      renderRSMTable();
+    };
+    inputs[1].oninput = () => { rsmState.ranges[i].min = parseFloat(inputs[1].value); };
+    inputs[2].oninput = () => { rsmState.ranges[i].max = parseFloat(inputs[2].value); };
+    c.appendChild(item);
+  });
+}
+
+function renderRSMTable() {
+  const {s, coded, factorNames, ranges} = rsmState;
+  if (!coded.length) return;
+  let html = '<table id="rsm-table"><thead><tr><th>试验号</th>';
+  for (let j=0;j<s;j++) html += `<th>${factorNames[j]} 实际值</th>`;
+  html += '<th>结果 y</th></tr></thead><tbody>';
+
+  for (let i=0;i<coded.length;i++) {
+    html += `<tr><td class="run-no">${i+1}</td>`;
+    for (let j=0;j<s;j++) {
+      const r = ranges[j];
+      const v = Number.isFinite(r.min) && Number.isFinite(r.max) && r.max > r.min
+        ? rsmActualValue(coded[i][j], r.min, r.max) : NaN;
+      html += `<td class="response-code">${Number.isFinite(v) ? fmt(v) : '—'}</td>`;
+    }
+    html += `<td><input type="number" step="any" class="result-input rsm-input" data-run="${i}" placeholder="y${i+1}"></td></tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('rsm-table-container').innerHTML = html;
+}
+
+function fillRSMDemo() {
+  if (!rsmState.coded.length) return;
+  // 示例为带有曲率和交互作用的二次响应，便于检查模块是否正常工作
+  const inputs = document.querySelectorAll('.rsm-input');
+  inputs.forEach((inp,i) => {
+    const x = rsmState.coded[i];
+    let y = 80 + 8*x[0] - 5*x[1] + 4*(x[2] || 0)
+      - 4*x[0]*x[0] - 3*x[1]*x[1] - 2*(x[2] || 0)*(x[2] || 0)
+      + 2*x[0]*x[1] - 1.5*x[0]*(x[2] || 0);
+    y += (Math.random()-0.5)*0.8;
+    inp.value = y.toFixed(2);
+  });
+  showToast('已填入模拟响应面数据');
+}
+
+function rsmFeatureRow(x) {
+  const row = [1];
+  for (let j=0;j<x.length;j++) row.push(x[j]);
+  for (let j=0;j<x.length;j++) row.push(x[j]*x[j]);
+  for (let j=0;j<x.length;j++) for (let k=j+1;k<x.length;k++) row.push(x[j]*x[k]);
+  return row;
+}
+
+function rsmFeatureNames(s) {
+  const names = ['截距'];
+  for (let j=0;j<s;j++) names.push(rsmState.factorNames[j]);
+  for (let j=0;j<s;j++) names.push(`${rsmState.factorNames[j]}²`);
+  for (let j=0;j<s;j++) for (let k=j+1;k<s;k++)
+    names.push(`${rsmState.factorNames[j]}×${rsmState.factorNames[k]}`);
+  return names;
+}
+
+function rsmPredict(beta, x) {
+  const row = rsmFeatureRow(x);
+  return row.reduce((sum,v,i)=>sum + v*beta[i],0);
+}
+
+function rsmFindOptimum(beta, goal) {
+  const s = rsmState.s;
+  const lo = -rsmState.alpha, hi = rsmState.alpha;
+  let bestX = new Array(s).fill(0);
+  let bestY = rsmPredict(beta,bestX);
+
+  // 多起点随机搜索 + 坐标局部搜索；结果严格限制在设计范围内
+  const starts = [new Array(s).fill(0)];
+  for (let i=0;i<2500;i++) starts.push(Array.from({length:s},()=>lo+Math.random()*(hi-lo)));
+
+  const better = (a,b) => goal === 'max' ? a > b : a < b;
+  for (const start of starts) {
+    let x = [...start];
+    let y = rsmPredict(beta,x);
+    let step = (hi-lo)/2;
+    for (let it=0;it<45;it++) {
+      let improved = false;
+      for (let j=0;j<s;j++) {
+        for (const dir of [-1,1]) {
+          const nx = [...x];
+          nx[j] = Math.max(lo,Math.min(hi,nx[j]+dir*step));
+          const ny = rsmPredict(beta,nx);
+          if (better(ny,y)) { x=nx; y=ny; improved=true; }
+        }
+      }
+      step *= 0.72;
+      if (!improved && step < 1e-4) break;
+    }
+    if (better(y,bestY)) { bestY=y; bestX=x; }
+  }
+  return {x:bestX, y:bestY};
+}
+
+function analyzeRSM() {
+  const {s,coded,ranges,factorNames} = rsmState;
+  if (!coded.length) return;
+
+  for (let j=0;j<s;j++) {
+    if (!Number.isFinite(ranges[j].min) || !Number.isFinite(ranges[j].max) || ranges[j].max <= ranges[j].min) {
+      showToast(`请正确设置 ${factorNames[j]} 的上下限`);
+      return;
+    }
+  }
+
+  const inputs = document.querySelectorAll('.rsm-input');
+  const y = [];
+  for (let i=0;i<coded.length;i++) {
+    const v=parseFloat(inputs[i].value);
+    if (!Number.isFinite(v)) {
+      showToast(`第 ${i+1} 号试验结果无效`);
+      inputs[i].focus();
+      return;
+    }
+    y.push(v);
+  }
+
+  const X=coded.map(rsmFeatureRow);
+  const p=X[0].length, n=X.length;
+  if (n <= p) {
+    showToast(`当前设计只有 ${n} 次试验，但二次模型需要 ${p} 个参数`);
+    return;
+  }
+
+  const Xt=X[0].map((_,j)=>X.map(row=>row[j]));
+  const XtX=matMul(Xt,X);
+  const Xty=matMul(Xt,y.map(v=>[v]));
+  const inv=matInverse(XtX);
+  if (!inv) {
+    showToast('模型矩阵不可逆，请重新生成设计');
+    return;
+  }
+
+  const beta=matMul(inv,Xty).map(r=>r[0]);
+  const yhat=X.map(row=>row.reduce((sum,v,i)=>sum+v*beta[i],0));
+  const mean=y.reduce((a,b)=>a+b,0)/n;
+  const SSE=y.reduce((a,v,i)=>a+(v-yhat[i])**2,0);
+  const SST=y.reduce((a,v)=>a+(v-mean)**2,0);
+  const R2=SST>0 ? 1-SSE/SST : 0;
+  const df=n-p;
+  const RMSE=df>0 ? Math.sqrt(SSE/df) : NaN;
+  const adjR2=(n-p)>0 && n>1 ? 1-(1-R2)*(n-1)/(n-p) : NaN;
+
+  const goal=document.getElementById('rsm-sel-goal').value;
+  const opt=rsmFindOptimum(beta,goal);
+
+  const actualOpt=opt.x.map((v,j)=>rsmActualValue(v,ranges[j].min,ranges[j].max));
+  const names=rsmFeatureNames(s);
+
+  let html='';
+  html += '<div class="result-block"><h3 class="result-title">二次回归模型</h3>';
+  html += `<div class="note-box">模型包含线性项、二次项和两两交互项。R² = ${fmt(R2)}　|　调整 R² = ${fmt(adjR2)}　|　RMSE = ${fmt(RMSE)}　|　残差自由度 = ${df}</div>`;
+  html += '<div class="table-scroll"><table class="analysis-table"><thead><tr><th>项</th><th>系数</th></tr></thead><tbody>';
+  for(let i=0;i<beta.length;i++) html += `<tr><td class="factor-cell">${names[i]}</td><td>${fmt(beta[i])}</td></tr>`;
+  html += '</tbody></table></div></div>';
+
+  html += '<div class="result-block"><h3 class="result-title">模型预测的较优点</h3>';
+  html += '<div class="opt-combo response-opt">';
+  actualOpt.forEach((v,j)=>{ html += `${factorNames[j]} = ${fmt(v)}${j<s-1 ? '　' : ''}`; });
+  html += '</div>';
+  html += `<div class="opt-pred" style="margin-top:6px;">模型预测 y ≈ <b>${fmt(opt.y)}</b></div>`;
+  html += '<div class="opt-note">这是模型在设定范围内找到的候选最优点，不是未经验证的最终结论。</div></div>';
+
+  html += '<div class="result-block"><h3 class="result-title">编码坐标</h3>';
+  html += '<div class="table-scroll"><table class="analysis-table"><thead><tr><th>因素</th><th>编码值</th><th>实际值</th></tr></thead><tbody>';
+  for(let j=0;j<s;j++) html += `<tr><td class="factor-cell">${factorNames[j]}</td><td>${fmt(opt.x[j])}</td><td>${fmt(actualOpt[j])}</td></tr>`;
+  html += '</tbody></table></div></div>';
+
+  html += '<div class="result-block"><h3 class="result-title">已有试验中的最佳点</h3>';
+  let best=0;
+  for(let i=1;i<n;i++) if(goal==='max'?y[i]>y[best]:y[i]<y[best]) best=i;
+  html += `<div class="opt-combo response-opt">第 ${best+1} 号试验</div>`;
+  html += `<div class="opt-pred" style="margin-top:6px;">实测 y = <b>${fmt(y[best])}</b></div></div>`;
+
+  document.getElementById('result-container').innerHTML=html;
+  showToast('响应面二次回归分析完成');
+}
+
+/* =========================================================================
+   通用格式化与回车跳格子
+   ========================================================================= */
+function fmt(v) {
+  if (!Number.isFinite(v)) return '—';
+  const a = Math.abs(v);
+  if (a === 0) return '0';
+  if (a >= 1e6 || (a < 1e-4 && a > 0)) return v.toExponential(3);
+  return v.toFixed(3);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.classList.contains('result-input')) {
+    const inputs = [...document.querySelectorAll(currentMode === 'ortho' ? '.ortho-input' : currentMode === 'uniform' ? '.uni-input' : '.rsm-input')];
+    const idx = inputs.indexOf(e.target);
+    if (idx >= 0 && idx < inputs.length - 1) {
+      inputs[idx+1].focus();
+      inputs[idx+1].select();
+    } else {
+      if (currentMode === 'ortho') analyzeOrtho();
+      else if (currentMode === 'uniform') analyzeUniform();
+      else analyzeRSM();
+    }
+  }
+});
+</script>
+</body>
+</html>
