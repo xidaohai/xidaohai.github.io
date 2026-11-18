@@ -257,12 +257,29 @@
 
     .nav-primary-row {
       max-width: 1320px;
-      margin: 0 auto;
+      width: calc(100% - 32px);
+      box-sizing: border-box;
+      margin: 8px auto;
       padding: 10px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 14px;
+      border: 1px solid var(--accent-gold-border);
+      border-radius: 15px;
+      background: linear-gradient(112deg, var(--glass-bg-strong), var(--glass-bg-soft) 58%, var(--glass-bg));
+      box-shadow:
+        0 0 0 3px rgba(148, 116, 63, 0.025),
+        0 7px 20px -15px rgba(74, 58, 32, 0.24),
+        inset 0 1px 0 var(--glass-highlight);
+    }
+
+    [data-theme="dark"] .nav-primary-row {
+      border-color: rgba(216, 189, 137, 0.19);
+      box-shadow:
+        0 0 0 3px rgba(216, 189, 137, 0.025),
+        0 8px 22px -16px rgba(0, 0, 0, 0.72),
+        inset 0 1px 0 rgba(255, 255, 255, 0.055);
     }
 
     .brand-cluster {
@@ -1739,6 +1756,12 @@
     /* 作者肖像展示框：只需替换下面的图片 URL；不依赖外部图片文件 */
     .author-feature-card {
       width: 136px;
+      display: block;
+      appearance: none;
+      -webkit-appearance: none;
+      color: inherit;
+      font: inherit;
+      cursor: zoom-in;
       align-self: flex-end;
       padding: 5px;
       border: 1px solid var(--dock-border);
@@ -1748,7 +1771,10 @@
       -webkit-backdrop-filter: blur(26px) saturate(175%);
       box-shadow: var(--dock-shadow);
       overflow: hidden;
+      transition: transform .22s ease, box-shadow .22s ease;
     }
+    .author-feature-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,.18); }
+    .author-feature-card:focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 3px; }
 
     .author-feature-photo {
       --author-photo-url: url("https://xidaohai.github.io/xdh.png"); /* 作者头像 */
@@ -2196,39 +2222,88 @@
     @media (max-width: 768px) {
       .site-header { position: relative; }
 
+      /* 手机端导航分层：主菜单完整换行显示，子菜单独立成区 */
       .nav-primary-row {
-        padding: 10px 14px 8px;
-        gap: 8px;
+        width: calc(100% - 18px);
+        margin: 8px auto 7px;
+        padding: 11px 11px 10px;
+        gap: 9px;
+        align-items: center;
+        border-radius: 14px;
+        box-shadow:
+          0 0 0 2px rgba(148, 116, 63, 0.025),
+          0 5px 16px -13px rgba(74, 58, 32, 0.22),
+          inset 0 1px 0 var(--glass-highlight);
       }
 
       .brand-cluster {
         width: 100%;
         justify-content: space-between;
+        gap: 8px;
       }
 
-      .nav-right-actions {
-        width: 100%;
-        justify-content: space-between;
-      }
+      .brand-link { font-size: 14px; gap: 8px; }
+      .brand-mark { width: 32px; height: 32px; }
+      .mode-switcher { flex: 0 0 auto; }
+      .mode-btn { padding: 6px 9px; font-size: 11.5px; }
 
       .collection-tabs {
+        order: 2;
+        width: 100%;
+        margin: 0;
+        padding: 9px 0 8px;
         display: flex;
         flex-wrap: wrap;
-        gap: 5px;
+        justify-content: flex-start;
+        gap: 6px;
+        overflow: visible;
+        border-top: 1px solid var(--border-subtle);
+        border-bottom: 1px solid var(--border-subtle);
       }
 
       .collection-tab {
-        flex: 1 1 auto;
+        flex: 1 1 calc(33.333% - 6px);
+        min-width: 0;
         justify-content: center;
-        padding: 6px 8px;
-        font-size: 11.5px;
+        padding: 7px 6px;
+        font-size: 11px;
+        background: var(--glass-bg-soft);
+        border-color: var(--border-subtle);
+        white-space: normal;
+        text-align: center;
       }
+      .collection-tab svg { flex: 0 0 14px; }
 
-      .nav-secondary-row { padding: 8px 14px; }
-      .nav-item { padding: 5px 8px; font-size: 11.5px; }
+      .nav-right-actions {
+        order: 3;
+        width: 100%;
+        justify-content: flex-end;
+        gap: 7px;
+        padding-top: 2px;
+      }
+      .theme-toggle, .download-btn { padding: 6px 10px; font-size: 11.5px; }
+
+      .nav-secondary-row {
+        padding: 8px 14px 10px;
+        overflow: visible;
+        background: var(--glass-bg-soft);
+        border-top: 0;
+      }
+      .nav-secondary-row::before {
+        content: "子菜单";
+        display: block;
+        margin: 0 0 7px 2px;
+        color: var(--text-muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .12em;
+      }
+      .nav-panels { width: 100%; min-width: 0; }
+      .nav-panel { flex-wrap: wrap; width: 100%; gap: 6px; }
+      .nav-item { padding: 6px 8px; font-size: 11px; white-space: normal; }
 
       .page-shell {
-        padding: 20px 14px calc(275px + env(safe-area-inset-bottom));
+        padding: 20px 14px calc(255px + env(safe-area-inset-bottom));
         gap: 22px;
       }
 
@@ -2266,30 +2341,83 @@
 
       .credits-card { padding: 14px; }
 
-      /* 手机端悬浮坞居中贴底 */
+      /* 手机端悬浮坞：音乐、社交入口在上，作者肖像独立置于最下方并保持原比例 */
       .bottom-right-dock {
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        align-items: center;
-        bottom: max(10px, env(safe-area-inset-bottom));
-        width: max-content;
-        max-width: calc(100vw - 16px);
+        left: 10px;
+        right: 10px;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        transform: none;
+        width: auto;
+        max-width: none;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "portrait" "music" "social";
+        align-items: end;
+        gap: 5px;
       }
 
-      /* 作者肖像在手机端缩小并右对齐，避免挤压底部快捷入口 */
-      .author-feature-card { width: 86px; padding: 4px; border-radius: 13px; }
-      .author-feature-photo { border-radius: 9px; }
-      .author-feature-photo::before { inset: 5px; border-radius: 6px; }
-      .author-feature-photo::after { top: 9px; left: 9px; width: 14px; }
-      .author-feature-caption { left: 9px; right: 9px; bottom: 8px; gap: 1px; }
-      .author-feature-kicker { font-size: 6px; letter-spacing: 0.14em; }
-      .author-feature-name { font-size: 11px; letter-spacing: 0.08em; }
+      .author-feature-card {
+        display: none;
+        grid-area: portrait;
+        width: 132px;
+        height: auto;
+        aspect-ratio: 2 / 3;
+        padding: 4px;
+        border-radius: 12px;
+        justify-self: end;
+        align-self: auto;
+        flex: none;
+      }
+      body.mobile-at-bottom .author-feature-card { display: block; }
 
-      .dock-music-card { padding: 6px 10px; gap: 8px; }
-      .music-meta { max-width: 130px; }
+      .author-feature-photo {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        aspect-ratio: 2 / 3;
+        border-radius: 8px;
+      }
+      .author-feature-photo::before { inset: 5px; border-radius: 5px; }
+      .author-feature-photo::after { top: 8px; left: 8px; width: 13px; }
+      .author-feature-caption { left: 8px; right: 7px; bottom: 7px; gap: 1px; }
+      .author-feature-kicker { font-size: 5px; letter-spacing: 0.08em; }
+      .author-feature-name { font-size: 10px; letter-spacing: 0.06em; }
+
+      .dock-music-card {
+        grid-area: music;
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 6px 9px;
+        gap: 7px;
+        border-radius: 12px;
+        justify-content: space-between;
+      }
+      .music-meta { max-width: none; flex: 1 1 auto; min-width: 0; }
+      .music-title { font-size: 10.5px; }
+      .music-vol-row input[type="range"] { width: min(78px, 100%); }
+
+      .social-dock {
+        grid-area: social;
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: space-around;
+        gap: 4px;
+        padding: 4px;
+        border-radius: 12px;
+      }
       .author-avatar-card { display: none; }
-      .social-link { width: 44px; height: 44px; flex: 0 0 44px; font-size: 9.5px; }
+      .social-link {
+        width: auto;
+        height: 35px;
+        min-width: 0;
+        flex: 1 1 0;
+        padding: 3px 2px;
+        font-size: 9px;
+        border-radius: 8px;
+      }
+      .qq-menu { flex: 1 1 0; min-width: 0; }
+      .qq-menu > .social-link { width: 100%; }
 
       .preview-dialog { height: 90vh; max-height: none; }
     }
@@ -2297,6 +2425,13 @@
     @media (max-width: 420px) {
       .toolbox-grid,
       .gallery-container { grid-template-columns: 1fr; }
+      .author-feature-card { width: 120px; }
+      .collection-tab { flex-basis: calc(50% - 6px); }
+      .dock-music-card { padding: 5px 7px; gap: 5px; }
+      .music-disc { width: 25px; height: 25px; }
+      .play-pause-btn { width: 28px; height: 28px; }
+      .social-link { height: 33px; }
+      .page-shell { padding-bottom: calc(255px + env(safe-area-inset-bottom)); }
     }
   </style>
 </head>
@@ -3194,14 +3329,14 @@
        ============================================================ -->
   <div class="bottom-right-dock" aria-label="音乐与作者快捷入口">
     <!-- 作者肖像展示框：在 CSS 中替换 YOUR_IMAGE_URL 即可更换图片 -->
-    <div class="author-feature-card" role="img" aria-label="作者西岛海肖像展示框">
+    <button class="author-feature-card" id="authorPortraitButton" type="button" aria-label="点击放大作者西岛海肖像">
       <div class="author-feature-photo">
         <div class="author-feature-caption">
           <span class="author-feature-kicker">AUTHOR · XIDAOHAI</span>
           <strong class="author-feature-name">西岛海</strong>
         </div>
       </div>
-    </div>
+    </button>
 
     <!-- 音乐播放器 -->
     <div class="dock-music-card">
@@ -3281,6 +3416,33 @@
       <div class="preview-body" id="previewBody"></div>
     </div>
   </div>
+
+  <div class="author-lightbox" id="authorLightbox" hidden role="dialog" aria-modal="true" aria-label="作者肖像放大查看">
+    <button class="author-lightbox-close" id="authorLightboxClose" type="button" aria-label="关闭">×</button>
+    <div class="author-lightbox-image" role="img" aria-label="西岛海作者肖像"></div>
+  </div>
+
+  <style>
+    .author-lightbox { position:fixed; inset:0; z-index:3000; display:grid; place-items:center; padding:22px; background:rgba(8,10,14,.82); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+    .author-lightbox[hidden] { display:none; }
+    .author-lightbox-image { width:min( min(78vw, 460px), calc((100dvh - 64px) * 2 / 3)); aspect-ratio:2/3; border-radius:16px; background-image:linear-gradient(180deg,transparent 70%,rgba(0,0,0,.5)),url("https://xidaohai.github.io/xdh.png"); background-size:cover; background-position:center; box-shadow:0 24px 80px rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.35); }
+    .author-lightbox-close { position:absolute; top:max(18px,env(safe-area-inset-top)); right:18px; width:42px; height:42px; border-radius:50%; border:1px solid rgba(255,255,255,.35); color:#fff; background:rgba(255,255,255,.12); font-size:28px; line-height:1; cursor:pointer; }
+    @media (max-width:768px) { .author-feature-card { width:132px; } }
+  </style>
+
+  <script>
+    (() => {
+      const trigger = document.getElementById('authorPortraitButton');
+      const overlay = document.getElementById('authorLightbox');
+      const close = document.getElementById('authorLightboxClose');
+      if (!trigger || !overlay || !close) return;
+      const hide = () => { overlay.hidden = true; document.body.style.overflow = ''; trigger.focus(); };
+      trigger.addEventListener('click', () => { overlay.hidden = false; document.body.style.overflow = 'hidden'; close.focus(); });
+      close.addEventListener('click', hide);
+      overlay.addEventListener('click', e => { if (e.target === overlay) hide(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && !overlay.hidden) hide(); });
+    })();
+  </script>
 
   <script>
     /* ============================================================
@@ -3958,6 +4120,25 @@
         }
       });
     });
+    /* 手机端作者肖像仅在滚动到页面底部时出现 */
+    (() => {
+      const mobileQuery = window.matchMedia('(max-width: 768px)');
+      const updateAuthorPortraitVisibility = () => {
+        if (!mobileQuery.matches) {
+          document.body.classList.remove('mobile-at-bottom');
+          return;
+        }
+        const root = document.documentElement;
+        const distanceToBottom = root.scrollHeight - (window.scrollY + window.innerHeight);
+        document.body.classList.toggle('mobile-at-bottom', distanceToBottom <= 24);
+      };
+      window.addEventListener('scroll', updateAuthorPortraitVisibility, { passive: true });
+      window.addEventListener('resize', updateAuthorPortraitVisibility, { passive: true });
+      if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', updateAuthorPortraitVisibility);
+      else mobileQuery.addListener(updateAuthorPortraitVisibility);
+      updateAuthorPortraitVisibility();
+    })();
+
   </script>
 </body>
 </html>
