@@ -80,7 +80,8 @@
         .manual-mode-active .mode-tabs,
         .manual-mode-active .input-section,
         .manual-mode-active .actions-section,
-        .manual-mode-active .aux-btns { display: none !important; }
+        .manual-mode-active .aux-btns,
+        .manual-mode-active .method-tip-card { display: none !important; }
         .manual-mode-active .left-panel { border-color: var(--purple); box-shadow: 0 0 40px rgba(191, 90, 242, 0.15); }
 
         .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); backdrop-filter: blur(12px); transition: all 0.4s ease; }
@@ -145,6 +146,71 @@
         .btn-target-mid { background: #1e2a2d; color: #b0e0e6; }
         .btn-manual { background: #2a1e2d; color: #e0b0e6; border-color: #443344; }
 
+        /* 左侧下方：方法选择小贴士 */
+        .method-tip-card {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 13px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .method-tip-head {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--text-sub);
+        }
+        .method-tip-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .method-tip-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #c8c8ce;
+        }
+        .method-tip-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+        .method-tip-dot.bi { background: var(--blue); box-shadow: 0 0 6px var(--blue); }
+        .method-tip-dot.opt { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+        .method-tip-badge {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            margin-left: 2px;
+            white-space: nowrap;
+        }
+        .method-tip-badge.bi {
+            background: rgba(77, 171, 247, 0.14);
+            color: var(--blue);
+            border: 1px solid rgba(77, 171, 247, 0.28);
+        }
+        .method-tip-badge.opt {
+            background: rgba(255, 215, 0, 0.13);
+            color: var(--yellow);
+            border: 1px solid rgba(255, 215, 0, 0.28);
+        }
+        @media (max-width: 900px) {
+            .method-tip-card { padding: 12px 13px; }
+            .method-tip-row { font-size: 12px; }
+        }
+
         .manual-controls { display: none; flex-direction: column; gap: 20px; margin-top: 15px; animation: fadeIn 0.5s ease; }
         .container.manual-mode-active .manual-controls { display: flex; }
         .div-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
@@ -183,6 +249,92 @@
 
         .footer { text-decoration: none; display: block; padding: 15px; font-size: 12px; color: var(--text-sub); text-align: center; }
         @media (min-width: 901px) { .footer { position: absolute; bottom: -45px; right: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border: 1px solid #333; border-radius: 30px; padding: 8px 20px; z-index: 100; } }
+    </style>
+
+    <!-- ===== 追加：二分法整合样式（不改动上方优选法原有样式） ===== -->
+    <style>
+        /* 顶部视图切换条 */
+        .app-switch {
+            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+            display: flex; background: #141418; border: 1px solid #2a2a2e;
+            border-radius: 12px; padding: 4px; gap: 4px; z-index: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .app-switch button {
+            background: transparent; border: none; color: #88888b;
+            font-size: 13px; font-weight: bold; padding: 8px 18px;
+            border-radius: 8px; cursor: pointer; transition: 0.3s;
+        }
+        .app-switch button.active { background: #282830; color: var(--yellow); }
+        .app-switch button.active[data-view="bi"] { color: var(--blue); }
+
+        /* 给固定切换条留出顶部空间（仅影响垂直偏移，不破坏原布局） */
+        body { padding-top: 76px !important; }
+
+        /* 二分法作用域内覆盖沿用类的配色 */
+        #bi-container .header h1 span { color: var(--blue); }
+        #bi-container .input-group input { color: var(--blue); }
+        #bi-container .input-group input:focus { border-color: var(--blue); }
+        #bi-container .input-group input.mid-input { color: var(--green); }
+        #bi-container .input-group input.mid-input:focus { border-color: var(--green); }
+        #bi-container .btn-icon:hover { border-color: var(--blue); }
+        #bi-container .toggle-btn:hover { border-color: var(--blue); }
+        #bi-container .step-tag { background: #1c3d5a; color: #9fd3ff; }
+        #bi-container .track-active { background: #263d4d; border: 1px solid rgba(77, 171, 247, 0.2); }
+        #bi-container .history-item { border-left-color: var(--blue); }
+        #bi-container .history-item b { color: var(--blue); }
+
+        #bi-txt-min, #bi-txt-max {
+            background: #000; border: 1px solid #333; border-radius: 8px;
+            color: var(--blue); font-size: 16px; font-weight: bold;
+            padding: 6px 12px; font-family: var(--mono-font);
+            text-align: center; min-width: 60px;
+        }
+
+        /* 二分法中心点标记 */
+        #bi-container .marker.mid { background: var(--green); box-shadow: 0 0 10px var(--green); }
+        #bi-container .marker-label.mid { color: var(--green); }
+
+        /* 本轮中心点展示 */
+        #bi-container .mid-display {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 18px; background: #1e1e24; border: 1px solid var(--border-color);
+            border-radius: var(--radius); border-bottom: 4px solid var(--green);
+        }
+        #bi-container .mid-display .label { font-size: 11px; color: var(--text-sub); font-weight: bold; letter-spacing: 1px; }
+        #bi-container .mid-display .value {
+            font-size: clamp(28px, 6vw, 36px); font-weight: bold;
+            font-family: var(--mono-font); color: var(--green);
+            letter-spacing: -0.5px; cursor: pointer; transition: 0.2s; user-select: all;
+        }
+        #bi-container .mid-display .value:hover { text-shadow: 0 0 12px rgba(0, 255, 136, 0.5); }
+        #bi-container .mid-display .hint { font-size: 11px; color: var(--text-sub); font-family: var(--mono-font); }
+
+        /* 方向判断按钮 */
+        #bi-container .decision-row { display: flex; gap: 12px; }
+        #bi-container .decision-btn {
+            flex: 1; padding: 16px; border-radius: var(--radius);
+            border: 1px solid #444; cursor: pointer; font-size: 14px; font-weight: bold;
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            transition: 0.3s; background: #1e1e24; color: var(--text-main);
+        }
+        #bi-container .decision-btn:hover { border-color: #666; }
+        #bi-container .decision-btn.left { border-left: 4px solid var(--blue); }
+        #bi-container .decision-btn.right { border-right: 4px solid var(--red); }
+        #bi-container .decision-btn .sub { font-size: 11px; color: var(--text-sub); font-weight: normal; font-family: var(--mono-font); }
+
+        /* 复制提示 */
+        .copy-toast {
+            position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%) translateY(20px);
+            background: var(--green); color: #000; padding: 10px 20px; border-radius: 24px;
+            font-size: 13px; font-weight: bold; opacity: 0; pointer-events: none;
+            transition: all 0.3s var(--smooth-easing); z-index: 999;
+        }
+        .copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 900px) {
+            #bi-container .input-group.bi-mid-group { flex: 1 1 100% !important; }
+        }
     </style>
 </head>
 <body>
@@ -264,6 +416,24 @@
                 <span class="indicator" id="anim-indicator"></span>
                 <span id="anim-label">动画开</span>
             </button>
+        </div>
+
+        <!-- 小贴士 -->
+        <div class="method-tip-card">
+            <div class="method-tip-head">
+                <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+                <span>选法小贴士</span>
+            </div>
+            <div class="method-tip-list">
+                <div class="method-tip-row">
+                    <span class="method-tip-dot bi"></span>
+                    <div>知道一个点往高调好，还是往低调好：使用 <span class="method-tip-badge bi">二分法</span></div>
+                </div>
+                <div class="method-tip-row">
+                    <span class="method-tip-dot opt"></span>
+                    <div>必须通过两个点对比，才能知道哪个点表现更好：使用 <span class="method-tip-badge opt">优选法（0.618法）</span></div>
+                </div>
+            </div>
         </div>
 
         <div class="manual-controls" id="manual-controls">
@@ -752,6 +922,424 @@
 
     // 初始化运行
     init();
+</script>
+
+<!-- ===== 追加：视图切换条 ===== -->
+<div class="app-switch" id="app-switch">
+    <button data-view="opt" class="active">优选法 0.618</button>
+    <button data-view="bi">二分法</button>
+</div>
+
+<!-- ===== 追加：二分法容器（id 全部 bi- 前缀，避免与优选法冲突） ===== -->
+<div class="container" id="bi-container" style="display:none;">
+    <div class="panel left-panel">
+        <div class="header">
+            <h1>二分法 <span>Bisection</span></h1>
+            <div class="desc">
+                本轮只看中心点 M 这一个数：判断解在 M 左侧还是右侧，丢掉另一半。<br>
+                中心点可输入或拖动轨道设定；点击中心点数值可复制。
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label>下限 Min</label>
+                <input type="number" id="bi-in-min" value="0" step="any">
+            </div>
+            <div class="input-group">
+                <label>上限 Max</label>
+                <input type="number" id="bi-in-max" value="100" step="any">
+            </div>
+            <div class="input-group bi-mid-group">
+                <label>中心点 M（可设）</label>
+                <input type="number" id="bi-in-mid" class="mid-input" placeholder="默认区间中点" step="any">
+            </div>
+            <div class="btn-controls">
+                <button class="btn-icon" id="bi-btn-reset" title="全局重置">
+                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="visualizer-section">
+            <div class="track-viewport">
+                <div class="marker-label mid" id="bi-lab-mid">中心 M</div>
+                <div class="track-container" id="bi-track-box">
+                    <div class="track-bg"></div>
+                    <div class="track-active" id="bi-bar-active"></div>
+                    <div class="marker mid" id="bi-ptr-mid"></div>
+                </div>
+            </div>
+            <div class="bounds-labels">
+                <span id="bi-txt-min">0.000</span>
+                <div class="step-tag" id="bi-txt-step">STEP 1</div>
+                <span id="bi-txt-max">100.000</span>
+            </div>
+        </div>
+
+        <!-- 本轮唯一判断点：中心点数值，点击复制 -->
+        <div class="mid-display">
+            <div class="label">本轮中心点 M</div>
+            <div class="value" id="bi-val-mid" title="点击复制">50.000</div>
+            <div class="hint" id="bi-hint-mid">当前区间 [0.000, 100.000]</div>
+        </div>
+
+        <!-- 方向判断：解在 M 左还是右 -->
+        <div class="decision-row">
+            <button class="decision-btn left" id="bi-btn-left">
+                <span>解在 M 左侧</span>
+                <span class="sub" id="bi-sub-left">保留 [0.000, 50.000]</span>
+            </button>
+            <button class="decision-btn right" id="bi-btn-right">
+                <span>解在 M 右侧</span>
+                <span class="sub" id="bi-sub-right">保留 [50.000, 100.000]</span>
+            </button>
+        </div>
+
+        <div class="aux-btns">
+            <button class="btn-aux btn-undo" id="bi-btn-undo" disabled>撤销回溯</button>
+            <button class="toggle-btn" id="bi-btn-toggle-anim">
+                <span class="indicator" id="bi-anim-indicator"></span>
+                <span id="bi-anim-label">动画开</span>
+            </button>
+        </div>
+
+        <!-- 小贴士 -->
+        <div class="method-tip-card">
+            <div class="method-tip-head">
+                <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+                <span>选法小贴士</span>
+            </div>
+            <div class="method-tip-list">
+                <div class="method-tip-row">
+                    <span class="method-tip-dot bi"></span>
+                    <div>知道一个点往高调好，还是往低调好：使用 <span class="method-tip-badge bi">二分法</span></div>
+                </div>
+                <div class="method-tip-row">
+                    <span class="method-tip-dot opt"></span>
+                    <div>必须通过两个点对比，才能知道哪个点表现更好：使用 <span class="method-tip-badge opt">优选法（0.618法）</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel right-panel">
+        <h3 style="font-size:13px; color:var(--text-sub); border-bottom:1px solid #333; padding-bottom:10px; font-weight:800; letter-spacing:1px;">HISTORY LOGS</h3>
+        <div class="history-list" id="bi-hist"></div>
+    </div>
+    <a href="https://space.bilibili.com/1534330" class="footer" target="_blank">灵敏度推广、网页制作者：西岛海</a>
+</div>
+
+<div class="copy-toast" id="bi-copy-toast">已复制</div>
+
+<script>
+    // ===== 视图切换（不影响优选法逻辑） =====
+    (function () {
+        const viewOpt = document.getElementById('main-container');
+        const viewBi = document.getElementById('bi-container');
+        const btns = document.querySelectorAll('#app-switch button');
+        btns.forEach(btn => {
+            btn.onclick = () => {
+                const v = btn.dataset.view;
+                btns.forEach(b => b.classList.toggle('active', b === btn));
+                if (v === 'opt') {
+                    viewOpt.style.display = '';
+                    viewBi.style.display = 'none';
+                } else {
+                    viewOpt.style.display = 'none';
+                    viewBi.style.display = '';
+                }
+            };
+        });
+    })();
+
+    // ===== 二分法（全部变量与 ID 局部化，不与优选法冲突） =====
+    (function () {
+        let iMin, iMax, cMin, cMax, step = 1;
+        let midOverride = null;
+        let stack = [];
+        let vMin, vMax;
+        let animationDisabled = false;
+        let isAnimating = false;
+
+        const $ = id => document.getElementById(id);
+        const fmt = n => Number(n).toFixed(3);
+
+        function getPct(val) {
+            if (vMax === vMin) return 0;
+            return ((val - vMin) / (vMax - vMin)) * 100;
+        }
+
+        function getMid() {
+            if (midOverride !== null && midOverride > cMin && midOverride < cMax) {
+                return midOverride;
+            }
+            return (cMin + cMax) / 2;
+        }
+
+        function init() {
+            const rawMin = $('bi-in-min').value.trim();
+            const rawMax = $('bi-in-max').value.trim();
+            const nextMin = rawMin === '' ? NaN : Number(rawMin);
+            const nextMax = rawMax === '' ? NaN : Number(rawMax);
+            if (!Number.isFinite(nextMin) || !Number.isFinite(nextMax) || nextMin >= nextMax) {
+                alert("范围无效：请输入有效数字，且下限需小于上限");
+                $('bi-in-min').value = Number.isFinite(iMin) ? iMin : 0;
+                $('bi-in-max').value = Number.isFinite(iMax) ? iMax : 100;
+                return;
+            }
+            iMin = nextMin;
+            iMax = nextMax;
+            cMin = iMin; cMax = iMax;
+            vMin = iMin; vMax = iMax;
+            midOverride = null;
+            $('bi-in-mid').value = '';
+            step = 1;
+            stack = [];
+            $('bi-hist').innerHTML = '';
+            $('bi-btn-undo').disabled = true;
+            updateUI();
+        }
+
+        function updateUI() {
+            const mid = getMid();
+
+            $('bi-val-mid').innerText = fmt(mid);
+            $('bi-hint-mid').innerText = `当前区间 [${fmt(cMin)}, ${fmt(cMax)}]`;
+            $('bi-sub-left').innerText = `保留 [${fmt(cMin)}, ${fmt(mid)}]`;
+            $('bi-sub-right').innerText = `保留 [${fmt(mid)}, ${fmt(cMax)}]`;
+            $('bi-txt-min').innerText = fmt(cMin);
+            $('bi-txt-max').innerText = fmt(cMax);
+            $('bi-txt-step').innerText = `STEP ${step}`;
+
+            $('bi-bar-active').style.left = getPct(cMin) + '%';
+            $('bi-bar-active').style.width = (getPct(cMax) - getPct(cMin)) + '%';
+            $('bi-ptr-mid').style.left = getPct(mid) + '%';
+            $('bi-lab-mid').style.left = getPct(mid) + '%';
+
+            if (getPct(mid) - getPct(cMin) < 10) {
+                $('bi-lab-mid').style.transform = 'translateX(8px)';
+            } else if (getPct(cMax) - getPct(mid) < 10) {
+                $('bi-lab-mid').style.transform = 'translateX(calc(-100% - 8px))';
+            } else {
+                $('bi-lab-mid').style.transform = 'translateX(-50%)';
+            }
+
+            if (document.activeElement !== $('bi-in-mid')) {
+                $('bi-in-mid').value = fmt(mid);
+            }
+
+            $('bi-btn-undo').disabled = stack.length === 0;
+        }
+
+        function saveState() {
+            stack.push({ cMin, cMax, step, midOverride });
+        }
+
+        function logAction(side, mid) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<b>[STEP ${step}]</b> 中心点 <span class="keep-badge" style="background:rgba(0,255,136,0.15); color:var(--green)">${fmt(mid)}</span> · 保留${side === 'left' ? '左' : '右'}半 → 新区间 <span class="keep-badge" style="background:rgba(77,171,247,0.2); color:var(--blue)">[${fmt(cMin)}, ${fmt(cMax)}]</span>`;
+            $('bi-hist').prepend(item);
+        }
+
+        function clearAnimResidue() {
+            document.querySelectorAll('#bi-container .crease-line, #bi-container .discard-part').forEach(el => el.remove());
+        }
+
+        function playFoldAnim(pFold, discLeft, discWidth, callback) {
+            if (isAnimating) return;
+            isAnimating = true;
+            const track = $('bi-track-box');
+
+            const crease = document.createElement('div');
+            crease.className = 'crease-line';
+            crease.style.left = pFold + '%';
+            crease.style.borderLeftColor = 'var(--blue)';
+            crease.style.boxShadow = '0 0 12px var(--blue)';
+            track.appendChild(crease);
+
+            const discard = document.createElement('div');
+            discard.className = 'discard-part';
+            discard.style.left = discLeft + '%';
+            discard.style.width = discWidth + '%';
+            discard.innerText = '撕掉';
+            track.appendChild(discard);
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    discard.style.width = '0%';
+                    discard.style.opacity = '0';
+                });
+            });
+
+            setTimeout(() => {
+                crease.remove();
+                discard.remove();
+                isAnimating = false;
+                if (callback) callback();
+            }, 950);
+        }
+
+        function doStep(side) {
+            if (isAnimating) return;
+            const mid = getMid();
+            let pFold, discLeft, discWidth;
+
+            if (side === 'left') {
+                pFold = getPct(mid);
+                discLeft = getPct(mid);
+                discWidth = getPct(cMax) - getPct(mid);
+            } else {
+                pFold = getPct(mid);
+                discLeft = getPct(cMin);
+                discWidth = getPct(mid) - getPct(cMin);
+            }
+
+            saveState();
+            const proceed = () => {
+                if (side === 'left') cMax = mid;
+                else cMin = mid;
+                midOverride = null;
+                step++;
+                logAction(side, mid);
+                updateUI();
+            };
+
+            if (animationDisabled) {
+                proceed();
+            } else {
+                playFoldAnim(pFold, discLeft, discWidth, proceed);
+            }
+        }
+
+        $('bi-btn-left').onclick = () => doStep('left');
+        $('bi-btn-right').onclick = () => doStep('right');
+
+        $('bi-btn-undo').onclick = () => {
+            if (stack.length === 0) return;
+            if (isAnimating) {
+                clearAnimResidue();
+                isAnimating = false;
+            }
+            const last = stack.pop();
+            cMin = last.cMin;
+            cMax = last.cMax;
+            step = last.step;
+            midOverride = last.midOverride;
+            const hist = $('bi-hist');
+            if (hist.firstChild) hist.removeChild(hist.firstChild);
+            clearAnimResidue();
+            updateUI();
+        };
+
+        $('bi-btn-reset').onclick = init;
+        $('bi-in-min').onchange = init;
+        $('bi-in-max').onchange = init;
+
+        $('bi-in-mid').oninput = function () {
+            const val = parseFloat(this.value);
+            if (!isNaN(val) && val > cMin && val < cMax) {
+                midOverride = val;
+            } else {
+                midOverride = null;
+            }
+            updateUI();
+        };
+
+        // 点击中心点数值复制
+        $('bi-val-mid').onclick = () => {
+            const text = $('bi-val-mid').innerText.trim();
+            const showToast = () => {
+                const toast = $('bi-copy-toast');
+                toast.classList.add('show');
+                clearTimeout(showToast._t);
+                showToast._t = setTimeout(() => toast.classList.remove('show'), 1400);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(showToast).catch(() => fallbackCopy(text, showToast));
+            } else {
+                fallbackCopy(text, showToast);
+            }
+        };
+
+        function fallbackCopy(text, cb) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); cb(); } catch (e) { alert('复制失败，请手动选择复制'); }
+            document.body.removeChild(ta);
+        }
+
+        // 拖动轨道设定中心点
+        let isDragging = false;
+
+        function getTrackPercent(clientX) {
+            const rect = $('bi-track-box').getBoundingClientRect();
+            if (!Number.isFinite(clientX) || rect.width <= 0) return 0;
+            const edgeSnap = 1;
+            if (clientX <= rect.left + edgeSnap) return 0;
+            if (clientX >= rect.right - edgeSnap) return 1;
+            return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        }
+
+        function handleTrackInteract(e) {
+            const clientX = e.type.includes('touch')
+                ? (e.touches[0] ? e.touches[0].clientX : null)
+                : e.clientX;
+            if (clientX === null || !Number.isFinite(clientX)) return;
+
+            const pct = getTrackPercent(clientX);
+            let val = vMin + pct * (vMax - vMin);
+            const eps = (cMax - cMin) * 0.001;
+            val = Math.max(cMin + eps, Math.min(cMax - eps, val));
+            midOverride = val;
+            updateUI();
+        }
+
+        $('bi-track-box').addEventListener('mousedown', (e) => {
+            isDragging = true;
+            handleTrackInteract(e);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) handleTrackInteract(e);
+        });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        $('bi-track-box').addEventListener('touchstart', (e) => {
+            isDragging = true;
+            handleTrackInteract(e);
+        }, { passive: true });
+        window.addEventListener('touchmove', (e) => {
+            if (isDragging) handleTrackInteract(e);
+        }, { passive: true });
+        window.addEventListener('touchend', () => { isDragging = false; });
+        window.addEventListener('touchcancel', () => { isDragging = false; });
+
+        $('bi-btn-toggle-anim').onclick = () => {
+            animationDisabled = !animationDisabled;
+            const btn = $('bi-btn-toggle-anim');
+            const indicator = $('bi-anim-indicator');
+            const label = $('bi-anim-label');
+            if (animationDisabled) {
+                btn.classList.add('off');
+                indicator.style.background = '#555';
+                label.innerText = '动画关';
+                $('bi-container').classList.add('no-anim');
+            } else {
+                btn.classList.remove('off');
+                indicator.style.background = 'var(--green)';
+                label.innerText = '动画开';
+                $('bi-container').classList.remove('no-anim');
+            }
+        };
+
+        init();
+    })();
 </script>
 </body>
 </html>
