@@ -62,10 +62,10 @@
         .container.is-advanced .adv-only-inline { display: inline-block !important; }
 
         @media (max-width: 900px) {
-            body { align-items: flex-start; overflow-y: auto; padding-bottom: 185px !important; }
+            body { align-items: flex-start; overflow-y: auto; padding-bottom: 220px !important; }
             .container { flex-direction: column; align-items: center; padding-bottom: 40px; }
             .left-panel, .right-panel { width: 100% !important; min-width: unset !important; }
-            .right-panel { max-height: 400px !important; }
+            .right-panel { max-height: 460px !important; }
             .input-section { flex-wrap: wrap !important; gap: 15px !important; padding: 20px !important; }
             .input-group { flex: 1 1 calc(50% - 10px) !important; }
             .input-group.target-group { flex: 1 1 100% !important; }
@@ -86,7 +86,7 @@
 
         .panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); backdrop-filter: blur(12px); transition: all 0.4s ease; }
         .left-panel { flex: 1.8; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-        .right-panel { flex: 1; min-width: 320px; display: flex; flex-direction: column; overflow: hidden; max-height: 85vh; }
+        .right-panel { flex: 1.05; min-width: 340px; display: flex; flex-direction: column; overflow: hidden; max-height: 85vh; }
 
         .header h1 { font-size: clamp(20px, 4vw, 24px); letter-spacing: -0.5px; }
         .header h1 span { color: var(--yellow); }
@@ -229,16 +229,156 @@
         .toggle-btn.off .indicator { background: #555; }
         .toggle-btn.off { border-color: #666; }
 
-        .history-list { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 12px; margin-top: 15px; padding-right: 8px; }
+        /* 右侧历史记录与区间收敛图谱 */
+        .right-panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .right-panel-head h3 {
+            font-size: 13px;
+            color: var(--text-sub);
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .hist-bounds-hint {
+            font-size: 11px;
+            color: var(--text-sub);
+            font-family: var(--mono-font);
+        }
+
+        /* 历史区间收敛图谱卡片（类似胶囊条 + 垂直刻度线） */
+        .hist-visual-card {
+            margin-top: 12px;
+            background: rgba(11, 14, 22, 0.72);
+            border: 1px solid #262936;
+            border-radius: 12px;
+            padding: 10px 12px;
+            max-height: 225px;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .hist-visual-card.has-items { display: flex; }
+        .hist-visual-card::-webkit-scrollbar { width: 4px; }
+        .hist-visual-card::-webkit-scrollbar-thumb { background: #33384a; border-radius: 10px; }
+
+        .hv-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 22px;
+            animation: slideUp 0.35s var(--smooth-easing) forwards;
+        }
+        .hv-num {
+            width: 18px;
+            text-align: right;
+            font-size: 11px;
+            font-weight: 700;
+            color: #7d869c;
+            font-family: var(--mono-font);
+            flex-shrink: 0;
+        }
+        .hv-track {
+            position: relative;
+            flex: 1;
+            height: 22px;
+        }
+        .hv-baseline {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.045);
+            transform: translateY(-50%);
+        }
+        .hv-pill {
+            position: absolute;
+            top: 4px;
+            height: 14px;
+            min-width: 4px;
+            border-radius: 999px;
+            background: rgba(34, 41, 66, 0.85);
+            border: 1px solid rgba(118, 134, 182, 0.62);
+            box-shadow: inset 0 0 8px rgba(96, 125, 196, 0.14);
+            transition: left 0.4s var(--smooth-easing), width 0.4s var(--smooth-easing);
+        }
+        .hv-pill.is-point {
+            background: rgba(191, 90, 242, 0.25);
+            border-color: var(--purple);
+        }
+        .hv-tick {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1.5px;
+            transform: translateX(-50%);
+            border-radius: 1px;
+            pointer-events: none;
+        }
+        .hv-tick.tick-mid {
+            background: #67b7bd;
+            box-shadow: 0 0 6px rgba(103, 183, 189, 0.55);
+        }
+        .hv-tick.tick-a {
+            background: var(--blue);
+            box-shadow: 0 0 5px rgba(77, 171, 247, 0.6);
+        }
+        .hv-tick.tick-b {
+            background: var(--red);
+            box-shadow: 0 0 5px rgba(255, 107, 107, 0.6);
+        }
+        .hv-tick.tick-sel {
+            background: var(--purple);
+            box-shadow: 0 0 6px rgba(191, 90, 242, 0.7);
+        }
+
+        .history-list { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 10px; margin-top: 12px; padding-right: 6px; }
         .history-list::-webkit-scrollbar { width: 5px; }
         .history-list::-webkit-scrollbar-thumb { background: #33333a; border-radius: 10px; }
-        .history-item { padding: 16px; background: rgba(255,255,255,0.02); border-radius: 12px; font-size: 13px; line-height: 1.6; border-left: 4px solid var(--yellow); animation: slideUp 0.4s var(--smooth-easing) forwards; border-right: 1px solid rgba(255,255,255,0.02); }
+        .history-item { padding: 13px 14px; background: rgba(255,255,255,0.02); border-radius: 12px; font-size: 13px; line-height: 1.55; border-left: 4px solid var(--yellow); animation: slideUp 0.4s var(--smooth-easing) forwards; border-right: 1px solid rgba(255,255,255,0.02); }
         .history-item.is-manual { border-left-color: var(--purple); background: rgba(191, 90, 242, 0.05); }
         .history-item.is-midpoint { border-left-color: var(--green); }
         .history-item.is-hybrid { border-left-color: var(--cyan); }
         .history-item.is-equal { border-left-color: var(--cyan); background: rgba(0, 229, 255, 0.05); }
-        .history-item b { font-family: var(--mono-font); color: var(--yellow); font-size: 14px; }
+        .history-item b { font-family: var(--mono-font); color: var(--yellow); font-size: 13px; }
         .keep-badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-weight: bold; font-family: var(--mono-font); margin: 0 2px; font-size: 12px; }
+
+        /* 每条文字记录内嵌的迷你胶囊条 */
+        .item-mini-bar {
+            position: relative;
+            height: 16px;
+            margin-top: 8px;
+            background: rgba(11, 14, 22, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 0 6px;
+        }
+        .item-mini-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .item-mini-pill {
+            position: absolute;
+            top: 3px;
+            height: 8px;
+            min-width: 3px;
+            border-radius: 999px;
+            background: rgba(36, 44, 70, 0.9);
+            border: 1px solid rgba(118, 134, 182, 0.65);
+        }
+        .item-mini-tick {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1.5px;
+            transform: translateX(-50%);
+        }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -323,14 +463,14 @@
 
         /* 左下角常驻：百分比浮动区间计算器 */
         .pct-dock {
-            position: fixed; left: 16px; bottom: 14px; width: 258px;
+            position: fixed; left: 16px; bottom: 14px; width: 276px;
             background: rgba(22, 22, 26, 0.96); border: 1px solid #303038;
             border-radius: 12px; padding: 11px 13px;
             box-shadow: 0 12px 30px rgba(0,0,0,0.75); z-index: 460;
             backdrop-filter: blur(10px);
         }
         .pct-dock-title { font-size: 12px; font-weight: 800; color: var(--yellow); margin-bottom: 8px; }
-        .pct-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .pct-row { display: flex; gap: 8px; margin-bottom: 7px; }
         .pct-col { flex: 1; min-width: 0; }
         .pct-col label { display: block; font-size: 10px; color: var(--text-sub); font-weight: bold; margin-bottom: 4px; }
         .pct-col input {
@@ -339,6 +479,19 @@
             text-align: center; font-family: var(--mono-font); outline: none;
         }
         .pct-col input:focus { border-color: var(--blue); }
+        .pct-presets {
+            display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;
+        }
+        .pct-preset-btn {
+            flex: 1 0 auto; min-width: 32px; background: #141418; border: 1px solid #2e2e36;
+            color: #a8a8b0; font-size: 10px; font-weight: bold; font-family: var(--mono-font);
+            padding: 4px 4px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+            text-align: center;
+        }
+        .pct-preset-btn:hover { border-color: #555; color: #fff; }
+        .pct-preset-btn.active {
+            background: #232c38; border-color: var(--blue); color: var(--blue);
+        }
         .pct-result {
             display: flex; justify-content: space-between; gap: 6px;
             background: rgba(255,255,255,0.03); border: 1px solid #26262e;
@@ -487,7 +640,11 @@
     </div>
 
     <div class="panel right-panel">
-        <h3 style="font-size:13px; color:var(--text-sub); border-bottom:1px solid #333; padding-bottom:10px; font-weight:800; letter-spacing:1px;">HISTORY LOGS</h3>
+        <div class="right-panel-head">
+            <h3>HISTORY LOGS</h3>
+            <span class="hist-bounds-hint" id="opt-hist-bounds">[0.00, 100.00]</span>
+        </div>
+        <div class="hist-visual-card" id="opt-hist-visual"></div>
         <div class="history-list" id="hist"></div>
     </div>
     <div class="footer" id="opt-footer" title="点击复制网址">灵敏度推广、网页制作者：西岛海</div>
@@ -608,7 +765,11 @@
     </div>
 
     <div class="panel right-panel">
-        <h3 style="font-size:13px; color:var(--text-sub); border-bottom:1px solid #333; padding-bottom:10px; font-weight:800; letter-spacing:1px;">HISTORY LOGS</h3>
+        <div class="right-panel-head">
+            <h3>HISTORY LOGS</h3>
+            <span class="hist-bounds-hint" id="bi-hist-bounds">[0.00, 100.00]</span>
+        </div>
+        <div class="hist-visual-card" id="bi-hist-visual"></div>
         <div class="history-list" id="bi-hist"></div>
     </div>
     <div class="footer" id="bi-footer" title="点击复制网址">灵敏度推广、网页制作者：西岛海</div>
@@ -626,6 +787,15 @@
             <label id="lbl-pct-rate">百分比 %</label>
             <input type="number" id="pct-rate" value="5" step="any">
         </div>
+    </div>
+    <div class="pct-presets" id="pct-presets">
+        <button type="button" class="pct-preset-btn" data-p="0.5">0.5%</button>
+        <button type="button" class="pct-preset-btn" data-p="1">1%</button>
+        <button type="button" class="pct-preset-btn" data-p="3">3%</button>
+        <button type="button" class="pct-preset-btn active" data-p="5">5%</button>
+        <button type="button" class="pct-preset-btn" data-p="10">10%</button>
+        <button type="button" class="pct-preset-btn" data-p="25">25%</button>
+        <button type="button" class="pct-preset-btn" data-p="50">50%</button>
     </div>
     <div class="pct-result">
         <span class="pct-low" id="pct-low-txt">低 95.00</span>
@@ -830,6 +1000,83 @@
     document.getElementById('opt-footer').onclick = () => copyToClipboard(AUTHOR_URL);
     document.getElementById('bi-footer').onclick = () => copyToClipboard(AUTHOR_URL);
 
+    // ===== 历史区间可视化图谱构建器 =====
+    function clampPct(v) {
+        return Math.max(0, Math.min(100, v));
+    }
+
+    function toNormPct(val, gMin, gMax) {
+        if (!Number.isFinite(gMin) || !Number.isFinite(gMax) || gMax <= gMin) return 0;
+        return clampPct(((val - gMin) / (gMax - gMin)) * 100);
+    }
+
+    function buildMiniBarHTML(gMin, gMax, segMin, segMax, ticks) {
+        const leftPct = toNormPct(segMin, gMin, gMax);
+        const rightPct = toNormPct(segMax, gMin, gMax);
+        const widthPct = Math.max(0, rightPct - leftPct);
+        const isPoint = Math.abs(segMax - segMin) <= (gMax - gMin) * 1e-6;
+
+        let ticksHtml = '';
+        (ticks || []).forEach(tk => {
+            const p = toNormPct(tk.val, gMin, gMax);
+            const colorMap = {
+                mid: 'var(--cyan)',
+                a: 'var(--blue)',
+                b: 'var(--red)',
+                sel: 'var(--purple)'
+            };
+            const bg = colorMap[tk.kind] || 'var(--cyan)';
+            ticksHtml += `<div class="item-mini-tick" style="left:${p}%; background:${bg};"></div>`;
+        });
+
+        return `
+            <div class="item-mini-bar">
+                <div class="item-mini-inner">
+                    <div class="item-mini-pill" style="left:${leftPct}%; width:${widthPct}%; ${isPoint ? 'border-color:var(--purple); background:rgba(191,90,242,0.3);' : ''}"></div>
+                    ${ticksHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    function appendVisualRow(containerEl, idx, gMin, gMax, segMin, segMax, ticks) {
+        const leftPct = toNormPct(segMin, gMin, gMax);
+        const rightPct = toNormPct(segMax, gMin, gMax);
+        const widthPct = Math.max(0, rightPct - leftPct);
+        const isPoint = Math.abs(segMax - segMin) <= (gMax - gMin) * 1e-6;
+
+        const row = document.createElement('div');
+        row.className = 'hv-row';
+
+        let ticksHtml = '';
+        (ticks || []).forEach(tk => {
+            const p = toNormPct(tk.val, gMin, gMax);
+            const cls = tk.kind ? `tick-${tk.kind}` : 'tick-mid';
+            ticksHtml += `<div class="hv-tick ${cls}" style="left:${p}%;"></div>`;
+        });
+
+        row.innerHTML = `
+            <div class="hv-num">${idx}</div>
+            <div class="hv-track">
+                <div class="hv-baseline"></div>
+                <div class="hv-pill ${isPoint ? 'is-point' : ''}" style="left:${leftPct}%; width:${widthPct}%;"></div>
+                ${ticksHtml}
+            </div>
+        `;
+        containerEl.appendChild(row);
+        containerEl.classList.add('has-items');
+        containerEl.scrollTop = containerEl.scrollHeight;
+    }
+
+    function popVisualRow(containerEl) {
+        if (containerEl.lastElementChild) {
+            containerEl.removeChild(containerEl.lastElementChild);
+        }
+        if (containerEl.children.length === 0) {
+            containerEl.classList.remove('has-items');
+        }
+    }
+
     // ===== 优选法 =====
     const PHI = 0.6180339887;
     let isAdvancedMode = false;
@@ -839,6 +1086,7 @@
     let vMin, vMax;
     let animationDisabled = false;
     let isAnimating = false;
+    let optLogCount = 0;
 
     const $ = id => document.getElementById(id);
     const f = n => fmtNum(n);
@@ -870,7 +1118,11 @@
         $('float-val').style.display = 'none';
         step = 1;
         stack = [];
+        optLogCount = 0;
         $('hist').innerHTML = '';
+        $('opt-hist-visual').innerHTML = '';
+        $('opt-hist-visual').classList.remove('has-items');
+        $('opt-hist-bounds').innerText = `[${f(iMin)}, ${f(iMax)}]`;
         $('btn-undo').disabled = true;
         $('in-target').value = '';
         updateUI();
@@ -981,19 +1233,30 @@
         });
     }
 
-    function logAction(type, sel, valA, valB, mode = 'normal') {
+    function logAction(type, sel, valA, valB, mode = 'normal', visInfo = null) {
+        optLogCount++;
+        const segMin = visInfo ? visInfo.segMin : cMin;
+        const segMax = visInfo ? visInfo.segMax : cMax;
+        const ticks = visInfo ? visInfo.ticks : [
+            { val: cMin + (1 - PHI) * (cMax - cMin), kind: 'a' },
+            { val: cMin + PHI * (cMax - cMin), kind: 'b' }
+        ];
+
+        appendVisualRow($('opt-hist-visual'), optLogCount, iMin, iMax, segMin, segMax, ticks);
+        const miniBarHtml = buildMiniBarHTML(iMin, iMax, segMin, segMax, ticks);
+
         const item = document.createElement('div');
         item.className = `history-item is-${mode}`;
         if (mode === 'manual') {
-            item.innerHTML = `<b>[精选定点]</b> 最终确认位点 <span class="keep-badge" style="background:var(--purple); color:#fff">${f(sel)}</span>`;
+            item.innerHTML = `<b>[#${optLogCount} 精选定点]</b> 最终确认位点 <span class="keep-badge" style="background:var(--purple); color:#fff">${f(sel)}</span>${miniBarHtml}`;
         } else if (mode === 'midpoint') {
-            item.innerHTML = `<b>[决策]</b> 取区间中点 <span class="keep-badge" style="background:var(--green); color:#000">${f(sel)}</span>`;
+            item.innerHTML = `<b>[#${optLogCount} 决策]</b> 取区间中点 <span class="keep-badge" style="background:var(--green); color:#000">${f(sel)}</span>${miniBarHtml}`;
         } else if (mode === 'hybrid') {
-            item.innerHTML = `<b>[混合微调]</b> 参考点与中点间 <span class="keep-badge" style="background:var(--cyan); color:#000">${f(sel)}</span>`;
+            item.innerHTML = `<b>[#${optLogCount} 混合微调]</b> 参考点与中点间 <span class="keep-badge" style="background:var(--cyan); color:#000">${f(sel)}</span>${miniBarHtml}`;
         } else if (mode === 'equal') {
-            item.innerHTML = `<b>[STEP ${step}]</b> A、B效果相同，保留中间区间 <span class="keep-badge" style="background:var(--cyan); color:#000">[${f(cMin)}, ${f(cMax)}]</span><div style="font-size:11px; opacity:0.6; margin-top:4px">两端已排除</div>`;
+            item.innerHTML = `<b>[#${optLogCount} STEP ${step - 1}]</b> 本轮候选：A = <span style="color:var(--blue)">${f(valA)}</span>，B = <span style="color:var(--red)">${f(valB)}</span>；效果相同，保留中间区间 <span class="keep-badge" style="background:var(--cyan); color:#000">[${f(cMin)}, ${f(cMax)}]</span><div style="font-size:11px; opacity:0.6; margin-top:4px">两端已排除</div>${miniBarHtml}`;
         } else {
-            item.innerHTML = `<b>[STEP ${step}]</b> 选择了 <span class="keep-badge" style="background:rgba(${type === 'A' ? '77,171,247' : '255,107,107'},0.2); color:var(--${type === 'A' ? 'blue' : 'red'})">方案 ${type}</span><div style="font-size:11px; opacity:0.6; margin-top:4px">新区间: [${f(cMin)}, ${f(cMax)}]</div>`;
+            item.innerHTML = `<b>[#${optLogCount} STEP ${step - 1}]</b> 本轮候选：A = <span style="color:var(--blue)">${f(valA)}</span>，B = <span style="color:var(--red)">${f(valB)}</span>；选择 <span class="keep-badge" style="background:rgba(${type === 'A' ? '77,171,247' : '255,107,107'},0.2); color:var(--${type === 'A' ? 'blue' : 'red'})">方案 ${type}</span><div style="font-size:11px; opacity:0.6; margin-top:4px">新区间: [${f(cMin)}, ${f(cMax)}]</div>${miniBarHtml}`;
         }
         $('hist').prepend(item);
     }
@@ -1036,19 +1299,21 @@
 
     function doStep(type) {
         if (isAnimating) return;
-        const range = cMax - cMin;
-        const pA = cMin + (1 - PHI) * range;
-        const pB = cMin + PHI * range;
+        const prevMin = cMin;
+        const prevMax = cMax;
+        const range = prevMax - prevMin;
+        const pA = prevMin + (1 - PHI) * range;
+        const pB = prevMin + PHI * range;
 
         let pFold, discLeft, discWidth;
         if (type === 'A') {
             pFold = getPct(pB);
             discLeft = getPct(pB);
-            discWidth = getPct(cMax) - getPct(pB);
+            discWidth = getPct(prevMax) - getPct(pB);
         } else {
             pFold = getPct(pA);
-            discLeft = getPct(cMin);
-            discWidth = getPct(pA) - getPct(cMin);
+            discLeft = getPct(prevMin);
+            discWidth = getPct(pA) - getPct(prevMin);
         }
 
         saveState();
@@ -1057,7 +1322,14 @@
             if (type === 'A') cMax = pB;
             else cMin = pA;
             step++;
-            logAction(type);
+            logAction(type, null, pA, pB, 'normal', {
+                segMin: prevMin,
+                segMax: prevMax,
+                ticks: [
+                    { val: pA, kind: 'a' },
+                    { val: pB, kind: 'b' }
+                ]
+            });
             updateUI();
         };
 
@@ -1092,19 +1364,33 @@
     $('btn-b').onclick = () => doStep('B');
     $('btn-equal').onclick = () => {
         if (isAnimating) return;
-        const range = cMax - cMin;
-        const pA = cMin + (1 - PHI) * range;
-        const pB = cMin + PHI * range;
+        const prevMin = cMin;
+        const prevMax = cMax;
+        const range = prevMax - prevMin;
+        const pA = prevMin + (1 - PHI) * range;
+        const pB = prevMin + PHI * range;
         saveState();
         cMin = pA;
         cMax = pB;
         step++;
-        logAction('EQUAL', (pA + pB) / 2, pA, pB, 'equal');
+        logAction('EQUAL', (pA + pB) / 2, pA, pB, 'equal', {
+            segMin: prevMin,
+            segMax: prevMax,
+            ticks: [
+                { val: pA, kind: 'a' },
+                { val: pB, kind: 'b' }
+            ]
+        });
         updateUI();
     };
     $('btn-mid').onclick = () => {
         if (isAnimating) return;
-        logAction('MID', (cMin + cMax) / 2, 0, 0, 'midpoint');
+        const m = (cMin + cMax) / 2;
+        logAction('MID', m, 0, 0, 'midpoint', {
+            segMin: cMin,
+            segMax: cMax,
+            ticks: [{ val: m, kind: 'mid' }]
+        });
     };
 
     $('btn-target-mid').onclick = () => {
@@ -1113,8 +1399,13 @@
         const range = cMax - cMin;
         const pA = cMin + (1 - PHI) * range;
         const pB = cMin + PHI * range;
-        const mid = (targetVal + (pA + pB) / 2) / 2;
-        logAction('HYBRID', mid, pA, pB, 'hybrid');
+        const abMid = (pA + pB) / 2;
+        const mid = (targetVal + abMid) / 2;
+        logAction('HYBRID', mid, pA, pB, 'hybrid', {
+            segMin: Math.min(targetVal, abMid),
+            segMax: Math.max(targetVal, abMid),
+            ticks: [{ val: mid, kind: 'mid' }]
+        });
     };
 
     $('in-target').oninput = function() {
@@ -1152,7 +1443,13 @@
 
     $('btn-confirm').onclick = () => {
         if (tempSelectedVal === null) return alert(T().needPick);
-        logAction('SELECT', tempSelectedVal, 0, 0, 'manual');
+        const range = cMax - cMin;
+        const abMid = (cMin + (1 - PHI) * range + cMin + PHI * range) / 2;
+        logAction('SELECT', tempSelectedVal, 0, 0, 'manual', {
+            segMin: Math.min(targetVal, abMid),
+            segMax: Math.max(targetVal, abMid),
+            ticks: [{ val: tempSelectedVal, kind: 'sel' }]
+        });
         $('btn-cancel').click();
     };
 
@@ -1177,7 +1474,11 @@
         targetVal = last.targetVal;
         anchorActive = last.anchorActive;
         const hist = $('hist');
-        if (hist.firstChild) hist.removeChild(hist.firstChild);
+        if (hist.firstChild) {
+            hist.removeChild(hist.firstChild);
+            optLogCount = Math.max(0, optLogCount - 1);
+            popVisualRow($('opt-hist-visual'));
+        }
         clearAnimResidue();
         vMin = iMin; vMax = iMax;
         updateUI();
@@ -1294,6 +1595,7 @@
         let vMin, vMax;
         let animationDisabled = false;
         let isAnimating = false;
+        let biLogCount = 0;
 
         function getPct(val) {
             if (vMax === vMin) return 0;
@@ -1326,7 +1628,11 @@
             $('bi-in-mid').value = '';
             step = 1;
             stack = [];
+            biLogCount = 0;
             $('bi-hist').innerHTML = '';
+            $('bi-hist-visual').innerHTML = '';
+            $('bi-hist-visual').classList.remove('has-items');
+            $('bi-hist-bounds').innerText = `[${fmtNum(iMin)}, ${fmtNum(iMax)}]`;
             $('bi-btn-undo').disabled = true;
             updateUI();
         }
@@ -1366,10 +1672,15 @@
             stack.push({ cMin, cMax, step, midOverride });
         }
 
-        function logAction(side, mid) {
+        function logAction(side, mid, prevMin, prevMax) {
+            biLogCount++;
+            const ticks = [{ val: mid, kind: 'mid' }];
+            appendVisualRow($('bi-hist-visual'), biLogCount, iMin, iMax, prevMin, prevMax, ticks);
+            const miniBarHtml = buildMiniBarHTML(iMin, iMax, prevMin, prevMax, ticks);
+
             const item = document.createElement('div');
             item.className = 'history-item';
-            item.innerHTML = `<b>[STEP ${step}]</b> M <span class="keep-badge" style="background:rgba(0,255,136,0.15); color:var(--green)">${fmtNum(mid)}</span> · ${side === 'left' ? 'L' : 'R'} → <span class="keep-badge" style="background:rgba(77,171,247,0.2); color:var(--blue)">[${fmtNum(cMin)}, ${fmtNum(cMax)}]</span>`;
+            item.innerHTML = `<b>[#${biLogCount} STEP ${step - 1}]</b> M <span class="keep-badge" style="background:rgba(0,255,136,0.15); color:var(--green)">${fmtNum(mid)}</span> · ${side === 'left' ? 'L' : 'R'} → <span class="keep-badge" style="background:rgba(77,171,247,0.2); color:var(--blue)">[${fmtNum(cMin)}, ${fmtNum(cMax)}]</span>${miniBarHtml}`;
             $('bi-hist').prepend(item);
         }
 
@@ -1413,17 +1724,19 @@
 
         function doStep(side) {
             if (isAnimating) return;
+            const prevMin = cMin;
+            const prevMax = cMax;
             const mid = getMid();
             let pFold, discLeft, discWidth;
 
             if (side === 'left') {
                 pFold = getPct(mid);
                 discLeft = getPct(mid);
-                discWidth = getPct(cMax) - getPct(mid);
+                discWidth = getPct(prevMax) - getPct(mid);
             } else {
                 pFold = getPct(mid);
-                discLeft = getPct(cMin);
-                discWidth = getPct(mid) - getPct(cMin);
+                discLeft = getPct(prevMin);
+                discWidth = getPct(mid) - getPct(prevMin);
             }
 
             saveState();
@@ -1432,7 +1745,7 @@
                 else cMin = mid;
                 midOverride = null;
                 step++;
-                logAction(side, mid);
+                logAction(side, mid, prevMin, prevMax);
                 updateUI();
             };
 
@@ -1458,7 +1771,11 @@
             step = last.step;
             midOverride = last.midOverride;
             const hist = $('bi-hist');
-            if (hist.firstChild) hist.removeChild(hist.firstChild);
+            if (hist.firstChild) {
+                hist.removeChild(hist.firstChild);
+                biLogCount = Math.max(0, biLogCount - 1);
+                popVisualRow($('bi-hist-visual'));
+            }
             clearAnimResidue();
             updateUI();
         };
@@ -1542,6 +1859,7 @@
         return {
             init,
             updateUI,
+            getBounds: () => ({ iMin, iMax }),
             refreshAnimLabel: () => {
                 $('bi-anim-label').innerText = animationDisabled ? T().animOff : T().animOn;
             }
@@ -1561,7 +1879,17 @@
         return { low: Math.min(v1, v2), high: Math.max(v1, v2) };
     }
 
+    function syncPresetHighlight() {
+        const rawRate = $('pct-rate').value.trim();
+        const val = rawRate === '' ? NaN : Number(rawRate);
+        document.querySelectorAll('#pct-presets .pct-preset-btn').forEach(btn => {
+            const p = Number(btn.dataset.p);
+            btn.classList.toggle('active', Number.isFinite(val) && Math.abs(val - p) < 1e-9);
+        });
+    }
+
     function updatePctCalc() {
+        syncPresetHighlight();
         const pair = calcPctPair();
         if (!pair) {
             $('pct-low-txt').innerText = T().pctLow('-');
@@ -1574,6 +1902,13 @@
 
     $('pct-base').oninput = updatePctCalc;
     $('pct-rate').oninput = updatePctCalc;
+
+    document.querySelectorAll('#pct-presets .pct-preset-btn').forEach(btn => {
+        btn.onclick = () => {
+            $('pct-rate').value = btn.dataset.p;
+            updatePctCalc();
+        };
+    });
 
     $('pct-apply-btn').onclick = () => {
         const pair = calcPctPair();
@@ -1655,6 +1990,14 @@
         $('lbl-pct-rate').innerText = d.pctRateLbl;
         $('pct-apply-btn').innerText = d.pctApply;
 
+        if (Number.isFinite(iMin) && Number.isFinite(iMax)) {
+            $('opt-hist-bounds').innerText = `[${f(iMin)}, ${f(iMax)}]`;
+        }
+        const biBounds = biController.getBounds();
+        if (Number.isFinite(biBounds.iMin) && Number.isFinite(biBounds.iMax)) {
+            $('bi-hist-bounds').innerText = `[${fmtNum(biBounds.iMin)}, ${fmtNum(biBounds.iMax)}]`;
+        }
+
         updatePctCalc();
         updateUI();
         biController.updateUI();
@@ -1687,6 +2030,13 @@
         btn.onclick = () => {
             decimals = parseInt(btn.dataset.d, 10);
             document.querySelectorAll('#prec-group button').forEach(b => b.classList.toggle('active', b === btn));
+            if (Number.isFinite(iMin) && Number.isFinite(iMax)) {
+                $('opt-hist-bounds').innerText = `[${f(iMin)}, ${f(iMax)}]`;
+            }
+            const biBounds = biController.getBounds();
+            if (Number.isFinite(biBounds.iMin) && Number.isFinite(biBounds.iMax)) {
+                $('bi-hist-bounds').innerText = `[${fmtNum(biBounds.iMin)}, ${fmtNum(biBounds.iMax)}]`;
+            }
             updatePctCalc();
             updateUI();
             biController.updateUI();
