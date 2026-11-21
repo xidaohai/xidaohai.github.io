@@ -1,0 +1,1758 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f7f4ee">
+<title>采样均值收敛｜均值、Huber 与 Hampel</title>
+<style>
+:root{
+  --bg:#f7f4ee;
+  --panel:#fcfbf8;
+  --panel-warm:#f2eee6;
+  --line:#dfd8cc;
+  --line-soft:#e8e2d7;
+  --text:#26231f;
+  --muted:#6e685f;
+  --accent:#2b6cb0;
+  --accent-soft:rgba(43,108,176,.11);
+  --mean:#1e7e67;
+  --mean-soft:rgba(30,126,103,.12);
+  --dot:#b87928;
+  --dot-soft:rgba(184,121,40,.14);
+  --excluded:#a39d93;
+  --danger:#b83d3d;
+  --chart-grid:#ece6da;
+  --chart-text:#756e63;
+  --chart-bg:#fcfbf8;
+  --chart-label-bg:rgba(252,251,248,.94);
+  --chart-point-border:#fcfbf8;
+  --chart-point-text:#6b4b1f;
+  --radius:16px;
+  --mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+  --serif:"Songti SC","Noto Serif SC","STSong",Georgia,serif;
+  --sans:Inter,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html{color-scheme:light}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1218;
+  --panel:#171e27;
+  --panel-warm:#1d2631;
+  --line:#34404e;
+  --line-soft:#2a3541;
+  --text:#e7edf4;
+  --muted:#a0acba;
+  --accent:#79b5f2;
+  --accent-soft:rgba(121,181,242,.16);
+  --mean:#65c9a9;
+  --mean-soft:rgba(101,201,169,.14);
+  --dot:#e2ad69;
+  --dot-soft:rgba(226,173,105,.16);
+  --excluded:#788594;
+  --danger:#f18a85;
+  --chart-grid:#2b3744;
+  --chart-text:#a2afbd;
+  --chart-bg:#171e27;
+  --chart-label-bg:rgba(23,30,39,.95);
+  --chart-point-border:#171e27;
+  --chart-point-text:#f1c78f;
+}
+html[data-theme="dark"] body{
+  background:radial-gradient(ellipse at 14% 0%,rgba(184,121,40,.08),transparent 42%),radial-gradient(ellipse at 88% 8%,rgba(30,126,103,.08),transparent 40%),var(--bg);
+}
+html[data-theme="dark"] .toolbar{background:rgba(23,30,39,.9)}
+html[data-theme="dark"] .toolbar-btn,
+html[data-theme="dark"] .group-action,
+html[data-theme="dark"] .num-input,
+html[data-theme="dark"] .btn,
+html[data-theme="dark"] .filter-control input,
+html[data-theme="dark"] .author,
+html[data-theme="dark"] .mini-btn{border-color:#435263}
+html[data-theme="dark"] .toolbar-btn:hover,
+html[data-theme="dark"] .group-tab:hover,
+html[data-theme="dark"] .btn:hover,
+html[data-theme="dark"] .mini-btn:hover{background:#283443;border-color:#66788b}
+html[data-theme="dark"] .toolbar-btn.primary,
+html[data-theme="dark"] .group-tab.active,
+html[data-theme="dark"] .group-action.primary,
+html[data-theme="dark"] .btn.primary{background:#203b36;border-color:#477d6d;color:#a8e4d0}
+html[data-theme="dark"] .hero-card{border-color:#3a4856;background:linear-gradient(120deg,#202a35,#1a242e)}
+html[data-theme="dark"] .stats-grid{border-color:var(--line)}
+html[data-theme="dark"] .filter-control input{background:var(--panel);color:var(--text)}
+html[data-theme="dark"] .group-tab{background:var(--panel-warm);border-color:var(--line-soft);color:var(--text)}
+html[data-theme="dark"] .group-tab-count{color:var(--muted)}
+html[data-theme="dark"] .toolbar-btn.primary:hover,html[data-theme="dark"] .btn.primary:hover{background:#294b42}
+html[data-theme="dark"] .mini-btn{background:#1b2530;color:var(--muted)}
+html[data-theme="dark"] .record-item{background:var(--panel-warm);border-color:var(--line-soft)}
+html[data-theme="dark"] .chart-scroll{scrollbar-color:#526173 #222c37}
+html[data-theme="dark"] .chart-scroll::-webkit-scrollbar-track{background:#222c37}
+html[data-theme="dark"] .chart-scroll::-webkit-scrollbar-thumb{background:#526173}
+html[data-theme="dark"] .chart-zoom-reset{background:#1b2530;border-color:#435263;color:var(--muted)}
+html[data-theme="dark"] .history-scroll{scrollbar-color:#526173 transparent}
+html[data-theme="dark"] .history-scroll::-webkit-scrollbar-thumb{background:#526173}
+html[data-theme="dark"] .record-item.excluded{background:#202833}
+html[data-theme="dark"] .diff-tag.hi{color:#ffaaa5;background:rgba(241,138,133,.12);border-color:rgba(241,138,133,.28)}
+html[data-theme="dark"] .diff-tag.lo{color:#a7d0ff;background:rgba(121,181,242,.12);border-color:rgba(121,181,242,.28)}
+html[data-theme="dark"] .diff-tag.eq{color:#a8e4d0;background:rgba(101,201,169,.12);border-color:rgba(101,201,169,.28)}
+html[data-theme="dark"] .diff-tag.off{color:#b3bdc8;background:rgba(163,174,188,.12);border-color:rgba(163,174,188,.24)}
+html[data-theme="dark"] .hampel-tag{color:#ffb2ad;background:rgba(241,138,133,.12);border-color:rgba(241,138,133,.28)}
+html[data-theme="dark"] .mini-btn.active-off{border-color:#90784d;color:#e2c28e;background:#342e22}
+html[data-theme="dark"] .mini-btn.del:hover{border-color:#a85f5f;background:#382427}
+html[data-theme="dark"] .author:hover{background:#243447}
+html[data-theme="dark"] .toast{background:#236c5b;color:#f3fff9}
+html[data-theme="dark"] ::selection{background:rgba(121,181,242,.28);color:#f3f7fb}
+body{
+  margin:0;min-height:100vh;
+  background:
+    radial-gradient(ellipse at 14% 0%,rgba(184,121,40,.07),transparent 42%),
+    radial-gradient(ellipse at 88% 8%,rgba(30,126,103,.06),transparent 40%),
+    var(--bg);
+  color:var(--text);font-family:var(--sans);
+  padding:28px 20px 82px;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.app{width:min(1120px,100%);margin:0 auto}
+.toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  margin:-4px 0 16px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;
+  background:rgba(252,251,248,.82);
+}
+.toolbar-label{font-size:10.5px;color:var(--muted);font-weight:750;white-space:nowrap}
+.toolbar-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.toolbar-btn{
+  height:34px;padding:0 11px;border:1px solid #cfc8ba;border-radius:8px;
+  background:var(--panel);color:var(--text);font-size:10.5px;font-weight:700;white-space:nowrap;
+}
+.toolbar-btn:hover{border-color:#9e9586;background:#efeae0}
+.toolbar-btn.primary{background:#e3efe9;border-color:#9fc4b6;color:#185c4b}
+.toolbar-btn:disabled{opacity:.4;cursor:not-allowed}
+.save-state{font-size:10px;color:var(--muted);white-space:nowrap}
+.theme-btn{min-width:92px}
+.file-input-hidden{display:none}
+
+header{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  gap:20px;margin-bottom:20px;flex-wrap:wrap;
+  padding-bottom:14px;border-bottom:1px solid var(--line);
+}
+h1{
+  font-family:var(--serif);
+  font-size:clamp(24px,3.2vw,32px);
+  letter-spacing:-.4px;margin:0;font-weight:700;color:var(--text);
+}
+.subtitle{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6}
+.pill-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pill{
+  font-size:11.5px;padding:6px 12px;border-radius:999px;
+  border:1px solid var(--line);background:var(--panel);color:var(--muted);font-weight:600;
+}
+.pill strong{color:var(--mean);font-family:var(--mono)}
+
+ .layout{display:grid;grid-template-columns:104px minmax(0,1.65fr) minmax(280px,.85fr);gap:16px;align-items:start}
+.group-rail{padding:12px;display:flex;flex-direction:column;gap:9px;align-self:start;position:sticky;top:16px;max-height:calc(100vh - 32px);min-width:0}
+.group-rail-title{font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--muted);padding:2px 3px 6px;border-bottom:1px solid var(--line)}
+.group-list{display:flex;flex-direction:column;gap:6px;overflow-y:auto;min-height:0;padding-right:2px}
+.group-tab{width:100%;border:1px solid var(--line-soft);background:var(--panel-warm);border-radius:9px;padding:8px 6px;text-align:left;color:var(--text);font-size:10.5px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+.group-tab:hover{border-color:#b7ad9e;background:#f4f0e8}
+.group-tab.active{background:#e3efe9;border-color:#9fc4b6;color:#185c4b;box-shadow:inset 0 0 0 1px rgba(24,92,75,.05)}
+.group-tab-count{display:block;font:9px var(--mono);color:var(--muted);margin-top:3px}
+.group-actions{display:grid;grid-template-columns:1fr;gap:6px;margin-top:auto}
+.group-action{border:1px solid #cfc8ba;border-radius:8px;background:var(--panel);color:var(--muted);padding:7px 5px;font-size:10px;font-weight:700}
+.group-action.primary{background:#e3efe9;border-color:#9fc4b6;color:#185c4b}
+.group-action:disabled{opacity:.35;cursor:not-allowed}
+.group-current{font-size:10px;color:var(--muted);font-weight:650}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:0 12px 32px rgba(52,44,32,.05);min-width:0;
+}
+.main{padding:22px;display:flex;flex-direction:column;gap:18px}
+.section{
+  border:1px solid var(--line-soft);border-radius:13px;
+  padding:16px;background:var(--panel-warm);
+}
+.section-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin-bottom:12px;flex-wrap:wrap;
+}
+.section-title{font-size:12.5px;font-weight:750;color:var(--text);letter-spacing:.2px}
+.section-hint{font-size:11px;color:var(--muted)}
+
+.hero-card{
+  display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;
+  border:1px solid #d4cfc3;border-radius:13px;padding:18px;
+  background:linear-gradient(120deg,#fbf9f4,#f1ede3);
+}
+.primary-estimates{display:flex;flex-direction:column;gap:15px;min-width:0}
+.estimate-block{min-width:0}
+.estimate-block.robust-estimate{padding-top:13px;border-top:1px solid var(--line)}
+.huber-value{color:var(--accent)}
+html[data-theme="dark"] .estimate-block.robust-estimate{border-top-color:var(--line)}
+.hero-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.25px}
+.hero-value{
+  font:800 clamp(32px,4.4vw,44px)/1.16 var(--mono);
+  color:var(--mean);margin-top:6px;overflow-wrap:anywhere;
+}
+.hero-sub{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.55}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;
+  border-left:1px solid var(--line);padding-left:16px;align-content:center;
+}
+.stat-box{
+  background:var(--panel);border:1px solid var(--line-soft);
+  border-radius:9px;padding:9px 11px;
+}
+.stat-box span{display:block;font-size:10px;color:var(--muted)}
+.stat-box strong{display:block;font:700 12.5px var(--mono);color:var(--text);margin-top:3px}
+.stat-box small{display:block;font-size:9px;color:var(--muted);margin-top:3px;line-height:1.35}
+.filter-control{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.filter-control label{font-size:10.5px;color:var(--muted);font-weight:700}
+.filter-control input{height:34px;width:104px;border:1px solid #cfc8ba;border-radius:7px;background:var(--panel);color:var(--text);padding:0 9px;font:650 12px var(--mono)}
+.filter-control input.invalid{border-color:var(--danger);box-shadow:0 0 0 2px rgba(184,61,61,.10)}
+.filter-control .filter-note{font-size:10px;color:var(--muted);line-height:1.45;flex:1 1 280px}
+
+.entry-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:9px;align-items:center}
+.num-input{
+  width:100%;height:44px;background:var(--panel);border:1px solid #cfc8ba;
+  border-radius:9px;color:var(--text);padding:0 14px;outline:none;
+  text-align:center;font:700 16px var(--mono);min-width:0;
+}
+.num-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.num-input.invalid{border-color:var(--danger)}
+.btn{
+  border:1px solid #cfc8ba;border-radius:9px;height:44px;padding:0 14px;
+  background:var(--panel);color:var(--text);font-size:11.5px;font-weight:700;
+  transition:.16s;white-space:nowrap;
+}
+.btn:hover{border-color:#9e9586;background:#efeae0}
+.btn.primary{background:#e3efe9;border-color:#9fc4b6;color:#185c4b}
+.btn.primary:hover{background:#d4e8de}
+.btn.ghost{background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:#ebe6dc;color:var(--text)}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.message{font-size:11px;line-height:1.55;color:var(--muted);min-height:16px;margin-top:10px}
+
+.chart-section{padding:18px}
+.plot-wrap{
+  position:relative;border:1px solid var(--line);border-radius:12px;
+  background:var(--panel);overflow:hidden;
+}
+.chart-scroll{width:100%;max-height:560px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#c8c0b2 #eee9df}
+.chart-scroll::-webkit-scrollbar{height:8px}
+.chart-scroll::-webkit-scrollbar-track{background:#eee9df;border-radius:10px}
+.chart-scroll::-webkit-scrollbar-thumb{background:#c8c0b2;border-radius:10px}
+canvas#chartCanvas{display:block;width:auto;height:330px;max-width:none;cursor:crosshair}
+.chart-zoom-tools{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.chart-zoom-tools span{font-size:10px;color:var(--muted)}
+.chart-zoom-tools strong{font:700 10.5px var(--mono);color:var(--accent);min-width:38px;text-align:right}
+.chart-zoom-reset{height:27px;padding:0 9px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--muted);font-size:10px;font-weight:700}
+.chart-zoom-reset:hover{border-color:var(--accent);color:var(--accent)}
+.chart-scroll-hint{font-size:10px;color:var(--muted);margin-top:7px}
+.plot-foot{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  flex-wrap:wrap;margin-top:11px;font-size:11px;color:var(--muted);
+}
+.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:11px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.legend .line-swatch{display:inline-block;width:14px;height:2.2px;margin-right:5px;vertical-align:3px}
+
+.status{
+  border-left:3px solid var(--mean);padding:3px 0 3px 11px;
+  font-size:11px;line-height:1.6;color:var(--muted);min-height:18px;
+}
+
+.side{padding:18px;display:flex;flex-direction:column;min-height:620px;max-height:calc(100vh - 86px)}
+.history-head{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:8px;padding-bottom:12px;border-bottom:1px solid var(--line);
+}
+.history-head h2{font-size:11.5px;letter-spacing:.7px;color:var(--text);margin:0;font-weight:750}
+.count{font:10.5px var(--mono);color:var(--muted)}
+.history-scroll{
+  flex:1;min-height:0;overflow:auto;padding:12px 4px 2px 0;
+  scrollbar-width:thin;scrollbar-color:#c8c0b2 transparent;
+}
+.history-scroll::-webkit-scrollbar{width:5px}
+.history-scroll::-webkit-scrollbar-track{background:transparent}
+.history-scroll::-webkit-scrollbar-thumb{background:#c8c0b2;border-radius:10px}
+.empty{
+  min-height:240px;height:100%;display:flex;align-items:center;justify-content:center;
+  text-align:center;color:#8c857a;font-size:11.5px;line-height:1.85;padding:20px;
+}
+.record-item{
+  border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;margin-bottom:8px;
+  background:var(--panel-warm);display:flex;justify-content:space-between;align-items:center;gap:8px;
+  transition:.15s;
+}
+.record-item.excluded{
+  opacity:.58;border-style:dashed;background:#f7f5f0;
+}
+.record-main{min-width:0;flex:1}
+.record-top{display:flex;align-items:center;gap:7px;margin-bottom:3px;flex-wrap:wrap}
+.idx{font:700 10px var(--mono);color:var(--muted)}
+.diff-tag{font:650 9.5px var(--mono);padding:2px 6px;border-radius:5px}
+.diff-tag.hi{color:#9e3333;background:rgba(184,61,61,.1);border:1px solid rgba(184,61,61,.24)}
+.diff-tag.lo{color:#265d96;background:rgba(43,108,176,.1);border:1px solid rgba(43,108,176,.24)}
+.diff-tag.eq{color:#1b6b57;background:rgba(30,126,103,.1);border:1px solid rgba(30,126,103,.24)}
+.diff-tag.off{color:#757067;background:rgba(117,112,103,.12);border:1px solid rgba(117,112,103,.25)}
+.hampel-tag{font:650 9.5px var(--sans);padding:2px 6px;border-radius:5px;color:#963d32;background:rgba(184,61,61,.09);border:1px solid rgba(184,61,61,.23)}
+.legend .ring-swatch{display:inline-block;width:9px;height:9px;border:2px solid #b83d3d;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.record-val{font:700 14px var(--mono);color:var(--text)}
+.record-item.excluded .record-val{text-decoration:line-through;color:var(--excluded)}
+.record-sub{font-size:9.5px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+.item-actions{display:flex;gap:5px;flex-shrink:0}
+.mini-btn{
+  border:1px solid #cfc8ba;background:var(--panel);color:var(--muted);
+  border-radius:6px;padding:5px 8px;font-size:10px;font-weight:650;
+}
+.mini-btn:hover{border-color:#9e9586;color:var(--text);background:#efeae0}
+.mini-btn.active-off{border-color:#b5965b;color:#8c631c;background:#fbf3e1}
+.mini-btn.del:hover{border-color:#c98a8a;color:var(--danger);background:#fdf2f2}
+
+.author{
+  position:fixed;right:20px;bottom:16px;
+  border:1px solid #cfc8ba;background:var(--panel);color:var(--text);
+  border-radius:999px;padding:8px 16px;font-size:11.5px;font-weight:750;
+  letter-spacing:.3px;cursor:pointer;z-index:20;
+  box-shadow:0 6px 20px rgba(46,38,26,.1);transition:.18s;user-select:none;
+}
+.author:hover{border-color:var(--accent);color:var(--accent);background:#f3f7fb}
+.toast{
+  position:fixed;right:20px;bottom:60px;
+  background:#1e7e67;color:#fbfaf7;border-radius:8px;
+  padding:8px 13px;font-size:11px;font-weight:700;
+  opacity:0;transform:translateY(6px);pointer-events:none;transition:.2s;z-index:30;
+}
+.toast.show{opacity:1;transform:none}
+
+@media(max-width:1080px){
+  .layout{grid-template-columns:minmax(0,1fr) minmax(270px,.82fr)}
+  .group-rail{grid-column:1 / -1;position:static;max-height:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px}
+  .group-rail-title{border:0;padding:0;white-space:nowrap}
+  .group-list{flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+  .group-tab{width:auto;min-width:88px;max-width:150px;flex:0 0 auto;text-align:center}
+  .group-actions{display:flex;gap:6px;margin:0}
+  .group-action{white-space:nowrap}
+  .hero-card{grid-template-columns:1fr}
+  .stats-grid{border-left:0;border-top:1px solid var(--line);padding-left:0;padding-top:12px}
+  .side{min-height:240px;max-height:440px}
+}
+@media(max-width:720px){
+  .layout{grid-template-columns:1fr}
+  .group-rail{grid-template-columns:1fr;gap:8px}
+  .group-list{order:2}
+  .group-rail-title{order:1}
+  .group-actions{order:3;display:flex}
+}
+@media(max-width:580px){
+  .chart-scroll{max-height:440px}
+  body{padding:16px 12px 28px}
+  .toolbar{align-items:flex-start}
+  .toolbar-actions{width:100%}
+  .toolbar-btn{flex:1 1 calc(50% - 7px)}
+  .entry-row{grid-template-columns:1fr 1fr 1fr}
+  .entry-row .num-input{grid-column:1 / -1}
+  canvas#chartCanvas{height:270px}
+  .author{position:static;display:block;width:max-content;margin:16px 0 0 auto}
+  .toast{right:12px;bottom:12px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>采样均值收敛</h1>
+      <div class="subtitle">逐次记录观测值，对照算术均值、中位数与 Huber 鲁棒估计；Hampel 仅标记局部异常候选，不自动删除数据。</div>
+    </div>
+    <div class="pill-bar">
+      <div class="pill">参与计算 <strong id="pillActive">0</strong> / <span id="pillTotal">0</span></div>
+      <div class="pill">样本标准差 s <strong id="pillStd">—</strong></div>
+    </div>
+  </header>
+
+  <section class="toolbar" aria-label="数据导入与导出">
+    <div class="toolbar-label">数据管理</div>
+    <div class="toolbar-actions">
+      <button class="toolbar-btn" id="importBtn" type="button">导入数据</button>
+      <button class="toolbar-btn primary" id="exportReportBtn" type="button">导出统计报告 HTML</button>
+      <button class="toolbar-btn" id="exportCsvBtn" type="button">导出 CSV</button>
+      <button class="toolbar-btn" id="exportJsonBtn" type="button">备份 JSON</button>
+      <button class="toolbar-btn" id="exportPngBtn" type="button">下载曲线 PNG</button>
+      <button class="toolbar-btn theme-btn" id="themeToggleBtn" type="button" aria-label="切换深色模式">切换深色</button>
+    </div>
+    <input class="file-input-hidden" id="importFile" type="file" accept=".json,.csv,application/json,text/csv">
+    <span class="save-state" id="saveState">自动保存待启用</span>
+  </section>
+
+  <div class="layout">
+    <aside class="panel group-rail" aria-label="数据分组">
+      <div class="group-rail-title">分组</div>
+      <div class="group-list" id="groupList"></div>
+      <div class="group-actions">
+        <button class="group-action primary" id="addGroupBtn" type="button">＋ 新增</button>
+        <button class="group-action" id="renameGroupBtn" type="button">重命名</button>
+        <button class="group-action" id="deleteGroupBtn" type="button">删除空组</button>
+      </div>
+    </aside>
+    <main class="panel main">
+      <section class="hero-card">
+        <div class="primary-estimates">
+          <div class="estimate-block">
+            <div class="hero-label">算术平均值（x̄ = Σx / k）</div>
+            <div class="hero-value" id="meanValue">—</div>
+            <div class="hero-sub" id="meanSub">在下方输入框填入数值，按 Enter 或点击“记录”即可开始累计。</div>
+          </div>
+          <div class="estimate-block robust-estimate">
+            <div class="hero-label">Huber 鲁棒估计</div>
+            <div class="hero-value huber-value" id="statHuber">—</div>
+            <div class="hero-sub" id="huberNote">c = 1.345</div>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box"><span>中位数</span><strong id="statMedian">—</strong></div>
+          <div class="stat-box"><span>MAD（中位数绝对偏差）</span><strong id="statMAD">—</strong><small>用于估计鲁棒尺度</small></div>
+          <div class="stat-box"><span>Hampel 局部异常候选</span><strong id="statHampel">—</strong><small id="hampelNote">仅标记，不自动排除</small></div>
+          <div class="stat-box"><span>极差（最大 - 最小）</span><strong id="statRange">—</strong></div>
+          <div class="stat-box"><span>最小值 / 最大值</span><strong id="statMinMax">—</strong></div>
+          <div class="stat-box"><span>参与总和 Σx</span><strong id="statSum">—</strong></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <div class="section-title">连续录入观测值</div>
+          <div class="section-hint" id="currentGroupHint">当前分组：默认组</div>
+        </div>
+        <div class="entry-row">
+          <input class="num-input" id="valInput" type="number" step="any" placeholder="输入数值，如 66" autofocus>
+          <button class="btn primary" id="addBtn" type="button">记录</button>
+          <button class="btn ghost" id="undoBtn" type="button" disabled>撤销</button>
+          <button class="btn ghost" id="clearBtn" type="button" disabled>清空</button>
+        </div>
+        <div class="filter-control">
+          <label for="hampelWindow">Hampel 窗口点数</label>
+          <input id="hampelWindow" type="number" min="3" max="9999" step="2" value="9" inputmode="numeric" aria-label="Hampel 局部窗口点数，需为不小于3的奇数" aria-describedby="hampelWindowNote">
+          <span class="filter-note" id="hampelWindowNote">每个观测值单独判断：窗口以该点为中心，前后各取 4 点（含自身共 9 点）；靠近首尾时使用实际可用的点。仅标记候选，不自动删除。</span>
+        </div>
+        <div class="message" id="message">提示：视图中的观测点可点击取消纳入或恢复；Hampel 异常候选只作提示，不会自动删除。</div>
+      </section>
+
+      <section class="section chart-section">
+        <div class="section-head">
+          <div class="section-title">观测值与累计均值视图</div>
+          <div class="chart-zoom-tools"><span>滚轮缩放</span><strong id="chartZoomValue">100%</strong><button class="chart-zoom-reset" id="chartZoomReset" type="button">重置</button></div>
+        </div>
+        <div class="plot-wrap">
+          <div class="chart-scroll" id="chartScroll" aria-label="曲线图，可左右滚动">
+            <canvas id="chartCanvas" width="780" height="330"></canvas>
+          </div>
+        </div>
+        <div class="chart-scroll-hint">滚动鼠标滚轮可放大或缩小图示；放大后可横向、纵向滚动查看。单击观测点可切换纳入状态。</div>
+        <div class="plot-foot">
+          <div class="legend">
+            <span><i style="background:var(--dot)"></i>已纳入观测点（点击取消）</span>
+            <span><i style="background:var(--excluded)"></i>已取消观测点（点击恢复）</span>
+            <span><span class="ring-swatch"></span>Hampel 候选异常</span>
+            <span><span class="line-swatch" style="background:var(--accent)"></span>累计均值轨迹</span>
+            <span><span class="line-swatch" style="background:var(--mean)"></span>当前最终均值</span>
+            <span>点旁数字 = 原始观测值</span>
+          </div>
+          <div id="chartSummary">等待录入数据...</div>
+        </div>
+      </section>
+
+      <div class="status" id="status">就绪：填入第一个数值即可开始。</div>
+    </main>
+
+    <aside class="panel side">
+      <div class="history-head">
+        <h2>录入明细</h2>
+        <span class="count" id="listCount">0 条</span>
+      </div>
+      <div class="history-scroll">
+        <div class="empty" id="emptyState">暂无记录。<br>每次输入的数值及参与状态<br>会按顺序显示在这里。</div>
+        <div id="recordList"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<button class="author" id="authorBtn" type="button" title="点击复制西岛海的 Bilibili 主页地址">西岛海</button>
+<div class="toast" id="toast" role="status">已复制主页地址</div>
+
+<script>
+(function(){
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const AUTHOR_URL = 'https://space.bilibili.com/1534330';
+  const STORAGE_KEY = 'samplingMeanConvergence.v3';
+
+  const state = {
+    // items contains the observations of the currently selected group.
+    items: [],
+    groups: [{ id: 'group-1', name: '默认组', items: [] }],
+    activeGroupId: 'group-1',
+    undoStack: [],
+    hoverIndex: -1
+  };
+
+  let nextId = 1;
+  let chartZoom = 1;
+  const CHART_ZOOM_MIN = 0.5;
+  const CHART_ZOOM_MAX = 3;
+  const CHART_BASE_HEIGHT = 330;
+  let dotHits = []; // { index, cx, cy, r }
+  let lastValidHampelWindow = 9;
+
+  function isValidHampelWindow(value){
+    return Number.isInteger(value) && value >= 3 && value <= 9999 && value % 2 === 1;
+  }
+
+  function getHampelWindow(){
+    const value = Number($('hampelWindow').value);
+    return isValidHampelWindow(value) ? value : lastValidHampelWindow;
+  }
+
+  function updateHampelWindowNote(){
+    const win = getHampelWindow();
+    const count = state.items.length;
+    const side = Math.floor(win / 2);
+    let note = `可填 3～9999 之间的任意奇数（如 9、15、21）。每个观测值都会单独判断：窗口以该点为中心，前后各取 ${side} 个点（含自身共 ${win} 点）；靠近首尾时，使用实际可用的点。`;
+    if(count > 0 && win >= count){
+      note += ` 当前分组有 ${count} 条记录，窗口已覆盖整组；每个点均以本组全部可用记录作参照。`;
+    }
+    note += ' Hampel 只标记候选，不自动删除。';
+    $('hampelWindowNote').textContent = note;
+  }
+
+  function applyTheme(theme, save = true, rerender = true){
+    const safe = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = safe;
+    document.documentElement.style.colorScheme = safe;
+    const button = $('themeToggleBtn');
+    if(button){
+      button.textContent = safe === 'dark' ? '切换浅色' : '切换深色';
+      button.setAttribute('aria-label', safe === 'dark' ? '切换浅色模式' : '切换深色模式');
+      button.title = safe === 'dark' ? '当前为深色主题，点击切换浅色' : '当前为浅色主题，点击切换深色';
+    }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.content = safe === 'dark' ? '#0e1218' : '#f7f4ee';
+    if(save && typeof persistState === 'function') persistState();
+    if(rerender && typeof render === 'function') render();
+    else if(typeof drawChart === 'function') drawChart(computeStats(state.items));
+  }
+
+  function cloneItems(arr){
+    return arr.map(it => ({ id: it.id, value: it.value, included: it.included }));
+  }
+
+  function fmt(n, sig = 7){
+    if(!Number.isFinite(n)) return '—';
+    if(Object.is(n, -0)) n = 0;
+    if(Math.abs(n) > 0 && (Math.abs(n) >= 1e8 || Math.abs(n) < 1e-6)){
+      return Number(n.toPrecision(sig)).toExponential();
+    }
+    return Number(n.toPrecision(sig)).toString();
+  }
+
+  function setMsg(text, bad = false){
+    const el = $('message');
+    el.textContent = text;
+    el.style.color = bad ? 'var(--danger)' : 'var(--muted)';
+  }
+
+  function setStatus(text, good = false){
+    const el = $('status');
+    el.textContent = text;
+    el.style.borderLeftColor = good ? 'var(--mean)' : 'var(--accent)';
+  }
+
+  function medianOfSorted(sorted){
+    const n = sorted.length;
+    if(!n) return NaN;
+    const mid = Math.floor(n / 2);
+    return n % 2 ? sorted[mid] : sorted[mid - 1] / 2 + sorted[mid] / 2;
+  }
+
+  function medianOf(values){
+    return medianOfSorted(values.slice().sort((a, b) => a - b));
+  }
+
+  // Linear-interpolated sample quantile (Type 7), used only as a scale fallback.
+  function quantileSorted(sorted, p){
+    if(!sorted.length) return NaN;
+    const pos = (sorted.length - 1) * p;
+    const lo = Math.floor(pos), hi = Math.ceil(pos);
+    if(lo === hi) return sorted[lo];
+    return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+  }
+
+  function numericalTolerance(values){
+    let magnitude = 1;
+    for(const v of values) magnitude = Math.max(magnitude, Math.abs(v));
+    return Number.EPSILON * magnitude * 64;
+  }
+
+  function cloneGroupItems(arr){
+    return (arr || []).map(it => ({ id: it.id, value: it.value, included: it.included !== false }));
+  }
+
+  function activeGroup(){
+    return state.groups.find(g => g.id === state.activeGroupId) || state.groups[0] || null;
+  }
+
+  function syncActiveGroup(){
+    const group = activeGroup();
+    if(group) group.items = cloneGroupItems(state.items);
+  }
+
+  function renderGroups(){
+    const list = $('groupList');
+    if(!list) return;
+    list.innerHTML = '';
+    state.groups.forEach(group => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'group-tab' + (group.id === state.activeGroupId ? ' active' : '');
+      button.setAttribute('aria-pressed', group.id === state.activeGroupId ? 'true' : 'false');
+      const name = document.createElement('span');
+      name.textContent = group.name;
+      const count = document.createElement('span');
+      count.className = 'group-tab-count';
+      const groupItems = group.id === state.activeGroupId ? state.items : group.items;
+      count.textContent = `${(groupItems || []).length} 条`;
+      button.append(name, count);
+      button.addEventListener('click', () => switchGroup(group.id));
+      list.appendChild(button);
+    });
+    const current = activeGroup();
+    $('currentGroupHint').textContent = current ? `当前分组：${current.name}` : '当前无分组';
+    $('renameGroupBtn').disabled = !current;
+    $('deleteGroupBtn').disabled = !current || state.groups.length <= 1 || state.items.length > 0;
+    $('deleteGroupBtn').title = state.items.length ? '请先清空当前组的记录，避免误删数据' : '只能删除空分组';
+  }
+
+  function switchGroup(id){
+    if(id === state.activeGroupId) return;
+    syncActiveGroup();
+    const target = state.groups.find(g => g.id === id);
+    if(!target) return;
+    state.activeGroupId = id;
+    state.items = cloneGroupItems(target.items);
+    state.undoStack = [];
+    state.hoverIndex = -1;
+    render();
+    requestAnimationFrame(() => { $('chartScroll').scrollLeft = $('chartScroll').scrollWidth; });
+    setStatus(`已切换到「${target.name}」，当前统计仅针对该分组。`, true);
+  }
+
+  function addGroup(){
+    const suggested = `分组 ${state.groups.length + 1}`;
+    const raw = window.prompt('请输入新分组名称：', suggested);
+    if(raw == null) return;
+    const name = raw.trim();
+    if(!name){ showToast('分组名称不能为空'); return; }
+    if(state.groups.some(g => g.name.toLowerCase() === name.toLowerCase())){ showToast('已有同名分组，请换一个名称'); return; }
+    syncActiveGroup();
+    const id = `group-${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+    state.groups.push({ id, name, items: [] });
+    state.activeGroupId = id;
+    state.items = [];
+    state.undoStack = [];
+    state.hoverIndex = -1;
+    render();
+    setStatus(`已创建分组「${name}」。`, true);
+  }
+
+  function renameGroup(){
+    const group = activeGroup();
+    if(!group) return;
+    const raw = window.prompt('修改当前分组名称：', group.name);
+    if(raw == null) return;
+    const name = raw.trim();
+    if(!name){ showToast('分组名称不能为空'); return; }
+    if(state.groups.some(g => g.id !== group.id && g.name.toLowerCase() === name.toLowerCase())){ showToast('已有同名分组，请换一个名称'); return; }
+    group.name = name;
+    render();
+    setStatus(`分组已重命名为「${name}」。`, true);
+  }
+
+  function deleteEmptyGroup(){
+    const group = activeGroup();
+    if(!group || state.groups.length <= 1) return;
+    syncActiveGroup();
+    if((group.items || []).length){ showToast('当前分组还有记录，请先逐条删除或清空后再删除分组'); return; }
+    if(!window.confirm(`确定删除空分组「${group.name}」吗？`)) return;
+    state.groups = state.groups.filter(g => g.id !== group.id);
+    state.activeGroupId = state.groups[0].id;
+    state.items = cloneGroupItems(state.groups[0].items);
+    state.undoStack = [];
+    render();
+    setStatus(`已删除空分组「${group.name}」。`);
+  }
+
+  function computeHuber(values, median, mad, sorted){
+    const c = 1.345;
+    const eps = numericalTolerance(values);
+    let scale = 1.4826 * mad;
+    let scaleSource = 'MAD';
+
+    // MAD can be zero in tied / quantized samples. Use IQR only as a transparent fallback.
+    if(!(scale > eps)){
+      const iqr = quantileSorted(sorted, 0.75) - quantileSorted(sorted, 0.25);
+      if(iqr > eps){
+        scale = iqr / 1.349;
+        scaleSource = 'IQR 回退';
+      }
+    }
+
+    if(values.length < 2){
+      return { value: median, note: '样本不足；暂以中位数显示', scale: 0, iterations: 0 };
+    }
+    if(!(scale > eps)){
+      return { value: median, note: 'MAD 与 IQR 均为 0；退回中位数', scale: 0, iterations: 0 };
+    }
+
+    // Solve sum(psi((x-mu)/scale)) = 0 by iteratively reweighted least squares.
+    // Huber weights are 1 inside c*scale and c*scale/|residual| outside it.
+    let mu = median;
+    let iterations = 0;
+    for(let iter = 0; iter < 100; iter++){
+      let weightSum = 0;
+      let weightedDelta = 0;
+      const cutoff = c * scale;
+      for(const x of values){
+        const residual = Math.abs(x - mu);
+        const weight = residual <= cutoff || residual === 0 ? 1 : cutoff / residual;
+        weightSum += weight;
+        weightedDelta += weight * (x - mu);
+      }
+      if(!(weightSum > 0) || !Number.isFinite(weightSum)) break;
+      const next = mu + weightedDelta / weightSum;
+      iterations = iter + 1;
+      if(!Number.isFinite(next)) break;
+      const delta = Math.abs(next - mu);
+      mu = next;
+      if(delta <= Math.max(eps, 1e-12 * Math.max(1, Math.abs(mu), scale))) break;
+    }
+    return {
+      value: mu,
+      note: `c = ${c} · 尺度：${scaleSource}${iterations >= 100 ? ' · 达到迭代上限' : ''}`,
+      scale,
+      iterations
+    };
+  }
+
+  function computeHampel(items, windowSize){
+    const result = new Map();
+    const radius = Math.floor(windowSize / 2);
+    let flaggedCount = 0;
+    let unassessableCount = 0;
+
+    // Keep the original recording positions: manually excluded observations are treated
+    // as missing values, not as if the observations on either side had become adjacent.
+    for(let i = 0; i < items.length; i++){
+      if(!items[i].included) continue;
+      // If the requested window covers the whole group, use the whole group as
+      // the reference set for every point. Otherwise use a centered, truncated window.
+      const from = windowSize >= items.length ? 0 : Math.max(0, i - radius);
+      const to = windowSize >= items.length ? items.length : Math.min(items.length, i + radius + 1);
+      const neighborhood = items.slice(from, to).filter(item => item.included).map(item => item.value);
+      if(neighborhood.length < 3){
+        result.set(i, { status: 'insufficient', flagged: false });
+        unassessableCount++;
+        continue;
+      }
+
+      const localMedian = medianOf(neighborhood);
+      const deviations = neighborhood.map(v => Math.abs(v - localMedian));
+      const localMad = medianOf(deviations);
+      const robustScale = 1.4826 * localMad;
+      const deviation = Math.abs(items[i].value - localMedian);
+      const tolerance = numericalTolerance(neighborhood);
+
+      // Standard Hampel threshold is 3 * 1.4826 * local MAD.
+      // If MAD is zero, a non-identical value is flagged as a candidate, with an explicit warning.
+      if(robustScale <= tolerance){
+        const flagged = deviation > tolerance;
+        result.set(i, {
+          status: flagged ? 'zero-mad-flag' : 'zero-mad',
+          flagged,
+          localMedian,
+          localMad,
+          threshold: 0,
+          deviation,
+          windowCount: neighborhood.length
+        });
+        if(flagged) flaggedCount++;
+        else unassessableCount++;
+        continue;
+      }
+
+      const threshold = 3 * robustScale;
+      const flagged = deviation > threshold;
+      result.set(i, {
+        status: flagged ? 'flagged' : 'normal',
+        flagged,
+        localMedian,
+        localMad,
+        threshold,
+        deviation,
+        windowCount: neighborhood.length
+      });
+      if(flagged) flaggedCount++;
+    }
+
+    return { byIndex: result, flaggedCount, unassessableCount };
+  }
+
+  function computeStats(items){
+    const totalCount = items.length;
+    const active = [];
+    items.forEach((it, idx) => {
+      if(it.included) active.push({ idx, value: it.value });
+    });
+
+    const k = active.length;
+    const runningByItem = new Array(totalCount).fill(NaN);
+    if(k === 0){
+      return {
+        totalCount,
+        activeCount: 0,
+        activeIndices: [],
+        activeRunningMeans: [],
+        runningByItem,
+        hampelByIndex: new Map(),
+        hampelFlagCount: 0,
+        hampelUnassessableCount: 0
+      };
+    }
+
+    let sum = 0;
+    const activeRunningMeans = [];
+    for(let i = 0; i < k; i++){
+      sum += active[i].value;
+      activeRunningMeans.push(sum / (i + 1));
+      runningByItem[active[i].idx] = sum / (i + 1);
+    }
+
+    const mean = sum / k;
+    const vals = active.map(a => a.value);
+    let min = Infinity, max = -Infinity;
+    for(const v of vals){ if(v < min) min = v; if(v > max) max = v; }
+    const range = max - min;
+    const sorted = vals.slice().sort((a, b) => a - b);
+    const median = medianOfSorted(sorted);
+    const absDeviations = vals.map(v => Math.abs(v - median)).sort((a, b) => a - b);
+    const mad = medianOfSorted(absDeviations);
+
+    let sqDiff = 0;
+    for(let i = 0; i < k; i++){
+      const d = vals[i] - mean;
+      sqDiff += d * d;
+    }
+    const std = k > 1 ? Math.sqrt(sqDiff / (k - 1)) : NaN;
+    const huber = computeHuber(vals, median, mad, sorted);
+    const hampelWindow = getHampelWindow();
+    const hampel = computeHampel(items, hampelWindow);
+
+    return {
+      totalCount,
+      activeCount: k,
+      activeIndices: active.map(a => a.idx),
+      activeRunningMeans,
+      runningByItem,
+      sum,
+      mean,
+      min,
+      max,
+      range,
+      median,
+      mad,
+      huber: huber.value,
+      huberNote: huber.note,
+      huberScale: huber.scale,
+      std,
+      hampelByIndex: hampel.byIndex,
+      hampelFlagCount: hampel.flaggedCount,
+      hampelUnassessableCount: hampel.unassessableCount
+    };
+  }
+
+  function drawChart(stats){
+    const canvas = $('chartCanvas');
+    const scroll = $('chartScroll');
+    const viewportWidth = Math.max(320, Math.floor(scroll.clientWidth || 780));
+    const n = state.items.length;
+    // Draw at a stable logical size; CSS scales the complete plot (including labels) for wheel zoom.
+    const desiredWidth = n > 1 ? 150 + (n - 1) * 78 : viewportWidth;
+    const baseWidth = Math.max(viewportWidth, Math.min(24000, desiredWidth));
+    const baseHeight = window.matchMedia('(max-width: 580px)').matches ? 270 : CHART_BASE_HEIGHT;
+    const cssWidth = baseWidth * chartZoom;
+    const cssHeight = baseHeight * chartZoom;
+    canvas.style.width = cssWidth + 'px';
+    canvas.style.height = cssHeight + 'px';
+    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2, 30000 / baseWidth));
+    const w = Math.floor(baseWidth);
+    const h = Math.floor(baseHeight);
+    const zoomLabel = $('chartZoomValue');
+    if(zoomLabel) zoomLabel.textContent = Math.round(chartZoom * 100) + '%';
+    if(canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)){
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+    }
+    const ctx = canvas.getContext('2d');
+    const dark = document.documentElement.dataset.theme === 'dark';
+    const palette = {
+      grid: dark ? '#2b3744' : '#ece6da',
+      text: dark ? '#a2afbd' : '#756e63',
+      emptyText: dark ? '#8795a4' : '#8e867a',
+      mean: dark ? '#65c9a9' : '#1e7e67',
+      meanLine: dark ? 'rgba(101,201,169,.62)' : 'rgba(30,126,103,.55)',
+      dotLine: dark ? 'rgba(226,173,105,.35)' : 'rgba(184,121,40,.32)',
+      running: dark ? '#79b5f2' : '#2b6cb0',
+      point: dark ? '#e2ad69' : '#b87928',
+      excluded: dark ? '#788594' : '#b5afa4',
+      pointBorder: dark ? '#171e27' : '#fcfbf8',
+      labelBg: dark ? 'rgba(23,30,39,.95)' : 'rgba(252,251,248,.94)',
+      labelText: dark ? '#f1c78f' : '#6b4b1f',
+      danger: dark ? '#f18a85' : '#b83d3d'
+    };
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, w, h);
+    dotHits = [];
+
+    const pad = { l: 58, r: 26, t: 24, b: 34 };
+    const pw = Math.max(40, w - pad.l - pad.r);
+    const ph = Math.max(40, h - pad.t - pad.b);
+
+    if(n === 0){
+      ctx.strokeStyle = palette.grid;
+      ctx.lineWidth = 1;
+      for(let i = 0; i <= 5; i++){
+        const gy = pad.t + (ph * i) / 5;
+        ctx.beginPath(); ctx.moveTo(pad.l, gy); ctx.lineTo(pad.l + pw, gy); ctx.stroke();
+      }
+      ctx.fillStyle = palette.emptyText;
+      ctx.font = '12px Inter, "PingFang SC", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('录入数据后，视图将显示各次观测点与累计均值轨迹', pad.l + pw / 2, pad.t + ph / 2);
+      ctx.restore();
+      return;
+    }
+
+    let vMin = Infinity, vMax = -Infinity;
+    for(const it of state.items){ if(it.value < vMin) vMin = it.value; if(it.value > vMax) vMax = it.value; }
+    const span = vMax - vMin;
+    const yPad = span > 0 ? span * 0.18 : Math.max(Math.abs(state.items[0].value) * 0.05, 1);
+    const yLo = vMin - yPad;
+    const yHi = vMax + yPad;
+
+    const toPx = idx => n === 1 ? pad.l + pw / 2 : pad.l + (idx / (n - 1)) * pw;
+    const toPy = val => pad.t + ph - ((val - yLo) / (yHi - yLo)) * ph;
+
+    // Horizontal grid & Y labels
+    ctx.strokeStyle = palette.grid;
+    ctx.lineWidth = 1;
+    for(let i = 0; i <= 5; i++){
+      const gy = pad.t + (ph * i) / 5;
+      ctx.beginPath(); ctx.moveTo(pad.l, gy); ctx.lineTo(pad.l + pw, gy); ctx.stroke();
+      const yVal = yHi - ((yHi - yLo) * i) / 5;
+      ctx.fillStyle = palette.text;
+      ctx.font = '10.5px ui-monospace, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(fmt(yVal, 5), pad.l - 8, gy + 3.5);
+    }
+
+    // X axis labels
+    const stride = n <= 18 ? 1 : Math.ceil(n / 14);
+    for(let i = 0; i < n; i += stride){
+      const gx = toPx(i);
+      ctx.fillStyle = palette.text;
+      ctx.font = '10.5px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(fmt(state.items[i].value, 8), gx, pad.t + ph + 20);
+    }
+    if(n > 1 && (n - 1) % stride !== 0){
+      ctx.fillText(fmt(state.items[n - 1].value, 8), toPx(n - 1), pad.t + ph + 20);
+    }
+
+    // Final active mean line
+    if(stats.activeCount > 0 && Number.isFinite(stats.mean)){
+      const yFinal = toPy(stats.mean);
+      ctx.save();
+      ctx.strokeStyle = palette.meanLine;
+      ctx.setLineDash([6, 4]);
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(pad.l, yFinal); ctx.lineTo(pad.l + pw, yFinal); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font = '700 10px ui-monospace, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillStyle = palette.mean;
+      ctx.fillText('均值 ' + fmt(stats.mean, 5), pad.l + pw - 4, Math.max(pad.t + 11, yFinal - 6));
+      ctx.restore();
+    }
+
+    // Faint connecting line across included points
+    if(stats.activeIndices.length > 1){
+      ctx.save();
+      ctx.strokeStyle = palette.dotLine;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      stats.activeIndices.forEach((idx, kIdx) => {
+        const px = toPx(idx), py = toPy(state.items[idx].value);
+        if(kIdx === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+      ctx.restore();
+
+      // Running mean trajectory across active points
+      ctx.save();
+      ctx.strokeStyle = palette.running;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      stats.activeIndices.forEach((idx, kIdx) => {
+        const px = toPx(idx), py = toPy(stats.activeRunningMeans[kIdx]);
+        if(kIdx === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Running mean dots on active points
+    if(stats.activeIndices.length > 0){
+      stats.activeIndices.forEach((idx, kIdx) => {
+        const px = toPx(idx);
+        const pyM = toPy(stats.activeRunningMeans[kIdx]);
+        ctx.beginPath();
+        ctx.arc(px, pyM, 3.6, 0, Math.PI * 2);
+        ctx.fillStyle = palette.running;
+        ctx.fill();
+      });
+    }
+
+    // Observation points (interactive)
+    state.items.forEach((it, idx) => {
+      const px = toPx(idx);
+      const py = toPy(it.value);
+      const isHover = state.hoverIndex === idx;
+      const r = isHover ? 7.5 : 6;
+
+      dotHits.push({ index: idx, cx: px, cy: py, r: 12 });
+
+      if(isHover){
+        ctx.beginPath();
+        ctx.arc(px, py, r + 4, 0, Math.PI * 2);
+        ctx.fillStyle = dark ? (it.included ? 'rgba(226,173,105,.2)' : 'rgba(120,133,148,.2)') : (it.included ? 'rgba(184,121,40,.18)' : 'rgba(163,157,147,.2)');
+        ctx.fill();
+      }
+
+      ctx.beginPath();
+      ctx.arc(px, py, r, 0, Math.PI * 2);
+      ctx.fillStyle = it.included ? palette.point : palette.excluded;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = palette.pointBorder;
+      ctx.stroke();
+
+      const hampelInfo = stats.hampelByIndex ? stats.hampelByIndex.get(idx) : null;
+      if(it.included && hampelInfo && hampelInfo.flagged){
+        ctx.beginPath();
+        ctx.arc(px, py, r + 4, 0, Math.PI * 2);
+        ctx.strokeStyle = palette.danger;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      if(!it.included){
+        ctx.beginPath();
+        ctx.moveTo(px - 3.5, py - 3.5);
+        ctx.lineTo(px + 3.5, py + 3.5);
+        ctx.moveTo(px + 3.5, py - 3.5);
+        ctx.lineTo(px - 3.5, py + 3.5);
+        ctx.strokeStyle = palette.pointBorder;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Label the measured value on the plot; do not use ordinal labels such as #1/#2.
+      // Label the measured value on the plot. With very long series, thin labels slightly
+      // while keeping every observation in the exported table/CSV.
+      const valueLabelStride = n <= 300 ? 1 : Math.ceil(n / 300);
+      if(idx % valueLabelStride === 0 || idx === n - 1){
+        const valueText = fmt(it.value, 8);
+        ctx.font = '600 10px ui-monospace, monospace';
+        ctx.textAlign = 'center';
+        const ly = (idx % 2 === 0) ? Math.max(pad.t + 10, py - 20) : Math.min(pad.t + ph - 6, py + 28);
+        const tw = ctx.measureText(valueText).width;
+        ctx.fillStyle = palette.labelBg;
+        ctx.fillRect(px - tw / 2 - 3, ly - 9, tw + 6, 13);
+        ctx.fillStyle = it.included ? palette.labelText : palette.excluded;
+        ctx.fillText(valueText, px, ly);
+      }
+    });
+
+    ctx.restore();
+  }
+
+  function render(){
+    const stats = computeStats(state.items);
+    const total = state.items.length;
+
+    $('pillActive').textContent = String(stats.activeCount);
+    $('pillTotal').textContent = String(total);
+    $('listCount').textContent = total + ' 条';
+    $('undoBtn').disabled = state.undoStack.length === 0;
+    $('clearBtn').disabled = total === 0;
+    $('emptyState').style.display = total === 0 ? 'flex' : 'none';
+
+    if(stats.activeCount > 0){
+      $('meanValue').textContent = fmt(stats.mean, 8);
+      $('meanSub').textContent = `当前由 ${stats.activeCount} 个已纳入观测点计算（共 ${total} 条记录），算术平均值为 ${fmt(stats.mean, 8)}。`;
+      $('pillStd').textContent = stats.activeCount > 1 ? fmt(stats.std, 4) : '—';
+      $('statHuber').textContent = fmt(stats.huber, 7);
+      $('huberNote').textContent = stats.huberNote;
+      $('statMedian').textContent = fmt(stats.median, 6);
+      $('statMAD').textContent = fmt(stats.mad, 6);
+      $('statHampel').textContent = `${stats.hampelFlagCount} / ${stats.activeCount}`;
+      $('hampelNote').textContent = stats.hampelUnassessableCount
+        ? `候选 ${stats.hampelFlagCount} 个 · 尺度不足 ${stats.hampelUnassessableCount} 个`
+        : '仅标记，不自动排除';
+      $('statRange').textContent = fmt(stats.range, 5);
+      $('statMinMax').textContent = `${fmt(stats.min, 5)} / ${fmt(stats.max, 5)}`;
+      $('statSum').textContent = fmt(stats.sum, 7);
+      $('chartSummary').textContent = `已纳入 ${stats.activeCount} 点 · 均值 ${fmt(stats.mean, 7)} · Huber ${fmt(stats.huber, 7)} · Hampel 候选 ${stats.hampelFlagCount}`;
+    } else {
+      $('meanValue').textContent = '—';
+      $('meanSub').textContent = total === 0
+        ? '在下方输入框填入数值，按 Enter 或点击“记录”即可开始累计。'
+        : '所有观测点均已取消纳入，点击视图或列表中的点可重新纳入计算。';
+      $('pillStd').textContent = '—';
+      $('statHuber').textContent = '—';
+      $('huberNote').textContent = 'c = 1.345';
+      $('statMedian').textContent = '—';
+      $('statMAD').textContent = '—';
+      $('statHampel').textContent = '—';
+      $('hampelNote').textContent = '仅标记，不自动排除';
+      $('statRange').textContent = '—';
+      $('statMinMax').textContent = '—';
+      $('statSum').textContent = '—';
+      $('chartSummary').textContent = total === 0 ? '等待录入数据...' : '当前无已纳入点';
+    }
+
+    const listEl = $('recordList');
+    listEl.innerHTML = '';
+
+    state.items.slice().reverse().forEach((it, revIdx) => {
+      const idx = total - revIdx - 1;
+      const runMean = stats.runningByItem ? stats.runningByItem[idx] : NaN;
+
+      let badgeCls = 'off', badgeTxt = '已取消';
+      if(it.included && stats.activeCount > 0){
+        const diff = it.value - stats.mean;
+        if(Math.abs(diff) <= 1e-12){
+          badgeCls = 'eq'; badgeTxt = '等于均值';
+        }else if(diff > 0){
+          badgeCls = 'hi'; badgeTxt = '+' + fmt(diff, 4);
+        }else{
+          badgeCls = 'lo'; badgeTxt = fmt(diff, 4);
+        }
+      }
+
+      const hampelInfo = stats.hampelByIndex ? stats.hampelByIndex.get(idx) : null;
+      const hampelBadge = it.included && hampelInfo && hampelInfo.flagged
+        ? `<span class="hampel-tag" title="${hampelInfo.status === 'zero-mad-flag' ? '局部 MAD 为 0，任何非零偏离都会成为候选；请人工核查' : '偏离局部中位数超过 3 × 1.4826 × MAD'}">Hampel 候选</span>`
+        : '';
+      const recordNote = !it.included
+        ? '未纳入当前统计'
+        : hampelInfo && hampelInfo.flagged
+          ? (hampelInfo.status === 'zero-mad-flag' ? '局部 MAD 为 0：候选标记需人工核查' : `局部中位数 ${fmt(hampelInfo.localMedian, 6)} · 偏差 ${fmt(hampelInfo.deviation, 5)} · 阈值 ${fmt(hampelInfo.threshold, 5)}`)
+          : Number.isFinite(runMean) ? '当时累计均值：' + fmt(runMean, 7) : '已纳入当前统计';
+      const row = document.createElement('div');
+      row.className = 'record-item' + (it.included ? '' : ' excluded');
+      row.innerHTML = `
+        <div class="record-main">
+          <div class="record-top">
+            <span class="idx">#${idx + 1}</span>
+            <span class="diff-tag ${badgeCls}">${badgeTxt}</span>
+            ${hampelBadge}
+          </div>
+          <div class="record-val">${fmt(it.value, 8)}</div>
+          <div class="record-sub">${recordNote}</div>
+        </div>
+        <div class="item-actions">
+          <button class="mini-btn ${it.included ? '' : 'active-off'}" type="button" data-toggle="${idx}">${it.included ? '取消' : '纳入'}</button>
+          <button class="mini-btn del" type="button" data-del="${idx}" title="永久删除此条">删</button>
+        </div>
+      `;
+      listEl.appendChild(row);
+    });
+
+    listEl.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-toggle'));
+        toggleInclude(idx);
+      });
+    });
+
+    listEl.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-del'));
+        state.undoStack.push(cloneItems(state.items));
+        const removed = state.items[idx];
+        state.items.splice(idx, 1);
+        setStatus(`已删除第 #${idx + 1} 条记录（${fmt(removed.value, 6)}）。`);
+        render();
+      });
+    });
+
+    updateHampelWindowNote();
+    updateHampelWindowNote();
+    drawChart(stats);
+    renderGroups();
+    persistState();
+  }
+
+  function toggleInclude(idx){
+    if(idx < 0 || idx >= state.items.length) return;
+    state.undoStack.push(cloneItems(state.items));
+    const target = state.items[idx];
+    target.included = !target.included;
+    const stats = computeStats(state.items);
+    if(target.included){
+      setStatus(`已重新纳入第 #${idx + 1} 个点（${fmt(target.value, 6)}）${stats.activeCount > 0 ? '，当前均值：' + fmt(stats.mean, 8) : ''}。`, true);
+    }else{
+      setStatus(`已取消第 #${idx + 1} 个点（${fmt(target.value, 6)}）的均值计算${stats.activeCount > 0 ? '，当前均值：' + fmt(stats.mean, 8) : ''}。`);
+    }
+    render();
+  }
+
+  function addValue(){
+    const raw = $('valInput').value.trim();
+    $('valInput').classList.remove('invalid');
+    if(raw === '' || !Number.isFinite(Number(raw))){
+      $('valInput').classList.add('invalid');
+      setMsg('请输入有效的数字。', true);
+      return;
+    }
+    const val = Number(raw);
+    state.undoStack.push(cloneItems(state.items));
+    state.items.push({ id: nextId++, value: val, included: true });
+    $('valInput').value = '';
+    $('valInput').focus();
+    const stats = computeStats(state.items);
+    setMsg('已记录。Hampel 只标记局部异常候选，不会自动排除；可点击点或列表按钮手动调整纳入状态。');
+    setStatus(`已记录 #${state.items.length}（${fmt(val, 7)}），当前均值：${fmt(stats.mean, 8)}。`, true);
+    render();
+    requestAnimationFrame(() => { $('chartScroll').scrollLeft = $('chartScroll').scrollWidth; });
+  }
+
+  function undo(){
+    if(!state.undoStack.length) return;
+    state.items = state.undoStack.pop();
+    setStatus('已撤销上一步操作。');
+    render();
+  }
+
+  function clearAll(){
+    if(!state.items.length) return;
+    state.undoStack.push(cloneItems(state.items));
+    state.items = [];
+    $('valInput').value = '';
+    $('valInput').focus();
+    setMsg('已清空所有记录，可重新开始累计。');
+    setStatus('记录已清空。');
+    render();
+  }
+
+  function localTimestamp(){
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+  }
+
+  function persistState(){
+    const badge = $('saveState');
+    try{
+      syncActiveGroup();
+      const payload = {
+        version: 4,
+        savedAt: new Date().toISOString(),
+        settings: { hampelWindow: getHampelWindow(), theme: document.documentElement.dataset.theme || 'light' },
+        nextId,
+        activeGroupId: state.activeGroupId,
+        groups: state.groups.map(g => ({ id: g.id, name: g.name, items: cloneGroupItems(g.items) })),
+        // Keep the active group's old-style items array for backward compatibility.
+        items: cloneGroupItems(state.items)
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      if(badge) badge.textContent = '已自动保存到此浏览器';
+      return true;
+    }catch(err){
+      if(badge) badge.textContent = '本地保存不可用，请导出备份';
+      return false;
+    }
+  }
+
+  function restoreState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return false;
+      const parsed = JSON.parse(raw);
+      if(!parsed) return false;
+      const normalizeItems = list => (Array.isArray(list) ? list : [])
+        .filter(it => it && it.value != null && Number.isFinite(Number(it.value)))
+        .map((it, i) => ({ id: Number.isFinite(Number(it.id)) ? Number(it.id) : i + 1, value: Number(it.value), included: it.included !== false }));
+      if(Array.isArray(parsed.groups) && parsed.groups.length){
+        state.groups = parsed.groups.map((g, i) => ({
+          id: String(g && g.id != null ? g.id : `group-${i+1}`),
+          name: String(g && g.name ? g.name : `分组 ${i+1}`),
+          items: normalizeItems(g && g.items)
+        }));
+        state.activeGroupId = state.groups.some(g => g.id === String(parsed.activeGroupId))
+          ? String(parsed.activeGroupId) : state.groups[0].id;
+        const selected = state.groups.find(g => g.id === state.activeGroupId);
+        state.items = cloneGroupItems(selected ? selected.items : []);
+      }else if(Array.isArray(parsed.items)){
+        // Migrate v3 single-list data into one default group.
+        state.groups = [{ id: 'group-1', name: '默认组', items: normalizeItems(parsed.items) }];
+        state.activeGroupId = 'group-1';
+        state.items = cloneGroupItems(state.groups[0].items);
+      }else return false;
+      const maxId = state.groups.reduce((m, g) => Math.max(m, ...g.items.map(it => it.id)), 0);
+      nextId = Math.max(maxId + 1, Number(parsed.nextId) || 1);
+      state.undoStack = [];
+      const win = Number(parsed.settings && parsed.settings.hampelWindow);
+      if(isValidHampelWindow(win)){ $('hampelWindow').value = String(win); lastValidHampelWindow = win; }
+      if(parsed.settings && parsed.settings.theme) applyTheme(parsed.settings.theme, false, false);
+      return state.groups.some(g => g.items.length > 0);
+    }catch(err){
+      return false;
+    }
+  }
+
+  function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }
+
+  function csvCell(value){
+    const str = value == null ? '' : String(value);
+    return /[",\r\n]/.test(str) ? '"' + str.replace(/"/g, '""') + '"' : str;
+  }
+
+  function rawNumber(n){
+    if(!Number.isFinite(n)) return '';
+    return Object.is(n, -0) ? '0' : n.toString();
+  }
+
+  function buildCsv(){
+    syncActiveGroup();
+    const rows = [[
+      '分组','组内序号','观测值','是否纳入','当时累计均值','与当前均值之差','Hampel候选','局部中位数','局部MAD','Hampel阈值'
+    ]];
+    for(const group of state.groups){
+      const items = group.id === state.activeGroupId ? state.items : group.items;
+      const stats = computeStats(items || []);
+      (items || []).forEach((it, idx) => {
+        const hi = stats.hampelByIndex && stats.hampelByIndex.get(idx);
+        const running = stats.runningByItem ? stats.runningByItem[idx] : NaN;
+        const included = it.included;
+        rows.push([
+          group.name,
+          idx + 1,
+          rawNumber(it.value),
+          included ? '是' : '否',
+          Number.isFinite(running) ? rawNumber(running) : '',
+          included && Number.isFinite(stats.mean) ? rawNumber(it.value - stats.mean) : '',
+          included && hi ? (hi.flagged ? '候选' : (hi.status === 'insufficient' ? '无法判断' : '否')) : '',
+          hi && Number.isFinite(hi.localMedian) ? rawNumber(hi.localMedian) : '',
+          hi && Number.isFinite(hi.localMad) ? rawNumber(hi.localMad) : '',
+          hi && Number.isFinite(hi.threshold) ? rawNumber(hi.threshold) : ''
+        ]);
+      });
+    }
+    return '\ufeff' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
+  }
+
+  function parseCsv(text){
+    const rows = [];
+    let row = [], cell = '', quoted = false;
+    for(let i = 0; i < text.length; i++){
+      const ch = text[i];
+      if(quoted){
+        if(ch === '"' && text[i+1] === '"'){ cell += '"'; i++; }
+        else if(ch === '"') quoted = false;
+        else cell += ch;
+      }else{
+        if(ch === '"') quoted = true;
+        else if(ch === ','){ row.push(cell); cell = ''; }
+        else if(ch === '\n'){ row.push(cell.replace(/\r$/, '')); rows.push(row); row = []; cell = ''; }
+        else cell += ch;
+      }
+    }
+    if(cell.length || row.length){ row.push(cell.replace(/\r$/, '')); rows.push(row); }
+    return rows.filter(r => r.some(v => String(v).trim() !== ''));
+  }
+
+  function importCsv(text){
+    const rows = parseCsv(text);
+    if(!rows.length) throw new Error('CSV 文件没有可导入的数据。');
+    const norm = v => String(v || '').replace(/^\ufeff/, '').trim().toLowerCase();
+    const header = rows[0].map(norm);
+    let valueIndex = header.findIndex(h => ['观测值','数值','value','measurement','x'].includes(h));
+    let includedIndex = header.findIndex(h => ['是否纳入','纳入','included','include'].includes(h));
+    let groupIndex = header.findIndex(h => ['分组','组别','group','groupname'].includes(h));
+    const hasHeader = valueIndex >= 0;
+    if(!hasHeader){ valueIndex = 0; includedIndex = -1; groupIndex = -1; }
+    const start = hasHeader ? 1 : 0;
+    const imported = [];
+    for(let i = start; i < rows.length; i++){
+      const row = rows[i];
+      const rawValue = String(row[valueIndex] ?? '').trim();
+      if(rawValue === '') continue;
+      const value = Number(rawValue);
+      if(!Number.isFinite(value)) continue;
+      const flag = includedIndex >= 0 ? norm(row[includedIndex]) : '是';
+      const included = !['否','0','false','no','排除','未纳入'].includes(flag);
+      const groupName = groupIndex >= 0 && String(row[groupIndex] || '').trim() ? String(row[groupIndex]).trim() : '导入数据';
+      imported.push({ id: nextId + imported.length, value, included, groupName });
+    }
+    if(!imported.length) throw new Error('没有找到有效观测值。请确认 CSV 中有“观测值”列，或第一列为数值。');
+    return imported;
+  }
+
+  function exportJson(){
+    const stats = computeStats(state.items);
+    syncActiveGroup();
+    const payload = {
+      format: 'sampling-mean-convergence-backup',
+      version: 4,
+      exportedAt: new Date().toISOString(),
+      activeGroupId: state.activeGroupId,
+      groups: state.groups.map(g => ({ id: g.id, name: g.name, items: cloneGroupItems(g.items) })),
+      settings: { hampelWindow: getHampelWindow(), theme: document.documentElement.dataset.theme || 'light' },
+      summary: {
+        totalCount: stats.totalCount,
+        activeCount: stats.activeCount,
+        mean: Number.isFinite(stats.mean) ? stats.mean : null,
+        median: Number.isFinite(stats.median) ? stats.median : null,
+        huber: Number.isFinite(stats.huber) ? stats.huber : null,
+        sampleStd: Number.isFinite(stats.std) ? stats.std : null,
+        mad: Number.isFinite(stats.mad) ? stats.mad : null,
+        hampelFlagCount: stats.hampelFlagCount
+      },
+      items: state.items.map((it, idx) => ({ id: it.id, index: idx + 1, value: it.value, included: !!it.included }))
+    };
+    downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }), `采样数据备份_${localTimestamp()}.json`);
+    showToast('JSON 数据备份已导出');
+  }
+
+  function exportCsv(){
+    downloadBlob(new Blob([buildCsv()], { type: 'text/csv;charset=utf-8' }), `采样明细_${localTimestamp()}.csv`);
+    showToast('CSV 明细已导出');
+  }
+
+  function escHtml(value){
+    return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function exportReport(){
+    const stats = computeStats(state.items);
+    const groupName = activeGroup() ? activeGroup().name : '当前分组';
+    const dateText = new Date().toLocaleString();
+    let chartImage = '';
+    try{ chartImage = $('chartCanvas').toDataURL('image/png'); }catch(err){ chartImage = ''; }
+    const metrics = [
+      ['参与样本数', `${stats.activeCount} / ${stats.totalCount}`],
+      ['算术平均值', Number.isFinite(stats.mean) ? fmt(stats.mean, 12) : '—'],
+      ['Huber 鲁棒估计', Number.isFinite(stats.huber) ? fmt(stats.huber, 12) : '—'],
+      ['中位数', Number.isFinite(stats.median) ? fmt(stats.median, 12) : '—'],
+      ['样本标准差', Number.isFinite(stats.std) ? fmt(stats.std, 12) : '—'],
+      ['MAD', Number.isFinite(stats.mad) ? fmt(stats.mad, 12) : '—'],
+      ['极差', Number.isFinite(stats.range) ? fmt(stats.range, 12) : '—'],
+      ['最小值 / 最大值', stats.activeCount ? `${fmt(stats.min, 12)} / ${fmt(stats.max, 12)}` : '—'],
+      ['参与总和', Number.isFinite(stats.sum) ? fmt(stats.sum, 12) : '—'],
+      ['Hampel 异常候选', `${stats.hampelFlagCount} 个（窗口 ${getHampelWindow()} 点）`]
+    ];
+    const metricHtml = metrics.map(([k,v]) => {
+      const primary = k === '算术平均值' || k === 'Huber 鲁棒估计';
+      return `<div class="metric${primary ? ' primary-result' : ''}"><span>${escHtml(k)}</span><strong>${escHtml(v)}</strong></div>`;
+    }).join('');
+    const rows = state.items.map((it, idx) => {
+      const hi = stats.hampelByIndex && stats.hampelByIndex.get(idx);
+      const running = stats.runningByItem ? stats.runningByItem[idx] : NaN;
+      const hampelStatus = !it.included ? '未纳入' : !hi ? '未评估' : hi.flagged ? '异常候选' : hi.status === 'insufficient' ? '样本不足' : '正常';
+      const detail = hi && Number.isFinite(hi.localMedian)
+        ? `局部中位数 ${fmt(hi.localMedian,7)}；局部 MAD ${fmt(hi.localMad,7)}；阈值 ${fmt(hi.threshold,7)}`
+        : '';
+      return `<tr><td>${idx+1}</td><td class="num">${escHtml(fmt(it.value,12))}</td><td>${it.included?'纳入':'排除'}</td><td class="num">${Number.isFinite(running)?escHtml(fmt(running,12)):'—'}</td><td>${escHtml(hampelStatus)}</td><td>${escHtml(detail)}</td></tr>`;
+    }).join('');
+    const chartCssWidth = Math.max(1, parseFloat($('chartCanvas').style.width) || $('chartCanvas').getBoundingClientRect().width);
+    const chartCssHeight = Math.max(1, parseFloat($('chartCanvas').style.height) || $('chartCanvas').getBoundingClientRect().height);
+    const imageBlock = chartImage ? `<section class="block"><h2>观测曲线</h2><div class="report-chart-tools"><span id="reportZoomLabel">滚轮缩放 · 100%</span><button id="reportZoomReset" type="button">重置缩放</button></div><div class="report-chart-scroll" role="region" aria-label="观测曲线，可滚轮缩放并左右、上下滚动查看完整数据"><img class="chart" src="${chartImage}" style="width:${chartCssWidth}px;height:${chartCssHeight}px" data-base-width="${chartCssWidth}" data-base-height="${chartCssHeight}" alt="观测值与累计均值曲线"></div><p class="note">在图表区域滚动鼠标滚轮可放大或缩小；放大后可横向、纵向滚动。点旁数字为原始观测值；蓝线为累计均值，绿色虚线为最终算术平均值。</p></section>` : '<section class="block"><h2>观测曲线</h2><p>当前浏览器未能生成嵌入式图像，请参考下方完整数据表。</p></section>';
+    const report = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>采样统计报告</title><style>
+      *{box-sizing:border-box}body{margin:0;padding:32px 18px 60px;background:#f5f3ee;color:#26231f;font-family:Arial,"Microsoft YaHei",sans-serif;line-height:1.6}.page{max-width:1100px;margin:auto}.head{border-bottom:2px solid #d9d2c6;padding-bottom:18px;margin-bottom:20px}.eyebrow{font-size:12px;color:#746d62}.head h1{font-size:28px;margin:4px 0}.meta{font-size:12px;color:#746d62}.block{background:#fffefa;border:1px solid #ded8cd;border-radius:14px;padding:20px;margin:16px 0}.block h2{font-size:16px;margin:0 0 12px}.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}.metric{padding:12px;border:1px solid #e7e1d7;border-radius:9px;background:#faf8f3}.metric.primary-result{border-color:#b8d2c8;background:#f0f7f3}.metric.primary-result strong{font-size:18px;color:#176b50}.metric span{display:block;font-size:11px;color:#746d62}.metric strong{display:block;margin-top:4px;font:700 15px ui-monospace,Consolas,monospace;overflow-wrap:anywhere}.report-chart-tools{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin:-2px 0 9px;font-size:11px;color:#746d62}.report-chart-tools button{border:1px solid #d5cdbf;background:#faf8f3;color:#514b42;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer}.report-chart-tools button:hover{border-color:#8fa9bd;color:#245d87}.report-chart-scroll{max-width:100%;max-height:560px;overflow:auto;overscroll-behavior:contain;border:1px solid #e7e1d7;border-radius:8px;background:#fff;scrollbar-width:thin;scrollbar-color:#bcb3a5 #eee9df}.report-chart-scroll::-webkit-scrollbar{width:9px;height:9px}.report-chart-scroll::-webkit-scrollbar-track{background:#eee9df;border-radius:10px}.report-chart-scroll::-webkit-scrollbar-thumb{background:#bcb3a5;border-radius:10px}.chart{display:block;width:auto;max-width:none;height:auto;border:0;border-radius:0;background:#fff}.note{font-size:11px;color:#746d62;margin:9px 0 0}.table-wrap{max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain}table{border-collapse:collapse;width:100%;font-size:12px;min-width:680px}th,td{padding:9px 10px;border-bottom:1px solid #e8e2d8;text-align:left;vertical-align:top}th{background:#f2eee6;white-space:nowrap}td.num{text-align:right;font-family:ui-monospace,Consolas,monospace;white-space:nowrap}.method{font-size:12px;color:#4f4a43}.method li{margin:5px 0}.foot{font-size:11px;color:#746d62;margin-top:18px}@media(max-width:600px){body{padding:18px 10px}.block{padding:13px}.head h1{font-size:23px}}
+      </style></head><body><main class="page"><header class="head"><div class="eyebrow">独立统计报告 · 可离线查看</div><h1>采样统计报告 · ${escHtml(groupName)}</h1><div class="meta">分组：${escHtml(groupName)}　·　导出时间：${escHtml(dateText)}　·　记录总数：${stats.totalCount}　·　纳入计算：${stats.activeCount}</div></header>
+      <section class="block"><h2>统计结果</h2><div class="metrics">${metricHtml}</div></section>${imageBlock}
+      <section class="block"><h2>计算口径</h2><ul class="method"><li><b>算术平均值：</b>纳入样本总和除以纳入样本数。</li><li><b>中位数：</b>将纳入样本升序排列；奇数取正中值，偶数取中间两个值的平均。</li><li><b>Huber：</b>调节常数 c=1.345；尺度优先使用 1.4826×MAD，尺度不足时使用 IQR/1.349 回退；两者仍不足则显示中位数。</li><li><b>样本标准差：</b>使用 n−1 分母；样本少于 2 个时不定义。</li><li><b>Hampel：</b>按录入顺序逐点判断；每个观测值均以自身为中心，使用 ${escHtml(getHampelWindow())} 点窗口（前后各 ${Math.floor(getHampelWindow()/2)} 点，含自身）。若窗口点数达到或超过当前分组记录数，则以整组可用数据作为参照；靠近首尾时窗口按实际可用点数缩小。阈值为 3×1.4826×局部 MAD；仅标记候选，不自动修改原始数据。窗口有效点不足 3 个时不评估；局部 MAD 为 0 时，非零偏离标记为需人工核查的候选。</li><li><b>纳入状态：</b>被排除的观测仍保留在原始记录表中，但不参与整体中心与尺度统计。</li></ul></section>
+      <section class="block"><h2>完整观测明细</h2><div class="table-wrap"><table><thead><tr><th>序号</th><th>观测值</th><th>状态</th><th>当时累计均值</th><th>Hampel 判断</th><th>局部参考信息</th></tr></thead><tbody>${rows || '<tr><td colspan="6">暂无观测记录</td></tr>'}</tbody></table></div></section>
+      <div class="foot">本报告由采样均值收敛工具生成。异常候选不等于测量错误；统计结论应结合采样设计、独立性和实际测量过程解释。</div></main><script>(function(){var box=document.querySelector('.report-chart-scroll');var img=box&&box.querySelector('img.chart');var label=document.getElementById('reportZoomLabel');var reset=document.getElementById('reportZoomReset');if(!box||!img)return;var baseW=Number(img.getAttribute('data-base-width'))||img.getBoundingClientRect().width;var baseH=Number(img.getAttribute('data-base-height'))||img.getBoundingClientRect().height;var zoom=1;function apply(next,clientX,clientY){var old=zoom;next=Math.max(.5,Math.min(3,next));if(Math.abs(next-old)<1e-6)return;var rect=box.getBoundingClientRect();var px=clientX==null?box.clientWidth/2:Math.max(0,Math.min(box.clientWidth,clientX-rect.left));var py=clientY==null?box.clientHeight/2:Math.max(0,Math.min(box.clientHeight,clientY-rect.top));var ax=box.scrollLeft+px;var ay=box.scrollTop+py;zoom=next;img.style.width=(baseW*zoom)+'px';img.style.height=(baseH*zoom)+'px';if(label)label.textContent='滚轮缩放 · '+Math.round(zoom*100)+'%';requestAnimationFrame(function(){var ratio=zoom/old;box.scrollLeft=Math.max(0,ax*ratio-px);box.scrollTop=Math.max(0,ay*ratio-py);});}box.addEventListener('wheel',function(e){if(!e.deltaY)return;e.preventDefault();apply(zoom*(e.deltaY<0?1.12:1/1.12),e.clientX,e.clientY);},{passive:false});if(reset)reset.addEventListener('click',function(){apply(1);});})();<\/script></body></html>`;
+    downloadBlob(new Blob([report], { type: 'text/html;charset=utf-8' }), `采样统计报告_${localTimestamp()}.html`);
+    showToast('独立统计报告已导出');
+  }
+
+  function exportPng(){
+    const source = $('chartCanvas');
+    if(!state.items.length){ showToast('暂无曲线可下载'); return; }
+    try{
+      // Compose a self-explanatory PNG: title + complete chart + concise legend.
+      const out = document.createElement('canvas');
+      const margin = 28, headerH = 58, footerH = 38;
+      out.width = source.width;
+      out.height = source.height + Math.round((headerH + footerH) * (source.width / Math.max(1, Number(source.style.width.replace('px','')) || source.width)));
+      const scale = source.width / Math.max(1, Number(source.style.width.replace('px','')) || source.width);
+      const top = Math.round(headerH * scale), bottom = Math.round(footerH * scale);
+      const ctx = out.getContext('2d');
+      const dark = document.documentElement.dataset.theme === 'dark';
+      const exportBg = dark ? '#171e27' : '#fcfbf8';
+      const exportText = dark ? '#e7edf4' : '#26231f';
+      const exportMuted = dark ? '#a0acba' : '#6e685f';
+      ctx.fillStyle = exportBg; ctx.fillRect(0,0,out.width,out.height);
+      ctx.fillStyle = exportText; ctx.font = `700 ${Math.round(17*scale)}px Arial,"Microsoft YaHei",sans-serif`;
+      ctx.textAlign = 'left'; ctx.fillText(`采样观测值与累计均值曲线 · ${activeGroup() ? activeGroup().name : ''}`, Math.round(margin*scale), Math.round(25*scale));
+      const stats = computeStats(state.items);
+      ctx.fillStyle = exportMuted; ctx.font = `${Math.round(10*scale)}px Arial,"Microsoft YaHei",sans-serif`;
+      ctx.fillText(`记录 ${stats.totalCount} 条 · 纳入 ${stats.activeCount} 条 · 均值 ${fmt(stats.mean,7)} · 中位数 ${fmt(stats.median,7)} · Huber ${fmt(stats.huber,7)}`, Math.round(margin*scale), Math.round(44*scale));
+      ctx.drawImage(source, 0, top);
+      ctx.fillStyle = exportMuted; ctx.font = `${Math.round(10*scale)}px Arial,"Microsoft YaHei",sans-serif`;
+      ctx.fillText('棕色点：观测值（点旁标注数值）　蓝线：累计均值　绿色虚线：最终均值　红圈：Hampel 异常候选', Math.round(margin*scale), top + source.height + Math.round(24*scale));
+      out.toBlob(blob => {
+        if(!blob){ showToast('图片生成失败，请尝试减少样本数量'); return; }
+        downloadBlob(blob, `采样曲线_${localTimestamp()}.png`);
+        showToast('完整曲线 PNG 已下载');
+      }, 'image/png');
+    }catch(err){
+      showToast('图片导出失败：样本可能过多，请改用 HTML 报告或 CSV');
+    }
+  }
+
+  async function importFile(file){
+    if(!file) return;
+    try{
+      const text = await file.text();
+      let newGroups = [];
+      let preferredGroupId = null;
+      let importedTheme = null;
+      if(file.name.toLowerCase().endsWith('.json') || file.type.includes('json')){
+        const parsed = JSON.parse(text);
+        if(!parsed) throw new Error('JSON 文件结构不正确。');
+        preferredGroupId = parsed.activeGroupId != null ? String(parsed.activeGroupId) : null;
+        const normalizeItems = list => (Array.isArray(list) ? list : [])
+          .filter(it => it && it.value != null && Number.isFinite(Number(it.value)))
+          .map((it,i) => ({ id: Number.isFinite(Number(it.id)) ? Number(it.id) : nextId+i, value: Number(it.value), included: it.included !== false }));
+        if(Array.isArray(parsed.groups) && parsed.groups.length){
+          newGroups = parsed.groups.map((g,i) => ({
+            id: String(g && g.id != null ? g.id : `import-group-${i+1}`),
+            name: String(g && g.name ? g.name : `导入分组 ${i+1}`),
+            items: normalizeItems(g && g.items)
+          }));
+        }else if(Array.isArray(parsed.items)){
+          const items = normalizeItems(parsed.items);
+          newGroups = [{ id: 'import-group-1', name: '导入数据', items }];
+        }else throw new Error('JSON 结构不正确：找不到 groups 或 items 数据列表。');
+        const win = Number(parsed.settings && parsed.settings.hampelWindow);
+        if(isValidHampelWindow(win)){ $('hampelWindow').value = String(win); lastValidHampelWindow = win; }
+        importedTheme = parsed.settings && parsed.settings.theme;
+      }else{
+        const imported = importCsv(text);
+        const map = new Map();
+        imported.forEach((it, i) => {
+          const name = it.groupName || '导入数据';
+          if(!map.has(name)) map.set(name, { id: `csv-${map.size+1}`, name, items: [] });
+          map.get(name).items.push({ id: nextId+i, value: it.value, included: it.included !== false });
+        });
+        newGroups = [...map.values()];
+      }
+      newGroups = newGroups.filter(g => Array.isArray(g.items));
+      if(!newGroups.length || !newGroups.some(g => g.items.length)) throw new Error('文件中没有有效的观测数值。');
+      const seen = new Set();
+      newGroups.forEach((g,i) => {
+        const base = g.id || `import-group-${i+1}`;
+        g.id = base;
+        if(seen.has(g.id)) g.id = `${base}-${i+1}`;
+        seen.add(g.id);
+      });
+      state.groups = newGroups;
+      const preferred = preferredGroupId && newGroups.find(g => g.id === preferredGroupId);
+      const firstNonEmpty = newGroups.find(g => g.items.length > 0);
+      const selectedGroup = preferred || firstNonEmpty || newGroups[0];
+      state.activeGroupId = selectedGroup.id;
+      state.items = cloneGroupItems(selectedGroup.items);
+      nextId = state.groups.reduce((m,g) => Math.max(m, ...g.items.map(it => Number(it.id)||0)), 0) + 1;
+      state.undoStack = [];
+      state.hoverIndex = -1;
+      if(importedTheme) applyTheme(importedTheme, false, false);
+      render();
+      requestAnimationFrame(() => { $('chartScroll').scrollLeft = $('chartScroll').scrollWidth; });
+      setStatus(`已导入 ${state.groups.length} 个分组；当前显示「${selectedGroup.name}」。`, true);
+      showToast(`成功导入 ${state.groups.length} 个分组`);
+    }catch(err){
+      setMsg(`导入失败：${err && err.message ? err.message : '文件无法解析'}`, true);
+      setStatus('导入未完成，现有数据未被替换。');
+    }
+    $('importFile').value = '';
+  }
+
+  function hitTestCanvas(evt){
+    const canvas = $('chartCanvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = (evt.clientX - rect.left) / chartZoom;
+    const y = (evt.clientY - rect.top) / chartZoom;
+    let bestIdx = -1;
+    let bestDist = Infinity;
+    for(const h of dotHits){
+      const d = Math.hypot(x - h.cx, y - h.cy);
+      if(d <= h.r && d < bestDist){
+        bestDist = d;
+        bestIdx = h.index;
+      }
+    }
+    return bestIdx;
+  }
+
+  function setChartZoom(nextZoom, clientX = null, clientY = null){
+    const scroll = $('chartScroll');
+    const rect = scroll.getBoundingClientRect();
+    const oldZoom = chartZoom;
+    const next = Math.max(CHART_ZOOM_MIN, Math.min(CHART_ZOOM_MAX, nextZoom));
+    if(Math.abs(next - oldZoom) < 1e-6) return;
+    const localX = clientX == null ? scroll.clientWidth / 2 : Math.max(0, Math.min(scroll.clientWidth, clientX - rect.left));
+    const localY = clientY == null ? scroll.clientHeight / 2 : Math.max(0, Math.min(scroll.clientHeight, clientY - rect.top));
+    const anchorX = scroll.scrollLeft + localX;
+    const anchorY = scroll.scrollTop + localY;
+    chartZoom = next;
+    drawChart(computeStats(state.items));
+    requestAnimationFrame(() => {
+      const ratio = chartZoom / oldZoom;
+      scroll.scrollLeft = Math.max(0, anchorX * ratio - localX);
+      scroll.scrollTop = Math.max(0, anchorY * ratio - localY);
+    });
+  }
+
+  $('chartScroll').addEventListener('wheel', evt => {
+    if(!evt.deltaY) return;
+    evt.preventDefault();
+    const factor = evt.deltaY < 0 ? 1.12 : 1 / 1.12;
+    setChartZoom(chartZoom * factor, evt.clientX, evt.clientY);
+  }, { passive: false });
+  $('chartZoomReset').addEventListener('click', () => setChartZoom(1));
+
+  $('chartCanvas').addEventListener('mousemove', evt => {
+    const idx = hitTestCanvas(evt);
+    if(idx !== state.hoverIndex){
+      state.hoverIndex = idx;
+      drawChart(computeStats(state.items));
+    }
+  });
+  $('chartCanvas').addEventListener('mouseleave', () => {
+    if(state.hoverIndex !== -1){
+      state.hoverIndex = -1;
+      drawChart(computeStats(state.items));
+    }
+  });
+  $('chartCanvas').addEventListener('click', evt => {
+    const idx = hitTestCanvas(evt);
+    if(idx !== -1){
+      toggleInclude(idx);
+    }
+  });
+
+  $('addGroupBtn').addEventListener('click', addGroup);
+  $('renameGroupBtn').addEventListener('click', renameGroup);
+  $('deleteGroupBtn').addEventListener('click', deleteEmptyGroup);
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    importFile(file);
+  });
+  $('exportReportBtn').addEventListener('click', exportReport);
+  $('exportCsvBtn').addEventListener('click', exportCsv);
+  $('exportJsonBtn').addEventListener('click', exportJson);
+  $('exportPngBtn').addEventListener('click', exportPng);
+
+  $('addBtn').addEventListener('click', addValue);
+  $('valInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      addValue();
+    }
+  });
+  $('undoBtn').addEventListener('click', undo);
+  $('clearBtn').addEventListener('click', clearAll);
+  $('hampelWindow').addEventListener('change', () => {
+    const n = Number($('hampelWindow').value);
+    if(!isValidHampelWindow(n)){
+      $('hampelWindow').classList.add('invalid');
+      $('hampelWindow').value = String(lastValidHampelWindow);
+      setMsg('Hampel 窗口必须是 3～9999 之间的奇数，例如 9、15、21。', true);
+      showToast('窗口点数需为不小于 3 的奇数');
+      return;
+    }
+    $('hampelWindow').classList.remove('invalid');
+    lastValidHampelWindow = n;
+    updateHampelWindowNote();
+    setMsg('Hampel 窗口已更新；每个观测点将使用新的局部参照范围。');
+    render();
+  });
+  $('themeToggleBtn').addEventListener('click', () => {
+    applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true);
+    updateHampelWindowNote();
+    showToast(document.documentElement.dataset.theme === 'dark' ? '已切换深色主题' : '已切换浅色主题');
+  });
+  window.addEventListener('resize', () => drawChart(computeStats(state.items)));
+
+  function showToast(text){
+    const t = $('toast'); t.textContent = text; t.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => t.classList.remove('show'), 2000);
+  }
+  async function copyAuthorUrl(){
+    try{
+      if(navigator.clipboard && window.isSecureContext){
+        await navigator.clipboard.writeText(AUTHOR_URL);
+        showToast('已复制主页地址');
+        return;
+      }
+    }catch(_e){}
+    const area = document.createElement('textarea');
+    area.value = AUTHOR_URL; area.setAttribute('readonly', '');
+    area.style.position = 'fixed'; area.style.opacity = '0'; area.style.left = '-9999px';
+    document.body.appendChild(area); area.select(); area.setSelectionRange(0, area.value.length);
+    let ok = false; try{ ok = document.execCommand('copy'); }catch(_e){}
+    document.body.removeChild(area);
+    showToast(ok ? '已复制主页地址' : '浏览器未允许复制，请手动复制：' + AUTHOR_URL);
+  }
+  $('authorBtn').addEventListener('click', copyAuthorUrl);
+
+  const restored = restoreState();
+  applyTheme(document.documentElement.dataset.theme || 'light', false, false);
+  render();
+  if(restored){
+    setStatus(`已从本浏览器恢复 ${state.items.length} 条历史记录。`, true);
+    requestAnimationFrame(() => { $('chartScroll').scrollLeft = $('chartScroll').scrollWidth; });
+  }
+})();
+</script>
+</body>
+</html>
